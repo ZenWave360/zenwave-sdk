@@ -1,10 +1,7 @@
 package io.zenwave360.generator.templating;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import io.zenwave360.generator.utils.JSONPath;
@@ -27,7 +24,7 @@ public class CustomHandlebarsHelpers {
         var baseDir = FilenameUtils.getPath(options.fn.filename());
         var tokens = new ArrayList<String>();
         tokens.add(context);
-        ((List) tokens).addAll(List.of(options.params));
+        ((List) tokens).addAll(Arrays.stream(options.params).map(Object::toString).collect(Collectors.toList()));
         tokens.replaceAll(t -> t.replaceAll("^\\./", "").replaceAll("^/", "").replaceAll("/$", ""));
         return baseDir + StringUtils.join(tokens, "/");
     }

@@ -3,8 +3,6 @@
 
 Generates a full backend application using a flexible hexagonal architecture
 
-This is the long description
-
 ## JDL Extensions/Customizations
 
 This generator supports the following JDL extensions:

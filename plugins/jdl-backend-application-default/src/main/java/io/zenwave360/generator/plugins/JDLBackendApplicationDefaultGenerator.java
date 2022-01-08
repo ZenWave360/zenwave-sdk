@@ -10,6 +10,7 @@ import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.generators.AbstractJDLGenerator;
 import io.zenwave360.generator.options.PersistenceType;
 import io.zenwave360.generator.options.ProgrammingStyle;
+import io.zenwave360.generator.options.DatabaseType;
 import io.zenwave360.generator.options.WebFlavorType;
 import io.zenwave360.generator.templating.*;
 import io.zenwave360.generator.utils.JSONPath;
@@ -23,6 +24,9 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
 
     @DocumentedOption(description = "Persistence")
     public PersistenceType persistence = PersistenceType.mongodb;
+
+    @DocumentedOption(description = "SQL database flavor")
+    public DatabaseType databaseType = DatabaseType.postgresql;
 
     @DocumentedOption(description = "Programming Style")
     public ProgrammingStyle style = ProgrammingStyle.imperative;

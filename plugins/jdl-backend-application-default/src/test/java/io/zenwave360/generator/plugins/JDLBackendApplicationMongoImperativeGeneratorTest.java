@@ -110,7 +110,7 @@ public class JDLBackendApplicationMongoImperativeGeneratorTest {
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.mongodb)
                 .withOption("style", ProgrammingStyle.imperative)
-                .withOption("entities", List.of("Customer"));
+                .withOption("entities", List.of("BaseEntity", "Customer"));
 
         new MainGenerator().generate(plugin);
 

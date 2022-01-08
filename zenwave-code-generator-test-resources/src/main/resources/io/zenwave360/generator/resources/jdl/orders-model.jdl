@@ -1,56 +1,61 @@
-/* Customers */
-@aggregate
-@search(elasticsearch)
-@searchCriteria
-@auditing
-entity Customer {
-	username String required minlength(3) maxlength(250),
-	password String required minlength(3) maxlength(250),
-	email String required minlength(3) maxlength(250),
-	firstName String required minlength(3) maxlength(250),
-	lastName String required minlength(3) maxlength(250)
-}
+	@auditing
+	entity BaseEntity {
+	}
 
 
-/* Orders */
-enum OrderStatus { CONFIRMED, SHIPPED, DELIVERED }
+	/* Customers */
+		@aggregate
+		@search(elasticsearch)
+		@searchCriteria
+		@extends(BaseEntity)
+	entity Customer {
+		username String required minlength(3) maxlength(250)
+		password String required minlength(3) maxlength(250)
+		email String required minlength(3) maxlength(250)
+		firstName String required minlength(3) maxlength(250)
+		lastName String required minlength(3) maxlength(250)
+	}
 
-@aggregate
-@searchCriteria(CustomerOrderSearchCriteria)
-@auditing
-entity CustomerOrder { // Order is a reserved word
-	date Instant,
-	status OrderStatus
-	@dbref	customer Customer
-	orderedItems OrderedItem[]
-	paymentDetails PaymentDetails[]
-	shippingDetails ShippingDetails
-}
 
-@skip
-entity CustomerOrderSearchCriteria {
-	status OrderStatus
-	dateFrom Instant
-	dateTo Instant
-}
+	/* Orders */
+	enum OrderStatus { CONFIRMED, SHIPPED, DELIVERED }
 
-@embedded
-entity OrderedItem {
-	catalogItemId Long,
-	name String required minlength(3) maxlength(250),
-	price BigDecimal required,
-	quantity Integer
-}
+		@aggregate
+		@searchCriteria(CustomerOrderSearchCriteria)
+		@extends(BaseEntity)
+	entity CustomerOrder { // Order is a reserved word
+		date Instant,
+		status OrderStatus
+		customer Customer
+		orderedItems OrderedItem[]
+		paymentDetails PaymentDetails
+		shippingDetails ShippingDetails
+	}
 
-@embedded
-entity PaymentDetails {
-	creditCardNumber String
-}
+		@skip
+	entity CustomerOrderSearchCriteria {
+		status OrderStatus
+		dateFrom Instant
+		dateTo Instant
+	}
 
-@embedded
-entity ShippingDetails {
-	address String
-}
+		@embedded
+	entity OrderedItem {
+		catalogItemId Long,
+		name String required minlength(3) maxlength(250),
+		price BigDecimal required,
+		quantity Integer
+	}
 
-service Customer with CustomerUseCases
-service CustomerOrder with CustomerOrderUseCases
+		@embedded
+	entity PaymentDetails {
+		creditCardNumber String
+	}
+
+		@embedded
+	entity ShippingDetails {
+		address String
+	}
+
+	service Customer with CustomerUseCases
+	service CustomerOrder with CustomerOrderUseCases

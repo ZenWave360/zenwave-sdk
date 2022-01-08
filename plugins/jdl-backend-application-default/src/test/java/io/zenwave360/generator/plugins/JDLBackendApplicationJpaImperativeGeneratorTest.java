@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.zenwave360.generator.Plugin;
+import io.zenwave360.generator.options.DatabaseType;
 import io.zenwave360.generator.testutils.MavenCompiler;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.shared.invoker.*;
@@ -51,6 +52,7 @@ public class JDLBackendApplicationJpaImperativeGeneratorTest {
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.jpa)
+                .withOption("databaseType", DatabaseType.mariadb)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("haltOnFailFormatting", false);
 

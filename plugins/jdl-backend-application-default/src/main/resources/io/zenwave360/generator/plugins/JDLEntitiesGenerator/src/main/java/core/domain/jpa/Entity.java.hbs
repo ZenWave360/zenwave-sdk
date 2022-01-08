@@ -34,10 +34,7 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
     private static final long serialVersionUID = 1L;
 
 {{#unless (skipEntityId entity)~}}
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-    @SequenceGenerator(name = "sequenceGenerator")
-    @Column(name = "id")
+    {{~> (partial 'partials/id' databaseType)}}
     private {{idJavaType}} id;
 
     @Version
