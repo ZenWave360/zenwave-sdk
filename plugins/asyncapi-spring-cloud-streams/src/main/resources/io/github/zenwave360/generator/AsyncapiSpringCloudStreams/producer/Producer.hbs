@@ -1,0 +1,46 @@
+package {{apiPackage}};
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.stereotype.Component;
+
+{{#if modelPackage}}
+import {{modelPackage}}.*;
+{{/if}}
+
+/**
+ * {{api.description}}
+ */
+@Component
+@EnableBinding({{interfaceClassName}}OutputChannels.class)
+public class {{apiClassName}} implements {{interfaceClassName}} {
+
+    private {{interfaceClassName}}OutputChannels channels;
+
+    @Autowired
+    public {{apiClassName}}({{interfaceClassName}}OutputChannels channels) {
+        super();
+        this.channels = channels;
+    }
+
+{{#each api.operations as |operation|}}
+    {{#each operation.messages as |message|}}
+    /**
+     * {{operation.description}}
+     */
+    public boolean {{operation.operationId}}${(operation.messages?size > 1)?then(message.name, '')}({{message.paramType}} payload, Header... headers) {
+        return channels.{{operation.operationId}}().send(MessageBuilder.createMessage(payload, asMessageHeaders(headers)));
+    }
+
+    {{/each}}
+{{/each}}
+
+    protected MessageHeaders asMessageHeaders(Header... headers) {
+        Map<String, Object> map = Header.asMap(headers, Header.Type.FOR_HEADERS);
+        return new MessageHeaders(map);
+    }
+}

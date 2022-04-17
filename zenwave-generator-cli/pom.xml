@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>zenwave-generator</artifactId>
+    <groupId>io.github.zenwave360</groupId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>zenwave-generator-cli</artifactId>
+  <name>zenwave-generator-cli</name>
+
+  <properties>
+
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>info.picocli</groupId>
+      <artifactId>picocli</artifactId>
+      <version>${picocli.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jknack</groupId>
+      <artifactId>handlebars</artifactId>
+      <version>${handlebars-java.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jknack</groupId>
+      <artifactId>handlebars-jackson2</artifactId>
+      <version>${handlebars-java.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.zenwave360</groupId>
+      <artifactId>json-schema-ref-parser-jvm</artifactId>
+      <version>${json-schema-ref-parser-jvm.version}</version>
+    </dependency>
+  </dependencies>
+
+</project>
