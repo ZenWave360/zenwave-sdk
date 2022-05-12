@@ -1,0 +1,72 @@
+asyncapi: 2.0.0
+info:
+  title: Sample eCommerce Checkout Core Public Event API
+  version: '1.0.0'
+  description: |
+    This API allows you to understand what is happening on a checkout for the Sample eCommerce.
+
+servers:
+  production:
+    url: servername[1-5].server:{port}
+    protocol: mqtt
+    description: PIPE Broker
+
+defaultContentType: application/*+avro
+
+channels:
+  ecommerce.${tenant}.${environment}.purchase.cart.public.v1:
+    description: The topic on which cart publish modification events.
+    publish:
+      summary: Publish information about cart modifications.
+      operationId: onCartEvent
+      bindings:
+        kafka:
+          bindingVersion: 'latest'
+      message:
+        oneOf:
+          - $ref: '#/components/messages/LinesAddedWithAvro'
+          - $ref: '#/components/messages/CreateProductWithSchema'
+          - $ref: '#/components/messages/CreateProductWithSchemaNoName'
+          - $ref: '#/components/messages/TransportWithJsonSchema'
+
+components:
+  messages:
+    LinesAddedWithAvro:
+      name: LinesAdded
+      title: Lines added
+      summary: Contains information about the recent cart and lines added
+      contentType: application/*+avro
+      schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+      payload:
+        $ref: "avros/all_cart_entities.avsc#/1"
+    CreateProductWithSchema:
+      name: CreateProduct
+      title: CreateProduct
+      summary: CreateProduct
+      contentType: application/*+json
+      schemaFormat: application/vnd.aai.asyncapi;version=2.0.0
+      payload:
+        $ref: "#/components/schemas/ProductPayload"
+    CreateProductWithSchemaNoName:
+      title: CreateProduct
+      summary: CreateProduct
+      contentType: application/*+json
+      schemaFormat: application/vnd.aai.asyncapi;version=2.0.0
+      payload:
+        $ref: "#/components/schemas/ProductPayload"
+    TransportWithJsonSchema:
+      name: CartConfirmed
+      title: Cart Confirmed
+      summary: Contains information about the recent cart that have been confirmed
+      contentType: application/*+json
+      schemaFormat: application/schema+json;version=draft-07
+      payload:
+        $ref: "json-schemas/transport.schema"
+  schemas:
+    ProductPayload:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+

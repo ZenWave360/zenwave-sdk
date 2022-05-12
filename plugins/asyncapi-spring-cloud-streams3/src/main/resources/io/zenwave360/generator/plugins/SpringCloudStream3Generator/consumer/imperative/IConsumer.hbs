@@ -1,0 +1,19 @@
+package {{apiPackage}};
+
+{{#if modelPackage}}
+import {{modelPackage}}.*;
+{{/if}}
+
+/**
+* {{api.description}}
+*/
+public interface I{{operation.x--operationIdCamelCase}} {
+
+{{#each operation.x--messages as |message|}}
+    /**
+     * {{operation.description}}
+     */
+    boolean {{operation.operationId}}{{#if (size operation.x--messages) eq 1}}_{{message.name}}{{/if}}({{message.x--javaType}} msg);
+{{/each}}
+
+}

@@ -1,0 +1,20 @@
+package {{apiPackage}};
+
+{{#if modelPackage}}
+import {{modelPackage}}.*;
+{{/if}}
+
+/**
+ * {{api.description}}
+ */
+public interface {{apiClassName}} {
+
+{{#each operations as |operation|}}
+    {{#each operation.x--messages as |message|}}
+    /**
+     * {{operation.description}}
+     */
+    boolean {{operation.operationId}}{{#if (size operation.x--messages) eq 1}}_{{message.name}}{{/if}}({{message.x--javaType}} {{message.name}}, Header... headers);
+    {{/each}}
+{{/each}}
+}

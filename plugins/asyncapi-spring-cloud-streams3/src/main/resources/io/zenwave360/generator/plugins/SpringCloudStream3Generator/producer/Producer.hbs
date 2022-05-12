@@ -1,0 +1,44 @@
+package {{api.apiPackage}};
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.stereotype.Component;
+import org.springframework.util.MimeType;
+
+{{#if api.modelPackage}}
+import {{api.modelPackage}}.*;
+{{/if}}
+
+/**
+ * {{api.description}}
+ */
+@Component
+public class {{apiClassName}} implements {{interfaceClassName}} {
+
+    @Autowired
+    private StreamBridge streamBridge;
+
+{{#each operations as |operation|}}
+    {{#each operation.x--messages as |message|}}
+    /**
+     * {{operation.description}}
+     */
+    boolean {{operation.operationId}}{{#if (size operation.x--messages) eq 1}}_{{message.name}}{{/if}}({{message.x--javaType}} {{message.name}}, Header... headers) {
+        MimeType outputContentType = MimeType.valueOf("{{operation.operation.message.contentType}}");
+        Message message = MessageBuilder.createMessage(payload, asMessageHeaders(headers));
+        return streamBridge.send("{{operation.x--operationIdKebabCase}}", message, outputContentType);
+    }
+
+    {{/each}}
+{{/each}}
+
+    protected MessageHeaders asMessageHeaders(Header... headers) {
+        Map<String, Object> map = Header.asMap(headers);
+        return new MessageHeaders(map);
+    }
+}

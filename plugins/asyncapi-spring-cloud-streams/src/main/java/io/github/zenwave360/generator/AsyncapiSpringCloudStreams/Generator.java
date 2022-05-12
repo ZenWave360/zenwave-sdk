@@ -1,4 +1,4 @@
-package io.github.zenwave360.generator.AsyncapiSpringCloudStreams;
+package io.github.zenwave360.generator.plugins;
 
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
@@ -38,11 +38,11 @@ public class Generator implements GeneratorPlugin {
     }
 
     public String getApiClassName() {
-        return apiClassName;
+        return "apiClassName";
     }
 
     public String getInterfaceClassName() {
-        return interfaceClassName;
+        return "interfaceClassName";
     }
 
     public List<ApiTemplate> reduce(AsyncAPI asyncAPI) {

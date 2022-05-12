@@ -1,0 +1,92 @@
+asyncapi: 2.0.0
+info:
+  title: Sample eCommerce Checkout Core Public Event API
+  version: '1.0.0'
+  description: |
+    This API allows you to understand what is happening on a checkout for the Sample eCommerce.
+
+servers:
+  production:
+    url: servername[1-5].server:{port}
+    protocol: mqtt
+    description: PIPE Broker
+
+defaultContentType: application/*+avro
+
+channels:
+  ecommerce.${tenant}.${environment}.purchase.cart.public.v1:
+    description: The topic on which cart publish modification events.
+    parameters:
+      tenant:
+        $ref: '#/components/parameters/tenant'
+      environment:
+        $ref: '#/components/parameters/environment'
+    publish:
+      summary: Publish information about cart modifications.
+      operationId: onCartEvent
+      bindings:
+        kafka:
+          bindingVersion: 'latest'
+      message:
+        oneOf:
+          - $ref: '#/components/messages/LinesAdded'
+          - $ref: '#/components/messages/LinesRemoved'
+          - $ref: '#/components/messages/CartConfirmed'
+
+components:
+  messages:
+    LinesAdded:
+      name: LinesAdded
+      title: Lines added
+      summary: Contains information about the recent cart and lines added
+      contentType: application/*+avro
+      schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        $ref: "avros/all_cart_entities.avsc#/1"
+      bindings:
+        kafka:
+          bindingVersion: 'latest'
+    LinesRemoved:
+      name: LinesRemoved
+      title: Lines removed
+      summary: Contains information about the recent cart and lines removed
+      contentType: application/*+avro
+      schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        $ref: "avros/all_cart_entities.avsc#/2"
+      bindings:
+        kafka:
+          bindingVersion: 'latest'
+    CartConfirmed:
+      name: CartConfirmed
+      title: Cart Confirmed
+      summary: Contains information about the recent cart that have been confirmed
+      contentType: application/*+avro
+      schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        $ref: "avros/all_cart_entities.avsc#/0"
+      bindings:
+        kafka:
+          bindingVersion: 'latest'
+  parameters:
+    tenant:
+      description: The tenant identifier
+      schema:
+        type: string
+    environment:
+      description: The environment identifier
+      schema:
+        type: string
+  messageTraits:
+    CommonHeaders:
+      headers:
+        type: object
+        properties:
+          ecommerce-metadata-session:
+            type: string

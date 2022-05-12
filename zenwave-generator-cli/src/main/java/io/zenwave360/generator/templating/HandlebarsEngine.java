@@ -2,37 +2,70 @@ package io.zenwave360.generator.templating;
 
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.Helper;
+import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
-import io.zenwave360.generator.processors.GeneratorPlugin;
+import io.zenwave360.generator.plugins.GeneratorPlugin;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class HandlebarsEngine {
+public class HandlebarsEngine implements TemplateEngine {
 
     Context context;
     Handlebars handlebars = new Handlebars();
 
+    GeneratorPlugin generator;
+
     public HandlebarsEngine(GeneratorPlugin generator) {
         context = Context
-                .newBuilder(generator)
-                .resolver(
-                        MapValueResolver.INSTANCE,
-                        JavaBeanValueResolver.INSTANCE,
-                        NonPrivateFieldValueResolver.INSTANCE)
+                .newBuilder(generator.asConfigurationMap())
+                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE)
                 .build();
+        context.combine("generator", generator.asConfigurationMap());
+        this.generator = generator;
+        handlebars.registerHelper("size", new Helper<List>() {
+            @Override
+            public Object apply(List list, Options options) throws IOException {
+                return list.size();
+            }
+        });
+        handlebars.registerHelper("uncapFirst", new Helper<String>() {
+            @Override
+            public Object apply(String text, Options options) throws IOException {
+                return StringUtils.uncapitalize(text);
+            }
+        });
+        handlebars.registerHelper("assign", new Helper<String>() {
+            public Object apply(final String variableName, final Options options) throws IOException {
+                CharSequence finalValue = options.apply(options.fn);
+                ((Map) options.context.model()).put(variableName, finalValue.toString().trim());
+                return null;
+            }
+        });
     }
 
-    public List<TemplateOutput> processTemplates(Map<String, Object> apiModel, List<TemplateInput> templateInputs) {
-        return this.processTemplates("api", apiModel, templateInputs);
+    @Override
+    public TemplateOutput processTemplate(Map<String, Object> model, TemplateInput templateInput) {
+        return this.processTemplates(model, Arrays.asList(templateInput)).get(0);
+    }
+    @Override
+    public List<TemplateOutput> processTemplates(Map<String, Object> model, List<TemplateInput> templateInputs) {
+        return this.processTemplates(null, model, templateInputs);
     }
 
+    @Override
     public List<TemplateOutput> processTemplates(String modelPrefix, Map<String, Object> apiModel, List<TemplateInput> templateInputs) {
-        context.combine(modelPrefix, apiModel);
+        if(modelPrefix != null) {
+            context.combine(modelPrefix, apiModel);
+        } else {
+            context.combine(apiModel);
+        }
         List<TemplateOutput> templateOutputList = new ArrayList<>();
         templateInputs.forEach(templateInput -> {
             if(templateInput.getSkip() == null || !templateInput.getSkip().get()) {

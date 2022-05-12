@@ -20,9 +20,18 @@
             <artifactId>zenwave-generator-cli</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.zenwave360</groupId>
+            <artifactId>zenwave-generator-cli</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <modules>
-        <module>asyncapi-spring-cloud-streams</module>
+        <module>asyncapi-base</module>
+        <module>asyncapi-spring-cloud-streams3</module>
     </modules>
 </project>

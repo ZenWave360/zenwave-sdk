@@ -1,4 +1,4 @@
-package io.github.zenwave360.generator.AsyncapiSpringCloudStreams;
+package io.github.zenwave360.generator.plugins;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
