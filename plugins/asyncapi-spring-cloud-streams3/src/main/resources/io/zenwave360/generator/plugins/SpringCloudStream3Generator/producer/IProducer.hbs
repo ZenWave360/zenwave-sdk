@@ -1,11 +1,11 @@
-package {{apiPackage}};
+package {{generator.apiPackage}};
 
-{{#if modelPackage}}
-import {{modelPackage}}.*;
+{{#if generator.modelPackage}}
+import {{generator.modelPackage}}.*;
 {{/if}}
 
 /**
- * {{api.description}}
+ * {{asyncapi.description}}
  */
 public interface {{apiClassName}} {
 

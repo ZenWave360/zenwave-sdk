@@ -9,9 +9,21 @@ import java.util.List;
 import java.util.Map;
 
 public class AsyncApiProcessor implements Processor {
+
+    public String targetProperty = "api";
+
+    public AsyncApiProcessor() {
+    }
+
+    public AsyncApiProcessor(String targetProperty) {
+        this.targetProperty = targetProperty;
+    }
+
     @Override
-    public Map<String, Object> process(Map<String, Object> model) {
-        List<Map<String, Object>> traitsParents = JsonPath.read(model, "$..[?(@.traits)]");
+    public Map<String, ?> process(Map<String, ?> contextModel) {
+        Map<String, ?> apiModel = targetProperty != null? (Map<String, ?>) contextModel.get(targetProperty) : contextModel;
+
+        List<Map<String, Object>> traitsParents = JsonPath.read(apiModel, "$..[?(@.traits)]");
         for (Map<String, Object> traitParent : traitsParents) {
             List<Map<String, Object>> traitsList = (List) traitParent.get("traits");
             for (Map<String, Object> traits : traitsList) {
@@ -19,7 +31,7 @@ public class AsyncApiProcessor implements Processor {
             }
         }
 
-        Map<String, Object> channels = JsonPath.read(model, "$.channels");
+        Map<String, Object> channels = JsonPath.read(apiModel, "$.channels");
         for (Map.Entry<String, Object> channel : channels.entrySet()) {
             Map<String, Map<String, Object>> value = (Map) channel.getValue();
             if(value != null){
@@ -36,19 +48,19 @@ public class AsyncApiProcessor implements Processor {
             }
         }
 
-        Map<String, Map> componentsMessages = JsonPath.read(model, "$.components.messages");
+        Map<String, Map> componentsMessages = JsonPath.read(apiModel, "$.components.messages");
         for(Map.Entry<String, Map> message: componentsMessages.entrySet()) {
             if(!message.getValue().containsKey("name")) {
                 message.getValue().put("name", message.getKey());
             }
         }
 
-        List<Map<String, Object>> messages = JsonPath.read(model, "$.channels..x--messages[*]");
+        List<Map<String, Object>> messages = JsonPath.read(apiModel, "$.channels..x--messages[*]");
         for (Map<String, Object> message : messages) {
             calculateMessageParamType(message);
         }
 
-        return model;
+        return contextModel;
     }
 
     private void addChannelNameToOperation(Map<String, Object> operation, String channelName) {

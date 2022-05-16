@@ -37,25 +37,16 @@ public class SpringCloudStreams3GeneratorTest {
     @Test
     public void testGenerator() throws Exception {
 //        File file = new File(getClass().getClassLoader().getResource("io/zenwave360/generator/parsers/asyncapi-circular-refs.yml").toURI());
-        Configuration configuration = new Configuration()
-                .withSpecFile("io/zenwave360/generator/plugins/asyncapi-commands.yml")
+        Configuration configuration = new SpringCloudStream3ConfigurationPreset()
+                .withSpecFile("classpath:io/zenwave360/generator/plugins/asyncapi-commands.yml")
                 .withTargetFolder("target/zenwave630/out")
                 .withOption("apiPackage", "io.example.integration.test.api")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
                 .withOption("role", "CLIENT")
-                .withOption("style", "REACTIVE")
-                .withChain(DefaultYamlParser.class, AsyncApiProcessor.class, SpringCloudStreams3Generator.class, DefaultTemplateWriter.class);
+                .withOption("style", "REACTIVE");
 
         new Generator(configuration).generate();
 
         logCaptor.getLogs();
-    }
-
-    public static class NoOpPluginGenerator implements GeneratorPlugin {
-
-        @Override
-        public List<TemplateOutput> generate(Map<String, Object> apiModel) {
-            return List.of(new TemplateOutput("nop.txt", "nop"));
-        }
     }
 }

@@ -1,4 +1,4 @@
-package {{apiPackage}};
+package {{generator.apiPackage}};
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
@@ -6,8 +6,8 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 import java.util.function.Consumer;
 
-{{#if modelPackage}}
-import {{modelPackage}}.*;
+{{#if generator.modelPackage}}
+import {{generator.modelPackage}}.*;
 {{/if}}
 
 @Component("{{operation.x--operationIdKebabCase}}")

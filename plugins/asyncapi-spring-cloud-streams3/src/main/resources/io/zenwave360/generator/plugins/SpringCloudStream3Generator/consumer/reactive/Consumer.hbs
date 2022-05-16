@@ -1,4 +1,4 @@
-package {{api.apiPackage};
+package {{generator.apiPackage}};
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
@@ -7,16 +7,16 @@ import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
 
-{{#if api.modelPackage}}
-import {{api.modelPackage}.*;
+{{#if generator.modelPackage}}
+import {{generator.modelPackage}}.*;
 {{/if}}
 
-@Component("{{operation.operationIdKebabCase}")
-public class {{operation.operationIdCamelCase} implements I{{operation.operationIdCamelCase} {
+@Component("{{operation.operationIdKebabCase}}")
+public class {{operation.operationIdCamelCase}} implements I{{operation.operationIdCamelCase}} {
 
     {{#each operation.messages as |message|}}
     @Autowired
-    private I{{operation.operationIdCamelCase}.{{message.name} {{message.name?uncap_first};
+    private I{{operation.operationIdCamelCase}.{{message.name} {{message.name?uncap_first}};
 
     {{/each}}
 
@@ -24,7 +24,7 @@ public class {{operation.operationIdCamelCase} implements I{{operation.operation
     public void accept(Message<?> message) {
         Object payload = message.getPayload();
         {{#each operation.messages as |message|}}
-        if(payload instanceof {{message.paramType}) {
+        if(payload instanceof {{message.paramType}}) {
             <#assign messageType = exposeMessage?string('Message<' + message.paramType + '>', message.paramType)>
             {{message.name?uncap_first}.accept(Flux.just((<{{messageType}>) payload));
             return;

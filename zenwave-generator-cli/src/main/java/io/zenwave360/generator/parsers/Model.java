@@ -1,5 +1,6 @@
 package io.zenwave360.generator.parsers;
 
+import com.jayway.jsonpath.PathNotFoundException;
 import io.zenwave360.jsonrefparser.$Refs;
 
 import java.io.File;
@@ -18,7 +19,11 @@ public class Model extends AbstractMap<String, Object> {
     }
 
     public <T> T getJsonPath(String jsonPath) {
-        return (T) refs.get(jsonPath);
+        try {
+            return (T) refs.get(jsonPath);
+        } catch (PathNotFoundException e) {
+            return null;
+        }
     }
 
     public Map<String, Object> model() {

@@ -12,17 +12,18 @@ import java.util.Map;
 
 public class SpringCloudStreams3GeneratorTemplatesTest {
 
-    SpringCloudStreams3Generator asyncapiGenerator = new SpringCloudStreams3Generator();
+    String targetProperty = "_api";
+    SpringCloudStreams3Generator asyncapiGenerator = new SpringCloudStreams3Generator(targetProperty);
 
-    private Map<String, Object> loadAsyncapiModelFromResource(String resource) throws Exception {
+    private Map<String, ?> loadAsyncapiModelFromResource(String resource) throws Exception {
         File file = new File(getClass().getClassLoader().getResource(resource).toURI());
-        Map<String, Object> model = new DefaultYamlParser().parse(file);
-        return new AsyncApiProcessor().process(model);
+        Map<String, ?> model = new DefaultYamlParser(file.getAbsolutePath(), targetProperty).parse();
+        return new AsyncApiProcessor(targetProperty).process(model);
     }
 
     @Test
     public void test_output_template_names_for_command_producer() throws Exception {
-        Map<String, Object> model = loadAsyncapiModelFromResource("io/zenwave360/generator/plugins/asyncapi-commands.yml");
+        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/plugins/asyncapi-commands.yml");
 
         asyncapiGenerator.role = AbstractAsyncapiGenerator.RoleType.CLIENT;
         asyncapiGenerator.apiPackage = "io.example.api";
@@ -36,7 +37,7 @@ public class SpringCloudStreams3GeneratorTemplatesTest {
 
     @Test
     public void test_output_template_names_for_command_consumer() throws Exception {
-        Map<String, Object> model = loadAsyncapiModelFromResource("io/zenwave360/generator/plugins/asyncapi-commands.yml");
+        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/plugins/asyncapi-commands.yml");
 
         asyncapiGenerator.role = AbstractAsyncapiGenerator.RoleType.PROVIDER;
         List<TemplateOutput> outputTemplates = asyncapiGenerator.generate(model);
@@ -49,7 +50,7 @@ public class SpringCloudStreams3GeneratorTemplatesTest {
 
     @Test
     public void test_output_template_names_for_events_producer() throws Exception {
-        Map<String, Object> model = loadAsyncapiModelFromResource("io/zenwave360/generator/plugins/asyncapi-events.yml");
+        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/plugins/asyncapi-events.yml");
 
         asyncapiGenerator.role = AbstractAsyncapiGenerator.RoleType.PROVIDER;
         asyncapiGenerator.apiPackage = "io.example.api";
@@ -60,12 +61,12 @@ public class SpringCloudStreams3GeneratorTemplatesTest {
         Assertions.assertEquals("io/example/api/IDefaultServiceEventsProducer.java", outputTemplates.get(1).getTargetFile());
         Assertions.assertEquals("io/example/api/DefaultServiceEventsProducer.java", outputTemplates.get(2).getTargetFile());
         System.out.println(outputTemplates.get(1).getContent());
-        Assertions.assertTrue(outputTemplates.get(0).getContent().contains("package io.example.api;"));
+        Assertions.assertTrue(outputTemplates.get(1).getContent().contains("package io.example.api;"));
     }
 
     @Test
     public void test_output_template_names_for_events_consumer() throws Exception {
-        Map<String, Object> model = loadAsyncapiModelFromResource("io/zenwave360/generator/plugins/asyncapi-events.yml");
+        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/plugins/asyncapi-events.yml");
 
         asyncapiGenerator.role = AbstractAsyncapiGenerator.RoleType.CLIENT;
         List<TemplateOutput> outputTemplates = asyncapiGenerator.generate(model);

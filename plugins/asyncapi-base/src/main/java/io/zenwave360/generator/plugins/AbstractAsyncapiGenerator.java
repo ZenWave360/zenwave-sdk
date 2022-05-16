@@ -2,6 +2,7 @@ package io.zenwave360.generator.plugins;
 
 import com.jayway.jsonpath.JsonPath;
 import io.zenwave360.generator.DocumentedOption;
+import io.zenwave360.generator.parsers.Model;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.ArrayList;
@@ -62,15 +63,15 @@ public abstract class AbstractAsyncapiGenerator implements GeneratorPlugin {
         return this.apiPackage.replaceAll("\\.", "/");
     }
 
-    public Map<String, List<Map<String, Object>>> getPublishOperationsGroupedByTag(Map<String, Object> apiModel) {
+    public Map<String, List<Map<String, Object>>> getPublishOperationsGroupedByTag(Model apiModel) {
         return getOperationsGroupedByTag(apiModel, OperationType.PUBLISH);
     }
 
-    public Map<String, List<Map<String, Object>>> getSubscribeOperationsGroupedByTag(Map<String, Object> model) {
+    public Map<String, List<Map<String, Object>>> getSubscribeOperationsGroupedByTag(Model model) {
         return getOperationsGroupedByTag(model, OperationType.SUBSCRIBE);
     }
 
-    public Map<String, List<Map<String, Object>>> getOperationsGroupedByTag(Map<String, Object> apiModel, OperationType operationType) {
+    public Map<String, List<Map<String, Object>>> getOperationsGroupedByTag(Model apiModel, OperationType operationType) {
         Map<String, List<Map<String, Object>>> operationsByTag = new HashMap<>();
         List<Map<String, Object>> operations = JsonPath.read(apiModel, "$.channels[*].*");
         for (Map<String, Object> operation : operations) {

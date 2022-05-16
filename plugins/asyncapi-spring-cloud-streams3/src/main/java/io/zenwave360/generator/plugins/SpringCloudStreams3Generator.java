@@ -1,6 +1,7 @@
 package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.DocumentedOption;
+import io.zenwave360.generator.parsers.Model;
 import io.zenwave360.generator.processors.utils.StringInterpolator;
 import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.TemplateEngine;
@@ -20,10 +21,19 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         IMPERATIVE, REACTIVE
     }
 
+    public String targetProperty = "api";
+
+    public SpringCloudStreams3Generator() {
+    }
+
+    public SpringCloudStreams3Generator(String targetProperty) {
+        this.targetProperty = targetProperty;
+    }
+
     @DocumentedOption(description = "Programming style: IMPERATIVE\\|REACTIVE")
     public ProgrammingStyle style = ProgrammingStyle.IMPERATIVE;
 
-    private HandlebarsEngine handlebarsEngine = new HandlebarsEngine(this);
+    private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
     private List<TemplateInput> producerTemplates = Arrays.asList(
             new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/common/Header", "${apiPackageFolder}/Header.java"),
@@ -56,36 +66,43 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         return serviceName + operationRoleType.getServiceSuffix();
     }
 
+    Model getApiModel(Map<String, ?> contextModel) {
+        return(Model) contextModel.get(targetProperty);
+    }
+
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> apiModel) {
+    public List<TemplateOutput> generate(Map<String, ?> contextModel) {
         List<TemplateOutput> templateOutputList = new ArrayList<>();
+        Model apiModel = getApiModel(contextModel);
         Map<String, List<Map<String, Object>>> subscribeOperations = getSubscribeOperationsGroupedByTag(apiModel);
         Map<String, List<Map<String, Object>>> publishOperations = getPublishOperationsGroupedByTag(apiModel);
         for (Map.Entry<String, List<Map<String, Object>>> entry : subscribeOperations.entrySet()) {
-            boolean isProducer = isProducer(role, OperationType.SUBSCRIBE);
+//            boolean isProducer = isProducer(role, OperationType.SUBSCRIBE);
             OperationRoleType operationRoleType = OperationRoleType.valueOf(role, OperationType.SUBSCRIBE);
-            templateOutputList.addAll(generateTemplateOutput(apiModel, entry.getKey(), entry.getValue(), operationRoleType));
+            templateOutputList.addAll(generateTemplateOutput(contextModel, entry.getKey(), entry.getValue(), operationRoleType));
         }
         for (Map.Entry<String, List<Map<String, Object>>> entry : publishOperations.entrySet()) {
-            boolean isProducer = isProducer(role, OperationType.PUBLISH);
+//            boolean isProducer = isProducer(role, OperationType.PUBLISH);
             OperationRoleType operationRoleType = OperationRoleType.valueOf(role, OperationType.PUBLISH);
-            templateOutputList.addAll(generateTemplateOutput(apiModel, entry.getKey(), entry.getValue(), operationRoleType));
+            templateOutputList.addAll(generateTemplateOutput(contextModel, entry.getKey(), entry.getValue(), operationRoleType));
         }
         return templateOutputList;
     }
 
-    public List<TemplateOutput> generateTemplateOutput(Map<String, Object> apiModel, String serviceName, List<Map<String, Object>> operations, OperationRoleType operationRoleType) {
+    public List<TemplateOutput> generateTemplateOutput(Map<String, ?> contextModel, String serviceName, List<Map<String, Object>> operations, OperationRoleType operationRoleType) {
         boolean isProducer = OperationRoleType.COMMAND_PRODUCER == operationRoleType || OperationRoleType.EVENT_PRODUCER == operationRoleType;
         if (isProducer) {
-            return generateTemplateOutput(apiModel, getTemplates(isProducer), serviceName, operations, operationRoleType);
+            return generateTemplateOutput(contextModel, getTemplates(isProducer), serviceName, operations, operationRoleType);
         } else {
-            return operations.stream().flatMap(operation -> generateTemplateOutput(apiModel, getTemplates(isProducer), serviceName, operation, operationRoleType).stream()).collect(Collectors.toList());
+            return operations.stream().flatMap(operation -> generateTemplateOutput(contextModel, getTemplates(isProducer), serviceName, operation, operationRoleType).stream()).collect(Collectors.toList());
         }
     }
 
-    public List<TemplateOutput> generateTemplateOutput(Map<String, Object> apiModel, List<TemplateInput> templates, String serviceName, Map<String, Object> operation, OperationRoleType operationRoleType) {
+    public List<TemplateOutput> generateTemplateOutput(Map<String, ?> contextModel, List<TemplateInput> templates, String serviceName, Map<String, Object> operation, OperationRoleType operationRoleType) {
         Map<String, Object> model = new HashMap<>();
-        model.put("api", apiModel);
+        model.put("generator", asConfigurationMap());
+        model.put("context", contextModel);
+        model.put("asyncapi", getApiModel(contextModel));
         model.put("serviceName", serviceName);
         model.put("operation", operation);
         model.put("apiPackageFolder", getApiPackageFolder());
@@ -93,9 +110,11 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         return getTemplateEngine().processTemplates(model, processTemplateFilenames(model, templates));
     }
 
-    public List<TemplateOutput> generateTemplateOutput(Map<String, Object> apiModel, List<TemplateInput> templates, String serviceName, List<Map<String, Object>> operations, OperationRoleType operationRoleType) {
+    public List<TemplateOutput> generateTemplateOutput(Map<String, ?> contextModel, List<TemplateInput> templates, String serviceName, List<Map<String, Object>> operations, OperationRoleType operationRoleType) {
         Map<String, Object> model = new HashMap<>();
-        model.put("api", apiModel);
+        model.put("generator", asConfigurationMap());
+        model.put("context", contextModel);
+        model.put("asyncapi", getApiModel(contextModel));
         model.put("serviceName", serviceName);
         model.put("operations", operations);
         model.put("apiPackageFolder", getApiPackageFolder());

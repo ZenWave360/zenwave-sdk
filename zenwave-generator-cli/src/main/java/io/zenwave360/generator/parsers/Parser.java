@@ -1,8 +1,8 @@
 package io.zenwave360.generator.parsers;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 public interface Parser {
-    Model parse(File file) throws IOException;
+    Map<String, Model> parse() throws IOException;
 }

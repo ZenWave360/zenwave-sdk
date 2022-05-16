@@ -17,6 +17,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 public @interface DocumentedOption {
 
+    String name() default "";
+
+    Class type() default String.class;
+
     String description() default "";
 
     boolean required() default false;

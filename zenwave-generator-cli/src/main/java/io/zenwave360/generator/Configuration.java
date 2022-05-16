@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 public class Configuration {
 
+    private static final String PRESET_ID = "base";
+
     private String specFile;
 
     private String targetFolder;
@@ -29,6 +31,12 @@ public class Configuration {
 
     public Configuration withOption(String name, Object value) {
         options.put(name, value);
+        return this;
+    }
+
+    public Configuration withOptions(Map<String, Object> options) {
+        // TODO maybe handle nested properties names containing '.' as nested objects.
+        this.options.putAll(options);
         return this;
     }
 

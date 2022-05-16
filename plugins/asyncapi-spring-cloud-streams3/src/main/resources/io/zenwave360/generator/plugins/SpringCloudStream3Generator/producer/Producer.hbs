@@ -1,4 +1,4 @@
-package {{api.apiPackage}};
+package {{generator.apiPackage}};
 
 import java.util.Map;
 
@@ -10,12 +10,12 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MimeType;
 
-{{#if api.modelPackage}}
-import {{api.modelPackage}}.*;
+{{#if generator.modelPackage}}
+import {{generator.modelPackage}}.*;
 {{/if}}
 
 /**
- * {{api.description}}
+ * {{asyncapi.description}}
  */
 @Component
 public class {{apiClassName}} implements {{interfaceClassName}} {

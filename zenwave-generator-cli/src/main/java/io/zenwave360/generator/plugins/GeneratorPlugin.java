@@ -21,14 +21,14 @@ public interface GeneratorPlugin {
         PROVIDER, CLIENT
     }
 
-    List<TemplateOutput> generate(Map<String, Object> apiModel);
+    List<TemplateOutput> generate(Map<String, ?> contextModel);
 
     default Map<String, Object> asConfigurationMap() {
         Map<String, Object> config = new HashMap<>();
         Field[] fields = getAllFields(this.getClass());
         for(Field field: fields) {
             try {
-                if(field.canAccess(this)) {
+                if(field.canAccess(this) && !field.getName().startsWith("this$")) {
                     config.put(field.getName(), field.get(this));
                 }
             } catch (IllegalAccessException e) {

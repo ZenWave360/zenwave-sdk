@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,15 +21,11 @@ public class HandlebarsEngine implements TemplateEngine {
     Context context;
     Handlebars handlebars = new Handlebars();
 
-    GeneratorPlugin generator;
-
-    public HandlebarsEngine(GeneratorPlugin generator) {
+    public HandlebarsEngine() {
         context = Context
-                .newBuilder(generator.asConfigurationMap())
+                .newBuilder(new HashMap<>())
                 .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE)
                 .build();
-        context.combine("generator", generator.asConfigurationMap());
-        this.generator = generator;
         handlebars.registerHelper("size", new Helper<List>() {
             @Override
             public Object apply(List list, Options options) throws IOException {

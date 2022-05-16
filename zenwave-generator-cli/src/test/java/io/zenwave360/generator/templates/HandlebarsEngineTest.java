@@ -16,19 +16,8 @@ import java.util.Map;
 public class HandlebarsEngineTest {
 
     @Test
-    public void testHandlebarsEngine() throws URISyntaxException, MalformedURLException {
-        HandlebarsEngine handlebarsEngine = new HandlebarsEngine(new GeneratorPlugin() {
-            private String unusedConfigurationField;
-
-            public String getUnusedConfigurationField() {
-                return unusedConfigurationField;
-            }
-
-            @Override
-            public List<TemplateOutput> generate(Map<String, Object> apiModel) {
-                return null;
-            }
-        });
+    public void testHandlebarsEngine() {
+        HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
         Map<String, Object> model = new HashMap<>();
         model.put("list", List.of(1, 2, 3));
