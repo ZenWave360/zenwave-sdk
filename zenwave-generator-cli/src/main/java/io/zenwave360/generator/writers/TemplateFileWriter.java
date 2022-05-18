@@ -12,11 +12,16 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 
-public class DefaultTemplateWriter implements TemplateWriter {
+public class TemplateFileWriter implements TemplateWriter {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
     private File targetFolder;
+
+    public TemplateFileWriter withTargetFolder(File targetFolder) {
+        this.targetFolder = targetFolder;
+        return this;
+    }
 
     public void setTargetFolder(File targetFolder) {
         this.targetFolder = targetFolder;

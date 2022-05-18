@@ -3,7 +3,7 @@ package io.zenwave360.generator.plugins;
 import io.zenwave360.generator.Configuration;
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.processors.AsyncApiProcessor;
-import io.zenwave360.generator.writers.DefaultTemplateWriter;
+import io.zenwave360.generator.writers.TemplateFileWriter;
 
 public class SpringCloudStream3ConfigurationPreset extends Configuration {
 
@@ -11,6 +11,6 @@ public class SpringCloudStream3ConfigurationPreset extends Configuration {
 
     public SpringCloudStream3ConfigurationPreset() {
         super();
-        withChain(DefaultYamlParser.class, AsyncApiProcessor.class, SpringCloudStreams3Generator.class, DefaultTemplateWriter.class);
+        withChain(DefaultYamlParser.class, AsyncApiProcessor.class, SpringCloudStreams3Generator.class, TemplateFileWriter.class);
     }
 }

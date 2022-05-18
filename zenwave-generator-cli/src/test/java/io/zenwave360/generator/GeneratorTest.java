@@ -2,7 +2,7 @@ package io.zenwave360.generator;
 
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.processors.AsyncApiProcessor;
-import io.zenwave360.generator.writers.DefaultTemplateWriter;
+import io.zenwave360.generator.writers.TemplateFileWriter;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -34,7 +34,7 @@ public class GeneratorTest {
         Configuration configuration = new Configuration()
                 .withSpecFile("classpath:io/zenwave360/generator/parsers/asyncapi-circular-refs.yml")
                 .withTargetFolder("target/zenwave630/out")
-                .withChain(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpPluginGenerator.class, DefaultTemplateWriter.class);
+                .withChain(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpPluginGenerator.class, TemplateFileWriter.class);
 
         new Generator(configuration).generate();
 

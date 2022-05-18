@@ -1,13 +1,8 @@
 package io.zenwave360.generator;
 
-import io.zenwave360.generator.parsers.DefaultYamlParser;
-import io.zenwave360.generator.processors.AsyncApiProcessor;
-import io.zenwave360.generator.writers.DefaultTemplateWriter;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -25,7 +20,8 @@ public class Main implements Callable<Void> {
     @Option(names = {"-c", "--chain"}, split = ",", description = "Comma separated chain of parsers,processors,generators,writters to be used")
     Class[] chain;
 
-    @Option(names = {"-o", "--options"})
+//    @Option(names = {"-o", "--options"})
+    @CommandLine.Parameters
     Map<String, Object> options;
 
     public static void main(String... args) {

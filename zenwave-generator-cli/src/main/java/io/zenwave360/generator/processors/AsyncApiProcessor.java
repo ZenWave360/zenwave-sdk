@@ -12,11 +12,9 @@ public class AsyncApiProcessor implements Processor {
 
     public String targetProperty = "api";
 
-    public AsyncApiProcessor() {
-    }
-
-    public AsyncApiProcessor(String targetProperty) {
+    public AsyncApiProcessor withTargetProperty(String targetProperty) {
         this.targetProperty = targetProperty;
+        return this;
     }
 
     @Override

@@ -25,8 +25,8 @@ public class SpringCloudStreams3GeneratorTemplateNamesTest {
 
     private Map<String, ?> loadAsyncapiModelFromResource(String resource) throws Exception {
         File file = new File(getClass().getClassLoader().getResource(resource).toURI());
-        Map<String, ?> model = new DefaultYamlParser(file.getAbsolutePath(), targetProperty).parse();
-        return new AsyncApiProcessor(targetProperty).process(model);
+        Map<String, ?> model = new DefaultYamlParser().withSpecFile(file.getAbsolutePath()).withTargetProperty(targetProperty).parse();
+        return new AsyncApiProcessor().withTargetProperty(targetProperty).process(model);
     }
 
     @Test

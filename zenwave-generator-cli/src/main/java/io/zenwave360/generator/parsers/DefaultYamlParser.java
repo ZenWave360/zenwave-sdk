@@ -14,6 +14,16 @@ public class DefaultYamlParser implements io.zenwave360.generator.parsers.Parser
     public String specFile;
     public String targetProperty = "api";
 
+    public DefaultYamlParser withSpecFile(String specFile) {
+        this.specFile = specFile;
+        return this;
+    }
+
+    public DefaultYamlParser withTargetProperty(String targetProperty) {
+        this.targetProperty = targetProperty;
+        return this;
+    }
+
     protected File findSpecFile(String specFile) {
         if(specFile.startsWith("classpath:")) {
             try {
@@ -23,14 +33,6 @@ public class DefaultYamlParser implements io.zenwave360.generator.parsers.Parser
             }
         }
         return new File(specFile);
-    }
-
-    public DefaultYamlParser() {
-    }
-
-    public DefaultYamlParser(String specFile, String targetProperty) {
-        this.specFile = specFile;
-        this.targetProperty = targetProperty;
     }
 
     @Override

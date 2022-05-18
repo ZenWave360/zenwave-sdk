@@ -8,8 +8,11 @@ import java.util.Map;
 
 public class NoOpPluginGenerator implements GeneratorPlugin {
 
+    public static Map<String, ?> context;
+
     @Override
     public List<TemplateOutput> generate(Map<String, ?> contextModel) {
+        context = contextModel;
         return List.of(new TemplateOutput("nop.txt", "nop"));
     }
 }

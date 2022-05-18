@@ -3,7 +3,6 @@ package io.zenwave360.generator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.zenwave360.generator.parsers.Model;
 import io.zenwave360.generator.parsers.Parser;
 import io.zenwave360.generator.plugins.GeneratorPlugin;
 import io.zenwave360.generator.processors.Processor;
@@ -36,13 +35,15 @@ public class Generator {
         Map<String, ?> model = new HashMap<>();
         List<TemplateOutput> templateOutputList = new ArrayList<>();
 
+        int chainIndex = 0;
         for (Class pluginClass: configuration.getChain()) {
             log.debug("Executing chained pluginClass {}", pluginClass);
             Object plugin = pluginClass.getDeclaredConstructor().newInstance();
-            applyConfiguration(plugin, configuration);
+            applyConfiguration(chainIndex++, plugin, configuration);
 
             if(plugin instanceof Parser) {
-                model = ((Parser) plugin).parse();
+                Map parsed = ((Parser) plugin).parse();
+                model.putAll(parsed);
             }
             if(plugin instanceof Processor) {
                 model = ((Processor) plugin).process(model);
@@ -64,10 +65,21 @@ public class Generator {
         }
     }
 
-    public void applyConfiguration(Object processor, Configuration configuration) throws JsonMappingException {
+    public void applyConfiguration(int chainIndex, Object processor, Configuration configuration) throws JsonMappingException {
+        Map<String, Object> options = configuration.getOptions();
+        Object processorClassOptions = options.get(processor.getClass().getName());
+        Object chainIndexOptions = options.get(String.valueOf(chainIndex));
+
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.updateValue(processor, configuration.getOptions());
+
+        mapper.updateValue(processor, options);
+        if (processorClassOptions != null) {
+            mapper.updateValue(processor, processorClassOptions);
+        }
+        if (chainIndexOptions != null) {
+            mapper.updateValue(processor, chainIndexOptions);
+        }
     }
 
 }

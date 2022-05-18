@@ -19,7 +19,7 @@ public class DefaultYamlParserTest {
     public void testParseYml() throws URISyntaxException, IOException {
         String targetProperty = "_api";
         File file = getClasspathResourceAsFile("io/zenwave360/generator/parsers/asyncapi-circular-refs.yml");
-        DefaultYamlParser parser = new DefaultYamlParser(file.getAbsolutePath(), targetProperty);
+        DefaultYamlParser parser = new DefaultYamlParser().withSpecFile(file.getAbsolutePath()).withTargetProperty(targetProperty);
         Model model = parser.parse().get(targetProperty);
         Assertions.assertNotNull(model);
         Assertions.assertNotNull(model.getJsonPath("$.channels.createProductNotification.subscribe.message"));

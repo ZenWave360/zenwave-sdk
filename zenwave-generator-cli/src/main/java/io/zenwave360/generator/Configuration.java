@@ -30,13 +30,24 @@ public class Configuration {
     }
 
     public Configuration withOption(String name, Object value) {
-        options.put(name, value);
+        String lastPath = name;
+        Map<String, Object> nestedTempObject = options;
+        String[] paths = name.split("\\.");
+        for (int i = 0; i < paths.length; i++) {
+            lastPath = paths[i];
+            if(!nestedTempObject.containsKey(lastPath)) {
+                nestedTempObject.put(paths[i], new HashMap<>());
+            }
+            if(i < paths.length -1) {
+                nestedTempObject = (Map<String, Object>) nestedTempObject.get(lastPath);
+            }
+        }
+        nestedTempObject.put(lastPath, value);
         return this;
     }
 
     public Configuration withOptions(Map<String, Object> options) {
-        // TODO maybe handle nested properties names containing '.' as nested objects.
-        this.options.putAll(options);
+        options.entrySet().forEach(o -> withOption(o.getKey(), o.getValue()));
         return this;
     }
 
