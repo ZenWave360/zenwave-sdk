@@ -12,7 +12,7 @@ public class Configuration {
 
     private String specFile;
 
-    private String targetFolder;
+    private String targetFolder = "target/zenwave";
     private List<Class> chain;
 
     private Map<String, Object> options = new HashMap<>();
@@ -24,8 +24,10 @@ public class Configuration {
     }
 
     public Configuration withTargetFolder(String targetFolder) {
-        this.targetFolder = targetFolder;
-        this.options.put("targetFolder", targetFolder);
+        if(targetFolder != null) {
+            this.targetFolder = targetFolder;
+            this.options.put("targetFolder", targetFolder);
+        }
         return this;
     }
 
@@ -52,7 +54,9 @@ public class Configuration {
     }
 
     public Configuration withChain(Class... processorClasses) {
-        chain = List.of(processorClasses);
+        if(processorClasses != null) {
+            chain = List.of(processorClasses);
+        }
         return this;
     }
     public Configuration withChain(String... processorClasses) {

@@ -20,7 +20,8 @@ public class TemplateStdoutWriter implements TemplateWriter {
 
     protected void write(String file, String contents) {
         log.debug("Writting template output to file: {}", file);
-        System.out.println("------ " + file + " ------");
+        System.out.println("------- " + file + " ------");
         System.out.println(contents);
+        System.out.println("--- end: " + file + " -----\n");
     }
 }

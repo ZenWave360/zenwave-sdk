@@ -3,6 +3,8 @@ package io.zenwave360.generator;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -22,7 +24,7 @@ public class Main implements Callable<Void> {
 
 //    @Option(names = {"-o", "--options"})
     @CommandLine.Parameters
-    Map<String, Object> options;
+    Map<String, Object> options = new HashMap<>();
 
     public static void main(String... args) {
         CommandLine cmd = new CommandLine(new Main());
@@ -32,7 +34,7 @@ public class Main implements Callable<Void> {
 
     @Override
     public Void call() throws Exception {
-        Configuration configuration = new Configuration()
+        Configuration configuration = createConfiguration(this.preset)
                 .withSpecFile((String) options.get("specFile"))
                 .withTargetFolder((String) options.get("targetFolder"))
                 .withOptions(options)
@@ -40,5 +42,12 @@ public class Main implements Callable<Void> {
 
         new Generator(configuration).generate();
         return null;
+    }
+
+    protected Configuration createConfiguration(String preset) throws Exception {
+        if (preset != null) {
+            return (Configuration) getClass().getClassLoader().loadClass(preset).getDeclaredConstructor().newInstance();
+        }
+        return new Configuration();
     }
 }

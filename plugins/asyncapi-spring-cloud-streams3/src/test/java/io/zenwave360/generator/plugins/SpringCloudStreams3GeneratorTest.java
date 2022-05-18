@@ -33,10 +33,11 @@ public class SpringCloudStreams3GeneratorTest {
         Configuration configuration = new SpringCloudStream3ConfigurationPreset()
                 .withSpecFile("classpath:io/zenwave360/generator/plugins/asyncapi-commands.yml")
                 .withTargetFolder("target/zenwave630/out")
-                .withOption("apiPackage", "io.example.integration.test.api")
-                .withOption("modelPackage", "io.example.integration.test.api.model")
-                .withOption("role", "CLIENT")
-                .withOption("style", "REACTIVE");
+//                .withOption("apiPackage", "io.example.integration.test.api")
+//                .withOption("modelPackage", "io.example.integration.test.api.model")
+//                .withOption("role", "CLIENT")
+//                .withOption("style", "REACTIVE")
+        ;
 
         new Generator(configuration).generate();
 
