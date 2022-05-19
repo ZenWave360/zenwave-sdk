@@ -1,21 +1,12 @@
 package io.zenwave360.generator.processors;
 
 import com.jayway.jsonpath.JsonPath;
-import org.apache.commons.lang3.RegExUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class AsyncApiProcessor implements Processor {
-
-    public String targetProperty = "api";
-
-    public AsyncApiProcessor withTargetProperty(String targetProperty) {
-        this.targetProperty = targetProperty;
-        return this;
-    }
+public class AsyncApiProcessor extends AbstractBaseProcessor implements Processor {
 
     @Override
     public Map<String, ?> process(Map<String, ?> contextModel) {
@@ -73,37 +64,7 @@ public class AsyncApiProcessor implements Processor {
         }
     }
 
-    private void addNormalizedTagName(Map<String, Object> operation) {
-        if (operation != null) {
-            String normalizedTagName = null;
-            List tags = (List) operation.get("tags");
-            if(tags != null) {
-                String tag = (String) (tags.get(0) instanceof Map? (String) ((Map) tags.get(0)).get("name") : tags.get(0));
-                normalizedTagName = normalizeTagName(tag);
-            }
-            operation.put("x--normalizedTagName", normalizedTagName);
-        }
-    }
-
-    public String normalizeTagName(String tagName) {
-        if(tagName == null) {
-            return null;
-        }
-        String[] tokens = RegExUtils.replaceAll(tagName, "[\\s-.]", " ").split(" ");
-        for (int i = 0; i < tokens.length; i++) {
-            tokens[i] = StringUtils.capitalize(tokens[i]);
-        }
-        return RegExUtils.removePattern(StringUtils.join(tokens), "^(\\d+)");
-    }
-
-    private void addOperationIdVariants(Map<String, Object> operation) {
-        if (operation != null) {
-            operation.put("x--operationIdCamelCase", StringUtils.capitalize((String) operation.get("operationId")));
-            operation.put("x--operationIdKebabCase", StringUtils.capitalize((String) operation.get("operationId")));
-        }
-    }
-
-    public void collectMessages(Map<String, Object> operation) {
+     public void collectMessages(Map<String, Object> operation) {
         if (operation != null) {
             Map message = (Map) operation.get("message");
             List messages = new ArrayList();

@@ -9,7 +9,7 @@ servers:
   production:
     url: servername[1-5].server:{port}
     protocol: mqtt
-    description: PIPE Broker
+    description: Kafka Broker
 
 defaultContentType: application/*+avro
 
