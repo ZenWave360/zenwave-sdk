@@ -16,12 +16,12 @@ import java.util.Map;
 public class SpringCloudStreams3GeneratorTemplateNamesTest {
 
     String targetProperty = "_api";
-    SpringCloudStreams3Generator mockedAsyncapiGenerator = new SpringCloudStreams3Generator(targetProperty) {
+    SpringCloudStreams3Generator mockedAsyncapiGenerator = new SpringCloudStreams3Generator() {
         @Override
         public TemplateEngine getTemplateEngine() {
             return new __NoOperationTemplateEngine();
         }
-    };
+    }.withTargetProperty(targetProperty);
 
     private Map<String, ?> loadAsyncapiModelFromResource(String resource) throws Exception {
         File file = new File(getClass().getClassLoader().getResource(resource).toURI());

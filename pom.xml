@@ -3,13 +3,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.zenwave360</groupId>
-    <artifactId>zenwave-generator</artifactId>
+    <artifactId>zenwave-code-generator</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>zenwave-generator</name>
+    <name>zenwave-code-generator</name>
     <description>Extensible code generation framework for JSON/YAML models and specifications.</description>
 
-    <url>https://github.com/ZenWave360/zenwave-generator</url>
+    <url>https://github.com/ZenWave360/zenwave-code-generator</url>
 
     <licenses>
         <license>
@@ -41,9 +41,9 @@
     </distributionManagement>
 
     <scm>
-        <connection>scm:git:git://github.com/ZenWave360/zenwave-generator.git</connection>
-        <developerConnection>scm:git:git@github.com:ZenWave360/zenwave-generator.git</developerConnection>
-        <url>https://github.com/ZenWave360/zenwave-generator</url>
+        <connection>scm:git:git://github.com/ZenWave360/zenwave-code-generator.git</connection>
+        <developerConnection>scm:git:git@github.com:ZenWave360/zenwave-code-generator.git</developerConnection>
+        <url>https://github.com/ZenWave360/zenwave-code-generator</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -58,9 +58,10 @@
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
 
         <slf4j-api.version>1.7.36</slf4j-api.version>
-        <picocli.version>4.6.2</picocli.version>
+        <picocli.version>4.6.3</picocli.version>
         <handlebars-java.version>4.3.0</handlebars-java.version>
         <json-schema-ref-parser-jvm.version>0.0.4-SNAPSHOT</json-schema-ref-parser-jvm.version>
+        <jdl-jvm.version>0.0.1-SNAPSHOT</jdl-jvm.version>
         <junit.version>4.13.2</junit.version>
     </properties>
     <dependencies>
@@ -84,9 +85,9 @@
     </dependencies>
 
     <modules>
-        <module>zenwave-generator-cli</module>
+        <module>zenwave-code-generator-cli</module>
         <module>plugins</module>
-        <module>zenwave-generator-mojo</module>
+        <module>zenwave-code-generator-mojo</module>
     </modules>
 
     <build>

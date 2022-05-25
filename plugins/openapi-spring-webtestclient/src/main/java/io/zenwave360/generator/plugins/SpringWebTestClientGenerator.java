@@ -34,10 +34,10 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
     private String prefix = "io/zenwave360/generator/plugins/SpringWebTestClientGenerator/";
-    private TemplateInput partialTemplate = new TemplateInput(prefix + "partials/Operation.java", "${apiPackageFolder}/Operation.java");
-    private TemplateInput testSetTemplate = new TemplateInput(prefix + "ControllersTestSet.java", "${apiPackageFolder}/ControllersTestSet.java");
-    private TemplateInput serviceTestTemplate = new TemplateInput(prefix + "ServiceIT.java", "${apiPackageFolder}/${serviceName}${generator.testSuffix}.java");
-    private TemplateInput operationTestTemplate = new TemplateInput(prefix + "OperationIT.java", "${apiPackageFolder}/${operation.operationId}${generator.testSuffix}.java");
+    private final TemplateInput partialTemplate = new TemplateInput(prefix + "partials/Operation.java", "${apiPackageFolder}/Operation.java");
+    private final TemplateInput testSetTemplate = new TemplateInput(prefix + "ControllersTestSet.java", "${apiPackageFolder}/ControllersTestSet.java");
+    private final TemplateInput serviceTestTemplate = new TemplateInput(prefix + "ServiceIT.java", "${apiPackageFolder}/${serviceName}${generator.testSuffix}.java");
+    private final TemplateInput operationTestTemplate = new TemplateInput(prefix + "OperationIT.java", "${apiPackageFolder}/${operation.operationId}${generator.testSuffix}.java");
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;

@@ -10,10 +10,9 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SpringWebTestClientGeneratorTest {
-
-    SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
 
     private Map<String, ?> loadApiModelFromResource(String resource) throws Exception {
         File file = new File(getClass().getClassLoader().getResource(resource).toURI());
@@ -24,7 +23,7 @@ public class SpringWebTestClientGeneratorTest {
     @Test
     public void test_output_partial_one_operation() throws Exception {
         Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/plugins/SpringWebTestClientGenerator/openapi-petstore.yml");
-
+        SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
         generator.groupBy = SpringWebTestClientGenerator.GroupByType.PARTIAL;
         generator.apiPackage = "io.example.api";
         generator.modelPackage = "io.example.api.model";
@@ -38,7 +37,7 @@ public class SpringWebTestClientGeneratorTest {
     @Test
     public void test_output_by_one_service() throws Exception {
         Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/plugins/SpringWebTestClientGenerator/openapi-petstore.yml");
-
+        SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
         generator.groupBy = SpringWebTestClientGenerator.GroupByType.SERVICE;
         generator.apiPackage = "io.example.api";
         generator.modelPackage = "io.example.api.model";
@@ -53,7 +52,7 @@ public class SpringWebTestClientGeneratorTest {
     @Test
     public void test_output_by_all_services() throws Exception {
         Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/plugins/SpringWebTestClientGenerator/openapi-petstore.yml");
-
+        SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
         generator.groupBy = SpringWebTestClientGenerator.GroupByType.SERVICE;
         generator.apiPackage = "io.example.api";
         generator.modelPackage = "io.example.api.model";

@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.github.zenwave360</groupId>
-        <artifactId>zenwave-generator</artifactId>
+        <artifactId>zenwave-code-generator</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>zenwave-generator-mojo</artifactId>
+    <artifactId>zenwave-code-generator-mojo</artifactId>
     <packaging>maven-plugin</packaging>
-    <name>zenwave-generator-mojo Maven Mojo</name>
+    <name>zenwave-code-generator-mojo Maven Mojo</name>
 
     <build>
         <plugins>
@@ -38,7 +38,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>zenwave-generator-cli</artifactId>
+            <artifactId>zenwave-code-generator-cli</artifactId>
             <version>${project.version}</version>
         </dependency>
 

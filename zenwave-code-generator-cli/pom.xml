@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>zenwave-generator</artifactId>
+    <artifactId>zenwave-code-generator</artifactId>
     <groupId>io.github.zenwave360</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>zenwave-generator-cli</artifactId>
-  <name>zenwave-generator-cli</name>
+  <artifactId>zenwave-code-generator-cli</artifactId>
+  <name>zenwave-code-generator-cli</name>
 
   <properties>
 
@@ -34,11 +34,17 @@
       <artifactId>json-schema-ref-parser-jvm</artifactId>
       <version>${json-schema-ref-parser-jvm.version}</version>
     </dependency>
+    <dependency>
+      <groupId>io.zenwave360.jhipster</groupId>
+      <artifactId>jdl-jvm</artifactId>
+      <version>${jdl-jvm.version}</version>
+      <optional>true</optional>
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
-      <plugin>
+    <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.2.0</version>
