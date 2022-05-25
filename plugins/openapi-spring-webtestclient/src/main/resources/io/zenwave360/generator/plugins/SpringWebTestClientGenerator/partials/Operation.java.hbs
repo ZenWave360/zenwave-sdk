@@ -1,0 +1,29 @@
+{{~#each operations as |operation|~}}
+    {{~#each operation.responses as |response|}}
+
+    /**
+    * Test: {{operation.description}} for {{response.description}}.
+    */
+    @Test
+    public void test{{asCapitalizedJavaProperty operation.operationId}}_{{response.x--statusCode}}() {
+        {{operation.x--request-dto}} requestBody = new {{operation.x--request-dto}}();
+        {{~#each operation.x--request-schema.properties as |property|}}
+        requestBody.set{{asCapitalizedJavaProperty @key}}(null);
+        {{~/each}}
+
+        webTestClient.{{operation.x--httpVerb}}().uri("{{operation.x--path}}")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .body(Mono.just(requestBody), {{operation.x--request-dto}}.class)
+            .exchange()
+            .expectStatus().isEqualTo({{response.x--statusCode}})
+    {{~#if response.x--response-schema}}
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+    {{/if}}
+    {{~#each response.x--response-schema.properties as |property|}}
+            .jsonPath("$.{{@key}}").isNotEmpty()
+    {{~/each}};
+    }
+    {{~/each~}}
+{{~/each~}}

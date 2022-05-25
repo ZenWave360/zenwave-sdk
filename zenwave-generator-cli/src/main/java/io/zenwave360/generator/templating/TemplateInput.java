@@ -29,4 +29,5 @@ public class TemplateInput {
     public Supplier<Boolean> getSkip() {
         return skip;
     }
+
 }

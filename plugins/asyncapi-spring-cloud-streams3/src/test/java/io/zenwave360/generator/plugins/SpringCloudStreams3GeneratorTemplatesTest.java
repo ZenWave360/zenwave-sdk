@@ -13,7 +13,7 @@ import java.util.Map;
 public class SpringCloudStreams3GeneratorTemplatesTest {
 
     String targetProperty = "_api";
-    SpringCloudStreams3Generator asyncapiGenerator = new SpringCloudStreams3Generator(targetProperty);
+    SpringCloudStreams3Generator asyncapiGenerator = new SpringCloudStreams3Generator().withTargetProperty(targetProperty);
 
     private Map<String, ?> loadAsyncapiModelFromResource(String resource) throws Exception {
         File file = new File(getClass().getClassLoader().getResource(resource).toURI());

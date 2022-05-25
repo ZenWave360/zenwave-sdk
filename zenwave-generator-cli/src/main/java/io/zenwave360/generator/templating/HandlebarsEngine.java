@@ -26,25 +26,7 @@ public class HandlebarsEngine implements TemplateEngine {
                 .newBuilder(new HashMap<>())
                 .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE)
                 .build();
-        handlebars.registerHelper("size", new Helper<List>() {
-            @Override
-            public Object apply(List list, Options options) throws IOException {
-                return list.size();
-            }
-        });
-        handlebars.registerHelper("uncapFirst", new Helper<String>() {
-            @Override
-            public Object apply(String text, Options options) throws IOException {
-                return StringUtils.uncapitalize(text);
-            }
-        });
-        handlebars.registerHelper("assign", new Helper<String>() {
-            public Object apply(final String variableName, final Options options) throws IOException {
-                CharSequence finalValue = options.apply(options.fn);
-                ((Map) options.context.model()).put(variableName, finalValue.toString().trim());
-                return null;
-            }
-        });
+        handlebars.registerHelpers(HandlebarsHelpers.class);
     }
 
     @Override

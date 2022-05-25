@@ -1,5 +1,7 @@
 package io.zenwave360.generator.processors;
 
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -17,6 +19,14 @@ public abstract class AbstractBaseProcessor implements Processor {
 
     public void setTargetProperty(String targetProperty) {
         this.targetProperty = targetProperty;
+    }
+
+    protected <T> T getJsonPath(Object model, String jsonPath) {
+        try {
+            return JsonPath.read(model, jsonPath);
+        } catch(PathNotFoundException e) {
+            return null;
+        }
     }
 
     protected void addNormalizedTagName(Map<String, Object> operation) {

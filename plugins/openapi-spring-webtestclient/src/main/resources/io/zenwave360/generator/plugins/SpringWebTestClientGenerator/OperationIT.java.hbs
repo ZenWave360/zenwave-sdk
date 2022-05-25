@@ -1,0 +1,31 @@
+package {{generator.apiPackage}};
+
+{{#if generator.modelPackage~}}
+import {{generator.modelPackage}}.*;
+{{~/if}}
+
+import java.time.Duration;
+import java.util.List;
+import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.reactive.server.WebTestClient;
+
+/**
+* Integration tests for the {@link {{serviceName}} REST controller.
+*/
+@IntegrationTest
+@AutoConfigureWebTestClient(timeout = IntegrationTest.DEFAULT_ENTITY_TIMEOUT)
+@WithMockUser
+class {{asCapitalizedJavaProperty operationId}}{{generator.testSuffix}} {
+
+@Autowired
+private WebTestClient webTestClient;
+
+{{> io/zenwave360/generator/plugins/SpringWebTestClientGenerator/partials/Operation.java}}
+
+}

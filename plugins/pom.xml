@@ -32,6 +32,8 @@
 
     <modules>
         <module>asyncapi-base</module>
+        <module>openapi-base</module>
         <module>asyncapi-spring-cloud-streams3</module>
+        <module>openapi-spring-webtestclient</module>
     </modules>
 </project>

@@ -18,6 +18,10 @@ public class Model extends AbstractMap<String, Object> {
         this.refs = refs;
     }
 
+    public $Refs getRefs() {
+        return refs;
+    }
+
     public <T> T getJsonPath(String jsonPath) {
         try {
             return (T) refs.get(jsonPath);

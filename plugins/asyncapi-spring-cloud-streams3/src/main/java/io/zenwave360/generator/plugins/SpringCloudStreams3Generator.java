@@ -22,16 +22,13 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     }
 
     public String targetProperty = "api";
-
-    public SpringCloudStreams3Generator() {
-    }
-
-    public SpringCloudStreams3Generator(String targetProperty) {
-        this.targetProperty = targetProperty;
-    }
-
     @DocumentedOption(description = "Programming style: IMPERATIVE\\|REACTIVE")
     public ProgrammingStyle style = ProgrammingStyle.IMPERATIVE;
+
+    public SpringCloudStreams3Generator withTargetProperty(String targetProperty) {
+        this.targetProperty = targetProperty;
+        return this;
+    }
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
