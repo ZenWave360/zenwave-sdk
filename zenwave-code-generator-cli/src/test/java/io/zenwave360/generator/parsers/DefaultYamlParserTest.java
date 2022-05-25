@@ -1,5 +1,6 @@
 package io.zenwave360.generator.parsers;
 
+import io.zenwave360.generator.processors.utils.JSONPath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +21,8 @@ public class DefaultYamlParserTest {
         String targetProperty = "_api";
         File file = getClasspathResourceAsFile("io/zenwave360/generator/parsers/asyncapi-circular-refs.yml");
         DefaultYamlParser parser = new DefaultYamlParser().withSpecFile(file.getAbsolutePath()).withTargetProperty(targetProperty);
-        Model model = parser.parse().get(targetProperty);
+        Model model = (Model) parser.parse().get(targetProperty);
         Assertions.assertNotNull(model);
-        Assertions.assertNotNull(model.getJsonPath("$.channels.createProductNotification.subscribe.message"));
+        Assertions.assertNotNull(JSONPath.get(model,"$.channels.createProductNotification.subscribe.message"));
     }
 }

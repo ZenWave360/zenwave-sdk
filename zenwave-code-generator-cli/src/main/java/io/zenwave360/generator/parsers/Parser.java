@@ -4,5 +4,5 @@ import java.io.IOException;
 import java.util.Map;
 
 public interface Parser {
-    Map<String, Model> parse() throws IOException;
+    Map<String, Object> parse() throws IOException;
 }

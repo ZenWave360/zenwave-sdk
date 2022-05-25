@@ -36,7 +36,7 @@ public class DefaultYamlParser implements io.zenwave360.generator.parsers.Parser
     }
 
     @Override
-    public Map<String, Model> parse() throws IOException {
+    public Map<String, Object> parse() throws IOException {
         File file = findSpecFile(specFile);
         $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions($RefParserOptions.OnCircular.SKIP));
         Map model = new LinkedHashMap<>();
