@@ -1,15 +1,21 @@
 package io.zenwave360.generator.templating;
 
-import java.io.File;
-
 public class TemplateOutput {
 
     private String targetFile;
     private String content;
 
+    private String mimeType;
+
     public TemplateOutput(String targetFile, String content) {
         this.targetFile = targetFile;
         this.content = content;
+    }
+
+    public TemplateOutput(String targetFile, String content, String mimeType) {
+        this.targetFile = targetFile;
+        this.content = content;
+        this.mimeType = mimeType;
     }
 
     public String getTargetFile() {
@@ -18,5 +24,9 @@ public class TemplateOutput {
 
     public String getContent() {
         return content;
+    }
+
+    public String getMimeType() {
+        return mimeType;
     }
 }

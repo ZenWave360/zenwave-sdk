@@ -120,7 +120,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     }
 
     public List<TemplateInput> processTemplateFilenames(Map<String, Object> model, List<TemplateInput> templateInputs) {
-        return templateInputs.stream().map(t -> new TemplateInput(interpolate(t.getTemplateLocation(), model), interpolate(t.getTargetFile(), model), t.getSkip())).collect(Collectors.toList());
+        return templateInputs.stream().map(t -> new TemplateInput(t).withTemplateLocation(interpolate(t.getTemplateLocation(), model)).withTargetFile(interpolate(t.getTargetFile(), model))).collect(Collectors.toList());
     }
 
     public String interpolate(String template, Map<String, Object> model) {

@@ -40,6 +40,11 @@
       <version>${jdl-jvm.version}</version>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>com.google.googlejavaformat</groupId>
+      <artifactId>google-java-format</artifactId>
+      <version>${google-java-format.version}</version>
+    </dependency>
   </dependencies>
 
   <build>

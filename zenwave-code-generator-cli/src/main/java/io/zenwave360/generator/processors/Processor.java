@@ -9,6 +9,6 @@ import java.util.Map;
 
 public interface Processor {
 
-    Map<String, ?> process(Map<String, ? extends Object> model);
+    Map<String, ?> process(Map<String, ? extends Object> contextModel);
 
 }

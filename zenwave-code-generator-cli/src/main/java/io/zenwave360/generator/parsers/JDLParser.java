@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,7 +14,9 @@ import java.util.stream.Collectors;
 public class JDLParser implements Parser {
 
     public String[] specFiles;
-    public String targetProperty = "api";
+    public String targetProperty = "jdl";
+
+    public Map<String, String> options = new HashMap<>();
 
     public void setSpecFile(String specFile) {
         this.specFiles = new String[]{ specFile };
@@ -26,6 +29,11 @@ public class JDLParser implements Parser {
 
     public JDLParser withTargetProperty(String targetProperty) {
         this.targetProperty = targetProperty;
+        return this;
+    }
+
+    public JDLParser withOptions(String option, String value) {
+        this.options.put(option, value);
         return this;
     }
 

@@ -1,0 +1,21 @@
+package {{generator.domainModelPackage}};
+
+/**
+ * Enum for {{defaultIfEmpty enum.description enum.name}}.
+ */
+public enum {{ enum.name }} {
+    {{#each enum.values }}
+    {{ this.name }}("{{defaultIfEmpty this.value this.name }}"),
+    {{~/each}}
+    ;
+
+    private final String value;
+
+    private {{ enum.name }}(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
+    }
+}

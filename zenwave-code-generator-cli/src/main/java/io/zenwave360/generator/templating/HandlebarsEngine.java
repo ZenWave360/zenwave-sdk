@@ -6,6 +6,7 @@ import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
+import com.github.jknack.handlebars.helper.StringHelpers;
 import io.zenwave360.generator.plugins.GeneratorPlugin;
 import org.apache.commons.lang3.StringUtils;
 
@@ -27,6 +28,7 @@ public class HandlebarsEngine implements TemplateEngine {
                 .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE)
                 .build();
         handlebars.registerHelpers(HandlebarsHelpers.class);
+        handlebars.registerHelpers(StringHelpers.class);
     }
 
     @Override
@@ -51,7 +53,7 @@ public class HandlebarsEngine implements TemplateEngine {
                 try {
                     String targetFile = handlebars.compileInline(templateInput.getTargetFile()).apply(context);
                     String content = handlebars.compile(templateInput.getTemplateLocation()).apply(context);
-                    templateOutputList.add(new TemplateOutput(targetFile, content));
+                    templateOutputList.add(new TemplateOutput(targetFile, content, templateInput.getMimeType()));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

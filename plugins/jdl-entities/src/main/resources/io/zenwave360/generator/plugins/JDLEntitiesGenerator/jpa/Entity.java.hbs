@@ -1,0 +1,50 @@
+package {{generator.domainModelPackage}};
+
+import java.io.Serializable;
+import javax.persistence.*;
+import javax.validation.constraints.*;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+/**
+* {{entity.comment}}
+*/
+@Entity
+@Table(name = "{{entity.tableName}}")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class {{capitalize entity.name}} implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
+    @SequenceGenerator(name = "sequenceGenerator")
+    @Column(name = "id")
+    private String id;
+
+{{#each entity.fields as |field|}}
+    @Column(name = "field.name")
+    {{#each field.validations as |validation|}}
+        {{#if validation.name eq 'required'}}@Required{{/if}}
+    {{/each}}
+    private {{field.type}} {{field.name}};
+{{/each}}
+
+{{#each entity.fields as |field|}}
+    public {{entity.name}} with{{capitalize field.name}}({{field.type}} {{field.name}}) {
+    this.{{field.name}} = {{field.name}};
+    return this;
+    }
+{{/each}}
+
+{{#each entity.fields as |field|}}
+    public {{field.type}} get{{capitalize field.name}}() {
+        return {{field.name}};
+    }
+
+    public void set{{capitalize field.name}}({{field.type}} {{field.name}}) {
+        this.{{field.name}} = {{field.name}};
+    }
+{{/each}}
+
+}

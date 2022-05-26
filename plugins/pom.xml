@@ -25,7 +25,9 @@
     <modules>
         <module>asyncapi-base</module>
         <module>openapi-base</module>
+        <module>jdl-base</module>
         <module>asyncapi-spring-cloud-streams3</module>
         <module>openapi-spring-webtestclient</module>
+        <module>jdl-entities</module>
     </modules>
 </project>

@@ -34,4 +34,5 @@ public class HandlebarsHelpers {
     public static String asCapitalizedJavaProperty(String text, Options options) throws IOException {
         return StringUtils.capitalize(text);
     }
+
 }

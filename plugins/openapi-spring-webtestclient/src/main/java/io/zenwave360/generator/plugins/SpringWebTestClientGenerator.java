@@ -95,7 +95,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
     }
 
     public TemplateInput processTemplateFilename(Map<String, Object> model, TemplateInput templateInput) {
-        return new TemplateInput(templateInput.getTemplateLocation(), interpolate(templateInput.getTargetFile(), model), templateInput.getSkip());
+        return new TemplateInput(templateInput).withTemplateLocation(interpolate(templateInput.getTemplateLocation(), model)).withTargetFile(interpolate(templateInput.getTargetFile(), model));
     }
 
     public String interpolate(String template, Map<String, Object> model) {

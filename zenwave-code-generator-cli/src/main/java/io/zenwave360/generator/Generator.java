@@ -3,6 +3,7 @@ package io.zenwave360.generator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.zenwave360.generator.formatters.Formatter;
 import io.zenwave360.generator.parsers.Parser;
 import io.zenwave360.generator.plugins.GeneratorPlugin;
 import io.zenwave360.generator.processors.Processor;
@@ -50,6 +51,9 @@ public class Generator {
             }
             if(plugin instanceof GeneratorPlugin) {
                 templateOutputList.addAll(((GeneratorPlugin) plugin).generate(model));
+            }
+            if(plugin instanceof Formatter) {
+                templateOutputList = ((Formatter) plugin).format(templateOutputList);
             }
             if(plugin instanceof TemplateWriter) {
                 ((TemplateWriter) plugin).write(templateOutputList);
