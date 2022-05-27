@@ -14,7 +14,7 @@ public class JavaFormatter implements Formatter {
 
 
     public TemplateOutput format(TemplateOutput templateOutput) {
-        if(templateOutput.getMimeType() != null && templateOutput.getMimeType().contains("java")) {
+        if(templateOutput.getMimeType() != null && templateOutput.getMimeType().equals("text/java")) {
             try {
                 String formattedSource = new com.google.googlejavaformat.java.Formatter().formatSourceAndFixImports(templateOutput.getContent());
                 return new TemplateOutput(templateOutput.getTargetFile(), formattedSource, templateOutput.getMimeType());

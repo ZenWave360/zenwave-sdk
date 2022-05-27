@@ -3,6 +3,7 @@ package io.zenwave360.generator.plugins;
 import io.zenwave360.generator.Configuration;
 import io.zenwave360.generator.formatters.JavaFormatter;
 import io.zenwave360.generator.parsers.DefaultYamlParser;
+import io.zenwave360.generator.parsers.JDLParser;
 import io.zenwave360.generator.processors.AsyncApiProcessor;
 import io.zenwave360.generator.processors.JDLProcessor;
 import io.zenwave360.generator.writers.TemplateFileWriter;
@@ -16,13 +17,13 @@ public class JDLEntitiesConfigurationPreset extends Configuration {
 
     public JDLEntitiesConfigurationPreset() {
         super();
-        withChain(DefaultYamlParser.class, JDLProcessor.class, JDLEntitiesGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
+        withChain(JDLParser.class, JDLProcessor.class, JDLEntitiesGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
     }
 
     @Override
     public Configuration withOptions(Map<String, Object> options) {
         if(!options.containsKey("targetFolder")) {
-            withChain(DefaultYamlParser.class, AsyncApiProcessor.class, JDLEntitiesGenerator.class, TemplateStdoutWriter.class);
+            withChain(JDLParser.class, JDLProcessor.class, JDLEntitiesGenerator.class, JavaFormatter.class, TemplateStdoutWriter.class);
         }
         return super.withOptions(options);
     }

@@ -16,11 +16,7 @@ import java.util.Map;
 public class JDLEntitiesGenerator extends AbstractJDLGenerator {
 
     enum PersistenceType {
-        MONGODB;
-
-        public String toString() {
-            return super.toString().toLowerCase();
-        }
+        mongodb;
     }
 
     public String targetProperty = "jdl";
@@ -29,7 +25,7 @@ public class JDLEntitiesGenerator extends AbstractJDLGenerator {
     public List<String> entities = new ArrayList<>();
 
     @DocumentedOption(description = "Persistence MONGODB|JPA default: MONGODB")
-    public PersistenceType persistence = PersistenceType.MONGODB;
+    public PersistenceType persistence = PersistenceType.mongodb;
 
 
     public JDLEntitiesGenerator withTargetProperty(String targetProperty) {
@@ -40,8 +36,8 @@ public class JDLEntitiesGenerator extends AbstractJDLGenerator {
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
     private String prefix = "io/zenwave360/generator/plugins/JDLEntitiesGenerator/";
-    private final TemplateInput entityTemplate = new TemplateInput(prefix + "${generator.persistence}/Entity.java", "${apiPackageFolder}/${entity.name}.java").withMimeType("text/java");
-    private final TemplateInput enumTemplate = new TemplateInput(prefix + "common/Enum.java", "${apiPackageFolder}/${enum.name}.java").withMimeType("text/java");
+    private final TemplateInput entityTemplate = new TemplateInput(prefix + "${generator.persistence}/Entity.java", "${generator.domainModelPackageFolder}/${entity.name}.java").withMimeType("text/java");
+    private final TemplateInput enumTemplate = new TemplateInput(prefix + "common/Enum.java", "${generator.domainModelPackageFolder}/${enum.name}.java").withMimeType("text/java");
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;
@@ -75,7 +71,7 @@ public class JDLEntitiesGenerator extends AbstractJDLGenerator {
         model.put("context", contextModel);
         model.put("jdl", getJDLModel(contextModel));
         model.put(key, entity);
-        model.put("getDomainModelPackageFolder", getDomainModelPackageFolder());
+        model.put("generator.domainModelPackageFolder", getDomainModelPackageFolder());
         return getTemplateEngine().processTemplate(model, processTemplateFilename(model, template));
     }
 

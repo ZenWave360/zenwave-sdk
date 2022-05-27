@@ -35,7 +35,6 @@ public interface GeneratorPlugin {
                 config.put(field.getName(), e.getMessage());
             }
         }
-
         return config;
     }
 }
