@@ -29,5 +29,6 @@
         <module>asyncapi-spring-cloud-streams3</module>
         <module>openapi-spring-webtestclient</module>
         <module>jdl-entities</module>
+        <module>jdl-to-openapi</module>
     </modules>
 </project>
