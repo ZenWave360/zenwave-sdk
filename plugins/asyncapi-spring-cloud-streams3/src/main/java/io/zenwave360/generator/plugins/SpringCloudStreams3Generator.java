@@ -21,12 +21,12 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         IMPERATIVE, REACTIVE
     }
 
-    public String targetProperty = "api";
+    public String sourceProperty = "api";
     @DocumentedOption(description = "Programming style: IMPERATIVE\\|REACTIVE")
     public ProgrammingStyle style = ProgrammingStyle.IMPERATIVE;
 
-    public SpringCloudStreams3Generator withTargetProperty(String targetProperty) {
-        this.targetProperty = targetProperty;
+    public SpringCloudStreams3Generator withSourceProperty(String sourceProperty) {
+        this.sourceProperty = sourceProperty;
         return this;
     }
 
@@ -64,7 +64,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     }
 
     Model getApiModel(Map<String, ?> contextModel) {
-        return(Model) contextModel.get(targetProperty);
+        return(Model) contextModel.get(sourceProperty);
     }
 
     @Override

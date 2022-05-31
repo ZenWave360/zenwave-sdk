@@ -19,7 +19,7 @@ public class JDLEntitiesGenerator extends AbstractJDLGenerator {
         mongodb;
     }
 
-    public String targetProperty = "jdl";
+    public String sourceProperty = "jdl";
 
     @DocumentedOption(description = "Entities to generate code for")
     public List<String> entities = new ArrayList<>();
@@ -28,8 +28,8 @@ public class JDLEntitiesGenerator extends AbstractJDLGenerator {
     public PersistenceType persistence = PersistenceType.mongodb;
 
 
-    public JDLEntitiesGenerator withTargetProperty(String targetProperty) {
-        this.targetProperty = targetProperty;
+    public JDLEntitiesGenerator withSourceProperty(String sourceProperty) {
+        this.sourceProperty = sourceProperty;
         return this;
     }
 
@@ -44,7 +44,7 @@ public class JDLEntitiesGenerator extends AbstractJDLGenerator {
     }
 
     protected Map<String, ?> getJDLModel(Map<String, ?> contextModel) {
-        return (Map) contextModel.get(targetProperty);
+        return (Map) contextModel.get(sourceProperty);
     }
 
     @Override

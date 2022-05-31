@@ -20,7 +20,7 @@ public class SpringCloudStreams3GeneratorTemplateNamesTest {
         public TemplateEngine getTemplateEngine() {
             return new __NoOperationTemplateEngine();
         }
-    }.withTargetProperty(targetProperty);
+    }.withSourceProperty(targetProperty);
 
     private Map<String, ?> loadAsyncapiModelFromResource(String resource) throws Exception {
         File file = new File(getClass().getClassLoader().getResource(resource).toURI());

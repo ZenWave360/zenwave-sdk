@@ -58,7 +58,6 @@ public class GeneratorTest {
                 .withOption("2.targetProperty", "jdl")
                 .withOption("3.targetProperty", "asyncapi")
                 .withOption("4.targetProperty", "openapi")
-                .withOption("5.targetProperty", "jdl")
                 .withChain(DefaultYamlParser.class, DefaultYamlParser.class, JDLParser.class, AsyncApiProcessor.class, OpenApiProcessor.class, NoOpPluginGenerator.class, TemplateFileWriter.class);
 
         new Generator(configuration).generate();

@@ -3,13 +3,8 @@ package io.zenwave360.generator.plugins;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.jayway.jsonpath.JsonPath;
 import io.zenwave360.generator.DocumentedOption;
 import io.zenwave360.generator.processors.utils.JSONPath;
-import io.zenwave360.generator.processors.utils.StringInterpolator;
-import io.zenwave360.generator.templating.HandlebarsEngine;
-import io.zenwave360.generator.templating.TemplateEngine;
-import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
 
 import java.util.ArrayList;
@@ -22,7 +17,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
 
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
-    public String targetProperty = "jdl";
+    public String sourceProperty = "jdl";
 
     @DocumentedOption(description = "Entities to generate code for")
     public List<String> entities = new ArrayList<>();
@@ -30,13 +25,13 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "Target file")
     public String targetFile = "openapi.yml";
 
-    public JDLToOpenAPIGenerator withTargetProperty(String targetProperty) {
-        this.targetProperty = targetProperty;
+    public JDLToOpenAPIGenerator withSourceProperty(String sourceProperty) {
+        this.sourceProperty = sourceProperty;
         return this;
     }
 
     protected Map<String, ?> getJDLModel(Map<String, ?> contextModel) {
-        return (Map) contextModel.get(targetProperty);
+        return (Map) contextModel.get(sourceProperty);
     }
 
     @Override

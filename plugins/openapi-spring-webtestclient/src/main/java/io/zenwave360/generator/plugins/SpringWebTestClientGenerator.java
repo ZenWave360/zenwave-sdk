@@ -8,7 +8,6 @@ import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -21,13 +20,13 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
         SERVICE, OPERATION, PARTIAL
     }
 
-    public String targetProperty = "api";
+    public String sourceProperty = "api";
     public GroupByType groupBy = GroupByType.SERVICE;
 
     public String testSuffix = "IT";
 
-    public SpringWebTestClientGenerator withTargetProperty(String targetProperty) {
-        this.targetProperty = targetProperty;
+    public SpringWebTestClientGenerator withSourceProperty(String sourceProperty) {
+        this.sourceProperty = sourceProperty;
         return this;
     }
 
@@ -44,7 +43,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
     }
 
     Model getApiModel(Map<String, ?> contextModel) {
-        return(Model) contextModel.get(targetProperty);
+        return(Model) contextModel.get(sourceProperty);
     }
 
     @Override

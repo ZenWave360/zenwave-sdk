@@ -7,8 +7,6 @@ import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.TemplateEngine;
 import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,16 +17,20 @@ import static org.apache.commons.lang3.StringUtils.capitalize;
 
 public class OpenAPIToJDLGenerator extends AbstractJDLGenerator {
 
-    public String targetProperty = "api";
+    public String sourceProperty = "api";
 
     @DocumentedOption(description = "Entities to generate code for")
     public List<String> entities = new ArrayList<>();
 
+    @DocumentedOption(description = "Target file")
+    public String targetFile = "entities.jdl";
+
+    @DocumentedOption(description = "Whether to use JDL relationships or plain field")
     public boolean useRelationships = true;
 
 
-    public OpenAPIToJDLGenerator withTargetProperty(String targetProperty) {
-        this.targetProperty = targetProperty;
+    public OpenAPIToJDLGenerator withSourceProperty(String sourceProperty) {
+        this.sourceProperty = sourceProperty;
         return this;
     }
 
@@ -37,7 +39,7 @@ public class OpenAPIToJDLGenerator extends AbstractJDLGenerator {
     private final TemplateInput openAPIToJDLTemplate = new TemplateInput("io/zenwave360/generator/plugins/OpenAPIToJDLGenerator/OpenAPIToJDL.jdl", "${generator.targetFile}").withMimeType("text/jdl");
 
     protected Map<String, ?> getOpenAPIModel(Map<String, ?> contextModel) {
-        return (Map) contextModel.get(targetProperty);
+        return (Map) contextModel.get(sourceProperty);
     }
 
     @Override
