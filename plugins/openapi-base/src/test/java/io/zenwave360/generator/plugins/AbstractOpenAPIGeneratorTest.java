@@ -32,7 +32,7 @@ public class AbstractOpenAPIGeneratorTest {
 
     @Test
     public void test_filter_operations_by_tag_and_verb() throws Exception {
-        Model model = loadAsyncapiModelFromResource("io/zenwave360/generator/plugins/openapi-petstore.yml");
+        Model model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         AbstractOpenAPIGenerator openapiGenerator = newAbstractAsyncapiGenerator();
         openapiGenerator.role = GeneratorPlugin.RoleType.PROVIDER;
         Map<String, List<Map<String, Object>>> allOperations = openapiGenerator.getOperationsGroupedByTag(model);

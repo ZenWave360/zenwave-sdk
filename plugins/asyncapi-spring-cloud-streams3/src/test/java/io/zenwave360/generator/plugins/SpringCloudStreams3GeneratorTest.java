@@ -31,7 +31,7 @@ public class SpringCloudStreams3GeneratorTest {
     public void testGenerator() throws Exception {
 //        File file = new File(getClass().getClassLoader().getResource("io/zenwave360/generator/parsers/asyncapi-circular-refs.yml").toURI());
         Configuration configuration = new SpringCloudStream3ConfigurationPreset()
-                .withSpecFile("classpath:io/zenwave360/generator/plugins/asyncapi-commands.yml")
+                .withSpecFile("classpath:io/zenwave360/generator/resources/asyncapi/asyncapi-commands.yml")
                 .withTargetFolder("target/zenwave630/out")
 //                .withOption("apiPackage", "io.example.integration.test.api")
 //                .withOption("modelPackage", "io.example.integration.test.api.model")

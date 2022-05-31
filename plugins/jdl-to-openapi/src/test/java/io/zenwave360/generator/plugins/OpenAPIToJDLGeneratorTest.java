@@ -27,7 +27,7 @@ public class OpenAPIToJDLGeneratorTest {
 
     @Test
     public void test_jdl_to_openapi_with_relationships() throws Exception {
-        Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/plugins/JDLToOpenAPIGenerator/openapi-petstore.yml");
+        Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         OpenAPIToJDLGenerator generator = new OpenAPIToJDLGenerator();
         generator.useRelationships = true;
 
@@ -41,7 +41,7 @@ public class OpenAPIToJDLGeneratorTest {
 
     @Test
     public void test_jdl_to_openapi_with_embedded() throws Exception {
-        Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/plugins/JDLToOpenAPIGenerator/openapi-petstore.yml");
+        Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         OpenAPIToJDLGenerator generator = new OpenAPIToJDLGenerator();
         generator.useRelationships = false;
 

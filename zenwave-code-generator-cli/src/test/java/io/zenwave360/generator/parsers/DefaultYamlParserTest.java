@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Map;
 
 public class DefaultYamlParserTest {
 
@@ -19,7 +17,7 @@ public class DefaultYamlParserTest {
     @Test
     public void testParseYml() throws URISyntaxException, IOException {
         String targetProperty = "_api";
-        File file = getClasspathResourceAsFile("io/zenwave360/generator/parsers/asyncapi-circular-refs.yml");
+        File file = getClasspathResourceAsFile("io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml");
         DefaultYamlParser parser = new DefaultYamlParser().withSpecFile(file.getAbsolutePath()).withTargetProperty(targetProperty);
         Model model = (Model) parser.parse().get(targetProperty);
         Assertions.assertNotNull(model);

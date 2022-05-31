@@ -19,7 +19,7 @@ public class MainTest {
 
         Main.main(
                 "-c", StringUtils.join(processors, ","),
-                "specFile=classpath:io/zenwave360/generator/parsers/asyncapi-circular-refs.yml",
+                "specFile=classpath:io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml",
                 "targetFolder=target/zenwave/out",
                 "inner.specFile=target/zenwave/out",
                 "inner.targetFolder=target/zenwave/out"
@@ -33,8 +33,8 @@ public class MainTest {
 
         Main.main(
                 "-c", StringUtils.join(processors, ","),
-                "0.specFile=classpath:io/zenwave360/generator/parsers/asyncapi-circular-refs.yml",
-                "2.specFile=classpath:io/zenwave360/generator/parsers/asyncapi-circular-refs.yml",
+                "0.specFile=classpath:io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml",
+                "2.specFile=classpath:io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml",
                 "0.targetProperty=asyncapi1",
                 "1.targetProperty=asyncapi1",
                 "2.targetProperty=asyncapi2",

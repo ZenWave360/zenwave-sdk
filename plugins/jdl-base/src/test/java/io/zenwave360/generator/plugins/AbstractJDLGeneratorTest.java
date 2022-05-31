@@ -28,7 +28,7 @@ public class AbstractJDLGeneratorTest {
 
     @Test
     public void test_todo() throws Exception {
-        Map<String, Object> model = loadAsyncapiModelFromResource("io/zenwave360/generator/plugins/21-points.jh");
+        Map<String, Object> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/jdl/21-points.jh");
         AbstractJDLGenerator jdlGenerator = newAbstractJDLGenerator();
         List<TemplateOutput> generated = jdlGenerator.generate(model);
     }

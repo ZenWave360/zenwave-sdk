@@ -20,7 +20,7 @@ public class JDLEntitiesGeneratorTest {
 
     @Test
     public void test_entities() throws Exception {
-        Map<String, ?> model = loadJDLModelFromResource("io/zenwave360/generator/plugins/JDLEntitiesGenerator/orders-model.jdl");
+        Map<String, ?> model = loadJDLModelFromResource("io/zenwave360/generator/resources/jdl/orders-model.jdl");
         JDLEntitiesGenerator generator = new JDLEntitiesGenerator();
 
         List<TemplateOutput> outputTemplates = generator.generate(model);

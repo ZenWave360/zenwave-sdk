@@ -7,10 +7,10 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>zenwave-code-generator-cli</artifactId>
-  <name>zenwave-code-generator-cli</name>
+  <name>${project.groupId}:${project.artifactId}</name>
 
   <properties>
-
+    <zenwave-code-generator-test-resources.folder>${pom.basedir}/../zenwave-code-generator-test-resources/src/test/resources</zenwave-code-generator-test-resources.folder>
   </properties>
 
   <dependencies>
@@ -44,6 +44,13 @@
       <groupId>com.google.googlejavaformat</groupId>
       <artifactId>google-java-format</artifactId>
       <version>${google-java-format.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>zenwave-code-generator-test-resources</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

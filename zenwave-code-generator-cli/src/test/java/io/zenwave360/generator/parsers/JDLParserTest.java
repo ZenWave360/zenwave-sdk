@@ -18,7 +18,7 @@ public class JDLParserTest {
     @Test
     public void testParseJDL() throws URISyntaxException, IOException {
         String targetProperty = "_jdl";
-        JDLParser parser = new JDLParser().withSpecFile("classpath:io/zenwave360/generator/parsers/21-points.jh").withTargetProperty(targetProperty);
+        JDLParser parser = new JDLParser().withSpecFile("classpath:io/zenwave360/generator/resources/jdl/21-points.jh").withTargetProperty(targetProperty);
         long startTime = System.currentTimeMillis();
         Map<String, Object> model = (Map) parser.parse().get(targetProperty);
         System.out.println("JDLParser load time: " + (System.currentTimeMillis() - startTime));

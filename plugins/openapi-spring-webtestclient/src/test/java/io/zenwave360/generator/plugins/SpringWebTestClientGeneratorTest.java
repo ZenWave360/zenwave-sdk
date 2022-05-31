@@ -22,7 +22,7 @@ public class SpringWebTestClientGeneratorTest {
 
     @Test
     public void test_output_partial_one_operation() throws Exception {
-        Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/plugins/SpringWebTestClientGenerator/openapi-petstore.yml");
+        Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
         generator.groupBy = SpringWebTestClientGenerator.GroupByType.PARTIAL;
         generator.apiPackage = "io.example.api";
@@ -36,7 +36,7 @@ public class SpringWebTestClientGeneratorTest {
 
     @Test
     public void test_output_by_one_service() throws Exception {
-        Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/plugins/SpringWebTestClientGenerator/openapi-petstore.yml");
+        Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
         generator.groupBy = SpringWebTestClientGenerator.GroupByType.SERVICE;
         generator.apiPackage = "io.example.api";
@@ -51,7 +51,7 @@ public class SpringWebTestClientGeneratorTest {
 
     @Test
     public void test_output_by_all_services() throws Exception {
-        Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/plugins/SpringWebTestClientGenerator/openapi-petstore.yml");
+        Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
         generator.groupBy = SpringWebTestClientGenerator.GroupByType.SERVICE;
         generator.apiPackage = "io.example.api";

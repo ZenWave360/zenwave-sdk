@@ -26,7 +26,7 @@ public class JDLToOpenAPIGeneratorTest {
 
     @Test
     public void test_jdl_to_openapi() throws Exception {
-        Map<String, ?> model = loadJDLModelFromResource("io/zenwave360/generator/plugins/JDLToOpenAPIGenerator/orders-model.jdl");
+        Map<String, ?> model = loadJDLModelFromResource("io/zenwave360/generator/resources/jdl/orders-model.jdl");
         JDLToOpenAPIGenerator generator = new JDLToOpenAPIGenerator();
 
         List<TemplateOutput> outputTemplates = generator.generate(model);

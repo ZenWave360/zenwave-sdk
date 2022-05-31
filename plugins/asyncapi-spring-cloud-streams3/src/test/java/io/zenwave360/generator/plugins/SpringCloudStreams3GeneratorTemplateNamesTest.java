@@ -1,7 +1,6 @@
 package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.parsers.DefaultYamlParser;
-import io.zenwave360.generator.parsers.Model;
 import io.zenwave360.generator.processors.AsyncApiProcessor;
 import io.zenwave360.generator.templating.__NoOperationTemplateEngine;
 import io.zenwave360.generator.templating.TemplateEngine;
@@ -31,7 +30,7 @@ public class SpringCloudStreams3GeneratorTemplateNamesTest {
 
     @Test
     public void test_output_template_names_for_command_producer() throws Exception {
-        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/plugins/asyncapi-commands.yml");
+        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-commands.yml");
 
         mockedAsyncapiGenerator.role = AbstractAsyncapiGenerator.RoleType.CLIENT;
         mockedAsyncapiGenerator.apiPackage = "io.example.api";
@@ -45,7 +44,7 @@ public class SpringCloudStreams3GeneratorTemplateNamesTest {
 
     @Test
     public void test_output_template_names_for_command_consumer() throws Exception {
-        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/plugins/asyncapi-commands.yml");
+        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-commands.yml");
 
         mockedAsyncapiGenerator.role = AbstractAsyncapiGenerator.RoleType.PROVIDER;
         List<TemplateOutput> outputTemplates = mockedAsyncapiGenerator.generate(model);
@@ -58,7 +57,7 @@ public class SpringCloudStreams3GeneratorTemplateNamesTest {
 
     @Test
     public void test_output_template_names_for_events_producer() throws Exception {
-        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/plugins/asyncapi-events.yml");
+        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-events.yml");
 
         mockedAsyncapiGenerator.role = AbstractAsyncapiGenerator.RoleType.PROVIDER;
         mockedAsyncapiGenerator.apiPackage = "io.example.api";
@@ -72,7 +71,7 @@ public class SpringCloudStreams3GeneratorTemplateNamesTest {
 
     @Test
     public void test_output_template_names_for_events_consumer() throws Exception {
-        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/plugins/asyncapi-events.yml");
+        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-events.yml");
 
         mockedAsyncapiGenerator.role = AbstractAsyncapiGenerator.RoleType.CLIENT;
         List<TemplateOutput> outputTemplates = mockedAsyncapiGenerator.generate(model);
