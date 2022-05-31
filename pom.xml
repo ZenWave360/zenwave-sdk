@@ -60,7 +60,7 @@
         <slf4j-api.version>1.7.36</slf4j-api.version>
         <picocli.version>4.6.3</picocli.version>
         <handlebars-java.version>4.3.0</handlebars-java.version>
-        <json-schema-ref-parser-jvm.version>0.0.4-SNAPSHOT</json-schema-ref-parser-jvm.version>
+        <json-schema-ref-parser-jvm.version>0.0.4</json-schema-ref-parser-jvm.version>
         <jdl-jvm.version>0.0.1-SNAPSHOT</jdl-jvm.version>
         <google-java-format.version>1.7</google-java-format.version>
         <junit.version>4.13.2</junit.version>

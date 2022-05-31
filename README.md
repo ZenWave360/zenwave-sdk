@@ -11,6 +11,7 @@ ZenWave Code Generator is a configurable and extensible code generator tool for 
 **Table of Contents:**
 
 - [ZenWave Code Generator](#zenwave-code-generator)
+  - [Building from source](#building-from-source)
   - [Jbang Instalation](#jbang-instalation)
   - [Available Plugins](#available-plugins)
     - [AsyncAPI](#asyncapi)
@@ -22,6 +23,17 @@ ZenWave Code Generator is a configurable and extensible code generator tool for 
       - [JDL Reverse Engineering from Java Classes](#jdl-reverse-engineering-from-java-classes)
       - [JDL To OpenAPI](#jdl-to-openapi)
       - [OpenAPI to JDL](#openapi-to-jdl)
+
+## Building from source
+
+You will need to build first one supporting project (jdl-jvm) that have not been published yet to maven central.
+
+```shell
+git clone https://github.com/ZenWave360/jdl-jvm.git && cd jdl-jvm && mvn clean install
+git clone https://github.com/ZenWave360/zenwave-code-generator.git && cd zenwave-code-generator && mvn clean install
+```
+
+Now you can install with JBang.
 
 ## Jbang Instalation
 
