@@ -30,5 +30,6 @@
         <module>openapi-spring-webtestclient</module>
         <module>jdl-entities</module>
         <module>jdl-to-openapi</module>
+        <module>java-to-jdl</module>
     </modules>
 </project>

@@ -64,6 +64,7 @@
         <jdl-jvm.version>0.0.1-SNAPSHOT</jdl-jvm.version>
         <google-java-format.version>1.7</google-java-format.version>
         <junit.version>4.13.2</junit.version>
+        <spring-boot-dependencies.version>2.6.7</spring-boot-dependencies.version>
 
         <zenwave-code-generator-test-resources.folder>${pom.basedir}/zenwave-code-generator-test-resources/src/test/resources</zenwave-code-generator-test-resources.folder>
     </properties>

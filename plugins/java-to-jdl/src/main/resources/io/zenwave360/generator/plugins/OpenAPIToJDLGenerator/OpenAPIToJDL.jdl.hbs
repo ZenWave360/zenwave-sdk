@@ -1,0 +1,43 @@
+
+{{#each jdlModel.entities as |entity|}}
+    {{~#if entity.description~}}
+/**
+ * {{entity.description}}
+ */
+    {{~/if~}}
+entity {{entity.name}} {
+    {{~#each entity.fields as |field|}}
+    {{field.name}} {{{field.type}}} {{#if field.description}}/** {{field.description}} */{{/if}}
+    {{~/each}}
+}
+
+{{/each}}
+
+{{#each jdlModel.enums as |enum|}}
+    {{~#if enum.description~}}
+/**
+* {{enum.description}}
+*/
+    {{~/if}}
+enum {{enum.name}} {
+    {{~#each enum.enumValues as |enumValue|}}
+    {{enumValue}}
+    {{~/each}}
+}
+
+{{/each}}
+
+{{#if jdlModel.relationships.oneToMany}}
+relationship OneToMany {
+    {{~#each jdlModel.relationships.oneToMany as |relationship|}}
+    {{relationship.0}}{ {{~relationship.1~}} } {{relationship.2}}
+    {{~/each}}
+}
+{{/if}}
+{{#if jdlModel.relationships.manyToOne}}
+relationship ManyToOne {
+    {{~#each jdlModel.relationships.manyToOne as |relationship|}}
+    {{relationship.0}}{ {{~relationship.1~}} } {{relationship.2}}
+    {{~/each}}
+}
+{{/if}}
