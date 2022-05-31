@@ -1,18 +1,28 @@
 package io.zenwave360.generator.processors;
 
 import io.zenwave360.generator.parsers.Model;
+import io.zenwave360.generator.processors.utils.JSONPath;
 import io.zenwave360.jsonrefparser.$Ref;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class OpenApiProcessor extends AbstractBaseProcessor implements Processor {
 
     @Override
     public Map<String, ?> process(Map<String, ?> contextModel) {
         Model apiModel = targetProperty != null? (Model) contextModel.get(targetProperty) : (Model) contextModel;
+
+        apiModel.getRefs().getOriginalRefsList().forEach(pair -> {
+            if(pair.getValue() instanceof Map) {
+                ((Map) pair.getValue()).put("x--originalRef", pair.getKey().getRef());
+            }
+        });
+
 
         List<Map<String, Object>> parametersParents = getJsonPath(apiModel, "$.paths[*][?(@.parameters)]");
         for (Map<String, Object> parametersParent : parametersParents) {
@@ -36,6 +46,18 @@ public class OpenApiProcessor extends AbstractBaseProcessor implements Processor
         for (Map<String, Object> operation : operations) {
             prepareOperationRequestInfo(apiModel, operation);
             simplifyOperationResponseInfo(apiModel, operation);
+        }
+
+        Map<String, Map> schemas = JSONPath.get(apiModel, "$.components.schemas");
+        for (Map.Entry<String, Map> entry : schemas.entrySet()) {
+            entry.getValue().put("x--schema-name", entry.getKey());
+        }
+
+        List<Map<String, Map>> properties = (List) JSONPath.get(apiModel, "$.components.schemas..[?(@.properties)].properties");
+        for (Map<String, Map> property : properties) {
+            for (Map.Entry<String, Map> entry : property.entrySet()) {
+                entry.getValue().put("x--property-name", entry.getKey());
+            }
         }
 
         return contextModel;

@@ -137,7 +137,8 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
                 property.put("pattern", "^[a-f\\d]{4}(?:[a-f\\d]{4}-){4}[a-f\\d]{12}$");
             }
             else if(blobTypes.contains(field.get("type"))) {
-                continue;
+                property.put("type", "string");
+                property.put("format", "binary");
             } else {
                 property.put("$ref", "#/components/schemas/" + field.get("type"));
             }
