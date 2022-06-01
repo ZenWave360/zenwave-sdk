@@ -1,0 +1,125 @@
+
+//==========================================================
+// Orders BC
+//==========================================================
+
+/**
+ * The Order entity.
+ */
+ @AggregateRoot
+entity Order {
+    state OrderState /** state */
+    customerId String /** customerId */
+    // orderLines OrderLineItem /** orderLines */
+    // paymentInfo OrderPaymentInfo
+    // deliveryInfo OrderDeliveryInfo
+}
+
+enum OrderState {
+    CREATED, CONFIRMED, CANCELLED
+}
+
+entity OrderLineItem {
+    menuItemId Integer
+    quantity Integer
+}
+
+/**
+ * The OrderPaymentInfo entity.
+ */
+entity OrderPaymentInfo {
+    creditCardId String
+}
+
+/**
+ * The OrderDeliveryInfo entity.
+ */
+entity OrderDeliveryInfo {
+    addressId String
+}
+
+relationship OneToMany {
+    Order to OrderLineItem
+}
+
+relationship OneToOne {
+	Order to OrderPaymentInfo
+    Order to OrderDeliveryInfo
+}
+
+//==========================================================
+// Restaurants BC
+//==========================================================
+
+/**
+ * The Restaurant entity.
+ */
+@AggregateRoot
+entity Restaurant {
+    name String
+}
+
+entity MenuItem {
+    name String
+    price Integer
+}
+
+entity RestaurantAddress {
+    address String
+}
+
+entity RestaurantOrder {
+	orderId String
+    status RestaurantOrderStatus
+}
+
+enum RestaurantOrderStatus {
+    ACCEPTED, READY, DELIVERED
+}
+
+relationship OneToMany {
+	Restaurant to MenuItem
+}
+
+relationship OneToOne {
+	Restaurant to RestaurantAddress
+}
+
+relationship ManyToOne {
+	Restaurant to RestaurantOrder
+}
+
+//==========================================================
+// Delivery BC
+//==========================================================
+entity DeliveryOrder {
+    orderId String
+    status DeliveryOrderStatus
+}
+
+enum DeliveryOrderStatus {
+    ACCEPTED, ONTRANSIT, DELIVERED
+}
+
+//==========================================================
+// Customers BC
+//==========================================================
+
+/**
+ * The Customer entity.
+ */
+@AggregateRoot
+entity Customer {
+    fullName String /** fullName */
+}
+
+entity CustomerAddress {}
+
+entity CreditCard {
+    cardNumber String
+}
+
+relationship OneToMany {
+	Customer to CustomerAddress
+    Customer to CreditCard
+}
