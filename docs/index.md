@@ -63,59 +63,60 @@ The main idea is:
 
 - **Define Aggregates and Entities in your Bounded Contexts:** Now you can describe your aggregate roots and their composing entities into separate JDL files
 
+{::options parse_block_html="true" /}
+
 <details>
   <summary>Orders Bounded Context JDL</summary>
 
+```
 //==========================================================
 // Orders BC
 //==========================================================
 
-/\*\*
-
-- The Order entity.
-  _/
-  @AggregateRoot
-  entity Order {
-  state OrderState /\*\* state _/
-  customerId String /** customerId \*/
-  // orderLines OrderLineItem /** orderLines \*/
-  // paymentInfo OrderPaymentInfo
-  // deliveryInfo OrderDeliveryInfo
-  }
+/**
+ * The Order entity.
+ */
+ @AggregateRoot
+entity Order {
+    state OrderState /** state */
+    customerId String /** customerId */
+    // orderLines OrderLineItem /** orderLines */
+    // paymentInfo OrderPaymentInfo
+    // deliveryInfo OrderDeliveryInfo
+}
 
 enum OrderState {
-CREATED, CONFIRMED, CANCELLED
+    CREATED, CONFIRMED, CANCELLED
 }
 
 entity OrderLineItem {
-menuItemId Integer
-quantity Integer
+    menuItemId Integer
+    quantity Integer
 }
 
-/\*\*
+/**
+ * The OrderPaymentInfo entity.
+ */
+entity OrderPaymentInfo {
+    creditCardId String
+}
 
-- The OrderPaymentInfo entity.
-  \*/
-  entity OrderPaymentInfo {
-  creditCardId String
-  }
-
-/\*\*
-
-- The OrderDeliveryInfo entity.
-  \*/
-  entity OrderDeliveryInfo {
-  addressId String
-  }
+/**
+ * The OrderDeliveryInfo entity.
+ */
+entity OrderDeliveryInfo {
+    addressId String
+}
 
 relationship OneToMany {
-Order to OrderLineItem
+    Order to OrderLineItem
 }
 
 relationship OneToOne {
-Order to OrderPaymentInfo
-Order to OrderDeliveryInfo
+	Order to OrderPaymentInfo
+    Order to OrderDeliveryInfo
 }
+```
 
 </details>
 
@@ -217,6 +218,8 @@ relationship OneToMany {
 ```
 
 </details>
+
+{::options parse_block_html="false" /}
 
 ![04-DDD-Agreggates-BoundedContexts-Orders_JDL.png](04-DDD-Agreggates-BoundedContexts-Orders_JDL.png)
 
