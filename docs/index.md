@@ -121,6 +121,7 @@ relationship OneToOne {
 </details>
 
 {::options parse_block_html="false" /}
+
 {::options parse_block_html="true" /}
 
 <details>
@@ -173,6 +174,7 @@ relationship ManyToOne {
 </details>
 
 {::options parse_block_html="false" /}
+
 {::options parse_block_html="true" /}
 
 <details>
@@ -195,6 +197,7 @@ enum DeliveryOrderStatus {
 </details>
 
 {::options parse_block_html="false" /}
+
 {::options parse_block_html="true" /}
 
 <details>
