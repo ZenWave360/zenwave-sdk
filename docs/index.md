@@ -21,8 +21,17 @@ The main idea is describe your domain core model using the JHipster Domain Langu
   - [Adding functionality on top of an existent microservices archytecture](#adding-functionality-on-top-of-an-existent-microservices-archytecture)
     - [Reverse engineering JDL from Java classes (JPA and MongoDB)](#reverse-engineering-jdl-from-java-classes-jpa-and-mongodb-1)
     - [Reverse engineering JDL from OpenAPI definition schemas](#reverse-engineering-jdl-from-openapi-definition-schemas)
-  - [Generating functional and testing code: What can we generate for you today?](#generating-functional-and-testing-code-what-can-we-generate-for-you-today)
-    - [JDL Server Entities (WIP)](#jdl-server-entities-wip)
+- [Generating functional and testing code: What can we generate for you today?](#generating-functional-and-testing-code-what-can-we-generate-for-you-today)
+  - [JDL Server Entities (WIP)](#jdl-server-entities-wip)
+  - [SpringData Repositories](#springdata-repositories)
+  - [SpringData Repositories InMemory Mocks](#springdata-repositories-inmemory-mocks)
+  - [OpenAPI Clients (using official OpenAPI generator)](#openapi-clients-using-official-openapi-generator)
+  - [High Fidelity Stateful REST API Mocks (using sister project ZenWave ApiMock)](#high-fidelity-stateful-rest-api-mocks-using-sister-project-zenwave-apimock)
+  - [AsyncAPI strongly typed interfaces and SpringCloudStreams3 implementations](#asyncapi-strongly-typed-interfaces-and-springcloudstreams3-implementations)
+  - [AsyncAPI interfaces Mocks and Contract Tests (ToBeDefined)](#asyncapi-interfaces-mocks-and-contract-tests-tobedefined)
+  - [SpringMVC and WebFlux Controller Stubs along with MapStruct Mappers from OpenAPI + JDL](#springmvc-and-webflux-controller-stubs-along-with-mapstruct-mappers-from-openapi--jdl)
+  - [SpringMVC and WebFlux WebTestClient integration/unit tests from OpenAPI definitions](#springmvc-and-webflux-webtestclient-integrationunit-tests-from-openapi-definitions)
+  - [KarateDSL Ent-to-End tests for REST APIs (using sister project ZenWave KarateIDE)](#karatedsl-ent-to-end-tests-for-rest-apis-using-sister-project-zenwave-karateide)
 
 # Choose your personal journey:
 
@@ -57,55 +66,56 @@ The main idea is:
 <details>
   <summary>Orders Bounded Context JDL</summary>
 
-```
 //==========================================================
 // Orders BC
 //==========================================================
 
-/**
- * The Order entity.
- */
- @AggregateRoot
-entity Order {
-    state OrderState /** state */
-    customerId String /** customerId */
-    // orderLines OrderLineItem /** orderLines */
-    // paymentInfo OrderPaymentInfo
-    // deliveryInfo OrderDeliveryInfo
-}
+/\*\*
+
+- The Order entity.
+  _/
+  @AggregateRoot
+  entity Order {
+  state OrderState /\*\* state _/
+  customerId String /** customerId \*/
+  // orderLines OrderLineItem /** orderLines \*/
+  // paymentInfo OrderPaymentInfo
+  // deliveryInfo OrderDeliveryInfo
+  }
 
 enum OrderState {
-    CREATED, CONFIRMED, CANCELLED
+CREATED, CONFIRMED, CANCELLED
 }
 
 entity OrderLineItem {
-    menuItemId Integer
-    quantity Integer
+menuItemId Integer
+quantity Integer
 }
 
-/**
- * The OrderPaymentInfo entity.
- */
-entity OrderPaymentInfo {
-    creditCardId String
-}
+/\*\*
 
-/**
- * The OrderDeliveryInfo entity.
- */
-entity OrderDeliveryInfo {
-    addressId String
-}
+- The OrderPaymentInfo entity.
+  \*/
+  entity OrderPaymentInfo {
+  creditCardId String
+  }
+
+/\*\*
+
+- The OrderDeliveryInfo entity.
+  \*/
+  entity OrderDeliveryInfo {
+  addressId String
+  }
 
 relationship OneToMany {
-    Order to OrderLineItem
+Order to OrderLineItem
 }
 
 relationship OneToOne {
-	Order to OrderPaymentInfo
-    Order to OrderDeliveryInfo
+Order to OrderPaymentInfo
+Order to OrderDeliveryInfo
 }
-```
 
 </details>
 
@@ -359,15 +369,33 @@ jbang zw -p io.zenwave360.generator.plugins.OpenAPIToJDLConfigurationPreset \
 cat target/out/entities.jdl
 ```
 
-## Generating functional and testing code: What can we generate for you today?
+# Generating functional and testing code: What can we generate for you today?
+
+Aims to generate a complete Architecture based on Domain models expressed in JDL.
 
 ![06-ServiceImplementation-Hexagonal](06-ServiceImplementation-Hexagonal.excalidraw.svg)
 
-### JDL Server Entities (WIP)
-
-Aims to generate a complete Architecture based on Domain models expressed in JDL.
+## JDL Server Entities (WIP)
 
 ```shell
 jbang zw -p io.zenwave360.generator.plugins.JDLEntitiesConfigurationPreset \
     specFile=entities-model.jdl targetFolder=target/out
 ```
+
+## SpringData Repositories
+
+## SpringData Repositories InMemory Mocks
+
+## OpenAPI Clients (using official OpenAPI generator)
+
+## High Fidelity Stateful REST API Mocks (using sister project ZenWave ApiMock)
+
+## AsyncAPI strongly typed interfaces and SpringCloudStreams3 implementations
+
+## AsyncAPI interfaces Mocks and Contract Tests (ToBeDefined)
+
+## SpringMVC and WebFlux Controller Stubs along with MapStruct Mappers from OpenAPI + JDL
+
+## SpringMVC and WebFlux WebTestClient integration/unit tests from OpenAPI definitions
+
+## KarateDSL Ent-to-End tests for REST APIs (using sister project ZenWave KarateIDE)
