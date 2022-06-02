@@ -120,6 +120,9 @@ relationship OneToOne {
 
 </details>
 
+{::options parse_block_html="false" /}
+{::options parse_block_html="true" /}
+
 <details>
   <summary>Restaurants Bounded Context JDL</summary>
 
@@ -169,6 +172,9 @@ relationship ManyToOne {
 
 </details>
 
+{::options parse_block_html="false" /}
+{::options parse_block_html="true" /}
+
 <details>
   <summary>Delivery Bounded Context JDL</summary>
 
@@ -187,6 +193,9 @@ enum DeliveryOrderStatus {
 ```
 
 </details>
+
+{::options parse_block_html="false" /}
+{::options parse_block_html="true" /}
 
 <details>
   <summary>Customers Bounded Context JDL</summary>
@@ -379,6 +388,15 @@ Aims to generate a complete Architecture based on Domain models expressed in JDL
 ![06-ServiceImplementation-Hexagonal](06-ServiceImplementation-Hexagonal.excalidraw.svg)
 
 ## JDL Server Entities (WIP)
+
+Generates entities annotated for persistence you can use as your core domaind aggregates.
+
+**NOTE:** We are very opinionated about not to hide annotated entities behind plain DTOs and MapStruct mappers (addapters in Hexagonal parlance) and take advantage of your ORM/ODM persistence framework semantics, and not hide them behind an extra layer of DTOs which will leave you in a _common-lowest-denominator_ land.
+
+So we would generate:
+
+- Annotated entities as core domain model aggregates, data on the inside.
+- Persistence Repositories as secondary ports for the annotated entities.
 
 ```shell
 jbang zw -p io.zenwave360.generator.plugins.JDLEntitiesConfigurationPreset \
