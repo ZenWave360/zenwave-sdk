@@ -397,15 +397,15 @@ jbang zw -p io.zenwave360.generator.plugins.JDLEntitiesConfigurationPreset \
 
 ## SpringData Repositories
 
-<TODO>
+_TODO_
 
 ## SpringData Repositories InMemory Mocks
 
-<TODO>
+_TODO_
 
 ## OpenAPI Clients (using official OpenAPI generator)
 
-<TODO>
+_TODO_
 
 ## High Fidelity Stateful REST API Mocks (using sister project ZenWave ApiMock)
 
@@ -436,11 +436,11 @@ jbang zw -p io.zenwave360.generator.plugins.SpringCloudStream3ConfigurationPrese
 
 ## AsyncAPI interfaces Mocks and Contract Tests (ToBeDefined)
 
-<TODO>
+_TODO_
 
 ## SpringMVC and WebFlux Controller Stubs along with MapStruct Mappers from OpenAPI + JDL
 
-<TODO>
+_TODO_
 
 ## SpringMVC and WebFlux WebTestClient integration/unit tests from OpenAPI definitions
 
