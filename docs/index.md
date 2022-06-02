@@ -63,12 +63,10 @@ The main idea is:
 
 - **Define Aggregates and Entities in your Bounded Contexts:** Now you can describe your aggregate roots and their composing entities into separate JDL files
 
-{::options parse_block_html="true" /}
-
 <details>
   <summary>Orders Bounded Context JDL</summary>
 
-```
+<pre>
 //==========================================================
 // Orders BC
 //==========================================================
@@ -116,12 +114,10 @@ relationship OneToOne {
 	Order to OrderPaymentInfo
     Order to OrderDeliveryInfo
 }
-```
+</pre>
 
 </details>
-
-{::options parse_block_html="false" /}
-
+ 
 {::options parse_block_html="true" /}
 
 <details>
