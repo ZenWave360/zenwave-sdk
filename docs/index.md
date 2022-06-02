@@ -47,6 +47,8 @@ We are going to use an hypothetical **Online Food Delivery Service** system.
 
 The main idea is:
 
+![ZenWave Modeling Languages](00-ZenWave-ModelingLanguages.excalidraw.svg)
+
 - To describe your domain core model using the JHipster Domain Language (JDL as ubiquitous language) and
 - API-First specs like AsyncAPI and OpenAPI to describe Inter Process Communications (IPC) between bounded contexts/microservices.
 - Use ZenWave Code Generator to generate (_a lot of_) infrastructure, functional and testing code from your models.
