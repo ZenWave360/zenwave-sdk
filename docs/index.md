@@ -255,10 +255,9 @@ With new upcoming version of AsyncAPI 3, you can separate how you describe on se
 - Channels, messages and servers
 - Applications connected to those channels
 
-<details>
+<details markdown="1">
   <summary>Food Delivery Service Order's Saga Asyncapi.yml example</summary>
 
-<div markdown="1">
 ```yaml
 asyncapi: 3.0.0
 
@@ -282,7 +281,6 @@ components:
           - $ref: "#/components/messages/onOrderDeliveryStatusUpdated"
           - $ref: "#/components/messages/onOrderDelivered"
 ```
-</div>
 
 </details>
 
