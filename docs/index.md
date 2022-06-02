@@ -118,12 +118,10 @@ relationship OneToOne {
 
 </details>
  
-{::options parse_block_html="true" /}
-
 <details>
   <summary>Restaurants Bounded Context JDL</summary>
 
-```
+<pre>
 //==========================================================
 // Restaurants BC
 //==========================================================
@@ -165,18 +163,14 @@ relationship OneToOne {
 relationship ManyToOne {
 	Restaurant to RestaurantOrder
 }
-```
+</pre>
 
 </details>
-
-{::options parse_block_html="false" /}
-
-{::options parse_block_html="true" /}
 
 <details>
   <summary>Delivery Bounded Context JDL</summary>
 
-```
+<pre>
 //==========================================================
 // Delivery BC
 //==========================================================
@@ -188,18 +182,14 @@ entity DeliveryOrder {
 enum DeliveryOrderStatus {
     ACCEPTED, ONTRANSIT, DELIVERED
 }
-```
+</pre>
 
 </details>
-
-{::options parse_block_html="false" /}
-
-{::options parse_block_html="true" /}
 
 <details>
   <summary>Customers Bounded Context JDL</summary>
 
-```
+<pre>
 //==========================================================
 // Customers BC
 //==========================================================
@@ -223,11 +213,9 @@ relationship OneToMany {
     Customer to CreditCard
 }
 
-```
+</pre>
 
 </details>
-
-{::options parse_block_html="false" /}
 
 ![04-DDD-Agreggates-BoundedContexts-Orders_JDL.png](04-DDD-Agreggates-BoundedContexts-Orders_JDL.png)
 
@@ -270,7 +258,7 @@ With new upcoming version of AsyncAPI 3, you can separate how you describe on se
 <details>
   <summary>Food Delivery Service Order's Saga Asyncapi.yml example</summary>
 
-```yaml
+<pre>
 asyncapi: 3.0.0
 
 info:
@@ -292,13 +280,14 @@ components:
           - $ref: "#/components/messages/onOrderPickedUp"
           - $ref: "#/components/messages/onOrderDeliveryStatusUpdated"
           - $ref: "#/components/messages/onOrderDelivered"
-```
+</pre>
 
 </details>
 
 <details>
   <summary>Applications connected to those channels: Restaurant Service Asyncapi.yml example</summary>
 
+<div markdown="1">
 ```yaml
 asyncapi: 3.0.0
 
@@ -335,6 +324,7 @@ operations:
     message:
       $ref: "orders.saga.asyncapi.yaml#/components/messages/onOrderReadyForPickup"
 ```
+</div>
 
 </details>
 
