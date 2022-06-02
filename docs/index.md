@@ -409,6 +409,8 @@ jbang zw -p io.zenwave360.generator.plugins.JDLEntitiesConfigurationPreset \
 
 ## High Fidelity Stateful REST API Mocks (using sister project ZenWave ApiMock)
 
+See sister project [ZenWave ApiMock](https://github.com/ZenWave360/zenwave-apimock)
+
 [High Fidelity Stateful Mocks (Consumer Contracts) with OpenAPI and KarateDSL @medium](https://medium.com/@ivangsa/high-fidelity-stateful-mocks-consumer-contracts-with-openapi-and-karatedsl-85a7f31cf84e)
 
 ## AsyncAPI strongly typed interfaces and SpringCloudStreams3 implementations
@@ -456,8 +458,10 @@ jbang zw -p io.zenwave360.generator.plugins.SpringWebTestsClientConfigurationPre
 
 ## KarateDSL Ent-to-End tests for REST APIs (using sister project ZenWave KarateIDE)
 
-[Generating Karate Test Features from OpenAPI @medium](https://medium.com/@ivangsa/from-manual-to-contract-testing-with-karatedsl-and-karateide-i-5884f1732680#8311)
+Use sister project [ZenWave KarateIDE](https://marketplace.visualstudio.com/items?itemName=KarateIDE.karate-ide)
 
 [![KarateIDE: Generate KarateDSL Tests from OpenAPI in VSCode](https://github.com/ZenWave360/karate-ide/resources/screenshots/generating-tests-from-openapi-youtube-embed.png)](https://www.youtube.com/watch?v=pYyRvly4cG8)
+
+[Generating Karate Test Features from OpenAPI @medium](https://medium.com/@ivangsa/from-manual-to-contract-testing-with-karatedsl-and-karateide-i-5884f1732680#8311)
 
 [Generate Tests that simulates end-user Business Flows @medium](https://medium.com/@ivangsa/from-manual-to-contract-testing-with-karatedsl-and-karateide-i-5884f1732680#9b70)
