@@ -258,7 +258,8 @@ With new upcoming version of AsyncAPI 3, you can separate how you describe on se
 <details>
   <summary>Food Delivery Service Order's Saga Asyncapi.yml example</summary>
 
-<pre>
+<div markdown="1">
+```yaml
 asyncapi: 3.0.0
 
 info:
@@ -280,7 +281,8 @@ components:
           - $ref: "#/components/messages/onOrderPickedUp"
           - $ref: "#/components/messages/onOrderDeliveryStatusUpdated"
           - $ref: "#/components/messages/onOrderDelivered"
-</pre>
+```
+</div>
 
 </details>
 
