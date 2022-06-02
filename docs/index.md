@@ -63,10 +63,10 @@ The main idea is:
 
 - **Define Aggregates and Entities in your Bounded Contexts:** Now you can describe your aggregate roots and their composing entities into separate JDL files
 
-<details>
+<details markdown="1">
   <summary>Orders Bounded Context JDL</summary>
 
-<pre>
+```
 //==========================================================
 // Orders BC
 //==========================================================
@@ -114,14 +114,14 @@ relationship OneToOne {
 	Order to OrderPaymentInfo
     Order to OrderDeliveryInfo
 }
-</pre>
+```
 
 </details>
  
-<details>
+<details markdown="1">
   <summary>Restaurants Bounded Context JDL</summary>
 
-<pre>
+```
 //==========================================================
 // Restaurants BC
 //==========================================================
@@ -163,14 +163,14 @@ relationship OneToOne {
 relationship ManyToOne {
 	Restaurant to RestaurantOrder
 }
-</pre>
+```
 
 </details>
 
-<details>
+<details markdown="1">
   <summary>Delivery Bounded Context JDL</summary>
 
-<pre>
+```
 //==========================================================
 // Delivery BC
 //==========================================================
@@ -182,14 +182,14 @@ entity DeliveryOrder {
 enum DeliveryOrderStatus {
     ACCEPTED, ONTRANSIT, DELIVERED
 }
-</pre>
+```
 
 </details>
 
-<details>
+<details  markdown="1">
   <summary>Customers Bounded Context JDL</summary>
 
-<pre>
+```
 //==========================================================
 // Customers BC
 //==========================================================
@@ -212,8 +212,7 @@ relationship OneToMany {
 	Customer to CustomerAddress
     Customer to CreditCard
 }
-
-</pre>
+```
 
 </details>
 
