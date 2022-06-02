@@ -1,3 +1,5 @@
+# ZenWave Code Generator
+
 > :warning: Work in progress and not ready for use.
 
 ZenWave Code Generator is a configurable and extensible code generator tool for **Domain Driven Design (DDD)** and **API-First** that can generate code from a mix of different models including:
@@ -10,6 +12,10 @@ The main idea is describe your domain core model using the JHipster Domain Langu
 
 **Note:** Official provided code generator plugins are designed to generate functional code and tests on top of existing projects. Creating a base project is out of scope but you can use http://start.spring.io or https://start.jhipster.tech/, in case your company doesn't already have a project starter or archetype.
 
+# Table of Contents
+
+- [ZenWave Code Generator](#zenwave-code-generator)
+- [Table of Contents](#table-of-contents)
 - [Choose your personal journey:](#choose-your-personal-journey)
   - [Designing a system from scratch with DDD and API-First](#designing-a-system-from-scratch-with-ddd-and-api-first)
     - [From idea to JDL](#from-idea-to-jdl)
@@ -283,15 +289,14 @@ components:
 
 </details>
 
-<details>
+<details markdown="1">
   <summary>Applications connected to those channels: Restaurant Service Asyncapi.yml example</summary>
 
-<div markdown="1">
 ```yaml
 asyncapi: 3.0.0
 
 info:
-  title: Website Backend
+  title: Restaurant Service
   version: 1.0.0
 
 servers:
@@ -323,7 +328,6 @@ operations:
     message:
       $ref: "orders.saga.asyncapi.yaml#/components/messages/onOrderReadyForPickup"
 ```
-</div>
 
 </details>
 
@@ -393,18 +397,67 @@ jbang zw -p io.zenwave360.generator.plugins.JDLEntitiesConfigurationPreset \
 
 ## SpringData Repositories
 
+<TODO>
+
 ## SpringData Repositories InMemory Mocks
+
+<TODO>
 
 ## OpenAPI Clients (using official OpenAPI generator)
 
+<TODO>
+
 ## High Fidelity Stateful REST API Mocks (using sister project ZenWave ApiMock)
+
+[High Fidelity Stateful Mocks (Consumer Contracts) with OpenAPI and KarateDSL @medium](https://medium.com/@ivangsa/high-fidelity-stateful-mocks-consumer-contracts-with-openapi-and-karatedsl-85a7f31cf84e)
 
 ## AsyncAPI strongly typed interfaces and SpringCloudStreams3 implementations
 
+Generates strongly typed java code (Producer and Consumers) for Spring Cloud Streams 3 from AsyncAPI specification.
+
+It supports:
+
+- Imperative and Reactive styles
+- Exposing your DTOs, Spring Messages or Kafka KStreams as parameter types.
+- All message formats supported by AsyncAPI specification: AsyncAPI schema (inline), JSON Schema (external files) and Avro (external files).
+
+> NOTE: some templates/combinations are still WIP
+
+```shell
+jbang zw -p io.zenwave360.generator.plugins.SpringCloudStream3ConfigurationPreset \
+    specFile=asyncapi.yml targetFolder=target/out \
+    apiPackage=io.example.integration.test.api \
+    modelPackage=io.example.integration.test.api.model \
+    role=<PROVIDER | CLIENT> \
+    style=<IMPERATIVE | REACTIVE>
+```
+
 ## AsyncAPI interfaces Mocks and Contract Tests (ToBeDefined)
+
+<TODO>
 
 ## SpringMVC and WebFlux Controller Stubs along with MapStruct Mappers from OpenAPI + JDL
 
+<TODO>
+
 ## SpringMVC and WebFlux WebTestClient integration/unit tests from OpenAPI definitions
 
+Generates test for SpringMVC or Spring WebFlux using WebTestClient based on OpenAPI specification.
+
+```shell
+jbang zw -p io.zenwave360.generator.plugins.SpringWebTestsClientConfigurationPreset \
+    specFile=openapi.yml targetFolder=target/out \
+    apiPackage=io.example.integration.test.api \
+    modelPackage=io.example.integration.test.api.model \
+    groupBy=<SERVICE | OPERATION | PARTIAL> \
+    operationIds=<comma separated or empty for all> \
+    statusCodes=<comma separated or empty for default>
+```
+
 ## KarateDSL Ent-to-End tests for REST APIs (using sister project ZenWave KarateIDE)
+
+[Generating Karate Test Features from OpenAPI @medium](https://medium.com/@ivangsa/from-manual-to-contract-testing-with-karatedsl-and-karateide-i-5884f1732680#8311)
+
+[![KarateIDE: Generate KarateDSL Tests from OpenAPI in VSCode](https://github.com/ZenWave360/karate-ide/resources/screenshots/generating-tests-from-openapi-youtube-embed.png)](https://www.youtube.com/watch?v=pYyRvly4cG8)
+
+[Generate Tests that simulates end-user Business Flows @medium](https://medium.com/@ivangsa/from-manual-to-contract-testing-with-karatedsl-and-karateide-i-5884f1732680#9b70)
