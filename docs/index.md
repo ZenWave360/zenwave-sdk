@@ -8,7 +8,7 @@ ZenWave Code Generator is a configurable and extensible code generator tool for 
 - [AsyncAPI](https://www.asyncapi.com/docs/getting-started/coming-from-openapi)
 - [OpenAPI](https://swagger.io/specification/)
 
-You can model your system architecture with JHipster Domain Language as **Ubiquitous Language** for [Data on the Inside](https://blog.acolyer.org/2016/09/13/data-on-the-outside-versus-data-on-the-inside/) and API-First specs like AsyncAPI and OpenAPI to describe Inter Process Communications (IPC) for Data on the Outside.
+You can model your system architecture with JHipster Domain Language as **Ubiquitous Language** for [Data on the Inside](https://blog.acolyer.org/2016/09/13/data-on-the-outside-versus-data-on-the-inside/) and **API-First** specs like AsyncAPI and OpenAPI to describe Inter Process Communications (IPC) for [Data on the Outside](https://blog.acolyer.org/2016/09/13/data-on-the-outside-versus-data-on-the-inside/).
 
 The main idea is:
 
