@@ -6,7 +6,7 @@
         <artifactId>zenwave-code-generator</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <groupId>io.github.zenwave360.generator</groupId>
+    <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
     <artifactId>plugins-parent</artifactId>
     <packaging>pom</packaging>
 

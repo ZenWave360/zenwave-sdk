@@ -42,11 +42,12 @@ You can use JBang to install the ZenWave Code Generator as a [JBang alias](https
 ```shell
 jbang alias add --name=zw \
     -m=io.zenwave360.generator.Main \
+    --repos=https://oss.sonatype.org/content/repositories/snapshots \
     --deps=\
-io.github.zenwave360.generator.plugins:asyncapi-spring-cloud-streams3:0.0.1-SNAPSHOT,\
-io.github.zenwave360.generator.plugins:openapi-spring-webtestclient:0.0.1-SNAPSHOT,\
-io.github.zenwave360.generator.plugins:jdl-entities:0.0.1-SNAPSHOT,\
-io.github.zenwave360.generator.plugins:jdl-to-openapi:0.0.1-SNAPSHOT \
+io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:0.0.1-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:0.0.1-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-entities:0.0.1-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.0.1-SNAPSHOT \
     io.github.zenwave360:zenwave-code-generator-cli:0.0.1-SNAPSHOT
 ```
 
