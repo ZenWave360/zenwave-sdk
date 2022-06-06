@@ -19,6 +19,14 @@ public class JSONPath {
         }
     }
 
+    public static <T> T get(Object object, String jsonPath, T defaultIfNull) {
+        try {
+            return (T) JsonPath.read(object, jsonPath);
+        } catch (PathNotFoundException e) {
+            return defaultIfNull;
+        }
+    }
+
     /**
      * This implementation has some limitations: object must be of type Map and path must use '.' as separator.
      * @param object

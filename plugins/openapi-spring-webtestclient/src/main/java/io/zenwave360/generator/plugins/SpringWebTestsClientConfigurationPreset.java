@@ -21,7 +21,7 @@ public class SpringWebTestsClientConfigurationPreset extends Configuration {
     @Override
     public Configuration withOptions(Map<String, Object> options) {
         if(!options.containsKey("targetFolder")) {
-            withChain(DefaultYamlParser.class, AsyncApiProcessor.class, SpringWebTestClientGenerator.class, TemplateStdoutWriter.class);
+            withChain(DefaultYamlParser.class, OpenApiProcessor.class, SpringWebTestClientGenerator.class, TemplateStdoutWriter.class);
             options.put(SpringWebTestClientGenerator.class.getName() + ".groupBy", SpringWebTestClientGenerator.GroupByType.PARTIAL.toString());
         }
         return super.withOptions(options);

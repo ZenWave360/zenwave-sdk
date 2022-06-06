@@ -1,8 +1,10 @@
 package io.zenwave360.generator.processors;
 
 import com.jayway.jsonpath.JsonPath;
+import io.zenwave360.generator.processors.utils.JSONPath;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +14,7 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
     public Map<String, ?> process(Map<String, ?> contextModel) {
         Map<String, ?> apiModel = targetProperty != null? (Map<String, ?>) contextModel.get(targetProperty) : contextModel;
 
-        List<Map<String, Object>> traitsParents = JsonPath.read(apiModel, "$..[?(@.traits)]");
+        List<Map<String, Object>> traitsParents = JSONPath.get(apiModel, "$..[?(@.traits)]");
         for (Map<String, Object> traitParent : traitsParents) {
             List<Map<String, Object>> traitsList = (List) traitParent.get("traits");
             for (Map<String, Object> traits : traitsList) {
@@ -20,7 +22,7 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
             }
         }
 
-        Map<String, Object> channels = JsonPath.read(apiModel, "$.channels");
+        Map<String, Object> channels = JSONPath.get(apiModel, "$.channels", Collections.emptyMap());
         for (Map.Entry<String, Object> channel : channels.entrySet()) {
             Map<String, Map<String, Object>> value = (Map) channel.getValue();
             if(value != null){
@@ -37,14 +39,14 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
             }
         }
 
-        Map<String, Map> componentsMessages = JsonPath.read(apiModel, "$.components.messages");
+        Map<String, Map> componentsMessages = JSONPath.get(apiModel, "$.components.messages", Collections.emptyMap());
         for(Map.Entry<String, Map> message: componentsMessages.entrySet()) {
             if(!message.getValue().containsKey("name")) {
                 message.getValue().put("name", message.getKey());
             }
         }
 
-        List<Map<String, Object>> messages = JsonPath.read(apiModel, "$.channels..x--messages[*]");
+        List<Map<String, Object>> messages = JSONPath.get(apiModel, "$.channels..x--messages[*]");
         for (Map<String, Object> message : messages) {
             calculateMessageParamType(message);
         }

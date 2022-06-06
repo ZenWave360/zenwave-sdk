@@ -5,6 +5,7 @@ import io.zenwave360.generator.processors.utils.JSONPath;
 import io.zenwave360.jsonrefparser.$Ref;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ public class OpenApiProcessor extends AbstractBaseProcessor implements Processor
             }
         }
 
-        Map<String, Map<String, Map<String, Object>>> paths = getJsonPath(apiModel, "$.paths");
+        Map<String, Map<String, Map<String, Object>>> paths = JSONPath.get(apiModel, "$.paths", Collections.emptyMap());
         for (Map.Entry<String, Map<String, Map<String, Object>>> path : paths.entrySet()) {
             for (Map.Entry<String, Map<String, Object>> pathItem : path.getValue().entrySet()) {
                 addPathNameToOperation(pathItem.getValue(), path.getKey());
@@ -48,12 +49,12 @@ public class OpenApiProcessor extends AbstractBaseProcessor implements Processor
             simplifyOperationResponseInfo(apiModel, operation);
         }
 
-        Map<String, Map> schemas = JSONPath.get(apiModel, "$.components.schemas");
+        Map<String, Map> schemas = JSONPath.get(apiModel, "$.components.schemas", Collections.emptyMap());
         for (Map.Entry<String, Map> entry : schemas.entrySet()) {
             entry.getValue().put("x--schema-name", entry.getKey());
         }
 
-        List<Map<String, Map>> properties = (List) JSONPath.get(apiModel, "$.components.schemas..[?(@.properties)].properties");
+        List<Map<String, Map>> properties = JSONPath.get(apiModel, "$.components.schemas..[?(@.properties)].properties");
         for (Map<String, Map> property : properties) {
             for (Map.Entry<String, Map> entry : property.entrySet()) {
                 entry.getValue().put("x--property-name", entry.getKey());
