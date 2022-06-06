@@ -1,7 +1,5 @@
 name: Publish SNAPSHOT to the Maven Central Repository
-on:
-  push:
-    branches: [ main ]
+on: workflow_dispatch
 jobs:
   publish:
     runs-on: ubuntu-latest
