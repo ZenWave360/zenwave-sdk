@@ -27,7 +27,9 @@ ZenWave Code Generator is a configurable and extensible code generator tool for 
 ## Building from source
 
 ```shell
-git clone https://github.com/ZenWave360/zenwave-code-generator.git && cd zenwave-code-generator && mvn clean install
+git clone https://github.com/ZenWave360/zenwave-code-generator.git
+cd zenwave-code-generator
+mvn clean install
 ```
 
 Now you can install with JBang.
