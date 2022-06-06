@@ -8,17 +8,15 @@ ZenWave Code Generator is a configurable and extensible code generator tool for 
 - [AsyncAPI](https://www.asyncapi.com/docs/getting-started/coming-from-openapi)
 - [OpenAPI](https://swagger.io/specification/)
 
-You can model your system architecture with JHipster Domain Language as **Ubiquitous Language** for [Data on the Inside](https://blog.acolyer.org/2016/09/13/data-on-the-outside-versus-data-on-the-inside/) and **API-First** specs like AsyncAPI and OpenAPI to describe Inter Process Communications (IPC) for [Data on the Outside](https://blog.acolyer.org/2016/09/13/data-on-the-outside-versus-data-on-the-inside/).
-
-The main idea is:
+Using JHipster Domain Language as **Ubiquitous Language** for [Data on the Inside](https://blog.acolyer.org/2016/09/13/data-on-the-outside-versus-data-on-the-inside/) and **API-First** specs like **AsyncAPI** and **OpenAPI** to describe Inter Process Communications (IPC) for [Data on the Outside](https://blog.acolyer.org/2016/09/13/data-on-the-outside-versus-data-on-the-inside/).
 
 ![ZenWave Modeling Languages](00-ZenWave-ModelingLanguages.excalidraw.svg)
 
 - **JHipster Domain Language (JDL) as Ubiquitous Language:** To describe your domain core domain model
 - **API-First specs like AsyncAPI and OpenAPI:** to describe Inter Process Communications (IPC) between bounded contexts/microservices.
-- Use **ZenWave Code Generator** to generate (_a lot of_) infrastructure, functional and testing code from your models and APIs.
+- **ZenWave Code Generator:** to generate (_a lot of_) infrastructure, functional and testing code from your models and APIs.
 
-**Note:** Official provided code generator plugins are designed to generate functional code and tests on top of existing projects. Creating a base project is out of scope, but you can always go to [start.spring.io](http://start.spring.io) or [start.jhipster.tech](https://start.jhipster.tech/), in case your company doesn't already have a project starter or archetype.
+**Note:** Official plugins are designed to generate functional code and tests on top of existing projects. Creating a base project is out of scope, but you can always go to [start.spring.io](http://start.spring.io) or [start.jhipster.tech](https://start.jhipster.tech/), in case your company doesn't already have a project starter or archetype.
 
 # Table of Contents
 
@@ -53,9 +51,9 @@ We are going to use an hypothetical **Online Food Delivery Service** system as a
 
 Whether you are:
 
-- [designing a system from scratch](#designing-a-system-from-scratch-with-ddd-and-api-first),
-- [refactoring a legacy monolith](#refactoring-a-legacy-monolith) or just
-- [Adding functionality on top of an existent microservices archytecture](#adding-functionality-on-top-of-an-existent-microservices-archytecture)
+- [Designing a system from scratch](#designing-a-system-from-scratch-with-ddd-and-api-first),
+- [Refactoring a legacy monolith](#refactoring-a-legacy-monolith) or just
+- [Adding functionality on top of an existent microservices architecture](#adding-functionality-on-top-of-an-existent-microservices-archytecture)
 
 ...ZenWave Code Generator can... [generate a lot of code for you](#generating-functional-and-testing-code-what-can-we-generate-for-you-today)
 
@@ -63,15 +61,15 @@ Whether you are:
 
 ## DDD: From Idea to JDL
 
-- **Domain Map:** First sketch your full domain model:
+- **Domain Map:** Sketch your full domain model
 
 ![01-DomainMap](01-DomainMap.excalidraw.svg)
 
-- **Domain Subdomains:** Decompouse your model into manageable subdomains:
+- **Domain Subdomains:** Decompose your model into manageable subdomains
 
 ![02-DomainSubdomains](02-DomainSubdomains.excalidraw.svg)
 
-- **Domain Bounded Contexts:** Separate your subdomains as separated bounded contexts. Entities from different bounded context can only be linked by _id_ but you can implement _query views_ and caches using patterns like CQRS to syncronize data from different BCs.
+- **Domain Bounded Contexts:** Separate your subdomains as separated bounded contexts. Entities from different bounded context can only be linked by _id_ but you can implement _query views_ and caches using patterns like CQRS to synchronize data from different BCs.
 
 ![03-DomainBoundedContexts](03-DomainBoundedContexts.excalidraw.svg)
 
@@ -241,6 +239,8 @@ When you separate your domain model into subdomains and bounded context, bounded
 - Access data from other bounded contexts
 - Coordinate inter process communications
 
+We will use **OpenAPI**, **AsyncAPI** and other specs to define the communication between these services.
+
 ### Access data owned by other bounded contexts: Direct Access vs CQRS
 
 For every service owning data is a good idea to:
@@ -266,7 +266,7 @@ An easy way to simplify consumers implementation, regarding evolving message for
 
 ### Sagas
 
-Currently, you can use AsyncAPI 2 specification to describe message schemas and the channels they are written to but is not enough to describe the inter process communication between services like SAGAs but [ongoing work for version 3](https://github.com/asyncapi/spec/issues/618) is very promissing regarding documenting IPCs like SAGAs and CQRS.
+Currently, you can use AsyncAPI 2 specification to describe message schemas and the channels they are written to but is not enough to describe the inter process communication between services like SAGAs but [ongoing work for version 3](https://github.com/asyncapi/spec/issues/618) is very promising regarding documenting IPCs like SAGAs and CQRS.
 
 With new upcoming version of AsyncAPI 3, you can separate how you describe on separate files:
 
@@ -352,7 +352,7 @@ operations:
 
 If starting with legacy project, you can reverse engineer JDL from Java entity classes. JPA and MongoDB are supported.
 
-It requires access to your project classpath so you can just paste the following code on any test class or main method:
+It requires access to your project classpath, so you can just paste the following code on any test class or main method:
 
 ```java
 String jdl = new JavaToJDLGenerator()
@@ -370,7 +370,7 @@ String jdl = new JavaToJDLGenerator()
 System.out.println(jdl);
 ```
 
-# Adding functionality on top of an existent microservices archytecture
+# Adding functionality on top of an existent microservices architecture
 
 ## Reverse engineering JDL from Java classes (JPA and MongoDB)
 
@@ -394,9 +394,9 @@ Aims to generate a complete Architecture based on Domain models expressed in JDL
 
 ## JDL Server Entities (WIP)
 
-Generates entities annotated for persistence you can use as your core domaind aggregates.
+Generates entities annotated for persistence you can use as your core domain aggregates.
 
-**NOTE:** We are very opinionated about not to hide annotated entities behind plain DTOs and MapStruct mappers (addapters in Hexagonal parlance) and take advantage of your ORM/ODM persistence framework semantics, and not hide them behind an extra layer of DTOs which will leave you in a _common-lowest-denominator_ land.
+**NOTE:** We are very opinionated about not to hide annotated entities behind plain DTOs and MapStruct mappers (adapters in Hexagonal parlance) and take advantage of your ORM/ODM persistence framework semantics, and not hide them behind an extra layer of DTOs which will leave you in a _common-lowest-denominator_ land.
 
 So we would generate:
 
