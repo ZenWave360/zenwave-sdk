@@ -35,7 +35,7 @@
       <version>${json-schema-ref-parser-jvm.version}</version>
     </dependency>
     <dependency>
-      <groupId>io.zenwave360.jhipster</groupId>
+      <groupId>io.github.zenwave360.jhipster</groupId>
       <artifactId>jdl-jvm</artifactId>
       <version>${jdl-jvm.version}</version>
       <optional>true</optional>
