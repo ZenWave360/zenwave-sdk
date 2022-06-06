@@ -11,7 +11,7 @@
       ],
       "repositories": [
         "mavencentral",
-        "snapshots=https://oss.sonatype.org/content/repositories/snapshots"
+        "snapshots=https://s01.oss.sonatype.org/content/repositories/snapshots"
       ],
       "main": "io.zenwave360.generator.Main"
     }
