@@ -26,10 +26,7 @@ ZenWave Code Generator is a configurable and extensible code generator tool for 
 
 ## Building from source
 
-You will need to build first one supporting project (jdl-jvm) that have not been published yet to maven central.
-
 ```shell
-git clone https://github.com/ZenWave360/jdl-jvm.git && cd jdl-jvm && mvn clean install
 git clone https://github.com/ZenWave360/zenwave-code-generator.git && cd zenwave-code-generator && mvn clean install
 ```
 
@@ -42,7 +39,6 @@ You can use JBang to install the ZenWave Code Generator as a [JBang alias](https
 ```shell
 jbang alias add --name=zw \
     -m=io.zenwave360.generator.Main \
-    --repos=mavencentral,snapshots=https://oss.sonatype.org/content/repositories/snapshots \
     --deps=\
 io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:0.0.1-SNAPSHOT,\
 io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:0.0.1-SNAPSHOT,\
@@ -52,6 +48,23 @@ io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.0.1-SNAPSHO
 ```
 
 You can include any custom plugin in as `--deps` option.
+
+In order to use SNAPSHOT versions you need to build from source or add this profile to your `~/.m2/settings.xml`:
+
+```xml
+  <profile>
+    <id>allow-snapshots</id>
+    <activation><activeByDefault>true</activeByDefault></activation>
+    <repositories>
+      <repository>
+        <id>snapshots-repo</id>
+        <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        <releases><enabled>false</enabled></releases>
+        <snapshots><enabled>true</enabled></snapshots>
+      </repository>
+    </repositories>
+  </profile>
+```
 
 > > NOTE: there is a [know bug](https://github.com/jbangdev/jbang/issues/1367) so after adding your jbang alias you may need to edit `$HOME/.jbang/jbang-catalog.json` and replace _repositories_ with _dependencies_ for your alias entry.
 
