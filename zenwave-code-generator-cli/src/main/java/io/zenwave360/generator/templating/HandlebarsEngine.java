@@ -31,6 +31,10 @@ public class HandlebarsEngine implements TemplateEngine {
         handlebars.registerHelpers(StringHelpers.class);
     }
 
+    public Handlebars getHandlebars() {
+        return handlebars;
+    }
+
     @Override
     public TemplateOutput processTemplate(Map<String, Object> model, TemplateInput templateInput) {
         return this.processTemplates(model, Arrays.asList(templateInput)).get(0);

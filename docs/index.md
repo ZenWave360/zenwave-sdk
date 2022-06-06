@@ -49,9 +49,15 @@ The main idea is:
 
 # An "Online Food Delivery Service"
 
-We are going to use an hypothetical **Online Food Delivery Service** system as an example.
+We are going to use an hypothetical **Online Food Delivery Service** system as an example to showcase how you can model and design a complex distributed system using JDL, OpenAPI and AsyncAPI...
 
-Whether you are [designing a system from scratch](#designing-a-system-from-scratch-with-ddd-and-api-first), [refactoring a legacy monolith](#refactoring-a-legacy-monolith) or just [Adding functionality on top of an existent microservices archytecture](#adding-functionality-on-top-of-an-existent-microservices-archytecture) ZenWave Code Generator can...
+Whether you are:
+
+- [designing a system from scratch](#designing-a-system-from-scratch-with-ddd-and-api-first),
+- [refactoring a legacy monolith](#refactoring-a-legacy-monolith) or just
+- [Adding functionality on top of an existent microservices archytecture](#adding-functionality-on-top-of-an-existent-microservices-archytecture)
+
+...ZenWave Code Generator can... [generate a lot of code for you](#generating-functional-and-testing-code-what-can-we-generate-for-you-today)
 
 # Designing a system from scratch with DDD and API-First
 

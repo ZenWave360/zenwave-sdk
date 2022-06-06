@@ -1,5 +1,6 @@
 package io.zenwave360.generator.plugins;
 
+import io.zenwave360.generator.DocumentedOption;
 import io.zenwave360.generator.parsers.Model;
 import io.zenwave360.generator.processors.utils.StringInterpolator;
 import io.zenwave360.generator.templating.HandlebarsEngine;
@@ -21,8 +22,11 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
     }
 
     public String sourceProperty = "api";
+
+    @DocumentedOption(description = "Generate test classes grouped by", required = true)
     public GroupByType groupBy = GroupByType.SERVICE;
 
+    @DocumentedOption(description = "Class name suffix for generated test classes")
     public String testSuffix = "IT";
 
     public SpringWebTestClientGenerator withSourceProperty(String sourceProperty) {
