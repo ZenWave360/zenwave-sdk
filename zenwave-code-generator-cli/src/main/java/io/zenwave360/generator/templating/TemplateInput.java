@@ -47,6 +47,11 @@ public class TemplateInput {
         return this;
     }
 
+    public TemplateInput withMimeType(OutputFormatType mimeType) {
+        this.mimeType = mimeType != null? mimeType.toString() : null;
+        return this;
+    }
+
     public TemplateInput withMimeType(String mimeType) {
         this.mimeType = mimeType;
         return this;

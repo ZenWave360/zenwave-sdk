@@ -1,7 +1,7 @@
-package {{generator.apiPackage}};
+package {{apiPackage}};
 
-{{#if generator.modelPackage~}}
-import {{generator.modelPackage}}.*;
+{{#if modelPackage~}}
+import {{modelPackage}}.*;
 {{~/if}}
 
 import java.time.Duration;
@@ -21,7 +21,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @IntegrationTest
 @AutoConfigureWebTestClient(timeout = IntegrationTest.DEFAULT_ENTITY_TIMEOUT)
 @WithMockUser
-class {{asCapitalizedJavaProperty operationId}}{{generator.testSuffix}} {
+class {{asCapitalizedJavaProperty operationId}}{{testSuffix}} {
 
 @Autowired
 private WebTestClient webTestClient;

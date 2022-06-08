@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.zenwave360.generator.formatters.Formatter;
 import io.zenwave360.generator.parsers.Parser;
-import io.zenwave360.generator.plugins.GeneratorPlugin;
 import io.zenwave360.generator.processors.Processor;
 import io.zenwave360.generator.templating.TemplateOutput;
 import io.zenwave360.generator.writers.TemplateWriter;

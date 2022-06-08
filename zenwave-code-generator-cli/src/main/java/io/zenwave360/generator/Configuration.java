@@ -1,5 +1,7 @@
 package io.zenwave360.generator;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -11,8 +13,7 @@ public class Configuration {
     private static final String PRESET_ID = "base";
 
     private String specFile;
-
-    private String targetFolder = "target/zenwave";
+    private String targetFolder;
     private List<Class> chain;
 
     private Map<String, Object> options = new HashMap<>();
@@ -45,6 +46,14 @@ public class Configuration {
             }
         }
         nestedTempObject.put(lastPath, value);
+
+        try {
+            if(FieldUtils.getField(this.getClass(), name) != null) {
+                FieldUtils.writeField(this, name, value);
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
         return this;
     }
 

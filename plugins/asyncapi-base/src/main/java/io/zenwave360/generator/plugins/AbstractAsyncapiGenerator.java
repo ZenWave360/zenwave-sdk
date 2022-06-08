@@ -2,6 +2,7 @@ package io.zenwave360.generator.plugins;
 
 import com.jayway.jsonpath.JsonPath;
 import io.zenwave360.generator.DocumentedOption;
+import io.zenwave360.generator.GeneratorPlugin;
 import io.zenwave360.generator.parsers.Model;
 import org.apache.commons.lang3.ObjectUtils;
 

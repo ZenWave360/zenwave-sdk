@@ -1,5 +1,6 @@
 package io.zenwave360.generator.parsers;
 
+import io.zenwave360.generator.DocumentedOption;
 import io.zenwave360.jsonrefparser.$RefParser;
 import io.zenwave360.jsonrefparser.$RefParserOptions;
 
@@ -11,6 +12,7 @@ import java.util.Map;
 
 public class DefaultYamlParser implements io.zenwave360.generator.parsers.Parser {
 
+    @DocumentedOption(description = "API Specification File")
     public String specFile;
     public String targetProperty = "api";
 

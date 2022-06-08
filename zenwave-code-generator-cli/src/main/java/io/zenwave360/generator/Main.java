@@ -11,7 +11,7 @@ import java.util.concurrent.Callable;
 /**
  * @author ivangsa
  */
-public class Main implements Callable<Void> {
+public class Main implements Callable<Integer> {
 
     @Option(names = {"-h", "--help"}, usageHelp = true, description = "display this help message")
     boolean help;
@@ -22,18 +22,19 @@ public class Main implements Callable<Void> {
     @Option(names = {"-c", "--chain"}, split = ",", description = "Comma separated chain of parsers,processors,generators,writters to be used")
     Class[] chain;
 
-//    @Option(names = {"-o", "--options"})
     @CommandLine.Parameters
     Map<String, Object> options = new HashMap<>();
 
     public static void main(String... args) {
         CommandLine cmd = new CommandLine(new Main());
         int returnCode = cmd.execute(args);
-//        System.exit(returnCode);
+        if(returnCode != 0) {
+            System.exit(returnCode);
+        }
     }
 
     @Override
-    public Void call() throws Exception {
+    public Integer call() throws Exception {
         Configuration configuration = createConfiguration(this.preset)
                 .withSpecFile((String) options.get("specFile"))
                 .withTargetFolder((String) options.get("targetFolder"))
@@ -41,7 +42,7 @@ public class Main implements Callable<Void> {
                 .withChain(chain);
 
         new Generator(configuration).generate();
-        return null;
+        return 0;
     }
 
     protected Configuration createConfiguration(String preset) throws Exception {

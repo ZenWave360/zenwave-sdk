@@ -1,4 +1,4 @@
-package io.zenwave360.generator.plugins;
+package io.zenwave360.generator;
 
 import io.zenwave360.generator.templating.TemplateOutput;
 

@@ -1,5 +1,6 @@
 package io.zenwave360.generator.writers;
 
+import io.zenwave360.generator.DocumentedOption;
 import io.zenwave360.generator.templating.TemplateOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ public class TemplateFileWriter implements TemplateWriter {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
+    @DocumentedOption(description = "Target folder to generate code to. If left empty, it will print to stdout.")
     private File targetFolder;
 
     public TemplateFileWriter withTargetFolder(File targetFolder) {
@@ -30,7 +32,7 @@ public class TemplateFileWriter implements TemplateWriter {
     @Override
     public void write(List<TemplateOutput> templateOutputList) {
         templateOutputList.stream()
-                .peek(t -> log.debug("Writting template to file: {}", t.getTargetFile()))
+                .peek(t -> log.debug("Writing template with targetFile: {}", t.getTargetFile()))
                 .forEach(t -> writeToFile(getFile(t.getTargetFile()), t.getContent()));
     }
 
@@ -39,7 +41,7 @@ public class TemplateFileWriter implements TemplateWriter {
     }
 
     protected void writeToFile(File file, String contents) {
-        log.debug("Writting template output to file: {}", file);
+        log.trace("Writing template output to file: {}", file);
         try {
             file.getParentFile().mkdirs();
             Files.writeString(Paths.get(file.toURI()),

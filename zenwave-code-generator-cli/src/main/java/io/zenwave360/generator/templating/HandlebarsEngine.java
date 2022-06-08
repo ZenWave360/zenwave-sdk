@@ -2,13 +2,9 @@ package io.zenwave360.generator.templating;
 
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Helper;
-import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
 import com.github.jknack.handlebars.helper.StringHelpers;
-import io.zenwave360.generator.plugins.GeneratorPlugin;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,7 +52,8 @@ public class HandlebarsEngine implements TemplateEngine {
             if(templateInput.getSkip() == null || !templateInput.getSkip().get()) {
                 try {
                     String targetFile = handlebars.compileInline(templateInput.getTargetFile()).apply(context);
-                    String content = handlebars.compile(templateInput.getTemplateLocation()).apply(context);
+                    String templateLocation = handlebars.compileInline(templateInput.getTemplateLocation()).apply(context);
+                    String content = handlebars.compile(templateLocation).apply(context);
                     templateOutputList.add(new TemplateOutput(targetFile, content, templateInput.getMimeType()));
                 } catch (IOException e) {
                     throw new RuntimeException(e);

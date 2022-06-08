@@ -2,7 +2,6 @@ package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.DocumentedOption;
 import io.zenwave360.generator.parsers.Model;
-import io.zenwave360.generator.processors.utils.StringInterpolator;
 import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.TemplateEngine;
 import io.zenwave360.generator.templating.TemplateInput;
@@ -25,6 +24,12 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     @DocumentedOption(description = "Programming style: IMPERATIVE\\|REACTIVE")
     public ProgrammingStyle style = ProgrammingStyle.IMPERATIVE;
 
+    @DocumentedOption(description = "Whether to expose underlying spring Message to consumers or not. Default: false")
+    public boolean exposeMessage = false;
+
+    public String consumerSuffix = "Consumer";
+    public String serviceSuffix = "Service";
+
     public SpringCloudStreams3Generator withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;
         return this;
@@ -33,15 +38,15 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
     private List<TemplateInput> producerTemplates = Arrays.asList(
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/common/Header", "${apiPackageFolder}/Header.java"),
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/producer/IProducer", "${apiPackageFolder}/I${apiClassName}.java"),
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/producer/Producer", "${apiPackageFolder}/${apiClassName}.java"));
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/common/Header.java", "{{apiPackageFolder}}/Header.java"),
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/producer/IProducer.java", "{{apiPackageFolder}}/I{{apiClassName}}.java"),
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/producer/Producer.java", "{{apiPackageFolder}}/{{apiClassName}}.java"));
     private List<TemplateInput> consumerReactiveTemplates = Arrays.asList(
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/reactive/IConsumer", "${apiPackageFolder}/I${operation.x--operationIdCamelCase}.java"),
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/reactive/Consumer", "${apiPackageFolder}/${operation.x--operationIdCamelCase}.java"));
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/reactive/Consumer.java", "{{apiPackageFolder}}/{{operation.x--operationIdCamelCase}}{{consumerSuffix}}.java"),
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/reactive/Service.java", "{{apiPackageFolder}}/{{operation.x--operationIdCamelCase}}{{serviceSuffix}}.java"));
     private List<TemplateInput> consumerImperativeTemplates = Arrays.asList(
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/imperative/IConsumer", "${apiPackageFolder}/I${operation.x--operationIdCamelCase}.java"),
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/imperative/Consumer", "${apiPackageFolder}/${operation.x--operationIdCamelCase}.java"));
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/imperative/Consumer.java", "{{apiPackageFolder}}/{{operation.x--operationIdCamelCase}}{{consumerSuffix}}.java"),
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/imperative/Service.java", "{{apiPackageFolder}}/{{operation.x--operationIdCamelCase}}{{serviceSuffix}}.java"));
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;
@@ -97,33 +102,25 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
     public List<TemplateOutput> generateTemplateOutput(Map<String, ?> contextModel, List<TemplateInput> templates, String serviceName, Map<String, Object> operation, OperationRoleType operationRoleType) {
         Map<String, Object> model = new HashMap<>();
-        model.put("generator", asConfigurationMap());
+        model.putAll(asConfigurationMap());
         model.put("context", contextModel);
         model.put("asyncapi", getApiModel(contextModel));
         model.put("serviceName", serviceName);
         model.put("operation", operation);
         model.put("apiPackageFolder", getApiPackageFolder());
         model.put("apiClassName", getApiClassName(serviceName, operationRoleType));
-        return getTemplateEngine().processTemplates(model, processTemplateFilenames(model, templates));
+        return getTemplateEngine().processTemplates(model, templates);
     }
 
     public List<TemplateOutput> generateTemplateOutput(Map<String, ?> contextModel, List<TemplateInput> templates, String serviceName, List<Map<String, Object>> operations, OperationRoleType operationRoleType) {
         Map<String, Object> model = new HashMap<>();
-        model.put("generator", asConfigurationMap());
+        model.putAll(asConfigurationMap());
         model.put("context", contextModel);
         model.put("asyncapi", getApiModel(contextModel));
         model.put("serviceName", serviceName);
         model.put("operations", operations);
         model.put("apiPackageFolder", getApiPackageFolder());
         model.put("apiClassName", getApiClassName(serviceName, operationRoleType));
-        return getTemplateEngine().processTemplates(model, processTemplateFilenames(model, templates));
-    }
-
-    public List<TemplateInput> processTemplateFilenames(Map<String, Object> model, List<TemplateInput> templateInputs) {
-        return templateInputs.stream().map(t -> new TemplateInput(t).withTemplateLocation(interpolate(t.getTemplateLocation(), model)).withTargetFile(interpolate(t.getTargetFile(), model))).collect(Collectors.toList());
-    }
-
-    public String interpolate(String template, Map<String, Object> model) {
-        return StringInterpolator.interpolate(template, model);
+        return getTemplateEngine().processTemplates(model, templates);
     }
 }

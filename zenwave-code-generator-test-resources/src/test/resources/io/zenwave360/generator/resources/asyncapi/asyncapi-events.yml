@@ -22,7 +22,7 @@ channels:
       message:
         oneOf:
           - $ref: "#/components/messages/createProductMsg"
-          - $ref: "#/components/messages/createProductMsg"
+          - $ref: "#/components/messages/createProductMsg2"
       bindings:
         kafka:
           bindingVersion: "latest"
@@ -47,12 +47,40 @@ components:
               - BLINK
           brandId:
             type: number
-            description: "Brand ID according masters, eg: 14 Zara Home, 18 Uterque, 1 Zara..."
+            description: ""
       payload:
         $ref: "#/components/schemas/CreateProductPayload"
-
+    createProductMsg2:
+      name: createProductMsg2
+      title: Create product message 2
+      summary: Requred info to create a product in a marketplace
+      contentType: application/json
+      headers:
+        properties:
+          messageType:
+            type: string
+            enum:
+              - create-product
+          destinationSystem:
+            type: string
+            enum:
+              - MPS
+              - BLINK
+          brandId:
+            type: number
+            description: ""
+      payload:
+        $ref: "#/components/schemas/CreateProductPayload2"
   schemas:
     CreateProductPayload:
+      type: object
+      properties:
+        storeId:
+          type: integer
+          format: int64
+        product:
+          $ref: "#/components/schemas/ProductLocaleMsg"
+    CreateProductPayload2:
       type: object
       properties:
         storeId:

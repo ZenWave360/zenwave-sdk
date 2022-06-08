@@ -1,13 +1,13 @@
-package {{generator.apiPackage}};
+package {{apiPackage}};
 
-{{#if generator.modelPackage}}
-import {{generator.modelPackage}}.*;
+{{#if modelPackage}}
+import {{modelPackage}}.*;
 {{/if}}
 
 /**
 * {{asyncapi.description}}
 */
-public interface I{{operation.x--operationIdCamelCase}} {
+public interface {{operation.x--operationIdCamelCase}}{{serviceSuffix}} {
 
 {{#each operation.x--messages as |message|}}
     /**

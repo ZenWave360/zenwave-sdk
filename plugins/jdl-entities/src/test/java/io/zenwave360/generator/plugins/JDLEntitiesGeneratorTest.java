@@ -25,12 +25,12 @@ public class JDLEntitiesGeneratorTest {
 
         List<TemplateOutput> outputTemplates = generator.generate(model);
 
-        outputTemplates = new JavaFormatter().format(outputTemplates);
 
         for (TemplateOutput outputTemplate : outputTemplates) {
             System.out.println(" ----------- " + outputTemplate.getTargetFile());
             System.out.println(outputTemplate.getContent());
         }
+        outputTemplates = new JavaFormatter().format(outputTemplates);
     }
 
 }

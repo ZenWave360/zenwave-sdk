@@ -1,5 +1,6 @@
 package io.zenwave360.generator.plugins;
 
+import io.zenwave360.generator.GeneratorPlugin;
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.parsers.Model;
 import io.zenwave360.generator.processors.AsyncApiProcessor;

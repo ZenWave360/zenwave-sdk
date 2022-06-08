@@ -1,6 +1,5 @@
 package io.zenwave360.generator;
 
-import io.zenwave360.generator.plugins.GeneratorPlugin;
 import io.zenwave360.generator.templating.TemplateOutput;
 
 import java.util.List;
