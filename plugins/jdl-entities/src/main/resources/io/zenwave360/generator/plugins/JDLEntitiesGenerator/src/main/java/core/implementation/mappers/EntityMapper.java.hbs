@@ -1,0 +1,12 @@
+package {{basePackage}}.core.implementation.mappers;
+
+import {{basePackage}}.core.domain.*;
+import {{basePackage}}.core.inbound.dtos.*;
+
+import org.mapstruct.Mapper;
+
+@Mapper()
+public interface {{entity.className}}Mapper {
+
+    {{entity.className}} asEntity({{entity.className}}Input input);
+}
