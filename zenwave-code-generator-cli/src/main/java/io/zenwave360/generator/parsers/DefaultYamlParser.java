@@ -10,6 +10,8 @@ import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static io.zenwave360.jsonrefparser.$RefParserOptions.OnCircular.SKIP;
+
 public class DefaultYamlParser implements io.zenwave360.generator.parsers.Parser {
 
     @DocumentedOption(description = "API Specification File")
@@ -40,9 +42,9 @@ public class DefaultYamlParser implements io.zenwave360.generator.parsers.Parser
     @Override
     public Map<String, Object> parse() throws IOException {
         File file = findSpecFile(specFile);
-        $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions($RefParserOptions.OnCircular.SKIP));
+        $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions().withOnCircular(SKIP));
         Map model = new LinkedHashMap<>();
-        model.put(targetProperty, new Model(file, parser.dereference().getRefs()));
+        model.put(targetProperty, new Model(file, parser.parse().dereference().getRefs()));
         return model;
     }
 }

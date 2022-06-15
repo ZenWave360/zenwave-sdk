@@ -7,10 +7,10 @@ import io.zenwave360.generator.GeneratorPlugin;
 public abstract class AbstractJDLGenerator implements GeneratorPlugin {
 
     @DocumentedOption(description = "Java Models package name")
-    public String domainModelPackage = "io.example.domain.model";
+    public String basePackage = "io.example.domain.model";
 
-    public String getDomainModelPackageFolder() {
-        return this.domainModelPackage.replaceAll("\\.", "/");
+    public String getBasePackageFolder() {
+        return this.basePackage.replaceAll("\\.", "/");
     }
 
 }

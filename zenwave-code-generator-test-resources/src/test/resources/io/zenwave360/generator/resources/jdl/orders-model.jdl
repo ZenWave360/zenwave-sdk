@@ -41,3 +41,6 @@ relationship ManyToOne {
 relationship ManyToMany {
 	CustomerOrder{orderedItems(name)} to OrderedItem{customerOrders(username)}
 }
+
+service Customer with CustomerUseCases
+service CustomerOrder,PaymentDetails,ShippingDetails with CustomerOrderUseCases

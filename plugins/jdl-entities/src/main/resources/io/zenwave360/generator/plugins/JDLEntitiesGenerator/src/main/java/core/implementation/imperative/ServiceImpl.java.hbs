@@ -1,0 +1,76 @@
+package {{basePackage}}.core.implementation;
+
+import {{basePackage}}.core.domain.*;
+import {{basePackage}}.core.inbound.*;
+import {{basePackage}}.core.inbound.dtos.*;
+import {{basePackage}}.core.outbound.mongodb.*;
+import {{basePackage}}.core.outbound.search.*;
+
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+/**
+ * Service Implementation for managing {{service.entityNames}}.
+ */
+@Service
+public class {{service.name}}Impl implements {{service.name}} {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
+{{#each entities as |entity|}}
+    private final {{entity.className}}Repository {{entity.instanceName}}Repository;
+    private final {{entity.className}}Mapper {{entity.instanceName}}Mapper;
+{{/each}}
+
+    /**
+     * Constructor.
+     */
+    public {{service.name}}Impl({{#joinWithTemplate service.entities ", "}}{{className}}Repository {{instanceName}}Repository{{/joinWithTemplate}}) {
+        {{#joinWithTemplate service.entities }}this.{{instanceName}}Repository = {{instanceName}}Repository;{{/joinWithTemplate}}
+    }
+
+{{#each entities as |entity|}}
+    // {{entity.name}}
+
+    @Override
+    public {{entity.className}} save{{entity.className}}({{entity.className}}Input {{entity.instanceName}}Input) {
+        log.debug("Request to save {{entity.className}} : {}", {{entity.instanceName}});
+        var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), {{entity.instanceName}}Input);
+        return {{entity.instanceName}}Repository.save({{entity.instanceName}});
+    }
+
+    @Override
+    public {{entity.className}} update{{entity.className}}({{entity.className}}Input {{entity.instanceName}}Input) {
+        log.debug("Request to update {{entity.className}} : {}", {{entity.instanceName}}Input);
+
+        return {{entity.instanceName}}Repository
+                .findById({{entity.instanceName}}.getId())
+                .map(existing{{entity.className}} -> {
+                    return {{entity.instanceName}}Mapper.update(existing{{entity.className}}, {{entity.instanceName}}Input);
+                })
+                .map({{entity.instanceName}}Repository::save);
+    }
+
+    @Override
+    public Page<{{entity.className}}> find{{entity.classNamePlural}}({{entity.className}}Criteria criteria) {
+        log.debug("Request to find {{entity.classNamePlural}}: {}", criteria);
+        return {{entity.instanceName}}Repository.findAll(criteria);
+    }
+
+    @Override
+    public Optional<{{entity.className}}> findOne{{entity.className}}(String id) {
+        log.debug("Request to get {{entity.className}} : {}", id);
+        return {{entity.instanceName}}Repository.findById(id);
+    }
+
+    @Override
+    public void delete{{entity.className}}(String id) {
+        log.debug("Request to delete {{entity.className}} : {}", id);
+        {{entity.instanceName}}Repository.deleteById(id);
+    }
+{{/each}}
+}

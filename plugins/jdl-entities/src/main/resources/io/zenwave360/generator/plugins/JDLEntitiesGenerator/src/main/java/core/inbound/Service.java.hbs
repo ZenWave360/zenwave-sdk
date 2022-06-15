@@ -1,0 +1,56 @@
+package {{basePackage}}.core.inbound;
+
+import {{basePackage}}.core.domain.*;
+import {{basePackage}}.core.inbound.dtos.*;
+import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+/**
+ * Inbound Service Port for managing {{service.entityNames}}.
+ */
+public interface {{service.name}} {
+
+{{#each entities as |entity|}}
+    // {{entity.name}}
+
+    /**
+     * Save a {{entity.instanceName}}.
+     *
+     * @param {{entity.instanceName}} the entity to save.
+     * @return the persisted entity.
+     */
+    {{entity.className}} save{{entity.className}}({{entity.className}}Input {{entity.instanceName}});
+
+    /**
+     * Updates a {{entity.instanceName}}.
+     *
+     * @param {{entity.instanceName}} the entity to update.
+     * @return the persisted entity.
+     */
+    {{entity.className}} update{{entity.className}}({{entity.className}}Input {{entity.instanceName}});
+
+    /**
+     * Get all the {{entity.classNamePlural}}.
+     *
+     * @param criteria the criteria with pagination information.
+     * @return the list of entities.
+     */
+    Page<{{entity.className}}> find{{entity.classNamePlural}}({{entity.className}}Criteria criteria);
+
+    /**
+     * Get the "id" {{entity.instanceName}}.
+     *
+     * @param id the id of the entity.
+     * @return the entity.
+     */
+    Optional<{{entity.className}}> findOne{{entity.className}}(String id);
+
+    /**
+     * Delete the "id" {{entity.instanceName}}.
+     *
+     * @param id the id of the entity.
+     */
+    void delete{{entity.className}}(String id);
+{{/each}}
+}

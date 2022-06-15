@@ -12,7 +12,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Entity
 @Table(name = "{{entity.tableName}}")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class {{capitalize entity.name}} implements Serializable {
+public class {{entity.className}} implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

@@ -60,12 +60,14 @@
         <slf4j-api.version>1.7.36</slf4j-api.version>
         <picocli.version>4.6.3</picocli.version>
         <handlebars-java.version>4.3.0</handlebars-java.version>
-        <json-schema-ref-parser-jvm.version>0.0.4</json-schema-ref-parser-jvm.version>
-        <jdl-jvm.version>0.0.3</jdl-jvm.version>
+        <json-schema-ref-parser-jvm.version>0.5.0</json-schema-ref-parser-jvm.version>
+        <jdl-jvm.version>0.5.0-SNAPSHOT</jdl-jvm.version>
         <google-java-format.version>1.7</google-java-format.version>
         <junit.version>4.13.2</junit.version>
         <spring-boot-dependencies.version>2.6.7</spring-boot-dependencies.version>
         <reflections.version>0.10.2</reflections.version>
+        <junit.version>5.8.2</junit.version>
+        <logcaptor.version>2.7.10</logcaptor.version>
 
         <zenwave-code-generator-test-resources.folder>${pom.basedir}/zenwave-code-generator-test-resources/src/test/resources</zenwave-code-generator-test-resources.folder>
     </properties>
@@ -78,13 +80,13 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.8.2</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.hakky54</groupId>
             <artifactId>logcaptor</artifactId>
-            <version>2.7.10</version>
+            <version>${logcaptor.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

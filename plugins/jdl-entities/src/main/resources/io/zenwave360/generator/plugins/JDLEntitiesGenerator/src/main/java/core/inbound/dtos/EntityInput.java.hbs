@@ -1,0 +1,39 @@
+package {{basePackage}}.core.inbound.dtos;
+
+import {{basePackage}}.core.domain.*;
+import java.io.Serializable;
+import javax.validation.constraints.*;
+
+/**
+ *
+ */
+public class {{entity.className}}Input implements Serializable {
+
+{{#each entity.fields as |field|}}
+    {{#each field.validations as |validation|}}
+    // @{{validation.name}}("{{validation.value}}")
+    {{/each}}
+    {{#assign "typeSuffix"}}{{#if field.isEntity}}Input{{/if}}{{/assign}}
+    private {{field.type}}{{typeSuffix}} {{field.name}};
+{{/each}}
+
+{{#each entity.fields as |field|}}
+    {{#assign "typeSuffix"}}{{#if field.isEntity}}Input{{/if}}{{/assign}}
+    public {{entity.className}}Input with{{capitalize field.name}}({{field.type}}{{typeSuffix}} {{field.name}}) {
+        this.{{field.name}} = {{field.name}};
+        return this;
+    }
+{{/each}}
+
+{{#each entity.fields as |field|}}
+// is entity {{field.isEntity}}
+    {{#assign "typeSuffix"}}{{#if field.isEntity}}Input{{/if}}{{/assign}}
+    public {{field.type}}{{typeSuffix}} get{{capitalize field.name}}() {
+        return {{field.name}};
+    }
+
+    public void set{{capitalize field.name}}({{field.type}}{{typeSuffix}} {{field.name}}) {
+        this.{{field.name}} = {{field.name}};
+    }
+{{/each}}
+}

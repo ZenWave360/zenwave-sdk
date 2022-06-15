@@ -1,4 +1,4 @@
-package {{domainModelPackage}};
+package {{basePackage}}.core.domain;
 
 import java.io.Serializable;
 import javax.validation.constraints.*;
@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 * {{entity.comment}}
 */
 @Document(collection = "{{entity.tableName}}")
-public class {{capitalize entity.name}} implements Serializable {
+public class {{entity.className}} implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -20,13 +20,13 @@ public class {{capitalize entity.name}} implements Serializable {
 {{#each entity.fields as |field|}}
     @Field
     {{#each field.validations as |validation|}}
-        @{{validation.name}}({{validation.value}})
+        // @{{validation.name}}("{{validation.value}}")
     {{/each}}
     private {{field.type}} {{field.name}};
 {{/each}}
 
 {{#each entity.fields as |field|}}
-    public {{entity.name}} with{{capitalize field.name}}({{field.type}} {{field.name}}) {
+    public {{entity.className}} with{{capitalize field.name}}({{field.type}} {{field.name}}) {
     this.{{field.name}} = {{field.name}};
     return this;
     }

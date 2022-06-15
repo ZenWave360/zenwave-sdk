@@ -42,6 +42,7 @@ public class HandlebarsEngine implements TemplateEngine {
 
     @Override
     public List<TemplateOutput> processTemplates(String modelPrefix, Map<String, Object> apiModel, List<TemplateInput> templateInputs) {
+        Context context = Context.newBuilder(this.context).build();
         if(modelPrefix != null) {
             context.combine(modelPrefix, apiModel);
         } else {

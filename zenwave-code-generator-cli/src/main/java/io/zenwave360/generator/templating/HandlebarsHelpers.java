@@ -4,8 +4,11 @@ import com.github.jknack.handlebars.Options;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HandlebarsHelpers {
 
@@ -35,4 +38,14 @@ public class HandlebarsHelpers {
         return StringUtils.capitalize(text);
     }
 
+    public static String joinWithTemplate(List<Object> context, Options options) throws IOException {
+        String delimiter = options.params.length > 0? options.params[0].toString() : "\n";
+        return context.stream().map(token -> {
+            try {
+                return options.apply(options.fn, token);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.joining(delimiter));
+    }
 }

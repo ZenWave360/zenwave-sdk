@@ -9,6 +9,9 @@ public class TemplateInput {
     private String mimeType;
     private Supplier<Boolean> skip;
 
+    public TemplateInput() {
+    }
+
     public TemplateInput(String templateLocation, String targetFile) {
         this.templateLocation = templateLocation;
         this.targetFile = targetFile;
