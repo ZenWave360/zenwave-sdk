@@ -5,7 +5,9 @@ import {{basePackage}}.core.inbound.*;
 import {{basePackage}}.core.inbound.dtos.*;
 import {{basePackage}}.core.implementation.mappers.*;
 import {{basePackage}}.core.outbound.mongodb.*;
+{{#if jdl.options.options.search}}
 import {{basePackage}}.core.outbound.search.*;
+{{/if}}
 
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -25,15 +27,19 @@ public class {{service.name}}Impl implements {{service.name}} {
 {{#each entities as |entity|}}
     private final {{entity.className}}Mapper {{entity.instanceName}}Mapper;
     private final {{entity.className}}Repository {{entity.instanceName}}Repository;
+    {{~#if options.search}}
+    private final {{entity.className}}SearchRepository {{entity.instanceName}}SearchRepository;
+    {{~/if}}
 {{/each}}
 
     /**
      * Constructor.
      */
-    public {{service.name}}Impl({{#joinWithTemplate service.entities ", "}}{{className}}Mapper {{instanceName}}Mapper, {{className}}Repository {{instanceName}}Repository{{/joinWithTemplate}}) {
+    public {{service.name}}Impl({{#joinWithTemplate service.entities ", "}}{{className}}Mapper {{instanceName}}Mapper, {{className}}Repository {{instanceName}}Repository{{#if options.search}}, {{className}}SearchRepository {{instanceName}}SearchRepository{{/if}}{{/joinWithTemplate}}) {
         {{~#joinWithTemplate service.entities ~}}
             this.{{instanceName}}Mapper = {{instanceName}}Mapper;
             this.{{instanceName}}Repository = {{instanceName}}Repository;
+            {{#if options.search}}this.{{instanceName}}SearchRepository = {{instanceName}}SearchRepository;{{/if}}
         {{~/joinWithTemplate~}}
     }
 
@@ -41,26 +47,27 @@ public class {{service.name}}Impl implements {{service.name}} {
     // {{entity.name}}
 
     @Override
-    public {{entity.className}} save{{entity.className}}({{entity.className}}Input {{entity.instanceName}}Input) {
-        log.debug("Request to save {{entity.className}}Input : {}", {{entity.instanceName}}Input);
-        var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), {{entity.instanceName}}Input);
+    public {{entity.className}} save{{entity.className}}({{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
+        log.debug("Request to save {{entity.className}}{{inputDTOSuffix}} : {}", {{entity.instanceName}}{{inputDTOSuffix}});
+        var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), {{entity.instanceName}}{{inputDTOSuffix}});
         return {{entity.instanceName}}Repository.save({{entity.instanceName}});
     }
 
     @Override
-    public Optional<{{entity.className}}> update{{entity.className}}({{entity.className}}Input {{entity.instanceName}}Input) {
-        log.debug("Request to update {{entity.className}} : {}", {{entity.instanceName}}Input);
+    public Optional<{{entity.className}}> update{{entity.className}}({{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
+        log.debug("Request to update {{entity.className}} : {}", {{entity.instanceName}}{{inputDTOSuffix}});
 
         return {{entity.instanceName}}Repository
-                .findById({{entity.instanceName}}Input.getId())
+                .findById({{entity.instanceName}}{{inputDTOSuffix}}.getId())
                 .map(existing{{entity.className}} -> {
-                    return {{entity.instanceName}}Mapper.update(existing{{entity.className}}, {{entity.instanceName}}Input);
+                    return {{entity.instanceName}}Mapper.update(existing{{entity.className}}, {{entity.instanceName}}{{inputDTOSuffix}});
                 })
                 .map({{entity.instanceName}}Repository::save);
     }
 
     @Override
-    public Page<{{entity.className}}> find{{entity.classNamePlural}}(Pageable criteria) {
+    {{~#assign "criteria"}}{{#if entity.options.withSearchCriteria}}{{entity.className}}{{criteriaDTOSuffix}}{{else}}Pageable{{/if}}{{/assign}}
+    public Page<{{entity.className}}> find{{entity.classNamePlural}}({{criteria}} criteria) {
         log.debug("Request to find {{entity.classNamePlural}}: {}", criteria);
         return {{entity.instanceName}}Repository.findAll(criteria);
     }

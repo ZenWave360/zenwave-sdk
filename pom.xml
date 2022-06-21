@@ -61,7 +61,7 @@
         <picocli.version>4.6.3</picocli.version>
         <handlebars-java.version>4.3.0</handlebars-java.version>
         <json-schema-ref-parser-jvm.version>0.5.0</json-schema-ref-parser-jvm.version>
-        <jdl-jvm.version>0.5.2-SNAPSHOT</jdl-jvm.version>
+        <jdl-jvm.version>0.5.2</jdl-jvm.version>
         <google-java-format.version>1.7</google-java-format.version>
         <junit.version>4.13.2</junit.version>
         <spring-boot-dependencies.version>2.6.7</spring-boot-dependencies.version>

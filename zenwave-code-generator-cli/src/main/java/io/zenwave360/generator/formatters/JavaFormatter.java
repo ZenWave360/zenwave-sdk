@@ -36,6 +36,10 @@ public class JavaFormatter implements Formatter {
     }
 
     public String getLine(String content, int line) {
-        return content.split("\\r?\\n")[line];
+        try {
+            return content.split("\\r?\\n")[line];
+        } catch (Exception e) {
+            return "";
+        }
     }
 }

@@ -47,8 +47,8 @@ public class {{entity.className}}Resource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/{{entity.kebabCasePlural}}")
-    public ResponseEntity<{{entity.className}}> create{{entity.className}}(@Valid @RequestBody {{entity.className}}Input {{entity.instanceName}}) throws URISyntaxException {
-        log.debug("REST request to save {{entity.className}}Input : {}", {{entity.instanceName}});
+    public ResponseEntity<{{entity.className}}> create{{entity.className}}(@Valid @RequestBody {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}) throws URISyntaxException {
+        log.debug("REST request to save {{entity.className}}{{inputDTOSuffix}} : {}", {{entity.instanceName}});
         {{entity.className}} result = {{serviceInstance}}.save{{entity.className}}({{entity.instanceName}});
         return ResponseEntity
                 .created(new URI("/api/{{entity.kebabCase}}s/" + result.getId()))
@@ -66,7 +66,7 @@ public class {{entity.className}}Resource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{{entity.kebabCasePlural}}/{id}")
-    public ResponseEntity<{{entity.className}}> update{{entity.className}}(@PathVariable(value = "id", required = false) final String id, @Valid @RequestBody {{entity.className}}Input {{entity.instanceName}})
+    public ResponseEntity<{{entity.className}}> update{{entity.className}}(@PathVariable(value = "id", required = false) final String id, @Valid @RequestBody {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}})
             throws URISyntaxException {
         log.debug("REST request to update {{entity.className}} : {}, {}", id, {{entity.instanceName}});
         Optional<{{entity.className}}> result = {{serviceInstance}}.update{{entity.className}}({{entity.instanceName}});

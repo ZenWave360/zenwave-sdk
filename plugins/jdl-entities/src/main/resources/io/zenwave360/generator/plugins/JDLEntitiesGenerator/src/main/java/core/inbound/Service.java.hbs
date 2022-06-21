@@ -20,7 +20,7 @@ public interface {{service.name}} {
      * @param {{entity.instanceName}} the entity to save.
      * @return the persisted entity.
      */
-    {{entity.className}} save{{entity.className}}({{entity.className}}Input {{entity.instanceName}});
+    {{entity.className}} save{{entity.className}}({{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}});
 
     /**
      * Updates a {{entity.instanceName}}.
@@ -28,7 +28,7 @@ public interface {{service.name}} {
      * @param {{entity.instanceName}} the entity to update.
      * @return the persisted entity.
      */
-    Optional<{{entity.className}}> update{{entity.className}}({{entity.className}}Input {{entity.instanceName}});
+    Optional<{{entity.className}}> update{{entity.className}}({{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}});
 
     /**
      * Get all the {{entity.classNamePlural}}.
@@ -36,7 +36,8 @@ public interface {{service.name}} {
      * @param criteria the criteria with pagination information.
      * @return the list of entities.
      */
-    Page<{{entity.className}}> find{{entity.classNamePlural}}(Pageable pageable);
+    {{~#assign "criteria"}}{{#if entity.options.withSearchCriteria}}{{entity.className}}{{criteriaDTOSuffix}}{{else}}Pageable{{/if}}{{/assign}}
+    Page<{{entity.className}}> find{{entity.classNamePlural}}({{criteria}} criteria);
 
     /**
      * Get the "id" {{entity.instanceName}}.

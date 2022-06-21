@@ -1,0 +1,45 @@
+package {{basePackage}}.core.outbound.search;
+
+// import {{basePackage}}.core.domain.*;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
+
+/**
+ * Spring Data Elasticsearch repository for the {@link {{entity.className}}{{searchDTOSuffix}} } entity.
+ */
+public interface {{entity.className}}SearchRepository extends ElasticsearchRepository<{{entity.className}}{{searchDTOSuffix}}, String>, {{entity.className}}SearchRepositoryInternal {}
+
+interface {{entity.className}}SearchRepositoryInternal {
+    Page<{{entity.className}}{{searchDTOSuffix}}> search(String query, Pageable pageable);
+}
+
+class {{entity.className}}SearchRepositoryInternalImpl implements {{entity.className}}SearchRepositoryInternal {
+
+    private final ElasticsearchRestTemplate elasticsearchTemplate;
+
+    {{entity.className}}SearchRepositoryInternalImpl(ElasticsearchRestTemplate elasticsearchTemplate) {
+        this.elasticsearchTemplate = elasticsearchTemplate;
+    }
+
+    @Override
+    public Page<{{entity.className}}{{searchDTOSuffix}}> search(String query, Pageable pageable) {
+        NativeSearchQuery nativeSearchQuery = new NativeSearchQuery(queryStringQuery(query));
+        nativeSearchQuery.setPageable(pageable);
+        List<{{entity.className}}{{searchDTOSuffix}}> hits = elasticsearchTemplate
+            .search(nativeSearchQuery, {{entity.className}}{{searchDTOSuffix}}.class)
+            .map(SearchHit::getContent)
+            .stream()
+            .collect(Collectors.toList());
+
+        return new PageImpl<>(hits, pageable, hits.size());
+    }
+}

@@ -39,6 +39,15 @@ public class JDLEntitiesGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "ProgrammingStyle imperative|reactive default: imperative")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
 
+    @DocumentedOption(description = "Suffix for CRUD operations DTOs (default: Input)")
+    public String inputDTOSuffix = "Input";
+
+    @DocumentedOption(description = "Suffix for search criteria DTOs (default: Criteria)")
+    public String criteriaDTOSuffix = "Criteria";
+
+    @DocumentedOption(description = "Suffix for elasticsearch document entities (default: Document)")
+    public String searchDTOSuffix = "Document";
+
     public JDLEntitiesGenerator withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;
         return this;
@@ -51,15 +60,18 @@ public class JDLEntitiesGenerator extends AbstractJDLGenerator {
     Object[] enumTemplate = { "src/main/java", "core/domain/common/Enum.java", "core/domain/{{enum.name}}.java", JAVA};
 
     Function<Map<String,?>, Boolean> skipEntityResource = (model) -> JSONPath.get(model, "$.entity.options.service") == null;
+    Function<Map<String,?>, Boolean> skipSearchCriteria = (model) -> JSONPath.get(model, "$.entity.options.withSearchCriteria") == null;
+
+    Function<Map<String,?>, Boolean> skipElasticSearch = (model) -> JSONPath.get(model, "$.entity.options.search") == null;
     List<Object[]> templatesByEntity = List.of(
             new Object[] { "src/main/java", "core/domain/{{persistence}}/Entity.java", "core/domain/{{entity.name}}.java", JAVA},
-            new Object[] { "src/main/java", "core/outbound/{{persistence}}/{{style}}/EntityRepository.java", "core/outbound/{{persistence}}/{{entity.name}}Repository.java", JAVA },
-            new Object[] { "src/main/java", "core/inbound/dtos/EntityCriteria.java", "core/inbound/dtos/{{entity.name}}Criteria.java", JAVA },
-            new Object[] { "src/main/java", "core/inbound/dtos/EntityInput.java", "core/inbound/dtos/{{entity.name}}Input.java", JAVA },
-            new Object[] { "src/main/java", "core/implementation/mappers/EntityMapper.java", "core/implementation/mappers/{{entity.name}}Mapper.java", JAVA },
-            new Object[] { "src/main/java", "adapters/web/{{webFlavor}}/EntityResource.java", "adapters/web/{{entity.name}}Resource.java", JAVA, skipEntityResource },
-            new Object[] { "src/main/java", "core/outbound/search/EntityDocument.java", "core/outbound/search/{{entity.name}}Document.java", JAVA },
-            new Object[] { "src/main/java", "core/outbound/search/EntitySearchRepository.java", "core/outbound/search/{{entity.name}}SearchRepository.java", JAVA }
+            new Object[] { "src/main/java", "core/outbound/{{persistence}}/{{style}}/EntityRepository.java", "core/outbound/{{persistence}}/{{entity.className}}Repository.java", JAVA },
+            new Object[] { "src/main/java", "core/inbound/dtos/EntityCriteria.java", "core/inbound/dtos/{{entity.className}}{{criteriaDTOSuffix}}.java", JAVA, skipSearchCriteria },
+            new Object[] { "src/main/java", "core/inbound/dtos/EntityInput.java", "core/inbound/dtos/{{entity.className}}{{inputDTOSuffix}}.java", JAVA },
+            new Object[] { "src/main/java", "core/implementation/mappers/EntityMapper.java", "core/implementation/mappers/{{entity.className}}Mapper.java", JAVA },
+            new Object[] { "src/main/java", "adapters/web/{{webFlavor}}/EntityResource.java", "adapters/web/{{entity.className}}Resource.java", JAVA, skipEntityResource },
+            new Object[] { "src/main/java", "core/outbound/search/EntityDocument.java", "core/outbound/search/{{entity.className}}{{searchDTOSuffix}}.java", JAVA, skipElasticSearch },
+            new Object[] { "src/main/java", "core/outbound/search/EntitySearchRepository.java", "core/outbound/search/{{entity.className}}SearchRepository.java", JAVA, skipElasticSearch }
     );
 
     List<Object[]> templatesByService = List.of(
