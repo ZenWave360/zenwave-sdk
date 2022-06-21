@@ -3,6 +3,7 @@ package {{basePackage}}.core.implementation;
 import {{basePackage}}.core.domain.*;
 import {{basePackage}}.core.inbound.*;
 import {{basePackage}}.core.inbound.dtos.*;
+import {{basePackage}}.core.implementation.mappers.*;
 import {{basePackage}}.core.outbound.mongodb.*;
 import {{basePackage}}.core.outbound.search.*;
 
@@ -22,15 +23,18 @@ public class {{service.name}}Impl implements {{service.name}} {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
 {{#each entities as |entity|}}
-    private final {{entity.className}}Repository {{entity.instanceName}}Repository;
     private final {{entity.className}}Mapper {{entity.instanceName}}Mapper;
+    private final {{entity.className}}Repository {{entity.instanceName}}Repository;
 {{/each}}
 
     /**
      * Constructor.
      */
-    public {{service.name}}Impl({{#joinWithTemplate service.entities ", "}}{{className}}Repository {{instanceName}}Repository{{/joinWithTemplate}}) {
-        {{#joinWithTemplate service.entities }}this.{{instanceName}}Repository = {{instanceName}}Repository;{{/joinWithTemplate}}
+    public {{service.name}}Impl({{#joinWithTemplate service.entities ", "}}{{className}}Mapper {{instanceName}}Mapper, {{className}}Repository {{instanceName}}Repository{{/joinWithTemplate}}) {
+        {{~#joinWithTemplate service.entities ~}}
+            this.{{instanceName}}Mapper = {{instanceName}}Mapper;
+            this.{{instanceName}}Repository = {{instanceName}}Repository;
+        {{~/joinWithTemplate~}}
     }
 
 {{#each entities as |entity|}}
@@ -38,17 +42,17 @@ public class {{service.name}}Impl implements {{service.name}} {
 
     @Override
     public {{entity.className}} save{{entity.className}}({{entity.className}}Input {{entity.instanceName}}Input) {
-        log.debug("Request to save {{entity.className}} : {}", {{entity.instanceName}});
+        log.debug("Request to save {{entity.className}}Input : {}", {{entity.instanceName}}Input);
         var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), {{entity.instanceName}}Input);
         return {{entity.instanceName}}Repository.save({{entity.instanceName}});
     }
 
     @Override
-    public {{entity.className}} update{{entity.className}}({{entity.className}}Input {{entity.instanceName}}Input) {
+    public Optional<{{entity.className}}> update{{entity.className}}({{entity.className}}Input {{entity.instanceName}}Input) {
         log.debug("Request to update {{entity.className}} : {}", {{entity.instanceName}}Input);
 
         return {{entity.instanceName}}Repository
-                .findById({{entity.instanceName}}.getId())
+                .findById({{entity.instanceName}}Input.getId())
                 .map(existing{{entity.className}} -> {
                     return {{entity.instanceName}}Mapper.update(existing{{entity.className}}, {{entity.instanceName}}Input);
                 })
@@ -56,7 +60,7 @@ public class {{service.name}}Impl implements {{service.name}} {
     }
 
     @Override
-    public Page<{{entity.className}}> find{{entity.classNamePlural}}({{entity.className}}Criteria criteria) {
+    public Page<{{entity.className}}> find{{entity.classNamePlural}}(Pageable criteria) {
         log.debug("Request to find {{entity.classNamePlural}}: {}", criteria);
         return {{entity.instanceName}}Repository.findAll(criteria);
     }

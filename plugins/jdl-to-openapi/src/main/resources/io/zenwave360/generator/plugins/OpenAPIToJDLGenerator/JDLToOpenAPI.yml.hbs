@@ -1,0 +1,103 @@
+openapi: 3.0.1
+info:
+  title: Zenwave 360 API
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080/api/
+tags:
+  - name: "Default"
+{{~#each jdlModel.serviceNames as |serviceName|}}
+  - name: "{{asTagName serviceName}}"
+{{~/each}}
+
+paths:
+{{#each jdlModel.entities as |entity|}}
+  {{#unless entity.options.embedded}}
+  /{{entity.kebabCasePlural}}:
+    get:
+      summary: Find {{entity.classNamePlural}}
+      operationId: find{{entity.classNamePlural}}
+      tags: [{{asTagName entity.options.service}}]
+      responses:
+        "200":
+          description: {{entity.classNamePlural}}
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Page"
+                  - type: object
+                    properties:
+                      content:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/{{entity.className}}"
+    post:
+      summary: Create {{entity.className}}
+      operationId: create{{entity.className}}
+      tags: [{{asTagName entity.options.service}}]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/{{entity.className}}"
+      responses:
+        "200":
+          description: {{entity.className}}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/{{entity.className}}"
+    put:
+      summary: Update {{entity.className}}
+      operationId: update{{entity.className}}
+      tags: [{{asTagName entity.options.service}}]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/{{entity.className}}"
+      responses:
+        "201":
+          description: {{entity.className}}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/{{entity.className}}"
+
+  /{{entity.kebabCasePlural}}/{id}:
+    get:
+      summary: Get {{entity.className}} by id
+      operationId: get{{entity.className}}
+      tags: [{{asTagName entity.options.service}}]
+      parameters:
+        - name: id
+          in: path
+          description: {{entity.className}} id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: {{entity.className}}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/{{entity.className}}"
+  {{/unless}}
+{{/each}}
+
+{{{schemasAsString}}}
+    Page:
+      type: object
+      properties:
+        number:
+          type: integer
+        numberOfElements:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer

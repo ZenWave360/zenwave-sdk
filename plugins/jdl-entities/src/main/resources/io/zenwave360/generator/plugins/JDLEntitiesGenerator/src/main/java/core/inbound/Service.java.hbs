@@ -28,7 +28,7 @@ public interface {{service.name}} {
      * @param {{entity.instanceName}} the entity to update.
      * @return the persisted entity.
      */
-    {{entity.className}} update{{entity.className}}({{entity.className}}Input {{entity.instanceName}});
+    Optional<{{entity.className}}> update{{entity.className}}({{entity.className}}Input {{entity.instanceName}});
 
     /**
      * Get all the {{entity.classNamePlural}}.
@@ -36,7 +36,7 @@ public interface {{service.name}} {
      * @param criteria the criteria with pagination information.
      * @return the list of entities.
      */
-    Page<{{entity.className}}> find{{entity.classNamePlural}}({{entity.className}}Criteria criteria);
+    Page<{{entity.className}}> find{{entity.classNamePlural}}(Pageable pageable);
 
     /**
      * Get the "id" {{entity.instanceName}}.

@@ -9,6 +9,21 @@ import javax.validation.constraints.*;
  */
 public class {{entity.className}}Input implements Serializable {
 
+    private String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public {{entity.className}}Input withId(String id) {
+        this.id = id;
+        return this;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
 {{#each entity.fields as |field|}}
     {{#each field.validations as |validation|}}
     // @{{validation.name}}("{{validation.value}}")

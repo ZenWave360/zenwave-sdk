@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface TemplateEngine {
-    TemplateOutput processTemplate(Map<String, Object> model, TemplateInput templateInput);
+    List<TemplateOutput> processTemplate(Map<String, Object> model, TemplateInput templateInput);
 
     List<TemplateOutput> processTemplates(Map<String, Object> model, List<TemplateInput> templateInputs);
 

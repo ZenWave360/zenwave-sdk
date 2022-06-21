@@ -4,13 +4,11 @@ import com.github.jknack.handlebars.Options;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class HandlebarsHelpers {
+public class CustomHandlebarsHelpers {
 
     public static Object size(List list, Options options) throws IOException {
         return list.size();
@@ -22,7 +20,8 @@ public class HandlebarsHelpers {
 
     public static Object assign(final String variableName, final Options options) throws IOException {
         CharSequence finalValue = options.apply(options.fn);
-        ((Map) options.context.model()).put(variableName, finalValue.toString().trim());
+        options.context.combine(Map.of(variableName, finalValue.toString().trim()));
+//        ((Map) options.context.model()).put(variableName, finalValue.toString().trim());
         return null;
     }
 

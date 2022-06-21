@@ -82,7 +82,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
         model.put("openapi", getApiModel(contextModel));
         model.put("includedTestsNames", includedTestsNames);
         model.put("apiPackageFolder", getApiPackageFolder());
-        return getTemplateEngine().processTemplate(model, template);
+        return getTemplateEngine().processTemplate(model, template).get(0);
     }
 
     public TemplateOutput generateTemplateOutput(Map<String, ?> contextModel, TemplateInput template, String serviceName, List<Map<String, Object>> operations) {
@@ -93,6 +93,6 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
         model.put("serviceName", serviceName + "Service");
         model.put("operations", operations);
         model.put("apiPackageFolder", getApiPackageFolder());
-        return getTemplateEngine().processTemplate(model, template);
+        return getTemplateEngine().processTemplate(model, template).get(0);
     }
 }

@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static io.zenwave360.generator.templating.OutputFormatType.JAVA;
@@ -49,12 +50,14 @@ public class JDLEntitiesGenerator extends AbstractJDLGenerator {
 
     Object[] enumTemplate = { "src/main/java", "core/domain/common/Enum.java", "core/domain/{{enum.name}}.java", JAVA};
 
+    Function<Map<String,?>, Boolean> skipEntityResource = (model) -> JSONPath.get(model, "$.entity.options.service") == null;
     List<Object[]> templatesByEntity = List.of(
             new Object[] { "src/main/java", "core/domain/{{persistence}}/Entity.java", "core/domain/{{entity.name}}.java", JAVA},
             new Object[] { "src/main/java", "core/outbound/{{persistence}}/{{style}}/EntityRepository.java", "core/outbound/{{persistence}}/{{entity.name}}Repository.java", JAVA },
             new Object[] { "src/main/java", "core/inbound/dtos/EntityCriteria.java", "core/inbound/dtos/{{entity.name}}Criteria.java", JAVA },
             new Object[] { "src/main/java", "core/inbound/dtos/EntityInput.java", "core/inbound/dtos/{{entity.name}}Input.java", JAVA },
-            new Object[] { "src/main/java", "adapters/web/{{webFlavor}}/EntityResource.java", "adapters/web/{{entity.name}}Resource.java", JAVA },
+            new Object[] { "src/main/java", "core/implementation/mappers/EntityMapper.java", "core/implementation/mappers/{{entity.name}}Mapper.java", JAVA },
+            new Object[] { "src/main/java", "adapters/web/{{webFlavor}}/EntityResource.java", "adapters/web/{{entity.name}}Resource.java", JAVA, skipEntityResource },
             new Object[] { "src/main/java", "core/outbound/search/EntityDocument.java", "core/outbound/search/{{entity.name}}Document.java", JAVA },
             new Object[] { "src/main/java", "core/outbound/search/EntitySearchRepository.java", "core/outbound/search/{{entity.name}}SearchRepository.java", JAVA }
     );
@@ -69,10 +72,12 @@ public class JDLEntitiesGenerator extends AbstractJDLGenerator {
     }
 
     protected TemplateInput asTemplateInput(Object[] templateNames) {
+        Function<Map<String,?>, Boolean> skip = templateNames.length > 4? (Function) templateNames[4] : null;
         return new TemplateInput()
                 .withTemplateLocation(templatesFolder + templateNames[0] + "/" + templateNames[1])
                 .withTargetFile(templateNames[0] + "/{{basePackageFolder}}/" + templateNames[2])
-                .withMimeType((OutputFormatType) templateNames[3]);
+                .withMimeType((OutputFormatType) templateNames[3])
+                .withSkip(skip);
     }
 
     protected Map<String, ?> getJDLModel(Map<String, ?> contextModel) {
@@ -87,13 +92,13 @@ public class JDLEntitiesGenerator extends AbstractJDLGenerator {
         Map<String, Map<String, ?>> entities = (Map) apiModel.get("entities");
         for (Map<String, ?> entity : entities.values()) {
             for (Object[] templateValues : templatesByEntity) {
-                templateOutputList.add(generateTemplateOutput(contextModel, asTemplateInput(templateValues), Map.of("entity",  entity)));
+                templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(templateValues), Map.of("entity",  entity)));
             }
         }
 
         Map<String, Map<String, ?>> enums = JSONPath.get(apiModel, "$.enums.enums");
         for (Map<String, ?> enumValue : enums.values()) {
-            templateOutputList.add(generateTemplateOutput(contextModel, asTemplateInput(enumTemplate), Map.of("enum", enumValue)));
+            templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(enumTemplate), Map.of("enum", enumValue)));
         }
 
         Map<String, Map<String, Object>> services = JSONPath.get(apiModel, "$.options.options.service", Collections.emptyMap());
@@ -103,7 +108,7 @@ public class JDLEntitiesGenerator extends AbstractJDLGenerator {
             List<Map<String, ?>> entitiesByService = getEntitiesByService(service, apiModel);
             service.put("entities", entitiesByService);
             for (Object[] templateValues : templatesByService) {
-                templateOutputList.add(generateTemplateOutput(contextModel, asTemplateInput(templateValues), Map.of("service",  service, "entities", entitiesByService)));
+                templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(templateValues), Map.of("service",  service, "entities", entitiesByService)));
             }
         }
 
@@ -124,7 +129,7 @@ public class JDLEntitiesGenerator extends AbstractJDLGenerator {
         return entitiesByService;
     }
 
-    public TemplateOutput generateTemplateOutput(Map<String, ?> contextModel, TemplateInput template, Map<String, ?> extModel) {
+    public List<TemplateOutput> generateTemplateOutput(Map<String, ?> contextModel, TemplateInput template, Map<String, ?> extModel) {
         Map<String, Object> model = new HashMap<>();
         model.putAll(asConfigurationMap());
         model.put("context", contextModel);
@@ -132,7 +137,7 @@ public class JDLEntitiesGenerator extends AbstractJDLGenerator {
         model.put("basePackageFolder", getBasePackageFolder());
         model.put("webFlavor", style == ProgrammingStyle.imperative? "mvc" : "webflux");
         model.putAll(extModel);
-        return getTemplateEngine().processTemplate(model, template);
+        return getTemplateEngine().processTemplates(model, List.of(template));
     }
 
 }

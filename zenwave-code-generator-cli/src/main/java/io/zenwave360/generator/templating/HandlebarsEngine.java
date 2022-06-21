@@ -23,7 +23,7 @@ public class HandlebarsEngine implements TemplateEngine {
                 .newBuilder(new HashMap<>())
                 .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE)
                 .build();
-        handlebars.registerHelpers(HandlebarsHelpers.class);
+        handlebars.registerHelpers(CustomHandlebarsHelpers.class);
         handlebars.registerHelpers(StringHelpers.class);
     }
 
@@ -32,8 +32,8 @@ public class HandlebarsEngine implements TemplateEngine {
     }
 
     @Override
-    public TemplateOutput processTemplate(Map<String, Object> model, TemplateInput templateInput) {
-        return this.processTemplates(model, Arrays.asList(templateInput)).get(0);
+    public List<TemplateOutput> processTemplate(Map<String, Object> model, TemplateInput templateInput) {
+        return this.processTemplates(model, List.of(templateInput));
     }
     @Override
     public List<TemplateOutput> processTemplates(Map<String, Object> model, List<TemplateInput> templateInputs) {
@@ -50,7 +50,7 @@ public class HandlebarsEngine implements TemplateEngine {
         }
         List<TemplateOutput> templateOutputList = new ArrayList<>();
         templateInputs.forEach(templateInput -> {
-            if(templateInput.getSkip() == null || !templateInput.getSkip().get()) {
+            if(templateInput.getSkip() == null || !Boolean.TRUE.equals(templateInput.getSkip().apply(apiModel))) {
                 try {
                     String targetFile = handlebars.compileInline(templateInput.getTargetFile()).apply(context);
                     String templateLocation = handlebars.compileInline(templateInput.getTemplateLocation()).apply(context);

@@ -1,13 +1,14 @@
 package io.zenwave360.generator.templating;
 
-import java.util.function.Supplier;
+import java.util.Map;
+import java.util.function.Function;
 
 public class TemplateInput {
     private String templateLocation;
     private String targetFile;
 
     private String mimeType;
-    private Supplier<Boolean> skip;
+    private Function<Map<String,?>, Boolean> skip;
 
     public TemplateInput() {
     }
@@ -32,7 +33,7 @@ public class TemplateInput {
         return targetFile;
     }
 
-    public Supplier<Boolean> getSkip() {
+    public Function<Map<String,?>, Boolean> getSkip() {
         return skip;
     }
 
@@ -60,7 +61,7 @@ public class TemplateInput {
         return this;
     }
 
-    public TemplateInput withSkip(Supplier<Boolean> skip) {
+    public TemplateInput withSkip(Function<Map<String, ?>, Boolean> skip) {
         this.skip = skip;
         return this;
     }

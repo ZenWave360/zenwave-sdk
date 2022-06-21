@@ -5,6 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.zenwave360.generator.DocumentedOption;
 import io.zenwave360.generator.processors.utils.JSONPath;
+import io.zenwave360.generator.templating.HandlebarsEngine;
+import io.zenwave360.generator.templating.OutputFormatType;
+import io.zenwave360.generator.templating.TemplateEngine;
+import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
 
 import java.util.ArrayList;
@@ -30,6 +34,10 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
         return this;
     }
 
+    private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
+
+    private final TemplateInput jdlToOpenAPITemplate = new TemplateInput("io/zenwave360/generator/plugins/OpenAPIToJDLGenerator/JDLToOpenAPI.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
+
     protected Map<String, ?> getJDLModel(Map<String, ?> contextModel) {
         return (Map) contextModel.get(sourceProperty);
     }
@@ -37,6 +45,9 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
     @Override
     public List<TemplateOutput> generate(Map<String, ?> contextModel) {
         Map<String, ?> jdlModel = getJDLModel(contextModel);
+        List<String> serviceNames = JSONPath.get(jdlModel, "$.options.options.service[*].value");
+        ((Map) jdlModel).put("serviceNames", serviceNames);
+
         Map<String, Object> oasSchemas = new HashMap<>();
         Map<String, Object> schemas = new HashMap<>();
         JSONPath.set(oasSchemas, "components.schemas", schemas);
@@ -66,8 +77,10 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+        // remove first line
+        openAPISchemasString = openAPISchemasString.substring(openAPISchemasString.indexOf("\n") + 1);
 
-        return List.of(new TemplateOutput(targetFile, openAPISchemasString, "text/yaml"));
+        return List.of(generateTemplateOutput(contextModel, jdlToOpenAPITemplate, jdlModel, openAPISchemasString));
     }
 
     private List blobTypes = List.of("Blob", "AnyBlob", "ImageBlob");
@@ -166,5 +179,24 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
         }
 
         return schema;
+    }
+
+    public TemplateOutput generateTemplateOutput(Map<String, ?> contextModel, TemplateInput template, Map<String, ?> jdlModel, String schemasAsString) {
+        Map<String, Object> model = new HashMap<>();
+        model.putAll(asConfigurationMap());
+        model.put("context", contextModel);
+        model.put("jdlModel", jdlModel);
+        model.put("schemasAsString", schemasAsString);
+        return getTemplateEngine().processTemplate(model, template).get(0);
+    }
+
+    protected TemplateEngine getTemplateEngine() {
+        handlebarsEngine.getHandlebars().registerHelper("asTagName", (context, options) -> {
+            if(context instanceof String) {
+                return ((String) context).replaceAll("(Service|UseCases)", "");
+            }
+            return "Default";
+        });
+        return handlebarsEngine;
     }
 }

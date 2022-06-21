@@ -16,6 +16,18 @@ public class {{entity.className}} implements Serializable {
 
     @Id
     private String id;
+    public String getId() {
+        return id;
+    }
+
+    public {{entity.className}} withId(String id) {
+        this.id = id;
+        return this;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
 {{#each entity.fields as |field|}}
     @Field

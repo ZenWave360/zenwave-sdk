@@ -15,6 +15,8 @@ entity CustomerOrder { // Order is a reserved word
 	date Instant,
 	status OrderStatus
 }
+
+@embedded
 entity OrderedItem {
 	catalogItemId Long,
 	name String required minlength(3) maxlength(250),

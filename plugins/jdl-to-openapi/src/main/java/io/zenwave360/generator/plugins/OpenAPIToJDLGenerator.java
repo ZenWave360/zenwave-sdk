@@ -160,7 +160,7 @@ public class OpenAPIToJDLGenerator extends AbstractJDLGenerator {
         model.putAll(asConfigurationMap());
         model.put("context", contextModel);
         model.put("jdlModel", jdlModel);
-        return getTemplateEngine().processTemplate(model, template);
+        return getTemplateEngine().processTemplate(model, template).get(0);
     }
 
     protected TemplateEngine getTemplateEngine() {
