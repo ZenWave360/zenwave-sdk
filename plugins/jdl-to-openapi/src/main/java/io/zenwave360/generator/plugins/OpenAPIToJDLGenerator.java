@@ -36,7 +36,7 @@ public class OpenAPIToJDLGenerator extends AbstractJDLGenerator {
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
-    private final TemplateInput openAPIToJDLTemplate = new TemplateInput("io/zenwave360/generator/plugins/OpenAPIToJDLGenerator/OpenAPIToJDL.jdl", "{{targetFile}}").withMimeType(OutputFormatType.JAVA);
+    private final TemplateInput openAPIToJDLTemplate = new TemplateInput("io/zenwave360/generator/plugins/OpenAPIToJDLGenerator/OpenAPIToJDL.jdl", "{{targetFile}}").withMimeType(OutputFormatType.JDL);
 
     protected Map<String, ?> getOpenAPIModel(Map<String, ?> contextModel) {
         return (Map) contextModel.get(sourceProperty);

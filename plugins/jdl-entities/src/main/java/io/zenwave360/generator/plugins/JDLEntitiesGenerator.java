@@ -87,7 +87,7 @@ public class JDLEntitiesGenerator extends AbstractJDLGenerator {
         Function<Map<String,?>, Boolean> skip = templateNames.length > 4? (Function) templateNames[4] : null;
         return new TemplateInput()
                 .withTemplateLocation(templatesFolder + templateNames[0] + "/" + templateNames[1])
-                .withTargetFile(templateNames[0] + "/{{basePackageFolder}}/" + templateNames[2])
+                .withTargetFile(templateNames[0] + "/{{asPackageFolder basePackage}}/" + templateNames[2])
                 .withMimeType((OutputFormatType) templateNames[3])
                 .withSkip(skip);
     }
@@ -146,7 +146,6 @@ public class JDLEntitiesGenerator extends AbstractJDLGenerator {
         model.putAll(asConfigurationMap());
         model.put("context", contextModel);
         model.put("jdl", getJDLModel(contextModel));
-        model.put("basePackageFolder", getBasePackageFolder());
         model.put("webFlavor", style == ProgrammingStyle.imperative? "mvc" : "webflux");
         model.putAll(extModel);
         return getTemplateEngine().processTemplates(model, List.of(template));

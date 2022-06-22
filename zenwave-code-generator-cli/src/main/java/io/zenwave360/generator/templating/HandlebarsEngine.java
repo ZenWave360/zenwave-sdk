@@ -8,7 +8,6 @@ import com.github.jknack.handlebars.helper.StringHelpers;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,11 @@ public class HandlebarsEngine implements TemplateEngine {
 
     public Handlebars getHandlebars() {
         return handlebars;
+    }
+
+    @Override
+    public String processInline(String template, Map<String, Object> model) throws IOException {
+       return handlebars.compileInline(template).apply(model);
     }
 
     @Override

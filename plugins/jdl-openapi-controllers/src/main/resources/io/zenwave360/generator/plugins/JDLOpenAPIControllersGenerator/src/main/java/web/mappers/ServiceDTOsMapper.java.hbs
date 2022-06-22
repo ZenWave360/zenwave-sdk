@@ -1,0 +1,22 @@
+package {{controllersPackage}}.mappers;
+
+import {{entitiesPackage}}.*;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+import java.util.List;
+
+@Mapper(componentModel = "spring")
+public interface {{service.name}}DTOsMapper {
+
+{{#each service.dtos as |dto|}}
+    {{~#assign "dtoClassName"}}{{openApiModelPackage}}.{{openApiModelPrefix}}{{dto.dtoName}}{{openApiModelSuffix}}{{/assign}}
+    {{~assign "entity" dto.jdl-entity}}
+    {{dtoClassName}} asDTO({{entity.className}} {{entity.instanceName}});
+    {{entity.className}} asEntity({{dtoClassName}} dto);
+    {{entity.className}} update(@MappingTarget {{entity.className}} {{entity.instanceName}}, {{dtoClassName}} dto);
+    List<{{dtoClassName}}> as{{entity.className}}DTOList(List<{{entity.className}}> {{entity.instanceNamePlural}});
+    List<{{entity.className}}> as{{entity.className}}List(List<{{dtoClassName}}> dtos);
+{{/each}}
+
+}

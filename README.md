@@ -24,16 +24,6 @@ ZenWave Code Generator is a configurable and extensible code generator tool for 
       - [JDL To OpenAPI](#jdl-to-openapi)
       - [OpenAPI to JDL](#openapi-to-jdl)
 
-## Building from source
-
-```shell
-git clone https://github.com/ZenWave360/zenwave-code-generator.git
-cd zenwave-code-generator
-mvn clean install
-```
-
-Now you can install with JBang.
-
 ## Jbang Instalation
 
 You can use JBang to install the ZenWave Code Generator as a [JBang alias](https://www.jbang.dev/documentation/guide/latest/alias_catalogs.html) with the following command:
@@ -51,6 +41,14 @@ io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.0.1-SNAPSHO
 ```
 
 You can include any custom plugin in as `--deps` option.
+
+## Building from source
+
+```shell
+git clone https://github.com/ZenWave360/zenwave-code-generator.git
+cd zenwave-code-generator
+mvn clean install
+```
 
 ## Available Plugins
 
@@ -100,7 +98,7 @@ jbang zw -p io.zenwave360.generator.plugins.SpringWebTestsClientConfigurationPre
 Aims to generate a complete Architecture based on Domain models expressed in JDL.
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.JDLEntitiesConfigurationPreset \
+jbang zw -p io.zenwave360.generator.plugins.JDLOpenAPIControllersConfigurationPreset \
     specFile=entities-model.jdl targetFolder=target/out
 ```
 

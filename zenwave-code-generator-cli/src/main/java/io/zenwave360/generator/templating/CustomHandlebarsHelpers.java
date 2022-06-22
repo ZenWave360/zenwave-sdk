@@ -19,9 +19,12 @@ public class CustomHandlebarsHelpers {
     }
 
     public static Object assign(final String variableName, final Options options) throws IOException {
-        CharSequence finalValue = options.apply(options.fn);
-        options.context.combine(Map.of(variableName, finalValue.toString().trim()));
-//        ((Map) options.context.model()).put(variableName, finalValue.toString().trim());
+        if(options.params.length == 1) {
+            options.context.combine(Map.of(variableName, options.param(0)));
+        } else {
+            CharSequence finalValue = options.apply(options.fn);
+            options.context.combine(Map.of(variableName, finalValue.toString().trim()));
+        }
         return null;
     }
 
@@ -35,6 +38,10 @@ public class CustomHandlebarsHelpers {
 
     public static String asCapitalizedJavaProperty(String text, Options options) throws IOException {
         return StringUtils.capitalize(text);
+    }
+
+    public static String asPackageFolder(String text, Options options) throws IOException {
+        return text != null? text.replaceAll("\\.", "/") : null;
     }
 
     public static String joinWithTemplate(List<Object> context, Options options) throws IOException {

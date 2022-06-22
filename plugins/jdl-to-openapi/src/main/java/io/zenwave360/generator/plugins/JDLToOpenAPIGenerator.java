@@ -3,6 +3,7 @@ package io.zenwave360.generator.plugins;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.oracle.truffle.js.runtime.builtins.JSON;
 import io.zenwave360.generator.DocumentedOption;
 import io.zenwave360.generator.processors.utils.JSONPath;
 import io.zenwave360.generator.templating.HandlebarsEngine;
@@ -87,6 +88,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
     private Map<String,?> convertToOpenAPI(Map<String,?> entity) {
         Map<String, Object> schema = new LinkedHashMap<>();
         schema.put("type", "object");
+        schema.put("x-jdl-entity", entity.get("name"));
         if(entity.get("comment") != null) {
             schema.put("description", entity.get("comment"));
         }
@@ -94,6 +96,10 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
         schema.put("required", requiredProperties);
         Map<String, Object> properties = new LinkedHashMap<>();
         schema.put("properties", properties);
+
+        if(!JSONPath.get(entity, "options.embedded", false)) {
+            properties.put("id", Map.of("type", "string"));
+        }
 
         List<Map<String, ?>> fields = (List) JSONPath.get(entity, "$.fields[*]");
         for (Map<String, ?> field : fields) {

@@ -18,6 +18,10 @@ public class Configuration {
 
     private Map<String, Object> options = new HashMap<>();
 
+    public <T extends Configuration> T processOptions() {
+        return (T) this;
+    }
+
     public Configuration withSpecFile(String specFile) {
         this.specFile = specFile;
         this.options.put("specFile", specFile);

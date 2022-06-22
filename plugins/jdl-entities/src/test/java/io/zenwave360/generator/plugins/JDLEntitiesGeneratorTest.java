@@ -60,9 +60,9 @@ public class JDLEntitiesGeneratorTest {
     @Test
     public void test_generator_hexagonal_mongodb_imperative() throws Exception {
         Configuration configuration = new JDLEntitiesConfigurationPreset()
-                .withSpecFile("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl")
-                .withTargetFolder("target/out")
-                .withOption("basePackage", "io.zenwave360.example")
+                .withSpecFile("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\api-registry.jdl")
+                .withTargetFolder("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy")
+                .withOption("basePackage", "io.zenwave360.registry")
                 .withOption("persistence", JDLEntitiesGenerator.PersistenceType.mongodb)
                 .withOption("style", JDLEntitiesGenerator.ProgrammingStyle.imperative)
                 ;

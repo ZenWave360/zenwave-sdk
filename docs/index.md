@@ -404,7 +404,7 @@ So we would generate:
 - Persistence Repositories as secondary ports for the annotated entities.
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.JDLEntitiesConfigurationPreset \
+jbang zw -p io.zenwave360.generator.plugins.JDLOpenAPIControllersConfigurationPreset \
     specFile=entities-model.jdl targetFolder=target/out
 ```
 

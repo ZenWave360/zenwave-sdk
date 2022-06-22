@@ -30,7 +30,8 @@ public class Generator {
     }
 
     public void generate() throws Exception {
-        log.debug("Executing generate with config options {}", configuration.getOptions());
+        log.debug("Executing 'generate' with config Options {}", configuration.getOptions());
+        log.debug("Processed Options {}", configuration.processOptions());
         log.debug("Processors chain is {}", configuration.getChain().stream().map(c -> c.getName()).collect(Collectors.toList()));
         Map<String, ?> model = new HashMap<>();
         List<TemplateOutput> templateOutputList = new ArrayList<>();

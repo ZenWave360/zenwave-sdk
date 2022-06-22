@@ -1,7 +1,10 @@
 package io.zenwave360.generator;
 
+import io.zenwave360.generator.templating.HandlebarsEngine;
+import io.zenwave360.generator.templating.TemplateEngine;
 import io.zenwave360.generator.templating.TemplateOutput;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -33,6 +36,17 @@ public interface GeneratorPlugin {
                 }
             } catch (IllegalAccessException e) {
                 config.put(field.getName(), e.getMessage());
+            }
+        }
+        TemplateEngine templateEngine = new HandlebarsEngine();
+        for (Map.Entry<String, Object> entry : config.entrySet()) {
+            try {
+                if(entry.getValue() instanceof String) {
+                    String value = templateEngine.processInline((String) entry.getValue(), config);
+                    entry.setValue(value);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
         return config;

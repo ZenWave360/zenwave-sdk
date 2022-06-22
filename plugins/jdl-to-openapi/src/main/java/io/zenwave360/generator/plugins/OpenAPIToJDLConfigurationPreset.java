@@ -17,13 +17,13 @@ public class OpenAPIToJDLConfigurationPreset extends Configuration {
 
     public OpenAPIToJDLConfigurationPreset() {
         super();
-        withChain(DefaultYamlParser.class, OpenApiProcessor.class, OpenAPIToJDLGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
+        withChain(DefaultYamlParser.class, OpenApiProcessor.class, OpenAPIToJDLGenerator.class, TemplateFileWriter.class);
     }
 
     @Override
     public Configuration withOptions(Map<String, Object> options) {
-        if(!options.containsKey("targetFolder")) {
-            withChain(DefaultYamlParser.class, OpenApiProcessor.class, OpenAPIToJDLGenerator.class, JavaFormatter.class, TemplateStdoutWriter.class);
+        if(!options.containsKey("targetFolder") && !options.containsKey("targetFile")) {
+            withChain(DefaultYamlParser.class, OpenApiProcessor.class, OpenAPIToJDLGenerator.class, TemplateStdoutWriter.class);
         }
         return super.withOptions(options);
     }

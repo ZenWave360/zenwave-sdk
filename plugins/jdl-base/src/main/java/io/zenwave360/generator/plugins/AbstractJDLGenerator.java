@@ -8,9 +8,4 @@ public abstract class AbstractJDLGenerator implements GeneratorPlugin {
 
     @DocumentedOption(description = "Java Models package name")
     public String basePackage = "io.example.domain.model";
-
-    public String getBasePackageFolder() {
-        return this.basePackage.replaceAll("\\.", "/");
-    }
-
 }
