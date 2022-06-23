@@ -35,7 +35,7 @@ jbang alias add --name=zw \
     --deps=\
 io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:0.0.1-SNAPSHOT,\
 io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:0.0.1-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-entities:0.0.1-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:0.0.1-SNAPSHOT,\
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.0.1-SNAPSHOT \
     io.github.zenwave360:zenwave-code-generator-cli:0.0.1-SNAPSHOT
 ```

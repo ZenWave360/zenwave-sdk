@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class SpringWebTestsClientConfigurationPreset extends Configuration {
 
-    public static final String PRESET_ID = "spring-webtestclient";
+    public static final String CONFIG_ID = "spring-webtestclient";
 
     public SpringWebTestsClientConfigurationPreset() {
         super();

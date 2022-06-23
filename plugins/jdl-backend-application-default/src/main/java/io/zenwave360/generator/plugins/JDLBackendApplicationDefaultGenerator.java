@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 import static io.zenwave360.generator.templating.OutputFormatType.JAVA;
 
-public class JDLEntitiesGenerator extends AbstractJDLGenerator {
+public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator {
 
     enum PersistenceType {
         mongodb;
@@ -48,7 +48,7 @@ public class JDLEntitiesGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "Suffix for elasticsearch document entities (default: Document)")
     public String searchDTOSuffix = "Document";
 
-    public JDLEntitiesGenerator withSourceProperty(String sourceProperty) {
+    public JDLBackendApplicationDefaultGenerator withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;
         return this;
     }

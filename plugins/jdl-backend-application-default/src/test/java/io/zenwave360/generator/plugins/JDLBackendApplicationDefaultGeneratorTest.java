@@ -9,7 +9,6 @@ import io.zenwave360.generator.templating.TemplateOutput;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-public class JDLEntitiesGeneratorTest {
+public class JDLBackendApplicationDefaultGeneratorTest {
 
     private static LogCaptor logCaptor = LogCaptor.forRoot();
 
@@ -46,7 +45,7 @@ public class JDLEntitiesGeneratorTest {
     @Test
     public void test_entities() throws Exception {
         Map<String, ?> model = loadJDLModelFromResource("io/zenwave360/generator/resources/jdl/orders-model.jdl");
-        JDLEntitiesGenerator generator = new JDLEntitiesGenerator();
+        JDLBackendApplicationDefaultGenerator generator = new JDLBackendApplicationDefaultGenerator();
 
         List<TemplateOutput> outputTemplates = generator.generate(model);
 
@@ -60,12 +59,12 @@ public class JDLEntitiesGeneratorTest {
 
     @Test
     public void test_generator_hexagonal_mongodb_imperative() throws Exception {
-        Configuration configuration = new JDLEntitiesConfigurationPreset()
+        Configuration configuration = new JDLBackendApplicationDefaultConfiguration()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl")
                 .withTargetFolder("target/out")
                 .withOption("basePackage", "io.zenwave360.example")
-                .withOption("persistence", JDLEntitiesGenerator.PersistenceType.mongodb)
-                .withOption("style", JDLEntitiesGenerator.ProgrammingStyle.imperative)
+                .withOption("persistence", JDLBackendApplicationDefaultGenerator.PersistenceType.mongodb)
+                .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative)
                 ;
 
         new Generator(configuration).generate();
@@ -78,12 +77,12 @@ public class JDLEntitiesGeneratorTest {
     @Test
     @Disabled
     public void test_generator_hexagonal_mongodb_imperative_registry() throws Exception {
-        Configuration configuration = new JDLEntitiesConfigurationPreset()
+        Configuration configuration = new JDLBackendApplicationDefaultConfiguration()
                 .withSpecFile("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\api-registry.jdl")
                 .withTargetFolder("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy")
                 .withOption("basePackage", "io.zenwave360.registry")
-                .withOption("persistence", JDLEntitiesGenerator.PersistenceType.mongodb)
-                .withOption("style", JDLEntitiesGenerator.ProgrammingStyle.imperative)
+                .withOption("persistence", JDLBackendApplicationDefaultGenerator.PersistenceType.mongodb)
+                .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative)
                 ;
 
         new Generator(configuration).generate();

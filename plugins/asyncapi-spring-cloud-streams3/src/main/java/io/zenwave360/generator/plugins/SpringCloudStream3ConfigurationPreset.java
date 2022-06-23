@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class SpringCloudStream3ConfigurationPreset extends Configuration {
 
-    public static final String PRESET_ID = "spring-cloud-streams3";
+    public static final String CONFIG_ID = "spring-cloud-streams3";
 
     public SpringCloudStream3ConfigurationPreset() {
         super();

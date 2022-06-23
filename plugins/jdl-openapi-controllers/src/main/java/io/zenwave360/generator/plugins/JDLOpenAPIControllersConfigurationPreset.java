@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class JDLOpenAPIControllersConfigurationPreset extends Configuration {
 
-    public static final String PRESET_ID = "jdl-entities";
+    public static final String CONFIG_ID = "jdl-backend-application-default";
 
     public JDLOpenAPIControllersConfigurationPreset() {
         super();

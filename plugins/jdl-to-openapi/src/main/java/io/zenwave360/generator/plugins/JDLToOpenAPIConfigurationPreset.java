@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class JDLToOpenAPIConfigurationPreset extends Configuration {
 
-    public static final String PRESET_ID = "jdl-to-openapi";
+    public static final String CONFIG_ID = "jdl-to-openapi";
 
     public JDLToOpenAPIConfigurationPreset() {
         super();

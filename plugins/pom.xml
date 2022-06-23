@@ -26,11 +26,11 @@
         <module>asyncapi-base</module>
         <module>openapi-base</module>
         <module>jdl-base</module>
-        <module>asyncapi-spring-cloud-streams3</module>
-        <module>openapi-spring-webtestclient</module>
-        <module>jdl-entities</module>
-        <module>jdl-to-openapi</module>
-        <module>jdl-openapi-controllers</module>
         <module>java-to-jdl</module>
+        <module>jdl-to-openapi</module>
+        <module>asyncapi-spring-cloud-streams3</module>
+        <module>jdl-backend-application-default</module>
+        <module>jdl-openapi-controllers</module>
+        <module>openapi-spring-webtestclient</module>
     </modules>
 </project>
