@@ -10,6 +10,7 @@ import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -44,7 +45,7 @@ public class JDLOpenAPIControllersGeneratorTest {
                 .withOption("openApiApiPackage", "io.zenwave360.example.web.api")
                 .withOption("openApiModelPackage", "io.zenwave360.example.web.api.model")
                 .withOption("openApiModelNameSuffix", "DTO")
-                .withOption("operationIds", List.of("addPet", "updatePet"))
+//                .withOption("operationIds", List.of("addPet", "updatePet"))
                 .withOption("style", JDLOpenAPIControllersGenerator.ProgrammingStyle.imperative)
                 .withTargetFolder("target/out")
                 ;
@@ -54,6 +55,28 @@ public class JDLOpenAPIControllersGeneratorTest {
         List<String> logs = logCaptor.getLogs();
 //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
 //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
+    }
+
+    @Test
+    @Disabled
+    public void test_generator_jdl_openapi_controllers_registry() throws Exception {
+        Configuration configuration = new JDLOpenAPIControllersConfigurationPreset()
+                .withSpecFile("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\openapi.yml")
+                .withOption("jdlFile", "C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\api-registry.jdl")
+                .withOption("basePackage", "io.zenwave360.registry")
+                .withOption("openApiApiPackage", "io.zenwave360.registry.adapters.web")
+                .withOption("openApiModelPackage", "io.zenwave360.registry.adapters.web.model")
+                .withOption("openApiModelNameSuffix", "DTO")
+                //                .withOption("operationIds", List.of("addPet", "updatePet"))
+                .withOption("style", JDLOpenAPIControllersGenerator.ProgrammingStyle.imperative)
+                .withTargetFolder("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy")
+                ;
+
+        new Generator(configuration).generate();
+
+        List<String> logs = logCaptor.getLogs();
+        //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
+        //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
     }
 
 }

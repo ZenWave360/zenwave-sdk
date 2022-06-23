@@ -10,7 +10,7 @@ import java.util.List;
 public interface {{service.name}}DTOsMapper {
 
 {{#each service.dtos as |dto|}}
-    {{~#assign "dtoClassName"}}{{openApiModelPackage}}.{{openApiModelPrefix}}{{dto.dtoName}}{{openApiModelSuffix}}{{/assign}}
+    {{~#assign "dtoClassName"}}{{openApiModelPackage}}.{{openApiModelNamePrefix}}{{dto.dtoName}}{{openApiModelNameSuffix}}{{/assign}}
     {{~assign "entity" dto.jdl-entity}}
     {{dtoClassName}} asDTO({{entity.className}} {{entity.instanceName}});
     {{entity.className}} asEntity({{dtoClassName}} dto);

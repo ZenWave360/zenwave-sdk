@@ -1,5 +1,6 @@
 package io.zenwave360.generator.plugins;
 
+import com.oracle.truffle.js.runtime.builtins.JSON;
 import io.zenwave360.generator.DocumentedOption;
 import io.zenwave360.generator.processors.utils.JSONPath;
 import io.zenwave360.generator.templating.HandlebarsEngine;
@@ -11,6 +12,8 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +23,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static io.zenwave360.generator.templating.OutputFormatType.JAVA;
+import static org.apache.commons.lang3.StringUtils.capitalize;
 
 public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
 
@@ -54,6 +58,9 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "Maps openapi dtos to jdl entity names")
     public Map<String, String> dtoToEntityNameMap = new HashMap<>();
 
+    @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
+    private String jdlBusinessEntityProperty = "x-business-entity";
+
     private Map<String, Map<String, Object>> dtoToEntityMap = new HashMap<>();
 
     @DocumentedOption(description = "ProgrammingStyle imperative|reactive default: imperative")
@@ -64,8 +71,8 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
     private String templatesFolder = "io/zenwave360/generator/plugins/JDLOpenAPIControllersGenerator/";
 
     List<Object[]> templates = List.of(
-            new Object[] { "src/main/java", "web/mappers/ServiceDTOsMapper.java", "{{asPackageFolder controllersPackage}}/mappers/{{service.name}}DTOsMapper.java", JAVA },
-            new Object[] { "src/main/java", "web/{{webFlavor}}/ServiceApiController.java", "{{asPackageFolder controllersPackage}}/{{service.name}}ApiController.java", JAVA }
+            new Object[] { "src/main/java", "web/mappers/ServiceDTOsMapper.java", "mappers/{{service.name}}DTOsMapper.java", JAVA },
+            new Object[] { "src/main/java", "web/{{webFlavor}}/ServiceApiController.java", "{{service.name}}ApiController.java", JAVA }
     );
 
     public TemplateEngine getTemplateEngine() {
@@ -76,7 +83,7 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
         Function<Map<String,?>, Boolean> skip = templateNames.length > 4? (Function) templateNames[4] : null;
         return new TemplateInput()
                 .withTemplateLocation(templatesFolder + templateNames[0] + "/" + templateNames[1])
-                .withTargetFile(templateNames[0] + "/{{asPackageFolder basePackage}}/" + templateNames[2])
+                .withTargetFile(templateNames[0] + "/{{asPackageFolder controllersPackage}}/" + templateNames[2])
                 .withMimeType((OutputFormatType) templateNames[3])
                 .withSkip(skip);
     }
@@ -101,16 +108,18 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
         Map<String, List<Map<String, Object>>> operationsByService = groupOperationsByService(operations);
 
         for (Map.Entry<String, List<Map<String, Object>>> operationByServiceEntry : operationsByService.entrySet()) {
-            Map service = Map.of("service", Map.of("name", operationByServiceEntry.getKey(), "operations", operationByServiceEntry.getValue()));
-            templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(templates.get(1)), service));
-        }
-
-
-        for (Map.Entry<String, List<Map<String, Object>>> operationByServiceEntry : operationsByService.entrySet()) {
-            Set dtoNames = new HashSet(JSONPath.get(operationByServiceEntry.getValue(), "$..x--response.x--response-dto"));
-            Map dtosMap = (Map) dtoNames.stream().collect(Collectors.toMap(dto -> dto, dto -> Map.of("dtoName", dto, "jdl-entity", dtoToEntityMap.get(dto))));
-            Map service = Map.of("service", Map.of("name", operationByServiceEntry.getKey(), "dtos", dtosMap));
-            templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(templates.get(0)), service));
+            Set<String> dtoNames = new HashSet();
+            dtoNames.addAll(JSONPath.get(operationByServiceEntry.getValue(), "$..x--request-dto"));
+            dtoNames.addAll(JSONPath.get(operationByServiceEntry.getValue(), "$..x--response.x--response-dto"));
+            Collection<Map<String, Object>> entities = JSONPath.get(operationByServiceEntry.getValue(), "$..jdl-entity[?(@.className)]"); // filters null
+            entities = entities.stream().distinct().collect(Collectors.toList());
+            Map dtoWithEntityMap = (Map) dtoNames.stream()
+                    .filter(dto -> dto != null && !dto.endsWith("Paginated"))
+                    .collect(Collectors.toMap(dto -> dto, dto -> Map.of("dtoName", dto, "jdl-entity", dtoToEntityMap.getOrDefault(dto, Collections.emptyMap()))));
+            Map service = Map.of("service", Map.of("name", operationByServiceEntry.getKey(), "operations", operationByServiceEntry.getValue(), "dtos", dtoWithEntityMap, "entities", entities));
+            for (Object[] template : templates) {
+                templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(template), service));
+            }
         }
 
         return templateOutputList;
@@ -134,7 +143,10 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
         List<Map<String, Object>> schemas = JSONPath.get(openApiModel, "$.components.schemas[*]");
         for (Map<String, Object> schema : schemas) {
             String schemaName = (String) schema.get("x--schema-name");
-            String entityName =  dtoToEntityNameMap.getOrDefault(schemaName, (String) schema.get("x-jdl-entity"));
+            if(schemaName.endsWith("Paginated")) {
+                continue;
+            }
+            String entityName =  dtoToEntityNameMap.getOrDefault(schemaName, (String) schema.get(jdlBusinessEntityProperty));
             entityName = StringUtils.defaultString(entityName, StringUtils.capitalize(schemaName));
             Map<String, Object> entity = JSONPath.get(jdlModel, "$.entities." + entityName);
             if(entity == null) {
@@ -155,4 +167,58 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
         return getTemplateEngine().processTemplates(model, List.of(template));
     }
 
+    {
+        handlebarsEngine.getHandlebars().registerHelper("orVoid", (context, options) -> {
+            return StringUtils.isNotBlank((String) context)? context : "Void";
+        });
+
+        handlebarsEngine.getHandlebars().registerHelper("asMethodParameters", (context, options) -> {
+            if(context instanceof Map) {
+                Map operation = (Map) context;
+                List<Map<String, Object>> params = (List) operation.getOrDefault("parameters", Collections.emptyList());
+                List methodParams = params.stream()
+                        .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
+                        .map(param -> {
+                            String javaType = getJavaType(param);
+                            String name = JSONPath.get(param, "$.name");
+                            return javaType + " " + name;
+                        }).collect(Collectors.toList());
+                if(operation.containsKey("x--request-dto")) {
+                    methodParams.add(String.format("%s%s%s %s", openApiModelNamePrefix, operation.get("x--request-dto"), openApiModelNameSuffix, "reqBody"));
+                }
+                return StringUtils.join(methodParams, ", ");
+            }
+            return options.fn(context);
+        });
+    }
+
+    protected int compareParamsByRequire(Map<String, Object> param1, Map<String, Object> param2) {
+        boolean required1 = JSONPath.get(param1, "required", false);
+        boolean required2 = JSONPath.get(param2, "required", false);
+        return (required1 && required2) || (!required1 && !required2)? 0 : required1? -1 : 1;
+    }
+    protected String getJavaType(Map<String, Object> param) {
+        String type = JSONPath.get(param, "$.schema.type");
+        String format = JSONPath.get(param, "$.schema.format");
+        if("date".equals(format)) {
+            return "LocalDate";
+        }
+        if("date-time".equals(format)) {
+            return "Instant";
+        }
+        if("integer".equals(type) && "int32".equals(format)) {
+            return "Integer";
+        }
+        if("integer".equals(type) && "int64".equals(format)) {
+            return "Long";
+        }
+        if("number".equals(type)) {
+            return "BigDecimal";
+        }
+        if("boolean".equals(type)) {
+            return "Boolean";
+        }
+
+        return "String";
+    }
 }

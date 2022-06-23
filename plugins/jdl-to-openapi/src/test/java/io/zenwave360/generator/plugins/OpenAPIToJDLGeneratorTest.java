@@ -50,7 +50,7 @@ public class OpenAPIToJDLGeneratorTest {
         Assertions.assertEquals(1, outputTemplates.size());
         Assertions.assertTrue(outputTemplates.get(0).getContent().contains("enum PetStatus"));
         Assertions.assertFalse(outputTemplates.get(0).getContent().contains("relationship OneToMany "));
-        Assertions.assertTrue(outputTemplates.get(0).getContent().contains("address List<Address>"));
+        Assertions.assertTrue(outputTemplates.get(0).getContent().contains("address Address[]"));
 
     }
 

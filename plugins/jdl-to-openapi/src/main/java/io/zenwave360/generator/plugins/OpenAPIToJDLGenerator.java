@@ -133,7 +133,7 @@ public class OpenAPIToJDLGenerator extends AbstractJDLGenerator {
                 oneToMany.add(new String[]{entityName, propertyName, itemsJDLType});
                 return null;
             } else {
-                return String.format("List<%s>", itemsJDLType);
+                return String.format("%s[]", itemsJDLType);
             }
         }
         if(property.get("x--schema-name") != null) {

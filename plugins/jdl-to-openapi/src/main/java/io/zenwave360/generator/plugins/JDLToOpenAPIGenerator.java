@@ -29,6 +29,8 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
 
     @DocumentedOption(description = "Target file")
     public String targetFile = "openapi.yml";
+    @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
+    private String jdlBusinessEntityProperty = "x-business-entity";
 
     public JDLToOpenAPIGenerator withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;
@@ -50,14 +52,26 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
         ((Map) jdlModel).put("serviceNames", serviceNames);
 
         Map<String, Object> oasSchemas = new HashMap<>();
-        Map<String, Object> schemas = new HashMap<>();
+        Map<String, Object> schemas = new LinkedHashMap<>();
         JSONPath.set(oasSchemas, "components.schemas", schemas);
 
 
         List<Map<String, ?>> entities = (List) JSONPath.get(jdlModel, "$.entities[*]");
         for (Map<String, ?> entity : entities) {
+            String entityName = (String) entity.get("name");
             Map<String, ?> openAPISchema = convertToOpenAPI(entity);
-            schemas.put((String) entity.get("name"), openAPISchema);
+            schemas.put(entityName, openAPISchema);
+
+            Map<String, Object> paginatedSchema = new HashMap<>();
+            paginatedSchema.put("allOf", List.of(
+                    Map.of("$ref", "#/components/schemas/Page"),
+                    Map.of("properties",
+                            Map.of("content",
+                                    Map.of("type", "array", "items", Map.of("$ref", "#/components/schemas/" + entityName)))
+                    )
+                )
+            );
+            schemas.put(entityName + "Paginated", paginatedSchema);
         }
 
         List<Map<String, ?>> enums = (List) JSONPath.get(jdlModel, "$.enums.enums[*]");
@@ -88,7 +102,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
     private Map<String,?> convertToOpenAPI(Map<String,?> entity) {
         Map<String, Object> schema = new LinkedHashMap<>();
         schema.put("type", "object");
-        schema.put("x-jdl-entity", entity.get("name"));
+        schema.put(jdlBusinessEntityProperty, entity.get("name"));
         if(entity.get("comment") != null) {
             schema.put("description", entity.get("comment"));
         }

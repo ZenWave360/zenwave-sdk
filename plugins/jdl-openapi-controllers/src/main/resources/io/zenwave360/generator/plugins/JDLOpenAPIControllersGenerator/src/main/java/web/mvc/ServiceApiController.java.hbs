@@ -13,11 +13,13 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.context.request.NativeWebRequest;
 
 
 /**
@@ -25,8 +27,33 @@ import org.springframework.data.domain.Pageable;
  */
 @RestController
 @RequestMapping("/api")
-public class {{service.name}}ApiController {
+public class {{service.name}}ApiController implements {{service.name}}Api {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    @Autowired
+    private NativeWebRequest request;
+
+    @Autowired
+    private {{service.name}}DTOsMapper mapper;
+
+{{#each service.entities as |entity|}}
+    {{~#if entity.options.service}}
+    @Autowired
+    private {{entity.options.service}} {{uncapFirst entity.options.service}};
+    {{/if~}}
+{{/each}}
+
+    @Override
+    public Optional<NativeWebRequest> getRequest() {
+        return Optional.ofNullable(request);
+    }
+
+{{#each service.operations as |operation|}}
+    {{~#assign "dtoClassName"}}{{openApiModelNamePrefix}}{{operation.x--response.x--response-dto}}{{openApiModelNameSuffix}}{{/assign}}
+    @Override
+    public ResponseEntity<{{orVoid dtoClassName}}> {{operation.operationId}}({{asMethodParameters operation}}) {
+        return null; // return {{service.name}}Api.super.{{operation.operationId}}();
+    }
+{{/each}}
 }

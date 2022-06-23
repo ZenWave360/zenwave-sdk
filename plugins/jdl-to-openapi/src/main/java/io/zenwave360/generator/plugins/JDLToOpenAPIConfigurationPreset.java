@@ -20,7 +20,7 @@ public class JDLToOpenAPIConfigurationPreset extends Configuration {
 
     @Override
     public Configuration withOptions(Map<String, Object> options) {
-        if(!options.containsKey("targetFolder")) {
+        if(!options.containsKey("targetFolder") && !options.containsKey("targetFile")) {
             withChain(JDLParser.class, JDLProcessor.class, JDLToOpenAPIGenerator.class, JavaFormatter.class, TemplateStdoutWriter.class);
         }
         return super.withOptions(options);
