@@ -98,7 +98,7 @@ jbang zw -p io.zenwave360.generator.plugins.SpringWebTestsClientConfigurationPre
 Aims to generate a complete Architecture based on Domain models expressed in JDL.
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.JDLOpenAPIControllersConfigurationPreset \
+jbang zw -p io.zenwave360.generator.plugins.JDLOpenAPIControllersConfiguration \
     specFile=entities-model.jdl targetFolder=target/out
 ```
 

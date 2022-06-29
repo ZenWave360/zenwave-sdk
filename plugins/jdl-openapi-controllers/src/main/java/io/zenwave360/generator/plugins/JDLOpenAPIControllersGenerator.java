@@ -55,13 +55,8 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "Package where your domain entities are")
     public String entitiesPackage = "{{basePackage}}.core.domain";
 
-    @DocumentedOption(description = "Maps openapi dtos to jdl entity names")
-    public Map<String, String> dtoToEntityNameMap = new HashMap<>();
-
-    @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
-    private String jdlBusinessEntityProperty = "x-business-entity";
-
-    private Map<String, Map<String, Object>> dtoToEntityMap = new HashMap<>();
+    @DocumentedOption(description = "Package where your domain services/usecases interfaces are")
+    public String servicesPackage = "{{basePackage}}.core.inbound";
 
     @DocumentedOption(description = "ProgrammingStyle imperative|reactive default: imperative")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
@@ -101,8 +96,6 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
         var openApiModel = getOpenAPIModel(contextModel);
         var jdlModel = getJDLModel(contextModel);
 
-        buildDtoToEntityMap(openApiModel, jdlModel);
-
         String operationIdsRegex = operationIds.isEmpty()? "" : " =~ /(" + StringUtils.join(operationIds, "|") + ")/";
         List<Map<String, Object>> operations = JSONPath.get(openApiModel, "$.paths[*][*][?(@.operationId" + operationIdsRegex + ")]");
         Map<String, List<Map<String, Object>>> operationsByService = groupOperationsByService(operations);
@@ -111,11 +104,11 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
             Set<String> dtoNames = new HashSet();
             dtoNames.addAll(JSONPath.get(operationByServiceEntry.getValue(), "$..x--request-dto"));
             dtoNames.addAll(JSONPath.get(operationByServiceEntry.getValue(), "$..x--response.x--response-dto"));
-            Collection<Map<String, Object>> entities = JSONPath.get(operationByServiceEntry.getValue(), "$..jdl-entity[?(@.className)]"); // filters null
+            Collection<Map<String, Object>> entities = JSONPath.get(operationByServiceEntry.getValue(), "$..x--entity[?(@.className)]"); // filters null
             entities = entities.stream().distinct().collect(Collectors.toList());
             Map dtoWithEntityMap = (Map) dtoNames.stream()
                     .filter(dto -> dto != null && !dto.endsWith("Paginated"))
-                    .collect(Collectors.toMap(dto -> dto, dto -> Map.of("dtoName", dto, "jdl-entity", dtoToEntityMap.getOrDefault(dto, Collections.emptyMap()))));
+                    .collect(Collectors.toMap(dto -> dto, dto -> Map.of("dtoName", dto, "x--entity", getOpenApiSchema(openApiModel, dto))));
             Map service = Map.of("service", Map.of("name", operationByServiceEntry.getKey(), "operations", operationByServiceEntry.getValue(), "dtos", dtoWithEntityMap, "entities", entities));
             for (Object[] template : templates) {
                 templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(template), service));
@@ -123,6 +116,10 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
         }
 
         return templateOutputList;
+    }
+
+    protected Map getOpenApiSchema(Map openApiModel, String schemaName) {
+        return JSONPath.get(openApiModel, "$.components.schemas." + schemaName + ".x--entity");
     }
 
     protected Map<String, List<Map<String, Object>>> groupOperationsByService(List<Map<String, Object>> operations) {
@@ -133,27 +130,10 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
                 operationsByService.put(tagName, new ArrayList<>());
             }
             String responseDto = JSONPath.get(operation, "$.x--response.x--response-dto");
-            operation.put("jdl-entity", dtoToEntityMap.get(responseDto));
+//            operation.put("jdl-entity", dtoToEntityMap.get(responseDto));
             operationsByService.get(tagName).add(operation);
         }
         return operationsByService;
-    }
-
-    protected void buildDtoToEntityMap(Map<String, ?> openApiModel, Map<String, ?> jdlModel){
-        List<Map<String, Object>> schemas = JSONPath.get(openApiModel, "$.components.schemas[*]");
-        for (Map<String, Object> schema : schemas) {
-            String schemaName = (String) schema.get("x--schema-name");
-            if(schemaName.endsWith("Paginated")) {
-                continue;
-            }
-            String entityName =  dtoToEntityNameMap.getOrDefault(schemaName, (String) schema.get(jdlBusinessEntityProperty));
-            entityName = StringUtils.defaultString(entityName, StringUtils.capitalize(schemaName));
-            Map<String, Object> entity = JSONPath.get(jdlModel, "$.entities." + entityName);
-            if(entity == null) {
-                entity = Map.of("name", entityName, "className", entityName, "instanceName", entityName, "classNamePlural", entityName + "s", "instanceNamePlural", entityName + "s");
-            }
-            dtoToEntityMap.put(schemaName, entity);
-        }
     }
 
     public List<TemplateOutput> generateTemplateOutput(Map<String, ?> contextModel, TemplateInput template, Map<String, ?> extModel) {

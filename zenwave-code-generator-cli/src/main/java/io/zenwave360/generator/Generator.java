@@ -71,15 +71,19 @@ public class Generator {
 
     public void applyConfiguration(int chainIndex, Object processor, Configuration configuration) throws JsonMappingException {
         Map<String, Object> options = configuration.getOptions();
-        Object processorClassOptions = options.get(processor.getClass().getName());
+        Object processorFullClassOptions = options.get(processor.getClass().getName());
+        Object processorSimpleClassOptions = options.get(processor.getClass().getSimpleName());
         Object chainIndexOptions = options.get(String.valueOf(chainIndex));
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         mapper.updateValue(processor, options);
-        if (processorClassOptions != null) {
-            mapper.updateValue(processor, processorClassOptions);
+        if (processorSimpleClassOptions != null) {
+            mapper.updateValue(processor, processorSimpleClassOptions);
+        }
+        if (processorFullClassOptions != null) {
+            mapper.updateValue(processor, processorFullClassOptions);
         }
         if (chainIndexOptions != null) {
             mapper.updateValue(processor, chainIndexOptions);

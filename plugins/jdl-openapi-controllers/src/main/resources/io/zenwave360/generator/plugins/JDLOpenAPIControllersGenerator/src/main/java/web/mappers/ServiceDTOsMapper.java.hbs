@@ -11,7 +11,7 @@ public interface {{service.name}}DTOsMapper {
 
 {{#each service.dtos as |dto|}}
     {{~#assign "dtoClassName"}}{{openApiModelPackage}}.{{openApiModelNamePrefix}}{{dto.dtoName}}{{openApiModelNameSuffix}}{{/assign}}
-    {{~assign "entity" dto.jdl-entity}}
+    {{~assign "entity" dto.x--entity}}
     {{dtoClassName}} asDTO({{entity.className}} {{entity.instanceName}});
     {{entity.className}} asEntity({{dtoClassName}} dto);
     {{entity.className}} update(@MappingTarget {{entity.className}} {{entity.instanceName}}, {{dtoClassName}} dto);

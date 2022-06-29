@@ -2,7 +2,6 @@ package io.zenwave360.generator.plugins;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import io.zenwave360.generator.formatters.JavaFormatter;
 import io.zenwave360.generator.parsers.JDLParser;
 import io.zenwave360.generator.processors.JDLProcessor;
 import io.zenwave360.generator.processors.utils.JSONPath;

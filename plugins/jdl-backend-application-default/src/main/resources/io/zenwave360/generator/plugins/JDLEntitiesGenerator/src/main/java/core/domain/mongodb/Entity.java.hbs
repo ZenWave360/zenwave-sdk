@@ -16,26 +16,24 @@ public class {{entity.className}} implements Serializable {
 
     @Id
     private String id;
+{{#each entity.fields as |field|}}
+    @Field
+    {{#each field.validations as |validation|~}}
+        // @{{validation.name}}("{{validation.value}}")
+    {{~/each}}
+    private {{field.type}} {{field.name}};
+{{/each}}
+
     public String getId() {
         return id;
     }
-
     public {{entity.className}} withId(String id) {
         this.id = id;
         return this;
     }
-
     public void setId(String id) {
         this.id = id;
     }
-
-{{#each entity.fields as |field|}}
-    @Field
-    {{#each field.validations as |validation|}}
-        // @{{validation.name}}("{{validation.value}}")
-    {{/each}}
-    private {{field.type}} {{field.name}};
-{{/each}}
 
 {{#each entity.fields as |field|}}
     public {{entity.className}} with{{capitalize field.name}}({{field.type}} {{field.name}}) {

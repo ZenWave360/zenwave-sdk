@@ -39,7 +39,7 @@ public class JSONPath {
             Object nested = object;
             for (String token : tokens) {
                 try {
-                    JsonPath.read(nested, token);
+                    nested = JsonPath.read(nested, token);
                 } catch (PathNotFoundException e) {
                     ((Map) nested).put(token, new LinkedHashMap());
                     nested = ((Map<?, ?>) nested).get(token);

@@ -1,7 +1,5 @@
 package io.zenwave360.generator.processors;
 
-import io.zenwave360.generator.parsers.Model;
-
 import java.util.Map;
 
 public class JDLProcessor extends AbstractBaseProcessor {

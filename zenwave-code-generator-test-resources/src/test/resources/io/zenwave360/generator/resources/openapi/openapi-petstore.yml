@@ -634,6 +634,7 @@ components:
   schemas:
     Order:
       type: object
+      x-business-entity: Order
       properties:
         id:
           type: integer
@@ -658,12 +659,14 @@ components:
         name: order
     OrderStatus:
       type: string
+      x-business-entity: OrderStatus
       enum:
         - placed
         - approved
         - delivered
     Customer:
       type: object
+      x-business-entity: Customer
       properties:
         id:
           type: integer
@@ -683,6 +686,7 @@ components:
         name: customer
     Address:
       type: object
+      x-business-entity: Address
       properties:
         street:
           type: string
@@ -700,6 +704,7 @@ components:
         name: address
     Category:
       type: object
+      x-business-entity: Category
       properties:
         id:
           type: integer
@@ -712,6 +717,7 @@ components:
         name: category
     User:
       type: object
+      x-business-entity: User
       properties:
         id:
           type: integer
@@ -744,6 +750,7 @@ components:
         name: user
     Tag:
       type: object
+      x-business-entity: Tag
       properties:
         id:
           type: integer
@@ -757,6 +764,7 @@ components:
         - name
         - photoUrls
       type: object
+      x-business-entity: Pet
       properties:
         id:
           type: integer

@@ -2,10 +2,6 @@ package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.Configuration;
 import io.zenwave360.generator.Generator;
-import io.zenwave360.generator.formatters.JavaFormatter;
-import io.zenwave360.generator.parsers.JDLParser;
-import io.zenwave360.generator.processors.JDLProcessor;
-import io.zenwave360.generator.templating.TemplateOutput;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -13,9 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 public class JDLOpenAPIControllersGeneratorTest {
 
@@ -38,7 +32,7 @@ public class JDLOpenAPIControllersGeneratorTest {
 
     @Test
     public void test_generator_jdl_openapi_controllers() throws Exception {
-        Configuration configuration = new JDLOpenAPIControllersConfigurationPreset()
+        Configuration configuration = new JDLOpenAPIControllersConfiguration()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/openapi-petstore.yml")
                 .withOption("jdlFile", "classpath:io/zenwave360/generator/resources/jdl/petstore.jdl")
                 .withOption("basePackage", "io.zenwave360.example")
@@ -60,7 +54,7 @@ public class JDLOpenAPIControllersGeneratorTest {
     @Test
     @Disabled
     public void test_generator_jdl_openapi_controllers_registry() throws Exception {
-        Configuration configuration = new JDLOpenAPIControllersConfigurationPreset()
+        Configuration configuration = new JDLOpenAPIControllersConfiguration()
                 .withSpecFile("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\openapi.yml")
                 .withOption("jdlFile", "C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\api-registry.jdl")
                 .withOption("basePackage", "io.zenwave360.registry")
