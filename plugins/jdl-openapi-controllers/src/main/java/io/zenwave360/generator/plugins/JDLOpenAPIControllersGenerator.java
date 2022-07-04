@@ -1,5 +1,6 @@
 package io.zenwave360.generator.plugins;
 
+import com.github.jknack.handlebars.Options;
 import com.oracle.truffle.js.runtime.builtins.JSON;
 import io.zenwave360.generator.DocumentedOption;
 import io.zenwave360.generator.processors.utils.JSONPath;
@@ -11,6 +12,7 @@ import io.zenwave360.generator.templating.TemplateOutput;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

@@ -44,7 +44,7 @@ public class DefaultYamlParser implements io.zenwave360.generator.parsers.Parser
         File file = findSpecFile(specFile);
         $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions().withOnCircular(SKIP));
         Map model = new LinkedHashMap<>();
-        model.put(targetProperty, new Model(file, parser.parse().dereference().getRefs()));
+        model.put(targetProperty, new Model(file, parser.parse().dereference().mergeAllOf().getRefs()));
         return model;
     }
 }

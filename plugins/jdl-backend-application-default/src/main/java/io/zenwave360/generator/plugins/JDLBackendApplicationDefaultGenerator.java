@@ -103,6 +103,9 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
 
         Map<String, Map<String, ?>> entities = (Map) apiModel.get("entities");
         for (Map<String, ?> entity : entities.values()) {
+            if(!isGenerateEntity((String) entity.get("name"))) {
+                continue;
+            }
             for (Object[] templateValues : templatesByEntity) {
                 templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(templateValues), Map.of("entity",  entity)));
             }
@@ -110,6 +113,9 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
 
         Map<String, Map<String, ?>> enums = JSONPath.get(apiModel, "$.enums.enums");
         for (Map<String, ?> enumValue : enums.values()) {
+            if(!isGenerateEntity((String) enumValue.get("name"))) {
+                continue;
+            }
             templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(enumTemplate), Map.of("enum", enumValue)));
         }
 
@@ -119,12 +125,20 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
             service.put("name", serviceName);
             List<Map<String, ?>> entitiesByService = getEntitiesByService(service, apiModel);
             service.put("entities", entitiesByService);
+            boolean isGenerateService = entitiesByService.stream().anyMatch(entity -> isGenerateEntity((String) entity.get("name")));
+            if(!isGenerateService) {
+                continue;
+            }
             for (Object[] templateValues : templatesByService) {
                 templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(templateValues), Map.of("service",  service, "entities", entitiesByService)));
             }
         }
 
         return templateOutputList;
+    }
+
+    protected boolean isGenerateEntity(String entity) {
+        return entities.isEmpty() || entities.contains(entity);
     }
 
     protected List<Map<String, ?>> getEntitiesByService(Map<String, Object> service, Map<String, ?> apiModel) {

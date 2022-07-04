@@ -41,5 +41,18 @@ public class JDLWithOpenApiProcessorTest {
         Assertions.assertFalse(responseEntities.isEmpty());
     }
 
+    @Test
+    public void testProcessJDLWithOpenAPI_registry() throws Exception {
+        var openapiModel = loadOpenApi("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\openapi.yml");
+        var jdlModel = loadJDL("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\api-registry.jdl");
+        var model = new HashMap<String, Object>();
+        model.putAll(openapiModel);
+        model.putAll(jdlModel);
 
+        var processed = new JDLWithOpenApiProcessor().process(model);
+        List requestEntities = JSONPath.get(processed,"$..[?(@.x--request-entity)]");
+        Assertions.assertFalse(requestEntities.isEmpty());
+        List responseEntities = JSONPath.get(processed,"$..[?(@.x--response-entity)]");
+        Assertions.assertFalse(responseEntities.isEmpty());
+    }
 }

@@ -2,7 +2,6 @@ package io.zenwave360.generator.processors;
 
 import io.zenwave360.generator.DocumentedOption;
 import io.zenwave360.generator.processors.utils.JSONPath;
-import org.apache.avro.data.Json;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -90,9 +89,6 @@ public class JDLWithOpenApiProcessor extends AbstractBaseProcessor {
     protected void enrichJdlEntitiesWithDtoNames(Map<String, ?> openApiModel, Map<String, ?> jdlModel) {
         List<Map<String, Object>> schemas = JSONPath.get(openApiModel, "$.components.schemas[*]");
         for (Map<String, Object> schema : schemas) {
-            if(isArrayOrPaginationSchema(schema)) {
-                continue;
-            }
             String schemaName = (String) schema.get("x--schema-name");
             String entityName =  dtoToEntityNameMap.getOrDefault(schemaName, (String) schema.get(jdlBusinessEntityProperty));
             entityName = StringUtils.defaultString(entityName, StringUtils.capitalize(schemaName));
@@ -110,22 +106,13 @@ public class JDLWithOpenApiProcessor extends AbstractBaseProcessor {
     protected void buildDtoToEntityMap(Map<String, ?> openApiModel, Map<String, ?> jdlModel){
         List<Map<String, Object>> schemas = JSONPath.get(openApiModel, "$.components.schemas[*]");
         for (Map<String, Object> schema : schemas) {
-            if(isArrayOrPaginationSchema(schema)) {
-                continue;
-            }
             String schemaName = (String) schema.get("x--schema-name");
             String entityName =  dtoToEntityNameMap.getOrDefault(schemaName, (String) schema.get(jdlBusinessEntityProperty));
             entityName = StringUtils.defaultString(entityName, StringUtils.capitalize(schemaName));
             Map<String, Object> entity = JSONPath.get(jdlModel, "$.entities." + entityName);
-            if(entity == null) {
-                entity = Map.of("name", entityName, "className", entityName, "instanceName", entityName, "classNamePlural", entityName + "s", "instanceNamePlural", entityName + "s");
+            if(entity != null) {
+                dtoToEntityMap.put(schemaName, entity);
             }
-            dtoToEntityMap.put(schemaName, entity);
         }
-    }
-
-    private boolean isArrayOrPaginationSchema(Map<String, Object> schema) {
-        String schemaName = (String) schema.get("x--schema-name");
-        return schemaName.endsWith("Paginated");
     }
 }

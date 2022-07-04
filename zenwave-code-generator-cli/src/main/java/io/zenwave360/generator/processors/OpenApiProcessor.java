@@ -20,7 +20,7 @@ public class OpenApiProcessor extends AbstractBaseProcessor implements Processor
 
         apiModel.getRefs().getOriginalRefsList().forEach(pair -> {
             if(pair.getValue() instanceof Map) {
-                ((Map) pair.getValue()).put("x--originalRef", pair.getKey().getRef());
+                ((Map) pair.getValue()).put("x--original-$ref", pair.getKey().getRef());
             }
         });
 

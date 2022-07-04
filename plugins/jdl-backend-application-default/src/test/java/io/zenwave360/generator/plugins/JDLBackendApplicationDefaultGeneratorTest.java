@@ -92,4 +92,22 @@ public class JDLBackendApplicationDefaultGeneratorTest {
         //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
     }
 
+    @Test
+    @Disabled
+    public void test_generator_hexagonal_mongodb_imperative_registry_only_some_entities() throws Exception {
+        Configuration configuration = new JDLBackendApplicationDefaultConfiguration()
+                .withSpecFile("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\api-registry.jdl")
+                .withTargetFolder("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy")
+                .withOption("basePackage", "io.zenwave360.registry")
+                .withOption("persistence", JDLBackendApplicationDefaultGenerator.PersistenceType.mongodb)
+                .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative)
+                .withOption("entities", List.of("Organization"))
+                ;
+
+        new Generator(configuration).generate();
+
+        List<String> logs = logCaptor.getLogs();
+        //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
+        //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
+    }
 }
