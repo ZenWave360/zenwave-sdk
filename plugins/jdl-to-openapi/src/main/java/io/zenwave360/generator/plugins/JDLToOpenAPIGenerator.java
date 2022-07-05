@@ -32,6 +32,9 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
     private String jdlBusinessEntityProperty = "x-business-entity";
 
+    @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas for paginated lists (default: x-business-entity-paginated)")
+    private String jdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
+
     public JDLToOpenAPIGenerator withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;
         return this;
@@ -65,6 +68,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
             Map<String, Object> paginatedSchema = new HashMap<>();
             paginatedSchema.put("allOf", List.of(
                     Map.of("$ref", "#/components/schemas/Page"),
+                    Map.of(jdlBusinessEntityPaginatedProperty, entityName),
                     Map.of("properties",
                             Map.of("content",
                                     Map.of("type", "array", "items", Map.of("$ref", "#/components/schemas/" + entityName)))

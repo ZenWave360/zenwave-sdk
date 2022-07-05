@@ -2,6 +2,7 @@ package {{controllersPackage}};
 
 import {{entitiesPackage}}.*;
 import {{servicesPackage}}.*;
+import {{inboundDtosPackage}}.*;
 import {{openApiModelPackage}}.*;
 import {{controllersPackage}}.mappers.*;
 
@@ -38,11 +39,9 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
     @Autowired
     private {{service.name}}DTOsMapper mapper;
 
-{{#each service.entities as |entity|}}
-    {{~#if entity.options.service}}
+{{#each entitiesServices as |service|}}
     @Autowired
-    private {{entity.options.service}} {{uncapFirst entity.options.service}};
-    {{/if~}}
+    private {{service}} {{uncapFirst service}};
 {{/each}}
 
     @Override
@@ -51,10 +50,40 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
     }
 
 {{#each service.operations as |operation|}}
-    {{~#assign "dtoClassName"}}{{openApiModelNamePrefix}}{{operation.x--response.x--response-dto}}{{openApiModelNameSuffix}}{{/assign}}
+    {{~#assign "requestDTOClassName"}}{{asDtoName operation.x--request-dto }}{{/assign}}
+    {{~#assign "responseDTOClassName"}}{{asDtoName operation.x--response.x--response-dto }}{{/assign}}
+    {{~#if operation.x--request-dto}}
+        {{~assign "requestBodySchema" operation.x--request-schema }}
+        {{~assign "requestEntity"     operation.x--request-entity}}
+        {{~#if requestEntity}}
+            {{~#assign "requestEntityClassName"}}{{requestEntity.className}}{{inputDTOSuffix}}{{/assign}}
+            {{~#assign "requestEntityInstance"}}{{requestEntity.instanceName}}{{inputDTOSuffix}}{{/assign}}
+            {{~#assign "requestEntityCriteriaClassName"}}{{requestEntity.className}}{{criteriaDTOSuffix}}{{/assign}}
+        {{/if}}
+    {{/if}}
+    {{~#if operation.x--response.x--response-dto}}
+        {{~assign "responseBodySchema" operation.x--response.x--response-schema }}
+        {{~assign "responseEntity"     operation.x--response.x--response-entity }}
+        {{~#if responseEntity}}
+            {{~#assign "responseEntityClassName"}}{{responseEntity.className}}{{entityDTOSuffix}}{{/assign}}
+            {{~#assign "responseEntityInstance"}}{{responseEntity.instanceName}}{{entityDTOSuffix}}{{/assign}}
+            {{~#assign "responseEntityPaginatedClassName"}}Page<{{responseEntityClassName}}>{{/assign}}
+        {{/if}}
+    {{/if}}
     @Override
-    public ResponseEntity<{{orVoid dtoClassName}}> {{operation.operationId}}({{asMethodParameters operation}}) {
-        return null; // return {{service.name}}Api.super.{{operation.operationId}}();
+    public ResponseEntity<{{orVoid responseDTOClassName}}> {{operation.operationId}}({{asMethodParameters operation}}) {
+    {{!--
+    /* requestBodySchema: {{{requestBodySchema}}} */
+    /* requestEntity: {{{requestEntity}}} */
+    /* responseBodySchema: {{{responseBodySchema}}} */
+    /* responseEntity: {{{responseEntity}}} */ --}}
+    {{~#if requestBodySchema~}}
+        {{requestEntityClassName}} {{requestEntityInstance}} = mapper.as{{requestEntityClassName}}(reqBody);
+    {{/if~}}
+        {{defaultIfEmpty responseEntityClassName "Object" }} {{defaultIfEmpty responseEntityInstance "paginated"}} =
+            {{uncapFirst (defaultIfEmpty responseEntity.options.service "defaultService")}}.{{operation.operationId}}({{requestEntityInstance}});
+        {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{responseEntity.instanceName}}{{entityDTOSuffix}});
+        return ResponseEntity.status({{operation.x--response.x--statusCode}}).body(responseDTO);
     }
 {{/each}}
 }

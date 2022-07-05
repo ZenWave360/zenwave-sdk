@@ -4,6 +4,7 @@ import com.github.jknack.handlebars.Options;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,7 +21,11 @@ public class CustomHandlebarsHelpers {
 
     public static Object assign(final String variableName, final Options options) throws IOException {
         if(options.params.length == 1) {
-            options.context.combine(Map.of(variableName, options.param(0)));
+            if(options.param(0) != null) {
+                options.context.combine(Map.of(variableName, options.param(0)));
+            } else {
+
+            }
         } else {
             CharSequence finalValue = options.apply(options.fn);
             options.context.combine(Map.of(variableName, finalValue.toString().trim()));
@@ -44,8 +49,12 @@ public class CustomHandlebarsHelpers {
         return text != null? text.replaceAll("\\.", "/") : null;
     }
 
-    public static String joinWithTemplate(List<Object> context, Options options) throws IOException {
+    public static String joinWithTemplate(Collection<Object> context, Options options) throws IOException {
         String delimiter = options.params.length > 0? options.params[0].toString() : "\n";
+        boolean removeDuplicates = options.hash("removeDuplicates", false);
+        if(removeDuplicates) {
+            context = context.stream().distinct().collect(Collectors.toList());
+        }
         return context.stream().map(token -> {
             try {
                 return options.apply(options.fn, token);

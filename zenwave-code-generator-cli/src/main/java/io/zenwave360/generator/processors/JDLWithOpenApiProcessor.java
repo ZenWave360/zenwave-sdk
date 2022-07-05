@@ -23,6 +23,9 @@ public class JDLWithOpenApiProcessor extends AbstractBaseProcessor {
     @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
     public String jdlBusinessEntityProperty = "x-business-entity";
 
+    @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas for paginated lists (default: x-business-entity-paginated)")
+    private String jdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
+
     @DocumentedOption(description = "Maps openapi dtos to jdl entity names")
     public Map<String, String> dtoToEntityNameMap = new HashMap<>();
 
@@ -55,6 +58,7 @@ public class JDLWithOpenApiProcessor extends AbstractBaseProcessor {
         var jdlModel = (Map) contextModel.get(jdlProperty);
 
         buildDtoToEntityMap(openApiModel, jdlModel);
+
         enrichOpenapiRequestAndResponseWithEntity(openApiModel);
         enrichSchemasWithEntity(openApiModel, jdlModel);
 

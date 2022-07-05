@@ -1,7 +1,5 @@
 package io.zenwave360.generator.plugins;
 
-import com.github.jknack.handlebars.Options;
-import com.oracle.truffle.js.runtime.builtins.JSON;
 import io.zenwave360.generator.DocumentedOption;
 import io.zenwave360.generator.processors.utils.JSONPath;
 import io.zenwave360.generator.templating.HandlebarsEngine;
@@ -12,7 +10,6 @@ import io.zenwave360.generator.templating.TemplateOutput;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,7 +22,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static io.zenwave360.generator.templating.OutputFormatType.JAVA;
-import static org.apache.commons.lang3.StringUtils.capitalize;
 
 public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
 
@@ -57,8 +53,23 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "Package where your domain entities are")
     public String entitiesPackage = "{{basePackage}}.core.domain";
 
+    @DocumentedOption(description = "Package where your inbound dtos are")
+    public String inboundDtosPackage = "{{basePackage}}.core.inbound.dtos";
+
     @DocumentedOption(description = "Package where your domain services/usecases interfaces are")
     public String servicesPackage = "{{basePackage}}.core.inbound";
+
+    @DocumentedOption(description = "Suffix for CRUD operations DTOs (default: Input)")
+    public String inputDTOSuffix = "Input";
+
+    @DocumentedOption(description = "Suffix for (output) entities DTOs (default: empty to use the entity itself)")
+    public String entityDTOSuffix = "";
+
+    @DocumentedOption(description = "Suffix for search criteria DTOs (default: Criteria)")
+    public String criteriaDTOSuffix = "Criteria";
+
+    @DocumentedOption(description = "Suffix for elasticsearch document entities (default: Document)")
+    public String searchDTOSuffix = "Document";
 
     @DocumentedOption(description = "ProgrammingStyle imperative|reactive default: imperative")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
@@ -106,12 +117,32 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
             Set<String> dtoNames = new HashSet();
             dtoNames.addAll(JSONPath.get(operationByServiceEntry.getValue(), "$..x--request-dto"));
             dtoNames.addAll(JSONPath.get(operationByServiceEntry.getValue(), "$..x--response.x--response-dto"));
-            Collection<Map<String, Object>> entities = JSONPath.get(operationByServiceEntry.getValue(), "$..x--entity[?(@.className)]"); // filters null
-            entities = entities.stream().distinct().collect(Collectors.toList());
+
             Map dtoWithEntityMap = (Map) dtoNames.stream()
-                    .filter(dto -> dto != null && !dto.endsWith("Paginated"))
-                    .collect(Collectors.toMap(dto -> dto, dto -> Map.of("dtoName", dto, "x--entity", getOpenApiSchema(openApiModel, dto))));
-            Map service = Map.of("service", Map.of("name", operationByServiceEntry.getKey(), "operations", operationByServiceEntry.getValue(), "dtos", dtoWithEntityMap, "entities", entities));
+                    .filter(dtoName -> getEntityForOpenApiSchema(openApiModel, dtoName) != null)
+                    .collect(Collectors.toMap(
+                            dtoName -> dtoName,
+                            dtoName -> Map.of(
+                                    "name", dtoName,
+                                    "schema", getOpenApiSchema(openApiModel, dtoName),
+                                    "entity", getEntityForOpenApiSchema(openApiModel, dtoName)))
+                    );
+
+            Collection<Map<String, Object>> entities = new HashSet<>(JSONPath.get(operationByServiceEntry.getValue(), "$..x--entity[?(@.className)]")); // filters null
+
+            Collection entitiesServices = entities.stream().map(entity -> JSONPath.get(entity, "options.service"))
+                    .distinct().filter(s -> s != null).collect(Collectors.toList());
+
+            Map service = Map.of(
+                    "service", Map.of(
+                            "name", operationByServiceEntry.getKey(),
+                            "operations", operationByServiceEntry.getValue()
+                    ),
+                    "dtoWithEntityMap", dtoWithEntityMap,
+                    "entities", entities,
+                    "entitiesServices", entitiesServices
+            );
+
             for (Object[] template : templates) {
                 templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(template), service));
             }
@@ -120,8 +151,12 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
         return templateOutputList;
     }
 
-    protected Map getOpenApiSchema(Map openApiModel, String schemaName) {
+    protected Map getEntityForOpenApiSchema(Map openApiModel, String schemaName) {
         return JSONPath.get(openApiModel, "$.components.schemas." + schemaName + ".x--entity");
+    }
+
+    protected Map getOpenApiSchema(Map openApiModel, String schemaName) {
+        return JSONPath.get(openApiModel, "$.components.schemas." + schemaName);
     }
 
     protected Map<String, List<Map<String, Object>>> groupOperationsByService(List<Map<String, Object>> operations) {
@@ -152,6 +187,10 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
     {
         handlebarsEngine.getHandlebars().registerHelper("orVoid", (context, options) -> {
             return StringUtils.isNotBlank((String) context)? context : "Void";
+        });
+
+        handlebarsEngine.getHandlebars().registerHelper("asDtoName", (context, options) -> {
+            return StringUtils.isNotBlank((String) context)? openApiModelNamePrefix + context + openApiModelNameSuffix : null;
         });
 
         handlebarsEngine.getHandlebars().registerHelper("asMethodParameters", (context, options) -> {
