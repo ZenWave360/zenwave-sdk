@@ -86,7 +86,7 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
     {{~#if requestBodySchema~}}
         {{requestEntityClassName}} {{requestEntityInstance}} = mapper.as{{requestEntityClassName}}(reqBody);
     {{/if~}}
-        {{{responseEntityClassName}}} {{defaultIfEmpty responseEntityInstance "paginated"}} = null; // TODO: {{entityService}}.{{operation.operationId}}({{requestEntityInstance}});
+        {{{responseEntityClassName}}} {{defaultIfEmpty responseEntityInstance "paginated"}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}({{requestEntityInstance}});
         {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{responseEntityInstance}});
         return ResponseEntity.status({{operation.x--response.x--statusCode}}).body(responseDTO);
     }

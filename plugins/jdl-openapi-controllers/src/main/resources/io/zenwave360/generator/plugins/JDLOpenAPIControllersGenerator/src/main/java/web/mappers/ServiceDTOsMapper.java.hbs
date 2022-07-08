@@ -17,11 +17,10 @@ public interface {{service.name}}DTOsMapper {
     {{~assign "entity" dto.entity}}
     {{~assign "paginatedEntity" dto.paginatedEntity}}
 {{~#if entity}}
-    {{~#assign "entityClassName"}}{{entity.className}}{{inputDTOSuffix}}{{/assign}}
-    {{~#assign "entityInstance"}}{{entity.instanceName}}{{inputDTOSuffix}}{{/assign}}
     {{~#assign "entityClassName"}}{{entity.className}}{{entityDTOSuffix}}{{/assign}}
+    {{~#assign "entityInstance"}}{{entity.instanceName}}{{entityDTOSuffix}}{{/assign}}
     {{~#assign "entityInputClassName"}}{{entity.className}}{{inputDTOSuffix}}{{/assign}}
-    {{~#assign "entityCriteriaClassName"}}{{entity.className}}{{inputDTOSuffix}}{{/assign}}
+    {{~#assign "entityCriteriaClassName"}}{{entity.className}}{{criteriaDTOSuffix}}{{/assign}}
 
     {{dtoClassName}} as{{dtoName}}({{entity.className}} {{entity.instanceName}});
     {{entityClassName}} as{{entityClassName}}({{dtoClassName}} dto);
