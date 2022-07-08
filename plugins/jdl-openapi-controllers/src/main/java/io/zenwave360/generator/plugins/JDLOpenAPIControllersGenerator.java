@@ -119,13 +119,15 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
             dtoNames.addAll(JSONPath.get(operationByServiceEntry.getValue(), "$..x--response.x--response-dto"));
 
             Map dtoWithEntityMap = (Map) dtoNames.stream()
-                    .filter(dtoName -> getEntityForOpenApiSchema(openApiModel, dtoName) != null)
+                    .filter(dtoName -> dtoName != null)
+//                    .filter(dtoName -> getEntityForOpenApiSchema(openApiModel, dtoName) != Boolean.FALSE || getPaginatedEntityForOpenApiSchema(openApiModel, dtoName) != Boolean.FALSE)
                     .collect(Collectors.toMap(
                             dtoName -> dtoName,
                             dtoName -> Map.of(
                                     "name", dtoName,
                                     "schema", getOpenApiSchema(openApiModel, dtoName),
-                                    "entity", getEntityForOpenApiSchema(openApiModel, dtoName)))
+                                    "entity", getEntityForOpenApiSchema(openApiModel, dtoName),
+                                    "paginatedEntity", getPaginatedEntityForOpenApiSchema(openApiModel, dtoName)))
                     );
 
             Collection<Map<String, Object>> entities = new HashSet<>(JSONPath.get(operationByServiceEntry.getValue(), "$..x--entity[?(@.className)]")); // filters null
@@ -133,7 +135,7 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
             Collection entitiesServices = entities.stream().map(entity -> JSONPath.get(entity, "options.service"))
                     .distinct().filter(s -> s != null).collect(Collectors.toList());
 
-            Map service = Map.of(
+            Map serviceModel = Map.of(
                     "service", Map.of(
                             "name", operationByServiceEntry.getKey(),
                             "operations", operationByServiceEntry.getValue()
@@ -144,19 +146,26 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
             );
 
             for (Object[] template : templates) {
-                templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(template), service));
+                templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(template), serviceModel));
             }
         }
 
         return templateOutputList;
     }
 
-    protected Map getEntityForOpenApiSchema(Map openApiModel, String schemaName) {
-        return JSONPath.get(openApiModel, "$.components.schemas." + schemaName + ".x--entity");
+    /** @return Map or false */
+    protected Object getEntityForOpenApiSchema(Map openApiModel, String schemaName) {
+        return JSONPath.get(openApiModel, "$.components.schemas." + schemaName + ".x--entity", false);
     }
 
-    protected Map getOpenApiSchema(Map openApiModel, String schemaName) {
-        return JSONPath.get(openApiModel, "$.components.schemas." + schemaName);
+    /** @return Map or false */
+    protected Object getPaginatedEntityForOpenApiSchema(Map openApiModel, String schemaName) {
+        return JSONPath.get(openApiModel, "$.components.schemas." + schemaName + ".x--entity-paginated", false);
+    }
+
+    /** @return Map or false */
+    protected Object getOpenApiSchema(Map openApiModel, String schemaName) {
+        return JSONPath.get(openApiModel, "$.components.schemas." + schemaName, false);
     }
 
     protected Map<String, List<Map<String, Object>>> groupOperationsByService(List<Map<String, Object>> operations) {

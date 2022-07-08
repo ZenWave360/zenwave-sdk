@@ -6,6 +6,7 @@ import {{inboundDtosPackage}}.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import java.util.List;
+import org.springframework.data.domain.Page;
 
 @Mapper(componentModel = "spring")
 public interface {{service.name}}DTOsMapper {
@@ -14,6 +15,10 @@ public interface {{service.name}}DTOsMapper {
     {{~#assign "dtoName"}}{{openApiModelNamePrefix}}{{dto.name}}{{openApiModelNameSuffix}}{{/assign}}
     {{~#assign "dtoClassName"}}{{openApiModelPackage}}.{{dtoName}}{{/assign}}
     {{~assign "entity" dto.entity}}
+    {{~assign "paginatedEntity" dto.paginatedEntity}}
+{{~#if entity}}
+    {{~#assign "entityClassName"}}{{entity.className}}{{inputDTOSuffix}}{{/assign}}
+    {{~#assign "entityInstance"}}{{entity.instanceName}}{{inputDTOSuffix}}{{/assign}}
     {{~#assign "entityClassName"}}{{entity.className}}{{entityDTOSuffix}}{{/assign}}
     {{~#assign "entityInputClassName"}}{{entity.className}}{{inputDTOSuffix}}{{/assign}}
     {{~#assign "entityCriteriaClassName"}}{{entity.className}}{{inputDTOSuffix}}{{/assign}}
@@ -29,6 +34,11 @@ public interface {{service.name}}DTOsMapper {
     {{entityClassName}} update(@MappingTarget {{entityClassName}} {{entity.instanceName}}, {{dtoClassName}} dto);
     List<{{dtoClassName}}> as{{dtoName}}List(List<{{entity.className}}> {{entity.instanceNamePlural}});
     List<{{entityClassName}}> as{{entityClassName}}List(List<{{dtoClassName}}> dtos);
+{{~/if}}
+{{~#if paginatedEntity}}
+    {{~#assign "paginatedEntityClassName"}}{{paginatedEntity.className}}{{/assign}}
+    {{dtoClassName}} as{{dtoName}}(Page<{{paginatedEntityClassName}}> page);
+{{/if~}}
 {{/each}}
 
 }

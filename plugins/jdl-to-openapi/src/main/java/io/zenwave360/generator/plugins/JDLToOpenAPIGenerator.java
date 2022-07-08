@@ -30,10 +30,13 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "Target file")
     public String targetFile = "openapi.yml";
     @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
-    private String jdlBusinessEntityProperty = "x-business-entity";
+    public String jdlBusinessEntityProperty = "x-business-entity";
 
     @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas for paginated lists (default: x-business-entity-paginated)")
-    private String jdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
+    public String jdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
+
+    @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. User '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
+    public List<String> paginatedDtoItemsJsonPath = List.of("$.items", "$.properties.content.items");
 
     public JDLToOpenAPIGenerator withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;

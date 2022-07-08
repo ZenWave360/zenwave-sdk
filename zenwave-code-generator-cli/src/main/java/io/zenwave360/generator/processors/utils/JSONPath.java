@@ -1,19 +1,27 @@
 package io.zenwave360.generator.processors.utils;
 
+import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.PathNotFoundException;
+import com.jayway.jsonpath.Predicate;
 import com.jayway.jsonpath.internal.path.CompiledPath;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class JSONPath {
 
+    private static final Configuration config = Configuration.defaultConfiguration()
+            .addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL);
+
     public static <T> T get(Object object, String jsonPath) {
         try {
-            return (T) JsonPath.read(object, jsonPath);
+            return (T) JsonPath.using(config).parse(object).read(jsonPath);
         } catch (PathNotFoundException e) {
             return null;
         }
@@ -21,7 +29,7 @@ public class JSONPath {
 
     public static <T> T get(Object object, String jsonPath, T defaultIfNull) {
         try {
-            return (T) JsonPath.read(object, jsonPath);
+            return ObjectUtils.firstNonNull(JsonPath.using(config).parse(object).read(jsonPath), defaultIfNull);
         } catch (PathNotFoundException e) {
             return defaultIfNull;
         }

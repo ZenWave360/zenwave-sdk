@@ -62,12 +62,18 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
         {{/if}}
     {{/if}}
     {{~#if operation.x--response.x--response-dto}}
-        {{~assign "responseBodySchema" operation.x--response.x--response-schema }}
-        {{~assign "responseEntity"     operation.x--response.x--response-entity }}
+        {{~assign "responseBodySchema"      operation.x--response.x--response-schema }}
+        {{~assign "responseEntity"          operation.x--response.x--response-entity }}
+        {{~assign "responseEntityPaginated" operation.x--response.x--response-entity-paginated }}
         {{~#if responseEntity}}
             {{~#assign "responseEntityClassName"}}{{responseEntity.className}}{{entityDTOSuffix}}{{/assign}}
             {{~#assign "responseEntityInstance"}}{{responseEntity.instanceName}}{{entityDTOSuffix}}{{/assign}}
-            {{~#assign "responseEntityPaginatedClassName"}}Page<{{responseEntityClassName}}>{{/assign}}
+            {{~#assign "entityServiceName"}}{{uncapFirst (defaultIfEmpty responseEntity.options.service "defaultService")}}{{/assign}}
+        {{/if}}
+        {{~#if responseEntityPaginated}}
+            {{~#assign "responseEntityClassName"}}Page<{{responseEntityPaginated.className}}>{{/assign}}
+            {{~#assign "responseEntityInstance"}}{{responseEntityPaginated.instanceName}}{{entityDTOSuffix}}{{/assign}}
+            {{~#assign "entityServiceName"}}{{uncapFirst (defaultIfEmpty responseEntityPaginated.options.service "defaultService")}}{{/assign}}
         {{/if}}
     {{/if}}
     @Override
@@ -80,9 +86,8 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
     {{~#if requestBodySchema~}}
         {{requestEntityClassName}} {{requestEntityInstance}} = mapper.as{{requestEntityClassName}}(reqBody);
     {{/if~}}
-        {{defaultIfEmpty responseEntityClassName "Object" }} {{defaultIfEmpty responseEntityInstance "paginated"}} =
-            {{uncapFirst (defaultIfEmpty responseEntity.options.service "defaultService")}}.{{operation.operationId}}({{requestEntityInstance}});
-        {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{responseEntity.instanceName}}{{entityDTOSuffix}});
+        {{{responseEntityClassName}}} {{defaultIfEmpty responseEntityInstance "paginated"}} = null; // TODO: {{entityService}}.{{operation.operationId}}({{requestEntityInstance}});
+        {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{responseEntityInstance}});
         return ResponseEntity.status({{operation.x--response.x--statusCode}}).body(responseDTO);
     }
 {{/each}}

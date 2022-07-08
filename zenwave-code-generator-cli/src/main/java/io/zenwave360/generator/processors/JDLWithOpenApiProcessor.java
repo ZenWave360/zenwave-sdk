@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Depends on {@link io.zenwave360.generator.processors.OpenApiProcessor} to run before.
@@ -24,7 +25,10 @@ public class JDLWithOpenApiProcessor extends AbstractBaseProcessor {
     public String jdlBusinessEntityProperty = "x-business-entity";
 
     @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas for paginated lists (default: x-business-entity-paginated)")
-    private String jdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
+    public String jdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
+
+    @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. User '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
+    public List<String> paginatedDtoItemsJsonPath = List.of("$.properties.items", "$.properties.content.items");
 
     @DocumentedOption(description = "Maps openapi dtos to jdl entity names")
     public Map<String, String> dtoToEntityNameMap = new HashMap<>();
@@ -59,8 +63,8 @@ public class JDLWithOpenApiProcessor extends AbstractBaseProcessor {
 
         buildDtoToEntityMap(openApiModel, jdlModel);
 
-        enrichOpenapiRequestAndResponseWithEntity(openApiModel);
         enrichSchemasWithEntity(openApiModel, jdlModel);
+        enrichOpenapiRequestAndResponseWithEntity(openApiModel);
 
         enrichJdlEntitiesWithDtoNames(openApiModel, jdlModel);
 
@@ -68,7 +72,24 @@ public class JDLWithOpenApiProcessor extends AbstractBaseProcessor {
         return contextModel;
     }
 
+    protected void enrichSchemasWithEntity(Map<String, Object> openApiModel, Map<String, Object> jdlModel) {
+        List<Map<String, Object>> schemas = JSONPath.get(openApiModel, "$.components.schemas[*]");
+        for (Map<String, Object> schema : schemas) {
+            String dtoName = (String) schema.get("x--schema-name");
+            String entityName = JSONPath.get(schema, jdlBusinessEntityProperty);
+            schema.put("x--entity", dtoToEntityMap.get(dtoName));
+
+            var paginatedDtoSchema = getPaginatedDtoSchema(schema);
+            if (paginatedDtoSchema != null) {
+                String paginatedDtoName = (String) paginatedDtoSchema.get("x--schema-name");
+                String paginatedEntityName = JSONPath.get(schema, jdlBusinessEntityPaginatedProperty);
+                schema.put("x--entity-paginated", dtoToEntityMap.get(paginatedDtoName));
+            }
+        }
+    }
+
     protected void enrichOpenapiRequestAndResponseWithEntity(Map<String, Object> openApiModel) {
+        // TODO consider using schemas x--entity and x--entity-paginated to inform this
         List<Map<String, Object>> requests = JSONPath.get(openApiModel, "$..[?(@.x--request-dto)]");
         for (Map<String, Object> request : requests) {
             String dtoName = JSONPath.get(request, "$.x--request-dto");
@@ -79,14 +100,12 @@ public class JDLWithOpenApiProcessor extends AbstractBaseProcessor {
         for (Map<String, Object> response : responses) {
             String dtoName = JSONPath.get(response, "$.x--response-dto");
             response.put("x--response-entity", dtoToEntityMap.get(dtoName));
-        }
-    }
 
-    protected void enrichSchemasWithEntity(Map<String, Object> openApiModel, Map<String, Object> jdlModel) {
-        List<Map<String, Object>> schemas = JSONPath.get(openApiModel, "$..[?(@." + jdlBusinessEntityProperty + ")]");
-        for (Map<String, Object> schema : schemas) {
-            String entityName = JSONPath.get(schema, jdlBusinessEntityProperty);
-            schema.put("x--entity", JSONPath.get(jdlModel, "$.entities." + entityName));
+            var paginatedDtoSchema = getPaginatedDtoSchema(response);
+            if(paginatedDtoSchema != null) {
+                String paginatedDtoName = (String) paginatedDtoSchema.get("x--schema-name");
+                response.put("x--response-entity-paginated", dtoToEntityMap.get(paginatedDtoName));
+            }
         }
     }
 
@@ -105,6 +124,14 @@ public class JDLWithOpenApiProcessor extends AbstractBaseProcessor {
                 JSONPath.set(entity, "options.dtos", dtos);
             }
         }
+    }
+
+    protected Map<String, Object> getPaginatedDtoSchema(Map<String, Object> schemaOrResponse){
+        var schema = JSONPath.get(schemaOrResponse, "x--response-schema", schemaOrResponse);
+        return paginatedDtoItemsJsonPath.stream()
+                .map(jsonPath -> (Map) JSONPath.get(schema, jsonPath))
+                .filter(paginatedDtoSchema -> paginatedDtoSchema != null)
+                .findFirst().orElse(null);
     }
 
     protected void buildDtoToEntityMap(Map<String, ?> openApiModel, Map<String, ?> jdlModel){
