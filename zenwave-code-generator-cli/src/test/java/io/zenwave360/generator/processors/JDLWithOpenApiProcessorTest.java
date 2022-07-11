@@ -4,6 +4,7 @@ import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.parsers.JDLParser;
 import io.zenwave360.generator.processors.utils.JSONPath;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -42,6 +43,7 @@ public class JDLWithOpenApiProcessorTest {
     }
 
     @Test
+    @Disabled
     public void testProcessJDLWithOpenAPI_registry() throws Exception {
         var openapiModel = loadOpenApi("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\openapi.yml");
         var jdlModel = loadJDL("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\api-registry.jdl");
