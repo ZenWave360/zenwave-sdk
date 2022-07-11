@@ -200,6 +200,10 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
             return StringUtils.isNotBlank((String) context)? openApiModelNamePrefix + context + openApiModelNameSuffix : null;
         });
 
+        handlebarsEngine.getHandlebars().registerHelper("statusCode", (context, options) -> {
+            return "default".equals(context)? "200" : context;
+        });
+
         handlebarsEngine.getHandlebars().registerHelper("asMethodParameters", (context, options) -> {
             if(context instanceof Map) {
                 Map operation = (Map) context;
