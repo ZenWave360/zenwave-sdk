@@ -73,4 +73,27 @@ public class JDLOpenAPIControllersGeneratorTest {
         //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
     }
 
+    @Test
+    @Disabled
+    public void test_generator_jdl_openapi_controllers_registry_no_jdl() throws Exception {
+        Configuration configuration = new JDLOpenAPIControllersConfiguration()
+                .withSpecFile("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\openapi.yml")
+//                .withOption("jdlFile", "C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\api-registry.jdl")
+                .withOption("basePackage", "io.zenwave360.registry")
+                .withOption("controllersPackage", "io.zenwave360.registry.nojdl.adapters.web")
+                .withOption("openApiApiPackage", "io.zenwave360.registry.adapters.web")
+                .withOption("openApiModelPackage", "io.zenwave360.registry.adapters.web.model")
+                .withOption("openApiModelNameSuffix", "DTO")
+                //                .withOption("operationIds", List.of("addPet", "updatePet"))
+                .withOption("style", JDLOpenAPIControllersGenerator.ProgrammingStyle.imperative)
+                .withTargetFolder("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy")
+                ;
+
+        new Generator(configuration).generate();
+
+        List<String> logs = logCaptor.getLogs();
+        //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
+        //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
+    }
+
 }

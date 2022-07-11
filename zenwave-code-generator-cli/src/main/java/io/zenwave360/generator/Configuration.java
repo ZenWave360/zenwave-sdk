@@ -2,6 +2,7 @@ package io.zenwave360.generator;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +69,7 @@ public class Configuration {
 
     public Configuration withChain(Class... processorClasses) {
         if(processorClasses != null) {
-            chain = List.of(processorClasses);
+            chain = new ArrayList<>(List.of(processorClasses));
         }
         return this;
     }
@@ -81,6 +82,36 @@ public class Configuration {
                     throw new RuntimeException(e);
                 }
             }).collect(Collectors.toList());
+        }
+        return this;
+    }
+
+    public Configuration removeFromChain(Class ...processorClasses) {
+        Arrays.stream(processorClasses).forEach(processorClass -> chain.remove(processorClass));
+        return this;
+    }
+
+    public Configuration replaceInChain(Class current, Class replacement) {
+        chain.replaceAll(chainedProcessor -> chainedProcessor.equals(current)? replacement : current);
+        return this;
+    }
+
+    public Configuration addAfterInChain(Class pivot, Class newProcessor) {
+        int index = chain.indexOf(pivot) + 1;
+        if(index == -1) {
+            chain.add(newProcessor);
+        } else {
+            chain.add(index, newProcessor);
+        }
+        return this;
+    }
+
+    public Configuration addBeforeInChain(Class pivot, Class newProcessor) {
+        int index = chain.indexOf(pivot);
+        if(index >= 0) {
+            chain.add(index, newProcessor);
+        } else {
+            chain.add(newProcessor);
         }
         return this;
     }

@@ -58,7 +58,7 @@ public class JavaToJDLGenerator implements GeneratorPlugin {
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, ?> contextModel) {
+    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
         Class entityAnnotationClass = persistenceType == PersistenceType.JPA? Entity.class : Document.class;
         Set<Class> entitySubClasses = getAnnotatedEntities(entityAnnotationClass);
 

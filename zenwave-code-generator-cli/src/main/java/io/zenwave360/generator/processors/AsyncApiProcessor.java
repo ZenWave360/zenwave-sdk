@@ -11,8 +11,8 @@ import java.util.Map;
 public class AsyncApiProcessor extends AbstractBaseProcessor implements Processor {
 
     @Override
-    public Map<String, ?> process(Map<String, ?> contextModel) {
-        Map<String, ?> apiModel = targetProperty != null? (Map<String, ?>) contextModel.get(targetProperty) : contextModel;
+    public Map<String, Object> process(Map<String, Object> contextModel) {
+        Map<String, Object> apiModel = targetProperty != null? (Map<String, Object>) contextModel.get(targetProperty) : contextModel;
 
         List<Map<String, Object>> traitsParents = JSONPath.get(apiModel, "$..[?(@.traits)]");
         for (Map<String, Object> traitParent : traitsParents) {

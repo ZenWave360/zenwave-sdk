@@ -45,12 +45,12 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
         return handlebarsEngine;
     }
 
-    Model getApiModel(Map<String, ?> contextModel) {
+    Model getApiModel(Map<String, Object> contextModel) {
         return(Model) contextModel.get(sourceProperty);
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, ?> contextModel) {
+    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
         List<TemplateOutput> templateOutputList = new ArrayList<>();
         Model apiModel = getApiModel(contextModel);
         Map<String, List<Map<String, Object>>> operationsByService = getOperationsGroupedByTag(apiModel);
@@ -75,7 +75,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
         return templateOutputList;
     }
 
-    public TemplateOutput generateTestSet(Map<String, ?> contextModel, TemplateInput template, Collection<String> includedTestsNames) {
+    public TemplateOutput generateTestSet(Map<String, Object> contextModel, TemplateInput template, Collection<String> includedTestsNames) {
         Map<String, Object> model = new HashMap<>();
         model.putAll(asConfigurationMap());
         model.put("context", contextModel);
@@ -85,7 +85,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
         return getTemplateEngine().processTemplate(model, template).get(0);
     }
 
-    public TemplateOutput generateTemplateOutput(Map<String, ?> contextModel, TemplateInput template, String serviceName, List<Map<String, Object>> operations) {
+    public TemplateOutput generateTemplateOutput(Map<String, Object> contextModel, TemplateInput template, String serviceName, List<Map<String, Object>> operations) {
         Map<String, Object> model = new HashMap<>();
         model.putAll(asConfigurationMap());
         model.put("context", contextModel);

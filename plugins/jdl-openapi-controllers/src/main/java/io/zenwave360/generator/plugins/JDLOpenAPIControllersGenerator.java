@@ -2,6 +2,7 @@ package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.DocumentedOption;
 import io.zenwave360.generator.processors.utils.JSONPath;
+import io.zenwave360.generator.processors.utils.Maps;
 import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.OutputFormatType;
 import io.zenwave360.generator.templating.TemplateEngine;
@@ -74,9 +75,9 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "ProgrammingStyle imperative|reactive default: imperative")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
 
-    private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
+    protected HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
-    private String templatesFolder = "io/zenwave360/generator/plugins/JDLOpenAPIControllersGenerator/";
+    protected String templatesFolder = "io/zenwave360/generator/plugins/JDLOpenAPIControllersGenerator/";
 
     List<Object[]> templates = List.of(
             new Object[] { "src/main/java", "web/mappers/ServiceDTOsMapper.java", "mappers/{{service.name}}DTOsMapper.java", JAVA },
@@ -88,7 +89,7 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
     }
 
     protected TemplateInput asTemplateInput(Object[] templateNames) {
-        Function<Map<String,?>, Boolean> skip = templateNames.length > 4? (Function) templateNames[4] : null;
+        Function<Map<String, Object>, Boolean> skip = templateNames.length > 4? (Function) templateNames[4] : null;
         return new TemplateInput()
                 .withTemplateLocation(templatesFolder + templateNames[0] + "/" + templateNames[1])
                 .withTargetFile(templateNames[0] + "/{{asPackageFolder controllersPackage}}/" + templateNames[2])
@@ -96,15 +97,15 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
                 .withSkip(skip);
     }
 
-    protected Map<String, ?> getJDLModel(Map<String, ?> contextModel) {
+    protected Map<String, Object> getJDLModel(Map<String, Object> contextModel) {
         return (Map) contextModel.get(jdlProperty);
     }
-    protected Map<String, ?> getOpenAPIModel(Map<String, ?> contextModel) {
+    protected Map<String, Object> getOpenAPIModel(Map<String, Object> contextModel) {
         return (Map) contextModel.get(openapiProperty);
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, ?> contextModel) {
+    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
         var templateOutputList = new ArrayList<TemplateOutput>();
         var openApiModel = getOpenAPIModel(contextModel);
         var jdlModel = getJDLModel(contextModel);
@@ -123,7 +124,7 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
 //                    .filter(dtoName -> getEntityForOpenApiSchema(openApiModel, dtoName) != Boolean.FALSE || getPaginatedEntityForOpenApiSchema(openApiModel, dtoName) != Boolean.FALSE)
                     .collect(Collectors.toMap(
                             dtoName -> dtoName,
-                            dtoName -> Map.of(
+                            dtoName -> Maps.of(
                                     "name", dtoName,
                                     "schema", getOpenApiSchema(openApiModel, dtoName),
                                     "entity", getEntityForOpenApiSchema(openApiModel, dtoName),
@@ -153,19 +154,16 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
         return templateOutputList;
     }
 
-    /** @return Map or false */
-    protected Object getEntityForOpenApiSchema(Map openApiModel, String schemaName) {
-        return JSONPath.get(openApiModel, "$.components.schemas." + schemaName + ".x--entity", false);
+    protected Map getEntityForOpenApiSchema(Map openApiModel, String schemaName) {
+        return JSONPath.get(openApiModel, "$.components.schemas." + schemaName + ".x--entity");
     }
 
-    /** @return Map or false */
-    protected Object getPaginatedEntityForOpenApiSchema(Map openApiModel, String schemaName) {
-        return JSONPath.get(openApiModel, "$.components.schemas." + schemaName + ".x--entity-paginated", false);
+    protected Map getPaginatedEntityForOpenApiSchema(Map openApiModel, String schemaName) {
+        return JSONPath.get(openApiModel, "$.components.schemas." + schemaName + ".x--entity-paginated");
     }
 
-    /** @return Map or false */
-    protected Object getOpenApiSchema(Map openApiModel, String schemaName) {
-        return JSONPath.get(openApiModel, "$.components.schemas." + schemaName, false);
+    protected Map getOpenApiSchema(Map openApiModel, String schemaName) {
+        return JSONPath.get(openApiModel, "$.components.schemas." + schemaName);
     }
 
     protected Map<String, List<Map<String, Object>>> groupOperationsByService(List<Map<String, Object>> operations) {
@@ -182,7 +180,7 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
         return operationsByService;
     }
 
-    public List<TemplateOutput> generateTemplateOutput(Map<String, ?> contextModel, TemplateInput template, Map<String, ?> extModel) {
+    public List<TemplateOutput> generateTemplateOutput(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> extModel) {
         Map<String, Object> model = new HashMap<>();
         model.putAll(asConfigurationMap());
         model.put("context", contextModel);

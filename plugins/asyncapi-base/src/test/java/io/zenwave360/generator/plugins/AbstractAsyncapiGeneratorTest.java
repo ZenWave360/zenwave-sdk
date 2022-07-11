@@ -18,14 +18,14 @@ public class AbstractAsyncapiGeneratorTest {
     private Model loadAsyncapiModelFromResource(String resource) throws Exception {
         String targetProperty = "api";
         File file = new File(getClass().getClassLoader().getResource(resource).toURI());
-        Map<String, ?> model = new DefaultYamlParser().withSpecFile(file.getAbsolutePath()).withTargetProperty(targetProperty).parse();
+        Map<String, Object> model = new DefaultYamlParser().withSpecFile(file.getAbsolutePath()).withTargetProperty(targetProperty).parse();
         return (Model) new AsyncApiProcessor().withTargetProperty(targetProperty).process(model).get(targetProperty);
     }
 
     private AbstractAsyncapiGenerator newAbstractAsyncapiGenerator() {
         return new AbstractAsyncapiGenerator() {
             @Override
-            public List<TemplateOutput> generate(Map<String, ?> apiModel) {
+            public List<TemplateOutput> generate(Map<String, Object> apiModel) {
                 return null;
             }
         };

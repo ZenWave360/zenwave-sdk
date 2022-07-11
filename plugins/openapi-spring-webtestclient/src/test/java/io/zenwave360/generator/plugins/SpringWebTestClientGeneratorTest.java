@@ -14,15 +14,15 @@ import java.util.stream.Collectors;
 
 public class SpringWebTestClientGeneratorTest {
 
-    private Map<String, ?> loadApiModelFromResource(String resource) throws Exception {
+    private Map<String, Object> loadApiModelFromResource(String resource) throws Exception {
         File file = new File(getClass().getClassLoader().getResource(resource).toURI());
-        Map<String, ?> model = new DefaultYamlParser().withSpecFile(file.getAbsolutePath()).parse();
+        Map<String, Object> model = new DefaultYamlParser().withSpecFile(file.getAbsolutePath()).parse();
         return new OpenApiProcessor().process(model);
     }
 
     @Test
     public void test_output_partial_one_operation() throws Exception {
-        Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
+        Map<String, Object> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
         generator.groupBy = SpringWebTestClientGenerator.GroupByType.PARTIAL;
         generator.apiPackage = "io.example.api";
@@ -36,7 +36,7 @@ public class SpringWebTestClientGeneratorTest {
 
     @Test
     public void test_output_by_one_service() throws Exception {
-        Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
+        Map<String, Object> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
         generator.groupBy = SpringWebTestClientGenerator.GroupByType.SERVICE;
         generator.apiPackage = "io.example.api";
@@ -51,7 +51,7 @@ public class SpringWebTestClientGeneratorTest {
 
     @Test
     public void test_output_by_all_services() throws Exception {
-        Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
+        Map<String, Object> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
         generator.groupBy = SpringWebTestClientGenerator.GroupByType.SERVICE;
         generator.apiPackage = "io.example.api";

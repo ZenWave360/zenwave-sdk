@@ -16,12 +16,12 @@ import static io.zenwave360.generator.processors.JDLWithOpenApiProcessor.OPENAPI
 
 public class JDLWithOpenApiProcessorTest {
 
-    private Map<String, ?> loadOpenApi(String resource) throws Exception {
+    private Map<String, Object> loadOpenApi(String resource) throws Exception {
         Map<String, Object> model = new DefaultYamlParser().withSpecFile(resource).withTargetProperty(OPENAPI_DEFAULT_PROPERTY).parse();
         return new OpenApiProcessor().withTargetProperty(OPENAPI_DEFAULT_PROPERTY).process(model);
     }
 
-    private Map<String, ?> loadJDL(String resource) throws IOException {
+    private Map<String, Object> loadJDL(String resource) throws IOException {
         Map<String, Object> model = new JDLParser().withSpecFile(resource).withTargetProperty(JDL_DEFAULT_PROPERTY).parse();
         return new JDLProcessor().withTargetProperty(JDL_DEFAULT_PROPERTY).process(model);
     }

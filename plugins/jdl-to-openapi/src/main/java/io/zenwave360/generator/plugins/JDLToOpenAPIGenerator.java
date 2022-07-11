@@ -47,13 +47,13 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
 
     private final TemplateInput jdlToOpenAPITemplate = new TemplateInput("io/zenwave360/generator/plugins/OpenAPIToJDLGenerator/JDLToOpenAPI.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
 
-    protected Map<String, ?> getJDLModel(Map<String, ?> contextModel) {
+    protected Map<String, Object> getJDLModel(Map<String, Object> contextModel) {
         return (Map) contextModel.get(sourceProperty);
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, ?> contextModel) {
-        Map<String, ?> jdlModel = getJDLModel(contextModel);
+    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
+        Map<String, Object> jdlModel = getJDLModel(contextModel);
         List<String> serviceNames = JSONPath.get(jdlModel, "$.options.options.service[*].value");
         ((Map) jdlModel).put("serviceNames", serviceNames);
 
@@ -62,10 +62,10 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
         JSONPath.set(oasSchemas, "components.schemas", schemas);
 
 
-        List<Map<String, ?>> entities = (List) JSONPath.get(jdlModel, "$.entities[*]");
-        for (Map<String, ?> entity : entities) {
+        List<Map<String, Object>> entities = (List) JSONPath.get(jdlModel, "$.entities[*]");
+        for (Map<String, Object> entity : entities) {
             String entityName = (String) entity.get("name");
-            Map<String, ?> openAPISchema = convertToOpenAPI(entity);
+            Map<String, Object> openAPISchema = convertToOpenAPI(entity);
             schemas.put(entityName, openAPISchema);
 
             Map<String, Object> paginatedSchema = new HashMap<>();
@@ -81,8 +81,8 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
             schemas.put(entityName + "Paginated", paginatedSchema);
         }
 
-        List<Map<String, ?>> enums = (List) JSONPath.get(jdlModel, "$.enums.enums[*]");
-        for (Map<String, ?> enumValue : enums) {
+        List<Map<String, Object>> enums = (List) JSONPath.get(jdlModel, "$.enums.enums[*]");
+        for (Map<String, Object> enumValue : enums) {
             Map<String, Object> enumSchema = new LinkedHashMap<>();
             enumSchema.put("type", "string");
             if(enumValue.get("comment") != null) {
@@ -106,7 +106,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
     }
 
     private List blobTypes = List.of("Blob", "AnyBlob", "ImageBlob");
-    private Map<String,?> convertToOpenAPI(Map<String,?> entity) {
+    private Map<String, Object> convertToOpenAPI(Map<String, Object> entity) {
         Map<String, Object> schema = new LinkedHashMap<>();
         schema.put("type", "object");
         schema.put(jdlBusinessEntityProperty, entity.get("name"));
@@ -122,8 +122,8 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
             properties.put("id", Map.of("type", "string"));
         }
 
-        List<Map<String, ?>> fields = (List) JSONPath.get(entity, "$.fields[*]");
-        for (Map<String, ?> field : fields) {
+        List<Map<String, Object>> fields = (List) JSONPath.get(entity, "$.fields[*]");
+        for (Map<String, Object> field : fields) {
             Map<String, Object> property = new LinkedHashMap<>();
 
             if("String".equals(field.get("type")) || "TextBlob".equals(field.get("type"))) {
@@ -208,7 +208,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
         return schema;
     }
 
-    public TemplateOutput generateTemplateOutput(Map<String, ?> contextModel, TemplateInput template, Map<String, ?> jdlModel, String schemasAsString) {
+    public TemplateOutput generateTemplateOutput(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> jdlModel, String schemasAsString) {
         Map<String, Object> model = new HashMap<>();
         model.putAll(asConfigurationMap());
         model.put("context", contextModel);

@@ -33,7 +33,7 @@ public class Generator {
         log.debug("Executing 'generate' with config Options {}", configuration.getOptions());
         log.debug("Processed Options {}", configuration.processOptions());
         log.debug("Processors chain is {}", configuration.getChain().stream().map(c -> c.getName()).collect(Collectors.toList()));
-        Map<String, ?> model = new HashMap<>();
+        Map<String, Object> model = new HashMap<>();
         List<TemplateOutput> templateOutputList = new ArrayList<>();
 
         int chainIndex = 0;

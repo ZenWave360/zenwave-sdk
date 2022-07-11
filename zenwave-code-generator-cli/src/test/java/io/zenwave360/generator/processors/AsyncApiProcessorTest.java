@@ -25,7 +25,7 @@ public class AsyncApiProcessorTest {
 
     @Test
     public void testProcessAsyncApiChannelName() throws Exception {
-        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml");
+        Map<String, Object> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml");
         AsyncApiProcessor processor = new AsyncApiProcessor().withTargetProperty(targetProperty);;
         Model processed = (Model) processor.process(model).get(targetProperty);
         String channelName = get(processed,"$.channels.createProductNotification.subscribe.x--channel");
@@ -34,7 +34,7 @@ public class AsyncApiProcessorTest {
 
     @Test
     public void testProcessAsyncApiOperationType() throws Exception {
-        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml");
+        Map<String, Object> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml");
         AsyncApiProcessor processor = new AsyncApiProcessor().withTargetProperty(targetProperty);
         Model processed = (Model) processor.process(model).get(targetProperty);
         String operationType = get(processed,"$.channels.createProductNotification.subscribe.x--operationType");
@@ -43,7 +43,7 @@ public class AsyncApiProcessorTest {
 
     @Test
     public void testProcessAsyncApiTraits() throws Exception {
-        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-shoping-cart.yml");
+        Map<String, Object> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-shoping-cart.yml");
 
         String headers = get(model.get(targetProperty), "$.components.messages.LinesRemoved.headers");
         Assertions.assertEquals(null, headers);
@@ -57,7 +57,7 @@ public class AsyncApiProcessorTest {
 
     @Test
     public void testCollectMessagesOneOf() throws Exception {
-        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-shoping-cart.yml");
+        Map<String, Object> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-shoping-cart.yml");
 
         AsyncApiProcessor processor = new AsyncApiProcessor().withTargetProperty(targetProperty);
         Model processed = (Model) processor.process(model).get(targetProperty);
@@ -68,7 +68,7 @@ public class AsyncApiProcessorTest {
 
     @Test
     public void testCollectMessagesSingleMessage() throws Exception {
-        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml");
+        Map<String, Object> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml");
 
         AsyncApiProcessor processor = new AsyncApiProcessor().withTargetProperty(targetProperty);
         Model processed = (Model) processor.process(model).get(targetProperty);
@@ -79,7 +79,7 @@ public class AsyncApiProcessorTest {
 
     @Test
     public void testCalculateMessagesParamTypeForAvros() throws Exception {
-        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-shoping-cart.yml");
+        Map<String, Object> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-shoping-cart.yml");
 
         AsyncApiProcessor processor = new AsyncApiProcessor().withTargetProperty(targetProperty);
         Model processed = (Model) processor.process(model).get(targetProperty);
@@ -89,7 +89,7 @@ public class AsyncApiProcessorTest {
 
     @Test
     public void testCalculateMessagesParamTypeForAsyncAPISchema() throws Exception {
-        Map<String, ?> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-javaType.yml");
+        Map<String, Object> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-javaType.yml");
 
         AsyncApiProcessor processor = new AsyncApiProcessor().withTargetProperty(targetProperty);
         Model processed = (Model) processor.process(model).get(targetProperty);

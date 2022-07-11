@@ -8,7 +8,7 @@ public class TemplateInput {
     private String targetFile;
 
     private String mimeType;
-    private Function<Map<String,?>, Boolean> skip;
+    private Function<Map<String, Object>, Boolean> skip;
 
     public TemplateInput() {
     }
@@ -33,7 +33,7 @@ public class TemplateInput {
         return targetFile;
     }
 
-    public Function<Map<String,?>, Boolean> getSkip() {
+    public Function<Map<String, Object>, Boolean> getSkip() {
         return skip;
     }
 
@@ -61,7 +61,7 @@ public class TemplateInput {
         return this;
     }
 
-    public TemplateInput withSkip(Function<Map<String, ?>, Boolean> skip) {
+    public TemplateInput withSkip(Function<Map<String, Object>, Boolean> skip) {
         this.skip = skip;
         return this;
     }

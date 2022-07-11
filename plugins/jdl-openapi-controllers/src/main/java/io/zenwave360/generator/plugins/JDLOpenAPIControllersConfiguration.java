@@ -4,6 +4,7 @@ import io.zenwave360.generator.Configuration;
 import io.zenwave360.generator.formatters.JavaFormatter;
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.parsers.JDLParser;
+import io.zenwave360.generator.processors.FillJDLWithDummyDataProcessor;
 import io.zenwave360.generator.processors.JDLProcessor;
 import io.zenwave360.generator.processors.JDLWithOpenApiProcessor;
 import io.zenwave360.generator.processors.OpenApiProcessor;
@@ -23,7 +24,13 @@ public class JDLOpenAPIControllersConfiguration extends Configuration {
     @Override
     public <T extends Configuration> T processOptions() {
         if(!getOptions().containsKey("targetFolder")) {
-            withChain(DefaultYamlParser.class, OpenApiProcessor.class, JDLParser.class, JDLProcessor.class, JDLWithOpenApiProcessor.class, JDLOpenAPIControllersGenerator.class, JavaFormatter.class, TemplateStdoutWriter.class);
+            replaceInChain(TemplateFileWriter.class, TemplateStdoutWriter.class);
+        }
+        if(!getOptions().containsKey("jdlFile")) {
+            removeFromChain(JDLParser.class, JDLProcessor.class);
+            addBeforeInChain(JDLWithOpenApiProcessor.class, FillJDLWithDummyDataProcessor.class);
+            withOption("FillJDLWithDummyDataProcessor.openapiProperty", "openapi");
+            withOption("FillJDLWithDummyDataProcessor.jdlProperty", "jdl");
         }
         // because we have more than one model, we need to configure how they are passed around from parser to processor and generator
         // we use class name for passing the properties, in case one class is repeated in chain we'd use the index number in the chain

@@ -25,7 +25,7 @@ public class OpenApiProcessorTest {
 
     @Test
     public void testProcessOpenAPI() throws Exception {
-        Map<String, ?> model = loadOpenAPIModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
+        Map<String, Object> model = loadOpenAPIModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         OpenApiProcessor processor = new OpenApiProcessor().withTargetProperty(targetProperty);;
         Model processed = (Model) processor.process(model).get(targetProperty);
         List httpVerbs = JSONPath.get(processed,"$.paths..x--httpVerb");

@@ -16,8 +16,7 @@ import java.util.Objects;
 
 public class JSONPath {
 
-    private static final Configuration config = Configuration.defaultConfiguration()
-            .addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL);
+    private static final Configuration config = Configuration.defaultConfiguration();
 
     public static <T> T get(Object object, String jsonPath) {
         try {

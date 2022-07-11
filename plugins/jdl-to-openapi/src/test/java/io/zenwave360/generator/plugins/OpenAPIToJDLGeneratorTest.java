@@ -16,15 +16,15 @@ public class OpenAPIToJDLGeneratorTest {
 
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
-    private Map<String, ?> loadApiModelFromResource(String resource) throws Exception {
+    private Map<String, Object> loadApiModelFromResource(String resource) throws Exception {
         File file = new File(getClass().getClassLoader().getResource(resource).toURI());
-        Map<String, ?> model = new DefaultYamlParser().withSpecFile(file.getAbsolutePath()).parse();
+        Map<String, Object> model = new DefaultYamlParser().withSpecFile(file.getAbsolutePath()).parse();
         return new OpenApiProcessor().process(model);
     }
 
     @Test
     public void test_jdl_to_openapi_with_relationships() throws Exception {
-        Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
+        Map<String, Object> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         OpenAPIToJDLGenerator generator = new OpenAPIToJDLGenerator();
         generator.useRelationships = true;
 
@@ -38,7 +38,7 @@ public class OpenAPIToJDLGeneratorTest {
 
     @Test
     public void test_jdl_to_openapi_with_embedded() throws Exception {
-        Map<String, ?> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
+        Map<String, Object> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         OpenAPIToJDLGenerator generator = new OpenAPIToJDLGenerator();
         generator.useRelationships = false;
 

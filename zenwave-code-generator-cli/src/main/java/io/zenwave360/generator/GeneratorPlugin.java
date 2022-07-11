@@ -24,7 +24,7 @@ public interface GeneratorPlugin {
         PROVIDER, CLIENT
     }
 
-    List<TemplateOutput> generate(Map<String, ?> contextModel);
+    List<TemplateOutput> generate(Map<String, Object> contextModel);
 
     default Map<String, Object> asConfigurationMap() {
         Map<String, Object> config = new HashMap<>();

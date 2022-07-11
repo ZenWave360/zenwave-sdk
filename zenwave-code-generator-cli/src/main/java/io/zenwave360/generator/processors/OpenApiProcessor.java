@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 public class OpenApiProcessor extends AbstractBaseProcessor implements Processor {
 
     @Override
-    public Map<String, ?> process(Map<String, ?> contextModel) {
+    public Map<String, Object> process(Map<String, Object> contextModel) {
         Model apiModel = targetProperty != null? (Model) contextModel.get(targetProperty) : (Model) contextModel;
 
         apiModel.getRefs().getOriginalRefsList().forEach(pair -> {

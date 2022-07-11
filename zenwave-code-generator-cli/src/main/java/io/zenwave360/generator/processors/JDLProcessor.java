@@ -4,8 +4,8 @@ import java.util.Map;
 
 public class JDLProcessor extends AbstractBaseProcessor {
     @Override
-    public Map<String, ?> process(Map<String, ?> contextModel) {
-        Map<String, ?> jdlModel = targetProperty != null? (Map) contextModel.get(targetProperty) : (Map) contextModel;
+    public Map<String, Object> process(Map<String, Object> contextModel) {
+        Map<String, Object> jdlModel = targetProperty != null? (Map) contextModel.get(targetProperty) : (Map) contextModel;
         // TODO placeholder for future processing
         return contextModel;
     }

@@ -36,15 +36,15 @@ public class JDLBackendApplicationDefaultGeneratorTest {
         logCaptor.close();
     }
 
-    private Map<String, ?> loadJDLModelFromResource(String resource) throws Exception {
+    private Map<String, Object> loadJDLModelFromResource(String resource) throws Exception {
         File file = new File(getClass().getClassLoader().getResource(resource).toURI());
-        Map<String, ?> model = new JDLParser().withSpecFile(file.getAbsolutePath()).parse();
+        Map<String, Object> model = new JDLParser().withSpecFile(file.getAbsolutePath()).parse();
         return new JDLProcessor().process(model);
     }
 
     @Test
     public void test_entities() throws Exception {
-        Map<String, ?> model = loadJDLModelFromResource("io/zenwave360/generator/resources/jdl/orders-model.jdl");
+        Map<String, Object> model = loadJDLModelFromResource("io/zenwave360/generator/resources/jdl/orders-model.jdl");
         JDLBackendApplicationDefaultGenerator generator = new JDLBackendApplicationDefaultGenerator();
 
         List<TemplateOutput> outputTemplates = generator.generate(model);

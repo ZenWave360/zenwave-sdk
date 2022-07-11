@@ -62,7 +62,7 @@ public class GeneratorTest {
 
         new Generator(configuration).generate();
 
-        Map<String, ?> contextModel = NoOpPluginGenerator.context;
+        Map<String, Object> contextModel = NoOpPluginGenerator.context;
 
         logCaptor.getLogs();
     }

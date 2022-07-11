@@ -68,12 +68,12 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         return serviceName + operationRoleType.getServiceSuffix();
     }
 
-    Model getApiModel(Map<String, ?> contextModel) {
+    Model getApiModel(Map<String, Object> contextModel) {
         return(Model) contextModel.get(sourceProperty);
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, ?> contextModel) {
+    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
         List<TemplateOutput> templateOutputList = new ArrayList<>();
         Model apiModel = getApiModel(contextModel);
         Map<String, List<Map<String, Object>>> subscribeOperations = getSubscribeOperationsGroupedByTag(apiModel);
@@ -91,7 +91,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         return templateOutputList;
     }
 
-    public List<TemplateOutput> generateTemplateOutput(Map<String, ?> contextModel, String serviceName, List<Map<String, Object>> operations, OperationRoleType operationRoleType) {
+    public List<TemplateOutput> generateTemplateOutput(Map<String, Object> contextModel, String serviceName, List<Map<String, Object>> operations, OperationRoleType operationRoleType) {
         boolean isProducer = OperationRoleType.COMMAND_PRODUCER == operationRoleType || OperationRoleType.EVENT_PRODUCER == operationRoleType;
         if (isProducer) {
             return generateTemplateOutput(contextModel, getTemplates(isProducer), serviceName, operations, operationRoleType);
@@ -100,7 +100,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         }
     }
 
-    public List<TemplateOutput> generateTemplateOutput(Map<String, ?> contextModel, List<TemplateInput> templates, String serviceName, Map<String, Object> operation, OperationRoleType operationRoleType) {
+    public List<TemplateOutput> generateTemplateOutput(Map<String, Object> contextModel, List<TemplateInput> templates, String serviceName, Map<String, Object> operation, OperationRoleType operationRoleType) {
         Map<String, Object> model = new HashMap<>();
         model.putAll(asConfigurationMap());
         model.put("context", contextModel);
@@ -112,7 +112,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         return getTemplateEngine().processTemplates(model, templates);
     }
 
-    public List<TemplateOutput> generateTemplateOutput(Map<String, ?> contextModel, List<TemplateInput> templates, String serviceName, List<Map<String, Object>> operations, OperationRoleType operationRoleType) {
+    public List<TemplateOutput> generateTemplateOutput(Map<String, Object> contextModel, List<TemplateInput> templates, String serviceName, List<Map<String, Object>> operations, OperationRoleType operationRoleType) {
         Map<String, Object> model = new HashMap<>();
         model.putAll(asConfigurationMap());
         model.put("context", contextModel);

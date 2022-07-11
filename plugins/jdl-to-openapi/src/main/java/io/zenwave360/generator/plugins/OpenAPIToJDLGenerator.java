@@ -38,18 +38,18 @@ public class OpenAPIToJDLGenerator extends AbstractJDLGenerator {
 
     private final TemplateInput openAPIToJDLTemplate = new TemplateInput("io/zenwave360/generator/plugins/OpenAPIToJDLGenerator/OpenAPIToJDL.jdl", "{{targetFile}}").withMimeType(OutputFormatType.JDL);
 
-    protected Map<String, ?> getOpenAPIModel(Map<String, ?> contextModel) {
+    protected Map<String, Object> getOpenAPIModel(Map<String, Object> contextModel) {
         return (Map) contextModel.get(sourceProperty);
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, ?> contextModel) {
+    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
         List<TemplateOutput> templateOutputList = new ArrayList<>();
-        Map<String, ?> openAPIModel = getOpenAPIModel(contextModel);
+        Map<String, Object> openAPIModel = getOpenAPIModel(contextModel);
 
         Map<String, Object> jdlModel = new HashMap<>();
-        List<Map<String, ?>> entities = new ArrayList<>();
-        List<Map<String, ?>> enums = new ArrayList<>();
+        List<Map<String, Object>> entities = new ArrayList<>();
+        List<Map<String, Object>> enums = new ArrayList<>();
         jdlModel.put("entities", entities);
         jdlModel.put("enums", enums);
         Map<String, Map> schemas = JSONPath.get(openAPIModel, "$.components.schemas");
@@ -155,7 +155,7 @@ public class OpenAPIToJDLGenerator extends AbstractJDLGenerator {
         return "String";
     }
 
-    public TemplateOutput generateTemplateOutput(Map<String, ?> contextModel, TemplateInput template, Map<String, ?> jdlModel) {
+    public TemplateOutput generateTemplateOutput(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> jdlModel) {
         Map<String, Object> model = new HashMap<>();
         model.putAll(asConfigurationMap());
         model.put("context", contextModel);

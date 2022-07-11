@@ -5,6 +5,7 @@ import io.zenwave360.generator.processors.utils.JSONPath;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,9 +58,9 @@ public class JDLWithOpenApiProcessor extends AbstractBaseProcessor {
     }
 
     @Override
-    public Map<String, ?> process(Map<String, ?> contextModel) {
+    public Map<String, Object> process(Map<String, Object> contextModel) {
         var openApiModel = (Map) contextModel.get(openapiProperty);
-        var jdlModel = (Map) contextModel.get(jdlProperty);
+        var jdlModel = (Map) contextModel.getOrDefault(jdlProperty, Collections.emptyMap());
 
         buildDtoToEntityMap(openApiModel, jdlModel);
 
@@ -109,7 +110,7 @@ public class JDLWithOpenApiProcessor extends AbstractBaseProcessor {
         }
     }
 
-    protected void enrichJdlEntitiesWithDtoNames(Map<String, ?> openApiModel, Map<String, ?> jdlModel) {
+    protected void enrichJdlEntitiesWithDtoNames(Map<String, Object> openApiModel, Map<String, Object> jdlModel) {
         List<Map<String, Object>> schemas = JSONPath.get(openApiModel, "$.components.schemas[*]");
         for (Map<String, Object> schema : schemas) {
             String schemaName = (String) schema.get("x--schema-name");
@@ -134,7 +135,7 @@ public class JDLWithOpenApiProcessor extends AbstractBaseProcessor {
                 .findFirst().orElse(null);
     }
 
-    protected void buildDtoToEntityMap(Map<String, ?> openApiModel, Map<String, ?> jdlModel){
+    protected void buildDtoToEntityMap(Map<String, Object> openApiModel, Map<String, Object> jdlModel){
         List<Map<String, Object>> schemas = JSONPath.get(openApiModel, "$.components.schemas[*]");
         for (Map<String, Object> schema : schemas) {
             String schemaName = (String) schema.get("x--schema-name");

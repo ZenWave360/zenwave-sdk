@@ -27,7 +27,7 @@ public class JavaFormatter implements Formatter {
             } catch (FormatterException e) {
                 if(e.diagnostics() != null && e.diagnostics().size() > 0) {
                     int line = e.diagnostics().get(0).line();
-                    String lineText = getLine(templateOutput.getContent(), line);
+                    String lineText = getLine(templateOutput.getContent(), line + 1);
                     log.error("Formatting error at {}:{} -> \"{}\"", templateOutput.getTargetFile(), line, lineText, e);
                 }
                 throw new RuntimeException(e);

@@ -2,6 +2,7 @@ package io.zenwave360.generator.processors;
 
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
+import io.zenwave360.generator.processors.utils.NamingUtils;
 import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -42,14 +43,7 @@ public abstract class AbstractBaseProcessor implements Processor {
     }
 
     protected String normalizeTagName(String tagName) {
-        if(tagName == null) {
-            return null;
-        }
-        String[] tokens = RegExUtils.replaceAll(tagName, "[\\s-.]", " ").split(" ");
-        for (int i = 0; i < tokens.length; i++) {
-            tokens[i] = StringUtils.capitalize(tokens[i]);
-        }
-        return RegExUtils.removePattern(StringUtils.join(tokens), "^(\\d+)");
+        return NamingUtils.asJavaTypeName(tagName);
     }
 
     protected void addOperationIdVariants(Map<String, Object> operation) {

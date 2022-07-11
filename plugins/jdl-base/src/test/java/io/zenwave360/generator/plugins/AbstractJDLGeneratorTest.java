@@ -19,7 +19,7 @@ public class AbstractJDLGeneratorTest {
     private AbstractJDLGenerator newAbstractJDLGenerator() {
         return new AbstractJDLGenerator() {
             @Override
-            public List<TemplateOutput> generate(Map<String, ?> apiModel) {
+            public List<TemplateOutput> generate(Map<String, Object> apiModel) {
                 return null;
             }
         };

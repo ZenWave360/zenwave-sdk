@@ -17,15 +17,15 @@ public class JDLToOpenAPIGeneratorTest {
 
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
-    private Map<String, ?> loadJDLModelFromResource(String resource) throws Exception {
+    private Map<String, Object> loadJDLModelFromResource(String resource) throws Exception {
         File file = new File(getClass().getClassLoader().getResource(resource).toURI());
-        Map<String, ?> model = new JDLParser().withSpecFile(file.getAbsolutePath()).parse();
+        Map<String, Object> model = new JDLParser().withSpecFile(file.getAbsolutePath()).parse();
         return new JDLProcessor().process(model);
     }
 
     @Test
     public void test_jdl_to_openapi() throws Exception {
-        Map<String, ?> model = loadJDLModelFromResource("io/zenwave360/generator/resources/jdl/orders-model.jdl");
+        Map<String, Object> model = loadJDLModelFromResource("io/zenwave360/generator/resources/jdl/orders-model.jdl");
         JDLToOpenAPIGenerator generator = new JDLToOpenAPIGenerator();
 
         List<TemplateOutput> outputTemplates = generator.generate(model);
@@ -33,7 +33,7 @@ public class JDLToOpenAPIGeneratorTest {
 
         System.out.println(outputTemplates.get(0).getContent());
 
-        Map<String, ?> oasSchema = mapper.readValue(outputTemplates.get(0).getContent(), Map.class);
+        Map<String, Object> oasSchema = mapper.readValue(outputTemplates.get(0).getContent(), Map.class);
         Assertions.assertTrue(((List) JSONPath.get(oasSchema,"$.components.schemas.OrderStatus.enum")).contains("DELIVERED"));
         Assertions.assertTrue(((List) JSONPath.get(oasSchema,"$.components.schemas.Customer.required")).contains("firstName"));
         Assertions.assertEquals("3", JSONPath.get(oasSchema,"$.components.schemas.Customer.properties.firstName.min-length"));

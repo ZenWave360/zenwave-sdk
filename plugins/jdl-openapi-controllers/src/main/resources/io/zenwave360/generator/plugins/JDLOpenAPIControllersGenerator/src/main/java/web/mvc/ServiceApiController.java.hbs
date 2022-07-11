@@ -3,6 +3,7 @@ package {{controllersPackage}};
 import {{entitiesPackage}}.*;
 import {{servicesPackage}}.*;
 import {{inboundDtosPackage}}.*;
+import {{openApiApiPackage}}.*;
 import {{openApiModelPackage}}.*;
 import {{controllersPackage}}.mappers.*;
 
@@ -86,7 +87,7 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
     {{~#if requestBodySchema~}}
         {{requestEntityClassName}} {{requestEntityInstance}} = mapper.as{{requestEntityClassName}}(reqBody);
     {{/if~}}
-        {{{responseEntityClassName}}} {{defaultIfEmpty responseEntityInstance "paginated"}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}({{requestEntityInstance}});
+        {{{responseEntityClassName}}} {{defaultIfEmpty responseEntityInstance "paginated"}} = null; // TODO: {{defaultIfEmpty entityServiceName "defaultService"}}.{{operation.operationId}}({{requestEntityInstance}});
         {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{responseEntityInstance}});
         return ResponseEntity.status({{operation.x--response.x--statusCode}}).body(responseDTO);
     }
