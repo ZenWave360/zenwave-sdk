@@ -9,11 +9,11 @@ import io.zenwave360.generator.writers.TemplateStdoutWriter;
 
 import java.util.Map;
 
-public class JDLToOpenAPIConfigurationPreset extends Configuration {
+public class JDLToOpenAPIConfiguration extends Configuration {
 
     public static final String CONFIG_ID = "jdl-to-openapi";
 
-    public JDLToOpenAPIConfigurationPreset() {
+    public JDLToOpenAPIConfiguration() {
         super();
         withChain(JDLParser.class, JDLProcessor.class, JDLToOpenAPIGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
     }

@@ -37,6 +37,7 @@ io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-stream
 io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:0.0.1-SNAPSHOT,\
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:0.0.1-SNAPSHOT,\
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.0.1-SNAPSHOT \
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:0.0.1-SNAPSHOT \
     io.github.zenwave360:zenwave-code-generator-cli:0.0.1-SNAPSHOT
 ```
 
@@ -82,7 +83,7 @@ jbang zw -p io.zenwave360.generator.plugins.SpringCloudStream3ConfigurationPrese
 Generates test for SpringMVC or Spring WebFlux using WebTestClient based on OpenAPI specification.
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.SpringWebTestsClientConfigurationPreset \
+jbang zw -p io.zenwave360.generator.plugins.SpringWebTestClientConfiguration \
     specFile=openapi.yml targetFolder=target/out \
     apiPackage=io.example.integration.test.api \
     modelPackage=io.example.integration.test.api.model \
@@ -129,7 +130,7 @@ System.out.println(jdl);
 Generate OpenAPI schemas from JDL entities:
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.JDLToOpenAPIConfigurationPreset \
+jbang zw -p io.zenwave360.generator.plugins.JDLToOpenAPIConfiguration \
     specFile=entities-model.jdl targetFolder=target/out targetFile=openapi.yml
 cat target/out/openapi.yml
 ```

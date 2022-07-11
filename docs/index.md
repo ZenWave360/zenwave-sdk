@@ -460,7 +460,7 @@ _TODO_: We can generate a lot of code to get you started to implement every new 
 Generates test for SpringMVC or Spring WebFlux using WebTestClient based on OpenAPI specification.
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.SpringWebTestsClientConfigurationPreset \
+jbang zw -p io.zenwave360.generator.plugins.SpringWebTestClientConfiguration \
     specFile=openapi.yml targetFolder=target/out \
     apiPackage=io.example.integration.test.api \
     modelPackage=io.example.integration.test.api.model \

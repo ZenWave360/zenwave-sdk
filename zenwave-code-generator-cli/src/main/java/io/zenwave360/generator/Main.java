@@ -16,10 +16,10 @@ public class Main implements Callable<Integer> {
     @Option(names = {"-h", "--help"}, usageHelp = true, description = "display this help message")
     boolean help;
 
-    @Option(names = {"-p", "--preset"}, arity = "0..1", description = "Preset chain and configuration options")
+    @Option(names = {"-p", "--plugin"}, arity = "0..1", description = "Plugin Configuration class")
     String preset;
 
-    @Option(names = {"-c", "--chain"}, split = ",", description = "Comma separated chain of parsers,processors,generators,writters to be used")
+    @Option(names = {"-c", "--chain"}, split = ",", description = "deprecated use --plugin instead")
     Class[] chain;
 
     @CommandLine.Parameters
@@ -38,8 +38,7 @@ public class Main implements Callable<Integer> {
         Configuration configuration = createConfiguration(this.preset)
                 .withSpecFile((String) options.get("specFile"))
                 .withTargetFolder((String) options.get("targetFolder"))
-                .withOptions(options)
-                .withChain(chain);
+                .withOptions(options);
 
         new Generator(configuration).generate();
         return 0;

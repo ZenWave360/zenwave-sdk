@@ -1,7 +1,10 @@
 package {{apiPackage}};
 
-{{#if modelPackage~}}
-import {{modelPackage}}.*;
+{{#if openApiApiPackage~}}
+import {{openApiApiPackage}}.*;
+{{~/if}}
+{{#if openApiApiPackage~}}
+import {{openApiModelPackage}}.*;
 {{~/if}}
 
 import java.time.Duration;
