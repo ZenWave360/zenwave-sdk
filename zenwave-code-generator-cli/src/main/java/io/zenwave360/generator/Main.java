@@ -38,7 +38,8 @@ public class Main implements Callable<Integer> {
         Configuration configuration = createConfiguration(this.preset)
                 .withSpecFile((String) options.get("specFile"))
                 .withTargetFolder((String) options.get("targetFolder"))
-                .withOptions(options);
+                .withOptions(options)
+                .withChain(chain);
 
         new Generator(configuration).generate();
         return 0;

@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 import static io.zenwave360.generator.templating.OutputFormatType.JAVA;
 
-public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
+public class JDLOpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
     enum ProgrammingStyle {
         imperative, reactive;
@@ -32,21 +32,6 @@ public class JDLOpenAPIControllersGenerator extends AbstractJDLGenerator {
 
     public String openapiProperty = "openapi";
     public String jdlProperty = "jdl";
-
-    @DocumentedOption(description = "OpenAPI operationIds to generate code for")
-    public List<String> operationIds = new ArrayList<>();
-
-    @DocumentedOption(description = "The package to used by OpenAPI-Generator for generated api objects/classes")
-    public String openApiApiPackage;
-
-    @DocumentedOption(description = "The package to used by OpenAPI-Generator for generated model objects/classes")
-    public String openApiModelPackage = "{{openApiApiPackage}}";
-
-    @DocumentedOption(description = "Sets the prefix for model enums and classes used by OpenAPI-Generator")
-    public String openApiModelNamePrefix = "";
-
-    @DocumentedOption(description = "Sets the suffix for model enums and classes used by OpenAPI-Generator")
-    public String openApiModelNameSuffix = "";
 
     @DocumentedOption(description = "The package to generate REST Controllers")
     public String controllersPackage = "{{basePackage}}.adapters.web";

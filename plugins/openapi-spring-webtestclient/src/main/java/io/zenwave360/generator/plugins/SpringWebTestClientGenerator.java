@@ -22,6 +22,9 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
 
     public String sourceProperty = "api";
 
+    @DocumentedOption(description = "The package to generate REST Controllers")
+    public String controllersPackage = "{{basePackage}}.adapters.web";
+
     @DocumentedOption(description = "Generate test classes grouped by", required = true)
     public GroupByType groupBy = GroupByType.SERVICE;
 

@@ -19,26 +19,36 @@ public abstract class AbstractOpenAPIGenerator implements GeneratorPlugin {
         GET, PUT, POST, DELETE, PATCH, HEAD, PARAMETERS
     }
 
-    @DocumentedOption(description = "Java API package name")
-    public String apiPackage = "io.example.api";
-    @DocumentedOption(description = "Java Models package name")
-    public String modelPackage = "io.example.api.model";
+    @DocumentedOption(description = "Applications base package")
+    public String basePackage;
 
+    @DocumentedOption(description = "The package to used by OpenAPI-Generator for generated api objects/classes")
+    public String openApiApiPackage;
+
+    @DocumentedOption(description = "The package to used by OpenAPI-Generator for generated model objects/classes")
+    public String openApiModelPackage = "{{openApiApiPackage}}";
+
+    @DocumentedOption(description = "Sets the prefix for model enums and classes used by OpenAPI-Generator")
+    public String openApiModelNamePrefix = "";
+
+    @DocumentedOption(description = "Sets the suffix for model enums and classes used by OpenAPI-Generator")
+    public String openApiModelNameSuffix = "";
     @DocumentedOption(description = "Project role: PROVIDER\\|CLIENT")
     public RoleType role = RoleType.PROVIDER;
 
-    @DocumentedOption(description = "Operation IDs to generate code for")
+    @DocumentedOption(description = "OpenAPI operationIds to generate code for")
     public List<String> operationIds = new ArrayList<>();
+
 
     @DocumentedOption(description = "Status codes to generate code for (default: 200, 201, 202 and 400")
     public List<String> statusCodes = List.of("200", "201", "202", "400");
 
     public String getApiPackageFolder() {
-        return this.apiPackage.replaceAll("\\.", "/");
+        return this.openApiApiPackage.replaceAll("\\.", "/");
     }
 
     public String getModelPackageFolder() {
-        return this.apiPackage.replaceAll("\\.", "/");
+        return this.openApiModelPackage.replaceAll("\\.", "/");
     }
 
     public Map<String, List<Map<String, Object>>> getOperationsGroupedByTag(Model apiModel, OperationType... operationTypes) {

@@ -25,8 +25,8 @@ public class SpringWebTestClientGeneratorTest {
         Map<String, Object> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
         generator.groupBy = SpringWebTestClientGenerator.GroupByType.PARTIAL;
-        generator.apiPackage = "io.example.api";
-        generator.modelPackage = "io.example.api.model";
+        generator.openApiApiPackage = "io.example.api";
+        generator.openApiModelPackage = "io.example.api.model";
         generator.operationIds = List.of("addPet");
         List<TemplateOutput> outputTemplates = generator.generate(model);
         Assertions.assertEquals(1, outputTemplates.size());
@@ -39,8 +39,8 @@ public class SpringWebTestClientGeneratorTest {
         Map<String, Object> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
         generator.groupBy = SpringWebTestClientGenerator.GroupByType.SERVICE;
-        generator.apiPackage = "io.example.api";
-        generator.modelPackage = "io.example.api.model";
+        generator.openApiApiPackage = "io.example.api";
+        generator.openApiModelPackage = "io.example.api.model";
         generator.operationIds = List.of("addPet");
         List<TemplateOutput> outputTemplates = generator.generate(model);
         Assertions.assertEquals(2, outputTemplates.size());
@@ -54,8 +54,8 @@ public class SpringWebTestClientGeneratorTest {
         Map<String, Object> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
         generator.groupBy = SpringWebTestClientGenerator.GroupByType.SERVICE;
-        generator.apiPackage = "io.example.api";
-        generator.modelPackage = "io.example.api.model";
+        generator.openApiApiPackage = "io.example.api";
+        generator.openApiModelPackage = "io.example.api.model";
         List<TemplateOutput> outputTemplates = generator.generate(model);
         Assertions.assertEquals(4, outputTemplates.size());
         Assertions.assertEquals("io/example/api/ControllersTestSet.java", outputTemplates.get(0).getTargetFile());
