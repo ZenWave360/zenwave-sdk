@@ -6,6 +6,7 @@ import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.TemplateEngine;
 import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,6 +79,12 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
         return templateOutputList;
     }
 
+    {
+        handlebarsEngine.getHandlebars().registerHelper("asDtoName", (context, options) -> {
+            return StringUtils.isNotBlank((String) context)? openApiModelNamePrefix + context + openApiModelNameSuffix : null;
+        });
+    }
+
     public TemplateOutput generateTestSet(Map<String, Object> contextModel, TemplateInput template, Collection<String> includedTestsNames) {
         Map<String, Object> model = new HashMap<>();
         model.putAll(asConfigurationMap());
@@ -93,7 +100,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
         model.putAll(asConfigurationMap());
         model.put("context", contextModel);
         model.put("openapi", getApiModel(contextModel));
-        model.put("serviceName", serviceName + "Service");
+        model.put("serviceName", serviceName + "ApiController");
         model.put("operations", operations);
         model.put("apiPackageFolder", getApiPackageFolder());
         return getTemplateEngine().processTemplate(model, template).get(0);

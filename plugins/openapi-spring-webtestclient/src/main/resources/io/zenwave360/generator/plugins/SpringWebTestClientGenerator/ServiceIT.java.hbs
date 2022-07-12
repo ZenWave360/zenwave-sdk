@@ -1,4 +1,4 @@
-package {{apiPackage}};
+package {{controllersPackage}};
 
 {{#if openApiApiPackage~}}
 import {{openApiApiPackage}}.*;
@@ -7,22 +7,20 @@ import {{openApiApiPackage}}.*;
 import {{openApiModelPackage}}.*;
 {{~/if}}
 
-import java.time.Duration;
-import java.util.List;
-import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
 
 /**
-* Integration tests for the {@link {{serviceName}} REST controller.
+* Integration tests for the {@link {{serviceName~}} } REST controller.
 */
-@IntegrationTest
-@AutoConfigureWebTestClient(timeout = IntegrationTest.DEFAULT_ENTITY_TIMEOUT)
+@SpringBootTest
+@AutoConfigureWebTestClient
 @WithMockUser
 class {{serviceName}}{{testSuffix}} {
 

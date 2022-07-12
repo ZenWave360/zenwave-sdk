@@ -15,6 +15,9 @@ public class NamingUtils {
         }
         String[] tokens = RegExUtils.replaceAll(name, "[\\s-.]", " ").split(" ");
         for (int i = 0; i < tokens.length; i++) {
+            if(StringUtils.isAllUpperCase(tokens[i])) {
+                tokens[i] = tokens[i].toLowerCase();
+            }
             tokens[i] = StringUtils.capitalize(tokens[i]);
         }
         return RegExUtils.removePattern(StringUtils.join(tokens), "^(\\d+)");

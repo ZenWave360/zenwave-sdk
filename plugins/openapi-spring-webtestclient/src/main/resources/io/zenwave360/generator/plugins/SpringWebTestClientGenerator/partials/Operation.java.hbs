@@ -6,21 +6,26 @@
     */
     @Test
     public void test{{asCapitalizedJavaProperty operation.operationId}}_{{response.x--statusCode}}() {
-        {{operation.x--request-dto}} requestBody = new {{operation.x--request-dto}}();
+    {{~#assign "requestDTOClassName"}}{{asDtoName operation.x--request-dto }}{{/assign}}
+    {{~#if requestDTOClassName}}
+        {{requestDTOClassName}} requestBody = new {{requestDTOClassName}}();
         {{~#each operation.x--request-schema.properties as |property|}}
         requestBody.set{{asCapitalizedJavaProperty @key}}(null);
         {{~/each}}
+    {{~/if}}
 
         webTestClient.{{operation.x--httpVerb}}().uri("{{operation.x--path}}")
-            .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
-            .body(Mono.just(requestBody), {{operation.x--request-dto}}.class)
+    {{~#if operation.x--request-dto}}
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(Mono.just(requestBody), {{requestDTOClassName}}.class)
+    {{~/if}}
             .exchange()
             .expectStatus().isEqualTo({{response.x--statusCode}})
     {{~#if response.x--response-schema}}
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
             .expectBody()
-    {{/if}}
+    {{~/if}}
     {{~#each response.x--response-schema.properties as |property|}}
             .jsonPath("$.{{@key}}").isNotEmpty()
     {{~/each}};

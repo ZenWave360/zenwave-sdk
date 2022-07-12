@@ -25,6 +25,7 @@ public class SpringWebTestClientGeneratorTest {
         Map<String, Object> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
         generator.groupBy = SpringWebTestClientGenerator.GroupByType.PARTIAL;
+        generator.basePackage = "io.example";
         generator.openApiApiPackage = "io.example.api";
         generator.openApiModelPackage = "io.example.api.model";
         generator.operationIds = List.of("addPet");
@@ -39,13 +40,14 @@ public class SpringWebTestClientGeneratorTest {
         Map<String, Object> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
         generator.groupBy = SpringWebTestClientGenerator.GroupByType.SERVICE;
+        generator.basePackage = "io.example";
         generator.openApiApiPackage = "io.example.api";
         generator.openApiModelPackage = "io.example.api.model";
         generator.operationIds = List.of("addPet");
         List<TemplateOutput> outputTemplates = generator.generate(model);
         Assertions.assertEquals(2, outputTemplates.size());
         Assertions.assertEquals("io/example/api/ControllersTestSet.java", outputTemplates.get(0).getTargetFile());
-        Assertions.assertEquals("io/example/api/PetServiceIT.java", outputTemplates.get(1).getTargetFile());
+        Assertions.assertEquals("io/example/api/PetApiControllerIT.java", outputTemplates.get(1).getTargetFile());
         System.out.println(outputTemplates.get(1).getContent());
     }
 
@@ -54,14 +56,15 @@ public class SpringWebTestClientGeneratorTest {
         Map<String, Object> model = loadApiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
         generator.groupBy = SpringWebTestClientGenerator.GroupByType.SERVICE;
+        generator.basePackage = "io.example";
         generator.openApiApiPackage = "io.example.api";
         generator.openApiModelPackage = "io.example.api.model";
         List<TemplateOutput> outputTemplates = generator.generate(model);
         Assertions.assertEquals(4, outputTemplates.size());
         Assertions.assertEquals("io/example/api/ControllersTestSet.java", outputTemplates.get(0).getTargetFile());
-        Assertions.assertEquals("io/example/api/UserServiceIT.java", outputTemplates.get(1).getTargetFile());
-        Assertions.assertEquals("io/example/api/StoreServiceIT.java", outputTemplates.get(2).getTargetFile());
-        Assertions.assertEquals("io/example/api/PetServiceIT.java", outputTemplates.get(3).getTargetFile());
+        Assertions.assertEquals("io/example/api/UserApiControllerIT.java", outputTemplates.get(1).getTargetFile());
+        Assertions.assertEquals("io/example/api/StoreApiControllerIT.java", outputTemplates.get(2).getTargetFile());
+        Assertions.assertEquals("io/example/api/PetApiControllerIT.java", outputTemplates.get(3).getTargetFile());
         System.out.println(outputTemplates.get(3).getContent());
     }
 }
