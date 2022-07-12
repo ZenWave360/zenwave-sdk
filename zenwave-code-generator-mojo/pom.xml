@@ -20,10 +20,12 @@
                 <version>3.6.0</version>
                 <executions>
                     <execution>
-                        <id>default-descriptor</id>
+                        <id>mojo-descriptor</id>
                         <phase>process-classes</phase>
+                        <goals>
+                            <goal>descriptor</goal>
+                        </goals>
                     </execution>
-                    <!-- if you want to generate help goal -->
                     <execution>
                         <id>help-goal</id>
                         <goals>

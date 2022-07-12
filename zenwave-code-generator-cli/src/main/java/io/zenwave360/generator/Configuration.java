@@ -19,6 +19,13 @@ public class Configuration {
 
     private Map<String, Object> options = new HashMap<>();
 
+    public static Configuration of(String pluginConfigAsString) throws Exception {
+        if (pluginConfigAsString != null) {
+            return (Configuration) Configuration.class.getClassLoader().loadClass(pluginConfigAsString).getDeclaredConstructor().newInstance();
+        }
+        return new Configuration();
+    }
+
     public <T extends Configuration> T processOptions() {
         return (T) this;
     }

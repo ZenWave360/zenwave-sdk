@@ -3,7 +3,6 @@ package io.zenwave360.generator;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -17,7 +16,7 @@ public class Main implements Callable<Integer> {
     boolean help;
 
     @Option(names = {"-p", "--plugin"}, arity = "0..1", description = "Plugin Configuration class")
-    String preset;
+    String pluginConfigClass;
 
     @Option(names = {"-c", "--chain"}, split = ",", description = "deprecated use --plugin instead")
     Class[] chain;
@@ -35,7 +34,7 @@ public class Main implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        Configuration configuration = createConfiguration(this.preset)
+        Configuration configuration = Configuration.of(this.pluginConfigClass)
                 .withSpecFile((String) options.get("specFile"))
                 .withTargetFolder((String) options.get("targetFolder"))
                 .withOptions(options)
@@ -43,12 +42,5 @@ public class Main implements Callable<Integer> {
 
         new Generator(configuration).generate();
         return 0;
-    }
-
-    protected Configuration createConfiguration(String preset) throws Exception {
-        if (preset != null) {
-            return (Configuration) getClass().getClassLoader().loadClass(preset).getDeclaredConstructor().newInstance();
-        }
-        return new Configuration();
     }
 }

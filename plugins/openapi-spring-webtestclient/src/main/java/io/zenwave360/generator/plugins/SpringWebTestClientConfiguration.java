@@ -19,11 +19,12 @@ public class SpringWebTestClientConfiguration extends Configuration {
     }
 
     @Override
-    public Configuration withOptions(Map<String, Object> options) {
-        if(!options.containsKey("targetFolder")) {
-            withChain(DefaultYamlParser.class, OpenApiProcessor.class, SpringWebTestClientGenerator.class, JavaFormatter.class, TemplateStdoutWriter.class);
-            options.put(SpringWebTestClientGenerator.class.getName() + ".groupBy", SpringWebTestClientGenerator.GroupByType.PARTIAL.toString());
+    public <T extends Configuration> T processOptions() {
+        System.out.println("options: " + getOptions());
+        if(!getOptions().containsKey("targetFolder")) {
+            replaceInChain(TemplateFileWriter.class, TemplateStdoutWriter.class);
+            withOption(SpringWebTestClientGenerator.class.getName() + ".groupBy", SpringWebTestClientGenerator.GroupByType.PARTIAL.toString());
         }
-        return super.withOptions(options);
+        return (T) this;
     }
 }

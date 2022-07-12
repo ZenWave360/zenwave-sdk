@@ -19,10 +19,10 @@ public class JDLBackendApplicationDefaultConfiguration extends Configuration {
     }
 
     @Override
-    public Configuration withOptions(Map<String, Object> options) {
-        if(!options.containsKey("targetFolder")) {
-            withChain(JDLParser.class, JDLProcessor.class, JDLBackendApplicationDefaultGenerator.class, JavaFormatter.class, TemplateStdoutWriter.class);
+    public <T extends Configuration> T processOptions() {
+        if(!getOptions().containsKey("targetFolder")) {
+            replaceInChain(TemplateFileWriter.class, TemplateStdoutWriter.class);
         }
-        return super.withOptions(options);
+        return (T) this;
     }
 }
