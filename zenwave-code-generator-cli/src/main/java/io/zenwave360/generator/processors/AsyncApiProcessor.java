@@ -4,11 +4,75 @@ import com.jayway.jsonpath.JsonPath;
 import io.zenwave360.generator.processors.utils.JSONPath;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class AsyncApiProcessor extends AbstractBaseProcessor implements Processor {
+
+    public enum SchemaFormatType {
+
+        ASYNCAPI("application/vnd.aai.asyncapi;"),
+        ASYNCAPI_JSON("application/vnd.aai.asyncapi+json;"),
+        ASYNCAPI_YAML("application/vnd.aai.asyncapi+yaml;"),
+        OPENAPI("application/vnd.oai.openapi;"),
+        OPENAPI_JSON("application/vnd.oai.openapi+json;"),
+        OPENAPI_YAML("application/vnd.oai.openapi+yaml;"),
+        JSONSCHEMA_JSON("application/schema+json;"),
+        JSONSCHEMA_YAML("application/schema+yaml;"),
+        AVRO("application/vnd.apache.avro;"),
+        AVRO_JSON("application/vnd.apache.avro+json;"),
+        AVRO_YAML("application/vnd.apache.avro+yaml;"),
+        ;
+
+        private static final List<SchemaFormatType> ASYNCAPI_ALL = Arrays.asList(ASYNCAPI, ASYNCAPI_JSON, ASYNCAPI_YAML);
+        private static final List<SchemaFormatType> OPENAPI_ALL = Arrays.asList(OPENAPI, OPENAPI_JSON, OPENAPI_YAML);
+        private static final List<SchemaFormatType> JSONSCHEMA_ALL = Arrays.asList(JSONSCHEMA_JSON, JSONSCHEMA_YAML);
+        private static final List<SchemaFormatType> AVRO_ALL = Arrays.asList(AVRO, AVRO_JSON, AVRO_YAML);
+
+        private static final List<SchemaFormatType> YAML_ALL = Arrays.asList(ASYNCAPI_YAML, OPENAPI_YAML, JSONSCHEMA_YAML, AVRO_YAML);
+
+        private String schemaFormatPrefix;
+
+        private SchemaFormatType(String regex) {
+            this.schemaFormatPrefix = regex;
+        }
+
+        public static boolean isSchemaFormat(SchemaFormatType formatType) {
+            return formatType == null || ASYNCAPI_ALL.contains(formatType) || OPENAPI_ALL.contains(formatType);
+        }
+
+        public static boolean isJsonSchemaFormat(SchemaFormatType formatType) {
+            return JSONSCHEMA_ALL.contains(formatType);
+        }
+
+        public static boolean isAvroFormat(SchemaFormatType formatType) {
+            return AVRO_ALL.contains(formatType);
+        }
+
+        public static boolean isNativeFormat(SchemaFormatType formatType) {
+            return isSchemaFormat(formatType);
+        }
+
+        public static boolean isYamlFormat(SchemaFormatType formatType) {
+            return YAML_ALL.contains(formatType);
+        }
+
+        public static SchemaFormatType getFormat(String schemaFormatString) {
+            if (schemaFormatString == null) {
+                return ASYNCAPI_YAML;
+            }
+            for (SchemaFormatType schemaFormat : SchemaFormatType.values()) {
+                if (schemaFormatString.startsWith(schemaFormat.schemaFormatPrefix)) {
+                    return schemaFormat;
+                }
+            }
+            return null;
+        }
+
+    }
+
 
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {

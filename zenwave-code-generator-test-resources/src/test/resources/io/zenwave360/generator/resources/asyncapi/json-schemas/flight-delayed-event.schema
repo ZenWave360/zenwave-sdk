@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://logistica.inditex.com/schemas/flight-delayed-event.json",
+  "javaType": "com.inditex.logistica.trnotsvc.schema.FlightDelayedEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "FlightDelayedEvent",
+  "description": "Schema representing a flight event",
+  "required": [
+    "flightId",
+    "airline",
+    "flightNumber",
+    "flightDate",
+    "originAirport",
+    "destinationAirport",
+    "transitType",
+    "flightStateType"
+  ],
+  "properties": {
+    "flightId": {
+      "type": "integer",
+      "description": "Unique identifier to flight"
+    },
+    "airline": {
+      "type": "string",
+      "description": "Flight airline"
+    },
+    "flightNumber": {
+      "type": "string",
+      "description": "Specific flight number"
+    },
+    "flightDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Flight date"
+    },
+    "originAirport": {
+      "type": "string",
+      "description": "Flight origin airport"
+    },
+    "destinationAirport": {
+      "type": "string",
+      "description": "Flight destination airport"
+    },
+    "scheduledArrivalTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Flight scheduled arrival time"
+    },
+    "estimatedArrivalTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Flight estimated arrival time"
+    },
+    "realArrivalTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Flight real arrival time"
+    },
+    "transitType": {
+      "$id": "#/properties/transitType",
+      "$ref": "master-data.schema"
+    },
+    "flightStateType": {
+      "$id": "#/properties/flightStateType",
+      "$ref": "master-data.schema"
+    }
+  }
+}

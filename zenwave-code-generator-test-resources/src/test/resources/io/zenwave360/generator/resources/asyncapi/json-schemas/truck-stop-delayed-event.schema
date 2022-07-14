@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://logistica.inditex.com/schemas/truck-stop-delayed-event.json",
+  "javaType": "com.inditex.logistica.trnotsvc.schema.TruckStopDelayedEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "TruckStopDelayedEvent",
+  "description": "Schema representing a truck stop event",
+  "required": [
+    "originSystem",
+    "transportId",
+    "alertLocation",
+    "transportType",
+    "transitType",
+    "alertStateType",
+    "originMarket",
+    "destinationMarket",
+    "originLocation",
+    "destinationLocation"
+  ],
+  "properties": {
+    "originSystem": {
+      "type": "string",
+      "description": "Transport Origin system"
+    },
+    "ownerSystem": {
+      "type": "string",
+      "description": "Transport owner system"
+    },
+    "transportId": {
+      "type": "integer",
+      "description": "Unique identifier to transport"
+    },
+    "alertLocation": {
+      "type": "integer",
+      "description": "Alert location"
+    },
+    "estimatedArrivalTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Transport Estimated arrival time"
+    },
+    "realArrivalTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Transport Real arrival time"
+    },
+    "estimatedDepartureTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Transport Estimated departure time"
+    },
+    "realDepartureTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Transport real departure time"
+    },
+    "transportType": {
+      "$id": "#/properties/transportType",
+      "$ref": "master-data.schema"
+    },
+    "transitType": {
+      "$id": "#/properties/transitType",
+      "$ref": "master-data.schema"
+    },
+    "alertStateType": {
+      "$id": "#/properties/alertStateType",
+      "$ref": "master-data.schema"
+    },
+    "carrierId": {
+      "type": "integer",
+      "description": "Unique identifier to transport carrier"
+    },
+    "carrier": {
+      "type": "string",
+      "description": "Transport carrier name"
+    },
+    "originMarket": {
+      "type": "string",
+      "description": "Transport origin market"
+    },
+    "destinationMarket": {
+      "type": "string",
+      "description": "Transport destination market"
+    },
+    "originLocation": {
+      "type": "integer",
+      "description": "Transport origin location"
+    },
+    "destinationLocation": {
+      "type": "integer",
+      "description": "Transport destination location"
+    },
+    "plateNumber": {
+      "type": "string",
+      "description": "Transport plate number"
+    }
+  }
+}

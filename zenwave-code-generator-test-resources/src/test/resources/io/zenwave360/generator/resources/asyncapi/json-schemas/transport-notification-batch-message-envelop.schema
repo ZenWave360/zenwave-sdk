@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://logistica.inditex.com/schemas/hit-nds-p2p-message.json",
+  "javaType": "com.inditex.logistica.trnotsvc.schema.TransportNotificationEventBatch",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "TransportNotificationEventBatch",
+  "description": "Message schema representing transport notification.",
+  "required": [
+    "metadata",
+    "data"
+  ],
+  "properties": {
+    "metadata": {
+      "$id": "#/properties/metadata",
+      "javaType": "com.inditex.logistica.trnotsvc.schema.TransportNotificationEventBatchMetadata",
+      "type": "object",
+      "additionalProperties": false,
+      "title": "The Metadata Schema",
+      "description": "meta information about event",
+      "default": {},
+      "examples": [
+        {
+          "type": "FLIGHT_DELAYED",
+          "origin": "HIT",
+          "creationTime": "2020-03-16T15:41:06.974152+05:30",
+          "entityIdReferenceKeys": [
+            "flightNumber",
+            "flightDate"
+          ]
+        }
+      ],
+      "required": [
+        "origin",
+        "type",
+        "creationTime"
+      ],
+      "properties": {
+        "origin": {
+          "$id": "#/properties/metadata/properties/origin",
+          "type": "string",
+          "title": "origin identifier",
+          "description": "identifier for the source system of event",
+          "default": "",
+          "examples": [
+            "HIT"
+          ]
+        },
+        "type": {
+          "$id": "#/properties/metadata/properties/type",
+          "type": "string",
+          "title": "Type of event",
+          "description": "Identifier to distinguish event type",
+          "default": "",
+          "examples": [
+            "FLIGHT_DELAYED"
+          ]
+        },
+        "creationTime": {
+          "$id": "#/properties/metadata/properties/creationTime",
+          "type": "string",
+          "title": "creationTime",
+          "format": "date-time",
+          "description": "Event generation timestamp as per ISO 8601 format",
+          "default": "",
+          "examples": [
+            "2020-03-16T15:41:06.974152Z"
+          ]
+        },
+        "entityIdReferenceKeys": {
+          "$id": "#/properties/metadata/properties/entityIdReferenceKeys",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "attributes requires to build logical key",
+          "examples": [
+            [
+              "flightNumber",
+              "flightDate"
+            ]
+          ]
+        }
+      }
+    },
+    "data": {
+      "$id": "#/properties/data",
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "flight-delayed-event.schema"
+          },
+          {
+            "$ref": "truck-stop-delayed-event.schema"
+          }
+        ]
+      },
+      "minItems": 1
+    }
+  }
+}

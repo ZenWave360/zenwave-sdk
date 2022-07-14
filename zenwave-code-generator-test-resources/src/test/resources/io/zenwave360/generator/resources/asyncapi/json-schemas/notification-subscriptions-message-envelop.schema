@@ -1,0 +1,201 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://logistica.inditex.com/schemas/agenda-nds-p2p-message.json",
+  "javaType": "com.inditex.logistica.trnotsvc.schema.NotificationEventSubscriptions",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "NotificationEventSubscriptions",
+  "description": "Message schema representing transport notification subscriptions.",
+  "required": [
+    "id",
+    "type",
+    "recipients"
+  ],
+  "properties": {
+    "id": {
+      "$id": "#/properties/id",
+      "type": "string",
+      "title": "The event identifier",
+      "description": "unique identifier to event",
+      "examples": [
+        "f5384751-a379-46d2-b7bd-b12f61538822-1"
+      ]
+    },
+    "type": {
+      "$id": "#/properties/type",
+      "type": "string",
+      "title": "Type of event",
+      "description": "Identifier to distinguish event type",
+      "examples": [
+        "FLIGHT_DELAYED"
+      ]
+    },
+    "recipients": {
+      "$id": "#/properties/recipients",
+      "type": "array",
+      "additionalProperties": false,
+      "title": "Recipients",
+      "description": "An array recipients",
+      "default": [],
+      "items": {
+        "$id": "#/properties/recipients/items",
+        "type": "object",
+        "additionalProperties": false,
+        "javaType": "com.inditex.logistica.trnotsvc.schema.NotificationRecipientData",
+        "title": "NotificationRecipientData",
+        "description": "Schema detail recipient info and notifications preference",
+        "default": {},
+        "examples": [
+          {
+            "userId": "sumitka",
+            "selectedLanguage": "en",
+            "data": {
+              "username": "sumitka",
+              "email": "sumitka@ext.inditex.com"
+            },
+            "notifications": [
+              {
+                "channel": "EMAIL",
+                "level": "ERROR"
+              },
+              {
+                "channel": "IN-APP",
+                "level": "INFO"
+              }
+            ]
+          }
+        ],
+        "required": [
+          "userId",
+          "selectedLanguage",
+          "contactInfo",
+          "notifications"
+        ],
+        "properties": {
+          "userId": {
+            "$id": "#/properties/recipients/items/properties/userId",
+            "type": "string",
+            "title": "userId",
+            "description": "Identifier to user(internal or external)",
+            "default": "",
+            "examples": [
+              "sumitka"
+            ]
+          },
+          "selectedLanguage": {
+            "$id": "#/properties/recipients/items/properties/selectedLanguage",
+            "type": "string",
+            "title": "language preference(ISO code) ",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+              "en",
+              "es"
+            ]
+          },
+          "contactInfo": {
+            "$id": "#/properties/recipients/items/properties/contactInfo",
+            "type": "object",
+            "additionalProperties": false,
+            "javaType": "com.inditex.logistica.trnotsvc.schema.RecipientContactInfo",
+            "title": "User Info",
+            "description": "A structure providing user info like email, username or Microsoft Teams channel ",
+            "default": {},
+            "examples": [
+              {
+                "email": "sumitka@ext.inditex.com",
+                "username": "sumitka"
+              }
+            ],
+            "properties": {
+              "email": {
+                "$id": "#/properties/recipients/items/properties/contactInfo/properties/email",
+                "type": "string",
+                "title": "User's email",
+                "examples": [
+                  "sumitka@ext.inditex.com"
+                ]
+              },
+              "username": {
+                "$id": "#/properties/recipients/items/properties/contactInfo/properties/username",
+                "type": "string",
+                "title": "username",
+                "examples": [
+                  "sumitka"
+                ]
+              },
+              "teamChannelURL": {
+                "$id": "#/properties/recipients/items/properties/contactInfo/properties/teamChannelURL",
+                "type": "string",
+                "title": "MicrosoftTeams channel url",
+                "examples": [
+                  "sumitka"
+                ]
+              }
+            }
+          },
+          "notifications": {
+            "$id": "#/properties/recipients/items/properties/notifications",
+            "type": "array",
+            "additionalProperties": false,
+            "title": "Subscribed notification preference",
+            "items": {
+              "$id": "#/properties/recipients/items/properties/notifications/items",
+              "type": "object",
+              "javaType": "com.inditex.logistica.trnotsvc.schema.RecipientNotificationSubscription",
+              "title": "RecipientNotificationSubscription",
+              "description": "An object to specify channel and level preference for subscription",
+              "default": {},
+              "examples": [
+                {
+                  "level": "ERROR",
+                  "channel": "EMAIL"
+                },
+                {
+                  "channel": "IN-APP",
+                  "level": "INFO"
+                }
+              ],
+              "required": [
+                "channel",
+                "level"
+              ],
+              "properties": {
+                "channel": {
+                  "$id": "#/properties/recipients/items/properties/notifications/items/properties/channel",
+                  "type": "string",
+                  "enum": [
+                    "EMAIL",
+                    "IN-APP",
+                    "M-TEAM"
+                  ],
+                  "title": "The Channel Schema",
+                  "description": "Attribute specifying channel.",
+                  "default": "",
+                  "examples": [
+                    "EMAIL"
+                  ]
+                },
+                "level": {
+                  "$id": "#/properties/recipients/items/properties/notifications/items/properties/level",
+                  "type": "string",
+                  "enum": [
+                    "INFO",
+                    "ERROR",
+                    "WARN"
+                  ],
+                  "title": "The Level Schema",
+                  "description": "Attribute specifying notification level",
+                  "default": "",
+                  "examples": [
+                    "ERROR"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

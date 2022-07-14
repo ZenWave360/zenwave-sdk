@@ -56,12 +56,15 @@ public abstract class AbstractAsyncapiGenerator implements GeneratorPlugin {
     @DocumentedOption(description = "Project role: PROVIDER\\|CLIENT")
     public RoleType role = RoleType.PROVIDER;
 
+    @DocumentedOption(description = "Operation ids to include in code generation. Generates code for ALL if left empty")
+    public List<String> operationIds = new ArrayList<>();
+
     public String getApiPackageFolder() {
         return this.apiPackage.replaceAll("\\.", "/");
     }
 
     public String getModelPackageFolder() {
-        return this.apiPackage.replaceAll("\\.", "/");
+        return this.modelPackage.replaceAll("\\.", "/");
     }
 
     public Map<String, List<Map<String, Object>>> getPublishOperationsGroupedByTag(Model apiModel) {

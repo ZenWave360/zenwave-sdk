@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
+        <artifactId>plugins-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <groupId>io.github.zenwave360.zenwave-code-generator.plugins</groupId>
+    <artifactId>asyncapi-jsonschema2pojo</artifactId>
+    <packaging>jar</packaging>
+
+    <properties>
+        <jsonschema2pojo.version>1.1.2</jsonschema2pojo.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.github.zenwave360.zenwave-code-generator.plugins</groupId>
+            <artifactId>asyncapi-base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jsonschema2pojo</groupId>
+            <artifactId>jsonschema2pojo-core</artifactId>
+            <version>${jsonschema2pojo.version}</version>
+        </dependency>
+    </dependencies>
+</project>
