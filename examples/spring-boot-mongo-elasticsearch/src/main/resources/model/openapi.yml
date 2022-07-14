@@ -1,0 +1,752 @@
+openapi: 3.0.1
+info:
+  title: Zenwave 360 Generated API
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080/api/
+tags:
+  - name: "Default"
+  - name: "Organization"
+  - name: "Artifacts"
+  - name: "ACL"
+
+paths:
+  /organizations:
+    get:
+      summary: Find Organizations
+      operationId: findOrganizations
+      tags: [Organization]
+      responses:
+        "200":
+          description: Organizations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrganizationPaginated"
+    post:
+      summary: Create Organization
+      operationId: createOrganization
+      tags: [Organization]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Organization"
+      responses:
+        "201":
+          description: Organization
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+
+  /organizations/{id}:
+    parameters:
+    - name: id
+      in: path
+      description: Organization id
+      required: true
+      schema:
+        type: string
+    get:
+      summary: Get Organization by id
+      operationId: getOrganization
+      tags: [Organization]
+      responses:
+        "200":
+          description: Organization
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+    put:
+      summary: Update Organization
+      operationId: updateOrganization
+      tags: [Organization]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Organization"
+      responses:
+        "200":
+          description: Organization
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+  
+
+
+
+  /teams:
+    get:
+      summary: Find Teams
+      operationId: findTeams
+      tags: [Organization]
+      responses:
+        "200":
+          description: Teams
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamPaginated"
+    post:
+      summary: Create Team
+      operationId: createTeam
+      tags: [Organization]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Team"
+      responses:
+        "201":
+          description: Team
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+
+  /teams/{id}:
+    parameters:
+    - name: id
+      in: path
+      description: Team id
+      required: true
+      schema:
+        type: string
+    get:
+      summary: Get Team by id
+      operationId: getTeam
+      tags: [Organization]
+      responses:
+        "200":
+          description: Team
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+    put:
+      summary: Update Team
+      operationId: updateTeam
+      tags: [Organization]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Team"
+      responses:
+        "200":
+          description: Team
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+  
+
+  /app-users:
+    get:
+      summary: Find AppUsers
+      operationId: findAppUsers
+      tags: [Organization]
+      responses:
+        "200":
+          description: AppUsers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppUserPaginated"
+    post:
+      summary: Create AppUser
+      operationId: createAppUser
+      tags: [Organization]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppUser"
+      responses:
+        "201":
+          description: AppUser
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppUser"
+
+  /app-users/{id}:
+    parameters:
+    - name: id
+      in: path
+      description: AppUser id
+      required: true
+      schema:
+        type: string
+    get:
+      summary: Get AppUser by id
+      operationId: getAppUser
+      tags: [Organization]
+      responses:
+        "200":
+          description: AppUser
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppUser"
+    put:
+      summary: Update AppUser
+      operationId: updateAppUser
+      tags: [Organization]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppUser"
+      responses:
+        "200":
+          description: AppUser
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppUser"
+  
+
+  /acls:
+    get:
+      summary: Find ACLS
+      operationId: findACLS
+      tags: [ACL]
+      responses:
+        "200":
+          description: ACLS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ACLPaginated"
+    post:
+      summary: Create ACL
+      operationId: createACL
+      tags: [ACL]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ACL"
+      responses:
+        "201":
+          description: ACL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ACL"
+
+  /acls/{id}:
+    parameters:
+    - name: id
+      in: path
+      description: ACL id
+      required: true
+      schema:
+        type: string
+    get:
+      summary: Get ACL by id
+      operationId: getACL
+      tags: [ACL]
+      responses:
+        "200":
+          description: ACL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ACL"
+    put:
+      summary: Update ACL
+      operationId: updateACL
+      tags: [ACL]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ACL"
+      responses:
+        "200":
+          description: ACL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ACL"
+  
+
+  /domains:
+    get:
+      summary: Find Domains
+      operationId: findDomains
+      tags: [Organization]
+      responses:
+        "200":
+          description: Domains
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DomainPaginated"
+    post:
+      summary: Create Domain
+      operationId: createDomain
+      tags: [Organization]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Domain"
+      responses:
+        "201":
+          description: Domain
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Domain"
+
+  /domains/{id}:
+    parameters:
+    - name: id
+      in: path
+      description: Domain id
+      required: true
+      schema:
+        type: string
+    get:
+      summary: Get Domain by id
+      operationId: getDomain
+      tags: [Organization]
+      responses:
+        "200":
+          description: Domain
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Domain"
+    put:
+      summary: Update Domain
+      operationId: updateDomain
+      tags: [Organization]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Domain"
+      responses:
+        "200":
+          description: Domain
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Domain"
+  
+
+  /artifact-files:
+    get:
+      summary: Find ArtifactFiles
+      operationId: findArtifactFiles
+      tags: [Default]
+      responses:
+        "200":
+          description: ArtifactFiles
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtifactFilePaginated"
+    post:
+      summary: Create ArtifactFile
+      operationId: createArtifactFile
+      tags: [Default]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArtifactFile"
+      responses:
+        "201":
+          description: ArtifactFile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtifactFile"
+
+  /artifact-files/{id}:
+    parameters:
+    - name: id
+      in: path
+      description: ArtifactFile id
+      required: true
+      schema:
+        type: string
+    get:
+      summary: Get ArtifactFile by id
+      operationId: getArtifactFile
+      tags: [Default]
+      responses:
+        "200":
+          description: ArtifactFile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtifactFile"
+    put:
+      summary: Update ArtifactFile
+      operationId: updateArtifactFile
+      tags: [Default]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArtifactFile"
+      responses:
+        "200":
+          description: ArtifactFile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtifactFile"
+  
+
+  /artifacts:
+    get:
+      summary: Find Artifacts
+      operationId: findArtifacts
+      tags: [Artifacts]
+      responses:
+        "200":
+          description: Artifacts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtifactPaginated"
+    post:
+      summary: Create Artifact
+      operationId: createArtifact
+      tags: [Artifacts]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Artifact"
+      responses:
+        "201":
+          description: Artifact
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Artifact"
+
+  /artifacts/{id}:
+    parameters:
+    - name: id
+      in: path
+      description: Artifact id
+      required: true
+      schema:
+        type: string
+    get:
+      summary: Get Artifact by id
+      operationId: getArtifact
+      tags: [Artifacts]
+      responses:
+        "200":
+          description: Artifact
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Artifact"
+    put:
+      summary: Update Artifact
+      operationId: updateArtifact
+      tags: [Artifacts]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Artifact"
+      responses:
+        "200":
+          description: Artifact
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Artifact"
+  
+components:
+  schemas:
+    Organization:
+      type: "object"
+      x-business-entity: "Organization"
+      required:
+      - "name"
+      - "url"
+      properties:
+        id:
+          type: "string"
+        name:
+          type: "string"
+        description:
+          type: "string"
+        url:
+          type: "string"
+          pattern: "^(http|https):.*$"
+    OrganizationPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "Organization"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/Organization"
+    ArtifactId:
+      type: "object"
+      x-business-entity: "ArtifactId"
+      required:
+      - "artifactId"
+      - "version"
+      - "groupId"
+      properties:
+        artifactId:
+          type: "string"
+        version:
+          type: "string"
+        groupId:
+          type: "string"
+    ArtifactIdPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "ArtifactId"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/ArtifactId"
+    TeamRole:
+      type: "object"
+      x-business-entity: "TeamRole"
+      properties:
+        roleType:
+          $ref: "#/components/schemas/RoleType"
+        teamId:
+          type: "string"
+    TeamRolePaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "TeamRole"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/TeamRole"
+    Team:
+      type: "object"
+      x-business-entity: "Team"
+      required:
+      - "name"
+      properties:
+        id:
+          type: "string"
+        name:
+          type: "string"
+        description:
+          type: "string"
+    TeamPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "Team"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/Team"
+    AppUser:
+      type: "object"
+      x-business-entity: "AppUser"
+      required:
+      - "name"
+      - "login"
+      - "email"
+      properties:
+        id:
+          type: "string"
+        name:
+          type: "string"
+        login:
+          type: "string"
+        email:
+          type: "string"
+        roles:
+          $ref: "#/components/schemas/TeamRole"
+    AppUserPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "AppUser"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/AppUser"
+    ACL:
+      type: "object"
+      x-business-entity: "ACL"
+      properties:
+        id:
+          type: "string"
+        teamId:
+          type: "string"
+        groupId:
+          type: "string"
+        artifactId:
+          type: "string"
+        permission:
+          $ref: "#/components/schemas/Permission"
+        userId:
+          type: "string"
+        domainId:
+          type: "string"
+    ACLPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "ACL"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/ACL"
+    Domain:
+      type: "object"
+      x-business-entity: "Domain"
+      required:
+      - "name"
+      properties:
+        id:
+          type: "string"
+        name:
+          type: "string"
+        description:
+          type: "string"
+    DomainPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "Domain"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/Domain"
+    ArtifactFile:
+      type: "object"
+      x-business-entity: "ArtifactFile"
+      required:
+      - "name"
+      - "relativePath"
+      properties:
+        id:
+          type: "string"
+        name:
+          type: "string"
+        artifactId:
+          $ref: "#/components/schemas/ArtifactId"
+        relativePath:
+          type: "string"
+        content:
+          type: "string"
+    ArtifactFilePaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "ArtifactFile"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/ArtifactFile"
+    Artifact:
+      type: "object"
+      x-business-entity: "Artifact"
+      required:
+      - "name"
+      properties:
+        id:
+          type: "string"
+        visibility:
+          $ref: "#/components/schemas/VisibilityType"
+        name:
+          type: "string"
+        description:
+          type: "string"
+        files:
+          $ref: "#/components/schemas/ArtifactFile"
+        artifactId:
+          $ref: "#/components/schemas/ArtifactId"
+        mainFile:
+          $ref: "#/components/schemas/ArtifactFile"
+        domainId:
+          type: "string"
+        status:
+          $ref: "#/components/schemas/ArtifactStatus"
+        tags:
+          type: "string"
+    ArtifactPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "Artifact"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/Artifact"
+    Permission:
+      type: "string"
+      enum:
+      - "READ"
+      - "MANAGE"
+      - "PUBLISH"
+    ArtifactStatus:
+      type: "string"
+      enum:
+      - "AVAILABLE"
+      - "PUBLISHED"
+      - "DRAFT"
+      - "DEPRECATED"
+      - "RETIRED"
+    VisibilityType:
+      type: "string"
+      enum:
+      - "INTERNAL"
+      - "PARTNER"
+      - "PUBLIC"
+    RoleType:
+      type: "string"
+      enum:
+      - "TEAM_ADMIN"
+      - "DEVELOPER"
+      - "ORG_ADMIN"
+      - "DESIGNER"
+
+    Page:
+      type: object
+      required:
+        - "content"
+        - "totalElements"
+        - "totalPages"
+        - "size"
+        - "number"
+      properties:
+        number:
+          type: integer
+          minimum: 0
+        numberOfElements:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 0
+          maximum: 200
+          multipleOf: 25
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
