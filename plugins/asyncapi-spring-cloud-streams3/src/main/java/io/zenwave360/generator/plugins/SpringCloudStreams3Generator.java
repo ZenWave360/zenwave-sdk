@@ -1,6 +1,7 @@
 package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.DocumentedOption;
+import io.zenwave360.generator.Utils;
 import io.zenwave360.generator.parsers.Model;
 import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.TemplateEngine;
@@ -102,7 +103,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
     public List<TemplateOutput> generateTemplateOutput(Map<String, Object> contextModel, List<TemplateInput> templates, String serviceName, Map<String, Object> operation, OperationRoleType operationRoleType) {
         Map<String, Object> model = new HashMap<>();
-        model.putAll(asConfigurationMap());
+        model.putAll(Utils.asConfigurationMap(this));
         model.put("context", contextModel);
         model.put("asyncapi", getApiModel(contextModel));
         model.put("serviceName", serviceName);
@@ -114,7 +115,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
     public List<TemplateOutput> generateTemplateOutput(Map<String, Object> contextModel, List<TemplateInput> templates, String serviceName, List<Map<String, Object>> operations, OperationRoleType operationRoleType) {
         Map<String, Object> model = new HashMap<>();
-        model.putAll(asConfigurationMap());
+        model.putAll(Utils.asConfigurationMap(this));
         model.put("context", contextModel);
         model.put("asyncapi", getApiModel(contextModel));
         model.put("serviceName", serviceName);

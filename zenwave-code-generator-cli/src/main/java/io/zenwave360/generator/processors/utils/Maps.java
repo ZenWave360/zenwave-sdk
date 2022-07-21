@@ -1,6 +1,7 @@
 package io.zenwave360.generator.processors.utils;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -9,7 +10,7 @@ import java.util.Map;
 public interface Maps {
 
     static <K, V> Map<K, V> of(K key, V value, Object ...keyValues) {
-        Map<K, V> map = new HashMap<>();
+        Map<K, V> map = new LinkedHashMap<>();
         map.put(key, value);
         if(keyValues != null) {
             int i = 0;

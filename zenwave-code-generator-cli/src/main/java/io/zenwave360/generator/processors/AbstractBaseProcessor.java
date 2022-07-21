@@ -11,7 +11,7 @@ import java.util.Map;
 
 public abstract class AbstractBaseProcessor implements Processor {
 
-    protected String targetProperty = "api";
+    public String targetProperty = "api";
 
     public <T extends AbstractBaseProcessor> T withTargetProperty(String targetProperty) {
         this.targetProperty = targetProperty;

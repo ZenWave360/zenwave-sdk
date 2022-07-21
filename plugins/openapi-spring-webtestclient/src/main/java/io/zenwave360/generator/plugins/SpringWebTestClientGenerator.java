@@ -1,6 +1,7 @@
 package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.DocumentedOption;
+import io.zenwave360.generator.Utils;
 import io.zenwave360.generator.parsers.Model;
 import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.TemplateEngine;
@@ -87,7 +88,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
 
     public TemplateOutput generateTestSet(Map<String, Object> contextModel, TemplateInput template, Collection<String> includedTestsNames) {
         Map<String, Object> model = new HashMap<>();
-        model.putAll(asConfigurationMap());
+        model.putAll(Utils.asConfigurationMap(this));
         model.put("context", contextModel);
         model.put("openapi", getApiModel(contextModel));
         model.put("includedTestsNames", includedTestsNames);
@@ -97,7 +98,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
 
     public TemplateOutput generateTemplateOutput(Map<String, Object> contextModel, TemplateInput template, String serviceName, List<Map<String, Object>> operations) {
         Map<String, Object> model = new HashMap<>();
-        model.putAll(asConfigurationMap());
+        model.putAll(Utils.asConfigurationMap(this));
         model.put("context", contextModel);
         model.put("openapi", getApiModel(contextModel));
         model.put("serviceName", serviceName + "ApiController");

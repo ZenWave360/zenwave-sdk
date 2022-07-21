@@ -1,0 +1,13 @@
+Help for: {{configClassName}}
+
+{{{plugin.description}}}
+
+Options:
+{{#each options as |option|}}
+  * {{~@key}}: {{{option.description}}}
+{{/each}}
+
+Undocumented options:
+{{#each undocumentedOptions as |option|}}
+  * {{~option.name}}: type: {{option.type}}, ower class: {{option.ownerClass}}
+{{/each}}

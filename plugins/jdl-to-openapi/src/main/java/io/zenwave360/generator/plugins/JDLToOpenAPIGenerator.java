@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.oracle.truffle.js.runtime.builtins.JSON;
 import io.zenwave360.generator.DocumentedOption;
+import io.zenwave360.generator.Utils;
 import io.zenwave360.generator.processors.utils.JSONPath;
 import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.OutputFormatType;
@@ -210,7 +211,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
 
     public TemplateOutput generateTemplateOutput(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> jdlModel, String schemasAsString) {
         Map<String, Object> model = new HashMap<>();
-        model.putAll(asConfigurationMap());
+        model.putAll(Utils.asConfigurationMap(this));
         model.put("context", contextModel);
         model.put("jdlModel", jdlModel);
         model.put("schemasAsString", schemasAsString);
