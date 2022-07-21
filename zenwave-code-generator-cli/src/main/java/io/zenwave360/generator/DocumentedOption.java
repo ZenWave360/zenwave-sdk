@@ -13,7 +13,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * Documents {@link io.zenwave360.generator.Generator} options, used for building help and documentation messages.
  */
 @Documented
-@Target({ FIELD, METHOD })
+@Target({ TYPE, FIELD, METHOD })
 @Retention(RUNTIME)
 public @interface DocumentedOption {
 

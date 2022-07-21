@@ -2,6 +2,7 @@ package io.zenwave360.generator;
 
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.parsers.JDLParser;
+import io.zenwave360.generator.plugins.NoOpPluginGenerator;
 import io.zenwave360.generator.processors.AsyncApiProcessor;
 import io.zenwave360.generator.processors.OpenApiProcessor;
 import io.zenwave360.generator.writers.TemplateFileWriter;

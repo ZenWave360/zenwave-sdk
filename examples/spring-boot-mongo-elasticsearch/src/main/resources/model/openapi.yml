@@ -498,9 +498,9 @@ components:
       - x-business-entity-paginated: "Organization"
       - properties:
           content:
-            type: "array"
             items:
               $ref: "#/components/schemas/Organization"
+            type: "array"
     ArtifactId:
       type: "object"
       x-business-entity: "ArtifactId"
@@ -521,9 +521,9 @@ components:
       - x-business-entity-paginated: "ArtifactId"
       - properties:
           content:
-            type: "array"
             items:
               $ref: "#/components/schemas/ArtifactId"
+            type: "array"
     TeamRole:
       type: "object"
       x-business-entity: "TeamRole"
@@ -538,9 +538,9 @@ components:
       - x-business-entity-paginated: "TeamRole"
       - properties:
           content:
-            type: "array"
             items:
               $ref: "#/components/schemas/TeamRole"
+            type: "array"
     Team:
       type: "object"
       x-business-entity: "Team"
@@ -559,9 +559,9 @@ components:
       - x-business-entity-paginated: "Team"
       - properties:
           content:
-            type: "array"
             items:
               $ref: "#/components/schemas/Team"
+            type: "array"
     AppUser:
       type: "object"
       x-business-entity: "AppUser"
@@ -586,9 +586,9 @@ components:
       - x-business-entity-paginated: "AppUser"
       - properties:
           content:
-            type: "array"
             items:
               $ref: "#/components/schemas/AppUser"
+            type: "array"
     ACL:
       type: "object"
       x-business-entity: "ACL"
@@ -613,9 +613,9 @@ components:
       - x-business-entity-paginated: "ACL"
       - properties:
           content:
-            type: "array"
             items:
               $ref: "#/components/schemas/ACL"
+            type: "array"
     Domain:
       type: "object"
       x-business-entity: "Domain"
@@ -634,9 +634,9 @@ components:
       - x-business-entity-paginated: "Domain"
       - properties:
           content:
-            type: "array"
             items:
               $ref: "#/components/schemas/Domain"
+            type: "array"
     ArtifactFile:
       type: "object"
       x-business-entity: "ArtifactFile"
@@ -660,9 +660,9 @@ components:
       - x-business-entity-paginated: "ArtifactFile"
       - properties:
           content:
-            type: "array"
             items:
               $ref: "#/components/schemas/ArtifactFile"
+            type: "array"
     Artifact:
       type: "object"
       x-business-entity: "Artifact"
@@ -695,9 +695,9 @@ components:
       - x-business-entity-paginated: "Artifact"
       - properties:
           content:
-            type: "array"
             items:
               $ref: "#/components/schemas/Artifact"
+            type: "array"
     Permission:
       type: "string"
       enum:

@@ -11,6 +11,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>spring-boot-mongo-elasticsearch</module>
+<!--        <module>spring-boot-mongo-elasticsearch</module>-->
     </modules>
 </project>

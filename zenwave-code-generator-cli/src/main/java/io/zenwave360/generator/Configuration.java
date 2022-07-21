@@ -1,12 +1,18 @@
 package io.zenwave360.generator;
 
+import io.zenwave360.generator.processors.utils.NamingUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.reflections.Reflections;
+import org.reflections.util.ConfigurationBuilder;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Configuration {
@@ -21,9 +27,30 @@ public class Configuration {
 
     public static Configuration of(String pluginConfigAsString) throws Exception {
         if (pluginConfigAsString != null) {
-            return (Configuration) Configuration.class.getClassLoader().loadClass(pluginConfigAsString).getDeclaredConstructor().newInstance();
+            if(pluginConfigAsString.contains(".")) {
+                return (Configuration) Configuration.class.getClassLoader().loadClass(pluginConfigAsString).getDeclaredConstructor().newInstance();
+            }
+            String simpleClassName = NamingUtils.asJavaTypeName(pluginConfigAsString);
+            var allConfigClasses = new Reflections("io.zenwave360.generator.plugins").getSubTypesOf(Configuration.class);
+            Optional<Class<? extends Configuration>> pluginClass = allConfigClasses.stream().filter(c -> matchesClassName(c, pluginConfigAsString, simpleClassName)).findFirst();
+            if(pluginClass.isPresent()) {
+                return pluginClass.get().getDeclaredConstructor().newInstance();
+            }
         }
         return new Configuration();
+    }
+
+    private static boolean matchesClassName(Class c, String pluginConfigAsString, String simpleClassName) {
+        Field configIdField = FieldUtils.getField(c,"CONFIG_ID");
+        if(configIdField != null) {
+            try {
+                if(configIdField.get(null).equals(pluginConfigAsString)) {
+                    return true;
+                }
+            } catch (IllegalAccessException ignored) {
+            }
+        }
+        return c.getSimpleName().matches(simpleClassName + "(Configuration){0,1}$");
     }
 
     public <T extends Configuration> T processOptions() {

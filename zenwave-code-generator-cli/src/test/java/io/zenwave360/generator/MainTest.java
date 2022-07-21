@@ -1,6 +1,8 @@
 package io.zenwave360.generator;
 
 import io.zenwave360.generator.parsers.DefaultYamlParser;
+import io.zenwave360.generator.plugins.NoOpPluginConfiguration;
+import io.zenwave360.generator.plugins.NoOpPluginGenerator;
 import io.zenwave360.generator.processors.AsyncApiProcessor;
 import io.zenwave360.generator.writers.TemplateFileWriter;
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +26,11 @@ public class MainTest {
                 "inner.specFile=target/zenwave/out",
                 "inner.targetFolder=target/zenwave/out"
         );
+    }
+
+    @Test
+    public void testMainHelp() {
+        Main.main("-h", "-p", NoOpPluginConfiguration.class.getName());
     }
 
     @Test
