@@ -15,8 +15,8 @@ public class Main implements Callable<Integer> {
     @Option(names = {"-h", "--help"}, usageHelp = true, description = "display this help message")
     boolean help;
 
-    @Option(names = {"-f", "--help-format"}, arity = "0..1", description = "Help output format", defaultValue = "SHORT")
-    Help.Format helpFormat = Help.Format.SHORT;
+    @Option(names = {"-f", "--help-format"}, arity = "0..1", description = "Help output format", defaultValue = "help")
+    Help.Format helpFormat = Help.Format.help;
 
     @Option(names = {"-p", "--plugin"}, arity = "0..1", description = "Plugin Configuration class")
     String pluginConfigClass;

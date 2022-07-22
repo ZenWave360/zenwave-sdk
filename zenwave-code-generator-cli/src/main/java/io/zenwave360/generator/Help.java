@@ -5,11 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.zenwave360.generator.processors.utils.Maps;
 import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.TemplateInput;
-import io.zenwave360.generator.templating.TemplateOutput;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -23,11 +21,7 @@ import static java.lang.reflect.Modifier.isStatic;
 public class Help {
 
     enum Format {
-        SHORT,
-        DETAILED,
-        JSON,
-        MARKDOWN,
-        HTML
+        help, detailed, json, markdown, html
     }
 
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -99,7 +93,7 @@ public class Help {
     }
 
     public String help(Configuration configuration, Format format) {
-        if(format == Format.JSON) {
+        if(format == Format.json) {
             try {
                 return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(buildHelpModel(configuration, format));
             } catch (JsonProcessingException e) {
