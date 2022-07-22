@@ -1,5 +1,7 @@
 package io.zenwave360.generator.parsers;
 
+import io.zenwave360.generator.DocumentedOption;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -13,11 +15,13 @@ import java.util.stream.Collectors;
 
 public class JDLParser implements Parser {
 
+    @DocumentedOption(description = "JDL files to parse")
     public String[] specFiles;
     public String targetProperty = "jdl";
 
     public Map<String, String> options = new HashMap<>();
 
+    @DocumentedOption(description = "JDL file to parse")
     public void setSpecFile(String specFile) {
         this.specFiles = new String[]{ specFile };
     }

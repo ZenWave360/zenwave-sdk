@@ -95,14 +95,49 @@ jbang zw -p io.zenwave360.generator.plugins.SpringWebTestClientConfiguration \
 
 ### JDL
 
-#### JDL Server Entities (WIP)
+#### JDL Server Backend Application
 
 Aims to generate a complete Architecture based on Domain models expressed in JDL.
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.JDLOpenAPIControllersConfiguration \
-    specFile=entities-model.jdl targetFolder=target/out
+jbang zw -p io.zenwave360.generator.plugins.JDLBackendApplicationDefaultConfiguration \
+    specFile=entities-model.jdl \
+    basePackage=io.zenwave360.example \
+    persistence=mongodb \
+    style=imperative \
+    targetFolder=. \
+    -h -f MARKDOWN
 ```
+
+| **Option** | **Description** | **Type** | **Default** | **Values** |
+|------------|-----------------|----------|-------------|------------|
+| `specFile` | OpenAPI file to parse |  |   |
+| `specFiles` | JDL files to parse |  |   |
+| `jdlBusinessEntityProperty` | Extension property referencing original jdl entity in components schemas (default: x-business-entity) |  |   |
+| `jdlBusinessEntityPaginatedProperty` | Extension property referencing original jdl entity in components schemas for paginated lists (default: x-business-entity-paginated) |  |   |
+| `paginatedDtoItemsJsonPath` | JSONPath list to search for response DTO schemas for list or paginated results. User '$.items' for lists or '$.properties.<content property>.items' for paginated results. |  |   |
+| `dtoToEntityNameMap` | Maps openapi dtos to jdl entity names |  |   |
+| `controllersPackage` | The package to generate REST Controllers |  |   |
+| `entitiesPackage` | Package where your domain entities are |  |   |
+| `inboundDtosPackage` | Package where your inbound dtos are |  |   |
+| `servicesPackage` | Package where your domain services/usecases interfaces are |  |   |
+| `inputDTOSuffix` | Suffix for CRUD operations DTOs (default: Input) |  |   |
+| `entityDTOSuffix` | Suffix for (output) entities DTOs (default: empty to use the entity itself) |  |   |
+| `criteriaDTOSuffix` | Suffix for search criteria DTOs (default: Criteria) |  |   |
+| `searchDTOSuffix` | Suffix for elasticsearch document entities (default: Document) |  |   |
+| `style` | ProgrammingStyle imperative|reactive default: imperative |  | imperative, reactive  |
+| `basePackage` | Applications base package |  |   |
+| `openApiApiPackage` | The package to used by OpenAPI-Generator for generated api objects/classes |  |   |
+| `openApiModelPackage` | The package to used by OpenAPI-Generator for generated model objects/classes |  |   |
+| `openApiModelNamePrefix` | Sets the prefix for model enums and classes used by OpenAPI-Generator |  |   |
+| `openApiModelNameSuffix` | Sets the suffix for model enums and classes used by OpenAPI-Generator |  |   |
+| `role` | Project role: PROVIDER\|CLIENT |  | PROVIDER, CLIENT  |
+| `operationIds` | OpenAPI operationIds to generate code for |  |   |
+| `statusCodes` | Status codes to generate code for (default: 200, 201, 202 and 400 |  |   |
+| `targetFolder` | Target folder to generate code to. If left empty, it will print to stdout. |  |   |
+| `jdlFile` | JDL file to parse |  |   |
+
+
 
 #### JDL Reverse Engineering from Java Classes
 

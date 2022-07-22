@@ -1,6 +1,7 @@
 package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.Configuration;
+import io.zenwave360.generator.DocumentedOption;
 import io.zenwave360.generator.formatters.JavaFormatter;
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.parsers.JDLParser;
@@ -15,6 +16,9 @@ import org.apache.commons.lang3.StringUtils;
 public class JDLOpenAPIControllersConfiguration extends Configuration {
 
     public static final String CONFIG_ID = "jdl-openapi-controllers";
+
+    @DocumentedOption(description = "JDL file to parse", required = false)
+    public String jdlFile;
 
     public JDLOpenAPIControllersConfiguration() {
         super();

@@ -17,10 +17,13 @@ import java.util.stream.Collectors;
 
 public class Configuration {
 
-    private static final String PRESET_ID = "base";
+    private static final String CONFIG_ID = "configuration";
 
-    private String specFile;
-    private String targetFolder;
+    @DocumentedOption(description = "OpenAPI file to parse", required = true)
+    public String specFile;
+
+    @DocumentedOption(description = "Target folder for generated output", required = false)
+    public String targetFolder;
     private List<Class> chain;
 
     private Map<String, Object> options = new HashMap<>();
