@@ -1,6 +1,6 @@
 package io.zenwave360.generator.plugins;
 
-import io.zenwave360.generator.DocumentedOption;
+import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.GeneratorPlugin;
 import io.zenwave360.generator.templating.TemplateOutput;
 import org.reflections.Reflections;

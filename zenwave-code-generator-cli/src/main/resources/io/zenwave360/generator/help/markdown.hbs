@@ -1,5 +1,7 @@
 Help for: {{configClassName}}
 
+{{{plugin.title}}}
+
 {{{plugin.description}}}
 
 Options:
@@ -7,5 +9,5 @@ Options:
 | **Option** | **Description** | **Type** | **Default** | **Values** |
 |------------|-----------------|----------|-------------|------------|
 {{~#each options as |option|}}
-| `{{@key}}` | {{{option.description}}} | {{{option.defaultValue}}} | {{join option.values ", " }}  |
+| `{{@key}}` | {{{option.description}}} | {{{option.type}}} | {{{option.defaultValue}}} | {{join option.values ", " }}  |
 {{~/each}}

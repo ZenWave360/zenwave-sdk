@@ -1,6 +1,6 @@
 package io.zenwave360.generator.parsers;
 
-import io.zenwave360.generator.DocumentedOption;
+import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.jsonrefparser.$RefParser;
 import io.zenwave360.jsonrefparser.$RefParserOptions;
 

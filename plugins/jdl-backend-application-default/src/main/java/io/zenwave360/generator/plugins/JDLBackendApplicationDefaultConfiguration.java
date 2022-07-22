@@ -1,16 +1,18 @@
 package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.Configuration;
-import io.zenwave360.generator.DocumentedOption;
+import io.zenwave360.generator.doc.DocumentedOption;
+import io.zenwave360.generator.doc.DocumentedPlugin;
 import io.zenwave360.generator.formatters.JavaFormatter;
 import io.zenwave360.generator.parsers.JDLParser;
 import io.zenwave360.generator.processors.JDLProcessor;
 import io.zenwave360.generator.writers.TemplateFileWriter;
 import io.zenwave360.generator.writers.TemplateStdoutWriter;
 
-import java.util.Map;
-
-@DocumentedOption(description = "Generates a full backend application using a flexible hexagonal architecture")
+/**
+ * This is the long description
+ */
+@DocumentedPlugin(value = "Generates a full backend application using a flexible hexagonal architecture", description = "${javadoc}")
 public class JDLBackendApplicationDefaultConfiguration extends Configuration {
 
     public static final String CONFIG_ID = "jdl-backend-application-default";

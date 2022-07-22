@@ -1,9 +1,8 @@
 package io.zenwave360.generator.parsers;
 
-import io.zenwave360.generator.DocumentedOption;
+import io.zenwave360.generator.doc.DocumentedOption;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;

@@ -1,6 +1,6 @@
 package io.zenwave360.generator.processors;
 
-import io.zenwave360.generator.DocumentedOption;
+import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.processors.utils.JSONPath;
 import org.apache.commons.lang3.StringUtils;
 
@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Depends on {@link io.zenwave360.generator.processors.OpenApiProcessor} to run before.

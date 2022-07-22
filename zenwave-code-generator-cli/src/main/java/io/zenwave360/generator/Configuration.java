@@ -1,9 +1,9 @@
 package io.zenwave360.generator;
 
+import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.processors.utils.NamingUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.reflections.Reflections;
-import org.reflections.util.ConfigurationBuilder;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Configuration {

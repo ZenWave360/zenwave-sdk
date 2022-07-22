@@ -2,6 +2,8 @@ package io.zenwave360.generator;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.zenwave360.generator.doc.DocumentedOption;
+import io.zenwave360.generator.doc.DocumentedPlugin;
 import io.zenwave360.generator.processors.utils.Maps;
 import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.TemplateInput;
@@ -33,9 +35,9 @@ public class Help {
         var undocumentedOptions = new LinkedHashMap<String, Map<String, Object>>();
         var pluginList = new LinkedHashMap<Class, Object>();
         model.put("configClassName", configuration.getClass().getName());
-        DocumentedOption pluginDocumentation = (DocumentedOption) configuration.getClass().getAnnotation(DocumentedOption.class);
+        DocumentedPlugin pluginDocumentation = (DocumentedPlugin) configuration.getClass().getAnnotation(DocumentedPlugin.class);
         if(pluginDocumentation != null) {
-            model.put("plugin", Maps.of("description", pluginDocumentation.description()));
+            model.put("plugin", Maps.of("title", pluginDocumentation.value(),"description", pluginDocumentation.description()));
         }
         model.put("config", configuration);
         model.put("options", options);
@@ -89,7 +91,7 @@ public class Help {
             throw new RuntimeException(e);
         }
         defaultValue = defaultValue == null? documentedOption.defaultValue() : defaultValue;
-        return Maps.of("description", documentedOption.description(), "type", type, "default", defaultValue, "values", values);
+        return Maps.of("description", documentedOption.description(), "type", type.getSimpleName(), "default", defaultValue, "values", values);
     }
 
     public String help(Configuration configuration, Format format) {

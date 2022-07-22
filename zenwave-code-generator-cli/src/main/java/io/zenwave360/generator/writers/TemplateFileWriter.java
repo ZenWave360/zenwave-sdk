@@ -1,6 +1,6 @@
 package io.zenwave360.generator.writers;
 
-import io.zenwave360.generator.DocumentedOption;
+import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.templating.TemplateOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

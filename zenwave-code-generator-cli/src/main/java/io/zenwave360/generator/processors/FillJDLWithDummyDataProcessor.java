@@ -1,6 +1,6 @@
 package io.zenwave360.generator.processors;
 
-import io.zenwave360.generator.DocumentedOption;
+import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.processors.utils.JSONPath;
 import io.zenwave360.generator.processors.utils.Maps;
 import io.zenwave360.generator.processors.utils.NamingUtils;

@@ -1,4 +1,4 @@
-package io.zenwave360.generator;
+package io.zenwave360.generator.doc;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -13,17 +13,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * Documents {@link io.zenwave360.generator.Generator} options, used for building help and documentation messages.
  */
 @Documented
-@Target({ TYPE, FIELD, METHOD })
+@Target({ TYPE })
 @Retention(RUNTIME)
-public @interface DocumentedOption {
+public @interface DocumentedPlugin {
 
-    String name() default "";
-
-    Class type() default String.class;
-
+    String value() default "";
     String description() default "";
-
-    boolean required() default false;
-
-    String defaultValue() default "";
 }
