@@ -1,7 +1,6 @@
 package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.Configuration;
-import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.doc.DocumentedPlugin;
 import io.zenwave360.generator.writers.TemplateStdoutWriter;
 
@@ -12,6 +11,6 @@ public class NoOpPluginConfiguration extends Configuration {
 
     public NoOpPluginConfiguration() {
         super();
-        withChain(NoOpPluginGenerator.class, TemplateStdoutWriter.class);
+        withChain(NoOpGenerator.class, TemplateStdoutWriter.class);
     }
 }

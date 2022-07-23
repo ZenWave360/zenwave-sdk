@@ -1,8 +1,8 @@
-package io.zenwave360.generator.plugins;
+package io.zenwave360.generator.generators;
 
 import com.jayway.jsonpath.JsonPath;
 import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.generator.GeneratorPlugin;
+import io.zenwave360.generator.generators.Generator;
 import io.zenwave360.generator.parsers.Model;
 import org.apache.commons.lang3.ObjectUtils;
 
@@ -14,13 +14,17 @@ import java.util.Map;
 import java.util.Set;
 
 
-public abstract class AbstractAsyncapiGenerator implements GeneratorPlugin {
+public abstract class AbstractAsyncapiGenerator implements Generator {
 
-    enum OperationType {
+    public enum RoleType {
+        PROVIDER, CLIENT
+    }
+
+    public enum OperationType {
         PUBLISH, SUBSCRIBE
     }
 
-    enum OperationRoleType {
+    public enum OperationRoleType {
         EVENT_PRODUCER("EventsProducer"),
         EVENT_CONSUMER("EventsConsumer"),
         COMMAND_PRODUCER("CommandsProducer"),

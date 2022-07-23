@@ -39,9 +39,6 @@
     </build>
 
     <modules>
-        <module>asyncapi-base</module>
-        <module>openapi-base</module>
-        <module>jdl-base</module>
         <module>java-to-jdl</module>
         <module>jdl-to-openapi</module>
         <module>asyncapi-spring-cloud-streams3</module>

@@ -2,7 +2,7 @@ package io.zenwave360.generator;
 
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.parsers.JDLParser;
-import io.zenwave360.generator.plugins.NoOpPluginGenerator;
+import io.zenwave360.generator.plugins.NoOpGenerator;
 import io.zenwave360.generator.processors.AsyncApiProcessor;
 import io.zenwave360.generator.processors.OpenApiProcessor;
 import io.zenwave360.generator.writers.TemplateFileWriter;
@@ -39,9 +39,9 @@ public class GeneratorTest {
         Configuration configuration = new Configuration()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml")
                 .withTargetFolder("target/zenwave630/out")
-                .withChain(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpPluginGenerator.class, TemplateFileWriter.class);
+                .withChain(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class);
 
-        new Generator(configuration).generate();
+        new Main().generate(configuration);
 
         logCaptor.getLogs();
     }
@@ -59,11 +59,11 @@ public class GeneratorTest {
                 .withOption("2.targetProperty", "jdl")
                 .withOption("3.targetProperty", "asyncapi")
                 .withOption("4.targetProperty", "openapi")
-                .withChain(DefaultYamlParser.class, DefaultYamlParser.class, JDLParser.class, AsyncApiProcessor.class, OpenApiProcessor.class, NoOpPluginGenerator.class, TemplateFileWriter.class);
+                .withChain(DefaultYamlParser.class, DefaultYamlParser.class, JDLParser.class, AsyncApiProcessor.class, OpenApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class);
 
-        new Generator(configuration).generate();
+        new Main().generate(configuration);
 
-        Map<String, Object> contextModel = NoOpPluginGenerator.context;
+        Map<String, Object> contextModel = NoOpGenerator.context;
 
         logCaptor.getLogs();
     }

@@ -1,7 +1,7 @@
 package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.generator.GeneratorPlugin;
+import io.zenwave360.generator.generators.Generator;
 import io.zenwave360.generator.templating.TemplateOutput;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class JavaToJDLGenerator implements GeneratorPlugin {
+public class JavaToJDLGenerator implements Generator {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 

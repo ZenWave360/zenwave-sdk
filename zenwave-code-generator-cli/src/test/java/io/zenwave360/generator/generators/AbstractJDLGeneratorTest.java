@@ -1,5 +1,6 @@
-package io.zenwave360.generator.plugins;
+package io.zenwave360.generator.generators;
 
+import io.zenwave360.generator.generators.AbstractJDLGenerator;
 import io.zenwave360.generator.parsers.JDLParser;
 import io.zenwave360.generator.templating.TemplateOutput;
 import org.junit.jupiter.api.Test;

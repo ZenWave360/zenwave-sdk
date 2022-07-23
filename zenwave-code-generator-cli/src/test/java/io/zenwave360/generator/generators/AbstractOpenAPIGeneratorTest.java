@@ -1,6 +1,6 @@
-package io.zenwave360.generator.plugins;
+package io.zenwave360.generator.generators;
 
-import io.zenwave360.generator.GeneratorPlugin;
+import io.zenwave360.generator.generators.AbstractOpenAPIGenerator;
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.parsers.Model;
 import io.zenwave360.generator.processors.OpenApiProcessor;
@@ -35,7 +35,6 @@ public class AbstractOpenAPIGeneratorTest {
     public void test_filter_operations_by_tag_and_verb() throws Exception {
         Model model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         AbstractOpenAPIGenerator openapiGenerator = newAbstractAsyncapiGenerator();
-        openapiGenerator.role = GeneratorPlugin.RoleType.PROVIDER;
         Map<String, List<Map<String, Object>>> allOperations = openapiGenerator.getOperationsGroupedByTag(model);
         Map<String, List<Map<String, Object>>> getOperations = openapiGenerator.getOperationsGroupedByTag(model, AbstractOpenAPIGenerator.OperationType.GET);
         Map<String, List<Map<String, Object>>> putOperations = openapiGenerator.getOperationsGroupedByTag(model, AbstractOpenAPIGenerator.OperationType.PUT);

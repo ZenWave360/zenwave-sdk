@@ -2,6 +2,7 @@ package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.Utils;
+import io.zenwave360.generator.generators.AbstractOpenAPIGenerator;
 import io.zenwave360.generator.processors.utils.JSONPath;
 import io.zenwave360.generator.processors.utils.Maps;
 import io.zenwave360.generator.templating.HandlebarsEngine;

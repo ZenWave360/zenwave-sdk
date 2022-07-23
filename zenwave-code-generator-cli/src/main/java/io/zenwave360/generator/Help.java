@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static io.zenwave360.generator.Main.applyConfiguration;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
@@ -44,13 +45,12 @@ public class Help {
         model.put("undocumentedOptions", undocumentedOptions);
         model.put("pluginChain", pluginList);
 
-        Generator generator = new Generator(configuration);
         int chainIndex = 0;
         for (Class pluginClass: configuration.getChain()) {
             Object plugin;
             try {
                 plugin = pluginClass.getDeclaredConstructor().newInstance();
-                generator.applyConfiguration(chainIndex++, plugin, configuration);
+                applyConfiguration(chainIndex++, plugin, configuration);
                 pluginList.put(pluginClass, Utils.asConfigurationMap(plugin));
             } catch (Exception e) {
                 throw new RuntimeException(e);

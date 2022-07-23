@@ -1,7 +1,7 @@
 package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.Configuration;
-import io.zenwave360.generator.Generator;
+import io.zenwave360.generator.Main;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -44,7 +44,7 @@ public class JDLOpenAPIControllersGeneratorTest {
                 .withTargetFolder("target/out")
                 ;
 
-        new Generator(configuration).generate();
+        new Main().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
 //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
@@ -66,7 +66,7 @@ public class JDLOpenAPIControllersGeneratorTest {
                 .withTargetFolder("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy")
                 ;
 
-        new Generator(configuration).generate();
+        new Main().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
         //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
@@ -89,7 +89,7 @@ public class JDLOpenAPIControllersGeneratorTest {
                 .withTargetFolder("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy")
                 ;
 
-        new Generator(configuration).generate();
+        new Main().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
         //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));

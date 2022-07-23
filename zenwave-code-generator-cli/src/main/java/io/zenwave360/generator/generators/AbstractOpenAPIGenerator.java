@@ -1,8 +1,8 @@
-package io.zenwave360.generator.plugins;
+package io.zenwave360.generator.generators;
 
 import com.jayway.jsonpath.JsonPath;
 import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.generator.GeneratorPlugin;
+import io.zenwave360.generator.generators.Generator;
 import io.zenwave360.generator.parsers.Model;
 import org.apache.commons.lang3.ObjectUtils;
 
@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 
-public abstract class AbstractOpenAPIGenerator implements GeneratorPlugin {
+public abstract class AbstractOpenAPIGenerator implements Generator {
 
-    enum OperationType {
+    public enum OperationType {
         GET, PUT, POST, DELETE, PATCH, HEAD, PARAMETERS
     }
 
@@ -33,8 +33,6 @@ public abstract class AbstractOpenAPIGenerator implements GeneratorPlugin {
 
     @DocumentedOption(description = "Sets the suffix for model enums and classes used by OpenAPI-Generator")
     public String openApiModelNameSuffix = "";
-    @DocumentedOption(description = "Project role: PROVIDER\\|CLIENT")
-    public RoleType role = RoleType.PROVIDER;
 
     @DocumentedOption(description = "OpenAPI operationIds to generate code for")
     public List<String> operationIds = new ArrayList<>();

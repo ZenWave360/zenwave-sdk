@@ -59,7 +59,7 @@ public final class PluginAnnotationProcessor extends AbstractProcessor {
                 System.out.println("Annotation2 " + annotation2.description());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error processing DocumentedPlugin javadoc into annotation description", e);
         }
         return true;
     }

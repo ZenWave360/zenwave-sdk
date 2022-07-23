@@ -2,6 +2,7 @@ package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.Utils;
+import io.zenwave360.generator.generators.AbstractAsyncapiGenerator;
 import io.zenwave360.generator.parsers.Model;
 import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.TemplateEngine;

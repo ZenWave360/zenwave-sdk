@@ -9,6 +9,7 @@ import com.sun.codemodel.CodeWriter;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JPackage;
 import io.zenwave360.generator.doc.DocumentedOption;
+import io.zenwave360.generator.generators.AbstractAsyncapiGenerator;
 import io.zenwave360.generator.parsers.Model;
 import io.zenwave360.generator.processors.AsyncApiProcessor;
 import io.zenwave360.generator.processors.utils.JSONPath;

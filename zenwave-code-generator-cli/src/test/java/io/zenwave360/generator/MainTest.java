@@ -2,7 +2,7 @@ package io.zenwave360.generator;
 
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.plugins.NoOpPluginConfiguration;
-import io.zenwave360.generator.plugins.NoOpPluginGenerator;
+import io.zenwave360.generator.plugins.NoOpGenerator;
 import io.zenwave360.generator.processors.AsyncApiProcessor;
 import io.zenwave360.generator.writers.TemplateFileWriter;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +16,7 @@ public class MainTest {
 
     @Test
     public void testMain() {
-        List<String> processors = List.of(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpPluginGenerator.class, TemplateFileWriter.class)
+        List<String> processors = List.of(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class)
                 .stream().map(c -> c.getName()).collect(Collectors.toList());
 
         Main.main(
@@ -35,7 +35,7 @@ public class MainTest {
 
     @Test
     public void testMainWithMultipleSpecFiles() {
-        List<String> processors = List.of(DefaultYamlParser.class, AsyncApiProcessor.class, DefaultYamlParser.class, AsyncApiProcessor.class, NoOpPluginGenerator.class)
+        List<String> processors = List.of(DefaultYamlParser.class, AsyncApiProcessor.class, DefaultYamlParser.class, AsyncApiProcessor.class, NoOpGenerator.class)
                 .stream().map(c -> c.getName()).collect(Collectors.toList());
 
         Main.main(
@@ -51,9 +51,9 @@ public class MainTest {
                 "inner.targetFolder=target/zenwave/out"
         );
 
-        Assertions.assertTrue(NoOpPluginGenerator.context != null);
-        Assertions.assertTrue(NoOpPluginGenerator.context.get("asyncapi1") != null);
-        Assertions.assertTrue(NoOpPluginGenerator.context.get("asyncapi2") != null);
-        Assertions.assertNotSame(NoOpPluginGenerator.context.get("asyncapi2"), NoOpPluginGenerator.context.get("asyncapi1"));
+        Assertions.assertTrue(NoOpGenerator.context != null);
+        Assertions.assertTrue(NoOpGenerator.context.get("asyncapi1") != null);
+        Assertions.assertTrue(NoOpGenerator.context.get("asyncapi2") != null);
+        Assertions.assertNotSame(NoOpGenerator.context.get("asyncapi2"), NoOpGenerator.context.get("asyncapi1"));
     }
 }
