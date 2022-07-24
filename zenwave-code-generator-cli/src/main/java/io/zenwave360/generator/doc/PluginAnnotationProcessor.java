@@ -35,7 +35,7 @@ public final class PluginAnnotationProcessor extends AbstractProcessor {
             for (Element pluginElement : pluginElements) {
                 DocumentedPlugin documentedPluginAnnotation = pluginElement.getAnnotation(DocumentedPlugin.class);
                 String docComment = elementUtils.getDocComment(pluginElement);
-                if ("${javadoc}".contentEquals(documentedPluginAnnotation.description()) && docComment != null) {
+                if ("${javadoc}".contentEquals(documentedPluginAnnotation.description())) {
                     Object jcTree = MethodUtils.invokeMethod(elementUtils, "getTree", pluginElement);
                     Object mods = FieldUtils.readField(jcTree, "mods", true);
                     List annotations = (List) FieldUtils.readField(mods, "annotations", true);

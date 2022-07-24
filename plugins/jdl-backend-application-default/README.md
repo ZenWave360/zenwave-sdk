@@ -1,18 +1,17 @@
-# JDLBackendApplicationDefaultConfiguration
+# io.zenwave360.generator.plugins.JDLBackendApplicationDefaultConfiguration
 
 Generates a full backend application using a flexible hexagonal architecture
 
-## Getting Help
+ This is the long description
 
-```shell
-jbang zw -p io.zenwave360.generator.plugins.JDLBackendApplicationDefaultConfiguration --help
-```
 
-## Options:
+## Options
 
 | **Option** | **Description** | **Type** | **Default** | **Values** |
 |------------|-----------------|----------|-------------|------------|
-| `specFiles` | JDL files to parse | String[] | [Ljava.lang.String;@54eb2b70 |   |
+| `specFile` | OpenAPI file to parse | String |  |   |
+| `targetFolder` | Target folder to generate code to. If left empty, it will print to stdout. | File |  |   |
+| `specFiles` | JDL files to parse | String[] | [null] |   |
 | `entities` | Entities to generate code for | List | [] |   |
 | `persistence` | Persistence | PersistenceType | mongodb | mongodb  |
 | `style` | Programming Style | ProgrammingStyle | imperative | imperative, reactive  |
@@ -20,7 +19,10 @@ jbang zw -p io.zenwave360.generator.plugins.JDLBackendApplicationDefaultConfigur
 | `criteriaDTOSuffix` | Suffix for search criteria DTOs (default: Criteria) | String | Criteria |   |
 | `searchDTOSuffix` | Suffix for elasticsearch document entities (default: Document) | String | Document |   |
 | `basePackage` | Java Models package name | String | io.example.domain.model |   |
-| `targetFolder` | Target folder for generated output | String |  |   |
-| `specFile` | OpenAPI file to parse | String |  |   |
 
+## Getting Help
+
+```shell
+jbang zw -p io.zenwave360.generator.plugins.JDLBackendApplicationDefaultConfiguration --help
+```
 
