@@ -37,7 +37,7 @@ public class JavaToJDLGenerator implements Generator {
         JPA, MONGODB
     }
 
-    @DocumentedOption(description = "Persistence type to search for annotations for (JPA|MONGODB)")
+    @DocumentedOption(description = "Persistence type to search for annotations for")
     public PersistenceType persistenceType = PersistenceType.MONGODB;
 
     @DocumentedOption(description = "Package name to scan for entities")

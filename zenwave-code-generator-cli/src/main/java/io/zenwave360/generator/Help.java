@@ -45,6 +45,15 @@ public class Help {
         model.put("undocumentedOptions", undocumentedOptions);
         model.put("pluginChain", pluginList);
 
+        // adds options from config class
+        for(Field field: FieldUtils.getAllFields(configuration.getClass())) {
+            DocumentedOption documentedOption = field.getAnnotation(DocumentedOption.class);
+            if (documentedOption != null) {
+                options.put(field.getName(), asModel(configuration, field, documentedOption));
+            }
+        }
+
+        // adds options from processors chain
         int chainIndex = 0;
         for (Class pluginClass: configuration.getChain()) {
             Object plugin;
@@ -67,12 +76,6 @@ public class Help {
             }
         }
 
-        for(Field field: FieldUtils.getAllFields(configuration.getClass())) {
-            DocumentedOption documentedOption = field.getAnnotation(DocumentedOption.class);
-            if (documentedOption != null) {
-                options.put(field.getName(), asModel(configuration, field, documentedOption));
-            }
-        }
         return model;
     }
 
@@ -84,14 +87,15 @@ public class Help {
         }
         Object defaultValue = null;
         try {
-            if(field.canAccess(plugin)) {
-                defaultValue = field.get(plugin);
-            }
+            defaultValue = FieldUtils.readField(field, plugin, true);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
         defaultValue = defaultValue == null? documentedOption.defaultValue() : defaultValue;
-        return Maps.of("description", documentedOption.description(), "type", type.getSimpleName(), "default", defaultValue, "values", values);
+        if(defaultValue.getClass().isArray()) {
+            defaultValue = Arrays.asList((Object[]) defaultValue);
+        }
+        return Maps.of("description", documentedOption.description(), "type", type.getSimpleName(), "defaultValue", defaultValue, "values", values);
     }
 
     public String help(Configuration configuration, Format format) {

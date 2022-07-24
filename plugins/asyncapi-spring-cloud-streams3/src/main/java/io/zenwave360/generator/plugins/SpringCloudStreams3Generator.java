@@ -23,7 +23,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     }
 
     public String sourceProperty = "api";
-    @DocumentedOption(description = "Programming style: IMPERATIVE\\|REACTIVE")
+    @DocumentedOption(description = "Programming style")
     public ProgrammingStyle style = ProgrammingStyle.IMPERATIVE;
 
     @DocumentedOption(description = "Whether to expose underlying spring Message to consumers or not. Default: false")

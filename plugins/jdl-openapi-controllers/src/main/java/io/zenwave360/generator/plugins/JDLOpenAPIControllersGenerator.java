@@ -59,7 +59,7 @@ public class JDLOpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     @DocumentedOption(description = "Suffix for elasticsearch document entities (default: Document)")
     public String searchDTOSuffix = "Document";
 
-    @DocumentedOption(description = "ProgrammingStyle imperative|reactive default: imperative")
+    @DocumentedOption(description = "Programming Style")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
 
     protected HandlebarsEngine handlebarsEngine = new HandlebarsEngine();

@@ -35,10 +35,10 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
     @DocumentedOption(description = "Entities to generate code for")
     public List<String> entities = new ArrayList<>();
 
-    @DocumentedOption(description = "Persistence MONGODB|JPA default: MONGODB")
+    @DocumentedOption(description = "Persistence")
     public PersistenceType persistence = PersistenceType.mongodb;
 
-    @DocumentedOption(description = "ProgrammingStyle imperative|reactive default: imperative")
+    @DocumentedOption(description = "Programming Style")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
 
     @DocumentedOption(description = "Suffix for CRUD operations DTOs (default: Input)")
