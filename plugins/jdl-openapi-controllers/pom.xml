@@ -10,19 +10,12 @@
     <artifactId>jdl-openapi-controllers</artifactId>
     <packaging>jar</packaging>
 
-    <properties>
-    </properties>
-
     <dependencies>
         <dependency>
-            <groupId>io.github.zenwave360.zenwave-code-generator.plugins</groupId>
-            <artifactId>openapi-base</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.zenwave360.zenwave-code-generator.plugins</groupId>
-            <artifactId>jdl-base</artifactId>
-            <version>${project.version}</version>
+            <groupId>io.github.zenwave360.jhipster</groupId>
+            <artifactId>jdl-jvm</artifactId>
+            <version>${jdl-jvm.version}</version>
         </dependency>
     </dependencies>
+
 </project>
