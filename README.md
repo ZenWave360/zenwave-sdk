@@ -54,15 +54,15 @@ mvn clean install
 
 ## Available Plugins
 
-| **Plugin**                                                                               | **Description**                    | **Model Types**      |
-| ---------------------------------------------------------------------------------------- | ---------------------------------- | -------------------- |
-| [AsyncAPI JSON Schema to POJO](./plugins/asyncapi-jsonschema2pojo/README.md)             | AsyncAPI JSON Schema to POJO       | AsyncAPI, JsonSchema |
-| [AsyncAPI to Spring Cloud Streams 3](./plugins/asyncapi-spring-cloud-streams3/README.md) | AsyncAPI to Spring Cloud Streams 3 | AsyncAPI             |
-| [JDL Backend Application Default](./plugins/jdl-backend-application-default/README.md)   | JDL Backend Application Default    | JDL                  |
-| [Java 2 JDL Reverse Engineering](./plugins/java-to-jdl/README.md)                        | Java 2 JDL Reverse Engineering     | Java, JDL            |
-| [JDL OpenAPI Controllers](./plugins/jdl-openapi-controllers/README.md)                   | JDL OpenAPI Controllers            | OpenAPI, JDL         |
-| [JDL to OpenAPI](./plugins/jdl-to-openapi/README.md)                                     | JDL to OpenAPI and OpenAPI to JDL  | JDL, OpenAPI         |
-| [OpenAPI to Spring WebTestClient](./plugins/openapi-spring-webtestclient/README.md)      | OpenAPI to Spring WebTestClient    | OpenAPI              |
+| **Plugin**                                                                               | **Description**                    | **Model Types**            |
+|------------------------------------------------------------------------------------------|------------------------------------|----------------------------|
+| [AsyncAPI JSON Schema to POJO](./plugins/asyncapi-jsonschema2pojo/README.md)             | AsyncAPI JSON Schema to POJO       | AsyncAPI, JsonSchema       |
+| [AsyncAPI to Spring Cloud Streams 3](./plugins/asyncapi-spring-cloud-streams3/README.md) | AsyncAPI to Spring Cloud Streams 3 | AsyncAPI, AVRO, JsonSchema |
+| [JDL Backend Application Default](./plugins/jdl-backend-application-default/README.md)   | JDL Backend Application Default    | JDL                        |
+| [Java 2 JDL Reverse Engineering](./plugins/java-to-jdl/README.md)                        | Java 2 JDL Reverse Engineering     | Java, JDL                  |
+| [JDL OpenAPI Controllers](./plugins/jdl-openapi-controllers/README.md)                   | JDL OpenAPI Controllers            | OpenAPI, JDL               |
+| [JDL to OpenAPI](./plugins/jdl-to-openapi/README.md)                                     | JDL to OpenAPI and OpenAPI to JDL  | JDL, OpenAPI               |
+| [OpenAPI to Spring WebTestClient](./plugins/openapi-spring-webtestclient/README.md)      | OpenAPI to Spring WebTestClient    | OpenAPI                    |
 
 ### AsyncApiJsonSchema2PojoConfiguration
 
@@ -73,7 +73,7 @@ ${javadoc}
 **Options:**
 
 | **Option**        | **Description**                                                                                                | **Type** | **Default**          | **Values**       |
-| ----------------- | -------------------------------------------------------------------------------------------------------------- | -------- | -------------------- | ---------------- |
+|-------------------|----------------------------------------------------------------------------------------------------------------|----------|----------------------|------------------|
 | `specFile`        | API Specification File                                                                                         | String   |                      |                  |
 | `targetFolder`    | Target folder to generate code to. If left empty, it will print to stdout.                                     | File     |                      |                  |
 | `messageNames`    | Message names to include in code generation (combined with operationIds). Generates code for ALL if left empty | List     | []                   |                  |
@@ -81,7 +81,7 @@ ${javadoc}
 | `apiPackage`      | Java API package name                                                                                          | String   | io.example.api       |                  |
 | `modelPackage`    | Java Models package name                                                                                       | String   | io.example.api.model |                  |
 | `bindingTypes`    | Binding names to include in code generation. Generates code for ALL bindings if left empty                     | List     |                      |                  |
-| `role`            | Project role: PROVIDER\|CLIENT                                                                                 | RoleType | PROVIDER             | PROVIDER, CLIENT |
+| `role`            | Project role                                                                                                   | RoleType | PROVIDER             | PROVIDER, CLIENT |
 | `operationIds`    | Operation ids to include in code generation. Generates code for ALL if left empty                              | List     | []                   |                  |
 
 **Getting Help:**
@@ -99,7 +99,7 @@ ${javadoc}
 **Options:**
 
 | **Option**      | **Description**                                                                            | **Type**         | **Default**          | **Values**           |
-| --------------- | ------------------------------------------------------------------------------------------ | ---------------- | -------------------- | -------------------- |
+|-----------------|--------------------------------------------------------------------------------------------|------------------|----------------------|----------------------|
 | `specFile`      | API Specification File                                                                     | String           |                      |                      |
 | `targetFolder`  | Target folder for generated output                                                         | String           |                      |                      |
 | `style`         | Programming style                                                                          | ProgrammingStyle | IMPERATIVE           | IMPERATIVE, REACTIVE |
@@ -107,7 +107,7 @@ ${javadoc}
 | `apiPackage`    | Java API package name                                                                      | String           | io.example.api       |                      |
 | `modelPackage`  | Java Models package name                                                                   | String           | io.example.api.model |                      |
 | `bindingTypes`  | Binding names to include in code generation. Generates code for ALL bindings if left empty | List             |                      |                      |
-| `role`          | Project role: PROVIDER\|CLIENT                                                             | RoleType         | PROVIDER             | PROVIDER, CLIENT     |
+| `role`          | Project role                                                                               | RoleType         | PROVIDER             | PROVIDER, CLIENT     |
 | `operationIds`  | Operation ids to include in code generation. Generates code for ALL if left empty          | List             | []                   |                      |
 
 **Getting Help:**
@@ -125,7 +125,7 @@ This is the long description
 **Options:**
 
 | **Option**          | **Description**                                                            | **Type**         | **Default**             | **Values**           |
-| ------------------- | -------------------------------------------------------------------------- | ---------------- | ----------------------- | -------------------- |
+|---------------------|----------------------------------------------------------------------------|------------------|-------------------------|----------------------|
 | `specFile`          | OpenAPI file to parse                                                      | String           |                         |                      |
 | `targetFolder`      | Target folder to generate code to. If left empty, it will print to stdout. | File             |                         |                      |
 | `specFiles`         | JDL files to parse                                                         | String[]         | [null]                  |                      |
@@ -174,7 +174,7 @@ ${javadoc}
 **Options:**
 
 | **Option**                           | **Description**                                                                                                                                                            | **Type**         | **Default**                                      | **Values**           |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------------------------------------------------ | -------------------- |
+|--------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|--------------------------------------------------|----------------------|
 | `jdlFile`                            | JDL file to parse                                                                                                                                                          | String           |                                                  |                      |
 | `specFile`                           | API Specification File                                                                                                                                                     | String           |                                                  |                      |
 | `targetFolder`                       | Target folder to generate code to. If left empty, it will print to stdout.                                                                                                 | File             |                                                  |                      |
@@ -215,7 +215,7 @@ ${javadoc}
 **Options:**
 
 | **Option**                           | **Description**                                                                                                                                                            | **Type** | **Default**                           | **Values** |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------- | ---------- |
+|--------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|---------------------------------------|------------|
 | `specFile`                           | OpenAPI file to parse                                                                                                                                                      | String   |                                       |            |
 | `targetFolder`                       | Target folder for generated output                                                                                                                                         | String   |                                       |            |
 | `specFiles`                          | JDL files to parse                                                                                                                                                         | String[] | [null]                                |            |
@@ -241,7 +241,7 @@ ${javadoc}
 **Options:**
 
 | **Option**         | **Description**                                 | **Type** | **Default**             | **Values** |
-| ------------------ | ----------------------------------------------- | -------- | ----------------------- | ---------- |
+|--------------------|-------------------------------------------------|----------|-------------------------|------------|
 | `specFile`         | API Specification File                          | String   |                         |            |
 | `targetFolder`     | Target folder for generated output              | String   |                         |            |
 | `entities`         | Entities to generate code for                   | List     | []                      |            |
@@ -264,7 +264,7 @@ ${javadoc}
 **Options:**
 
 | **Option**               | **Description**                                                              | **Type**    | **Default**                  | **Values**                  |
-| ------------------------ | ---------------------------------------------------------------------------- | ----------- | ---------------------------- | --------------------------- |
+|--------------------------|------------------------------------------------------------------------------|-------------|------------------------------|-----------------------------|
 | `specFile`               | API Specification File                                                       | String      |                              |                             |
 | `targetFolder`           | Target folder to generate code to. If left empty, it will print to stdout.   | File        |                              |                             |
 | `controllersPackage`     | The package to generate REST Controllers                                     | String      | {{basePackage}}.adapters.web |                             |
