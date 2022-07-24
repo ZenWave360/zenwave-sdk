@@ -10,7 +10,7 @@ ZenWave Code Generator is a configurable and extensible code generator tool for 
 
 Using JHipster Domain Language as **Ubiquitous Language** for [Data on the Inside](https://blog.acolyer.org/2016/09/13/data-on-the-outside-versus-data-on-the-inside/) and **API-First** specs like **AsyncAPI** and **OpenAPI** to describe Inter Process Communications (IPC) for [Data on the Outside](https://blog.acolyer.org/2016/09/13/data-on-the-outside-versus-data-on-the-inside/).
 
-![ZenWave Modeling Languages](00-ZenWave-ModelingLanguages.excalidraw.svg)
+![ZenWave Modeling Languages](docs/00-ZenWave-ModelingLanguages.excalidraw.svg)
 
 - **JHipster Domain Language (JDL) as Ubiquitous Language:** To describe your domain core domain model
 - **API-First specs like AsyncAPI and OpenAPI:** to describe Inter Process Communications (IPC) between bounded contexts/microservices.
@@ -63,15 +63,15 @@ Whether you are:
 
 - **Domain Map:** Sketch your full domain model
 
-![01-DomainMap](01-DomainMap.excalidraw.svg)
+![01-DomainMap](docs/01-DomainMap.excalidraw.svg)
 
 - **Domain Subdomains:** Decompose your model into manageable subdomains
 
-![02-DomainSubdomains](02-DomainSubdomains.excalidraw.svg)
+![02-DomainSubdomains](docs/02-DomainSubdomains.excalidraw.svg)
 
 - **Domain Bounded Contexts:** Separate your subdomains as separated bounded contexts. Entities from different bounded context can only be linked by _id_ but you can implement _query views_ and caches using patterns like CQRS to synchronize data from different BCs.
 
-![03-DomainBoundedContexts](03-DomainBoundedContexts.excalidraw.svg)
+![03-DomainBoundedContexts](docs/03-DomainBoundedContexts.excalidraw.svg)
 
 - **Define Aggregates and Entities in your Bounded Contexts:** Now you can describe your aggregate roots and their composing entities into separate JDL files (click to expand to see file contents):
 
@@ -228,9 +228,9 @@ relationship OneToMany {
 
 </details>
 
-![04-DDD-Agreggates-BoundedContexts-Orders_JDL.png](04-DDD-Agreggates-BoundedContexts-Orders_JDL.png)
+![04-DDD-Agreggates-BoundedContexts-Orders_JDL.png](docs/04-DDD-Agreggates-BoundedContexts-Orders_JDL.png)
 
-![04-DDD-Agreggates-BoundedContexts](04-DDD-Agreggates-BoundedContexts.excalidraw.svg)
+![04-DDD-Agreggates-BoundedContexts](docs/04-DDD-Agreggates-BoundedContexts.excalidraw.svg)
 
 ## API-First: Designing Inter-Service Communication
 
@@ -250,7 +250,7 @@ For every service owning data is a good idea to:
 
 This is commonly enough for other services to implement either direct synchronous access or create CQRS views.
 
-![05-DDD-CQRS-And-Direct-Access](05-DDD-CQRS-And-Direct-Access.excalidraw.svg)
+![05-DDD-CQRS-And-Direct-Access](docs/05-DDD-CQRS-And-Direct-Access.excalidraw.svg)
 
 Because APIs do evolve:
 
@@ -262,7 +262,7 @@ An easy way to simplify consumers implementation, regarding evolving message for
 - Just publish the aggregate ID and the event type (Create, Update, Delete) to the event broker.
 - Let the consumers use the REST API to fetch data synchronously.
 
-![05-DDD-CQRS-And-Evolving-Message-Schemas](05-DDD-CQRS-And-Evolving-Message-Schemas.excalidraw.svg)
+![05-DDD-CQRS-And-Evolving-Message-Schemas](docs/05-DDD-CQRS-And-Evolving-Message-Schemas.excalidraw.svg)
 
 ### Sagas
 
@@ -344,7 +344,7 @@ operations:
 
 </details>
 
-![05-InterProcessComunication-API-First](05-InterProcessComunication-API-First.excalidraw.svg)
+![05-InterProcessComunication-API-First](docs/05-InterProcessComunication-API-First.excalidraw.svg)
 
 # Refactoring a legacy monolith
 
@@ -390,7 +390,7 @@ cat target/out/entities.jdl
 
 Aims to generate a complete Architecture based on Domain models expressed in JDL.
 
-![06-ServiceImplementation-Hexagonal](06-ServiceImplementation-Hexagonal.excalidraw.svg)
+![06-ServiceImplementation-Hexagonal](docs/06-ServiceImplementation-Hexagonal.excalidraw.svg)
 
 ## JDL Server Entities (WIP)
 

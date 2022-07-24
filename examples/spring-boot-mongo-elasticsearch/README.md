@@ -1,5 +1,7 @@
 # ZenWave Example
 
+https://github.com/ZenWave360/zenwave-code-generator/tree/main/examples/spring-boot-mongo-elasticsearch
+
 ## ZenWave Code Generator
 
 ### Install ZenWave
