@@ -24,7 +24,7 @@ import static java.lang.reflect.Modifier.isStatic;
 public class Help {
 
     enum Format {
-        help, detailed, json, markdown, html
+        help, detailed, json, markdown, html, list
     }
 
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -99,6 +99,9 @@ public class Help {
     }
 
     public String help(Configuration configuration, Format format) {
+        if(format == Format.list) {
+
+        }
         if(format == Format.json) {
             try {
                 return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(buildHelpModel(configuration, format));

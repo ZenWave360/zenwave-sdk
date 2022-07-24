@@ -2,6 +2,7 @@ package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.Configuration;
 import io.zenwave360.generator.doc.DocumentedOption;
+import io.zenwave360.generator.doc.DocumentedPlugin;
 import io.zenwave360.generator.formatters.JavaFormatter;
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.parsers.JDLParser;
@@ -13,6 +14,7 @@ import io.zenwave360.generator.writers.TemplateFileWriter;
 import io.zenwave360.generator.writers.TemplateStdoutWriter;
 import org.apache.commons.lang3.StringUtils;
 
+@DocumentedPlugin("Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.")
 public class JDLOpenAPIControllersConfiguration extends Configuration {
 
     public static final String CONFIG_ID = "jdl-openapi-controllers";

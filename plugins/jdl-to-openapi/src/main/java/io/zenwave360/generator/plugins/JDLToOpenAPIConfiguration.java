@@ -1,6 +1,7 @@
 package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.Configuration;
+import io.zenwave360.generator.doc.DocumentedPlugin;
 import io.zenwave360.generator.formatters.JavaFormatter;
 import io.zenwave360.generator.parsers.JDLParser;
 import io.zenwave360.generator.processors.JDLProcessor;
@@ -9,6 +10,7 @@ import io.zenwave360.generator.writers.TemplateStdoutWriter;
 
 import java.util.Map;
 
+@DocumentedPlugin("Generates a full OpenAPI definitions for CRUD operations from JDL models")
 public class JDLToOpenAPIConfiguration extends Configuration {
 
     public static final String CONFIG_ID = "jdl-to-openapi";

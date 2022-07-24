@@ -69,7 +69,7 @@ It supports:
 > NOTE: some templates/combinations are still WIP
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.SpringCloudStream3ConfigurationPreset \
+jbang zw -p io.zenwave360.generator.plugins.SpringCloudStream3Configuration \
     specFile=asyncapi.yml targetFolder=target/out \
     apiPackage=io.example.integration.test.api \
     modelPackage=io.example.integration.test.api.model \
@@ -176,7 +176,7 @@ cat target/out/openapi.yml
 Reverse engineer JDL entities from OpenAPI schemas:
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.OpenAPIToJDLConfigurationPreset \
+jbang zw -p io.zenwave360.generator.plugins.OpenAPIToJDLConfiguration \
     specFile=openapi.yml targetFolder=target/out targetFile=entities.jdl
 cat target/out/entities.jdl
 ```

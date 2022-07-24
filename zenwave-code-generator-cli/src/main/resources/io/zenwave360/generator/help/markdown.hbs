@@ -1,13 +1,19 @@
-Help for: {{configClassName}}
+# {{configClassName}}
 
 {{{plugin.title}}}
 
 {{{plugin.description}}}
 
-Options:
+## Options
 
 | **Option** | **Description** | **Type** | **Default** | **Values** |
 |------------|-----------------|----------|-------------|------------|
 {{~#each options as |option|}}
 | `{{@key}}` | {{{option.description}}} | {{{option.type}}} | {{{option.defaultValue}}} | {{join option.values ", " }}  |
 {{~/each}}
+
+## Getting Help
+
+```shell
+jbang zw -p {{configClassName}} --help
+```
