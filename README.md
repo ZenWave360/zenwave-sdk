@@ -15,27 +15,13 @@ ZenWave Code Generator is a configurable and extensible code generator tool for 
   - [Building from source](#building-from-source)
   - [Available Plugins](#available-plugins)
     - [AsyncApiJsonSchema2PojoConfiguration](#asyncapijsonschema2pojoconfiguration)
-      - [Options](#options)
-      - [Getting Help](#getting-help)
     - [SpringCloudStream3Configuration](#springcloudstream3configuration)
-      - [Options](#options-1)
-      - [Getting Help](#getting-help-1)
     - [JDLBackendApplicationDefaultConfiguration](#jdlbackendapplicationdefaultconfiguration)
-      - [Options](#options-2)
-      - [Getting Help](#getting-help-2)
     - [Java 2 JDL Reverse Engineering](#java-2-jdl-reverse-engineering)
     - [JDLOpenAPIControllersConfiguration](#jdlopenapicontrollersconfiguration)
-      - [Options](#options-3)
-      - [Getting Help](#getting-help-3)
     - [JDLToOpenAPIConfiguration](#jdltoopenapiconfiguration)
-      - [Options](#options-4)
-      - [Getting Help](#getting-help-4)
     - [OpenAPIToJDLConfiguration](#openapitojdlconfiguration)
-      - [Options](#options-5)
-      - [Getting Help](#getting-help-5)
     - [SpringWebTestClientConfiguration](#springwebtestclientconfiguration)
-      - [Options](#options-6)
-      - [Getting Help](#getting-help-6)
 
 ## Jbang Instalation
 
@@ -84,7 +70,7 @@ Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schem
 
 ${javadoc}
 
-#### Options
+**Options:**
 
 | **Option**        | **Description**                                                                                                | **Type** | **Default**          | **Values**       |
 | ----------------- | -------------------------------------------------------------------------------------------------------------- | -------- | -------------------- | ---------------- |
@@ -98,7 +84,7 @@ ${javadoc}
 | `role`            | Project role: PROVIDER\|CLIENT                                                                                 | RoleType | PROVIDER             | PROVIDER, CLIENT |
 | `operationIds`    | Operation ids to include in code generation. Generates code for ALL if left empty                              | List     | []                   |                  |
 
-#### Getting Help
+**Getting Help:**
 
 ```shell
 jbang zw -p io.zenwave360.generator.plugins.AsyncApiJsonSchema2PojoConfiguration --help
@@ -110,7 +96,7 @@ Generates strongly typed SpringCloudStreams3 producer/consumer classes for Async
 
 ${javadoc}
 
-#### Options
+**Options:**
 
 | **Option**      | **Description**                                                                            | **Type**         | **Default**          | **Values**           |
 | --------------- | ------------------------------------------------------------------------------------------ | ---------------- | -------------------- | -------------------- |
@@ -124,7 +110,7 @@ ${javadoc}
 | `role`          | Project role: PROVIDER\|CLIENT                                                             | RoleType         | PROVIDER             | PROVIDER, CLIENT     |
 | `operationIds`  | Operation ids to include in code generation. Generates code for ALL if left empty          | List             | []                   |                      |
 
-#### Getting Help
+**Getting Help:**
 
 ```shell
 jbang zw -p io.zenwave360.generator.plugins.SpringCloudStream3Configuration --help
@@ -136,7 +122,7 @@ Generates a full backend application using a flexible hexagonal architecture
 
 This is the long description
 
-#### Options
+**Options:**
 
 | **Option**          | **Description**                                                            | **Type**         | **Default**             | **Values**           |
 | ------------------- | -------------------------------------------------------------------------- | ---------------- | ----------------------- | -------------------- |
@@ -151,7 +137,7 @@ This is the long description
 | `searchDTOSuffix`   | Suffix for elasticsearch document entities (default: Document)             | String           | Document                |                      |
 | `basePackage`       | Java Models package name                                                   | String           | io.example.domain.model |                      |
 
-#### Getting Help
+**Getting Help:**
 
 ```shell
 jbang zw -p io.zenwave360.generator.plugins.JDLBackendApplicationDefaultConfiguration --help
@@ -185,7 +171,7 @@ Generates implementations based on JDL models and OpenAPI definitions SpringMVC 
 
 ${javadoc}
 
-#### Options
+**Options:**
 
 | **Option**                           | **Description**                                                                                                                                                            | **Type**         | **Default**                                      | **Values**           |
 | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------------------------------------------------ | -------------------- |
@@ -214,7 +200,7 @@ ${javadoc}
 | `operationIds`                       | OpenAPI operationIds to generate code for                                                                                                                                  | List             | []                                               |                      |
 | `statusCodes`                        | Status codes to generate code for (default: 200, 201, 202 and 400                                                                                                          | List             | [200, 201, 202, 400]                             |                      |
 
-#### Getting Help
+**Getting Help:**
 
 ```shell
 jbang zw -p io.zenwave360.generator.plugins.JDLOpenAPIControllersConfiguration --help
@@ -226,7 +212,7 @@ Generates a full OpenAPI definitions for CRUD operations from JDL models
 
 ${javadoc}
 
-#### Options
+**Options:**
 
 | **Option**                           | **Description**                                                                                                                                                            | **Type** | **Default**                           | **Values** |
 | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------- | ---------- |
@@ -240,7 +226,7 @@ ${javadoc}
 | `paginatedDtoItemsJsonPath`          | JSONPath list to search for response DTO schemas for list or paginated results. User '$.items' for lists or '$.properties.<content property>.items' for paginated results. | List     | [$.items, $.properties.content.items] |            |
 | `basePackage`                        | Java Models package name                                                                                                                                                   | String   | io.example.domain.model               |            |
 
-#### Getting Help
+**Getting Help:**
 
 ```shell
 jbang zw -p io.zenwave360.generator.plugins.JDLToOpenAPIConfiguration --help
@@ -252,7 +238,7 @@ Generates JDL model from OpenAPI schemas
 
 ${javadoc}
 
-#### Options
+**Options:**
 
 | **Option**         | **Description**                                 | **Type** | **Default**             | **Values** |
 | ------------------ | ----------------------------------------------- | -------- | ----------------------- | ---------- |
@@ -263,7 +249,7 @@ ${javadoc}
 | `useRelationships` | Whether to use JDL relationships or plain field | boolean  | true                    |            |
 | `basePackage`      | Java Models package name                        | String   | io.example.domain.model |            |
 
-#### Getting Help
+**Getting Help:**
 
 ```shell
 jbang zw -p io.zenwave360.generator.plugins.OpenAPIToJDLConfiguration --help
@@ -275,7 +261,7 @@ Generates spring WebTestClient tests from OpenAPI defined endpoints.
 
 ${javadoc}
 
-#### Options
+**Options:**
 
 | **Option**               | **Description**                                                              | **Type**    | **Default**                  | **Values**                  |
 | ------------------------ | ---------------------------------------------------------------------------- | ----------- | ---------------------------- | --------------------------- |
@@ -292,7 +278,7 @@ ${javadoc}
 | `operationIds`           | OpenAPI operationIds to generate code for                                    | List        | []                           |                             |
 | `statusCodes`            | Status codes to generate code for (default: 200, 201, 202 and 400            | List        | [200, 201, 202, 400]         |                             |
 
-#### Getting Help
+**Getting Help:**
 
 ```shell
 jbang zw -p io.zenwave360.generator.plugins.SpringWebTestClientConfiguration --help
