@@ -10,10 +10,8 @@ import io.zenwave360.generator.writers.TemplateStdoutWriter;
 
 import java.util.Map;
 
-@DocumentedPlugin("Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI")
+@DocumentedPlugin(value = "Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI", shortCode = "spring-cloud-streams3")
 public class SpringCloudStream3Configuration extends Configuration {
-
-    public static final String CONFIG_ID = "spring-cloud-streams3";
 
     public SpringCloudStream3Configuration() {
         super();

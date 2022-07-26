@@ -1,7 +1,7 @@
 package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.Configuration;
-import io.zenwave360.generator.Main;
+import io.zenwave360.generator.MainGenerator;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -41,7 +41,7 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
                 .withOption("modelPackage", "io.example.integration.test.api.model")
                 ;
 
-        new Main().generate(configuration);
+        new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
         Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_events/IDefaultServiceEventsProducer.java"));
@@ -59,7 +59,7 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
                 .withOption("modelPackage", "io.example.integration.test.api.model")
                 ;
 
-        new Main().generate(configuration);
+        new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
         Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_events/IDefaultServiceEventsProducer.java"));

@@ -15,6 +15,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 public @interface DocumentedPlugin {
 
-    String value() default "";
+    String value();
     String description() default "";
+
+    String shortCode() default "";
 }

@@ -10,10 +10,8 @@ import io.zenwave360.generator.writers.TemplateStdoutWriter;
 
 import java.util.Map;
 
-@DocumentedPlugin("Generates a full OpenAPI definitions for CRUD operations from JDL models")
+@DocumentedPlugin(value = "Generates a full OpenAPI definitions for CRUD operations from JDL models", shortCode = "jdl-to-openapi")
 public class JDLToOpenAPIConfiguration extends Configuration {
-
-    public static final String CONFIG_ID = "jdl-to-openapi";
 
     public JDLToOpenAPIConfiguration() {
         super();

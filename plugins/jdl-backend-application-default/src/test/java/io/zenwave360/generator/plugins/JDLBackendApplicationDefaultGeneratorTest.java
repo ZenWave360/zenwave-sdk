@@ -1,7 +1,7 @@
 package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.Configuration;
-import io.zenwave360.generator.Main;
+import io.zenwave360.generator.MainGenerator;
 import io.zenwave360.generator.formatters.JavaFormatter;
 import io.zenwave360.generator.parsers.JDLParser;
 import io.zenwave360.generator.processors.JDLProcessor;
@@ -67,7 +67,7 @@ public class JDLBackendApplicationDefaultGeneratorTest {
                 .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative)
                 ;
 
-        new Main().generate(configuration);
+        new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
 //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
@@ -85,7 +85,7 @@ public class JDLBackendApplicationDefaultGeneratorTest {
                 .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative)
                 ;
 
-        new Main().generate(configuration);
+        new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
         //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
@@ -104,7 +104,7 @@ public class JDLBackendApplicationDefaultGeneratorTest {
                 .withOption("entities", List.of("Organization"))
                 ;
 
-        new Main().generate(configuration);
+        new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
         //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));

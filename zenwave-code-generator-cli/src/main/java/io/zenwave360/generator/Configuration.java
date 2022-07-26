@@ -1,6 +1,7 @@
 package io.zenwave360.generator;
 
 import io.zenwave360.generator.doc.DocumentedOption;
+import io.zenwave360.generator.doc.DocumentedPlugin;
 import io.zenwave360.generator.processors.utils.NamingUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.reflections.Reflections;
@@ -15,8 +16,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Configuration {
-
-    private static final String CONFIG_ID = "configuration";
 
     @DocumentedOption(description = "OpenAPI file to parse", required = true)
     public String specFile;
@@ -43,14 +42,9 @@ public class Configuration {
     }
 
     private static boolean matchesClassName(Class c, String pluginConfigAsString, String simpleClassName) {
-        Field configIdField = FieldUtils.getField(c,"CONFIG_ID");
-        if(configIdField != null) {
-            try {
-                if(configIdField.get(null).equals(pluginConfigAsString)) {
-                    return true;
-                }
-            } catch (IllegalAccessException ignored) {
-            }
+        DocumentedPlugin documentedPlugin = (DocumentedPlugin) c.getAnnotation(DocumentedPlugin.class);
+        if(documentedPlugin != null && pluginConfigAsString.contentEquals(documentedPlugin.shortCode())) {
+            return true;
         }
         return c.getSimpleName().matches(simpleClassName + "(Configuration){0,1}$");
     }

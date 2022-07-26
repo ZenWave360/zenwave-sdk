@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-public class GeneratorTest {
+public class MainGeneratorTest {
 
     private static LogCaptor logCaptor = LogCaptor.forRoot();
 
@@ -41,7 +41,7 @@ public class GeneratorTest {
                 .withTargetFolder("target/zenwave630/out")
                 .withChain(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class);
 
-        new Main().generate(configuration);
+        new MainGenerator().generate(configuration);
 
         logCaptor.getLogs();
     }
@@ -61,7 +61,7 @@ public class GeneratorTest {
                 .withOption("4.targetProperty", "openapi")
                 .withChain(DefaultYamlParser.class, DefaultYamlParser.class, JDLParser.class, AsyncApiProcessor.class, OpenApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class);
 
-        new Main().generate(configuration);
+        new MainGenerator().generate(configuration);
 
         Map<String, Object> contextModel = NoOpGenerator.context;
 

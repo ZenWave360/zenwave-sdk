@@ -11,10 +11,8 @@ import io.zenwave360.generator.writers.TemplateStdoutWriter;
 import java.util.Map;
 
 
-@DocumentedPlugin("Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files")
+@DocumentedPlugin(value = "Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files", shortCode = "jsonschema2pojo")
 public class AsyncApiJsonSchema2PojoConfiguration extends Configuration {
-
-    public static final String CONFIG_ID = "spring-cloud-streams3";
 
     public AsyncApiJsonSchema2PojoConfiguration() {
         super();

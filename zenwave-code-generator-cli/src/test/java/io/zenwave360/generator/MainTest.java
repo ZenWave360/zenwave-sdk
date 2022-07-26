@@ -29,11 +29,6 @@ public class MainTest {
     }
 
     @Test
-    public void testMainHelp() {
-        Main.main("-h", "-p", NoOpPluginConfiguration.class.getName());
-    }
-
-    @Test
     public void testMainWithMultipleSpecFiles() {
         List<String> processors = List.of(DefaultYamlParser.class, AsyncApiProcessor.class, DefaultYamlParser.class, AsyncApiProcessor.class, NoOpGenerator.class)
                 .stream().map(c -> c.getName()).collect(Collectors.toList());

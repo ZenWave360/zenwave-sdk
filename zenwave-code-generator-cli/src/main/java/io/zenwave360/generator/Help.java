@@ -8,6 +8,7 @@ import io.zenwave360.generator.processors.utils.Maps;
 import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.TemplateInput;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.reflections.Reflections;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static io.zenwave360.generator.Main.applyConfiguration;
+import static io.zenwave360.generator.MainGenerator.applyConfiguration;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
@@ -30,7 +31,7 @@ public class Help {
     private ObjectMapper objectMapper = new ObjectMapper();
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
-    protected Map<String, Object> buildHelpModel(Configuration configuration, Format format) {
+    protected Map<String, Object> buildHelpModel(Configuration configuration) {
         var model = new LinkedHashMap<String, Object>();
         var options = new LinkedHashMap<String, Object>();
         var undocumentedOptions = new LinkedHashMap<String, Map<String, Object>>();
@@ -38,7 +39,7 @@ public class Help {
         model.put("configClassName", configuration.getClass().getName());
         DocumentedPlugin pluginDocumentation = (DocumentedPlugin) configuration.getClass().getAnnotation(DocumentedPlugin.class);
         if(pluginDocumentation != null) {
-            model.put("plugin", Maps.of("title", pluginDocumentation.value(),"description", pluginDocumentation.description()));
+            model.put("plugin", Maps.of("title", pluginDocumentation.value(),"description", pluginDocumentation.description(), "shortCode", pluginDocumentation.shortCode()));
         }
         model.put("config", configuration);
         model.put("options", options);
@@ -79,6 +80,19 @@ public class Help {
         return model;
     }
 
+    protected Map<String, Object> discoverAvailablePlugins() {
+        var plugins = new ArrayList<>();
+        var allConfigClasses = new Reflections("io", "com", "org").getSubTypesOf(Configuration.class);
+        for (Class<? extends Configuration> pluginClass : allConfigClasses) {
+            try {
+                plugins.add(buildHelpModel(Configuration.of(pluginClass.getName())));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return Map.of("plugins", plugins);
+    }
+
     protected Map<String, Object> asModel(Object plugin, Field field, DocumentedOption documentedOption) {
         Class type = field.getType();
         List values = new ArrayList();
@@ -99,18 +113,16 @@ public class Help {
     }
 
     public String help(Configuration configuration, Format format) {
-        if(format == Format.list) {
-
-        }
+        var model = format == Format.list? discoverAvailablePlugins() : buildHelpModel(configuration);
         if(format == Format.json) {
             try {
-                return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(buildHelpModel(configuration, format));
+                return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(model);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
         }
         String template = "io/zenwave360/generator/help/" + format.toString();
-        return handlebarsEngine.processTemplate(buildHelpModel(configuration, format), new TemplateInput().withTemplateLocation(template).withTargetFile("")).get(0).getContent();
+        return handlebarsEngine.processTemplate(model, new TemplateInput().withTemplateLocation(template).withTargetFile("")).get(0).getContent();
     }
 
 }

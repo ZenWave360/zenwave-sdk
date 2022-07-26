@@ -10,11 +10,8 @@ import io.zenwave360.generator.writers.TemplateStdoutWriter;
 
 import java.util.Map;
 
-@DocumentedPlugin("Generates spring WebTestClient tests from OpenAPI defined endpoints.")
+@DocumentedPlugin(value = "Generates spring WebTestClient tests from OpenAPI defined endpoints.", shortCode = "spring-webtestclient")
 public class SpringWebTestClientConfiguration extends Configuration {
-
-    public static final String CONFIG_ID = "spring-webtestclient";
-
     public SpringWebTestClientConfiguration() {
         super();
         withChain(DefaultYamlParser.class, OpenApiProcessor.class, SpringWebTestClientGenerator.class, JavaFormatter.class, TemplateFileWriter.class);

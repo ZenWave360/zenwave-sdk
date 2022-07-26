@@ -1,7 +1,7 @@
 package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.Configuration;
-import io.zenwave360.generator.Main;
+import io.zenwave360.generator.MainGenerator;
 import io.zenwave360.generator.generators.AbstractAsyncapiGenerator;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.AfterAll;
@@ -42,7 +42,7 @@ public class SpringCloudStreams3GeneratorTest {
                 .withOption("style", SpringCloudStreams3Generator.ProgrammingStyle.IMPERATIVE)
                 ;
 
-        new Main().generate(configuration);
+        new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
         Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_events/IDefaultServiceEventsProducer.java"));
@@ -59,7 +59,7 @@ public class SpringCloudStreams3GeneratorTest {
                 .withOption("role", AbstractAsyncapiGenerator.RoleType.PROVIDER)
         ;
 
-        new Main().generate(configuration);
+        new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
         Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_imperative/DoCreateProductConsumer.java"));
@@ -77,7 +77,7 @@ public class SpringCloudStreams3GeneratorTest {
                 .withOption("exposeMessage", true)
                 ;
 
-        new Main().generate(configuration);
+        new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
         Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_imperative_expose_message/DoCreateProductConsumer.java"));
@@ -95,7 +95,7 @@ public class SpringCloudStreams3GeneratorTest {
                 .withOption("style", SpringCloudStreams3Generator.ProgrammingStyle.REACTIVE)
                 ;
 
-        new Main().generate(configuration);
+        new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
         Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
@@ -114,7 +114,7 @@ public class SpringCloudStreams3GeneratorTest {
                 .withOption("exposeMessage", true)
                 ;
 
-        new Main().generate(configuration);
+        new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
         Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive_expose_message/DoCreateProductConsumer.java"));
@@ -131,7 +131,7 @@ public class SpringCloudStreams3GeneratorTest {
                 .withOption("role", AbstractAsyncapiGenerator.RoleType.CLIENT)
                 ;
 
-        new Main().generate(configuration);
+        new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
         Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/client_for_commands/IDefaultServiceCommandsProducer.java"));
@@ -149,7 +149,7 @@ public class SpringCloudStreams3GeneratorTest {
                 .withOption("style", SpringCloudStreams3Generator.ProgrammingStyle.IMPERATIVE)
                 ;
 
-        new Main().generate(configuration);
+        new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
         Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/client_for_events_imperative/OnProductCreatedConsumer.java"));
@@ -168,7 +168,7 @@ public class SpringCloudStreams3GeneratorTest {
                 .withOption("exposeMessage", true)
                 ;
 
-        new Main().generate(configuration);
+        new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
         Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/client_for_events_imperative_expose_message/OnProductCreatedConsumer.java"));
@@ -186,7 +186,7 @@ public class SpringCloudStreams3GeneratorTest {
                 .withOption("style", SpringCloudStreams3Generator.ProgrammingStyle.REACTIVE)
                 ;
 
-        new Main().generate(configuration);
+        new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
         Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/client_for_events_reactive/IDefaultServiceCommandsProducer.java"));
@@ -205,7 +205,7 @@ public class SpringCloudStreams3GeneratorTest {
                 .withOption("exposeMessage", true)
                 ;
 
-        new Main().generate(configuration);
+        new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
         Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/client_for_events_reactive_expose_message/IDefaultServiceCommandsProducer.java"));

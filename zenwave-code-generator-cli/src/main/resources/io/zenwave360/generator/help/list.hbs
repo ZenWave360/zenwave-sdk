@@ -1,0 +1,5 @@
+Available plugins:
+
+{{#each plugins as |plugin| ~}}
+{{ljust plugin.plugin.shortCode size=30 pad=" "}} {{{plugin.configClassName}}}: {{{plugin.plugin.title}}}
+{{/each}}

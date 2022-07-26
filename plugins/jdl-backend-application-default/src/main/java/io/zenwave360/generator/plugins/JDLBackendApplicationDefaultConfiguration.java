@@ -12,10 +12,8 @@ import io.zenwave360.generator.writers.TemplateStdoutWriter;
 /**
  * This is the long description
  */
-@DocumentedPlugin(value = "Generates a full backend application using a flexible hexagonal architecture", description = "${javadoc}")
+@DocumentedPlugin(value = "Generates a full backend application using a flexible hexagonal architecture", shortCode = "jdl-backend-application-default", description = "${javadoc}")
 public class JDLBackendApplicationDefaultConfiguration extends Configuration {
-
-    public static final String CONFIG_ID = "jdl-backend-application-default";
 
     public JDLBackendApplicationDefaultConfiguration() {
         super();

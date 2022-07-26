@@ -14,10 +14,8 @@ import io.zenwave360.generator.writers.TemplateFileWriter;
 import io.zenwave360.generator.writers.TemplateStdoutWriter;
 import org.apache.commons.lang3.StringUtils;
 
-@DocumentedPlugin("Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.")
+@DocumentedPlugin(value = "Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.", shortCode = "jdl-openapi-controllers")
 public class JDLOpenAPIControllersConfiguration extends Configuration {
-
-    public static final String CONFIG_ID = "jdl-openapi-controllers";
 
     @DocumentedOption(description = "JDL file to parse", required = false)
     public String jdlFile;

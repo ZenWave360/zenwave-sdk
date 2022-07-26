@@ -93,7 +93,7 @@ public class GeneratorMojo extends AbstractMojo {
                     .withTargetFolder(targetFolder.getAbsolutePath())
                     .withOptions(options);
 
-            new Main().generate(configuration);
+            new MainGenerator().generate(configuration);
         } catch (Exception e) {
             // Maven logs exceptions thrown by plugins only if invoked with -e
             // I find it annoying to jump through hoops to get basic diagnostic information,

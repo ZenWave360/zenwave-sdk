@@ -37,7 +37,7 @@ public class Main implements Callable<Integer> {
     @Option(names = {"-p", "--plugin"}, arity = "0..1", description = "Plugin Configuration class")
     String pluginConfigClass;
 
-    @Option(names = {"-c", "--chain"}, split = ",", description = "deprecated use --plugin instead")
+    @Option(names = {"-c", "--chain"}, split = ",", description = "<undocumented> use --plugin instead")
     Class[] chain;
 
     @CommandLine.Parameters
@@ -48,7 +48,7 @@ public class Main implements Callable<Integer> {
         CommandLine cmd = new CommandLine(main);
         CommandLine.ParseResult parsed  = cmd.parseArgs(args);
 
-        if(parsed.hasMatchedOption("h") && parsed.hasMatchedOption("p")) {
+        if(parsed.hasMatchedOption("h") && (parsed.hasMatchedOption("p") || parsed.hasMatchedOption("f"))) {
             try {
                 main.help();
             } catch (Exception e) {
@@ -70,7 +70,7 @@ public class Main implements Callable<Integer> {
                 .withTargetFolder((String) options.get("targetFolder"))
                 .withOptions(options)
                 .withChain(chain);
-        generate(configuration);
+        new MainGenerator().generate(configuration);
         return 0;
     }
 
@@ -82,57 +82,5 @@ public class Main implements Callable<Integer> {
                 .withChain(chain);
         String help = new Help().help(configuration, helpFormat);
         System.out.println(help);
-    }
-
-    public void generate(Configuration configuration) throws Exception {
-        log.debug("Executing 'generate' with config Options {}", configuration.getOptions());
-        log.debug("Processed Options {}", configuration.processOptions());
-        log.debug("Processors chain is {}", configuration.getChain().stream().map(c -> c.getName()).collect(Collectors.toList()));
-        Map<String, Object> model = new HashMap<>();
-        List<TemplateOutput> templateOutputList = new ArrayList<>();
-
-        int chainIndex = 0;
-        for (Class pluginClass: configuration.getChain()) {
-            log.debug("Executing chained pluginClass {}", pluginClass);
-            Object plugin = pluginClass.getDeclaredConstructor().newInstance();
-            applyConfiguration(chainIndex++, plugin, configuration);
-
-            if(plugin instanceof Parser) {
-                Map parsed = ((Parser) plugin).parse();
-                model.putAll(parsed);
-            }
-            if(plugin instanceof Processor) {
-                model = ((Processor) plugin).process(model);
-            }
-            if(plugin instanceof Generator) {
-                templateOutputList.addAll(((Generator) plugin).generate(model));
-            }
-            if(plugin instanceof Formatter) {
-                templateOutputList = ((Formatter) plugin).format(templateOutputList);
-            }
-            if(plugin instanceof TemplateWriter) {
-                ((TemplateWriter) plugin).write(templateOutputList);
-            }
-        }
-    }
-    public static void applyConfiguration(int chainIndex, Object processor, Configuration configuration) throws JsonMappingException {
-        Map<String, Object> options = configuration.getOptions();
-        Object processorFullClassOptions = options.get(processor.getClass().getName());
-        Object processorSimpleClassOptions = options.get(processor.getClass().getSimpleName());
-        Object chainIndexOptions = options.get(String.valueOf(chainIndex));
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        mapper.updateValue(processor, options);
-        if (processorSimpleClassOptions != null) {
-            mapper.updateValue(processor, processorSimpleClassOptions);
-        }
-        if (processorFullClassOptions != null) {
-            mapper.updateValue(processor, processorFullClassOptions);
-        }
-        if (chainIndexOptions != null) {
-            mapper.updateValue(processor, chainIndexOptions);
-        }
     }
 }
