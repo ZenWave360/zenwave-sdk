@@ -39,7 +39,7 @@ public class ConfigurationTest {
 
     @Test
     public void testLoadConfigFromConfigId() throws Exception {
-        Configuration config = Configuration.of("nop");
+        Configuration config = Configuration.of("no-op");
         Assertions.assertNotNull(config);
         Assertions.assertEquals(NoOpPluginConfiguration.class, config.getClass());
     }
