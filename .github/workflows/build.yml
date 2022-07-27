@@ -51,18 +51,6 @@ jobs:
           echo "coverage = ${{ steps.jacoco.outputs.coverage }}"
           echo "branch coverage = ${{ steps.jacoco.outputs.branches }}"
 
-      - name: Generate JaCoCo Badges for zenwave-code-generator-cli
-        id: jacoco-zenwave-code-generator-cli
-        uses: cicirello/jacoco-badge-generator@v2
-        with:
-          generate-branches-badge: true
-          generate-summary: true
-          jacoco-csv-file: zenwave-code-generator-cli/target/site/jacoco/jacoco.csv
-          coverage-badge-filename: zenwave-code-generator-cli/jacoco.svg
-          branches-badge-filename: zenwave-code-generator-cli/branches.svg
-          coverage-label: coverage
-          branches-label: branches
-
       - name: Commit and push the coverage badges and summary file
         if: ${{ github.event_name != 'pull_request' }}
         run: |
