@@ -29,8 +29,8 @@ jobs:
         with:
           generate-branches-badge: true
           jacoco-csv-file: zenwave-code-generator-cli/target/site/jacoco/jacoco.csv
-          coverage-badge-filename: zenwave-code-generator-cli/jacoco.svg
-          branches-badge-filename: zenwave-code-generator-cli/branches1.svg
+          coverage-badge-filename: zenwave-code-generator-cli-jacoco.svg
+          branches-badge-filename: zenwave-code-generator-cli-branches.svg
           coverage-label: coverage
           branches-label: branches
 
