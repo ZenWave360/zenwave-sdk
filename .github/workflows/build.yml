@@ -27,6 +27,7 @@ jobs:
         id: jacoco-zenwave-code-generator-cli
         uses: cicirello/jacoco-badge-generator@v2
         with:
+          badges-directory: badges
           generate-branches-badge: true
           jacoco-csv-file: zenwave-code-generator-cli/target/site/jacoco/jacoco.csv
           coverage-badge-filename: zenwave-code-generator-cli-jacoco.svg
