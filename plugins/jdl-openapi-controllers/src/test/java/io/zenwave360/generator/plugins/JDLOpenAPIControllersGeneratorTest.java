@@ -52,18 +52,18 @@ public class JDLOpenAPIControllersGeneratorTest {
     }
 
     @Test
-    @Disabled
+    // @Disabled
     public void test_generator_jdl_openapi_controllers_registry() throws Exception {
         Configuration configuration = new JDLOpenAPIControllersConfiguration()
-                .withSpecFile("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\openapi.yml")
-                .withOption("jdlFile", "C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\api-registry.jdl")
-                .withOption("basePackage", "io.zenwave360.registry")
-                .withOption("openApiApiPackage", "io.zenwave360.registry.adapters.web")
-                .withOption("openApiModelPackage", "io.zenwave360.registry.adapters.web.model")
+                .withSpecFile("../../examples/spring-boot-mongo-elasticsearch\\src\\main\\resources\\model\\openapi.yml")
+                .withOption("jdlFile", "../../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/orders-model.jdl")
+                .withOption("basePackage", "io.zenwave360.example")
+                .withOption("openApiApiPackage", "io.zenwave360.example.adapters.web")
+                .withOption("openApiModelPackage", "io.zenwave360.example.adapters.web.model")
                 .withOption("openApiModelNameSuffix", "DTO")
                 //                .withOption("operationIds", List.of("addPet", "updatePet"))
                 .withOption("style", JDLOpenAPIControllersGenerator.ProgrammingStyle.imperative)
-                .withTargetFolder("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy")
+                .withTargetFolder("../../examples/spring-boot-mongo-elasticsearch")
                 ;
 
         new MainGenerator().generate(configuration);
@@ -74,19 +74,19 @@ public class JDLOpenAPIControllersGeneratorTest {
     }
 
     @Test
-    @Disabled
+    // @Disabled
     public void test_generator_jdl_openapi_controllers_registry_no_jdl() throws Exception {
         Configuration configuration = new JDLOpenAPIControllersConfiguration()
-                .withSpecFile("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\openapi.yml")
-//                .withOption("jdlFile", "C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\api-registry.jdl")
-                .withOption("basePackage", "io.zenwave360.registry")
-                .withOption("controllersPackage", "io.zenwave360.registry.nojdl.adapters.web")
-                .withOption("openApiApiPackage", "io.zenwave360.registry.adapters.web")
-                .withOption("openApiModelPackage", "io.zenwave360.registry.adapters.web.model")
+                .withSpecFile("../../examples/spring-boot-mongo-elasticsearch\\src\\main\\resources\\model\\openapi.yml")
+//                .withOption("jdlFile", "../../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/orders-model.jdl")
+                .withOption("basePackage", "io.zenwave360.example")
+                .withOption("controllersPackage", "io.zenwave360.example.nojdl.adapters.web")
+                .withOption("openApiApiPackage", "io.zenwave360.example.adapters.web")
+                .withOption("openApiModelPackage", "io.zenwave360.example.adapters.web.model")
                 .withOption("openApiModelNameSuffix", "DTO")
                 //                .withOption("operationIds", List.of("addPet", "updatePet"))
                 .withOption("style", JDLOpenAPIControllersGenerator.ProgrammingStyle.imperative)
-                .withTargetFolder("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy")
+                .withTargetFolder("../../examples/spring-boot-mongo-elasticsearch")
                 ;
 
         new MainGenerator().generate(configuration);

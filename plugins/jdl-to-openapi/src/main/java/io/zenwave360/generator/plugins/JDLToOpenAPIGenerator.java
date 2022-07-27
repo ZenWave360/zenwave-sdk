@@ -11,6 +11,7 @@ import io.zenwave360.generator.templating.TemplateEngine;
 import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
 import io.zenwave360.generator.utils.JSONPath;
+import io.zenwave360.generator.utils.Maps;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,7 +75,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
                     Map.of(jdlBusinessEntityPaginatedProperty, entityName),
                     Map.of("properties",
                             Map.of("content",
-                                    Map.of("type", "array", "items", Map.of("$ref", "#/components/schemas/" + entityName)))
+                                    Maps.of("type", "array", "items", Map.of("$ref", "#/components/schemas/" + entityName)))
                     )
                 )
             );
@@ -184,11 +185,11 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
             }
             String minlength = JSONPath.get(field, "$.validations.minlength.value");
             if(minlength != null) {
-                property.put("min-length", minlength);
+                property.put("minLength", minlength);
             }
             String maxlength = JSONPath.get(field, "$.validations.maxlength.value");
             if(maxlength != null) {
-                property.put("max-length", maxlength);
+                property.put("maxLength", maxlength);
             }
             String pattern = JSONPath.get(field, "$.validations.pattern.value");
             if(pattern != null) {

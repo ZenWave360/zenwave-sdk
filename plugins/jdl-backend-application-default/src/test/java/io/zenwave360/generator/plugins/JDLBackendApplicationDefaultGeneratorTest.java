@@ -75,12 +75,12 @@ public class JDLBackendApplicationDefaultGeneratorTest {
     }
 
     @Test
-    @Disabled
+    // @Disabled
     public void test_generator_hexagonal_mongodb_imperative_registry() throws Exception {
         Configuration configuration = new JDLBackendApplicationDefaultConfiguration()
-                .withSpecFile("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\api-registry.jdl")
-                .withTargetFolder("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy")
-                .withOption("basePackage", "io.zenwave360.registry")
+                .withSpecFile("../../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/orders-model.jdl")
+                .withTargetFolder("../../examples/spring-boot-mongo-elasticsearch")
+                .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", JDLBackendApplicationDefaultGenerator.PersistenceType.mongodb)
                 .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative)
                 ;
@@ -93,12 +93,12 @@ public class JDLBackendApplicationDefaultGeneratorTest {
     }
 
     @Test
-    @Disabled
+    // @Disabled
     public void test_generator_hexagonal_mongodb_imperative_registry_only_some_entities() throws Exception {
         Configuration configuration = new JDLBackendApplicationDefaultConfiguration()
-                .withSpecFile("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\api-registry.jdl")
-                .withTargetFolder("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy")
-                .withOption("basePackage", "io.zenwave360.registry")
+                .withSpecFile("../../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/orders-model.jdl")
+                .withTargetFolder("../../examples/spring-boot-mongo-elasticsearch")
+                .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", JDLBackendApplicationDefaultGenerator.PersistenceType.mongodb)
                 .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative)
                 .withOption("entities", List.of("Organization"))

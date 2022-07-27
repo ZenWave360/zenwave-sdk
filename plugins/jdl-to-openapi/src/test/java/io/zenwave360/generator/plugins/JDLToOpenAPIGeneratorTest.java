@@ -36,7 +36,7 @@ public class JDLToOpenAPIGeneratorTest {
         Map<String, Object> oasSchema = mapper.readValue(outputTemplates.get(0).getContent(), Map.class);
         Assertions.assertTrue(((List) JSONPath.get(oasSchema,"$.components.schemas.OrderStatus.enum")).contains("DELIVERED"));
         Assertions.assertTrue(((List) JSONPath.get(oasSchema,"$.components.schemas.Customer.required")).contains("firstName"));
-        Assertions.assertEquals("3", JSONPath.get(oasSchema,"$.components.schemas.Customer.properties.firstName.min-length"));
+        Assertions.assertEquals("3", JSONPath.get(oasSchema,"$.components.schemas.Customer.properties.firstName.minLength"));
         Assertions.assertEquals("#/components/schemas/OrderStatus", JSONPath.get(oasSchema,"$.components.schemas.CustomerOrder.properties.status.$ref"));
     }
 

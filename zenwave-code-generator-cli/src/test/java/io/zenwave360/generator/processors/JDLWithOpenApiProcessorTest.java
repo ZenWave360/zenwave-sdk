@@ -43,10 +43,10 @@ public class JDLWithOpenApiProcessorTest {
     }
 
     @Test
-    @Disabled
+//    @Disabled
     public void testProcessJDLWithOpenAPI_registry() throws Exception {
-        var openapiModel = loadOpenApi("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\openapi.yml");
-        var jdlModel = loadJDL("C:\\Users\\ivan.garcia\\workspace\\zenwave\\zenwave360-registy\\src\\main\\resources\\model\\api-registry.jdl");
+        var openapiModel = loadOpenApi("../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/openapi.yml");
+        var jdlModel = loadJDL("../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/orders-model.jdl");
         var model = new HashMap<String, Object>();
         model.putAll(openapiModel);
         model.putAll(jdlModel);
