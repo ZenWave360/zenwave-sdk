@@ -12,7 +12,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Checkout badges branch to a badges directory nested inside first checkout
+        uses: actions/checkout@v2
+        with:
+          ref: badges
+          path: badges
 
       - name: Set up the Java JDK
         uses: actions/setup-java@v2
@@ -28,6 +35,7 @@ jobs:
         uses: cicirello/jacoco-badge-generator@v2
         with:
           generate-branches-badge: true
+          generate-summary: true
           jacoco-csv-file: >
             ./plugins/asyncapi-jsonschema2pojo/target/site/jacoco/jacoco.csv
             ./plugins/asyncapi-spring-cloud-streams3/target/site/jacoco/jacoco.csv
@@ -48,9 +56,10 @@ jobs:
         uses: cicirello/jacoco-badge-generator@v2
         with:
           generate-branches-badge: true
+          generate-summary: true
           jacoco-csv-file: zenwave-code-generator-cli/target/site/jacoco/jacoco.csv
-          coverage-badge-filename: zenwave-code-generator-cli-jacoco.svg
-          branches-badge-filename: zenwave-code-generator-cli-branches.svg
+          coverage-badge-filename: zenwave-code-generator-cli/jacoco.svg
+          branches-badge-filename: zenwave-code-generator-cli/branches.svg
           coverage-label: coverage
           branches-label: branches
 
