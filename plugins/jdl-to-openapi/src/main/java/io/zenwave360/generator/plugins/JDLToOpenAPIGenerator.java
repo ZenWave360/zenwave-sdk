@@ -4,14 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.generator.Utils;
 import io.zenwave360.generator.generators.AbstractJDLGenerator;
-import io.zenwave360.generator.processors.utils.JSONPath;
 import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.OutputFormatType;
 import io.zenwave360.generator.templating.TemplateEngine;
 import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
+import io.zenwave360.generator.utils.JSONPath;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -211,7 +210,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
 
     public TemplateOutput generateTemplateOutput(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> jdlModel, String schemasAsString) {
         Map<String, Object> model = new HashMap<>();
-        model.putAll(Utils.asConfigurationMap(this));
+        model.putAll(this.asConfigurationMap());
         model.put("context", contextModel);
         model.put("jdlModel", jdlModel);
         model.put("schemasAsString", schemasAsString);

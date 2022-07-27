@@ -1,14 +1,13 @@
 package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.generator.Utils;
 import io.zenwave360.generator.generators.AbstractJDLGenerator;
-import io.zenwave360.generator.processors.utils.JSONPath;
 import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.OutputFormatType;
 import io.zenwave360.generator.templating.TemplateEngine;
 import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
+import io.zenwave360.generator.utils.JSONPath;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -159,7 +158,7 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
 
     public List<TemplateOutput> generateTemplateOutput(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> extModel) {
         Map<String, Object> model = new HashMap<>();
-        model.putAll(Utils.asConfigurationMap(this));
+        model.putAll(this.asConfigurationMap());
         model.put("context", contextModel);
         model.put("jdl", getJDLModel(contextModel));
         model.put("webFlavor", style == ProgrammingStyle.imperative? "mvc" : "webflux");

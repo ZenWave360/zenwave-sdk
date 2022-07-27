@@ -1,7 +1,6 @@
 package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.Configuration;
-import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.doc.DocumentedPlugin;
 import io.zenwave360.generator.formatters.JavaFormatter;
 import io.zenwave360.generator.parsers.JDLParser;

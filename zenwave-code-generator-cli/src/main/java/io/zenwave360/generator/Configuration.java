@@ -2,11 +2,10 @@ package io.zenwave360.generator;
 
 import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.doc.DocumentedPlugin;
-import io.zenwave360.generator.processors.utils.NamingUtils;
+import io.zenwave360.generator.utils.NamingUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.reflections.Reflections;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

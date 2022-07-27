@@ -2,11 +2,8 @@ package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.Configuration;
 import io.zenwave360.generator.doc.DocumentedPlugin;
-import io.zenwave360.generator.formatters.JavaFormatter;
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.processors.AsyncApiProcessor;
-import io.zenwave360.generator.writers.TemplateFileWriter;
-import io.zenwave360.generator.writers.TemplateStdoutWriter;
 
 import java.util.Map;
 

@@ -1,6 +1,7 @@
 package io.zenwave360.generator.templating;
 
 import com.github.jknack.handlebars.Options;
+import io.zenwave360.generator.utils.NamingUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -33,16 +34,8 @@ public class CustomHandlebarsHelpers {
         return null;
     }
 
-    public static String capitalize(String text, Options options) throws IOException {
-        return StringUtils.capitalize(text);
-    }
-
-    public static String asJavaProperty(String text, Options options) throws IOException {
-        return text;
-    }
-
     public static String asCapitalizedJavaProperty(String text, Options options) throws IOException {
-        return StringUtils.capitalize(text);
+        return NamingUtils.asJavaTypeName(text);
     }
 
     public static String asPackageFolder(String text, Options options) throws IOException {

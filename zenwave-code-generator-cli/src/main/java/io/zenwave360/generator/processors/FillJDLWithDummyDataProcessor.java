@@ -1,9 +1,9 @@
 package io.zenwave360.generator.processors;
 
 import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.generator.processors.utils.JSONPath;
-import io.zenwave360.generator.processors.utils.Maps;
-import io.zenwave360.generator.processors.utils.NamingUtils;
+import io.zenwave360.generator.utils.JSONPath;
+import io.zenwave360.generator.utils.Maps;
+import io.zenwave360.generator.utils.NamingUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.ArrayList;

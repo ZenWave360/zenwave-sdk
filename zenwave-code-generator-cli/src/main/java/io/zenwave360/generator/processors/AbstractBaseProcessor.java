@@ -2,8 +2,7 @@ package io.zenwave360.generator.processors;
 
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
-import io.zenwave360.generator.processors.utils.NamingUtils;
-import org.apache.commons.lang3.RegExUtils;
+import io.zenwave360.generator.utils.NamingUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;

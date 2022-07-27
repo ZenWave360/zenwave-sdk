@@ -1,7 +1,7 @@
 package io.zenwave360.generator.processors;
 
 import io.zenwave360.generator.parsers.Model;
-import io.zenwave360.generator.processors.utils.JSONPath;
+import io.zenwave360.generator.utils.JSONPath;
 import io.zenwave360.jsonrefparser.$Ref;
 
 import java.util.ArrayList;
@@ -9,8 +9,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class OpenApiProcessor extends AbstractBaseProcessor implements Processor {
 

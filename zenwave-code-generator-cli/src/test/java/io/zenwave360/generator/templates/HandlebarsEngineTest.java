@@ -23,5 +23,8 @@ public class HandlebarsEngineTest {
         Assertions.assertTrue(templateOutput.getContent().contains("This is the assigned value"));
         Assertions.assertTrue(templateOutput.getContent().contains("List size is 3"));
         Assertions.assertTrue(templateOutput.getContent().contains("upperCase"));
+        Assertions.assertTrue(templateOutput.getContent().contains("asCapitalizedJavaProperty TratraTratra"));
+        Assertions.assertTrue(templateOutput.getContent().contains("asPackageFolder io/zenwave360/generator/templating"));
+        Assertions.assertTrue(templateOutput.getContent().contains("Prefix2Suffix"));
     }
 }

@@ -4,7 +4,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.parsers.Model;
-import io.zenwave360.generator.processors.utils.JSONPath;
+import io.zenwave360.generator.utils.JSONPath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

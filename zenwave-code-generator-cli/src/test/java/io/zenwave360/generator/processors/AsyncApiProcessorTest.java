@@ -11,7 +11,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-import static io.zenwave360.generator.processors.utils.JSONPath.get;
+import static io.zenwave360.generator.utils.JSONPath.get;
 
 public class AsyncApiProcessorTest {
 

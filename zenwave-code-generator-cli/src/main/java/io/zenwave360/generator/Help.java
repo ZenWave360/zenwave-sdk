@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.doc.DocumentedPlugin;
-import io.zenwave360.generator.processors.utils.Maps;
+import io.zenwave360.generator.generators.Generator;
+import io.zenwave360.generator.utils.Maps;
 import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.TemplateInput;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -61,7 +62,7 @@ public class Help {
             try {
                 plugin = pluginClass.getDeclaredConstructor().newInstance();
                 applyConfiguration(chainIndex++, plugin, configuration);
-                pluginList.put(pluginClass, Utils.asConfigurationMap(plugin));
+                pluginList.put(pluginClass, Generator.asConfigurationMap(plugin));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

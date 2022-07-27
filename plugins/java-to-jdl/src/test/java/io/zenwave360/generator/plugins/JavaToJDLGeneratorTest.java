@@ -1,9 +1,6 @@
 package io.zenwave360.generator.plugins;
 
-import io.zenwave360.generator.templating.TemplateOutput;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 public class JavaToJDLGeneratorTest {
 

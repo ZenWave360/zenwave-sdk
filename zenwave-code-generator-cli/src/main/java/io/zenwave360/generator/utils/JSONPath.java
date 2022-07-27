@@ -1,4 +1,4 @@
-package io.zenwave360.generator.processors.utils;
+package io.zenwave360.generator.utils;
 
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;

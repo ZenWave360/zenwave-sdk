@@ -1,4 +1,4 @@
-package io.zenwave360.generator.processors.utils;
+package io.zenwave360.generator.utils;
 
 import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +28,6 @@ public class NamingUtils {
     }
 
     public static String asJavaPropertyName(String name) {
-        return StringUtils.uncapitalize(name);
+        return StringUtils.uncapitalize(asJavaTypeName(name));
     }
 }

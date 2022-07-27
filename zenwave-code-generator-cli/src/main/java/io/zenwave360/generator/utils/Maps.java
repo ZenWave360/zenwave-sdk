@@ -1,8 +1,16 @@
-package io.zenwave360.generator.processors.utils;
+package io.zenwave360.generator.utils;
 
+import io.zenwave360.generator.templating.HandlebarsEngine;
+import io.zenwave360.generator.templating.TemplateEngine;
+
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static java.lang.reflect.Modifier.isStatic;
+import static org.apache.commons.lang3.reflect.FieldUtils.getAllFields;
 
 /**
  * Mutable version of {@link java.util.Map} static methods and other utilities.
@@ -22,5 +30,4 @@ public interface Maps {
         }
         return map;
     }
-
 }

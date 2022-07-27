@@ -1,7 +1,6 @@
 package io.zenwave360.generator.plugins;
 
 import io.zenwave360.generator.Configuration;
-import io.zenwave360.generator.Main;
 import io.zenwave360.generator.MainGenerator;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.AfterAll;

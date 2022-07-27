@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.zenwave360.generator.parsers.JDLParser;
 import io.zenwave360.generator.processors.JDLProcessor;
-import io.zenwave360.generator.processors.utils.JSONPath;
 import io.zenwave360.generator.templating.TemplateOutput;
+import io.zenwave360.generator.utils.JSONPath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

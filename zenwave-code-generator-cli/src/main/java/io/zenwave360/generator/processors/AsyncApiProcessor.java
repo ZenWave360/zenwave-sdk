@@ -1,7 +1,7 @@
 package io.zenwave360.generator.processors;
 
 import com.jayway.jsonpath.JsonPath;
-import io.zenwave360.generator.processors.utils.JSONPath;
+import io.zenwave360.generator.utils.JSONPath;
 
 import java.util.ArrayList;
 import java.util.Arrays;
