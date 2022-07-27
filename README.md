@@ -105,3 +105,6 @@ Refer to individual plugin's documentation for more information:
 | [JDL to OpenAPI](./plugins/jdl-to-openapi/README.md)                                     | JDL to OpenAPI and OpenAPI to JDL  | JDL, OpenAPI               |
 | [OpenAPI to Spring WebTestClient](./plugins/openapi-spring-webtestclient/README.md)      | OpenAPI to Spring WebTestClient    | OpenAPI                    |
 
+# ZenWave Code Generator Documentation
+
+https://zenwave360.github.io/zenwave-code-generator/

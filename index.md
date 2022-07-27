@@ -1,6 +1,13 @@
 # ZenWave Code Generator
 
-> :warning: Work in progress and not ready for use.
+> :warning: Work in progress.
+
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360/zenwave-generator.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360/zenwave-generator)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/ZenWave360/zenwave-generator?logo=GitHub)](https://github.com/ZenWave360/zenwave-generator/releases)
+[![build](https://github.com/ZenWave360/zenwave-generator/workflows/build/badge.svg)](https://github.com/ZenWave360/zenwave-generator/actions/workflows/build.yml)
+[![coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-generator/badges/jacoco.svg)](https://github.com/ZenWave360/zenwave-generator/actions/workflows/build.yml)
+[![branches coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-generator/badges/branches.svg)](https://github.com/ZenWave360/zenwave-generator/actions/workflows/build.yml)
+[![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-generator)](https://github.com/ZenWave360/zenwave-generator/blob/main/LICENSE)
 
 ZenWave Code Generator is a configurable and extensible code generator tool for **Domain Driven Design (DDD)** and **API-First** that can generate code from a mix of different models including:
 
@@ -437,55 +444,55 @@ jbang zw -p io.zenwave360.generator.plugins.JDLBackendApplicationDefaultConfigur
 ```
 
 <details markdown="1">
-  <summary>generator logs (expand to see)</summary>
+  <summary>generated files (expand to see)</summary>
 
 ```shell
-// Domain models annotated for SpringData MondoDB
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/domain/Customer.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/domain/CustomerOrder.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/domain/OrderedItem.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/domain/OrderStatus.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/domain/PaymentDetails.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/domain/ShippingDetails.java
+# Domain models annotated for SpringData MondoDB
+src/main/java/io/zenwave360/example/core/domain/Customer.java
+src/main/java/io/zenwave360/example/core/domain/CustomerOrder.java
+src/main/java/io/zenwave360/example/core/domain/OrderedItem.java
+src/main/java/io/zenwave360/example/core/domain/OrderStatus.java
+src/main/java/io/zenwave360/example/core/domain/PaymentDetails.java
+src/main/java/io/zenwave360/example/core/domain/ShippingDetails.java
 
-// Inbound Interfaces
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/inbound/CustomerOrderUseCases.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/inbound/CustomerUseCases.java
-// Inbound DTOS
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/inbound/dtos/CustomerCriteria.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/inbound/dtos/CustomerInput.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/inbound/dtos/CustomerOrderInput.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/inbound/dtos/OrderedItemInput.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/inbound/dtos/PaymentDetailsInput.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/inbound/dtos/ShippingDetailsInput.java
+# Inbound Interfaces
+src/main/java/io/zenwave360/example/core/inbound/CustomerOrderUseCases.java
+src/main/java/io/zenwave360/example/core/inbound/CustomerUseCases.java
+# Inbound DTOS
+src/main/java/io/zenwave360/example/core/inbound/dtos/CustomerCriteria.java
+src/main/java/io/zenwave360/example/core/inbound/dtos/CustomerInput.java
+src/main/java/io/zenwave360/example/core/inbound/dtos/CustomerOrderInput.java
+src/main/java/io/zenwave360/example/core/inbound/dtos/OrderedItemInput.java
+src/main/java/io/zenwave360/example/core/inbound/dtos/PaymentDetailsInput.java
+src/main/java/io/zenwave360/example/core/inbound/dtos/ShippingDetailsInput.java
 
-// Outbound Interfaces for MongoDB
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/outbound/mongodb/CustomerOrderRepository.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/outbound/mongodb/CustomerRepository.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/outbound/mongodb/OrderedItemRepository.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/outbound/mongodb/PaymentDetailsRepository.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/outbound/mongodb/ShippingDetailsRepository.java
+# Outbound Interfaces for MongoDB
+src/main/java/io/zenwave360/example/core/outbound/mongodb/CustomerOrderRepository.java
+src/main/java/io/zenwave360/example/core/outbound/mongodb/CustomerRepository.java
+src/main/java/io/zenwave360/example/core/outbound/mongodb/OrderedItemRepository.java
+src/main/java/io/zenwave360/example/core/outbound/mongodb/PaymentDetailsRepository.java
+src/main/java/io/zenwave360/example/core/outbound/mongodb/ShippingDetailsRepository.java
 
-// Outbound Interfaces and annotated DTO for ElasticSearch
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/outbound/search/CustomerDocument.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/outbound/search/CustomerSearchRepository.java
+# Outbound Interfaces and annotated DTO for ElasticSearch
+src/main/java/io/zenwave360/example/core/outbound/search/CustomerDocument.java
+src/main/java/io/zenwave360/example/core/outbound/search/CustomerSearchRepository.java
 
-// Services/UseCases Implementation
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/implementation/CustomerOrderUseCasesImpl.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/implementation/CustomerUseCasesImpl.java
+# Services/UseCases Implementation
+src/main/java/io/zenwave360/example/core/implementation/CustomerOrderUseCasesImpl.java
+src/main/java/io/zenwave360/example/core/implementation/CustomerUseCasesImpl.java
 
-// Mapstruct Mappers used by Services/UseCases
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/implementation/mappers/CustomerMapper.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/implementation/mappers/CustomerOrderMapper.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/implementation/mappers/OrderedItemMapper.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/implementation/mappers/PaymentDetailsMapper.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/implementation/mappers/ShippingDetailsMapper.java
+# Mapstruct Mappers used by Services/UseCases
+src/main/java/io/zenwave360/example/core/implementation/mappers/CustomerMapper.java
+src/main/java/io/zenwave360/example/core/implementation/mappers/CustomerOrderMapper.java
+src/main/java/io/zenwave360/example/core/implementation/mappers/OrderedItemMapper.java
+src/main/java/io/zenwave360/example/core/implementation/mappers/PaymentDetailsMapper.java
+src/main/java/io/zenwave360/example/core/implementation/mappers/ShippingDetailsMapper.java
 
-// CRUD SpringMVC REST Controllers
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/adapters/web/CustomerOrderResource.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/adapters/web/CustomerResource.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/adapters/web/PaymentDetailsResource.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/adapters/web/ShippingDetailsResource.java
+# CRUD SpringMVC REST Controllers
+src/main/java/io/zenwave360/example/adapters/web/CustomerOrderResource.java
+src/main/java/io/zenwave360/example/adapters/web/CustomerResource.java
+src/main/java/io/zenwave360/example/adapters/web/PaymentDetailsResource.java
+src/main/java/io/zenwave360/example/adapters/web/ShippingDetailsResource.java
 
 ```
 </details>
@@ -529,15 +536,15 @@ jbang zw -p io.zenwave360.generator.plugins.JDLOpenAPIControllersConfiguration \
 ```
 
 <details markdown="1">
-  <summary>generator logs (expand to see)</summary>
+  <summary>generated files (expand to see)</summary>
 
 ```shell
-// REST Controllers implementing OpenAPI generated interfaces
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/adapters/web/CustomerApiController.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/adapters/web/CustomerOrderApiController.java
-// Mapstruct Mappers used by REST Controllers
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/adapters/web/mappers/CustomerDTOsMapper.java
-DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/adapters/web/mappers/CustomerOrderDTOsMapper.java
+# REST Controllers implementing OpenAPI generated interfaces
+src/main/java/io/zenwave360/example/adapters/web/CustomerApiController.java
+src/main/java/io/zenwave360/example/adapters/web/CustomerOrderApiController.java
+# Mapstruct Mappers used by REST Controllers
+src/main/java/io/zenwave360/example/adapters/web/mappers/CustomerDTOsMapper.java
+src/main/java/io/zenwave360/example/adapters/web/mappers/CustomerOrderDTOsMapper.java
 ```
 </details>
 
@@ -558,12 +565,12 @@ jbang zw -p io.zenwave360.generator.plugins.SpringWebTestClientConfiguration \
 ```
 
 <details markdown="1">
-  <summary>generator logs (expand to see)</summary>
+  <summary>generated files (expand to see)</summary>
 
 ```shell
-DEBUG TemplateFileWriter - Writing template with targetFile: io/zenwave360/example/adapters/web/ControllersTestSet.java
-DEBUG TemplateFileWriter - Writing template with targetFile: io/zenwave360/example/adapters/web/CustomerApiControllerIT.java
-DEBUG TemplateFileWriter - Writing template with targetFile: io/zenwave360/example/adapters/web/CustomerOrderApiControllerIT.java
+io/zenwave360/example/adapters/web/ControllersTestSet.java
+io/zenwave360/example/adapters/web/CustomerApiControllerIT.java
+io/zenwave360/example/adapters/web/CustomerOrderApiControllerIT.java
 ```
 </details>
 
