@@ -27,18 +27,16 @@ jobs:
         id: jacoco-zenwave-code-generator-cli
         uses: cicirello/jacoco-badge-generator@v2
         with:
-          badges-directory: badges
           generate-branches-badge: true
           jacoco-csv-file: zenwave-code-generator-cli/target/site/jacoco/jacoco.csv
-          coverage-badge-filename: zenwave-code-generator-cli-jacoco.svg
-          branches-badge-filename: zenwave-code-generator-cli-branches.svg
+          coverage-badge-filename: zenwave-code-generator-cli/jacoco.svg
+          branches-badge-filename: zenwave-code-generator-cli/branches.svg
           coverage-label: coverage
           branches-label: branches
 
       - name: Commit and push the coverage badges and summary file
         if: ${{ github.event_name != 'pull_request' }}
         run: |
-          cd badges
           if [[ `git status --porcelain *.svg *.json` ]]; then
             git config --global user.name 'github-actions'
             git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
