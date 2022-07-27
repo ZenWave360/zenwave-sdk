@@ -55,7 +55,7 @@ public class JDLOpenAPIControllersGeneratorTest {
     // @Disabled
     public void test_generator_jdl_openapi_controllers_registry() throws Exception {
         Configuration configuration = new JDLOpenAPIControllersConfiguration()
-                .withSpecFile("../../examples/spring-boot-mongo-elasticsearch\\src\\main\\resources\\model\\openapi.yml")
+                .withSpecFile("../../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/openapi.yml")
                 .withOption("jdlFile", "../../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/orders-model.jdl")
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("openApiApiPackage", "io.zenwave360.example.adapters.web")
