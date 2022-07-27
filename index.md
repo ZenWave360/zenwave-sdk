@@ -241,30 +241,14 @@ When you separate your domain model into subdomains and bounded context, bounded
 
 We will use **OpenAPI**, **AsyncAPI** and other specs to define the communication between these services.
 
-### Access data owned by other bounded contexts: Direct Access vs CQRS
+### Access data owned by other bounded contexts: Direct Access, Event Sourcing and CQRS 
 
-For every service owning data is a good idea to:
-
-- Publish read access owned @RootAggregates as request-response services like a REST API, gRPC, GraphQL...
-- Publish events of @RootAggregates changes (Create, Update, Delete) to a shared event broker as a publish-subscribe services.
-
-This is commonly enough for other services to implement either direct synchronous access or create CQRS views.
-
-![05-DDD-CQRS-And-Direct-Access](docs/05-DDD-CQRS-And-Direct-Access.excalidraw.svg)
-
-Because APIs do evolve:
-
-- By their synchronous nature REST APIs, if up to date, clients and services should be compatible with each other.
-- But event messages depending on the event broker retention policy may live indefinitely and that complicates consumers implementation as they may need to know how to process different evolving message formats.
-
-An easy way to simplify consumers implementation, regarding evolving message formats:
-
-- Just publish the aggregate ID and the event type (Create, Update, Delete) to the event broker.
-- Let the consumers use the REST API to fetch data synchronously.
-
-![05-DDD-CQRS-And-Evolving-Message-Schemas](docs/05-DDD-CQRS-And-Evolving-Message-Schemas.excalidraw.svg)
+- **Direct Access:** _TODO_ Link to JDL-2-OpenAPI generator
+- **Event Sourcing and CQRS:** _TODO_ Templates for Transactional Outbox pattern with AsyncAPI for Event Sourcing and CQRS
 
 ### Sagas
+
+> _TODO_ Code generation for Sagas based on AsyncAPI 3 proposal for channels menu and request-response (see expandable examples below)
 
 Currently, you can use AsyncAPI 2 specification to describe message schemas and the channels they are written to but is not enough to describe the inter process communication between services like SAGAs but [ongoing work for version 3](https://github.com/asyncapi/spec/issues/618) is very promising regarding documenting IPCs like SAGAs and CQRS.
 
@@ -392,33 +376,196 @@ Aims to generate a complete Architecture based on Domain models expressed in JDL
 
 ![06-ServiceImplementation-Hexagonal](docs/06-ServiceImplementation-Hexagonal.excalidraw.svg)
 
-## JDL Server Entities (WIP)
+## JDL Backend Application
 
-Generates entities annotated for persistence you can use as your core domain aggregates.
+The following instructions were executed on top of a standard https://start.spring.io generated application for MongoDB, ElasticSearch and Mapstruct with the following JDL model as only input:
 
-**NOTE:** We are very opinionated about not to hide annotated entities behind plain DTOs and MapStruct mappers (adapters in Hexagonal parlance) and take advantage of your ORM/ODM persistence framework semantics, and not hide them behind an extra layer of DTOs which will leave you in a _common-lowest-denominator_ land.
+<details markdown="1">
+  <summary>orders-model.jdl (expand to see)</summary>
 
-So we would generate:
+```jdl
+/* Customers */
+@search(elasticsearch)
+entity Customer {
+	username String required minlength(3) maxlength(250),
+	password String required minlength(3) maxlength(250),
+	email String required minlength(3) maxlength(250),
+	firstName String required minlength(3) maxlength(250),
+	lastName String required minlength(3) maxlength(250)
+}
 
-- Annotated entities as core domain model aggregates, data on the inside.
-- Persistence Repositories as secondary ports for the annotated entities.
+
+/* Orders */
+enum OrderStatus { CONFIRMED, SHIPPED, DELIVERED }
+
+entity CustomerOrder { // Order is a reserved word
+	date Instant,
+	status OrderStatus
+	customer Customer
+	orderedItems OrderedItem[]
+	paymentDetails PaymentDetails[]
+	shippingDetails ShippingDetails
+}
+
+@embedded
+entity OrderedItem {
+	catalogItemId Long,
+	name String required minlength(3) maxlength(250),
+	price BigDecimal required,
+	quantity Integer
+}
+entity PaymentDetails {
+	creditCardNumber String
+}
+
+entity ShippingDetails {
+	address String
+}
+
+service Customer with CustomerUseCases
+service CustomerOrder,PaymentDetails,ShippingDetails with CustomerOrderUseCases
+```
+</details>
+
+```shell
+jbang zw -p io.zenwave360.generator.plugins.JDLBackendApplicationDefaultConfiguration \
+    specFile=src/main/resources/model/orders-model.jdl \
+    basePackage=io.zenwave360.example \
+    persistence=mongodb \
+    style=imperative \
+    targetFolder=.
+```
+
+<details markdown="1">
+  <summary>generator logs (expand to see)</summary>
+
+```shell
+// Domain models annotated for SpringData MondoDB
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/domain/Customer.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/domain/CustomerOrder.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/domain/OrderedItem.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/domain/OrderStatus.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/domain/PaymentDetails.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/domain/ShippingDetails.java
+
+// Inbound Interfaces
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/inbound/CustomerOrderUseCases.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/inbound/CustomerUseCases.java
+// Inbound DTOS
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/inbound/dtos/CustomerCriteria.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/inbound/dtos/CustomerInput.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/inbound/dtos/CustomerOrderInput.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/inbound/dtos/OrderedItemInput.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/inbound/dtos/PaymentDetailsInput.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/inbound/dtos/ShippingDetailsInput.java
+
+// Outbound Interfaces for MongoDB
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/outbound/mongodb/CustomerOrderRepository.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/outbound/mongodb/CustomerRepository.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/outbound/mongodb/OrderedItemRepository.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/outbound/mongodb/PaymentDetailsRepository.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/outbound/mongodb/ShippingDetailsRepository.java
+
+// Outbound Interfaces and annotated DTO for ElasticSearch
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/outbound/search/CustomerDocument.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/outbound/search/CustomerSearchRepository.java
+
+// Services/UseCases Implementation
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/implementation/CustomerOrderUseCasesImpl.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/implementation/CustomerUseCasesImpl.java
+
+// Mapstruct Mappers used by Services/UseCases
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/implementation/mappers/CustomerMapper.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/implementation/mappers/CustomerOrderMapper.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/implementation/mappers/OrderedItemMapper.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/implementation/mappers/PaymentDetailsMapper.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/core/implementation/mappers/ShippingDetailsMapper.java
+
+// CRUD SpringMVC REST Controllers
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/adapters/web/CustomerOrderResource.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/adapters/web/CustomerResource.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/adapters/web/PaymentDetailsResource.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/adapters/web/ShippingDetailsResource.java
+
+```
+</details>
+
+#### JDL To OpenAPI
+
+Generate a baseline OpenAPI definition from JDL entities:
+
+- Component Schemas for entities, plain and paginated lists
+- CRUD operations for entities
+
+```shell
+jbang zw -p io.zenwave360.generator.plugins.JDLToOpenAPIConfiguration \
+    specFile=src/main/resources/model/orders-model.jdl \
+    targetFile=src/main/resources/model/openapi.yml
+```
+
+
+#### SpringMVC Controllers from OpenAPI
+
+Delete generated CRUD Controllers and generate SpringMVC Controller interfaces with the official OpenAPI Generator:
+
+```shell
+rm -rf src/main/java/io/zenwave360/example/adapters/web
+mvn clean generate-sources
+```
+
+Generate new SpringMVC controllers from controllers interfaces generated by the OpenAPI Generator:
+
+```shell
 
 ```shell
 jbang zw -p io.zenwave360.generator.plugins.JDLOpenAPIControllersConfiguration \
-    specFile=entities-model.jdl targetFolder=target/out
+    specFile=src/main/resources/model/openapi.yml \
+    jdlFile=src/main/resources/model/orders-model.jdl \
+    basePackage=io.zenwave360.example \
+    openApiApiPackage=io.zenwave360.example.adapters.web \
+    openApiModelPackage=io.zenwave360.example.adapters.web.model \
+    openApiModelNameSuffix=DTO \
+    targetFolder=.
 ```
 
-## SpringData Repositories
+<details markdown="1">
+  <summary>generator logs (expand to see)</summary>
 
-_TODO_: Generate SpringData Repository interfaces for every @AggregateRoot entity.
+```shell
+// REST Controllers implementing OpenAPI generated interfaces
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/adapters/web/CustomerApiController.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/adapters/web/CustomerOrderApiController.java
+// Mapstruct Mappers used by REST Controllers
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/adapters/web/mappers/CustomerDTOsMapper.java
+DEBUG TemplateFileWriter - Writing template with targetFile: src/main/java/io/zenwave360/example/adapters/web/mappers/CustomerOrderDTOsMapper.java
+```
+</details>
 
-## SpringData Repositories InMemory Mocks
+## SpringMVC and WebFlux WebTestClient integration/unit tests from OpenAPI (and JDL) definitions
 
-_TODO_: Generate InMemory (with simple hashmaps) implementation for SpringData Repositories along with some sample data (probably in easily editable yaml format).
+Generates test for SpringMVC or Spring WebFlux using WebTestClient based on OpenAPI specification.
 
-## OpenAPI Clients (using official OpenAPI generator)
+```shell
+jbang zw -p io.zenwave360.generator.plugins.SpringWebTestClientConfiguration \
+    specFile=src/main/resources/model/openapi.yml \
+    jdlFile=src/main/resources/model/orders-model.jdl \
+    targetFolder=src/test/java \
+    controllersPackage=io.zenwave360.example.adapters.web \
+    openApiApiPackage=io.zenwave360.example.adapters.web \
+    openApiModelPackage=io.zenwave360.example.adapters.web.model \
+    openApiModelNameSuffix=DTO \
+    groupBy=SERVICE
+```
 
-_TODO_
+<details markdown="1">
+  <summary>generator logs (expand to see)</summary>
+
+```shell
+DEBUG TemplateFileWriter - Writing template with targetFile: io/zenwave360/example/adapters/web/ControllersTestSet.java
+DEBUG TemplateFileWriter - Writing template with targetFile: io/zenwave360/example/adapters/web/CustomerApiControllerIT.java
+DEBUG TemplateFileWriter - Writing template with targetFile: io/zenwave360/example/adapters/web/CustomerOrderApiControllerIT.java
+```
+</details>
 
 ## High Fidelity Stateful REST API Mocks (using sister project ZenWave ApiMock)
 
@@ -450,24 +597,6 @@ jbang zw -p io.zenwave360.generator.plugins.SpringCloudStream3Configuration \
 ## AsyncAPI interfaces Mocks and Contract Tests (ToBeDefined)
 
 _TODO_: Use Pact.io? Spring Cloud Contract? Roll your own?
-
-## SpringMVC and WebFlux Controller Stubs along with MapStruct Mappers from OpenAPI + JDL
-
-_TODO_: We can generate a lot of code to get you started to implement every new endpoint... so you can just fill in the missing details and implement your service business rules.
-
-## SpringMVC and WebFlux WebTestClient integration/unit tests from OpenAPI definitions
-
-Generates test for SpringMVC or Spring WebFlux using WebTestClient based on OpenAPI specification.
-
-```shell
-jbang zw -p io.zenwave360.generator.plugins.SpringWebTestClientConfiguration \
-    specFile=openapi.yml targetFolder=target/out \
-    apiPackage=io.example.integration.test.api \
-    modelPackage=io.example.integration.test.api.model \
-    groupBy=<SERVICE | OPERATION | PARTIAL> \
-    operationIds=<comma separated or empty for all> \
-    statusCodes=<comma separated or empty for default>
-```
 
 ## KarateDSL Ent-to-End tests for REST APIs (using sister project ZenWave KarateIDE)
 

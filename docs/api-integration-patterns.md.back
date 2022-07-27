@@ -1,0 +1,22 @@
+### Access data owned by other bounded contexts: Direct Access vs CQRS
+
+For every service owning data is a good idea to:
+
+- Publish read access owned @RootAggregates as request-response services like a REST API, gRPC, GraphQL...
+- Publish events of @RootAggregates changes (Create, Update, Delete) to a shared event broker as a publish-subscribe services.
+
+This is commonly enough for other services to implement either direct synchronous access or create CQRS views.
+
+![05-DDD-CQRS-And-Direct-Access](docs/05-DDD-CQRS-And-Direct-Access.excalidraw.svg)
+
+Because APIs do evolve:
+
+- By their synchronous nature REST APIs, if up to date, clients and services should be compatible with each other.
+- But event messages depending on the event broker retention policy may live indefinitely and that complicates consumers implementation as they may need to know how to process different evolving message formats.
+
+An easy way to simplify consumers implementation, regarding evolving message formats:
+
+- Just publish the aggregate ID and the event type (Create, Update, Delete) to the event broker.
+- Let the consumers use the REST API to fetch data synchronously.
+
+![05-DDD-CQRS-And-Evolving-Message-Schemas](docs/05-DDD-CQRS-And-Evolving-Message-Schemas.excalidraw.svg)

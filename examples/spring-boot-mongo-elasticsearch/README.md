@@ -25,7 +25,7 @@ io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:0.0.
 
 ```shell
 jbang zw -p io.zenwave360.generator.plugins.JDLBackendApplicationDefaultConfiguration \
-    specFile=src/main/resources/model/api-example.jdl \
+    specFile=src/main/resources/model/orders-model.jdl \
     basePackage=io.zenwave360.example \
     persistence=mongodb \
     style=imperative \
@@ -34,11 +34,14 @@ jbang zw -p io.zenwave360.generator.plugins.JDLBackendApplicationDefaultConfigur
 
 #### JDL To OpenAPI
 
-Generate OpenAPI schemas from JDL entities:
+Generate OpenAPI definition from JDL entities:
+
+- Component Schemas for entities, plain and paginated lists
+- CRUD operations for entities
 
 ```shell
 jbang zw -p io.zenwave360.generator.plugins.JDLToOpenAPIConfiguration \
-    specFile=src/main/resources/model/api-example.jdl \
+    specFile=src/main/resources/model/orders-model.jdl \
     targetFile=src/main/resources/model/openapi.yml
 ```
 
@@ -60,7 +63,7 @@ mvn clean generate-sources
 ```shell
 jbang zw -p io.zenwave360.generator.plugins.JDLOpenAPIControllersConfiguration \
     specFile=src/main/resources/model/openapi.yml \
-    jdlFile=src/main/resources/model/api-example.jdl \
+    jdlFile=src/main/resources/model/orders-model.jdl \
     basePackage=io.zenwave360.example \
     openApiApiPackage=io.zenwave360.example.adapters.web \
     openApiModelPackage=io.zenwave360.example.adapters.web.model \
@@ -75,6 +78,7 @@ Generates test for SpringMVC or Spring WebFlux using WebTestClient based on Open
 ```shell
 jbang zw -p io.zenwave360.generator.plugins.SpringWebTestClientConfiguration \
     specFile=src/main/resources/model/openapi.yml \
+    jdlFile=src/main/resources/model/orders-model.jdl \
     targetFolder=src/test/java \
     controllersPackage=io.zenwave360.example.adapters.web \
     openApiApiPackage=io.zenwave360.example.adapters.web \
