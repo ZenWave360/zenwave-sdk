@@ -2,12 +2,12 @@
 
 > :warning: Work in progress.
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360/zenwave-generator.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360/zenwave-generator)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/ZenWave360/zenwave-generator?logo=GitHub)](https://github.com/ZenWave360/zenwave-generator/releases)
-[![build](https://github.com/ZenWave360/zenwave-generator/workflows/build/badge.svg)](https://github.com/ZenWave360/zenwave-generator/actions/workflows/build.yml)
-[![coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-generator/badges/jacoco.svg)](https://github.com/ZenWave360/zenwave-generator/actions/workflows/build.yml)
-[![branches coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-generator/badges/branches.svg)](https://github.com/ZenWave360/zenwave-generator/actions/workflows/build.yml)
-[![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-generator)](https://github.com/ZenWave360/zenwave-generator/blob/main/LICENSE)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360/zenwave-code-generator.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360/zenwave-code-generator)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/ZenWave360/zenwave-code-generator?logo=GitHub)](https://github.com/ZenWave360/zenwave-code-generator/releases)
+[![build](https://github.com/ZenWave360/zenwave-code-generator/workflows/build/badge.svg)](https://github.com/ZenWave360/zenwave-code-generator/actions/workflows/build.yml)
+[![coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-code-generator/badges/jacoco.svg)](https://github.com/ZenWave360/zenwave-code-generator/actions/workflows/build.yml)
+[![branches coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-code-generator/badges/branches.svg)](https://github.com/ZenWave360/zenwave-code-generator/actions/workflows/build.yml)
+[![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-code-generator)](https://github.com/ZenWave360/zenwave-code-generator/blob/main/LICENSE)
 
 ZenWave Code Generator is a configurable and extensible code generator tool for **Domain Driven Design (DDD)** and **API-First** that can generate code from a mix of different models including:
 
@@ -250,8 +250,15 @@ We will use **OpenAPI**, **AsyncAPI** and other specs to define the communicatio
 
 ### Access data owned by other bounded contexts: Direct Access, Event Sourcing and CQRS 
 
-- **Direct Access:** _TODO_ Link to JDL-2-OpenAPI generator
-- **Event Sourcing and CQRS:** _TODO_ Templates for Transactional Outbox pattern with AsyncAPI for Event Sourcing and CQRS
+- **Direct Access:** [Generates a full OpenAPI definitions for CRUD operations from JDL models](https://zenwave360.github.io/zenwave-code-generator/plugins/jdl-to-openapi/)
+- **Event Sourcing:** _TODO_ 
+  - from entities.jdl (aggregates) 
+  - generate AsyncAPI definition and SpringData event listeners with SpringCloudStreams client that writes event to a topic
+- **Transactional Outbox:** _TODO_ 
+  - from asyncapi.yml 
+  - generate an event client that writes to a transactional outbox and a Pulling Publisher that reads from the outbox and sends events to a topic 
+- **Event Sourcing and CQRS:** _TODO_ 
+  - combine direct access, transactional outbox and event sourcing
 
 ### Sagas
 
