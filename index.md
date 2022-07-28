@@ -480,7 +480,6 @@ src/main/java/io/zenwave360/example/core/outbound/search/CustomerSearchRepositor
 # Services/UseCases Implementation
 src/main/java/io/zenwave360/example/core/implementation/CustomerOrderUseCasesImpl.java
 src/main/java/io/zenwave360/example/core/implementation/CustomerUseCasesImpl.java
-
 # Mapstruct Mappers used by Services/UseCases
 src/main/java/io/zenwave360/example/core/implementation/mappers/CustomerMapper.java
 src/main/java/io/zenwave360/example/core/implementation/mappers/CustomerOrderMapper.java
