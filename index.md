@@ -33,23 +33,21 @@ Using JHipster Domain Language as **Ubiquitous Language** for [Data on the Insid
 - [Designing a system from scratch with DDD and API-First](#designing-a-system-from-scratch-with-ddd-and-api-first)
   - [DDD: From Idea to JDL](#ddd-from-idea-to-jdl)
   - [API-First: Designing Inter-Service Communication](#api-first-designing-inter-service-communication)
-    - [Access data owned by other bounded contexts: Direct Access vs CQRS](#access-data-owned-by-other-bounded-contexts-direct-access-vs-cqrs)
+    - [Access data owned by other bounded contexts: Direct Access, Event Sourcing and CQRS](#access-data-owned-by-other-bounded-contexts-direct-access-event-sourcing-and-cqrs)
     - [Sagas](#sagas)
 - [Refactoring a legacy monolith](#refactoring-a-legacy-monolith)
   - [Reverse engineering JDL from Java classes (JPA and MongoDB)](#reverse-engineering-jdl-from-java-classes-jpa-and-mongodb)
-- [Adding functionality on top of an existent microservices archytecture](#adding-functionality-on-top-of-an-existent-microservices-archytecture)
+- [Adding functionality on top of an existent microservices architecture](#adding-functionality-on-top-of-an-existent-microservices-architecture)
   - [Reverse engineering JDL from Java classes (JPA and MongoDB)](#reverse-engineering-jdl-from-java-classes-jpa-and-mongodb-1)
   - [Reverse engineering JDL from OpenAPI definition schemas](#reverse-engineering-jdl-from-openapi-definition-schemas)
 - [Generating functional and testing code: What can we generate for you today?](#generating-functional-and-testing-code-what-can-we-generate-for-you-today)
-  - [JDL Server Entities (WIP)](#jdl-server-entities-wip)
-  - [SpringData Repositories](#springdata-repositories)
-  - [SpringData Repositories InMemory Mocks](#springdata-repositories-inmemory-mocks)
-  - [OpenAPI Clients (using official OpenAPI generator)](#openapi-clients-using-official-openapi-generator)
+  - [JDL Backend Application](#jdl-backend-application)
+      - [JDL To OpenAPI](#jdl-to-openapi)
+      - [SpringMVC Controllers from OpenAPI](#springmvc-controllers-from-openapi)
+  - [SpringMVC and WebFlux WebTestClient integration/unit tests from OpenAPI (and JDL) definitions](#springmvc-and-webflux-webtestclient-integrationunit-tests-from-openapi-and-jdl-definitions)
   - [High Fidelity Stateful REST API Mocks (using sister project ZenWave ApiMock)](#high-fidelity-stateful-rest-api-mocks-using-sister-project-zenwave-apimock)
   - [AsyncAPI strongly typed interfaces and SpringCloudStreams3 implementations](#asyncapi-strongly-typed-interfaces-and-springcloudstreams3-implementations)
   - [AsyncAPI interfaces Mocks and Contract Tests (ToBeDefined)](#asyncapi-interfaces-mocks-and-contract-tests-tobedefined)
-  - [SpringMVC and WebFlux Controller Stubs along with MapStruct Mappers from OpenAPI + JDL](#springmvc-and-webflux-controller-stubs-along-with-mapstruct-mappers-from-openapi--jdl)
-  - [SpringMVC and WebFlux WebTestClient integration/unit tests from OpenAPI definitions](#springmvc-and-webflux-webtestclient-integrationunit-tests-from-openapi-definitions)
   - [KarateDSL Ent-to-End tests for REST APIs (using sister project ZenWave KarateIDE)](#karatedsl-ent-to-end-tests-for-rest-apis-using-sister-project-zenwave-karateide)
 
 # An "Online Food Delivery Service"
@@ -248,16 +246,16 @@ When you separate your domain model into subdomains and bounded context, bounded
 
 We will use **OpenAPI**, **AsyncAPI** and other specs to define the communication between these services.
 
-### Access data owned by other bounded contexts: Direct Access, Event Sourcing and CQRS 
+### Access data owned by other bounded contexts: Direct Access, Event Sourcing and CQRS
 
 - **Direct Access:** [Generates a full OpenAPI definitions for CRUD operations from JDL models](https://zenwave360.github.io/zenwave-code-generator/plugins/jdl-to-openapi/)
-- **Event Sourcing:** _TODO_ 
-  - from entities.jdl (aggregates) 
+- **Event Sourcing:** _TODO_
+  - from entities.jdl (aggregates)
   - generate AsyncAPI definition and SpringData event listeners with SpringCloudStreams client that writes event to a topic
-- **Transactional Outbox:** _TODO_ 
-  - from asyncapi.yml 
-  - generate an event client that writes to a transactional outbox and a Pulling Publisher that reads from the outbox and sends events to a topic 
-- **Event Sourcing and CQRS:** _TODO_ 
+- **Transactional Outbox:** _TODO_
+  - from asyncapi.yml
+  - generate an event client that writes to a transactional outbox and a Pulling Publisher that reads from the outbox and sends events to a topic
+- **Event Sourcing and CQRS:** _TODO_
   - combine direct access, transactional outbox and event sourcing
 
 ### Sagas
@@ -439,6 +437,7 @@ entity ShippingDetails {
 service Customer with CustomerUseCases
 service CustomerOrder,PaymentDetails,ShippingDetails with CustomerOrderUseCases
 ```
+
 </details>
 
 ```shell
@@ -501,6 +500,7 @@ src/main/java/io/zenwave360/example/adapters/web/PaymentDetailsResource.java
 src/main/java/io/zenwave360/example/adapters/web/ShippingDetailsResource.java
 
 ```
+
 </details>
 
 #### JDL To OpenAPI
@@ -516,7 +516,6 @@ jbang zw -p io.zenwave360.generator.plugins.JDLToOpenAPIConfiguration \
     targetFile=src/main/resources/model/openapi.yml
 ```
 
-
 #### SpringMVC Controllers from OpenAPI
 
 Delete generated CRUD Controllers and generate SpringMVC Controller interfaces with the official OpenAPI Generator:
@@ -528,7 +527,7 @@ mvn clean generate-sources
 
 Generate new SpringMVC controllers from controllers interfaces generated by the OpenAPI Generator:
 
-```shell
+````shell
 
 ```shell
 jbang zw -p io.zenwave360.generator.plugins.JDLOpenAPIControllersConfiguration \
@@ -539,7 +538,7 @@ jbang zw -p io.zenwave360.generator.plugins.JDLOpenAPIControllersConfiguration \
     openApiModelPackage=io.zenwave360.example.adapters.web.model \
     openApiModelNameSuffix=DTO \
     targetFolder=.
-```
+````
 
 <details markdown="1">
   <summary>generated files (expand to see)</summary>
@@ -552,6 +551,7 @@ src/main/java/io/zenwave360/example/adapters/web/CustomerOrderApiController.java
 src/main/java/io/zenwave360/example/adapters/web/mappers/CustomerDTOsMapper.java
 src/main/java/io/zenwave360/example/adapters/web/mappers/CustomerOrderDTOsMapper.java
 ```
+
 </details>
 
 ## SpringMVC and WebFlux WebTestClient integration/unit tests from OpenAPI (and JDL) definitions
@@ -578,6 +578,7 @@ io/zenwave360/example/adapters/web/ControllersTestSet.java
 io/zenwave360/example/adapters/web/CustomerApiControllerIT.java
 io/zenwave360/example/adapters/web/CustomerOrderApiControllerIT.java
 ```
+
 </details>
 
 ## High Fidelity Stateful REST API Mocks (using sister project ZenWave ApiMock)
