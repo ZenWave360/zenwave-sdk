@@ -42,7 +42,7 @@
         <module>java-to-jdl</module>
         <module>jdl-to-openapi</module>
         <module>asyncapi-spring-cloud-streams3</module>
-<!--        <module>asyncapi-jsonschema2pojo</module>-->
+        <module>asyncapi-jsonschema2pojo</module>
         <module>jdl-backend-application-default</module>
         <module>jdl-openapi-controllers</module>
         <module>openapi-spring-webtestclient</module>

@@ -38,7 +38,6 @@ jobs:
           generate-branches-badge: true
           generate-summary: true
           jacoco-csv-file: >
-            ./plugins/asyncapi-jsonschema2pojo/target/site/jacoco/jacoco.csv
             ./plugins/asyncapi-spring-cloud-streams3/target/site/jacoco/jacoco.csv
             ./plugins/java-to-jdl/target/site/jacoco/jacoco.csv
             ./plugins/jdl-backend-application-default/target/site/jacoco/jacoco.csv
