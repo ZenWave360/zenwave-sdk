@@ -30,4 +30,8 @@ public class NamingUtils {
     public static String asJavaPropertyName(String name) {
         return StringUtils.uncapitalize(asJavaTypeName(name));
     }
+
+    public static String asKebabCase(String value) {
+        return value.replaceAll("([A-Z])([a-z])", "-$1$2").toLowerCase();
+    }
 }

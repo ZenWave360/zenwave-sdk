@@ -5,6 +5,9 @@
 *.ear
 *.class
 
+pom.xml.releaseBackup
+release.properties
+
 
 # eclipse specific git ignore
 *.pydevproject
