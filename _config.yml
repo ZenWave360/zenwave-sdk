@@ -9,3 +9,5 @@ logo: 'https://avatars.githubusercontent.com/u/93670347'
 aux_links:
   "See on GitHub":
     - "//github.com/zenwave360/zenwave-code-generator"
+ga_tracking:  G-PWPE0ZF877
+ga_tracking_anonymize_ip: true # Use GDPR compliant Google Analytics settings (true by default)
