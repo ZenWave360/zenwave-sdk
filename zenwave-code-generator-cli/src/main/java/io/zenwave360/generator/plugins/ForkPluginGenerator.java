@@ -36,10 +36,10 @@ public class ForkPluginGenerator implements Generator {
     @DocumentedOption(description = "Plugin Configuration class to fork", required = true)
     public String sourcePluginClassName;
 
-    @DocumentedOption(required = true)
+    @DocumentedOption(description = "New Plugin Configuration class. It will be used for class name, package and maven groupId.", required = true)
     public String targetPluginClassName;
 
-    @DocumentedOption(description = "Plugin Configuration class to fork", required = false)
+    @DocumentedOption(description = "Download URL for the source code of original plugin in zip format", required = false)
     public URL downloadURL = new URL("https://github.com/ZenWave360/zenwave-code-generator/archive/refs/tags/v0.1.0.zip");
 
     @DocumentedOption
@@ -66,7 +66,7 @@ public class ForkPluginGenerator implements Generator {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     final Pattern packageClassSplitPattern = Pattern.compile("(.*)\\.(\\w+)", Pattern.MULTILINE);

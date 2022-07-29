@@ -23,6 +23,10 @@ Using JHipster Domain Language as **Ubiquitous Language** for [Data on the Insid
 - **API-First specs like AsyncAPI and OpenAPI:** to describe Inter Process Communications (IPC) between bounded contexts/microservices.
 - **ZenWave Code Generator:** to generate (_a lot of_) infrastructure, functional and testing code from your models and APIs.
 
+ZenWave Code Generator is designed to be easily extensible and adaptable to your project or your organization needs and likes. You can always [fork an existing, standard or custom plugin](https://github.com/ZenWave360/zenwave-code-generator/#forking-an-standard-or-custom-plugin).
+
+Please refer to [**ZenWave Code Generator**](https://github.com/ZenWave360/zenwave-code-generator/) in GitHub for install instructions.
+
 **Note:** Official plugins are designed to generate functional code and tests on top of existing projects. Creating a base project is out of scope, but you can always go to [start.spring.io](http://start.spring.io) or [start.jhipster.tech](https://start.jhipster.tech/), in case your company doesn't already have a project starter or archetype.
 
 # Table of Contents
