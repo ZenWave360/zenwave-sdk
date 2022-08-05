@@ -72,7 +72,10 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
             new Object[] { "src/main/java", "core/implementation/mappers/EntityMapper.java", "core/implementation/mappers/{{entity.className}}Mapper.java", JAVA },
             new Object[] { "src/main/java", "adapters/web/{{webFlavor}}/EntityResource.java", "adapters/web/{{entity.className}}Resource.java", JAVA, skipEntityResource },
             new Object[] { "src/main/java", "core/outbound/search/EntityDocument.java", "core/outbound/search/{{entity.className}}{{searchDTOSuffix}}.java", JAVA, skipElasticSearch },
-            new Object[] { "src/main/java", "core/outbound/search/EntitySearchRepository.java", "core/outbound/search/{{entity.className}}SearchRepository.java", JAVA, skipElasticSearch }
+            new Object[] { "src/main/java", "core/outbound/search/EntitySearchRepository.java", "core/outbound/search/{{entity.className}}SearchRepository.java", JAVA, skipElasticSearch },
+
+            new Object[] { "src/test/java", "core/outbound/{{persistence}}/{{style}}/InMemoryMongoRepository.java", "core/outbound/{{persistence}}/inmemory/InMemoryMongoRepository.java", JAVA },
+            new Object[] { "src/test/java", "core/outbound/{{persistence}}/{{style}}/EntityRepositoryInMemory.java", "core/outbound/{{persistence}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA }
     );
 
     List<Object[]> templatesByService = List.of(

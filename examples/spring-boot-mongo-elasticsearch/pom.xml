@@ -14,7 +14,7 @@
 	<name>${pom.groupId}:${pom.artifactId}</name>
 	<description>ZenWave360 Example</description>
 	<properties>
-		<java.version>11</java.version>
+		<java.version>17</java.version>
 		<spring-boot.version>${pom.parent.version}</spring-boot.version>
 		<archunit-junit5.version>0.22.0</archunit-junit5.version>
 		<mapstruct.version>1.5.1.Final</mapstruct.version>
