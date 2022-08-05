@@ -13,7 +13,7 @@ import org.springframework.data.domain.Sort;
 public class {{entity.className}}{{criteriaDTOSuffix}} extends PageRequest implements Serializable, Pageable {
 
     public {{entity.className}}{{criteriaDTOSuffix}}() {
-        this(0, 10, null);
+        this(0, 10, Sort.unsorted());
     }
 
     public {{entity.className}}{{criteriaDTOSuffix}}(int page, int size, Sort sort) {

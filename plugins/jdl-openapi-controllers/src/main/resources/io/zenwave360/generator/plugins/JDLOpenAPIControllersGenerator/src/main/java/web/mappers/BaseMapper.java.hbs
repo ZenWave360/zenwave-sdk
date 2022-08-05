@@ -1,0 +1,19 @@
+package {{controllersPackage}}.mappers;
+
+import org.mapstruct.Mapper;
+
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.TimeZone;
+
+@Mapper(componentModel = "spring")
+public abstract class BaseMapper {
+
+    public Instant asInstant(OffsetDateTime date) {
+        return date.toInstant();
+    }
+
+    public OffsetDateTime asOffsetDateTime(Instant date) {
+        return OffsetDateTime.ofInstant(date, TimeZone.getTimeZone("UTC").toZoneId());
+    }
+}

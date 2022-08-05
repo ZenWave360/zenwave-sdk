@@ -66,6 +66,7 @@ public class JDLOpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     protected String templatesFolder = "io/zenwave360/generator/plugins/JDLOpenAPIControllersGenerator/";
 
     List<Object[]> templates = List.of(
+            new Object[] { "src/main/java", "web/mappers/BaseMapper.java", "mappers/BaseMapper.java", JAVA },
             new Object[] { "src/main/java", "web/mappers/ServiceDTOsMapper.java", "mappers/{{service.name}}DTOsMapper.java", JAVA },
             new Object[] { "src/main/java", "web/{{webFlavor}}/ServiceApiController.java", "{{service.name}}ApiController.java", JAVA }
     );

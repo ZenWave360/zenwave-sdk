@@ -15,12 +15,12 @@ public interface {{service.name}} {
     // {{entity.name}}
 
     /**
-     * Save a {{entity.instanceName}}.
+     * Creates a {{entity.instanceName}}.
      *
      * @param {{entity.instanceName}} the entity to save.
      * @return the persisted entity.
      */
-    {{entity.className}} save{{entity.className}}({{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}});
+    {{entity.className}} create{{entity.className}}({{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}});
 
     /**
      * Updates a {{entity.instanceName}}.
@@ -28,7 +28,7 @@ public interface {{service.name}} {
      * @param {{entity.instanceName}} the entity to update.
      * @return the persisted entity.
      */
-    Optional<{{entity.className}}> update{{entity.className}}({{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}});
+    Optional<{{entity.className}}> update{{entity.className}}(String id, {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}});
 
     /**
      * Get all the {{entity.classNamePlural}}.
@@ -45,7 +45,7 @@ public interface {{service.name}} {
      * @param id the id of the entity.
      * @return the entity.
      */
-    Optional<{{entity.className}}> findOne{{entity.className}}(String id);
+    Optional<{{entity.className}}> get{{entity.className}}(String id);
 
     /**
      * Delete the "id" {{entity.instanceName}}.

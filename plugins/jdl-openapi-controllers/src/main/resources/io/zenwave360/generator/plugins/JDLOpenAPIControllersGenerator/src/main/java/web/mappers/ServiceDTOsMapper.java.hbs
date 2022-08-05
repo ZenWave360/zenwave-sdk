@@ -8,7 +8,7 @@ import org.mapstruct.MappingTarget;
 import java.util.List;
 import org.springframework.data.domain.Page;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = BaseMapper.class)
 public interface {{service.name}}DTOsMapper {
 
 {{#each dtoWithEntityMap as |dto|}}

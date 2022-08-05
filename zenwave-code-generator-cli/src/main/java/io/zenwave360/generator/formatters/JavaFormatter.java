@@ -1,9 +1,9 @@
 package io.zenwave360.generator.formatters;
 
 import com.google.googlejavaformat.java.FormatterException;
+import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.templating.OutputFormatType;
 import io.zenwave360.generator.templating.TemplateOutput;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,12 +14,19 @@ public class JavaFormatter implements Formatter {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
+    @DocumentedOption(description = "Skip java sources output formatting")
+    public boolean skipFormatting = false;
+
     public List<TemplateOutput> format(List<TemplateOutput> templateOutputList) {
         return templateOutputList.stream().map(t -> format(t)).collect(Collectors.toList());
     }
 
 
     public TemplateOutput format(TemplateOutput templateOutput) {
+        if(skipFormatting) {
+            log.debug("Skipping java formatting");
+            return templateOutput;
+        }
         if(templateOutput.getMimeType() != null && templateOutput.getMimeType().equals(OutputFormatType.JAVA.toString())) {
             try {
                 String formattedSource = new com.google.googlejavaformat.java.Formatter().formatSourceAndFixImports(templateOutput.getContent());

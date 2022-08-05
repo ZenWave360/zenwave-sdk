@@ -47,18 +47,18 @@ public class {{service.name}}Impl implements {{service.name}} {
     // {{entity.name}}
 
     @Override
-    public {{entity.className}} save{{entity.className}}({{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
+    public {{entity.className}} create{{entity.className}}({{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
         log.debug("Request to save {{entity.className}}{{inputDTOSuffix}} : {}", {{entity.instanceName}}{{inputDTOSuffix}});
         var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), {{entity.instanceName}}{{inputDTOSuffix}});
         return {{entity.instanceName}}Repository.save({{entity.instanceName}});
     }
 
     @Override
-    public Optional<{{entity.className}}> update{{entity.className}}({{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
+    public Optional<{{entity.className}}> update{{entity.className}}(String id, {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
         log.debug("Request to update {{entity.className}} : {}", {{entity.instanceName}}{{inputDTOSuffix}});
 
         return {{entity.instanceName}}Repository
-                .findById({{entity.instanceName}}{{inputDTOSuffix}}.getId())
+                .findById(id)
                 .map(existing{{entity.className}} -> {
                     return {{entity.instanceName}}Mapper.update(existing{{entity.className}}, {{entity.instanceName}}{{inputDTOSuffix}});
                 })
@@ -73,7 +73,7 @@ public class {{service.name}}Impl implements {{service.name}} {
     }
 
     @Override
-    public Optional<{{entity.className}}> findOne{{entity.className}}(String id) {
+    public Optional<{{entity.className}}> get{{entity.className}}(String id) {
         log.debug("Request to get {{entity.className}} : {}", id);
         return {{entity.instanceName}}Repository.findById(id);
     }

@@ -2,27 +2,14 @@ package {{basePackage}}.core.inbound.dtos;
 
 import {{basePackage}}.core.domain.*;
 import java.io.Serializable;
+import java.math.*;
+import java.time.*;
 import javax.validation.constraints.*;
 
 /**
  *
  */
 public class {{entity.className}}{{inputDTOSuffix}} implements Serializable {
-
-    private String id;
-
-    public String getId() {
-        return id;
-    }
-
-    public {{entity.className}}{{inputDTOSuffix}} withId(String id) {
-        this.id = id;
-        return this;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
 {{#each entity.fields as |field|}}
     {{#each field.validations as |validation|}}

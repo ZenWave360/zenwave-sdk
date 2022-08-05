@@ -48,8 +48,8 @@ public class {{entity.className}}Resource {
      */
     @PostMapping("/{{entity.kebabCasePlural}}")
     public ResponseEntity<{{entity.className}}> create{{entity.className}}(@Valid @RequestBody {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}) throws URISyntaxException {
-        log.debug("REST request to save {{entity.className}}{{inputDTOSuffix}} : {}", {{entity.instanceName}});
-        {{entity.className}} result = {{serviceInstance}}.save{{entity.className}}({{entity.instanceName}});
+        log.debug("REST request to create {{entity.className}}{{inputDTOSuffix}} : {}", {{entity.instanceName}});
+        {{entity.className}} result = {{serviceInstance}}.create{{entity.className}}({{entity.instanceName}});
         return ResponseEntity
                 .created(new URI("/api/{{entity.kebabCase}}s/" + result.getId()))
                 .body(result);
@@ -69,7 +69,7 @@ public class {{entity.className}}Resource {
     public ResponseEntity<{{entity.className}}> update{{entity.className}}(@PathVariable(value = "id", required = false) final String id, @Valid @RequestBody {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}})
             throws URISyntaxException {
         log.debug("REST request to update {{entity.className}} : {}, {}", id, {{entity.instanceName}});
-        Optional<{{entity.className}}> result = {{serviceInstance}}.update{{entity.className}}({{entity.instanceName}});
+        Optional<{{entity.className}}> result = {{serviceInstance}}.update{{entity.className}}(id, {{entity.instanceName}});
         return wrapOrNotFound(result);
     }
 
@@ -93,7 +93,7 @@ public class {{entity.className}}Resource {
     @GetMapping("/{{entity.kebabCasePlural}}/{id}")
     public ResponseEntity<{{entity.className}}> get{{entity.className}}(@PathVariable String id) {
         log.debug("REST request to get {{entity.className}} : {}", id);
-        Optional<{{entity.className}}> {{entity.instanceName}} = {{serviceInstance}}.findOne{{entity.className}}(id);
+        Optional<{{entity.className}}> {{entity.instanceName}} = {{serviceInstance}}.get{{entity.className}}(id);
         return wrapOrNotFound({{entity.instanceName}});
     }
 

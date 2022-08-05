@@ -12,6 +12,8 @@ public class {{entity.className}}{{searchDTOSuffix}} implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private String id;
+
 {{#each entity.fields as |field|}}
     {{~#unless field.isEntity}}
     {{~#assign "fieldType"}}{{#if field.isEnum}}String{{else}}{{field.type}}{{/if}}{{/assign~}}
@@ -28,6 +30,17 @@ public class {{entity.className}}{{searchDTOSuffix}} implements Serializable {
     }
     {{~/unless}}
 {{/each}}
+
+    public String getId() {
+        return id;
+    }
+    public {{entity.className}}{{searchDTOSuffix}} withId(String id) {
+        this.id = id;
+        return this;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
 
 {{#each entity.fields as |field|}}
     {{#unless field.isEntity}}

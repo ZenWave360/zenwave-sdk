@@ -290,9 +290,9 @@ components:
       - x-business-entity-paginated: "PaymentDetails"
       - properties:
           content:
+            type: "array"
             items:
               $ref: "#/components/schemas/PaymentDetails"
-            type: "array"
     Customer:
       type: "object"
       x-business-entity: "Customer"
@@ -331,9 +331,9 @@ components:
       - x-business-entity-paginated: "Customer"
       - properties:
           content:
+            type: "array"
             items:
               $ref: "#/components/schemas/Customer"
-            type: "array"
     OrderedItem:
       type: "object"
       x-business-entity: "OrderedItem"
@@ -360,9 +360,9 @@ components:
       - x-business-entity-paginated: "OrderedItem"
       - properties:
           content:
+            type: "array"
             items:
               $ref: "#/components/schemas/OrderedItem"
-            type: "array"
     CustomerOrder:
       type: "object"
       x-business-entity: "CustomerOrder"
@@ -388,9 +388,9 @@ components:
       - x-business-entity-paginated: "CustomerOrder"
       - properties:
           content:
+            type: "array"
             items:
               $ref: "#/components/schemas/CustomerOrder"
-            type: "array"
     ShippingDetails:
       type: "object"
       x-business-entity: "ShippingDetails"
@@ -405,9 +405,9 @@ components:
       - x-business-entity-paginated: "ShippingDetails"
       - properties:
           content:
+            type: "array"
             items:
               $ref: "#/components/schemas/ShippingDetails"
-            type: "array"
     OrderStatus:
       type: "string"
       enum:
