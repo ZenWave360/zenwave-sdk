@@ -2,8 +2,8 @@
 
 For every service owning data is a good idea to:
 
-- Publish read access owned @RootAggregates as request-response services like a REST API, gRPC, GraphQL...
 - Publish events of @RootAggregates changes (Create, Update, Delete) to a shared event broker as a publish-subscribe services.
+- Publish read access owned @RootAggregates as request-response services like a REST API, gRPC, GraphQL...
 
 This is commonly enough for other services to implement either direct synchronous access or create CQRS views.
 
