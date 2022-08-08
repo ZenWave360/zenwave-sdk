@@ -30,11 +30,32 @@ public class InMemoryMongoRepository<T> implements MongoRepository<T, String> {
 
     private final PrimaryKeyGenerator<String> primaryKeyGenerator = () -> UUID.randomUUID().toString();
 
+
+    public Map<String, T> getEntities() {
+        return entities;
+    }
+
+    public boolean containsKey(String key) {
+        return entities.containsKey(key);
+    }
+
+    public boolean containsEntity(T entity) {
+        return entities.containsValue(entity);
+    }
+
     protected <F> F readField(Object target, String fieldName) {
         try {
-            return (F) FieldUtils.readField(target, fieldName);
+          return (F) FieldUtils.readField(target, fieldName, true);
         } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException("Field not found or not accessible: " + fieldName);
+          throw new IllegalArgumentException("Field not found or not accessible: " + fieldName);
+        }
+    }
+
+    protected void writeField(Object target, String fieldName, Object value) {
+        try {
+          FieldUtils.writeField(target, fieldName, value, true);
+        } catch (IllegalAccessException e) {
+          throw new IllegalArgumentException("Field not found or not accessible: " + fieldName);
         }
     }
 
@@ -70,6 +91,7 @@ public class InMemoryMongoRepository<T> implements MongoRepository<T, String> {
             throw new IllegalArgumentException("entity must not be null");
         }
         String id = firstNonNull(readField(entity, "id"), primaryKeyGenerator.next());
+        writeField(entity, "id", id);
         entities.put(id, entity);
         return entity;
     }
