@@ -90,16 +90,22 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
         {{requestEntityClassName}} {{requestEntityInstance}} = mapper.as{{requestEntityClassName}}(reqBody);
     {{/if~}}
     {{~#if responseEntity~}}
-        Optional<{{{responseEntityClassName}}}> {{responseEntityInstance}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}({{requestEntityInstance}});
-        if ({{responseEntityInstance}}.isPresent()) {
+        {{~#if (eq operation.x--response.x--statusCode "201") ~}}
+            {{{responseEntityClassName}}} {{responseEntityInstance}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}({{requestEntityInstance}});
             {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{responseEntityInstance}});
             return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        {{~else~}}
+            Optional<{{{responseEntityClassName}}}> {{responseEntityInstance}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}({{requestEntityInstance}});
+            if ({{responseEntityInstance}}.isPresent()) {
+                {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{responseEntityInstance}}.get());
+                return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        {{~/if~}}
     {{else if responseEntityPaginated~}}
         {{{responseEntityClassName}}} {{responseEntityInstance}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}({{requestEntityInstance}});
-        {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{responseEntityInstance}}.get());
+        {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{responseEntityInstance}});
         return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
     {{else}}
         return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).build();

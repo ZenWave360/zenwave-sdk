@@ -12,6 +12,11 @@ import java.util.stream.Collectors;
 
 public class CustomHandlebarsHelpers {
 
+    public static boolean eq(String first, Options options) throws IOException {
+        String second = options.param(0);
+        return StringUtils.equals(first, second);
+    }
+
     public static Object size(List list, Options options) throws IOException {
         return list.size();
     }

@@ -199,6 +199,10 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
                 property.put("description", field.get("comment"));
             }
 
+            if(field.get("isArray") == Boolean.TRUE) {
+                property = Maps.of("type", "array", "items", property);
+            }
+
             properties.put((String) field.get("name"), property);
         }
 

@@ -375,9 +375,13 @@ components:
         shippingDetails:
           $ref: "#/components/schemas/ShippingDetails"
         orderedItems:
-          $ref: "#/components/schemas/OrderedItem"
+          type: "array"
+          items:
+            $ref: "#/components/schemas/OrderedItem"
         paymentDetails:
-          $ref: "#/components/schemas/PaymentDetails"
+          type: "array"
+          items:
+            $ref: "#/components/schemas/PaymentDetails"
         status:
           $ref: "#/components/schemas/OrderStatus"
         customer:

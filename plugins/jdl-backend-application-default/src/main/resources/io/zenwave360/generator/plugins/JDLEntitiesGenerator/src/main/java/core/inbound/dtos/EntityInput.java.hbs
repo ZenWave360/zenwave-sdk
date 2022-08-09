@@ -4,6 +4,7 @@ import {{basePackage}}.core.domain.*;
 import java.io.Serializable;
 import java.math.*;
 import java.time.*;
+import java.util.*;
 import javax.validation.constraints.*;
 
 /**
@@ -16,12 +17,18 @@ public class {{entity.className}}{{inputDTOSuffix}} implements Serializable {
     // @{{validation.name}}("{{validation.value}}")
     {{/each}}
     {{#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix}}{{/if}}{{/assign}}
-    private {{field.type}}{{typeSuffix}} {{field.name}};
+    private {{{fieldType field suffix=typeSuffix}}} {{field.name}};
 {{/each}}
 
 {{#each entity.fields as |field|}}
     {{#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix}}{{/if}}{{/assign}}
-    public {{entity.className}}{{inputDTOSuffix}} with{{capitalize field.name}}({{field.type}}{{typeSuffix}} {{field.name}}) {
+    {{~#if field.isArray}}
+        public {{entity.className}} add{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
+        this.{{field.name}}.add({{field.name}});
+        return this;
+        }
+    {{~/if}}
+    public {{entity.className}}{{inputDTOSuffix}} with{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
         this.{{field.name}} = {{field.name}};
         return this;
     }
@@ -30,11 +37,11 @@ public class {{entity.className}}{{inputDTOSuffix}} implements Serializable {
 {{#each entity.fields as |field|}}
 // is entity {{field.isEntity}}
     {{#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix}}{{/if}}{{/assign}}
-    public {{field.type}}{{typeSuffix}} get{{capitalize field.name}}() {
+    public {{{fieldType field suffix=typeSuffix}}} get{{capitalize field.name}}() {
         return {{field.name}};
     }
 
-    public void set{{capitalize field.name}}({{field.type}}{{typeSuffix}} {{field.name}}) {
+    public void set{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
         this.{{field.name}} = {{field.name}};
     }
 {{/each}}

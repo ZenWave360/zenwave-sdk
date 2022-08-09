@@ -8,3 +8,13 @@ asPackageFolder {{asPackageFolder "io.zenwave360.generator.templating"}}
 {{#joinWithTemplate theList}}
    Prefix{{.}}Suffix
 {{/joinWithTemplate}}
+
+{{#if (eq var "assigned value")}}
+    Inside if 1
+{{/if}}
+
+{{#if (eq var "NOT assigned value")}}
+    Inside if 2
+{{else}}
+    Inside else 2
+{{/if}}

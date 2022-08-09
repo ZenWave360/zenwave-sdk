@@ -26,5 +26,7 @@ public class HandlebarsEngineTest {
         Assertions.assertTrue(templateOutput.getContent().contains("asCapitalizedJavaProperty TratraTratra"));
         Assertions.assertTrue(templateOutput.getContent().contains("asPackageFolder io/zenwave360/generator/templating"));
         Assertions.assertTrue(templateOutput.getContent().contains("Prefix2Suffix"));
+        Assertions.assertTrue(templateOutput.getContent().contains("Inside if 1"));
+        Assertions.assertTrue(templateOutput.getContent().contains("Inside else 2"));
     }
 }

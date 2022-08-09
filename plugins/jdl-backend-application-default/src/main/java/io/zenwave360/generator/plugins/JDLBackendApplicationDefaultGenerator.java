@@ -142,6 +142,18 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
         return templateOutputList;
     }
 
+    {
+        handlebarsEngine.getHandlebars().registerHelper("fieldType", (context, options) -> {
+            Map field = (Map) context;
+            String type = (String) field.get("type");
+            String prefix = (String) options.hash.getOrDefault("prefix", "");
+            String suffix = (String) options.hash.getOrDefault("suffix", "");
+            if(field.get("isArray") == Boolean.TRUE) {
+                return String.format("List<%s%s%s>", prefix, type, suffix);
+            }
+            return String.format("%s%s%s", prefix, type, suffix);
+        });
+    }
     protected boolean isGenerateEntity(String entity) {
         return entities.isEmpty() || entities.contains(entity);
     }
