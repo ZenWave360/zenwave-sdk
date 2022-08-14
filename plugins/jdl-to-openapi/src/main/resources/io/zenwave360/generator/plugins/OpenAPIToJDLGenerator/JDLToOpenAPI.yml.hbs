@@ -12,18 +12,16 @@ tags:
 
 paths:
 {{~#each jdlModel.entities as |entity|}}
-  {{~#unless entity.options.embedded}}
+  {{~#unless (skipOperations entity)}}
   /{{entity.kebabCasePlural}}:
     get:
       summary: Find {{entity.classNamePlural}}
       operationId: find{{entity.classNamePlural}}
       tags: [{{asTagName entity.options.service}}]
       parameters:
-        - in: query
-          name: pageable
-          required: true
-          schema:
-            $ref: "#/components/schemas/Pageable"
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
 {{~#if entity.options.searchCriteria}}
       requestBody:
         content:
@@ -118,31 +116,28 @@ paths:
           type: integer
         totalPages:
           type: integer
-    Pageable:
-      type: object
-      properties:
-        sort:
-          type: array
-          items:
-            type: object
-            properties:
-              direction:
-                type: string
-                enum: [ASC, DESC]
-              property:
-                type: string
-          properties:
-            empty:
-              type: boolean
-            sorted:
-              type: boolean
-            unsorted:
-              type: boolean
-        offset:
-          type: integer
-        pageNumber:
-          type: integer
-          minimum: 0
-        pageSize:
-          type: integer
-          minimum: 0
+
+  parameters:
+    page:
+      name: page
+      in: query
+      description: The number of results page
+      schema:
+        type: integer
+        format: int32
+        default: 0
+    limit:
+      name: limit
+      in: query
+      description: The number of results in a single page
+      schema:
+        type: integer
+        format: int32
+        default: 20
+    sort:
+      name: sort
+      in: query
+      description: The number of results page
+      schema:
+        type: array
+        format: string

@@ -177,7 +177,7 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
             if(criteria == Boolean.TRUE) {
                 return String.format("%s%s", entity.get("className"), criteriaDTOSuffix);
             }
-            return null;
+            return "Pageable";
         });
 
         handlebarsEngine.getHandlebars().registerHelper("skipEntityRepository", (context, options) -> {

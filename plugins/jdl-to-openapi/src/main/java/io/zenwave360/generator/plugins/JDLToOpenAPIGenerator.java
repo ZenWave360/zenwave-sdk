@@ -14,10 +14,12 @@ import io.zenwave360.generator.utils.JSONPath;
 import io.zenwave360.generator.utils.Maps;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
 
@@ -28,15 +30,18 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "Entities to generate code for")
     public List<String> entities = new ArrayList<>();
 
+    @DocumentedOption(description = "Skip generating operations for entities annotated with these")
+    public List<String> skipForAnnotations = List.of("vo", "embedded", "skip");
+
     @DocumentedOption(description = "Target file")
     public String targetFile = "openapi.yml";
     @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
     public String jdlBusinessEntityProperty = "x-business-entity";
 
-    @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas for paginated lists (default: x-business-entity-paginated)")
+    @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas for paginated lists")
     public String jdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
 
-    @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. User '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
+    @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. Examples: '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
     public List<String> paginatedDtoItemsJsonPath = List.of("$.items", "$.properties.content.items");
 
     public JDLToOpenAPIGenerator withSourceProperty(String sourceProperty) {
@@ -52,6 +57,19 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
         return (Map) contextModel.get(sourceProperty);
     }
 
+    protected boolean isGenerateSchemaEntity(Map<String, Object> entity) {
+        String entityName = (String) entity.get("name");
+        return entities.isEmpty() || entities.contains(entityName);
+    }
+
+    {
+        handlebarsEngine.getHandlebars().registerHelper("skipOperations", (context, options) -> {
+            Map entity = (Map) context;
+            String annotationsFilter = skipForAnnotations.stream().map(a -> "@." + a).collect(Collectors.joining(" || "));
+            return skipForAnnotations.isEmpty() || !((List) JSONPath.get(entity, "$.options[?(" + annotationsFilter + ")]")).isEmpty();
+        });
+    }
+
     @Override
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {
         Map<String, Object> jdlModel = getJDLModel(contextModel);
@@ -65,6 +83,9 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
 
         List<Map<String, Object>> entities = (List) JSONPath.get(jdlModel, "$.entities[*]");
         for (Map<String, Object> entity : entities) {
+            if(!isGenerateSchemaEntity(entity)) {
+                continue;
+            }
             String entityName = (String) entity.get("name");
             Map<String, Object> openAPISchema = convertToOpenAPI(entity);
             schemas.put(entityName, openAPISchema);
@@ -84,6 +105,9 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
 
         List<Map<String, Object>> enums = (List) JSONPath.get(jdlModel, "$.enums.enums[*]");
         for (Map<String, Object> enumValue : enums) {
+            if(!isGenerateSchemaEntity(enumValue)) {
+                continue;
+            }
             Map<String, Object> enumSchema = new LinkedHashMap<>();
             enumSchema.put("type", "string");
             if(enumValue.get("comment") != null) {

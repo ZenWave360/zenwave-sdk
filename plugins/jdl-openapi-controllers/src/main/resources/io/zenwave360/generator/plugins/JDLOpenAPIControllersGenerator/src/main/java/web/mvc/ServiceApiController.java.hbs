@@ -40,10 +40,12 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
     @Autowired
     private {{service.name}}DTOsMapper mapper;
 
+{{#if jdl.isDummy}}/*{{/if}}
 {{#each entitiesServices as |service|}}
     @Autowired
     private {{service}} {{uncapFirst service}};
 {{/each}}
+{{#if jdl.isDummy}}*/{{/if}}
 
     @Override
     public Optional<NativeWebRequest> getRequest() {
@@ -80,7 +82,7 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
         {{/if}}
     {{/if}}
     @Override
-    public ResponseEntity<{{orVoid responseDTOClassName}}> {{operation.operationId}}({{asMethodParameters operation}}) {
+    public ResponseEntity<{{orVoid responseDTOClassName}}> {{operation.operationId}}({{{asMethodParameters operation}}}) {
     {{!--
     /* requestBodySchema: {{{requestBodySchema}}} */
     /* requestEntity: {{{requestEntity}}} */

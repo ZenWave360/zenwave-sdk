@@ -20,7 +20,7 @@ public interface {{service.name}}DTOsMapper {
     {{~#assign "entityClassName"}}{{entity.className}}{{entityDTOSuffix}}{{/assign}}
     {{~#assign "entityInstance"}}{{entity.instanceName}}{{entityDTOSuffix}}{{/assign}}
     {{~#assign "entityInputClassName"}}{{entity.className}}{{inputDTOSuffix}}{{/assign}}
-    {{~#assign "entityCriteriaClassName"}}{{entity.className}}{{criteriaDTOSuffix}}{{/assign}}
+    {{~#assign "entityCriteriaClassName"}}{{criteriaClassName entity}}{{/assign}}
 
     {{dtoClassName}} as{{dtoName}}({{entity.className}} {{entity.instanceName}});
     {{entityClassName}} as{{entityClassName}}({{dtoClassName}} dto);

@@ -4,6 +4,16 @@ Generates a full backend application using a flexible hexagonal architecture
 
 This is the long description
 
+## JDL Extensions/Customizations
+
+| **Annotation**                  | **@Persistence** | **Repository** | **Id** |
+|:--------------------------------|:-----------------|:---------------|:-------|
+| **entity**                      | yes              |                | yes    |
+| **@aggregate**                  | yes              | yes            | yes    |
+| **@embedded**                   | yes              |                |        |
+| **@vo**                         |                  |                |        |
+| **@searchCriteria(entityName)** |                  |                |        |
+
 ## Options
 
 | **Option**          | **Description**                                                            | **Type**         | **Default**             | **Values**           |

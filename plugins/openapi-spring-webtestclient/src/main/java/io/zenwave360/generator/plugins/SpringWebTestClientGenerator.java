@@ -7,6 +7,7 @@ import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.TemplateEngine;
 import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
+import io.zenwave360.generator.utils.JSONPath;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;

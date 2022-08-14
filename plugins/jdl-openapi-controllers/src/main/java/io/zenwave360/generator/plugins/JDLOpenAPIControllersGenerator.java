@@ -191,6 +191,18 @@ public class JDLOpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
             return "default".equals(context)? "200" : context;
         });
 
+        handlebarsEngine.getHandlebars().registerHelper("criteriaClassName", (context, options) -> {
+            Map entity = (Map) context;
+            Object criteria = JSONPath.get(entity, "$.options.searchCriteria");
+            if(criteria instanceof String) {
+                return criteria;
+            }
+            if(criteria == Boolean.TRUE) {
+                return String.format("%s%s", entity.get("className"), criteriaDTOSuffix);
+            }
+            return "Pageable";
+        });
+
         handlebarsEngine.getHandlebars().registerHelper("asMethodParameters", (context, options) -> {
             if(context instanceof Map) {
                 Map operation = (Map) context;
@@ -236,6 +248,9 @@ public class JDLOpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         }
         if("boolean".equals(type)) {
             return "Boolean";
+        }
+        if("array".equals(type)) {
+            return "List<String>";
         }
 
         return "String";

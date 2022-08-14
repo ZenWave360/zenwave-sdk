@@ -36,8 +36,7 @@ public interface {{service.name}} {
      * @param criteria the criteria with pagination information.
      * @return the list of entities.
      */
-    {{~#assign "criteria"}}{{#if entity.options.searchCriteria}}{{entity.className}}{{criteriaDTOSuffix}}{{else}}Pageable{{/if}}{{/assign}}
-    Page<{{entity.className}}> find{{entity.classNamePlural}}({{criteria}} criteria);
+    Page<{{entity.className}}> find{{entity.classNamePlural}}({{criteriaClassName entity}} criteria);
 
     /**
      * Get the "id" {{entity.instanceName}}.

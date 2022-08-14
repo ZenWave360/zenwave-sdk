@@ -79,8 +79,7 @@ public class {{entity.className}}Resource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of {{entity.instanceName}}s in body.
      */
     @GetMapping("/{{entity.kebabCasePlural}}")
-    {{~#assign "criteria"}}{{#if entity.options.searchCriteria}}{{entity.className}}{{criteriaDTOSuffix}}{{else}}Pageable{{/if}}{{/assign}}
-    public Page<{{entity.className}}> find{{entity.classNamePlural}}({{criteria}} criteria) {
+    public Page<{{entity.className}}> find{{entity.classNamePlural}}({{criteriaClassName entity}} criteria) {
         log.debug("REST request to get all {{entity.classNamePlural}}s");
         return {{serviceInstance}}.find{{entity.classNamePlural}}(criteria);
     }

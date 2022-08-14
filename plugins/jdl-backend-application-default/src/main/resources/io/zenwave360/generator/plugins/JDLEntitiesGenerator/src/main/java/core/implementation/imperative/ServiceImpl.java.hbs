@@ -68,8 +68,7 @@ public {{service.name}}Impl({{#joinWithTemplate service.entities ", "}}{{classNa
     }
 
     @Override
-    {{~#assign "criteria"}}{{#if entity.options.searchCriteria}}{{entity.className}}{{criteriaDTOSuffix}}{{else}}Pageable{{/if}}{{/assign}}
-    public Page<{{entity.className}}> find{{entity.classNamePlural}}({{criteria}} criteria) {
+    public Page<{{entity.className}}> find{{entity.classNamePlural}}({{criteriaClassName entity}} criteria) {
         log.debug("Request to find {{entity.classNamePlural}}: {}", criteria);
         return {{entity.instanceName}}Repository.findAll(criteria);
     }

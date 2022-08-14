@@ -10,77 +10,20 @@ tags:
   - name: "CustomerOrder"
 
 paths:
-  /payment-details:
-    get:
-      summary: Find PaymentDetails
-      operationId: findPaymentDetails
-      tags: [CustomerOrder]
-      responses:
-        "200":
-          description: PaymentDetails
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaymentDetailsPaginated"
-    post:
-      summary: Create PaymentDetails
-      operationId: createPaymentDetails
-      tags: [CustomerOrder]
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PaymentDetails"
-      responses:
-        "201":
-          description: PaymentDetails
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaymentDetails"
-
-  /payment-details/{id}:
-    parameters:
-    - name: id
-      in: path
-      description: PaymentDetails id
-      required: true
-      schema:
-        type: string
-    get:
-      summary: Get PaymentDetails by id
-      operationId: getPaymentDetails
-      tags: [CustomerOrder]
-      responses:
-        "200":
-          description: PaymentDetails
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaymentDetails"
-    put:
-      summary: Update PaymentDetails
-      operationId: updatePaymentDetails
-      tags: [CustomerOrder]
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PaymentDetails"
-      responses:
-        "200":
-          description: PaymentDetails
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaymentDetails"
-  
-
   /customers:
     get:
       summary: Find Customers
       operationId: findCustomers
       tags: [Customer]
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Customer"
       responses:
         "200":
           description: Customers
@@ -142,12 +85,20 @@ paths:
                 $ref: "#/components/schemas/Customer"
   
 
-
   /customer-orders:
     get:
       summary: Find CustomerOrders
       operationId: findCustomerOrders
       tags: [CustomerOrder]
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerOrder"
       responses:
         "200":
           description: CustomerOrders
@@ -209,90 +160,11 @@ paths:
                 $ref: "#/components/schemas/CustomerOrder"
   
 
-  /shipping-details:
-    get:
-      summary: Find ShippingDetails
-      operationId: findShippingDetails
-      tags: [CustomerOrder]
-      responses:
-        "200":
-          description: ShippingDetails
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ShippingDetailsPaginated"
-    post:
-      summary: Create ShippingDetails
-      operationId: createShippingDetails
-      tags: [CustomerOrder]
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ShippingDetails"
-      responses:
-        "201":
-          description: ShippingDetails
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ShippingDetails"
 
-  /shipping-details/{id}:
-    parameters:
-    - name: id
-      in: path
-      description: ShippingDetails id
-      required: true
-      schema:
-        type: string
-    get:
-      summary: Get ShippingDetails by id
-      operationId: getShippingDetails
-      tags: [CustomerOrder]
-      responses:
-        "200":
-          description: ShippingDetails
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ShippingDetails"
-    put:
-      summary: Update ShippingDetails
-      operationId: updateShippingDetails
-      tags: [CustomerOrder]
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ShippingDetails"
-      responses:
-        "200":
-          description: ShippingDetails
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ShippingDetails"
-  
+
+
 components:
   schemas:
-    PaymentDetails:
-      type: "object"
-      x-business-entity: "PaymentDetails"
-      properties:
-        id:
-          type: "string"
-        creditCardNumber:
-          type: "string"
-    PaymentDetailsPaginated:
-      allOf:
-      - $ref: "#/components/schemas/Page"
-      - x-business-entity-paginated: "PaymentDetails"
-      - properties:
-          content:
-            type: "array"
-            items:
-              $ref: "#/components/schemas/PaymentDetails"
     Customer:
       type: "object"
       x-business-entity: "Customer"
@@ -307,24 +179,24 @@ components:
           type: "string"
         firstName:
           type: "string"
-          minLength: "3"
-          maxLength: "250"
+          minLength: 3
+          maxLength: 250
         lastName:
           type: "string"
-          minLength: "3"
-          maxLength: "250"
+          minLength: 3
+          maxLength: 250
         password:
           type: "string"
-          minLength: "3"
-          maxLength: "250"
+          minLength: 3
+          maxLength: 250
         email:
           type: "string"
-          minLength: "3"
-          maxLength: "250"
+          minLength: 3
+          maxLength: 250
         username:
           type: "string"
-          minLength: "3"
-          maxLength: "250"
+          minLength: 3
+          maxLength: 250
     CustomerPaginated:
       allOf:
       - $ref: "#/components/schemas/Page"
@@ -334,35 +206,6 @@ components:
             type: "array"
             items:
               $ref: "#/components/schemas/Customer"
-    OrderedItem:
-      type: "object"
-      x-business-entity: "OrderedItem"
-      required:
-      - "name"
-      - "price"
-      properties:
-        catalogItemId:
-          type: "integer"
-          format: "int64"
-        name:
-          type: "string"
-          minLength: "3"
-          maxLength: "250"
-        quantity:
-          type: "integer"
-          format: "int32"
-        price:
-          type: "number"
-          format: "double"
-    OrderedItemPaginated:
-      allOf:
-      - $ref: "#/components/schemas/Page"
-      - x-business-entity-paginated: "OrderedItem"
-      - properties:
-          content:
-            type: "array"
-            items:
-              $ref: "#/components/schemas/OrderedItem"
     CustomerOrder:
       type: "object"
       x-business-entity: "CustomerOrder"
@@ -399,8 +242,6 @@ components:
       type: "object"
       x-business-entity: "ShippingDetails"
       properties:
-        id:
-          type: "string"
         address:
           type: "string"
     ShippingDetailsPaginated:
@@ -412,6 +253,73 @@ components:
             type: "array"
             items:
               $ref: "#/components/schemas/ShippingDetails"
+    CustomerOrderSearchCriteria:
+      type: "object"
+      x-business-entity: "CustomerOrderSearchCriteria"
+      properties:
+        id:
+          type: "string"
+        dateTo:
+          type: "string"
+          format: "date-time"
+        dateFrom:
+          type: "string"
+          format: "date-time"
+        status:
+          $ref: "#/components/schemas/OrderStatus"
+    CustomerOrderSearchCriteriaPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "CustomerOrderSearchCriteria"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/CustomerOrderSearchCriteria"
+    PaymentDetails:
+      type: "object"
+      x-business-entity: "PaymentDetails"
+      properties:
+        creditCardNumber:
+          type: "string"
+    PaymentDetailsPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "PaymentDetails"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/PaymentDetails"
+    OrderedItem:
+      type: "object"
+      x-business-entity: "OrderedItem"
+      required:
+      - "name"
+      - "price"
+      properties:
+        catalogItemId:
+          type: "integer"
+          format: "int64"
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 250
+        quantity:
+          type: "integer"
+          format: "int32"
+        price:
+          type: "number"
+          format: "double"
+    OrderedItemPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "OrderedItem"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/OrderedItem"
     OrderStatus:
       type: "string"
       enum:
@@ -443,3 +351,32 @@ components:
           type: integer
         totalPages:
           type: integer
+
+  parameters:
+    page:
+      name: page
+      in: query
+      required: true
+      description: The number of results page
+      schema:
+        type: integer
+        format: int32
+        default: 0
+    limit:
+      name: limit
+      in: query
+      required: true
+      description: The number of results in a single page
+      schema:
+        type: integer
+        format: int32
+        default: 20
+    sort:
+      name: sort
+      in: query
+      required: true
+      description: The number of results page
+      schema:
+        type: array
+        items:
+          type: string
