@@ -80,7 +80,7 @@ public class {{service.name}}Test  {
     }
 
     @Test
-    {{~#assign "criteria"}}{{#if entity.options.withSearchCriteria}}new {{entity.className}}{{criteriaDTOSuffix}}(){{else}}PageRequest.of(0, 10){{/if}}{{/assign}}
+    {{~#assign "criteria"}}{{#if entity.options.searchCriteria}}new {{entity.className}}{{criteriaDTOSuffix}}(){{else}}PageRequest.of(0, 10){{/if}}{{/assign}}
     void testFind{{entity.classNamePlural}}() {
         var criteria = {{criteria}};
         // TODO fill criteria

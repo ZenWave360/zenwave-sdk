@@ -9,7 +9,7 @@ entity Team {
     description String
 }
 
-@withSearchCriteria
+@searchCriteria
 entity Domain {
     name String required
     description String

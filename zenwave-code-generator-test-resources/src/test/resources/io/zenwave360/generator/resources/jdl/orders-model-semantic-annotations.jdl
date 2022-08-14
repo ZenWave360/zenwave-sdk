@@ -1,7 +1,7 @@
 /* Customers */
 @aggregate
 @search(elasticsearch)
-@searchCriteria
+@searchCriteria // self-defined criteria
 entity Customer {
 	username String required minlength(3) maxlength(250),
 	password String required minlength(3) maxlength(250),
@@ -12,10 +12,9 @@ entity Customer {
 
 
 /* Orders */
-enum OrderStatus { CONFIRMED, SHIPPED, DELIVERED }
 
 @aggregate
-@searchCriteria(CustomerOrderSearchCriteria)
+@searchCriteria(OrderSearchCriteria)
 entity CustomerOrder { // Order is a reserved word
 	date Instant,
 	status OrderStatus
@@ -25,8 +24,10 @@ entity CustomerOrder { // Order is a reserved word
 	shippingDetails ShippingDetails
 }
 
+enum OrderStatus { CONFIRMED, SHIPPED, DELIVERED }
+
 @skip
-entity CustomerOrderSearchCriteria {
+entity OrderSearchCriteria {
     status OrderStatus
     dateFrom Instant
     dateTo Instant

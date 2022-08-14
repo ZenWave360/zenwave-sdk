@@ -11,10 +11,18 @@ entity Customer {
 /* Orders */
 enum OrderStatus { CONFIRMED, SHIPPED, DELIVERED }
 
+@searchCriteria(OrderSearchCriteria)
 entity CustomerOrder { // Order is a reserved word
 	date Instant,
 	status OrderStatus
 	orderedItemsArray OrderedItem[]
+}
+
+@skip
+entity OrderSearchCriteria {
+    status OrderStatus
+    dateFrom Instant
+    dateTo Instant
 }
 
 @embedded

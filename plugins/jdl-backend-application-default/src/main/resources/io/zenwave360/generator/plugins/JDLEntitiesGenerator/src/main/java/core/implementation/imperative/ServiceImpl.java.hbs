@@ -26,7 +26,9 @@ public class {{service.name}}Impl implements {{service.name}} {
 
 {{#each entities as |entity|}}
     private final {{entity.className}}Mapper {{entity.instanceName}}Mapper;
+    {{~#unless (skipEntityRepository this)}}
     private final {{entity.className}}Repository {{entity.instanceName}}Repository;
+    {{~/unless}}
     {{~#if options.search}}
     private final {{entity.className}}SearchRepository {{entity.instanceName}}SearchRepository;
     {{~/if}}
@@ -35,10 +37,10 @@ public class {{service.name}}Impl implements {{service.name}} {
     /**
      * Constructor.
      */
-    public {{service.name}}Impl({{#joinWithTemplate service.entities ", "}}{{className}}Mapper {{instanceName}}Mapper, {{className}}Repository {{instanceName}}Repository{{#if options.search}}, {{className}}SearchRepository {{instanceName}}SearchRepository{{/if}}{{/joinWithTemplate}}) {
+public {{service.name}}Impl({{#joinWithTemplate service.entities ", "}}{{className}}Mapper {{instanceName}}Mapper{{#unless (skipEntityRepository this)}}, {{className}}Repository {{instanceName}}Repository{{/unless}}{{#if options.search}}, {{className}}SearchRepository {{instanceName}}SearchRepository{{/if}}{{/joinWithTemplate}}) {
         {{~#joinWithTemplate service.entities ~}}
             this.{{instanceName}}Mapper = {{instanceName}}Mapper;
-            this.{{instanceName}}Repository = {{instanceName}}Repository;
+            {{#unless (skipEntityRepository this)}}this.{{instanceName}}Repository = {{instanceName}}Repository;{{/unless}}
             {{#if options.search}}this.{{instanceName}}SearchRepository = {{instanceName}}SearchRepository;{{/if}}
         {{~/joinWithTemplate~}}
     }
@@ -66,7 +68,7 @@ public class {{service.name}}Impl implements {{service.name}} {
     }
 
     @Override
-    {{~#assign "criteria"}}{{#if entity.options.withSearchCriteria}}{{entity.className}}{{criteriaDTOSuffix}}{{else}}Pageable{{/if}}{{/assign}}
+    {{~#assign "criteria"}}{{#if entity.options.searchCriteria}}{{entity.className}}{{criteriaDTOSuffix}}{{else}}Pageable{{/if}}{{/assign}}
     public Page<{{entity.className}}> find{{entity.classNamePlural}}({{criteria}} criteria) {
         log.debug("Request to find {{entity.classNamePlural}}: {}", criteria);
         return {{entity.instanceName}}Repository.findAll(criteria);

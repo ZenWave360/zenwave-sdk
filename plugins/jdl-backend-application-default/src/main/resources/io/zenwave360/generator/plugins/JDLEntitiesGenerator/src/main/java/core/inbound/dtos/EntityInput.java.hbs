@@ -23,7 +23,7 @@ public class {{entity.className}}{{inputDTOSuffix}} implements Serializable {
 {{#each entity.fields as |field|}}
     {{#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix}}{{/if}}{{/assign}}
     {{~#if field.isArray}}
-        public {{entity.className}} add{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
+        public {{entity.className}}{{inputDTOSuffix}} add{{capitalize field.name}}({{field.type}}{{typeSuffix}} {{field.name}}) {
         this.{{field.name}}.add({{field.name}});
         return this;
         }
@@ -35,8 +35,7 @@ public class {{entity.className}}{{inputDTOSuffix}} implements Serializable {
 {{/each}}
 
 {{#each entity.fields as |field|}}
-// is entity {{field.isEntity}}
-    {{#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix}}{{/if}}{{/assign}}
+    {{~#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix}}{{/if}}{{/assign}}
     public {{{fieldType field suffix=typeSuffix}}} get{{capitalize field.name}}() {
         return {{field.name}};
     }

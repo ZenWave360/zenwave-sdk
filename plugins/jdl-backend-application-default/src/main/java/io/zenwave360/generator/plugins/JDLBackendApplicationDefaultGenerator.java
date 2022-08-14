@@ -10,6 +10,7 @@ import io.zenwave360.generator.templating.TemplateOutput;
 import io.zenwave360.generator.utils.JSONPath;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -60,22 +61,33 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
 
     Object[] enumTemplate = { "src/main/java", "core/domain/common/Enum.java", "core/domain/{{enum.name}}.java", JAVA};
 
-    Function<Map<String, Object>, Boolean> skipEntityResource = (model) -> JSONPath.get(model, "$.entity.options.service") == null;
-    Function<Map<String, Object>, Boolean> skipSearchCriteria = (model) -> JSONPath.get(model, "$.entity.options.withSearchCriteria") == null;
+    boolean useSemanticAnnotations = false;
 
-    Function<Map<String, Object>, Boolean> skipElasticSearch = (model) -> JSONPath.get(model, "$.entity.options.search") == null;
+    boolean is(Map<String, Object> model, String ...annotations) {
+        String annotationsFilter = Arrays.stream(annotations).map(a -> "@." + a).collect(Collectors.joining(" || "));
+        return !((List) JSONPath.get(model, "$.entity.options[?(" + annotationsFilter + ")]")).isEmpty();
+    }
+
+    Function<Map<String, Object>, Boolean> skipEntityRepository = (model) -> useSemanticAnnotations && !is(model, "aggregate");
+    Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo");
+    Function<Map<String, Object>, Boolean> skipEntity = (model) -> is(model, "vo");
+    Function<Map<String, Object>, Boolean> skipVO = (model) -> useSemanticAnnotations && !is(model, "vo");
+    Function<Map<String, Object>, Boolean> skipEntityResource = (model) -> is(model, "vo") || !is(model, "service");
+    Function<Map<String, Object>, Boolean> skipSearchCriteria = (model) -> is(model, "vo") || !is(model, "searchCriteria");
+    Function<Map<String, Object>, Boolean> skipElasticSearch = (model) -> is(model, "vo") || !is(model, "search");
     List<Object[]> templatesByEntity = List.of(
-            new Object[] { "src/main/java", "core/domain/{{persistence}}/Entity.java", "core/domain/{{entity.name}}.java", JAVA},
-            new Object[] { "src/main/java", "core/outbound/{{persistence}}/{{style}}/EntityRepository.java", "core/outbound/{{persistence}}/{{entity.className}}Repository.java", JAVA },
-            new Object[] { "src/main/java", "core/inbound/dtos/EntityCriteria.java", "core/inbound/dtos/{{entity.className}}{{criteriaDTOSuffix}}.java", JAVA, skipSearchCriteria },
-            new Object[] { "src/main/java", "core/inbound/dtos/EntityInput.java", "core/inbound/dtos/{{entity.className}}{{inputDTOSuffix}}.java", JAVA },
-            new Object[] { "src/main/java", "core/implementation/mappers/EntityMapper.java", "core/implementation/mappers/{{entity.className}}Mapper.java", JAVA },
+            new Object[] { "src/main/java", "core/domain/vo/Entity.java", "core/domain/{{entity.name}}.java", JAVA, skipVO },
+            new Object[] { "src/main/java", "core/domain/{{persistence}}/Entity.java", "core/domain/{{entity.name}}.java", JAVA, skipEntity},
+            new Object[] { "src/main/java", "core/outbound/{{persistence}}/{{style}}/EntityRepository.java", "core/outbound/{{persistence}}/{{entity.className}}Repository.java", JAVA, skipEntityRepository },
+            new Object[] { "src/main/java", "core/inbound/dtos/EntityCriteria.java", "core/inbound/dtos/{{criteriaClassName entity }}.java", JAVA, skipSearchCriteria },
+            new Object[] { "src/main/java", "core/inbound/dtos/EntityInput.java", "core/inbound/dtos/{{entity.className}}{{inputDTOSuffix}}.java", JAVA, skipEntity },
+            new Object[] { "src/main/java", "core/implementation/mappers/EntityMapper.java", "core/implementation/mappers/{{entity.className}}Mapper.java", JAVA, skipEntity },
             new Object[] { "src/main/java", "adapters/web/{{webFlavor}}/EntityResource.java", "adapters/web/{{entity.className}}Resource.java", JAVA, skipEntityResource },
             new Object[] { "src/main/java", "core/outbound/search/EntityDocument.java", "core/outbound/search/{{entity.className}}{{searchDTOSuffix}}.java", JAVA, skipElasticSearch },
             new Object[] { "src/main/java", "core/outbound/search/EntitySearchRepository.java", "core/outbound/search/{{entity.className}}SearchRepository.java", JAVA, skipElasticSearch },
 
-            new Object[] { "src/test/java", "core/outbound/{{persistence}}/{{style}}/InMemoryMongoRepository.java", "core/outbound/{{persistence}}/inmemory/InMemoryMongoRepository.java", JAVA },
-            new Object[] { "src/test/java", "core/outbound/{{persistence}}/{{style}}/EntityRepositoryInMemory.java", "core/outbound/{{persistence}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA }
+            new Object[] { "src/test/java", "core/outbound/{{persistence}}/{{style}}/InMemoryMongoRepository.java", "core/outbound/{{persistence}}/inmemory/InMemoryMongoRepository.java", JAVA, skipEntityRepository },
+            new Object[] { "src/test/java", "core/outbound/{{persistence}}/{{style}}/EntityRepositoryInMemory.java", "core/outbound/{{persistence}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA, skipEntityRepository }
     );
 
     List<Object[]> templatesByService = List.of(
@@ -106,9 +118,11 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
         var templateOutputList = new ArrayList<TemplateOutput>();
         var apiModel = getJDLModel(contextModel);
 
+        useSemanticAnnotations = ((List) JSONPath.get(apiModel, "$.entities[*][?(@.options.aggregate)]")).size() > 0;
+
         Map<String, Map<String, Object>> entities = (Map) apiModel.get("entities");
         for (Map<String, Object> entity : entities.values()) {
-            if(!isGenerateEntity((String) entity.get("name"))) {
+            if(!isGenerateEntity(entity)) {
                 continue;
             }
             for (Object[] templateValues : templatesByEntity) {
@@ -118,7 +132,7 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
 
         Map<String, Map<String, Object>> enums = JSONPath.get(apiModel, "$.enums.enums");
         for (Map<String, Object> enumValue : enums.values()) {
-            if(!isGenerateEntity((String) enumValue.get("name"))) {
+            if(!isGenerateEntity(enumValue)) {
                 continue;
             }
             templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(enumTemplate), Map.of("enum", enumValue)));
@@ -130,7 +144,7 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
             service.put("name", serviceName);
             List<Map<String, Object>> entitiesByService = getEntitiesByService(service, apiModel);
             service.put("entities", entitiesByService);
-            boolean isGenerateService = entitiesByService.stream().anyMatch(entity -> isGenerateEntity((String) entity.get("name")));
+            boolean isGenerateService = entitiesByService.stream().anyMatch(entity -> isGenerateEntity(entity));
             if(!isGenerateService) {
                 continue;
             }
@@ -153,9 +167,33 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
             }
             return String.format("%s%s%s", prefix, type, suffix);
         });
+
+        handlebarsEngine.getHandlebars().registerHelper("criteriaClassName", (context, options) -> {
+            Map entity = (Map) context;
+            Object criteria = JSONPath.get(entity, "$.options.searchCriteria");
+            if(criteria instanceof String) {
+                return criteria;
+            }
+            if(criteria == Boolean.TRUE) {
+                return String.format("%s%s", entity.get("className"), criteriaDTOSuffix);
+            }
+            return null;
+        });
+
+        handlebarsEngine.getHandlebars().registerHelper("skipEntityRepository", (context, options) -> {
+            Map entity = (Map) context;
+            return skipEntityRepository.apply(Map.of("entity", entity));
+        });
+
+        handlebarsEngine.getHandlebars().registerHelper("skipEntityId", (context, options) -> {
+            Map entity = (Map) context;
+            return skipEntityId.apply(Map.of("entity", entity));
+        });
     }
-    protected boolean isGenerateEntity(String entity) {
-        return entities.isEmpty() || entities.contains(entity);
+    protected boolean isGenerateEntity(Map entity) {
+        boolean skip = JSONPath.get(entity, "options.skip", false);
+        String entityName = (String) entity.get("name");
+        return !skip && (entities.isEmpty() || entities.contains(entityName));
     }
 
     protected List<Map<String, Object>> getEntitiesByService(Map<String, Object> service, Map<String, Object> apiModel) {

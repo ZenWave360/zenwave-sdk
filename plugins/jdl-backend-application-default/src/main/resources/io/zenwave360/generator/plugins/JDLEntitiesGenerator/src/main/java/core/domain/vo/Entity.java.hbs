@@ -5,42 +5,21 @@ import java.math.*;
 import java.time.*;
 import java.util.*;
 import javax.validation.constraints.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 /**
 * {{entity.comment}}
 */
-{{#unless (skipEntityId entity)~}}@Document(collection = "{{entity.tableName}}"){{/unless~}}
 public class {{entity.className}} implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-{{#unless (skipEntityId entity)~}}
-    @Id
-    private String id;
-{{/unless~}}
 {{#each entity.fields as |field|}}
-    @Field
     {{#each field.validations as |validation|~}}
         // @{{validation.name}}("{{validation.value}}")
     {{~/each}}
     private {{{fieldType field}}} {{field.name}};
 {{/each}}
 
-{{#unless (skipEntityId entity)~}}
-    public String getId() {
-        return id;
-    }
-    public {{entity.className}} withId(String id) {
-        this.id = id;
-        return this;
-    }
-    public void setId(String id) {
-        this.id = id;
-    }
-{{/unless~}}
 
 {{#each entity.fields as |field|}}
     {{~#if field.isArray}}

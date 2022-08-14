@@ -1,16 +1,10 @@
 package io.zenwave360.generator.utils;
 
-import io.zenwave360.generator.templating.HandlebarsEngine;
-import io.zenwave360.generator.templating.TemplateEngine;
-
-import java.io.IOException;
-import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-
-import static java.lang.reflect.Modifier.isStatic;
-import static org.apache.commons.lang3.reflect.FieldUtils.getAllFields;
 
 /**
  * Mutable version of {@link java.util.Map} static methods and other utilities.
@@ -29,5 +23,19 @@ public interface Maps {
             }
         }
         return map;
+    }
+
+    static Map copy(Map source) {
+        return (Map) deepCopy((Object) source);
+    }
+
+    private static Object deepCopy(Object source) {
+        if(source instanceof Map) {
+            source = new HashMap<>((Map) source);
+            ((HashMap<String, Object>) source).entrySet().forEach(e -> e.setValue(deepCopy(e.getValue())));
+        } else if(source instanceof List) {
+            source = ((List<?>) source).stream().map(e -> deepCopy(e));
+        }
+        return source;
     }
 }

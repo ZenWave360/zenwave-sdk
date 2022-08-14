@@ -25,7 +25,7 @@ public class FillJDLWithDummyDataProcessor extends AbstractBaseProcessor {
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
         var openApiModel = (Map) contextModel.get(openapiProperty);
-        var jdlModel = (Map) contextModel.getOrDefault(jdlProperty, new HashMap<>());
+        var jdlModel = (Map) contextModel.getOrDefault(jdlProperty, Maps.of("isDummy", true));
         contextModel.put(jdlProperty, jdlModel);
 
         Map<String, String> schemaTagMap = new HashMap<>();
