@@ -18,6 +18,19 @@ paths:
       summary: Find {{entity.classNamePlural}}
       operationId: find{{entity.classNamePlural}}
       tags: [{{asTagName entity.options.service}}]
+      parameters:
+        - in: query
+          name: pageable
+          required: true
+          schema:
+            $ref: "#/components/schemas/Pageable"
+{{~#if entity.options.searchCriteria}}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/{{entity.className}}{{criteriaDTOSuffix}}"
+{{~/if}}
       responses:
         "200":
           description: {{entity.classNamePlural}}
@@ -105,3 +118,31 @@ paths:
           type: integer
         totalPages:
           type: integer
+    Pageable:
+      type: object
+      properties:
+        sort:
+          type: array
+          items:
+            type: object
+            properties:
+              direction:
+                type: string
+                enum: [ASC, DESC]
+              property:
+                type: string
+          properties:
+            empty:
+              type: boolean
+            sorted:
+              type: boolean
+            unsorted:
+              type: boolean
+        offset:
+          type: integer
+        pageNumber:
+          type: integer
+          minimum: 0
+        pageSize:
+          type: integer
+          minimum: 0

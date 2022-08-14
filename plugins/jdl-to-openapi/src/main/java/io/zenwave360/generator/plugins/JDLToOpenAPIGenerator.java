@@ -185,11 +185,11 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
             }
             String minlength = JSONPath.get(field, "$.validations.minlength.value");
             if(minlength != null) {
-                property.put("minLength", minlength);
+                property.put("minLength", asNumber(minlength));
             }
             String maxlength = JSONPath.get(field, "$.validations.maxlength.value");
             if(maxlength != null) {
-                property.put("maxLength", maxlength);
+                property.put("maxLength", asNumber(maxlength));
             }
             String pattern = JSONPath.get(field, "$.validations.pattern.value");
             if(pattern != null) {
@@ -211,6 +211,14 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
         }
 
         return schema;
+    }
+
+    private Object asNumber(String number) {
+        try {
+            return Integer.parseInt(number);
+        } catch (NumberFormatException e) {
+            return number;
+        }
     }
 
     public TemplateOutput generateTemplateOutput(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> jdlModel, String schemasAsString) {
