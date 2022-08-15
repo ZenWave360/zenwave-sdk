@@ -16,7 +16,7 @@ This generator supports the following JDL extensions:
 | **@aggregate**                  | yes        | yes              | yes            | yes    |
 | **@embedded**                   | yes        | yes              |                |        |
 | **@vo**                         | yes        |                  |                |        |
-| **@searchCriteria(entityName)** | yes        |                  |                |        |
+| **@searchCriteria(entityName)** |            |                  |                |        |
 | **@skip**                       | no         |                  |                |        |
 
 **@searchCriteria(entityName)** is used to specify the entity name for the search criteria, if empty will take the same fields as the actual entity.
