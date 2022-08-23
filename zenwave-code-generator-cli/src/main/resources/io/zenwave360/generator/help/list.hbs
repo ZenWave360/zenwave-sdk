@@ -1,5 +1,7 @@
+ZW> Code Generator ({{version}})
+
 Available plugins:
 
 {{#each plugins as |plugin| ~}}
-{{ljust plugin.plugin.shortCode size=30 pad=" "}} {{{plugin.configClassName}}}: {{{plugin.plugin.title}}}
+{{ljust plugin.plugin.shortCode size=30 pad=" "}} {{{plugin.configClassName}}}: {{{plugin.plugin.title}}} ({{plugin.version}})
 {{/each}}

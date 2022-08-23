@@ -42,6 +42,7 @@ public class Help {
         if(pluginDocumentation != null) {
             model.put("plugin", Maps.of("title", pluginDocumentation.value(),"description", pluginDocumentation.description(), "shortCode", pluginDocumentation.shortCode()));
         }
+        model.put("version", getClass().getPackage().getImplementationVersion());
         model.put("config", configuration);
         model.put("options", options);
         model.put("undocumentedOptions", undocumentedOptions);
@@ -91,7 +92,7 @@ public class Help {
                 throw new RuntimeException(e);
             }
         }
-        return Map.of("plugins", plugins);
+        return Maps.of("plugins", plugins);
     }
 
     protected Map<String, Object> asModel(Object plugin, Field field, DocumentedOption documentedOption) {
@@ -110,11 +111,12 @@ public class Help {
         if(defaultValue.getClass().isArray()) {
             defaultValue = Arrays.asList((Object[]) defaultValue);
         }
-        return Maps.of("description", documentedOption.description(), "type", type.getSimpleName(), "defaultValue", defaultValue, "values", values);
+        return Map.of("description", documentedOption.description(), "type", type.getSimpleName(), "defaultValue", defaultValue, "values", values);
     }
 
     public String help(Configuration configuration, Format format) {
         var model = format == Format.list? discoverAvailablePlugins() : buildHelpModel(configuration);
+        model.put("version", getClass().getPackage().getImplementationVersion());
         if(format == Format.json) {
             try {
                 return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(model);
