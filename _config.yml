@@ -5,7 +5,7 @@ github_username: ivangsa
 # Theme settings
 remote_theme: just-the-docs/just-the-docs
 search_enabled: true
-logo: "raw/main/docs/code-generator-logo-notext.png"
+logo: "https://github.com/ZenWave360/zenwave-code-generator/raw/main/docs/code-generator-logo-notext.png"
 aux_links:
   "See on GitHub":
     - "//github.com/zenwave360/zenwave-code-generator"
