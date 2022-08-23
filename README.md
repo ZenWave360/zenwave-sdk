@@ -1,7 +1,11 @@
 # ZenWave Code Generator
 
+<p align="center">
+
 ![ZW> Code Generator](docs/code-generator-logo-dark.svg#gh-dark-mode-only)
 ![ZW> Code Generator](docs/code-generator-logo-light.svg#gh-light-mode-only)
+
+</p>
 
 > :warning: Work in progress.
 
