@@ -18,7 +18,7 @@ ZenWave Code Generator is a configurable and extensible code generator tool for 
 
 Using JHipster Domain Language as **Ubiquitous Language** for [Data on the Inside](https://blog.acolyer.org/2016/09/13/data-on-the-outside-versus-data-on-the-inside/) and **API-First** specs like **AsyncAPI** and **OpenAPI** to describe Inter Process Communications (IPC) for [Data on the Outside](https://blog.acolyer.org/2016/09/13/data-on-the-outside-versus-data-on-the-inside/).
 
-![ZenWave Modeling Languages](docs/00-ZenWave-ModelingLanguages.excalidraw.svg)
+![ZenWave Modeling Languages](docs/logos/00-ZenWave-ModelingLanguages.excalidraw.svg)
 
 - **JHipster Domain Language (JDL) as Ubiquitous Language:** To describe your domain core domain model
 - **API-First specs like AsyncAPI and OpenAPI:** to describe Inter Process Communications (IPC) between bounded contexts/microservices.
