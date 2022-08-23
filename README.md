@@ -1,5 +1,8 @@
 # ZenWave Code Generator
 
+![ZW> Code Generator](docs/code-generator-logo-dark.svg#gh-dark-mode-only)
+![ZW> Code Generator](docs/code-generator-logo-light.svg#gh-light-mode-only)
+
 > :warning: Work in progress.
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360/zenwave-code-generator.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360/zenwave-code-generator)
@@ -20,6 +23,7 @@ ZenWave Code Generator is a configurable and extensible code generator tool for 
 
 - [ZenWave Code Generator](#zenwave-code-generator)
   - [Jbang Instalation](#jbang-instalation)
+  - [Features / Roadmap](#features--roadmap)
   - [Building from source](#building-from-source)
   - [Usage](#usage)
   - [Available Plugins](#available-plugins)
@@ -46,6 +50,53 @@ io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:0.2.
 ```
 
 You can include any custom plugin in as `--deps` option.
+
+## Features / Roadmap
+
+- [x] ZenWave Code Generator CLI
+  - [x] Default parsers, processors, plugins, templating, formatters, writers, etc... for AsyncAPI, OpenAPI and JDL.
+  - [x] Help command: detailed, json, markdown, list of available plugins
+  - [x] Fork existing (custom or standard) plugin command
+- [x] ZenWave Code Generator Maven Plugin
+- [ ] Standard Plugins
+  - [ ] JDL Backend Application (flexible hexagonal architecture)
+    - [x] Domain Entities,
+    - [x] Inbound: Service Ports, DTOs, Mappers and CRUD implementation
+      - [x] Acceptance Tests: SpringData InMemory Repositories
+    - [x] Outbound: SpringData Repositories, ElasticSearch... (for REST or Async see other plugins)
+    - [x] Adapters:
+      - [x] Spring MVC
+      - [ ] Spring WebFlux
+    - [ ] Flavors
+      - [x] MongoDB
+        - [x] Imperative
+        - [ ] Reactive
+      - [ ] JPA
+        - [ ] Imperative
+        - [ ] Reactive
+  - [x] JDL OpenAPI Controllers
+  - [x] OpenAPI to Spring WebTestClient
+  - [x] AsyncAPI Spring Cloud Streams3
+    - [x] Consumer and Producer. Blocking and Reactive.
+    - [ ] Outbox pattern
+      - [ ] For MongoDB
+      - [ ] For JPA/SQL
+  - [ ] JDL to Specs
+    - [x] JDL to OpenAPI
+    - [ ] JDL to AsyncAPI
+      - [ ] AsyncAPI schemas
+      - [ ] JsonSchemas
+      - [ ] AVRO schemas
+  - [ ] Testing
+    - [ ] KarateDSL
+      - [ ] OpenAPI to Karate E2E Tests
+      - [ ] OpenAPI to Karate/ApiMock Stateful Mocks
+    - [ ] OpenAPI to REST-assured
+  - [x] Reverser Engineering
+    - [x] OpenAPI 2 JDL
+    - [x] Java 2 JDL
+      - [x] Spring Data MongoDB annotations
+      - [x] JPA annotations
 
 ## Building from source
 
@@ -119,7 +170,7 @@ jbang zw -p io.zenwave360.generator.plugins.ForkPluginConfiguration -h
 ```
 
 | **Option**              | **Description**                                                                            | **Type** | **Default**                                                                       | **Values** |
-|-------------------------|--------------------------------------------------------------------------------------------|----------|-----------------------------------------------------------------------------------|------------|
+| ----------------------- | ------------------------------------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------- | ---------- |
 | `targetFolder`          |                                                                                            | String   |                                                                                   |            |
 | `sourcePluginClassName` | Plugin Configuration class to fork                                                         | String   |                                                                                   |            |
 | `targetPluginClassName` | New Plugin Configuration class. It will be used for class name, package and maven groupId. | String   |                                                                                   |            |

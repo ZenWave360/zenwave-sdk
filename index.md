@@ -35,6 +35,7 @@ Please refer to [**ZenWave Code Generator**](https://github.com/ZenWave360/zenwa
 - [ZenWave Code Generator](#zenwave-code-generator)
 - [Table of Contents](#table-of-contents)
 - [Generating functional and testing code: What can we generate for you today?](#generating-functional-and-testing-code-what-can-we-generate-for-you-today)
+  - [Features / Roadmap](#features--roadmap)
   - [JDL Backend Application](#jdl-backend-application)
     - [Fully functional Backend Application from JDL](#fully-functional-backend-application-from-jdl)
     - [JDL To OpenAPI](#jdl-to-openapi)
@@ -70,6 +71,53 @@ Whether you are:
 - [Adding functionality on top of an existent microservices architecture](#adding-functionality-on-top-of-an-existent-microservices-archytecture)
 
 ...ZenWave Code Generator can... **generate a lot of code for you!!**
+
+## Features / Roadmap
+
+- [x] ZenWave Code Generator CLI
+  - [x] Default parsers, processors, plugins, templating, formatters, writers, etc... for AsyncAPI, OpenAPI and JDL.
+  - [x] Help command: detailed, json, markdown, list of available plugins
+  - [x] Fork existing (custom or standard) plugin command
+- [x] ZenWave Code Generator Maven Plugin
+- [ ] Standard Plugins
+  - [ ] JDL Backend Application (flexible hexagonal architecture)
+    - [x] Domain Entities,
+    - [x] Inbound: Service Ports, DTOs, Mappers and CRUD implementation
+      - [x] Acceptance Tests: SpringData InMemory Repositories
+    - [x] Outbound: SpringData Repositories, ElasticSearch... (for REST or Async see other plugins)
+    - [x] Adapters:
+      - [x] Spring MVC
+      - [ ] Spring WebFlux
+    - [ ] Flavors
+      - [x] MongoDB
+        - [x] Imperative
+        - [ ] Reactive
+      - [ ] JPA
+        - [ ] Imperative
+        - [ ] Reactive
+  - [x] JDL OpenAPI Controllers
+  - [x] OpenAPI to Spring WebTestClient
+  - [x] AsyncAPI Spring Cloud Streams3
+    - [x] Consumer and Producer. Blocking and Reactive.
+    - [ ] Outbox pattern
+      - [ ] For MongoDB
+      - [ ] For JPA/SQL
+  - [ ] JDL to Specs
+    - [x] JDL to OpenAPI
+    - [ ] JDL to AsyncAPI
+      - [ ] AsyncAPI schemas
+      - [ ] JsonSchemas
+      - [ ] AVRO schemas
+  - [ ] Testing
+    - [ ] KarateDSL
+      - [ ] OpenAPI to Karate E2E Tests
+      - [ ] OpenAPI to Karate/ApiMock Stateful Mocks
+    - [ ] OpenAPI to REST-assured
+  - [x] Reverser Engineering
+    - [x] OpenAPI 2 JDL
+    - [x] Java 2 JDL
+      - [x] Spring Data MongoDB annotations
+      - [x] JPA annotations
 
 ## JDL Backend Application
 
