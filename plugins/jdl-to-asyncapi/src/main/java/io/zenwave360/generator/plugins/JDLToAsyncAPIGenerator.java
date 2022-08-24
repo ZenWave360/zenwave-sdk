@@ -12,7 +12,6 @@ import io.zenwave360.generator.templating.TemplateEngine;
 import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
 import io.zenwave360.generator.utils.JSONPath;
-import io.zenwave360.generator.utils.Maps;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +23,7 @@ import java.util.stream.Collectors;
 import static io.zenwave360.generator.generators.JDLEntitiesToSchemasConverter.convertEntityToSchema;
 import static io.zenwave360.generator.generators.JDLEntitiesToSchemasConverter.convertEnumToSchema;
 
-public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
+public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
 
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
@@ -37,24 +36,18 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
     public List<String> skipForAnnotations = List.of("vo", "embedded", "skip");
 
     @DocumentedOption(description = "Target file")
-    public String targetFile = "openapi.yml";
+    public String targetFile = "asyncapi.yml";
     @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
     public String jdlBusinessEntityProperty = "x-business-entity";
 
-    @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas for paginated lists")
-    public String jdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
-
-    @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. Examples: '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
-    public List<String> paginatedDtoItemsJsonPath = List.of("$.items", "$.properties.content.items");
-
-    public JDLToOpenAPIGenerator withSourceProperty(String sourceProperty) {
+    public JDLToAsyncAPIGenerator withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;
         return this;
     }
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
-    private final TemplateInput jdlToOpenAPITemplate = new TemplateInput("io/zenwave360/generator/plugins/OpenAPIToJDLGenerator/JDLToOpenAPI.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
+    private final TemplateInput jdlToAsyncAPITemplate = new TemplateInput("io/zenwave360/generator/plugins/AsyncAPIToJDLGenerator/JDLToAsyncAPI.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
 
     protected Map<String, Object> getJDLModel(Map<String, Object> contextModel) {
         return (Map) contextModel.get(sourceProperty);
@@ -90,20 +83,8 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
                 continue;
             }
             String entityName = (String) entity.get("name");
-            Map<String, Object> openAPISchema = convertEntityToSchema(entity, jdlBusinessEntityProperty);
-            schemas.put(entityName, openAPISchema);
-
-            Map<String, Object> paginatedSchema = new HashMap<>();
-            paginatedSchema.put("allOf", List.of(
-                    Map.of("$ref", "#/components/schemas/Page"),
-                    Map.of(jdlBusinessEntityPaginatedProperty, entityName),
-                    Map.of("properties",
-                            Map.of("content",
-                                    Maps.of("type", "array", "items", Map.of("$ref", "#/components/schemas/" + entityName)))
-                    )
-                )
-            );
-            schemas.put(entityName + "Paginated", paginatedSchema);
+            Map<String, Object> asyncAPISchema = convertEntityToSchema(entity, jdlBusinessEntityProperty);
+            schemas.put(entityName, asyncAPISchema);
         }
 
         List<Map<String, Object>> enums = (List) JSONPath.get(jdlModel, "$.enums.enums[*]");
@@ -115,16 +96,16 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
             schemas.put((String) enumValue.get("name"), enumSchema);
         }
 
-        String openAPISchemasString = null;
+        String asyncAPISchemasString = null;
         try {
-            openAPISchemasString = mapper.writeValueAsString(oasSchemas);
+            asyncAPISchemasString = mapper.writeValueAsString(oasSchemas);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
         // remove first line
-        openAPISchemasString = openAPISchemasString.substring(openAPISchemasString.indexOf("\n") + 1);
+        asyncAPISchemasString = asyncAPISchemasString.substring(asyncAPISchemasString.indexOf("\n") + 1);
 
-        return List.of(generateTemplateOutput(contextModel, jdlToOpenAPITemplate, jdlModel, openAPISchemasString));
+        return List.of(generateTemplateOutput(contextModel, jdlToAsyncAPITemplate, jdlModel, asyncAPISchemasString));
     }
 
     public TemplateOutput generateTemplateOutput(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> jdlModel, String schemasAsString) {

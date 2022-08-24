@@ -17,8 +17,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -105,7 +107,7 @@ public class ForkPluginGenerator implements Generator {
             log.debug("Moving {} to folder {}", javaFile, targetPackageFolder);
             String relativeFileName = asRelative(sourcePackageFolder.getPath(), javaFile.getPath());
             relativeFileName = renameTargetClass(relativeFileName, sourcePackageAndClass[1], targetPackageAndClass[1]);
-            FileUtils.moveFile(javaFile, new File(targetPackageFolder, relativeFileName));
+            moveFile(javaFile, new File(targetPackageFolder, relativeFileName));
         }
 
         targetPackageTestsFolder.mkdirs();
@@ -114,7 +116,7 @@ public class ForkPluginGenerator implements Generator {
             log.debug("Moving {} to folder {}", testFile, targetPackageTestsFolder);
             String relativeFileName = asRelative(sourcePackageTestsFolder.getPath(), testFile.getPath());
             relativeFileName = renameTargetClass(relativeFileName, sourcePackageAndClass[1], targetPackageAndClass[1]);
-            FileUtils.moveFile(testFile, new File(targetPackageTestsFolder, relativeFileName));
+            moveFile(testFile, new File(targetPackageTestsFolder, relativeFileName));
         }
 
         targetResourcesPackageFolder.mkdirs();
@@ -123,7 +125,7 @@ public class ForkPluginGenerator implements Generator {
             log.debug("Moving {} to folder {}", resourceFile, targetResourcesPackageFolder);
             String relativeFileName = asRelative(sourceResourcesPackageFolder.getPath(), resourceFile.getPath());
             relativeFileName = renameTargetClass(relativeFileName, sourcePackageAndClass[1], targetPackageAndClass[1]);
-            FileUtils.moveFile(resourceFile, new File(targetResourcesPackageFolder, relativeFileName));
+            moveFile(resourceFile, new File(targetResourcesPackageFolder, relativeFileName));
         }
 
         targetTestsResourcesPackageFolder.mkdirs();
@@ -132,8 +134,16 @@ public class ForkPluginGenerator implements Generator {
             log.debug("Moving {} to folder {}", testsResourceFile, targetTestsResourcesPackageFolder);
             String relativeFileName = asRelative(sourceTestsResourcesPackageFolder.getPath(), testsResourceFile.getPath());
             relativeFileName = renameTargetClass(relativeFileName, sourcePackageAndClass[1], targetPackageAndClass[1]);
-            FileUtils.moveFile(testsResourceFile, new File(targetTestsResourcesPackageFolder, relativeFileName));
+            moveFile(testsResourceFile, new File(targetTestsResourcesPackageFolder, relativeFileName));
         }
+    }
+
+    private void moveFile(File src, File target) throws IOException {
+        if(src.equals(target)) {
+            log.debug("Skip moving file to itself {}", src);
+            return;
+        }
+        FileUtils.moveFile(src, target);
     }
 
     private String asRelative(String root, String nested) {
@@ -182,10 +192,12 @@ public class ForkPluginGenerator implements Generator {
         String[] sourcePackageAndClass = splitPackageAndClass(sourcePluginClassName);
         String[] targetPackageAndClass = splitPackageAndClass(targetPluginClassName);
 
+        String targetArtifactId = NamingUtils.asKebabCase(targetPackageAndClass[1]).replace("-configuration", "");
+
         String pom = Files.readString(Path.of(pomFile.toURI()));
         String artifactIdMatch = findMatchWithShorterIndent(pom, artifactIdPattern);
         String groupIdMatch = findMatchWithShorterIndent(pom, groupIdPattern);
-        pom = replaceLine(pom, artifactIdMatch, "    <artifactId>" + NamingUtils.asKebabCase(targetPackageAndClass[1]) + "</artifactId>");
+        pom = replaceLine(pom, artifactIdMatch, "    <artifactId>" + targetArtifactId + "</artifactId>");
         pom = replaceLine(pom, groupIdMatch, "    <groupId>" + targetPackageAndClass[0] + "</groupId>");
         Files.writeString(Path.of(pomFile.toURI()), pom);
     }

@@ -105,8 +105,7 @@ Whether you are:
   - [ ] JDL to Specs
     - [x] JDL to OpenAPI
     - [ ] JDL to AsyncAPI
-      - [ ] AsyncAPI schemas
-      - [ ] JsonSchemas
+      - [x] AsyncAPI schemas
       - [ ] AVRO schemas
   - [ ] Testing
     - [ ] KarateDSL

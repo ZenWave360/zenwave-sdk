@@ -10,6 +10,7 @@
         "io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:RELEASE",
         "io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:RELEASE",
         "io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:RELEASE",
+        "io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi:RELEASE",
         "io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:RELEASE"
       ],
       "main": "io.zenwave360.generator.Main"
@@ -23,6 +24,7 @@
         "io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:0.2.3-SNAPSHOT",
         "io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:0.2.3-SNAPSHOT",
         "io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.2.3-SNAPSHOT",
+        "io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi:0.2.3-SNAPSHOT",
         "io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:0.2.3-SNAPSHOT"
       ],
       "repositories": [

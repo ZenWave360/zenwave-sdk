@@ -17,6 +17,7 @@ io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-jsonschema2pojo:0.2
 io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:0.2.3-SNAPSHOT,\
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:0.2.3-SNAPSHOT,\
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.2.3-SNAPSHOT \
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi:0.2.3-SNAPSHOT \
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:0.2.3-SNAPSHOT \
     io.github.zenwave360:zenwave-code-generator-cli:0.2.3-SNAPSHOT
 ```

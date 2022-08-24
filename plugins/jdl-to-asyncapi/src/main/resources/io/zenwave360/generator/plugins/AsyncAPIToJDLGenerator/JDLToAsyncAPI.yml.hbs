@@ -1,0 +1,83 @@
+asyncapi: 2.4.0
+info:
+  title: Zenwave 360 Generated API
+  version: 0.0.1
+
+defaultContentType: application/json
+
+tags:
+  - name: "Default"
+{{~#each jdlModel.serviceNames as |serviceName|}}
+  - name: "{{asTagName serviceName}}"
+{{~/each}}
+
+channels:
+{{~#each jdlModel.entities as |entity|}}
+  {{~#unless (skipOperations entity)}}
+  {{entity.kebabCasePlural}}:
+    publish:
+      summary: {{entity.className}} Channel Events
+      operationId: on{{entity.className}}Event
+      tags:
+        - name: {{asTagName entity.options.service}}
+      message:
+        oneOf:
+          - $ref: "#/components/messages/{{entity.className}}CreatedMessage"
+          - $ref: "#/components/messages/{{entity.className}}UpdatedMessage"
+          - $ref: "#/components/messages/{{entity.className}}DeletedMessage"
+  {{/unless}}
+{{~/each}}
+
+components:
+  messages:
+{{~#each jdlModel.entities as |entity|}}
+  {{~#unless (skipOperations entity)}}
+    {{entity.className}}CreatedMessage:
+      name: {{entity.className}}CreatedMessage
+      title: Message for {{entity.className}} Created Event
+      summary: Message for {{entity.className}} Created Event
+      payload:
+        $ref: "#/components/schemas/{{entity.className}}CreatedPayload"
+    {{entity.className}}UpdatedMessage:
+      name: {{entity.className}}UpdatedMessage
+      title: Message for {{entity.className}} Updated Event
+      summary: Message for {{entity.className}} Updated Event
+      payload:
+        $ref: "#/components/schemas/{{entity.className}}UpdatedPayload"
+    {{entity.className}}DeletedMessage:
+      name: {{entity.className}}DeletedMessage
+      title: Message for {{entity.className}} Deleted Event
+      summary: Message for {{entity.className}} Deleted Event
+      payload:
+        $ref: "#/components/schemas/{{entity.className}}DeletedPayload"
+  {{/unless}}
+{{~/each}}
+
+{{{schemasAsString}}}
+
+{{~#each jdlModel.entities as |entity|}}
+  {{~#unless (skipOperations entity)}}
+    {{entity.className}}CreatedPayload:
+      type: object
+      properties:
+        {{entity.instanceName}}Id:
+          type: integer
+          format: int64
+        {{entity.instanceName}}:
+          $ref: "#/components/schemas/{{entity.className}}"
+    {{entity.className}}UpdatedPayload:
+      type: object
+      properties:
+        {{entity.instanceName}}Id:
+          type: integer
+          format: int64
+        {{entity.instanceName}}:
+          $ref: "#/components/schemas/{{entity.className}}"
+        {{entity.className}}DeletedPayload:
+          type: object
+          properties:
+            {{entity.instanceName}}Id:
+              type: integer
+              format: int64
+  {{/unless}}
+{{~/each}}
