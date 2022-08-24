@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class Configuration {
 
-    @DocumentedOption(description = "OpenAPI file to parse", required = true)
+    @DocumentedOption(description = "Spec file to parse", required = true)
     public String specFile;
 
     @DocumentedOption(description = "Target folder for generated output", required = false)

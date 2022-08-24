@@ -6,8 +6,8 @@
     <groupId>io.github.zenwave360</groupId>
     <version>0.2.3-SNAPSHOT</version>
   </parent>
-  <artifactId>zenwave-code-generator-test-resources</artifactId>
   <name>${project.groupId}:${project.artifactId}</name>
+  <artifactId>zenwave-code-generator-test-resources</artifactId>
 
   <properties>
     <spring-boot-dependencies.version>2.6.7</spring-boot-dependencies.version>

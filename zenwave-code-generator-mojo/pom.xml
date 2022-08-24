@@ -6,9 +6,9 @@
         <artifactId>zenwave-code-generator</artifactId>
         <version>0.2.3-SNAPSHOT</version>
     </parent>
+    <name>${project.groupId}:${project.artifactId}</name>
     <artifactId>zenwave-code-generator-mojo</artifactId>
     <packaging>maven-plugin</packaging>
-    <name>zenwave-code-generator-mojo Maven Mojo</name>
 
     <build>
         <plugins>
