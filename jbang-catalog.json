@@ -2,6 +2,19 @@
   "catalogs": {},
   "aliases": {
     "zw": {
+      "script-ref": "io.github.zenwave360:zenwave-code-generator-cli:RELEASE",
+      "dependencies": [
+        "org.slf4j:slf4j-simple:1.7.36",
+        "io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:RELEASE",
+        "io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-jsonschema2pojo:RELEASE",
+        "io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:RELEASE",
+        "io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:RELEASE",
+        "io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:RELEASE",
+        "io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:RELEASE"
+      ],
+      "main": "io.zenwave360.generator.Main"
+    },
+    "zw-snapshot": {
       "script-ref": "io.github.zenwave360:zenwave-code-generator-cli:0.2.3-SNAPSHOT",
       "dependencies": [
         "org.slf4j:slf4j-simple:1.7.36",

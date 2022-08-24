@@ -42,13 +42,13 @@ jbang alias add --name=zw \
     --repos=mavencentral,snapshots=https://s01.oss.sonatype.org/content/repositories/snapshots \
     --deps=\
 org.slf4j:slf4j-simple:1.7.36,\
-io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:0.2.3-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-jsonschema2pojo:0.2.3-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:0.2.3-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:0.2.3-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.2.3-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:0.2.3-SNAPSHOT \
-    io.github.zenwave360:zenwave-code-generator-cli:0.2.3-SNAPSHOT
+io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:RELEASE,\
+io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-jsonschema2pojo:RELEASE,\
+io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:RELEASE,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:RELEASE,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:RELEASE,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:RELEASE \
+    io.github.zenwave360:zenwave-code-generator-cli:RELEASE
 ```
 
 You can include any custom plugin in as `--deps` option.
