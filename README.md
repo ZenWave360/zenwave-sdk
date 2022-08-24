@@ -34,7 +34,19 @@ ZenWave Code Generator is a configurable and extensible code generator tool for 
 
 ## Jbang Instalation
 
-You can use JBang to install the ZenWave Code Generator as a [JBang alias](https://www.jbang.dev/documentation/guide/latest/alias_catalogs.html) with the following command:
+The easiest way to install ZenWave Code Generator is as a [JBang alias](https://www.jbang.dev/documentation/guide/latest/alias_catalogs.html):
+
+```shell
+jbang alias add zw@zenwave360/zenwave-code-generator
+```
+
+or if you prefer to use the latest **snapshot** versions:
+
+```shell
+jbang alias add --name=zw zw-snapshots@zenwave360/zenwave-code-generator
+```
+
+If you plan to use **custom plugins** you will need to use the command in the following format:
 
 ```shell
 jbang alias add --name=zw \
@@ -42,16 +54,18 @@ jbang alias add --name=zw \
     --repos=mavencentral,snapshots=https://s01.oss.sonatype.org/content/repositories/snapshots \
     --deps=\
 org.slf4j:slf4j-simple:1.7.36,\
-io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:RELEASE,\
-io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-jsonschema2pojo:RELEASE,\
-io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:RELEASE,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:RELEASE,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:RELEASE,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:RELEASE \
-    io.github.zenwave360:zenwave-code-generator-cli:RELEASE
+io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:0.2.3-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-jsonschema2pojo:0.2.3-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:0.2.3-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:0.2.3-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.2.3-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:0.2.3-SNAPSHOT \
+    io.github.zenwave360:zenwave-code-generator-cli:0.2.3-SNAPSHOT
 ```
 
-You can include any custom plugin in as `--deps` option.
+You can include any **custom plugin** jars in the `--deps` option.
+
+JBang will use you maven settings for repository resolution, but you can also specify a custom maven repository in the `--repos` option.
 
 ## Features / Roadmap
 
@@ -110,10 +124,10 @@ mvn clean install
 
 ## Usage
 
-Once installed through the JBang alias, you can use the ZenWave Code Generator by running a command in the following format:
+Use the following jbang format:
 
 ```shell
-jbang zw -p <pluginConfigClass> optionName=value optionName2=value
+jbang zw -p <pluginConfigClass or short-code> optionName=value optionName2=value
 ```
 
 You can get a list of all available plugins:
