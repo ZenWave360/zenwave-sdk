@@ -98,8 +98,9 @@ Whether you are:
   - [x] JDL OpenAPI Controllers
   - [x] OpenAPI to Spring WebTestClient
   - [x] AsyncAPI Spring Cloud Streams3
-    - [x] Consumer and Producer. Blocking and Reactive.
-    - [ ] Outbox pattern
+    - [x] Consumer and Producer. Imperative and Reactive.
+    - [ ] Support for custom extension for messages envelop (x-envelop-javaType)
+    - [ ] Producer with Transactional Outbox pattern
       - [ ] For MongoDB
       - [ ] For JPA/SQL
   - [ ] JDL to Specs
