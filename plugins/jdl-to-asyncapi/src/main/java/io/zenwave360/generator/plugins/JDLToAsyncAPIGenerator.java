@@ -12,9 +12,11 @@ import io.zenwave360.generator.templating.OutputFormatType;
 import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
 import io.zenwave360.generator.utils.JSONPath;
+import io.zenwave360.generator.utils.Maps;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,6 +37,8 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "Entities to generate code for")
     public List<String> entities = new ArrayList<>();
 
+    @DocumentedOption(description = "Annotations to generate code for (ex. aggregate)")
+    public List<String> annotations = new ArrayList<>();
     @DocumentedOption(description = "Skip generating operations for entities annotated with these")
     public List<String> skipForAnnotations = List.of("vo", "embedded", "skip");
 
@@ -65,14 +69,6 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
     protected boolean isGenerateSchemaEntity(Map<String, Object> entity) {
         String entityName = (String) entity.get("name");
         return entities.isEmpty() || entities.contains(entityName);
-    }
-
-    {
-        handlebarsEngine.getHandlebars().registerHelper("skipOperations", (context, options) -> {
-            Map entity = (Map) context;
-            String annotationsFilter = skipForAnnotations.stream().map(a -> "@." + a).collect(Collectors.joining(" || "));
-            return skipForAnnotations.isEmpty() || !((List) JSONPath.get(entity, "$.options[?(" + annotationsFilter + ")]")).isEmpty();
-        });
     }
 
     @Override
@@ -123,7 +119,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
 
     protected String writeAsString(ObjectMapper mapper, Object value) {
         try {
-            return mapper.writeValueAsString(value);
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(value);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -135,7 +131,39 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         String avroJson = writeAsString(jsonMapper, avro);
         String targetFolder = new File(targetFile).getParent();
         targetFolder = targetFolder == null? "avro" : targetFolder + "/avro";
-        return List.of(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name), avroJson, OutputFormatType.JSON.toString()));
+        List<TemplateOutput> avroList = new ArrayList<>();
+
+        avroList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name), avroJson, OutputFormatType.JSON.toString()));
+
+        if(!skipOperations(entityOrEnum) || entityOrEnum.get("fields") == null) {
+            // creating 'fake' jdl entities for message payloads for created/updated/deleted as { id: <id>, payload: <entity> }
+
+            Map<String, Object> fields = new HashMap<>();
+            // id will be created automatically
+//            fields.put("id", Map.of("isEntity", false, "isEnum", false, "name", "id", "type", converter.idType));
+
+            Map<String, Object> deleteMessagePayload = new HashMap<>();
+            deleteMessagePayload.put("name", name + "DeletedPayload");
+            deleteMessagePayload.put("fields", fields);
+            avroJson = writeAsString(jsonMapper, converter.convertToAvro(deleteMessagePayload));
+            avroList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name + "DeletedPayload"), avroJson, OutputFormatType.JSON.toString()));
+
+            fields.put("payload", Map.of("isEntity", true, "isEnum", false, "name", "payload", "type", name));
+
+            Map<String, Object> createdMessagePayload = new HashMap<>();
+            createdMessagePayload.put("name", name + "CreatedPayload");
+            createdMessagePayload.put("fields", fields);
+            avroJson = writeAsString(jsonMapper, converter.convertToAvro(createdMessagePayload));
+            avroList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name + "CreatedPayload"), avroJson, OutputFormatType.JSON.toString()));
+
+            Map<String, Object> updatedMessagePayload = new HashMap<>();
+            updatedMessagePayload.put("name", name + "UpdatedPayload");
+            updatedMessagePayload.put("fields", fields);
+            avroJson = writeAsString(jsonMapper, converter.convertToAvro(updatedMessagePayload));
+            avroList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name + "UpdatedPayload"), avroJson, OutputFormatType.JSON.toString()));
+        }
+
+        return avroList;
     }
 
     public TemplateOutput generateTemplateOutput(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> jdlModel, String schemasAsString) {
@@ -148,7 +176,25 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         return handlebarsEngine.processTemplate(model, template).get(0);
     }
 
+    protected boolean skipOperations(Map entity) {
+        if(!isGenerateSchemaEntity(entity)) {
+            return true;
+        }
+        String annotationsFilter = annotations.stream().map(a -> "@." + a).collect(Collectors.joining(" || "));
+        boolean hasAnnotation = !annotations.isEmpty() && !JSONPath.get(entity, "$.options[?(" + annotationsFilter + ")]", Collections.emptyList()).isEmpty();
+        if(hasAnnotation || skipForAnnotations.isEmpty()) {
+            return false;
+        }
+        String skipAnnotationsFilter = skipForAnnotations.stream().map(a -> "@." + a).collect(Collectors.joining(" || "));
+        boolean hasSkipAnnotation = !JSONPath.get(entity, "$.options[?(" + skipAnnotationsFilter + ")]", Collections.emptyList()).isEmpty();
+        return skipForAnnotations.isEmpty() || hasSkipAnnotation;
+    }
+
     {
+        handlebarsEngine.getHandlebars().registerHelper("skipOperations", (context, options) -> {
+            return skipOperations((Map) context);
+        });
+
         handlebarsEngine.getHandlebars().registerHelper("asTagName", (context, options) -> {
             if(context instanceof String) {
                 return ((String) context).replaceAll("(Service|UseCases)", "");
