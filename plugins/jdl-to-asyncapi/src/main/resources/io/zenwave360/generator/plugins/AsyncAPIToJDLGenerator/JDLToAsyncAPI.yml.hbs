@@ -36,25 +36,29 @@ components:
       name: {{entity.className}}CreatedMessage
       title: Message for {{entity.className}} Created Event
       summary: Message for {{entity.className}} Created Event
+      schemaFormat: {{{schemaFormatString}}}
       payload:
-        $ref: "#/components/schemas/{{entity.className}}CreatedPayload"
+        $ref: {{payloadRef entity "Created"}}
     {{entity.className}}UpdatedMessage:
       name: {{entity.className}}UpdatedMessage
       title: Message for {{entity.className}} Updated Event
       summary: Message for {{entity.className}} Updated Event
+      schemaFormat: {{{schemaFormatString}}}
       payload:
-        $ref: "#/components/schemas/{{entity.className}}UpdatedPayload"
+        $ref: {{payloadRef entity "Updated"}}
     {{entity.className}}DeletedMessage:
       name: {{entity.className}}DeletedMessage
       title: Message for {{entity.className}} Deleted Event
       summary: Message for {{entity.className}} Deleted Event
+      schemaFormat: {{{schemaFormatString}}}
       payload:
-        $ref: "#/components/schemas/{{entity.className}}DeletedPayload"
+        $ref: {{payloadRef entity "Deleted"}}
   {{/unless}}
 {{~/each}}
 
 {{{schemasAsString}}}
 
+{{~#if schemasAsString}}
 {{~#each jdlModel.entities as |entity|}}
   {{~#unless (skipOperations entity)}}
     {{entity.className}}CreatedPayload:
@@ -81,3 +85,4 @@ components:
               format: int64
   {{/unless}}
 {{~/each}}
+{{~/if}}

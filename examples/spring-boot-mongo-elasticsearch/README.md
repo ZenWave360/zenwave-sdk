@@ -46,6 +46,19 @@ jbang zw -p io.zenwave360.generator.plugins.JDLToOpenAPIConfiguration \
     targetFile=src/main/resources/model/openapi.yml
 ```
 
+#### JDL To AsyncAPI
+
+Generate AsyncAPI definition from JDL entities:
+
+- One channel for each entity update events
+- Messages and payloads for each entity Create/Update/Delete events (AVRO and AsyncAPI schema)
+
+```shell
+jbang zw -p io.zenwave360.generator.plugins.JDLToAsyncAPIConfiguration \
+    specFile=src/main/resources/model/orders-model.jdl \
+    targetFile=src/main/resources/model/asyncapi.yml
+```
+
 
 #### SpringMVC Controllers from OpenAPI
 

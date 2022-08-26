@@ -4,17 +4,36 @@ import io.zenwave360.generator.utils.JSONPath;
 import io.zenwave360.generator.utils.Maps;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class JDLEntitiesToSchemasConverter {
-
     private static final List blobTypes = List.of("Blob", "AnyBlob", "ImageBlob");
 
-    public static Map<String, Object> convertEnumToSchema(Map<String, Object> enumValue) {
+    public String jdlBusinessEntityProperty = "x-business-entity";
+
+    public String idType = "string";
+
+    public JDLEntitiesToSchemasConverter withIdType(String idType) {
+        this.idType = idType;
+        return this;
+    }
+
+    public JDLEntitiesToSchemasConverter withJdlBusinessEntityProperty(String jdlBusinessEntityProperty) {
+        this.jdlBusinessEntityProperty = jdlBusinessEntityProperty;
+        return this;
+    }
+
+    public Map<String, Object> convertToSchema(Map<String, Object> entityOrEnum) {
+        boolean isEnum = entityOrEnum.get("values") != null;
+        return isEnum? convertEnumToSchema(entityOrEnum) : convertEntityToSchema(entityOrEnum);
+    }
+    public Map<String, Object> convertEnumToSchema(Map<String, Object> enumValue) {
         Map<String, Object> enumSchema = new LinkedHashMap<>();
         enumSchema.put("type", "string");
+        enumSchema.put(jdlBusinessEntityProperty, enumValue.get("name"));
         if(enumValue.get("comment") != null) {
             enumSchema.put("description", enumValue.get("comment"));
         }
@@ -23,7 +42,7 @@ public class JDLEntitiesToSchemasConverter {
         return enumSchema;
     }
 
-    public static Map<String, Object> convertEntityToSchema(Map<String, Object> entity, String jdlBusinessEntityProperty) {
+    public Map<String, Object> convertEntityToSchema(Map<String, Object> entity) {
         Map<String, Object> schema = new LinkedHashMap<>();
         schema.put("type", "object");
         schema.put(jdlBusinessEntityProperty, entity.get("name"));
@@ -36,7 +55,7 @@ public class JDLEntitiesToSchemasConverter {
         schema.put("properties", properties);
 
         if(!JSONPath.get(entity, "options.embedded", false)) {
-            properties.put("id", Map.of("type", "string"));
+            properties.put("id", Map.of("type", idType));
         }
 
         List<Map<String, Object>> fields = (List) JSONPath.get(entity, "$.fields[*]");

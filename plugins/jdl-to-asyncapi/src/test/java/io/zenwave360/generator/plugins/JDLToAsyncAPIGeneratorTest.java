@@ -44,4 +44,18 @@ public class JDLToAsyncAPIGeneratorTest {
         Assertions.assertEquals("#/components/schemas/CustomerOrder", JSONPath.get(oasSchema,"$.components.schemas.CustomerOrderCreatedPayload.properties.customerOrder.$ref"));
     }
 
+    @Test
+    public void test_jdl_to_asyncapi_with_avro() throws Exception {
+        Map<String, Object> model = loadJDLModelFromResource("io/zenwave360/generator/resources/jdl/orders-model.jdl");
+        JDLToAsyncAPIGenerator generator = new JDLToAsyncAPIGenerator();
+        generator.schemaFormat = JDLToAsyncAPIGenerator.SchemaFormat.avro;
+
+        List<TemplateOutput> outputTemplates = generator.generate(model);
+
+        System.out.println(outputTemplates.get(outputTemplates.size() - 1).getContent());
+
+        Map<String, Object> oasSchema = mapper.readValue(outputTemplates.get(outputTemplates.size() - 1).getContent(), Map.class);
+        Assertions.assertEquals(3, ((List) JSONPath.get(oasSchema,"$.channels.customer-orders.publish.message.oneOf")).size());
+    }
+
 }

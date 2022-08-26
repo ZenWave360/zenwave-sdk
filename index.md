@@ -82,7 +82,9 @@ Whether you are:
 - [ ] Standard Plugins
   - [ ] JDL Backend Application (flexible hexagonal architecture)
     - [x] Domain Entities,
-    - [x] Inbound: Service Ports, DTOs, Mappers and CRUD implementation
+    - [x] Inbound
+      - [x] Service Ports, DTOs, Mappers
+      - [x] Implementation for CRUD operations
       - [x] Acceptance Tests: SpringData InMemory Repositories
     - [x] Outbound: SpringData Repositories, ElasticSearch... (for REST or Async see other plugins)
     - [x] Adapters:

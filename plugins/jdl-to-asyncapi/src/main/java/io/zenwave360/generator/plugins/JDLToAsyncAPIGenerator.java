@@ -5,14 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.generators.AbstractJDLGenerator;
+import io.zenwave360.generator.generators.JDLEntitiesToAvroConverter;
 import io.zenwave360.generator.generators.JDLEntitiesToSchemasConverter;
 import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.OutputFormatType;
-import io.zenwave360.generator.templating.TemplateEngine;
 import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
 import io.zenwave360.generator.utils.JSONPath;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -20,12 +21,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static io.zenwave360.generator.generators.JDLEntitiesToSchemasConverter.convertEntityToSchema;
-import static io.zenwave360.generator.generators.JDLEntitiesToSchemasConverter.convertEnumToSchema;
-
 public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
 
-    ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+    ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+    ObjectMapper jsonMapper = new ObjectMapper();
+
+    enum SchemaFormat {
+        schema, avro
+    }
 
     public String sourceProperty = "jdl";
 
@@ -39,6 +42,12 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
     public String targetFile = "asyncapi.yml";
     @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
     public String jdlBusinessEntityProperty = "x-business-entity";
+
+    @DocumentedOption(description = "Schema format for messages' payload")
+    public SchemaFormat schemaFormat = SchemaFormat.schema;
+
+    public String defaultSchemaFormat = "application/vnd.aai.asyncapi;version=2.4.0";
+    public String avroSchemaFormat = "application/vnd.apache.avro+json;version=1.9.0";
 
     public JDLToAsyncAPIGenerator withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;
@@ -68,6 +77,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
 
     @Override
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {
+        List<TemplateOutput> outputList = new ArrayList<>();
         Map<String, Object> jdlModel = getJDLModel(contextModel);
         List<String> serviceNames = JSONPath.get(jdlModel, "$.options.options.service[*].value");
         ((Map) jdlModel).put("serviceNames", serviceNames);
@@ -76,36 +86,56 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         Map<String, Object> schemas = new LinkedHashMap<>();
         JSONPath.set(oasSchemas, "components.schemas", schemas);
 
+        JDLEntitiesToAvroConverter toAvroConverter = new JDLEntitiesToAvroConverter().withIdType("string").withNamespace(basePackage);
+        JDLEntitiesToSchemasConverter toSchemasConverter = new JDLEntitiesToSchemasConverter().withIdType("string").withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
 
         List<Map<String, Object>> entities = (List) JSONPath.get(jdlModel, "$.entities[*]");
-        for (Map<String, Object> entity : entities) {
+        List<Map<String, Object>> enums = (List) JSONPath.get(jdlModel, "$.enums.enums[*]");
+        List<Map> entitiesAndEnums = new ArrayList<>();
+        entitiesAndEnums.addAll(entities);
+        entitiesAndEnums.addAll(enums);
+
+        for (Map<String, Object> entity : entitiesAndEnums) {
             if(!isGenerateSchemaEntity(entity)) {
                 continue;
             }
-            String entityName = (String) entity.get("name");
-            Map<String, Object> asyncAPISchema = convertEntityToSchema(entity, jdlBusinessEntityProperty);
-            schemas.put(entityName, asyncAPISchema);
-        }
-
-        List<Map<String, Object>> enums = (List) JSONPath.get(jdlModel, "$.enums.enums[*]");
-        for (Map<String, Object> enumValue : enums) {
-            if(!isGenerateSchemaEntity(enumValue)) {
-                continue;
+            if(schemaFormat == SchemaFormat.schema) {
+                String entityName = (String) entity.get("name");
+                Map<String, Object> asyncAPISchema = toSchemasConverter.convertToSchema(entity);
+                schemas.put(entityName, asyncAPISchema);
             }
-            Map<String, Object> enumSchema = convertEnumToSchema(enumValue);
-            schemas.put((String) enumValue.get("name"), enumSchema);
+            if(schemaFormat == SchemaFormat.avro) {
+                outputList.addAll(convertToAvro(toAvroConverter, entity));
+            }
         }
 
-        String asyncAPISchemasString = null;
+
+        String asyncAPISchemasString = "";
+        if(schemaFormat == SchemaFormat.schema) {
+            asyncAPISchemasString = writeAsString(yamlMapper, oasSchemas);
+            // remove first line
+            asyncAPISchemasString = asyncAPISchemasString.substring(asyncAPISchemasString.indexOf("components:") + 12);
+        }
+
+        outputList.add(generateTemplateOutput(contextModel, jdlToAsyncAPITemplate, jdlModel, asyncAPISchemasString));
+        return outputList;
+    }
+
+    protected String writeAsString(ObjectMapper mapper, Object value) {
         try {
-            asyncAPISchemasString = mapper.writeValueAsString(oasSchemas);
+            return mapper.writeValueAsString(value);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        // remove first line
-        asyncAPISchemasString = asyncAPISchemasString.substring(asyncAPISchemasString.indexOf("\n") + 1);
+    }
 
-        return List.of(generateTemplateOutput(contextModel, jdlToAsyncAPITemplate, jdlModel, asyncAPISchemasString));
+    protected List<TemplateOutput> convertToAvro(JDLEntitiesToAvroConverter converter, Map<String, Object> entityOrEnum) {
+        String name = (String) entityOrEnum.get("name");
+        Map avro = converter.convertToAvro(entityOrEnum);
+        String avroJson = writeAsString(jsonMapper, avro);
+        String targetFolder = new File(targetFile).getParent();
+        targetFolder = targetFolder == null? "avro" : targetFolder + "/avro";
+        return List.of(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name), avroJson, OutputFormatType.JSON.toString()));
     }
 
     public TemplateOutput generateTemplateOutput(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> jdlModel, String schemasAsString) {
@@ -113,17 +143,26 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         model.putAll(this.asConfigurationMap());
         model.put("context", contextModel);
         model.put("jdlModel", jdlModel);
+        model.put("schemaFormatString", schemaFormat == SchemaFormat.schema? defaultSchemaFormat : avroSchemaFormat);
         model.put("schemasAsString", schemasAsString);
-        return getTemplateEngine().processTemplate(model, template).get(0);
+        return handlebarsEngine.processTemplate(model, template).get(0);
     }
 
-    protected TemplateEngine getTemplateEngine() {
+    {
         handlebarsEngine.getHandlebars().registerHelper("asTagName", (context, options) -> {
             if(context instanceof String) {
                 return ((String) context).replaceAll("(Service|UseCases)", "");
             }
             return "Default";
         });
-        return handlebarsEngine;
+
+        handlebarsEngine.getHandlebars().registerHelper("payloadRef", (context, options) -> {
+            Map entity = (Map) context;
+            String eventTypeName = options.param(0);
+            if(schemaFormat == SchemaFormat.avro) {
+                return String.format("avro/%s%sPayload.avsc", entity.get("className"), eventTypeName);
+            }
+            return String.format("#/components/schemas/%s%sPayload", entity.get("className"), eventTypeName);
+        });
     }
 }

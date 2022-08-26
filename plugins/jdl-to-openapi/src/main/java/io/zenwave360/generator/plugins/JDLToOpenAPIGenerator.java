@@ -21,9 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static io.zenwave360.generator.generators.JDLEntitiesToSchemasConverter.convertEntityToSchema;
-import static io.zenwave360.generator.generators.JDLEntitiesToSchemasConverter.convertEnumToSchema;
-
 public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
 
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -83,6 +80,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
         Map<String, Object> schemas = new LinkedHashMap<>();
         JSONPath.set(oasSchemas, "components.schemas", schemas);
 
+        JDLEntitiesToSchemasConverter converter = new JDLEntitiesToSchemasConverter().withIdType("string").withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
 
         List<Map<String, Object>> entities = (List) JSONPath.get(jdlModel, "$.entities[*]");
         for (Map<String, Object> entity : entities) {
@@ -90,7 +88,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
                 continue;
             }
             String entityName = (String) entity.get("name");
-            Map<String, Object> openAPISchema = convertEntityToSchema(entity, jdlBusinessEntityProperty);
+            Map<String, Object> openAPISchema = converter.convertToSchema(entity);
             schemas.put(entityName, openAPISchema);
 
             Map<String, Object> paginatedSchema = new HashMap<>();
@@ -111,7 +109,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
             if(!isGenerateSchemaEntity(enumValue)) {
                 continue;
             }
-            Map<String, Object> enumSchema = convertEnumToSchema(enumValue);
+            Map<String, Object> enumSchema = converter.convertToSchema(enumValue);
             schemas.put((String) enumValue.get("name"), enumSchema);
         }
 
