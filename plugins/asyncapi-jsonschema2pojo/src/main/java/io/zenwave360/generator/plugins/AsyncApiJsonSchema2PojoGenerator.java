@@ -18,16 +18,23 @@ import io.zenwave360.generator.utils.NamingUtils;
 import io.zenwave360.jsonrefparser.$Ref;
 import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jsonschema2pojo.AnnotationStyle;
 import org.jsonschema2pojo.Annotator;
 import org.jsonschema2pojo.AnnotatorFactory;
 import org.jsonschema2pojo.ContentResolver;
+import org.jsonschema2pojo.DefaultGenerationConfig;
 import org.jsonschema2pojo.FileCodeWriterWithEncoding;
 import org.jsonschema2pojo.GenerationConfig;
+import org.jsonschema2pojo.Jackson2Annotator;
 import org.jsonschema2pojo.Jsonschema2Pojo;
 import org.jsonschema2pojo.Schema;
+import org.jsonschema2pojo.SchemaGenerator;
+import org.jsonschema2pojo.SchemaMapper;
 import org.jsonschema2pojo.SchemaStore;
 import org.jsonschema2pojo.SourceType;
 import org.jsonschema2pojo.rules.RuleFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +51,8 @@ import static org.jsonschema2pojo.SourceType.YAMLSCHEMA;
 
 public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator {
 
+    private Logger log = LoggerFactory.getLogger(getClass());
+
     public String sourceProperty = "api";
 
     @DocumentedOption(description = "API Specification File")
@@ -57,6 +66,8 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
     @DocumentedOption(description = "Target folder to generate code to. If left empty, it will print to stdout.")
     public File targetFolder;
+
+    public String originalRefProperty = "x--originalRef";
 
     public AsyncApiJsonSchema2PojoGenerator withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;
@@ -115,8 +126,6 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             final JsonSchema2PojoConfiguration config = JsonSchema2PojoConfiguration.of(jsonschema2pojo);
             config.setTargetDirectory(targetFolder);
             config.setTargetPackage(modelPackage);
-            SourceType sourceType = AsyncApiProcessor.SchemaFormatType.isYamlFormat(schemaFormatType)? YAMLSCHEMA : JSONSCHEMA;
-            config.setSourceType(sourceType);
 
             String messageClassName = NamingUtils.asJavaTypeName(name); // TODO
             if(AsyncApiProcessor.SchemaFormatType.isNativeFormat(schemaFormatType)) {
@@ -136,38 +145,27 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
         }
         Jsonschema2Pojo.generate(config, null);
     }
+    public void generateFromNativeFormat(JsonSchema2PojoConfiguration config, Map<String, Object> payload, String packageName, String className) throws IOException {
+        var json = this.convertToJson(payload, packageName);
 
-    private final RuleFactory ruleFactory = new RuleFactory();
-    public void generateFromNativeFormat(GenerationConfig config, Map<String, Object> payload, String packageName, String className) throws IOException {
-        final CodeWriter sourcesWriter = new FileCodeWriterWithEncoding(targetFolder, config.getOutputEncoding());
-        final CodeWriter resourcesWriter = new FileCodeWriterWithEncoding(targetFolder, config.getOutputEncoding());
-
-        final Annotator annotator = this.getAnnotator(config);
-
-        this.ruleFactory.setAnnotator(annotator);
-        this.ruleFactory.setGenerationConfig(config);
-        // ruleFactory.setLogger(logger);
-        this.ruleFactory.setSchemaStore(new SchemaStore(new ContentResolver(new YAMLFactory())));
-
-        final JCodeModel codeModel = new JCodeModel();
-        final JPackage jpackage = codeModel._package(packageName);
-        final JsonNode schemaNode = this.convertToObjectNode(payload, packageName);
-        this.ruleFactory.getSchemaRule().apply(className, schemaNode, null, jpackage, new Schema(null, schemaNode, null));
+        SchemaMapper mapper = new SchemaMapper(new RuleFactory(config , new Jackson2Annotator(config), new SchemaStore()), new SchemaGenerator());
+        var sourcesWriter = new FileCodeWriterWithEncoding(targetFolder, config.getOutputEncoding());
+        var resourcesWriter = new FileCodeWriterWithEncoding(targetFolder, config.getOutputEncoding());
+        var codeModel = new JCodeModel();
+        mapper.generate(codeModel, className, packageName, json);
         codeModel.build(sourcesWriter, resourcesWriter);
     }
 
-    private final ObjectMapper jacksonMapper = new ObjectMapper(new YAMLFactory());
-    protected JsonNode convertToObjectNode(final Map<String, Object> payload, final String packageName) throws JsonProcessingException {
-        this.jacksonMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-//        this.jacksonMapper.addMixIn(message.getPayload().getClass(), JsonIncludeOriginalRefMixin.class);
-        String yml = this.jacksonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(payload);
-        yml = RegExUtils.replaceAll(yml, "originalRef: \".*#/components/schemas/", "javaType: \"" + packageName + ".");
+    private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+    private final ObjectMapper jsonMapper = new ObjectMapper();
+
+    protected String convertToJson(final Map<String, Object> payload, final String packageName) throws JsonProcessingException {
+        this.yamlMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        String yml = this.yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(payload);
+        yml = RegExUtils.replaceAll(yml, originalRefProperty + ": \".*#/components/schemas/", "javaType: \"" + packageName + ".");
         yml = RegExUtils.replaceAll(yml, "ref: \".*#/components/schemas/", "javaType: \"" + packageName + ".");
-        return this.jacksonMapper.readTree(yml);
+        Object jsonObject = this.yamlMapper.readTree(yml);
+        return this.jsonMapper.writeValueAsString(jsonObject);
     }
 
-    protected Annotator getAnnotator(final GenerationConfig config) {
-        final AnnotatorFactory factory = new AnnotatorFactory(config);
-        return factory.getAnnotator(factory.getAnnotator(config.getAnnotationStyle()), factory.getAnnotator(config.getCustomAnnotator()));
-    }
 }

@@ -92,7 +92,7 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
 	private String customDatePattern = null;
 	private String customTimePattern = null;
 	private String customDateTimePattern = null;
-	private String refFragmentPathDelimiters = null;
+	private String refFragmentPathDelimiters = "#/.";
 	private SourceSortOrder sourceSortOrder = SourceSortOrder.OS;
     public static JsonSchema2PojoConfiguration of(Map<String, String> settings) {
 		JsonSchema2PojoConfiguration config = new JsonSchema2PojoConfiguration();
@@ -146,7 +146,7 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
 
 	private static boolean getBoolean(Map<String, String> s, String key, boolean defaultValue) {
 		if (s.containsKey(key)) {
-			return new Boolean(s.get(key));
+			return Boolean.getBoolean(s.get(key));
 		}
 		return defaultValue;
 	}

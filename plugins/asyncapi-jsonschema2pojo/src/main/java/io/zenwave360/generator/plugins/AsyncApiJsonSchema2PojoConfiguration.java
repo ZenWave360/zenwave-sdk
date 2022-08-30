@@ -13,7 +13,7 @@ public class AsyncApiJsonSchema2PojoConfiguration extends Configuration {
 
     public AsyncApiJsonSchema2PojoConfiguration() {
         super();
-        withChain(DefaultYamlParser.class, AsyncApiProcessor.class, AsyncApiJsonSchema2PojoGenerator.class);
+        withChain(DefaultYamlParser.class, AsyncApiProcessor.class, OriginalRefProcessor.class, AsyncApiJsonSchema2PojoGenerator.class);
     }
 
     @Override
