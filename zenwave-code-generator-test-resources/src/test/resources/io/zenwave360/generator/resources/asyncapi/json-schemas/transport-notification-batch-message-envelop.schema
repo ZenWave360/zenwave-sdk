@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
   "$id": "http://logistica.inditex.com/schemas/hit-nds-p2p-message.json",
-  "javaType": "com.inditex.logistica.trnotsvc.schema.TransportNotificationEventBatch",
+  "javaType": "io.example.transport.schema.TransportNotificationEventBatch",
   "type": "object",
   "additionalProperties": false,
   "title": "TransportNotificationEventBatch",
@@ -13,7 +13,7 @@
   "properties": {
     "metadata": {
       "$id": "#/properties/metadata",
-      "javaType": "com.inditex.logistica.trnotsvc.schema.TransportNotificationEventBatchMetadata",
+      "javaType": "io.example.transport.schema.TransportNotificationEventBatchMetadata",
       "type": "object",
       "additionalProperties": false,
       "title": "The Metadata Schema",

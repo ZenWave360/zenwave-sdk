@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
   "$id": "http://logistica.inditex.com/schemas/truck-stop-delayed-event.json",
-  "javaType": "com.inditex.logistica.trnotsvc.schema.TruckStopDelayedEvent",
+  "javaType": "io.example.transport.schema.TruckStopDelayedEvent",
   "type": "object",
   "additionalProperties": false,
   "title": "TruckStopDelayedEvent",
