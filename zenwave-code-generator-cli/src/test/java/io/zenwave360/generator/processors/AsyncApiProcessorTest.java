@@ -96,8 +96,8 @@ public class AsyncApiProcessorTest {
         List<String> paramTypes = get(processed,"$..x--messages..x--javaType");
         Assertions.assertEquals(4, paramTypes.size());
         Assertions.assertEquals("org.asyncapi.tools.example.event.cart.v1.LinesAddedEvent", paramTypes.get(0));
-        Assertions.assertEquals("CreateProduct", paramTypes.get(1));
-        Assertions.assertEquals("CreateProductWithSchemaNoName", paramTypes.get(2));
+        Assertions.assertEquals("ProductPayload", paramTypes.get(1));
+        Assertions.assertEquals("ProductPayload", paramTypes.get(2));
         Assertions.assertEquals("io.example.schema.TransportNotificationEventData", paramTypes.get(3));
     }
 }

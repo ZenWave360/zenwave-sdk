@@ -7,14 +7,14 @@ import {{modelPackage}}.*;
 /**
  * {{asyncapi.description}}
  */
-public interface {{apiClassName}} {
+public interface I{{apiClassName}} {
 
 {{#each operations as |operation|}}
     {{#each operation.x--messages as |message|}}
     /**
      * {{operation.description}}
      */
-    boolean {{operation.operationId}}{{#if (size operation.x--messages) eq 1}}_{{message.name}}{{/if}}({{message.x--javaType}} {{message.name}}, Header... headers);
+    boolean {{operation.operationId}}({{message.x--javaType}} payload, Header... headers);
     {{/each}}
 {{/each}}
 }

@@ -23,19 +23,19 @@ public class GeneratorMojo extends AbstractMojo {
     /**
      * The name of the generator to use.
      */
-    @Parameter(name = "generatorName", property = "asyncapi.generator.plugin", required = true)
+    @Parameter(name = "generatorName", property = "zenwave.generatorName", required = true)
     private String generatorName;
 
     /**
      * Location of the JSON/YAML spec, as URL or file.
      */
-    @Parameter(name = "inputSpec", property = "zenwave.generator.inputSpec", required = true)
+    @Parameter(name = "inputSpec", property = "zenwave.inputSpec", required = true)
     private String inputSpec;
 
     /**
      * Location of the output directory.
      */
-    @Parameter(name = "targetFolder", property = "zenwave.generator.output", defaultValue = "${project.build.directory}/generated-sources/zenwave")
+    @Parameter(name = "targetFolder", property = "zenwave.output", defaultValue = "${project.build.directory}/generated-sources/zenwave")
     private File targetFolder;
 
 
@@ -47,7 +47,7 @@ public class GeneratorMojo extends AbstractMojo {
     private boolean addCompileSourceRoot = true;
 
     /**
-     * A map of language-specific parameters as passed with the -c option to the command line
+     * A map of specific options for the called generator plugin.
      */
     @Parameter(name = "configOptions")
     private Map<String, String> configOptions;
@@ -55,10 +55,10 @@ public class GeneratorMojo extends AbstractMojo {
     /**
      * A configOptions string as 'key=value1,value2\nkey2=value3'.
      */
-    @Parameter(name = "configKeyValueOptions", property = "zenwave.generator.configOptions")
+    @Parameter(name = "configKeyValueOptions", property = "zenwave.configOptions")
     private String configKeyValueOptions;
 
-    @Parameter(name = "skip", property = "zenwave.generator.skip", required = false, defaultValue = "false")
+    @Parameter(name = "skip", property = "zenwave.skip", required = false, defaultValue = "false")
     private Boolean skip;
 
     /**

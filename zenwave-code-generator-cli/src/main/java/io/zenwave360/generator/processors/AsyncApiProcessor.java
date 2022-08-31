@@ -1,6 +1,7 @@
 package io.zenwave360.generator.processors;
 
 import com.jayway.jsonpath.JsonPath;
+import io.zenwave360.generator.parsers.Model;
 import io.zenwave360.generator.utils.JSONPath;
 
 import java.util.ArrayList;
@@ -76,7 +77,14 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
 
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
-        Map<String, Object> apiModel = targetProperty != null? (Map<String, Object>) contextModel.get(targetProperty) : contextModel;
+        Model apiModel = targetProperty != null? (Model) contextModel.get(targetProperty) : (Model) contextModel;
+
+        apiModel.getRefs().getOriginalRefsList().forEach(pair -> {
+            if(pair.getValue() instanceof Map) {
+                ((Map) pair.getValue()).put("x--original-$ref", pair.getKey().getRef());
+            }
+        });
+
 
         List<Map<String, Object>> traitsParents = JSONPath.get(apiModel, "$..[?(@.traits)]");
         for (Map<String, Object> traitParent : traitsParents) {
@@ -108,6 +116,11 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
             if(!message.getValue().containsKey("name")) {
                 message.getValue().put("name", message.getKey());
             }
+        }
+
+        Map<String, Map> schemas = JSONPath.get(apiModel, "$.components.schemas", Collections.emptyMap());
+        for (Map.Entry<String, Map> entry : schemas.entrySet()) {
+            entry.getValue().put("x--schema-name", entry.getKey());
         }
 
         List<Map<String, Object>> messages = JSONPath.get(apiModel, "$.channels..x--messages[*]");
@@ -155,7 +168,10 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
             javaType = JsonPath.read(message, "payload.javaType");
         }
         if("asyncapi".equals(schemaFormat) || "openapi".equals(schemaFormat)) {
-            javaType = normalizeTagName((String) message.getOrDefault("x-javaType", message.get("name")));
+            javaType = normalizeTagName(JSONPath.get(message, "payload.x--schema-name"));
+            if(javaType == null) {
+                javaType = normalizeTagName((String) message.getOrDefault("x-javaType", message.get("name")));
+            }
         }
 
         if(javaType != null) {

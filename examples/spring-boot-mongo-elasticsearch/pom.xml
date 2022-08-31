@@ -21,6 +21,8 @@
 		<spring-cloud.version>2021.0.3</spring-cloud.version>
 		<testcontainers.version>1.17.2</testcontainers.version>
 
+		<zenwave.version>0.2.3-SNAPSHOT</zenwave.version>
+
 		<!-- Plugin versions -->
 		<maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
 		<maven-site-plugin.version>3.9.1</maven-site-plugin.version>
@@ -212,6 +214,13 @@
 				<artifactId>modernizer-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>2.5.2</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.openapitools</groupId>
 				<artifactId>openapi-generator-maven-plugin</artifactId>
 				<version>5.4.0</version>
@@ -244,11 +253,55 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<artifactId>maven-install-plugin</artifactId>
-				<version>2.5.2</version>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
+				<groupId>io.github.zenwave360</groupId>
+				<artifactId>zenwave-code-generator-mojo</artifactId>
+				<version>${zenwave.version}</version>
+				<executions>
+					<execution>
+						<id>generate-asyncapi-producer</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<generatorName>spring-cloud-streams3</generatorName>
+							<inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
+							<configOptions>
+								<role>PROVIDER</role>
+								<style>IMPERATIVE</style>
+								<apiPackage>io.zenwave360.example.adapters.events</apiPackage>
+								<modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
+							</configOptions>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate-asyncapi-producer-dtos</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<generatorName>jsonschema2pojo</generatorName>
+							<inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
+							<configOptions>
+								<apiPackage>io.zenwave360.example.adapters.events</apiPackage>
+								<modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
+							</configOptions>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>io.github.zenwave360.zenwave-code-generator.plugins</groupId>
+						<artifactId>asyncapi-spring-cloud-streams3</artifactId>
+						<version>${zenwave.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>io.github.zenwave360.zenwave-code-generator.plugins</groupId>
+						<artifactId>asyncapi-jsonschema2pojo</artifactId>
+						<version>${zenwave.version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 		<pluginManagement>

@@ -19,10 +19,10 @@ public class SpringCloudStream3Configuration extends Configuration {
     }
 
     @Override
-    public Configuration withOptions(Map<String, Object> options) {
-        if(!options.containsKey("targetFolder")) {
-            withChain(DefaultYamlParser.class, AsyncApiProcessor.class, SpringCloudStreams3Generator.class, JavaFormatter.class, TemplateStdoutWriter.class);
+    public <T extends Configuration> T processOptions() {
+        if(!getOptions().containsKey("targetFolder")) {
+            replaceInChain(TemplateFileWriter.class, TemplateStdoutWriter.class);
         }
-        return super.withOptions(options);
+        return super.processOptions();
     }
 }

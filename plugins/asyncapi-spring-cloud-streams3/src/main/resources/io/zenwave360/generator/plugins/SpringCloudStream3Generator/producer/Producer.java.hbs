@@ -18,7 +18,7 @@ import {{modelPackage}}.*;
  * {{asyncapi.description}}
  */
 @Component
-public class {{apiClassName}} implements {{interfaceClassName}} {
+public class {{apiClassName}} implements I{{apiClassName}} {
 
     @Autowired
     private StreamBridge streamBridge;
@@ -28,7 +28,7 @@ public class {{apiClassName}} implements {{interfaceClassName}} {
     /**
      * {{operation.description}}
      */
-    boolean {{operation.operationId}}{{#if (size operation.x--messages) eq 1}}_{{message.name}}{{/if}}({{message.x--javaType}} {{message.name}}, Header... headers) {
+    public boolean {{operation.operationId}}({{message.x--javaType}} payload, Header... headers) {
         MimeType outputContentType = MimeType.valueOf("{{operation.operation.message.contentType}}");
         Message message = MessageBuilder.createMessage(payload, asMessageHeaders(headers));
         return streamBridge.send("{{operation.x--operationIdKebabCase}}", message, outputContentType);

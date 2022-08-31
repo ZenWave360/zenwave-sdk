@@ -4,6 +4,7 @@ import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.generators.Generator;
 import io.zenwave360.generator.templating.TemplateOutput;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +12,8 @@ public class NoOpGenerator implements Generator {
 
     @DocumentedOption(description = "This is the plugin option description")
     public String pluginOption;
+
+    public List<String> array = new ArrayList<>();
 
     public static Map<String, Object> context;
 

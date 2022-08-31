@@ -19,13 +19,11 @@ public class Header {
         return new Header(name, value);
     }
 
-    public static Map<String, Object> asMap(final Header[] headers, final Type type) {
+    public static Map<String, Object> asMap(final Header[] headers) {
         final Map<String, Object> map = new HashMap<String, Object>();
         if (headers != null) {
             for (final Header header : headers) {
-                if ((type == null) || type.equals(header.getType())) {
-                    map.put(header.getName(), header.getValue());
-                }
+                map.put(header.getName(), header.getValue());
             }
         }
         return map;

@@ -7,6 +7,7 @@ import io.zenwave360.generator.processors.AsyncApiProcessor;
 import io.zenwave360.generator.writers.TemplateFileWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -50,5 +51,21 @@ public class MainTest {
         Assertions.assertTrue(NoOpGenerator.context.get("asyncapi1") != null);
         Assertions.assertTrue(NoOpGenerator.context.get("asyncapi2") != null);
         Assertions.assertNotSame(NoOpGenerator.context.get("asyncapi2"), NoOpGenerator.context.get("asyncapi1"));
+    }
+
+    @Test
+    @Disabled
+    public void testMain_with_array_options() {
+        List<String> processors = List.of(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class)
+                .stream().map(c -> c.getName()).collect(Collectors.toList());
+
+        Main.main(
+                "-c", StringUtils.join(processors, ","),
+                "specFile=classpath:io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml",
+                "targetFolder=target/zenwave/out",
+                "inner.specFile=target/zenwave/out",
+                "inner.targetFolder=target/zenwave/out",
+                "array.0=one"
+        );
     }
 }
