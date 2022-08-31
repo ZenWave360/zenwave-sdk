@@ -67,7 +67,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     @DocumentedOption(description = "Target folder to generate code to. If left empty, it will print to stdout.")
     public File targetFolder;
 
-    public String originalRefProperty = "x--originalRef";
+    public String originalRefProperty = "x--original-\\$ref";
 
     public AsyncApiJsonSchema2PojoGenerator withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;
