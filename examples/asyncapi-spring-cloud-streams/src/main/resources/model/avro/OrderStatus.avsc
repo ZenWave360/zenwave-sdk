@@ -1,0 +1,6 @@
+{
+  "type" : "enum",
+  "name" : "OrderStatus",
+  "namespace" : "io.example.domain.model",
+  "symbols" : [ "DELIVERED", "CONFIRMED", "SHIPPED" ]
+}

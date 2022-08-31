@@ -1,0 +1,9 @@
+{
+  "type" : "record",
+  "name" : "PaymentDetails",
+  "namespace" : "io.example.domain.model",
+  "fields" : [ {
+    "name" : "creditCardNumber",
+    "type" : [ null, "string" ]
+  } ]
+}

@@ -1,0 +1,54 @@
+/* Customers */
+@aggregate
+@search(elasticsearch)
+@searchCriteria
+entity Customer {
+	username String required minlength(3) maxlength(250),
+	password String required minlength(3) maxlength(250),
+	email String required minlength(3) maxlength(250),
+	firstName String required minlength(3) maxlength(250),
+	lastName String required minlength(3) maxlength(250)
+}
+
+
+/* Orders */
+enum OrderStatus { CONFIRMED, SHIPPED, DELIVERED }
+
+@aggregate
+@searchCriteria(CustomerOrderSearchCriteria)
+entity CustomerOrder { // Order is a reserved word
+	date Instant,
+	status OrderStatus
+	customer Customer
+	orderedItems OrderedItem[]
+	paymentDetails PaymentDetails[]
+	shippingDetails ShippingDetails
+}
+
+@skip
+entity CustomerOrderSearchCriteria {
+    status OrderStatus
+    dateFrom Instant
+    dateTo Instant
+}
+
+@embedded
+entity OrderedItem {
+	catalogItemId Long,
+	name String required minlength(3) maxlength(250),
+	price BigDecimal required,
+	quantity Integer
+}
+
+@embedded
+entity PaymentDetails {
+	creditCardNumber String
+}
+
+@embedded
+entity ShippingDetails {
+	address String
+}
+
+service Customer with CustomerUseCases
+service CustomerOrder with CustomerOrderUseCases

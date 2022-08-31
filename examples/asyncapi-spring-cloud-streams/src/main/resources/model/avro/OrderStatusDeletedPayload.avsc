@@ -1,0 +1,9 @@
+{
+  "type" : "record",
+  "name" : "OrderStatusDeletedPayload",
+  "namespace" : "io.example.domain.model",
+  "fields" : [ {
+    "name" : "id",
+    "type" : "string"
+  } ]
+}

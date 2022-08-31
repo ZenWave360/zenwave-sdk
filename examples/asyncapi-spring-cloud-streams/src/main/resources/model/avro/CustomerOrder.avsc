@@ -1,0 +1,29 @@
+{
+  "type" : "record",
+  "name" : "CustomerOrder",
+  "namespace" : "io.example.domain.model",
+  "fields" : [ {
+    "name" : "id",
+    "type" : "string"
+  }, {
+    "name" : "date",
+    "type" : [ null, "string" ]
+  }, {
+    "name" : "shippingDetails",
+    "type" : "ShippingDetails"
+  }, {
+    "type" : "array",
+    "items" : "OrderedItem",
+    "java-class" : "java.util.List"
+  }, {
+    "type" : "array",
+    "items" : "PaymentDetails",
+    "java-class" : "java.util.List"
+  }, {
+    "name" : "status",
+    "type" : "OrderStatus"
+  }, {
+    "name" : "customer",
+    "type" : "Customer"
+  } ]
+}

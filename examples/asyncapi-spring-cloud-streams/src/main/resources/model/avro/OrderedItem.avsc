@@ -1,0 +1,18 @@
+{
+  "type" : "record",
+  "name" : "OrderedItem",
+  "namespace" : "io.example.domain.model",
+  "fields" : [ {
+    "name" : "catalogItemId",
+    "type" : [ null, "long" ]
+  }, {
+    "name" : "name",
+    "type" : "string"
+  }, {
+    "name" : "quantity",
+    "type" : [ null, "integer" ]
+  }, {
+    "name" : "price",
+    "type" : "double"
+  } ]
+}

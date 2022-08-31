@@ -1,0 +1,24 @@
+{
+  "type" : "record",
+  "name" : "Customer",
+  "namespace" : "io.example.domain.model",
+  "fields" : [ {
+    "name" : "id",
+    "type" : "string"
+  }, {
+    "name" : "firstName",
+    "type" : "string"
+  }, {
+    "name" : "lastName",
+    "type" : "string"
+  }, {
+    "name" : "password",
+    "type" : "string"
+  }, {
+    "name" : "email",
+    "type" : "string"
+  }, {
+    "name" : "username",
+    "type" : "string"
+  } ]
+}

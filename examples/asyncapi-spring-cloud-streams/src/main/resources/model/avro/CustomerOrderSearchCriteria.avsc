@@ -1,0 +1,18 @@
+{
+  "type" : "record",
+  "name" : "CustomerOrderSearchCriteria",
+  "namespace" : "io.example.domain.model",
+  "fields" : [ {
+    "name" : "id",
+    "type" : "string"
+  }, {
+    "name" : "dateTo",
+    "type" : [ null, "string" ]
+  }, {
+    "name" : "dateFrom",
+    "type" : [ null, "string" ]
+  }, {
+    "name" : "status",
+    "type" : "OrderStatus"
+  } ]
+}

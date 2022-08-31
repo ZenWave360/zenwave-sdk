@@ -1,0 +1,9 @@
+{
+  "type" : "record",
+  "name" : "ShippingDetails",
+  "namespace" : "io.example.domain.model",
+  "fields" : [ {
+    "name" : "address",
+    "type" : [ null, "string" ]
+  } ]
+}

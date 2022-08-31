@@ -1,0 +1,85 @@
+asyncapi: 2.4.0
+info:
+  title: Zenwave 360 Generated API
+  version: 0.0.1
+
+defaultContentType: application/json
+
+tags:
+  - name: "Default"
+  - name: "Customer"
+  - name: "CustomerOrder"
+
+channels:
+  customers:
+    publish:
+      summary: Customer Channel Events
+      operationId: onCustomerEvent
+      tags:
+        - name: Customer
+      message:
+        oneOf:
+          - $ref: "#/components/messages/CustomerCreatedMessage"
+          - $ref: "#/components/messages/CustomerUpdatedMessage"
+          - $ref: "#/components/messages/CustomerDeletedMessage"
+  
+  customer-orders:
+    publish:
+      summary: CustomerOrder Channel Events
+      operationId: onCustomerOrderEvent
+      tags:
+        - name: CustomerOrder
+      message:
+        oneOf:
+          - $ref: "#/components/messages/CustomerOrderCreatedMessage"
+          - $ref: "#/components/messages/CustomerOrderUpdatedMessage"
+          - $ref: "#/components/messages/CustomerOrderDeletedMessage"
+  
+
+components:
+  messages:
+    CustomerCreatedMessage:
+      name: CustomerCreated
+      title: Message for Customer Created Event
+      summary: Message for Customer Created Event
+      schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+      payload:
+        $ref: "avro/CustomerCreatedPayload.avsc"
+    CustomerUpdatedMessage:
+      name: CustomerUpdated
+      title: Message for Customer Updated Event
+      summary: Message for Customer Updated Event
+      schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+      payload:
+        $ref: "avro/CustomerUpdatedPayload.avsc"
+    CustomerDeletedMessage:
+      name: CustomerDeleted
+      title: Message for Customer Deleted Event
+      summary: Message for Customer Deleted Event
+      schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+      payload:
+        $ref: "avro/CustomerDeletedPayload.avsc"
+  
+    CustomerOrderCreatedMessage:
+      name: CustomerOrderCreated
+      title: Message for CustomerOrder Created Event
+      summary: Message for CustomerOrder Created Event
+      schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+      payload:
+        $ref: "avro/CustomerOrderCreatedPayload.avsc"
+    CustomerOrderUpdatedMessage:
+      name: CustomerOrderUpdated
+      title: Message for CustomerOrder Updated Event
+      summary: Message for CustomerOrder Updated Event
+      schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+      payload:
+        $ref: "avro/CustomerOrderUpdatedPayload.avsc"
+    CustomerOrderDeletedMessage:
+      name: CustomerOrderDeleted
+      title: Message for CustomerOrder Deleted Event
+      summary: Message for CustomerOrder Deleted Event
+      schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+      payload:
+        $ref: "avro/CustomerOrderDeletedPayload.avsc"
+  
+

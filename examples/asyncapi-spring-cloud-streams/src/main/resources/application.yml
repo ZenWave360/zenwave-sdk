@@ -1,0 +1,10 @@
+spring:
+  security:
+    user:
+      name: user
+      password: password
+      roles: USER
+
+  data:
+    mongodb:
+      database: zenwave360-example
