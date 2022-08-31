@@ -87,7 +87,7 @@ public class JDLEntitiesToAvroConverter {
                 //                property.put("format", "date-time");
             }
             else if("Integer".equals(entityField.get("type"))) {
-                field.put("type", typeList("integer", isRequired));
+                field.put("type", typeList("int", isRequired));
 //                field.put("format", "int32");
             }
             else if("Long".equals(entityField.get("type"))) {
@@ -133,7 +133,7 @@ public class JDLEntitiesToAvroConverter {
             }
 
             if(entityField.get("isArray") == Boolean.TRUE) {
-                field = Maps.of("type", "array", "items", field.get("type"), "java-class", "java.util.List");
+                field = Maps.of("name", field.get("name"),"type", Maps.of("type","array", "items", field.get("type"), "java-class", "java.util.List"));
             }
 
             fields.add(field);
@@ -143,7 +143,7 @@ public class JDLEntitiesToAvroConverter {
     }
 
     private Object typeList(String type, boolean isRequired) {
-        return isRequired? type : Arrays.asList(null, type);
+        return isRequired? type : Arrays.asList("null", type);
     }
 
     private static Object asNumber(String number) {

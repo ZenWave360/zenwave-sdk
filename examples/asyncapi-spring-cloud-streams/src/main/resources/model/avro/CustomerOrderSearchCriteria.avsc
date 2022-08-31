@@ -7,10 +7,10 @@
     "type" : "string"
   }, {
     "name" : "dateTo",
-    "type" : [ null, "string" ]
+    "type" : [ "null", "string" ]
   }, {
     "name" : "dateFrom",
-    "type" : [ null, "string" ]
+    "type" : [ "null", "string" ]
   }, {
     "name" : "status",
     "type" : "OrderStatus"

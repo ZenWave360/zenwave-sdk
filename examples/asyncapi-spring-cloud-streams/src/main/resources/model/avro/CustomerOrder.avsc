@@ -7,18 +7,24 @@
     "type" : "string"
   }, {
     "name" : "date",
-    "type" : [ null, "string" ]
+    "type" : [ "null", "string" ]
   }, {
     "name" : "shippingDetails",
     "type" : "ShippingDetails"
   }, {
-    "type" : "array",
-    "items" : "OrderedItem",
-    "java-class" : "java.util.List"
+    "name" : "orderedItems",
+    "type" : {
+      "type" : "array",
+      "items" : "OrderedItem",
+      "java-class" : "java.util.List"
+    }
   }, {
-    "type" : "array",
-    "items" : "PaymentDetails",
-    "java-class" : "java.util.List"
+    "name" : "paymentDetails",
+    "type" : {
+      "type" : "array",
+      "items" : "PaymentDetails",
+      "java-class" : "java.util.List"
+    }
   }, {
     "name" : "status",
     "type" : "OrderStatus"

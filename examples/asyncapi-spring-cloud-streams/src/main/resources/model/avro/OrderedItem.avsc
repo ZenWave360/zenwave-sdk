@@ -4,13 +4,13 @@
   "namespace" : "io.example.domain.model",
   "fields" : [ {
     "name" : "catalogItemId",
-    "type" : [ null, "long" ]
+    "type" : [ "null", "long" ]
   }, {
     "name" : "name",
     "type" : "string"
   }, {
     "name" : "quantity",
-    "type" : [ null, "integer" ]
+    "type" : [ "null", "int" ]
   }, {
     "name" : "price",
     "type" : "double"

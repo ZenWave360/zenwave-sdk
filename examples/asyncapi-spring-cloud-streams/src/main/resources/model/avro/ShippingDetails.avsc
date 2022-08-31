@@ -4,6 +4,6 @@
   "namespace" : "io.example.domain.model",
   "fields" : [ {
     "name" : "address",
-    "type" : [ null, "string" ]
+    "type" : [ "null", "string" ]
   } ]
 }
