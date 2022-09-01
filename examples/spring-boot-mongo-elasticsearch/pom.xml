@@ -22,7 +22,7 @@
 		<spring-cloud.version>2021.0.3</spring-cloud.version>
 		<testcontainers.version>1.17.2</testcontainers.version>
 
-		<zenwave.version>0.3.1-SNAPSHOT</zenwave.version>
+		<zenwave.version>0.4.0</zenwave.version>
 
 		<!-- Plugin versions -->
 		<maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>

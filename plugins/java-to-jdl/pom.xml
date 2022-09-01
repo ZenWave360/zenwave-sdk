@@ -29,7 +29,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.zenwave360</groupId>
+            <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
             <artifactId>zenwave-code-generator-test-resources</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
