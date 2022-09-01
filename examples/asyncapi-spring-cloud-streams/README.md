@@ -12,7 +12,7 @@ Generate AsyncAPI definition from JDL entities:
 - Messages and payloads for each entity Create/Update/Delete events (AVRO and AsyncAPI schema)
 
 ```shell
-jbang zw-snapshot -p io.zenwave360.generator.plugins.JDLToAsyncAPIConfiguration \
+jbang zw -p io.zenwave360.generator.plugins.JDLToAsyncAPIConfiguration \
     specFile=src/main/resources/model/orders-model.jdl \
     targetFile=src/main/resources/model/asyncapi.yml
 ```
@@ -25,9 +25,10 @@ Generate AsyncAPI definition from JDL entities:
 - Messages and payloads for each entity Create/Update/Delete events (AVRO and AsyncAPI schema)
 
 ```shell
-jbang zw-snapshot -p io.zenwave360.generator.plugins.JDLToAsyncAPIConfiguration \
+jbang zw -p io.zenwave360.generator.plugins.JDLToAsyncAPIConfiguration \
     specFile=src/main/resources/model/orders-model.jdl \
     schemaFormat=avro \
+    avroPackage=io.zenwave360.example.adapters.events.avro \
     targetFile=src/main/resources/model/asyncapi-avro.yml
 ```
 

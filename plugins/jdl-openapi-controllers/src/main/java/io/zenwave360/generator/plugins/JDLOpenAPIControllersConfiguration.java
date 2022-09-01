@@ -6,7 +6,7 @@ import io.zenwave360.generator.doc.DocumentedPlugin;
 import io.zenwave360.generator.formatters.JavaFormatter;
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.parsers.JDLParser;
-import io.zenwave360.generator.processors.FillJDLWithDummyDataProcessor;
+import io.zenwave360.generator.processors.JDLWithDummyDataProcessor;
 import io.zenwave360.generator.processors.JDLProcessor;
 import io.zenwave360.generator.processors.JDLWithOpenApiProcessor;
 import io.zenwave360.generator.processors.OpenApiProcessor;
@@ -32,7 +32,7 @@ public class JDLOpenAPIControllersConfiguration extends Configuration {
         }
         if(!getOptions().containsKey("jdlFile")) {
             removeFromChain(JDLParser.class, JDLProcessor.class);
-            addBeforeInChain(JDLWithOpenApiProcessor.class, FillJDLWithDummyDataProcessor.class);
+            addBeforeInChain(JDLWithOpenApiProcessor.class, JDLWithDummyDataProcessor.class);
             withOption("FillJDLWithDummyDataProcessor.openapiProperty", "openapi");
             withOption("FillJDLWithDummyDataProcessor.jdlProperty", "jdl");
         }

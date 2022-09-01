@@ -75,7 +75,7 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
     Function<Map<String, Object>, Boolean> skipEntityResource = (model) -> is(model, "vo") || !is(model, "service");
     Function<Map<String, Object>, Boolean> skipSearchCriteria = (model) -> is(model, "vo") || !is(model, "searchCriteria");
     Function<Map<String, Object>, Boolean> skipElasticSearch = (model) -> is(model, "vo") || !is(model, "search");
-    List<Object[]> templatesByEntity = List.of(
+    protected List<Object[]> templatesByEntity = List.of(
             new Object[] { "src/main/java", "core/domain/vo/Entity.java", "core/domain/{{entity.name}}.java", JAVA, skipVO },
             new Object[] { "src/main/java", "core/domain/{{persistence}}/Entity.java", "core/domain/{{entity.name}}.java", JAVA, skipEntity},
             new Object[] { "src/main/java", "core/outbound/{{persistence}}/{{style}}/EntityRepository.java", "core/outbound/{{persistence}}/{{entity.className}}Repository.java", JAVA, skipEntityRepository },
@@ -90,7 +90,7 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
             new Object[] { "src/test/java", "core/outbound/{{persistence}}/{{style}}/EntityRepositoryInMemory.java", "core/outbound/{{persistence}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA, skipEntityRepository }
     );
 
-    List<Object[]> templatesByService = List.of(
+    protected List<Object[]> templatesByService = List.of(
             new Object[] { "src/main/java", "core/inbound/Service.java", "core/inbound/{{service.name}}.java", JAVA },
             new Object[] { "src/main/java", "core/implementation/{{style}}/ServiceImpl.java", "core/implementation/{{service.name}}Impl.java", JAVA },
             new Object[] { "src/test/java", "core/implementation/{{style}}/ServiceTest.java", "core/implementation/{{service.name}}Test.java", JAVA }

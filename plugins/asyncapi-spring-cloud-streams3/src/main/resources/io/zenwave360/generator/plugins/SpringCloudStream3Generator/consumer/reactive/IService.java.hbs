@@ -1,0 +1,19 @@
+package {{apiPackage}};
+
+import java.util.function.Consumer;
+import org.springframework.messaging.Message;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+{{#if modelPackage}}
+import {{modelPackage}}.*;
+{{/if}}
+
+
+public interface {{serviceName operation.x--operationIdCamelCase}} {
+
+{{#each operation.x--messages as |message|}}
+    Mono<Void> {{operation.operationId}}{{methodSuffix message operation}}(Flux<{{message.x--javaType}}> msg);
+{{/each}}
+
+}

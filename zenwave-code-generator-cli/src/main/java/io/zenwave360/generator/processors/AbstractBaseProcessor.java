@@ -47,8 +47,8 @@ public abstract class AbstractBaseProcessor implements Processor {
 
     protected void addOperationIdVariants(Map<String, Object> operation) {
         if (operation != null) {
-            operation.put("x--operationIdCamelCase", StringUtils.capitalize((String) operation.get("operationId")));
-            operation.put("x--operationIdKebabCase", StringUtils.capitalize((String) operation.get("operationId")));
+            operation.put("x--operationIdCamelCase", NamingUtils.asCamelCase((String) operation.get("operationId")));
+            operation.put("x--operationIdKebabCase", NamingUtils.asKebabCase((String) operation.get("operationId")));
         }
     }
 }

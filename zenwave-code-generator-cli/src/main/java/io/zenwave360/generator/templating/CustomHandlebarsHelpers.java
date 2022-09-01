@@ -39,12 +39,20 @@ public class CustomHandlebarsHelpers {
         return null;
     }
 
-    public static String asCapitalizedJavaProperty(String text, Options options) throws IOException {
+    public static String asInstanceName(String text, Options options) throws IOException {
+        return NamingUtils.asInstanceName(text);
+    }
+
+    public static String asJavaTypeName(String text, Options options) throws IOException {
         return NamingUtils.asJavaTypeName(text);
     }
 
     public static String asPackageFolder(String text, Options options) throws IOException {
         return text != null? text.replaceAll("\\.", "/") : null;
+    }
+
+    public static String kebabCase(String text, Options options) throws IOException {
+        return text != null? NamingUtils.asKebabCase(text) : null;
     }
 
     public static String joinWithTemplate(Collection<Object> context, Options options) throws IOException {

@@ -1,25 +1,25 @@
 package {{apiPackage}};
 
+import java.util.function.Function;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 {{#if exposeMessage}}
-import org.springframework.messaging.support.MessageBuilder;
+    import org.springframework.messaging.support.MessageBuilder;
 {{/if}}
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Component;
-
-import java.util.function.Consumer;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 {{#if modelPackage}}
 import {{modelPackage}}.*;
 {{/if}}
 
-@Component("{{operation.operationIdKebabCase}}")
-public class {{operation.operationIdCamelCase}}{{consumerSuffix}} implements Function<Flux<Message<?>>, Mono<Void>> {
+@Component("{{operation.x--operationIdKebabCase}}")
+public class {{consumerName operation.x--operationIdCamelCase}} implements Function<Flux<Message<?>>, Mono<Void>> {
 
     @Autowired
-    {{#assign "bussines"}}{{uncapFirst operation.x--operationIdCamelCase}}{{/assign}}
-    private {{operation.x--operationIdCamelCase}} {{bussines}};
+    private {{serviceName operation.x--operationIdCamelCase}} service;
 
 
     @Override
@@ -28,9 +28,9 @@ public class {{operation.operationIdCamelCase}}{{consumerSuffix}} implements Fun
         {{#each operation.x--messages as |message|}}
             if(m.getPayload() instanceof {{message.x--javaType}}) {
             {{#if exposeMessage}}
-                {{bussines}}.{{operation.operationId}}{{#if (size operation.x--messages) eq 1}}_{{message.name}}{{/if}}(Flux.just(MessageBuilder.<{{message.x--javaType}}>createMessage(({{message.x--javaType}}) m.getPayload(), m.getHeaders())));
+                service.{{operation.operationId}}{{methodSuffix message operation}}(Flux.just(MessageBuilder.<{{message.x--javaType}}>createMessage(({{message.x--javaType}}) m.getPayload(), m.getHeaders())));
             {{else}}
-                {{bussines}}.{{operation.operationId}}{{#if (size operation.x--messages) eq 1}}_{{message.name}}{{/if}}(Flux.just(({{message.x--javaType}}) m.getPayload());
+                service.{{operation.operationId}}{{methodSuffix message operation}}(Flux.just(({{message.x--javaType}}) m.getPayload()));
             {{/if}}
             }
         {{/each}}

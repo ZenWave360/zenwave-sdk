@@ -19,11 +19,14 @@ public class HandlebarsEngineTest {
         Map<String, Object> model = new HashMap<>();
         model.put("list", List.of(1, 2, 3));
         TemplateOutput templateOutput = handlebarsEngine.processTemplate(model, new TemplateInput("io/zenwave360/generator/templating/handlebars-test", "")).get(0);
+//System.out.println(templateOutput.getContent());
 
         Assertions.assertTrue(templateOutput.getContent().contains("This is the assigned value"));
         Assertions.assertTrue(templateOutput.getContent().contains("List size is 3"));
         Assertions.assertTrue(templateOutput.getContent().contains("upperCase"));
-        Assertions.assertTrue(templateOutput.getContent().contains("asCapitalizedJavaProperty TratraTratra"));
+        Assertions.assertTrue(templateOutput.getContent().contains("asInstanceName tratraTratra"));
+        Assertions.assertTrue(templateOutput.getContent().contains("asJavaTypeName TratraTratra"));
+        Assertions.assertTrue(templateOutput.getContent().contains("kebabCase some-camel-case-with-spaces"));
         Assertions.assertTrue(templateOutput.getContent().contains("asPackageFolder io/zenwave360/generator/templating"));
         Assertions.assertTrue(templateOutput.getContent().contains("Prefix2Suffix"));
         Assertions.assertTrue(templateOutput.getContent().contains("Inside if 1"));

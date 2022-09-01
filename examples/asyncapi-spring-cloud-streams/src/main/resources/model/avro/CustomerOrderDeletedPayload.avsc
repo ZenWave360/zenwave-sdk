@@ -1,7 +1,7 @@
 {
   "type" : "record",
   "name" : "CustomerOrderDeletedPayload",
-  "namespace" : "io.example.domain.model",
+  "namespace" : "io.zenwave360.example.adapters.events.avro",
   "fields" : [ {
     "name" : "id",
     "type" : "string"

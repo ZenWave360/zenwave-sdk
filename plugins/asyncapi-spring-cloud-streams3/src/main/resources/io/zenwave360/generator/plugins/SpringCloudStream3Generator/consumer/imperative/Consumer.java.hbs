@@ -11,11 +11,10 @@ import {{modelPackage}}.*;
 {{/if}}
 
 @Component("{{operation.x--operationIdKebabCase}}")
-public class {{operation.x--operationIdCamelCase}}{{consumerSuffix}} implements Consumer<Message<Object>> {
+public class {{consumerName operation.x--operationIdCamelCase}} implements Consumer<Message<Object>> {
 
     @Autowired
-    {{#assign "bussines"}}{{uncapFirst operation.x--operationIdCamelCase}}{{/assign}}
-    private {{operation.x--operationIdCamelCase}} {{bussines}};
+    private {{serviceName operation.x--operationIdCamelCase}} service;
 
     @Override
     public void accept(Message<Object> message) {
@@ -23,9 +22,9 @@ public class {{operation.x--operationIdCamelCase}}{{consumerSuffix}} implements 
         {{#each operation.x--messages as |message|}}
         if(payload instanceof {{message.x--javaType}}) {
             {{#if exposeMessage}}
-            {{bussines}}.{{operation.operationId}}{{#if (size operation.x--messages) eq 1}}_{{message.name}}{{/if}}(MessageBuilder.createMessage(({{message.x--javaType}}) payload, message.getHeaders()));
+            service.{{operation.operationId}}{{methodSuffix message operation}}(MessageBuilder.createMessage(({{message.x--javaType}}) payload, message.getHeaders()));
             {{else}}
-            {{bussines}}.{{operation.operationId}}{{#if (size operation.x--messages) eq 1}}_{{message.name}}{{/if}}(({{message.x--javaType}}) payload);
+            service.{{operation.operationId}}{{methodSuffix message operation}}(({{message.x--javaType}}) payload);
             {{/if}}
             return;
         }

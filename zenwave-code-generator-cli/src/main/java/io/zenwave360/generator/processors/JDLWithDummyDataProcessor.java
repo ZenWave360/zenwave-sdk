@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FillJDLWithDummyDataProcessor extends AbstractBaseProcessor {
+public class JDLWithDummyDataProcessor extends AbstractBaseProcessor {
 
     public String jdlProperty = "jdl";
     public String openapiProperty = "openapi";

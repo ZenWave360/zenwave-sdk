@@ -10,7 +10,7 @@ import java.util.Map;
 
 import static io.zenwave360.generator.processors.JDLWithOpenApiProcessor.OPENAPI_DEFAULT_PROPERTY;
 
-public class FillJDLWithDummyDataProcessorTest {
+public class JDLWithDummyDataProcessorTest {
 
     private Map<String, Object> loadOpenApi(String resource) throws Exception {
         Map<String, Object> model = new DefaultYamlParser().withSpecFile(resource).withTargetProperty(OPENAPI_DEFAULT_PROPERTY).parse();
@@ -23,7 +23,7 @@ public class FillJDLWithDummyDataProcessorTest {
         var model = new HashMap<String, Object>();
         model.putAll(openapiModel);
 
-        var processor = new FillJDLWithDummyDataProcessor();
+        var processor = new JDLWithDummyDataProcessor();
         var processed = processor.process(model);
         Assertions.assertNotNull(processed.get(processor.jdlProperty));
         Map jdlModel = (Map) processed.get(processor.jdlProperty);

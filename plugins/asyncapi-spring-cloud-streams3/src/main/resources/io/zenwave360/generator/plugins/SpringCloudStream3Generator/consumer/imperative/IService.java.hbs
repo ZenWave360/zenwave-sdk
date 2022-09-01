@@ -7,13 +7,13 @@ import {{modelPackage}}.*;
 /**
 * {{asyncapi.description}}
 */
-public interface {{operation.x--operationIdCamelCase}}{{serviceSuffix}} {
+public interface {{serviceName operation.x--operationIdCamelCase}} {
 
 {{#each operation.x--messages as |message|}}
     /**
      * {{operation.description}}
      */
-    boolean {{operation.operationId}}{{#if (size operation.x--messages) eq 1}}_{{message.name}}{{/if}}({{message.x--javaType}} msg);
+    boolean {{operation.operationId}}{{methodSuffix message operation}}({{message.x--javaType}} msg);
 {{/each}}
 
 }

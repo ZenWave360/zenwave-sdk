@@ -5,12 +5,12 @@
     * Test: {{operation.description}} for {{response.description}}.
     */
     @Test
-    public void test{{asCapitalizedJavaProperty operation.operationId}}_{{response.x--statusCode}}() {
+    public void test{{asJavaTypeName operation.operationId}}_{{response.x--statusCode}}() {
     {{~#assign "requestDTOClassName"}}{{asDtoName operation.x--request-dto }}{{/assign}}
     {{~#if requestDTOClassName}}
         {{requestDTOClassName}} requestBody = new {{requestDTOClassName}}();
         {{~#each operation.x--request-schema.properties as |property|}}
-        requestBody.set{{asCapitalizedJavaProperty @key}}(null);
+        requestBody.set{{asJavaTypeName @key}}(null);
         {{~/each}}
     {{~/if}}
 

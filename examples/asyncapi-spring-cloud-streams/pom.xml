@@ -72,6 +72,11 @@
 			<artifactId>mapstruct</artifactId>
 			<version>${mapstruct.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.avro</groupId>
+			<artifactId>avro</artifactId>
+			<version>${avro.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -212,7 +217,7 @@
 							<configOptions>
 								<role>PROVIDER</role>
 								<style>IMPERATIVE</style>
-								<apiPackage>io.zenwave360.example.adapters.events</apiPackage>
+								<apiPackage>io.zenwave360.example.adapters.events.producer</apiPackage>
 								<modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
 							</configOptions>
 						</configuration>
@@ -244,7 +249,43 @@
 							<configOptions>
 								<role>PROVIDER</role>
 								<style>IMPERATIVE</style>
-								<apiPackage>io.zenwave360.example.adapters.events</apiPackage>
+								<apiPackage>io.zenwave360.example.adapters.events.producer_avro</apiPackage>
+								<modelPackage>io.zenwave360.example.adapters.events.avro</modelPackage>
+							</configOptions>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>generate-asyncapi-client-imperative</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<generatorName>spring-cloud-streams3</generatorName>
+							<inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
+							<configOptions>
+								<role>CLIENT</role>
+								<style>IMPERATIVE</style>
+								<apiPackage>io.zenwave360.example.adapters.events.consumer.imperative</apiPackage>
+								<modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
+							</configOptions>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate-asyncapi-client-reactive</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<generatorName>spring-cloud-streams3</generatorName>
+							<inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
+							<configOptions>
+								<role>CLIENT</role>
+								<style>REACTIVE</style>
+								<apiPackage>io.zenwave360.example.adapters.events.consumer.reactive</apiPackage>
+								<modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
 							</configOptions>
 						</configuration>
 					</execution>
@@ -296,6 +337,25 @@
 								<import>${project.basedir}/src/main/resources/model/avro/CustomerOrderDeletedPayload.avsc</import>
 								<import>${project.basedir}/src/main/resources/model/avro/CustomerOrderUpdatedPayload.avsc</import>
 							</imports>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.basedir}/target/generated-sources/avro/src/main/java/</source>
+							</sources>
 						</configuration>
 					</execution>
 				</executions>

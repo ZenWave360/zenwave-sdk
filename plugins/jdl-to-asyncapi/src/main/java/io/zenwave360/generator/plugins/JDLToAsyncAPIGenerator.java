@@ -50,6 +50,9 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "Schema format for messages' payload")
     public SchemaFormat schemaFormat = SchemaFormat.schema;
 
+    @DocumentedOption(description = "Package name for generated Avro Schemas (.avsc)")
+    public String avroPackage = "io.example.domain.model";
+
     public String defaultSchemaFormat = "application/vnd.aai.asyncapi;version=2.4.0";
     public String avroSchemaFormat = "application/vnd.apache.avro+json;version=1.9.0";
 
@@ -82,7 +85,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         Map<String, Object> schemas = new LinkedHashMap<>();
         JSONPath.set(oasSchemas, "components.schemas", schemas);
 
-        JDLEntitiesToAvroConverter toAvroConverter = new JDLEntitiesToAvroConverter().withIdType("string").withNamespace(basePackage);
+        JDLEntitiesToAvroConverter toAvroConverter = new JDLEntitiesToAvroConverter().withIdType("string").withNamespace(avroPackage);
         JDLEntitiesToSchemasConverter toSchemasConverter = new JDLEntitiesToSchemasConverter().withIdType("string").withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
 
         List<Map<String, Object>> entities = (List) JSONPath.get(jdlModel, "$.entities[*]");

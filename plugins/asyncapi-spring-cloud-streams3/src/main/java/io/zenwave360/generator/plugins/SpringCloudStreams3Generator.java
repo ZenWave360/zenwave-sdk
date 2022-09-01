@@ -7,6 +7,7 @@ import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.TemplateEngine;
 import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
+import io.zenwave360.generator.utils.JSONPath;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,8 +29,20 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     @DocumentedOption(description = "Whether to expose underlying spring Message to consumers or not. Default: false")
     public boolean exposeMessage = false;
 
+    @DocumentedOption(description = "To avoid method erasure conflicts, when exposeMessage or reactive style this character will be used as separator to append message payload type to method names in consumer interfaces.")
+    public String methodAndMessageSeparator = "$";
+
+    @DocumentedOption(description = "SC Streams Binder class prefix")
+    public String consumerPrefix = "";
+
+    @DocumentedOption(description = "SC Streams Binder class suffix")
     public String consumerSuffix = "Consumer";
-    public String serviceSuffix = "Service";
+
+    @DocumentedOption(description = "Business/Service interface prefix")
+    public String servicePrefix = "I";
+
+    @DocumentedOption(description = "Business/Service interface suffix")
+    public String serviceSuffix = "ConsumerService";
 
     public SpringCloudStreams3Generator withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;
@@ -37,17 +50,35 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     }
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
+    {
+        handlebarsEngine.getHandlebars().registerHelper("consumerName", (context, options) -> {
+            return String.format("%s%s%s", consumerPrefix, context, consumerSuffix);
+        });
+        handlebarsEngine.getHandlebars().registerHelper("serviceName", (context, options) -> {
+            return String.format("%s%s%s", servicePrefix, context, serviceSuffix);
+        });
+        handlebarsEngine.getHandlebars().registerHelper("methodSuffix", (context, options) -> {
+            if(exposeMessage || style == ProgrammingStyle.REACTIVE) {
+                int messagesCount = JSONPath.get(options.param(0), "$.x--messages.length()", 0);
+                if(messagesCount > 0) {
+                    String messageJavaType = JSONPath.get(context, "$.x--javaType");
+                    return String.format("%s%s", methodAndMessageSeparator, messageJavaType);
+                }
+            }
+            return null;
+        });
+    }
 
-    private List<TemplateInput> producerTemplates = Arrays.asList(
+    protected List<TemplateInput> producerTemplates = Arrays.asList(
             new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/common/Header.java", "{{apiPackageFolder}}/Header.java"),
             new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/producer/IProducer.java", "{{apiPackageFolder}}/I{{apiClassName}}.java"),
             new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/producer/Producer.java", "{{apiPackageFolder}}/{{apiClassName}}.java"));
-    private List<TemplateInput> consumerReactiveTemplates = Arrays.asList(
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/reactive/Consumer.java", "{{apiPackageFolder}}/{{operation.x--operationIdCamelCase}}{{consumerSuffix}}.java"),
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/reactive/Service.java", "{{apiPackageFolder}}/{{operation.x--operationIdCamelCase}}{{serviceSuffix}}.java"));
-    private List<TemplateInput> consumerImperativeTemplates = Arrays.asList(
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/imperative/Consumer.java", "{{apiPackageFolder}}/{{operation.x--operationIdCamelCase}}{{consumerSuffix}}.java"),
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/imperative/Service.java", "{{apiPackageFolder}}/{{operation.x--operationIdCamelCase}}{{serviceSuffix}}.java"));
+    protected List<TemplateInput> consumerReactiveTemplates = Arrays.asList(
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/reactive/Consumer.java", "{{apiPackageFolder}}/{{consumerName operation.x--operationIdCamelCase}}.java"),
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/reactive/IService.java", "{{apiPackageFolder}}/{{serviceName operation.x--operationIdCamelCase}}.java"));
+    protected List<TemplateInput> consumerImperativeTemplates = Arrays.asList(
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/imperative/Consumer.java", "{{apiPackageFolder}}/{{consumerName operation.x--operationIdCamelCase}}.java"),
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/imperative/IService.java", "{{apiPackageFolder}}/{{serviceName operation.x--operationIdCamelCase}}.java"));
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;

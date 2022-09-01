@@ -10,6 +10,14 @@ public class NamingUtils {
     }
 
     public static String asJavaTypeName(String name) {
+        return RegExUtils.removePattern(asCamelCase(name), "^(\\d+)");
+    }
+
+    public static String asInstanceName(String name) {
+        return StringUtils.uncapitalize(asCamelCase(name));
+    }
+
+    public static String asCamelCase(String name) {
         if(name == null) {
             return null;
         }
@@ -20,18 +28,14 @@ public class NamingUtils {
             }
             tokens[i] = StringUtils.capitalize(tokens[i]);
         }
-        return RegExUtils.removePattern(StringUtils.join(tokens), "^(\\d+)");
-    }
-
-    public static String asInstanceName(String name) {
-        return StringUtils.uncapitalize(name);
-    }
-
-    public static String asJavaPropertyName(String name) {
-        return StringUtils.uncapitalize(asJavaTypeName(name));
+        return StringUtils.join(tokens);
     }
 
     public static String asKebabCase(String value) {
-        return value.replaceAll("([A-Z])([a-z])", "-$1$2").toLowerCase();
+//        value = value.replaceAll("([A-Z])([a-z])", "-$1$2").toLowerCase();
+        value = value.replaceAll("([a-z])([A-Z])", "$1-$2");
+        value = value.replaceAll(" ", "-");
+        value = value.replaceAll("--", "-");
+        return value.toLowerCase();
     }
 }
