@@ -61,7 +61,7 @@ io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-defa
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.2.3-SNAPSHOT,\
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi:0.2.3-SNAPSHOT,\
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:0.2.3-SNAPSHOT \
-    io.github.zenwave360:zenwave-code-generator-cli:0.2.3-SNAPSHOT
+    io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli:0.2.3-SNAPSHOT
 ```
 
 You can include any **custom plugin** jars in the `--deps` option.

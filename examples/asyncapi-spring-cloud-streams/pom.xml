@@ -201,7 +201,7 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>io.github.zenwave360</groupId>
+				<groupId>io.github.zenwave360.zenwave-code-generator</groupId>
 				<artifactId>zenwave-code-generator-mojo</artifactId>
 				<version>${zenwave.version}</version>
 				<executions>
