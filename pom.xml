@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
     <artifactId>zenwave-code-generator</artifactId>
-    <version>0.3.1-SNAPSHOT</version>
+    <version>0.4.0</version>
     <packaging>pom</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -43,7 +43,7 @@
         <connection>scm:git:git://github.com/ZenWave360/zenwave-code-generator.git</connection>
         <developerConnection>scm:git:git@github.com:ZenWave360/zenwave-code-generator.git</developerConnection>
         <url>https://github.com/ZenWave360/zenwave-code-generator</url>
-        <tag>HEAD</tag>
+        <tag>v0.4.0</tag>
     </scm>
 
     <properties>
