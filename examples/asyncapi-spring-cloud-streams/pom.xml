@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>io.github.zenwave360</groupId>
 	<artifactId>asyncapi-spring-cloud-streams-examples</artifactId>
-	<version>0.3.1-SNAPSHOT</version>
+	<version>0.5.1-SNAPSHOT</version>
 	<name>${pom.groupId}:${pom.artifactId}</name>
 
 	<properties>
@@ -22,7 +22,7 @@
 		<avro.version>1.11.1</avro.version>
 		<testcontainers.version>1.17.2</testcontainers.version>
 
-		<zenwave.version>0.3.1-SNAPSHOT</zenwave.version>
+		<zenwave.version>0.5.0-SNAPSHOT</zenwave.version>
 
 		<!-- Plugin versions -->
 		<maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
