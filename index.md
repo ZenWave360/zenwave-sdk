@@ -34,16 +34,28 @@ Please refer to [**ZenWave Code Generator**](https://github.com/ZenWave360/zenwa
 
 ZenWave Code Generator is not a Code Generator but a **Modeling Tool** for Domain Driven Design and API-First in disguise of a _code generator_.
 
-Its pourpose is to produce sucessfull software projects by dramatically shortening the feedback loop between the expert domain knowled and working software and its tests.
+Its purpose is to produce successful software projects by dramatically shortening the feedback loop between the expert domain knowledge and working software and its tests.
 
 ![Domain Driven Design Feedback Loop](docs/ZenWave-360-DDD-Feedback-Loop-with-ZW-Products.excalidraw.svg)
 
 In this way all team members: **Domain Experts**, **Product Owners**, **Software Archytechts**, **Developers** and **Testers** can provide early feedback based on an **Ubiquitous Language (JDL)** and the software and tests generated from that model.
 
+# Why Domain Driven Design?
+
+> "There are three types of developers implementing microservices. Those who use DDD, those who don't realise they do, and those who fail."
+
+**DDD:** is about building software around a domain model that represents the problem we want to solve. Expressed by and Ubiquitous Language that is shared by all team members. It helps understand the problem before thinking of a solution. It connects Domain Experts with Technical Experts building a shared understanding of the problem and the solution.
+
+**ZenWave360:** is about speeding up the feedback loop from idea -> model -> working software and tests.
+
+![Design to Code](docs/ZenWave360-Design-Code-Loop.excalidraw.svg)
+
+
 # Table of Contents
 
 - [ZenWave Code Generator](#zenwave-code-generator)
 - [Not (just) a Code Generator](#not-just-a-code-generator)
+- [Why Domain Driven Design?](#why-domain-driven-design)
 - [Table of Contents](#table-of-contents)
 - [Generating functional and testing code: What can we generate for you today?](#generating-functional-and-testing-code-what-can-we-generate-for-you-today)
   - [Features / Roadmap](#features--roadmap)
