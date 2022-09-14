@@ -30,11 +30,21 @@ Please refer to [**ZenWave Code Generator**](https://github.com/ZenWave360/zenwa
 
 **Note:** Official plugins are designed to generate functional code and tests on top of existing projects. Creating a base project is out of scope, but you can always go to [start.spring.io](http://start.spring.io) or [start.jhipster.tech](https://start.jhipster.tech/), in case your company doesn't already have a project starter or archetype.
 
+# Not (just) a Code Generator
+
+ZenWave Code Generator is not a Code Generator but a **modeling tool** for Domain Driven Design and API-First in disguise of a _code generator_.
+
+Its pourpose is to produce sucessfull software projects by dramatically shortening the feedback loop between the expert domain knowled and working software and its tests.
+
+![Domain Driven Design Feedback Loop](docs/ZenWave-360-DDD-Feedback-Loop-with-ZW-Products.excalidraw.svg)
+
+In this way all team members: **Domain Experts**, **Product Owners**, **Software Archytechts**, **Developers** and **Testers** can provide early feedback based on an **Ubiquitous Language (JDL)** and the software and tests generated from that model.
+
 # Table of Contents
 
 - [ZenWave Code Generator](#zenwave-code-generator)
+- [Not (just) a Code Generator](#not-just-a-code-generator)
 - [Table of Contents](#table-of-contents)
-- [Not a Code Generator](#not-a-code-generator)
 - [Generating functional and testing code: What can we generate for you today?](#generating-functional-and-testing-code-what-can-we-generate-for-you-today)
   - [Features / Roadmap](#features--roadmap)
   - [JDL Backend Application](#jdl-backend-application)
@@ -58,16 +68,6 @@ Please refer to [**ZenWave Code Generator**](https://github.com/ZenWave360/zenwa
     - [Access data owned by other bounded contexts: Direct Access, Event Sourcing and CQRS](#access-data-owned-by-other-bounded-contexts-direct-access-event-sourcing-and-cqrs)
     - [Event Sourcing and CQRS](#event-sourcing-and-cqrs)
     - [Sagas](#sagas)
-
-# Not a Code Generator
-
-ZenWave Code Generator is not a Code Generator but a modeling tool for Domain Driven Design in the shape of a _code generator_.
-
-Its pourpose is to produce sucessfull software projects by dramatically shortening the feedback loop between the expert domain knowled and working software and its tests.
-
-![Domain Driven Design Feedback Loop](docs/ZenWave-360-DDD-Feedback-Loop-with-ZW-Products.excalidraw.svg)
-
-In this way all team members: **Domain Experts**, **Product Owners**, **Software Archytechts**, **Developers** and **Testers** can provide early feedback based on an **Ubiquitous Language (JDL)** and the software and tests generated from that model.
 
 # Generating functional and testing code: What can we generate for you today?
 
