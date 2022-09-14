@@ -23,3 +23,44 @@ ${javadoc}
 ```shell
 jbang zw -p io.zenwave360.generator.plugins.AsyncApiJsonSchema2PojoConfiguration --help
 ```
+
+## Maven Plugin Configuration (API-First)
+
+You can use ZenWave Maven Plugin to generate code as part of your build process:
+
+- Adding this generator jar as dependency to zenwave maven plugin.
+- Passing any configuration as <configOptions>.
+
+```xml
+<plugin>
+    <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
+    <artifactId>zenwave-code-generator-mojo</artifactId>
+    <version>${zenwave.version}</version>
+    <executions>
+        <execution>
+            <id>generate-asyncapi-producer</id>
+            <phase>generate-sources</phase>
+            <goals>
+                <goal>generate</goal>
+            </goals>
+            <configuration>
+                <generatorName>spring-cloud-streams3</generatorName>
+                <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
+                <configOptions>
+                    <role>PROVIDER</role>
+                    <style>IMPERATIVE</style>
+                    <apiPackage>io.zenwave360.example.adapters.events.producer</apiPackage>
+                    <modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
+                </configOptions>
+            </configuration>
+        </execution>
+    </executions>
+    <dependencies>
+        <dependency>
+            <groupId>io.github.zenwave360.zenwave-code-generator.plugins</groupId>
+            <artifactId>asyncapi-jsonschema2pojo</artifactId>
+            <version>${zenwave.version}</version>
+        </dependency>
+    </dependencies>
+</plugin>
+```

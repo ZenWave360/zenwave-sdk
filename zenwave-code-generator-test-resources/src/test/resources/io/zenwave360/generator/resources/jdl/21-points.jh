@@ -3,24 +3,6 @@
  * This is the application and entity model for the 21-Points (https://github.com/mraible/21-points) application from Matt Raible
  */
 
-application {
-  config {
-    applicationType monolith,
-    baseName HealthPoints
-    packageName com.okta.developer,
-    authenticationType oauth2,
-    prodDatabaseType postgresql,
-    buildTool gradle,
-    searchEngine elasticsearch,
-    testFrameworks [cypress],
-    clientFramework react,
-    enableTranslation true,
-    nativeLanguage en,
-    languages [en, es]
-  }
-  entities Points, BloodPressure, Weight, Preferences
-}
-
 // JDL definition for application 'TwentyOnePoints' generated with command 'jhipster export-jdl'
 
 entity BloodPressure {
