@@ -37,7 +37,7 @@ ZenWave Code Generator is a configurable and extensible code generator tool for 
 The easiest way to install ZenWave Code Generator is as a [JBang alias](https://www.jbang.dev/documentation/guide/latest/alias_catalogs.html):
 
 ```shell
-jbang alias add zw@zenwave360/zenwave-code-generator
+jbang alias add -name=zw zw-release@zenwave360/zenwave-code-generator
 ```
 
 or if you prefer to use the latest **snapshot** versions:
@@ -54,14 +54,14 @@ jbang alias add --name=zw \
     --repos=mavencentral,snapshots=https://s01.oss.sonatype.org/content/repositories/snapshots \
     --deps=\
 org.slf4j:slf4j-simple:1.7.36,\
-io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:0.4.1-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-jsonschema2pojo:0.4.1-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:0.4.1-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:0.4.1-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.4.1-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi:0.4.1-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:0.4.1-SNAPSHOT \
-    io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli:0.4.1-SNAPSHOT
+io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:0.5.0-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-jsonschema2pojo:0.5.0-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:0.5.0-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:0.5.0-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.5.0-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi:0.5.0-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:0.5.0-SNAPSHOT \
+    io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli:0.5.0-SNAPSHOT
 ```
 
 You can include any **custom plugin** jars in the `--deps` option.

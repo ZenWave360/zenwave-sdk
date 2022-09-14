@@ -32,7 +32,7 @@ Please refer to [**ZenWave Code Generator**](https://github.com/ZenWave360/zenwa
 
 # Not (just) a Code Generator
 
-ZenWave Code Generator is not a Code Generator but a **modeling tool** for Domain Driven Design and API-First in disguise of a _code generator_.
+ZenWave Code Generator is not a Code Generator but a **Modeling Tool** for Domain Driven Design and API-First in disguise of a _code generator_.
 
 Its pourpose is to produce sucessfull software projects by dramatically shortening the feedback loop between the expert domain knowled and working software and its tests.
 

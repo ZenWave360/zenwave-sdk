@@ -24,6 +24,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static io.zenwave360.generator.templating.OutputFormatType.JAVA;
+import static io.zenwave360.generator.templating.OutputFormatType.JSON;
 
 public class JDLOpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
@@ -210,7 +211,7 @@ public class JDLOpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                 List methodParams = params.stream()
                         .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
                         .map(param -> {
-                            String javaType = getJavaType(param);
+                            String javaType = getJavaTypeOrOptional(param);
                             String name = JSONPath.get(param, "$.name");
                             return javaType + " " + name;
                         }).collect(Collectors.toList());
@@ -227,6 +228,12 @@ public class JDLOpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         boolean required1 = JSONPath.get(param1, "required", false);
         boolean required2 = JSONPath.get(param2, "required", false);
         return (required1 && required2) || (!required1 && !required2)? 0 : required1? -1 : 1;
+    }
+
+    protected String getJavaTypeOrOptional(Map<String, Object> param) {
+        boolean isOptional = isOptional(param);
+        String javaType = getJavaType(param);
+        return isOptional? "Optional<" + javaType + ">" : javaType;
     }
     protected String getJavaType(Map<String, Object> param) {
         String type = JSONPath.get(param, "$.schema.type");
@@ -250,9 +257,13 @@ public class JDLOpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
             return "Boolean";
         }
         if("array".equals(type)) {
-            return "List<String>";
+            return "List<Object>";
         }
 
         return "String";
+    }
+
+    protected boolean isOptional(Map param) {
+        return "query".equals(JSONPath.get(param, "in")) && !JSONPath.get(param, "required", false);
     }
 }

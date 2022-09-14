@@ -322,6 +322,7 @@ components:
               $ref: "#/components/schemas/OrderedItem"
     OrderStatus:
       type: "string"
+      x-business-entity: "OrderStatus"
       enum:
       - "DELIVERED"
       - "CONFIRMED"
@@ -356,7 +357,6 @@ components:
     page:
       name: page
       in: query
-      required: true
       description: The number of results page
       schema:
         type: integer
@@ -365,7 +365,6 @@ components:
     limit:
       name: limit
       in: query
-      required: true
       description: The number of results in a single page
       schema:
         type: integer
@@ -374,9 +373,8 @@ components:
     sort:
       name: sort
       in: query
-      required: true
       description: The number of results page
       schema:
         type: array
         items:
-          type: string
+          format: string

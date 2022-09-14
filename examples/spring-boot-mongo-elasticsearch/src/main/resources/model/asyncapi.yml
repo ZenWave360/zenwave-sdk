@@ -39,21 +39,21 @@ channels:
 components:
   messages:
     CustomerCreatedMessage:
-      name: CustomerCreatedMessage
+      name: CustomerCreated
       title: Message for Customer Created Event
       summary: Message for Customer Created Event
       schemaFormat: application/vnd.aai.asyncapi;version=2.4.0
       payload:
         $ref: "#/components/schemas/CustomerCreatedPayload"
     CustomerUpdatedMessage:
-      name: CustomerUpdatedMessage
+      name: CustomerUpdated
       title: Message for Customer Updated Event
       summary: Message for Customer Updated Event
       schemaFormat: application/vnd.aai.asyncapi;version=2.4.0
       payload:
         $ref: "#/components/schemas/CustomerUpdatedPayload"
     CustomerDeletedMessage:
-      name: CustomerDeletedMessage
+      name: CustomerDeleted
       title: Message for Customer Deleted Event
       summary: Message for Customer Deleted Event
       schemaFormat: application/vnd.aai.asyncapi;version=2.4.0
@@ -61,21 +61,21 @@ components:
         $ref: "#/components/schemas/CustomerDeletedPayload"
   
     CustomerOrderCreatedMessage:
-      name: CustomerOrderCreatedMessage
+      name: CustomerOrderCreated
       title: Message for CustomerOrder Created Event
       summary: Message for CustomerOrder Created Event
       schemaFormat: application/vnd.aai.asyncapi;version=2.4.0
       payload:
         $ref: "#/components/schemas/CustomerOrderCreatedPayload"
     CustomerOrderUpdatedMessage:
-      name: CustomerOrderUpdatedMessage
+      name: CustomerOrderUpdated
       title: Message for CustomerOrder Updated Event
       summary: Message for CustomerOrder Updated Event
       schemaFormat: application/vnd.aai.asyncapi;version=2.4.0
       payload:
         $ref: "#/components/schemas/CustomerOrderUpdatedPayload"
     CustomerOrderDeletedMessage:
-      name: CustomerOrderDeletedMessage
+      name: CustomerOrderDeleted
       title: Message for CustomerOrder Deleted Event
       summary: Message for CustomerOrder Deleted Event
       schemaFormat: application/vnd.aai.asyncapi;version=2.4.0

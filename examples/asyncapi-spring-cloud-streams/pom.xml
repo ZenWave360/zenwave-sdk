@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>io.github.zenwave360</groupId>
-	<artifactId>asyncapi-spring-cloud-streams-examples</artifactId>
+	<artifactId>spring-cloud-streams-example</artifactId>
 	<version>0.5.1-SNAPSHOT</version>
 	<name>${pom.groupId}:${pom.artifactId}</name>
 
