@@ -11,7 +11,7 @@
     <packaging>pom</packaging>
 
     <modules>
-<!--        <module>spring-boot-mongo-elasticsearch</module>-->
-<!--        <module>asyncapi-spring-cloud-streams</module>-->
+        <module>spring-boot-mongo-elasticsearch</module>
+        <module>asyncapi-spring-cloud-streams</module>
     </modules>
 </project>
