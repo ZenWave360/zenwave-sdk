@@ -97,10 +97,11 @@ JBang will use you maven settings for repository resolution, but you can also sp
   - [x] OpenAPI to Spring WebTestClient
   - [x] AsyncAPI Spring Cloud Streams3
     - [x] Consumer and Producer. Imperative and Reactive.
-    - [ ] Support for custom extension for messages envelop (x-envelop-javaType)
+      - [ ] Dead Letter Queue
     - [ ] Producer with Transactional Outbox pattern
       - [ ] For MongoDB
       - [ ] For JPA/SQL
+    - [ ] Enterprise Envelop Pattern (x-envelop-javaType)
   - [x] JDL to Specs
     - [x] JDL to OpenAPI
     - [x] JDL to AsyncAPI

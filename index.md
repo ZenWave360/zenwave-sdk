@@ -97,6 +97,8 @@ Whether you are:
 
 ## Features / Roadmap
 
+![ZenWave Features MindMap](docs/ZenWave-MindMap.svg)
+
 - [x] ZenWave Code Generator CLI
   - [x] Default parsers, processors, plugins, templating, formatters, writers, etc... for AsyncAPI, OpenAPI and JDL.
   - [x] Help command: detailed, json, markdown, list of available plugins
@@ -124,10 +126,11 @@ Whether you are:
   - [x] OpenAPI to Spring WebTestClient
   - [x] AsyncAPI Spring Cloud Streams3
     - [x] Consumer and Producer. Imperative and Reactive.
-    - [ ] Support for custom extension for messages envelop (x-envelop-javaType)
+      - [ ] Dead Letter Queue
     - [ ] Producer with Transactional Outbox pattern
       - [ ] For MongoDB
       - [ ] For JPA/SQL
+    - [ ] Enterprise Envelop Pattern (x-envelop-javaType)
   - [x] JDL to Specs
     - [x] JDL to OpenAPI
     - [x] JDL to AsyncAPI
