@@ -23,6 +23,12 @@ public class {{apiClassName}} implements I{{apiClassName}} {
     @Autowired
     private StreamBridge streamBridge;
 
+    private String bindingName = "{{operation.x--operationIdKebabCase}}-out-0";
+
+    public void setBindingName(String bindingName) {
+        this.bindingName = bindingName;
+    }
+
 {{#each operations as |operation|}}
     {{#each operation.x--messages as |message|}}
     /**
@@ -31,7 +37,7 @@ public class {{apiClassName}} implements I{{apiClassName}} {
     public boolean {{operation.operationId}}({{message.x--javaType}} payload, Header... headers) {
         MimeType outputContentType = MimeType.valueOf("{{operation.operation.message.contentType}}");
         Message message = MessageBuilder.createMessage(payload, asMessageHeaders(headers));
-        return streamBridge.send("{{operation.x--operationIdKebabCase}}", message, outputContentType);
+        return streamBridge.send(bindingName, message, outputContentType);
     }
 
     {{/each}}

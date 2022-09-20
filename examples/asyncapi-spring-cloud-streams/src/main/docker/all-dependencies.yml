@@ -38,28 +38,19 @@ services:
     environment:
       - 'ES_JAVA_OPTS=-Xms1024m -Xmx1024m'
       - 'discovery.type=single-node'
-#  keycloak:
-#    image: jboss/keycloak:16.1.0
-#    command:
-#      [
-#        '-b',
-#        '0.0.0.0',
-#        '-Dkeycloak.migration.action=import',
-#        '-Dkeycloak.migration.provider=dir',
-#        '-Dkeycloak.migration.dir=/opt/jboss/keycloak/realm-config',
-#        '-Dkeycloak.migration.strategy=OVERWRITE_EXISTING',
-#        '-Djboss.socket.binding.port-offset=1000',
-#        '-Dkeycloak.profile.feature.upload_scripts=enabled',
-#      ]
-#    volumes:
-#      - ./realm-config:/opt/jboss/keycloak/realm-config
-#    environment:
-#      - KEYCLOAK_USER=admin
-#      - KEYCLOAK_PASSWORD=admin
-#      - DB_VENDOR=h2
-#    # If you want to expose these ports outside your dev PC,
-#    # remove the "127.0.0.1:" prefix
-#    ports:
-#      - 127.0.0.1:9080:9080
-#      - 127.0.0.1:9443:9443
-#      - 127.0.0.1:10990:10990
+  zenwaveexample-kafka:
+    image: confluentinc/cp-kafka:7.2.1
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_BROKER_ID: 2
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+    ports:
+      - 9092:9092
+  zenwaveexample-zookeeper:
+    image: confluentinc/cp-zookeeper:7.2.1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SYNC_LIMIT: 2
