@@ -1,13 +1,24 @@
 package io.zenwave360.generator.jpa2jdl;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.*;
-import javax.validation.constraints.*;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * A Tag.
@@ -32,7 +43,7 @@ public class Tag implements Serializable {
 
     @ManyToMany(mappedBy = "tags")
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    @JsonIgnoreProperties(value = { "blog", "tags" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"blog", "tags"}, allowSetters = true)
     private Set<Post> posts = new HashSet<>();
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
@@ -117,8 +128,8 @@ public class Tag implements Serializable {
     @Override
     public String toString() {
         return "Tag{" +
-            "id=" + getId() +
-            ", name='" + getName() + "'" +
-            "}";
+                "id=" + getId() +
+                ", name='" + getName() + "'" +
+                "}";
     }
 }

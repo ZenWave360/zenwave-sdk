@@ -1,8 +1,6 @@
 package io.zenwave360.generator.parsers;
 
-import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.jsonrefparser.$RefParser;
-import io.zenwave360.jsonrefparser.$RefParserOptions;
+import static io.zenwave360.jsonrefparser.$RefParserOptions.OnCircular.SKIP;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +8,9 @@ import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static io.zenwave360.jsonrefparser.$RefParserOptions.OnCircular.SKIP;
+import io.zenwave360.generator.doc.DocumentedOption;
+import io.zenwave360.jsonrefparser.$RefParser;
+import io.zenwave360.jsonrefparser.$RefParserOptions;
 
 public class DefaultYamlParser implements io.zenwave360.generator.parsers.Parser {
 
@@ -29,7 +29,7 @@ public class DefaultYamlParser implements io.zenwave360.generator.parsers.Parser
     }
 
     protected File findSpecFile(String specFile) {
-        if(specFile.startsWith("classpath:")) {
+        if (specFile.startsWith("classpath:")) {
             try {
                 return new File(getClass().getClassLoader().getResource(specFile.replaceFirst("classpath:", "")).toURI());
             } catch (URISyntaxException e) {

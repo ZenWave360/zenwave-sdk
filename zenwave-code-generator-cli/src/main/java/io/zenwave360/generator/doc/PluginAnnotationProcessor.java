@@ -1,7 +1,11 @@
 package io.zenwave360.generator.doc;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.commons.lang3.reflect.MethodUtils;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Proxy;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -10,12 +14,9 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Proxy;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 
 @SupportedAnnotationTypes({"io.zenwave360.generator.doc.DocumentedPlugin"})
 public final class PluginAnnotationProcessor extends AbstractProcessor {
@@ -42,11 +43,11 @@ public final class PluginAnnotationProcessor extends AbstractProcessor {
                     for (Object annotation : annotations) {
                         Object annotationType = FieldUtils.readField(annotation, "annotationType", true);
                         Object type = FieldUtils.readField(annotationType, "type", true);
-                        if(DocumentedPlugin.class.getName().contentEquals(type.toString())) {
+                        if (DocumentedPlugin.class.getName().contentEquals(type.toString())) {
                             List args = (List) FieldUtils.readField(annotation, "args", true);
                             for (Object arg : args) {
                                 Object lhs = FieldUtils.readField(arg, "lhs", true);
-                                if("description".contentEquals(lhs.toString())) {
+                                if ("description".contentEquals(lhs.toString())) {
                                     Object rhs = FieldUtils.readField(arg, "rhs", true);
                                     FieldUtils.writeField(rhs, "value", docComment);
                                 }

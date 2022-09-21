@@ -1,8 +1,18 @@
 package io.zenwave360.generator.plugins;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
 import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.generators.AbstractJDLGenerator;
 import io.zenwave360.generator.generators.JDLEntitiesToAvroConverter;
@@ -12,16 +22,6 @@ import io.zenwave360.generator.templating.OutputFormatType;
 import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
 import io.zenwave360.generator.utils.JSONPath;
-import io.zenwave360.generator.utils.Maps;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
 
@@ -95,22 +95,21 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         entitiesAndEnums.addAll(enums);
 
         for (Map<String, Object> entity : entitiesAndEnums) {
-            if(!isGenerateSchemaEntity(entity)) {
+            if (!isGenerateSchemaEntity(entity)) {
                 continue;
             }
-            if(schemaFormat == SchemaFormat.schema) {
+            if (schemaFormat == SchemaFormat.schema) {
                 String entityName = (String) entity.get("name");
                 Map<String, Object> asyncAPISchema = toSchemasConverter.convertToSchema(entity);
                 schemas.put(entityName, asyncAPISchema);
             }
-            if(schemaFormat == SchemaFormat.avro) {
+            if (schemaFormat == SchemaFormat.avro) {
                 outputList.addAll(convertToAvro(toAvroConverter, entity));
             }
         }
 
-
         String asyncAPISchemasString = "";
-        if(schemaFormat == SchemaFormat.schema) {
+        if (schemaFormat == SchemaFormat.schema) {
             asyncAPISchemasString = writeAsString(yamlMapper, oasSchemas);
             // remove first line
             asyncAPISchemasString = asyncAPISchemasString.substring(asyncAPISchemasString.indexOf("components:") + 12);
@@ -133,17 +132,17 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         Map avro = converter.convertToAvro(entityOrEnum);
         String avroJson = writeAsString(jsonMapper, avro);
         String targetFolder = new File(targetFile).getParent();
-        targetFolder = targetFolder == null? "avro" : targetFolder + "/avro";
+        targetFolder = targetFolder == null ? "avro" : targetFolder + "/avro";
         List<TemplateOutput> avroList = new ArrayList<>();
 
         avroList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name), avroJson, OutputFormatType.JSON.toString()));
 
-        if(!skipOperations(entityOrEnum) || entityOrEnum.get("fields") == null) {
+        if (!skipOperations(entityOrEnum) || entityOrEnum.get("fields") == null) {
             // creating 'fake' jdl entities for message payloads for created/updated/deleted as { id: <id>, payload: <entity> }
 
             Map<String, Object> fields = new HashMap<>();
             // id will be created automatically
-//            fields.put("id", Map.of("isEntity", false, "isEnum", false, "name", "id", "type", converter.idType));
+            // fields.put("id", Map.of("isEntity", false, "isEnum", false, "name", "id", "type", converter.idType));
 
             Map<String, Object> deleteMessagePayload = new HashMap<>();
             deleteMessagePayload.put("name", name + "DeletedPayload");
@@ -174,18 +173,18 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         model.putAll(this.asConfigurationMap());
         model.put("context", contextModel);
         model.put("jdlModel", jdlModel);
-        model.put("schemaFormatString", schemaFormat == SchemaFormat.schema? defaultSchemaFormat : avroSchemaFormat);
+        model.put("schemaFormatString", schemaFormat == SchemaFormat.schema ? defaultSchemaFormat : avroSchemaFormat);
         model.put("schemasAsString", schemasAsString);
         return handlebarsEngine.processTemplate(model, template).get(0);
     }
 
     protected boolean skipOperations(Map entity) {
-        if(!isGenerateSchemaEntity(entity)) {
+        if (!isGenerateSchemaEntity(entity)) {
             return true;
         }
         String annotationsFilter = annotations.stream().map(a -> "@." + a).collect(Collectors.joining(" || "));
         boolean hasAnnotation = !annotations.isEmpty() && !JSONPath.get(entity, "$.options[?(" + annotationsFilter + ")]", Collections.emptyList()).isEmpty();
-        if(hasAnnotation || skipForAnnotations.isEmpty()) {
+        if (hasAnnotation || skipForAnnotations.isEmpty()) {
             return false;
         }
         String skipAnnotationsFilter = skipForAnnotations.stream().map(a -> "@." + a).collect(Collectors.joining(" || "));
@@ -199,7 +198,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         });
 
         handlebarsEngine.getHandlebars().registerHelper("asTagName", (context, options) -> {
-            if(context instanceof String) {
+            if (context instanceof String) {
                 return ((String) context).replaceAll("(Service|UseCases)", "");
             }
             return "Default";
@@ -208,7 +207,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         handlebarsEngine.getHandlebars().registerHelper("payloadRef", (context, options) -> {
             Map entity = (Map) context;
             String eventTypeName = options.param(0);
-            if(schemaFormat == SchemaFormat.avro) {
+            if (schemaFormat == SchemaFormat.avro) {
                 return String.format("avro/%s%sPayload.avsc", entity.get("className"), eventTypeName);
             }
             return String.format("#/components/schemas/%s%sPayload", entity.get("className"), eventTypeName);

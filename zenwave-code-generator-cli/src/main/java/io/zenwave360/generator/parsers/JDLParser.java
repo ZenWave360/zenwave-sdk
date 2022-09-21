@@ -1,7 +1,5 @@
 package io.zenwave360.generator.parsers;
 
-import io.zenwave360.generator.doc.DocumentedOption;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -11,6 +9,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import io.zenwave360.generator.doc.DocumentedOption;
 
 public class JDLParser implements Parser {
 
@@ -22,7 +22,7 @@ public class JDLParser implements Parser {
 
     @DocumentedOption(description = "JDL file to parse")
     public void setSpecFile(String specFile) {
-        this.specFiles = new String[]{ specFile };
+        this.specFiles = new String[] {specFile};
     }
 
     public JDLParser withSpecFile(String... specFile) {
@@ -41,7 +41,7 @@ public class JDLParser implements Parser {
     }
 
     protected String loadSpecFile(String specFile) {
-        if(specFile.startsWith("classpath:")) {
+        if (specFile.startsWith("classpath:")) {
             try {
                 return new String(getClass().getClassLoader().getResourceAsStream(specFile.replaceFirst("classpath:", "")).readAllBytes(), StandardCharsets.UTF_8);
             } catch (Exception e) {

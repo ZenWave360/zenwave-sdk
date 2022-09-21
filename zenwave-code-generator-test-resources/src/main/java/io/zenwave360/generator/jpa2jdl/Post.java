@@ -1,14 +1,28 @@
 package io.zenwave360.generator.jpa2jdl;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.*;
-import javax.validation.constraints.*;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * A Post.
@@ -44,7 +58,7 @@ public class Post implements Serializable {
     @ManyToMany
     @JoinTable(name = "rel_post__tag", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    @JsonIgnoreProperties(value = { "posts" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"posts"}, allowSetters = true)
     private Set<Tag> tags = new HashSet<>();
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
@@ -162,10 +176,10 @@ public class Post implements Serializable {
     @Override
     public String toString() {
         return "Post{" +
-            "id=" + getId() +
-            ", title='" + getTitle() + "'" +
-            ", content='" + getContent() + "'" +
-            ", date='" + getDate() + "'" +
-            "}";
+                "id=" + getId() +
+                ", title='" + getTitle() + "'" +
+                ", content='" + getContent() + "'" +
+                ", date='" + getDate() + "'" +
+                "}";
     }
 }

@@ -1,17 +1,17 @@
 package io.zenwave360.generator;
 
-import io.zenwave360.generator.parsers.DefaultYamlParser;
-import io.zenwave360.generator.plugins.NoOpPluginConfiguration;
-import io.zenwave360.generator.plugins.NoOpGenerator;
-import io.zenwave360.generator.processors.AsyncApiProcessor;
-import io.zenwave360.generator.writers.TemplateFileWriter;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import io.zenwave360.generator.parsers.DefaultYamlParser;
+import io.zenwave360.generator.plugins.NoOpGenerator;
+import io.zenwave360.generator.processors.AsyncApiProcessor;
+import io.zenwave360.generator.writers.TemplateFileWriter;
 
 public class MainTest {
 
@@ -25,8 +25,7 @@ public class MainTest {
                 "specFile=classpath:io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml",
                 "targetFolder=target/zenwave/out",
                 "inner.specFile=target/zenwave/out",
-                "inner.targetFolder=target/zenwave/out"
-        );
+                "inner.targetFolder=target/zenwave/out");
     }
 
     @Test
@@ -44,8 +43,7 @@ public class MainTest {
                 "3.targetProperty=asyncapi2",
                 "targetFolder=target/zenwave/out",
                 "inner.specFile=target/zenwave/out",
-                "inner.targetFolder=target/zenwave/out"
-        );
+                "inner.targetFolder=target/zenwave/out");
 
         Assertions.assertTrue(NoOpGenerator.context != null);
         Assertions.assertTrue(NoOpGenerator.context.get("asyncapi1") != null);
@@ -65,7 +63,6 @@ public class MainTest {
                 "targetFolder=target/zenwave/out",
                 "inner.specFile=target/zenwave/out",
                 "inner.targetFolder=target/zenwave/out",
-                "array.0=one"
-        );
+                "array.0=one");
     }
 }

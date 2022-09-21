@@ -1,27 +1,26 @@
 package io.zenwave360.generator.processors;
 
-import io.zenwave360.generator.parsers.Model;
-import io.zenwave360.generator.utils.JSONPath;
-import io.zenwave360.jsonrefparser.$Ref;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.zenwave360.generator.parsers.Model;
+import io.zenwave360.generator.utils.JSONPath;
+import io.zenwave360.jsonrefparser.$Ref;
+
 public class OpenApiProcessor extends AbstractBaseProcessor implements Processor {
 
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
-        Model apiModel = targetProperty != null? (Model) contextModel.get(targetProperty) : (Model) contextModel;
+        Model apiModel = targetProperty != null ? (Model) contextModel.get(targetProperty) : (Model) contextModel;
 
         apiModel.getRefs().getOriginalRefsList().forEach(pair -> {
-            if(pair.getValue() instanceof Map) {
+            if (pair.getValue() instanceof Map) {
                 ((Map) pair.getValue()).put("x--original-$ref", pair.getKey().getRef());
             }
         });
-
 
         List<Map<String, Object>> parametersParents = getJsonPath(apiModel, "$.paths[*][?(@.parameters)]");
         for (Map<String, Object> parametersParent : parametersParents) {
@@ -62,7 +61,6 @@ public class OpenApiProcessor extends AbstractBaseProcessor implements Processor
         return contextModel;
     }
 
-
     private void addPathNameToOperation(Map<String, Object> operation, String path) {
         if (operation != null) {
             operation.put("x--path", path);
@@ -77,7 +75,7 @@ public class OpenApiProcessor extends AbstractBaseProcessor implements Processor
 
     private void addParentParametersToOperation(Map<String, Object> operation, List<Map<String, Object>> parentParameters) {
         if (operation != null && parentParameters != null && !parentParameters.isEmpty()) {
-            if(!operation.containsKey("parameters")) {
+            if (!operation.containsKey("parameters")) {
                 operation.put("parameters", new ArrayList<>());
             }
             List<Map<String, Object>> parameters = (List<Map<String, Object>>) operation.get("parameters");
@@ -97,7 +95,7 @@ public class OpenApiProcessor extends AbstractBaseProcessor implements Processor
 
     private void simplifyOperationResponseInfo(Model apiModel, Map<String, Object> operation) {
         Map<String, Map<String, Object>> responses = getJsonPath(operation, "$.responses");
-        if(responses != null) {
+        if (responses != null) {
             operation.put("x--response", getSimplifiedResponseInfo(apiModel, responses.entrySet().stream().findFirst().get()));
             for (Map.Entry<String, Map<String, Object>> responseEntry : responses.entrySet()) {
                 Map<String, Object> simplified = getSimplifiedResponseInfo(apiModel, responseEntry);
@@ -110,7 +108,7 @@ public class OpenApiProcessor extends AbstractBaseProcessor implements Processor
         Map<String, Object> simplified = new HashMap<>();
         simplified.put("x--statusCode", response.getKey());
         Map<String, Object> responseBodySchema = getJsonPath(response.getValue(), "$.content['application/json'].schema");
-        if(responseBodySchema != null) {
+        if (responseBodySchema != null) {
             $Ref ref = apiModel.getRefs().getOriginalRef(responseBodySchema);
             simplified.put("x--content-type", "application/json");
             simplified.put("x--response-schema", responseBodySchema);

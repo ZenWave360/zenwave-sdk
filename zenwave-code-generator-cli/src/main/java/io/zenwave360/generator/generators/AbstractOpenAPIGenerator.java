@@ -1,17 +1,17 @@
 package io.zenwave360.generator.generators;
 
-import com.jayway.jsonpath.JsonPath;
-import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.generator.generators.Generator;
-import io.zenwave360.generator.parsers.Model;
-import org.apache.commons.lang3.ObjectUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ObjectUtils;
+
+import com.jayway.jsonpath.JsonPath;
+
+import io.zenwave360.generator.doc.DocumentedOption;
+import io.zenwave360.generator.parsers.Model;
 
 public abstract class AbstractOpenAPIGenerator implements Generator {
 
@@ -36,7 +36,6 @@ public abstract class AbstractOpenAPIGenerator implements Generator {
 
     @DocumentedOption(description = "OpenAPI operationIds to generate code for")
     public List<String> operationIds = new ArrayList<>();
-
 
     @DocumentedOption(description = "Status codes to generate code for (default: 200, 201, 202 and 400")
     public List<String> statusCodes = List.of("200", "201", "202", "400");

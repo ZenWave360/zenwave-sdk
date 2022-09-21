@@ -1,18 +1,13 @@
 package io.zenwave360.generator.utils;
 
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.Option;
-import com.jayway.jsonpath.PathNotFoundException;
-import com.jayway.jsonpath.Predicate;
-import com.jayway.jsonpath.internal.path.CompiledPath;
-import org.apache.commons.lang3.ObjectUtils;
-
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
+
+import org.apache.commons.lang3.ObjectUtils;
+
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 
 public class JSONPath {
 
@@ -36,12 +31,13 @@ public class JSONPath {
 
     /**
      * This implementation has some limitations: object must be of type Map and path must use '.' as separator.
+     * 
      * @param object
      * @param jsonPath
      * @param value
      */
     public static void set(Object object, String jsonPath, Object value) {
-        if(jsonPath.contains(".")) {
+        if (jsonPath.contains(".")) {
             String[] tokens = jsonPath.split("\\.");
             Object nested = object;
             for (String token : tokens) {

@@ -2,8 +2,18 @@ package io.zenwave360.generator.jpa2jdl;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import javax.persistence.*;
-import javax.validation.constraints.*;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -129,11 +139,11 @@ public class Product implements Serializable {
     @Override
     public String toString() {
         return "Product{" +
-            "id=" + getId() +
-            ", title='" + getTitle() + "'" +
-            ", price=" + getPrice() +
-            ", image='" + getImage() + "'" +
-            ", imageContentType='" + getImageContentType() + "'" +
-            "}";
+                "id=" + getId() +
+                ", title='" + getTitle() + "'" +
+                ", price=" + getPrice() +
+                ", image='" + getImage() + "'" +
+                ", imageContentType='" + getImageContentType() + "'" +
+                "}";
     }
 }

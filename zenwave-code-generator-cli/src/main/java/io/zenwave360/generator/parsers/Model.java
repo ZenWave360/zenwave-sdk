@@ -1,13 +1,11 @@
 package io.zenwave360.generator.parsers;
 
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.PathNotFoundException;
-import io.zenwave360.jsonrefparser.$Refs;
-
 import java.io.File;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Set;
+
+import io.zenwave360.jsonrefparser.$Refs;
 
 public class Model extends AbstractMap<String, Object> {
 

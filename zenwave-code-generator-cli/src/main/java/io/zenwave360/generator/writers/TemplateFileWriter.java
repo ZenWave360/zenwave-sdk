@@ -1,10 +1,5 @@
 package io.zenwave360.generator.writers;
 
-import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.generator.templating.TemplateOutput;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -12,6 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.zenwave360.generator.doc.DocumentedOption;
+import io.zenwave360.generator.templating.TemplateOutput;
 
 public class TemplateFileWriter implements TemplateWriter {
 
@@ -37,7 +38,7 @@ public class TemplateFileWriter implements TemplateWriter {
     }
 
     protected File getFile(String fileName) {
-        return targetFolder != null? new File(targetFolder, fileName) : new File(fileName);
+        return targetFolder != null ? new File(targetFolder, fileName) : new File(fileName);
     }
 
     protected void writeToFile(File file, String contents) {

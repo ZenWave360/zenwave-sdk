@@ -1,14 +1,16 @@
 package io.zenwave360.generator.templating;
 
-import com.github.jknack.handlebars.Options;
-import io.zenwave360.generator.utils.NamingUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.github.jknack.handlebars.Options;
+
+import io.zenwave360.generator.utils.NamingUtils;
 
 public class CustomHandlebarsHelpers {
 
@@ -26,8 +28,8 @@ public class CustomHandlebarsHelpers {
     }
 
     public static Object assign(final String variableName, final Options options) throws IOException {
-        if(options.params.length == 1) {
-            if(options.param(0) != null) {
+        if (options.params.length == 1) {
+            if (options.param(0) != null) {
                 options.context.combine(Map.of(variableName, options.param(0)));
             } else {
 
@@ -48,17 +50,17 @@ public class CustomHandlebarsHelpers {
     }
 
     public static String asPackageFolder(String text, Options options) throws IOException {
-        return text != null? text.replaceAll("\\.", "/") : null;
+        return text != null ? text.replaceAll("\\.", "/") : null;
     }
 
     public static String kebabCase(String text, Options options) throws IOException {
-        return text != null? NamingUtils.asKebabCase(text) : null;
+        return text != null ? NamingUtils.asKebabCase(text) : null;
     }
 
     public static String joinWithTemplate(Collection<Object> context, Options options) throws IOException {
-        String delimiter = options.params.length > 0? options.params[0].toString() : "\n";
+        String delimiter = options.params.length > 0 ? options.params[0].toString() : "\n";
         boolean removeDuplicates = options.hash("removeDuplicates", false);
-        if(removeDuplicates) {
+        if (removeDuplicates) {
             context = context.stream().distinct().collect(Collectors.toList());
         }
         return context.stream().map(token -> {

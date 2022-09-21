@@ -1,17 +1,19 @@
 package io.zenwave360.generator.plugins;
 
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
 import io.zenwave360.generator.parsers.JDLParser;
 import io.zenwave360.generator.processors.JDLProcessor;
 import io.zenwave360.generator.templating.TemplateOutput;
 import io.zenwave360.generator.utils.JSONPath;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.util.List;
-import java.util.Map;
 
 public class JDLToOpenAPIGeneratorTest {
 
@@ -34,10 +36,10 @@ public class JDLToOpenAPIGeneratorTest {
         System.out.println(outputTemplates.get(0).getContent());
 
         Map<String, Object> oasSchema = mapper.readValue(outputTemplates.get(0).getContent(), Map.class);
-        Assertions.assertTrue(((List) JSONPath.get(oasSchema,"$.components.schemas.OrderStatus.enum")).contains("DELIVERED"));
-        Assertions.assertTrue(((List) JSONPath.get(oasSchema,"$.components.schemas.Customer.required")).contains("firstName"));
-        Assertions.assertEquals("3", JSONPath.get(oasSchema,"$.components.schemas.Customer.properties.firstName.minLength").toString());
-        Assertions.assertEquals("#/components/schemas/OrderStatus", JSONPath.get(oasSchema,"$.components.schemas.CustomerOrder.properties.status.$ref"));
+        Assertions.assertTrue(((List) JSONPath.get(oasSchema, "$.components.schemas.OrderStatus.enum")).contains("DELIVERED"));
+        Assertions.assertTrue(((List) JSONPath.get(oasSchema, "$.components.schemas.Customer.required")).contains("firstName"));
+        Assertions.assertEquals("3", JSONPath.get(oasSchema, "$.components.schemas.Customer.properties.firstName.minLength").toString());
+        Assertions.assertEquals("#/components/schemas/OrderStatus", JSONPath.get(oasSchema, "$.components.schemas.CustomerOrder.properties.status.$ref"));
     }
 
 }

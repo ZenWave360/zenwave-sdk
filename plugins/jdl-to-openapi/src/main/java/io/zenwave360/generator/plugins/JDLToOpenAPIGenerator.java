@@ -1,8 +1,16 @@
 package io.zenwave360.generator.plugins;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
 import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.generators.AbstractJDLGenerator;
 import io.zenwave360.generator.generators.JDLEntitiesToSchemasConverter;
@@ -13,13 +21,6 @@ import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
 import io.zenwave360.generator.utils.JSONPath;
 import io.zenwave360.generator.utils.Maps;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
 
@@ -84,7 +85,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
 
         List<Map<String, Object>> entities = (List) JSONPath.get(jdlModel, "$.entities[*]");
         for (Map<String, Object> entity : entities) {
-            if(!isGenerateSchemaEntity(entity)) {
+            if (!isGenerateSchemaEntity(entity)) {
                 continue;
             }
             String entityName = (String) entity.get("name");
@@ -97,16 +98,13 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
                     Map.of(jdlBusinessEntityPaginatedProperty, entityName),
                     Map.of("properties",
                             Map.of("content",
-                                    Maps.of("type", "array", "items", Map.of("$ref", "#/components/schemas/" + entityName)))
-                    )
-                )
-            );
+                                    Maps.of("type", "array", "items", Map.of("$ref", "#/components/schemas/" + entityName))))));
             schemas.put(entityName + "Paginated", paginatedSchema);
         }
 
         List<Map<String, Object>> enums = (List) JSONPath.get(jdlModel, "$.enums.enums[*]");
         for (Map<String, Object> enumValue : enums) {
-            if(!isGenerateSchemaEntity(enumValue)) {
+            if (!isGenerateSchemaEntity(enumValue)) {
                 continue;
             }
             Map<String, Object> enumSchema = converter.convertToSchema(enumValue);
@@ -136,7 +134,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
 
     protected TemplateEngine getTemplateEngine() {
         handlebarsEngine.getHandlebars().registerHelper("asTagName", (context, options) -> {
-            if(context instanceof String) {
+            if (context instanceof String) {
                 return ((String) context).replaceAll("(Service|UseCases)", "");
             }
             return "Default";

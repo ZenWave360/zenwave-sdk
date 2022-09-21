@@ -1,12 +1,13 @@
 package io.zenwave360.generator.parsers;
 
-import io.zenwave360.generator.utils.JSONPath;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import io.zenwave360.generator.utils.JSONPath;
 
 public class DefaultYamlParserTest {
 
@@ -21,6 +22,6 @@ public class DefaultYamlParserTest {
         DefaultYamlParser parser = new DefaultYamlParser().withSpecFile(file.getAbsolutePath()).withTargetProperty(targetProperty);
         Model model = (Model) parser.parse().get(targetProperty);
         Assertions.assertNotNull(model);
-        Assertions.assertNotNull(JSONPath.get(model,"$.channels.createProductNotification.subscribe.message"));
+        Assertions.assertNotNull(JSONPath.get(model, "$.channels.createProductNotification.subscribe.message"));
     }
 }

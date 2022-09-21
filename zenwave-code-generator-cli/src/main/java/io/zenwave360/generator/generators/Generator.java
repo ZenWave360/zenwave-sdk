@@ -1,8 +1,7 @@
 package io.zenwave360.generator.generators;
 
-import io.zenwave360.generator.templating.HandlebarsEngine;
-import io.zenwave360.generator.templating.TemplateEngine;
-import io.zenwave360.generator.templating.TemplateOutput;
+import static java.lang.reflect.Modifier.isStatic;
+import static org.apache.commons.lang3.reflect.FieldUtils.getAllFields;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -10,8 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.reflect.Modifier.isStatic;
-import static org.apache.commons.lang3.reflect.FieldUtils.getAllFields;
+import io.zenwave360.generator.templating.HandlebarsEngine;
+import io.zenwave360.generator.templating.TemplateEngine;
+import io.zenwave360.generator.templating.TemplateOutput;
 
 public interface Generator {
 
@@ -24,9 +24,9 @@ public interface Generator {
     public static Map<String, Object> asConfigurationMap(Object object) {
         Map<String, Object> config = new HashMap<>();
         Field[] fields = getAllFields(object.getClass());
-        for(Field field: fields) {
+        for (Field field : fields) {
             try {
-                if(!isStatic(field.getModifiers()) && field.canAccess(object) && !field.getName().startsWith("this$")) {
+                if (!isStatic(field.getModifiers()) && field.canAccess(object) && !field.getName().startsWith("this$")) {
                     config.put(field.getName(), field.get(object));
                 }
             } catch (IllegalAccessException e) {
@@ -36,7 +36,7 @@ public interface Generator {
         TemplateEngine templateEngine = new HandlebarsEngine();
         for (Map.Entry<String, Object> entry : config.entrySet()) {
             try {
-                if(entry.getValue() instanceof String) {
+                if (entry.getValue() instanceof String) {
                     String value = templateEngine.processInline((String) entry.getValue(), config);
                     entry.setValue(value);
                 }

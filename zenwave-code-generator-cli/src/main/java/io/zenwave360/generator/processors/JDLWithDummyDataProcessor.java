@@ -1,15 +1,16 @@
 package io.zenwave360.generator.processors;
 
-import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.generator.utils.JSONPath;
-import io.zenwave360.generator.utils.Maps;
-import io.zenwave360.generator.utils.NamingUtils;
-import org.apache.commons.lang3.ObjectUtils;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang3.ObjectUtils;
+
+import io.zenwave360.generator.doc.DocumentedOption;
+import io.zenwave360.generator.utils.JSONPath;
+import io.zenwave360.generator.utils.Maps;
+import io.zenwave360.generator.utils.NamingUtils;
 
 public class JDLWithDummyDataProcessor extends AbstractBaseProcessor {
 
@@ -37,7 +38,6 @@ public class JDLWithDummyDataProcessor extends AbstractBaseProcessor {
         }
 
         Map<String, Map> services = new HashMap<>();
-
 
         Map<String, Map<String, Object>> entities = new HashMap();
         jdlModel.put("entities", entities);

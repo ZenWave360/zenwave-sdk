@@ -1,12 +1,12 @@
 package io.zenwave360.generator.plugins;
 
-import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.generator.generators.Generator;
-import io.zenwave360.generator.templating.TemplateOutput;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import io.zenwave360.generator.doc.DocumentedOption;
+import io.zenwave360.generator.generators.Generator;
+import io.zenwave360.generator.templating.TemplateOutput;
 
 public class NoOpGenerator implements Generator {
 

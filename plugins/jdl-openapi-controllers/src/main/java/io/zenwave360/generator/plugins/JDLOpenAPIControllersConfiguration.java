@@ -1,18 +1,19 @@
 package io.zenwave360.generator.plugins;
 
+import org.apache.commons.lang3.StringUtils;
+
 import io.zenwave360.generator.Configuration;
 import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.doc.DocumentedPlugin;
 import io.zenwave360.generator.formatters.JavaFormatter;
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.parsers.JDLParser;
-import io.zenwave360.generator.processors.JDLWithDummyDataProcessor;
 import io.zenwave360.generator.processors.JDLProcessor;
+import io.zenwave360.generator.processors.JDLWithDummyDataProcessor;
 import io.zenwave360.generator.processors.JDLWithOpenApiProcessor;
 import io.zenwave360.generator.processors.OpenApiProcessor;
 import io.zenwave360.generator.writers.TemplateFileWriter;
 import io.zenwave360.generator.writers.TemplateStdoutWriter;
-import org.apache.commons.lang3.StringUtils;
 
 @DocumentedPlugin(value = "Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.", shortCode = "jdl-openapi-controllers")
 public class JDLOpenAPIControllersConfiguration extends Configuration {
@@ -27,10 +28,10 @@ public class JDLOpenAPIControllersConfiguration extends Configuration {
 
     @Override
     public <T extends Configuration> T processOptions() {
-        if(!getOptions().containsKey("targetFolder")) {
+        if (!getOptions().containsKey("targetFolder")) {
             replaceInChain(TemplateFileWriter.class, TemplateStdoutWriter.class);
         }
-        if(!getOptions().containsKey("jdlFile")) {
+        if (!getOptions().containsKey("jdlFile")) {
             removeFromChain(JDLParser.class, JDLProcessor.class);
             addBeforeInChain(JDLWithOpenApiProcessor.class, JDLWithDummyDataProcessor.class);
             withOption("FillJDLWithDummyDataProcessor.openapiProperty", "openapi");

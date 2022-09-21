@@ -1,30 +1,21 @@
 package io.zenwave360.generator.processors;
 
-import com.jayway.jsonpath.JsonPath;
-import io.zenwave360.generator.parsers.Model;
-import io.zenwave360.generator.utils.JSONPath;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.jayway.jsonpath.JsonPath;
+
+import io.zenwave360.generator.parsers.Model;
+import io.zenwave360.generator.utils.JSONPath;
+
 public class AsyncApiProcessor extends AbstractBaseProcessor implements Processor {
 
     public enum SchemaFormatType {
 
-        ASYNCAPI("application/vnd.aai.asyncapi;"),
-        ASYNCAPI_JSON("application/vnd.aai.asyncapi+json;"),
-        ASYNCAPI_YAML("application/vnd.aai.asyncapi+yaml;"),
-        OPENAPI("application/vnd.oai.openapi;"),
-        OPENAPI_JSON("application/vnd.oai.openapi+json;"),
-        OPENAPI_YAML("application/vnd.oai.openapi+yaml;"),
-        JSONSCHEMA_JSON("application/schema+json;"),
-        JSONSCHEMA_YAML("application/schema+yaml;"),
-        AVRO("application/vnd.apache.avro;"),
-        AVRO_JSON("application/vnd.apache.avro+json;"),
-        AVRO_YAML("application/vnd.apache.avro+yaml;"),
+        ASYNCAPI("application/vnd.aai.asyncapi;"), ASYNCAPI_JSON("application/vnd.aai.asyncapi+json;"), ASYNCAPI_YAML("application/vnd.aai.asyncapi+yaml;"), OPENAPI("application/vnd.oai.openapi;"), OPENAPI_JSON("application/vnd.oai.openapi+json;"), OPENAPI_YAML("application/vnd.oai.openapi+yaml;"), JSONSCHEMA_JSON("application/schema+json;"), JSONSCHEMA_YAML("application/schema+yaml;"), AVRO("application/vnd.apache.avro;"), AVRO_JSON("application/vnd.apache.avro+json;"), AVRO_YAML("application/vnd.apache.avro+yaml;"),
         ;
 
         private static final List<SchemaFormatType> ASYNCAPI_ALL = Arrays.asList(ASYNCAPI, ASYNCAPI_JSON, ASYNCAPI_YAML);
@@ -74,17 +65,15 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
 
     }
 
-
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
-        Model apiModel = targetProperty != null? (Model) contextModel.get(targetProperty) : (Model) contextModel;
+        Model apiModel = targetProperty != null ? (Model) contextModel.get(targetProperty) : (Model) contextModel;
 
         apiModel.getRefs().getOriginalRefsList().forEach(pair -> {
-            if(pair.getValue() instanceof Map) {
+            if (pair.getValue() instanceof Map) {
                 ((Map) pair.getValue()).put("x--original-$ref", pair.getKey().getRef());
             }
         });
-
 
         List<Map<String, Object>> traitsParents = JSONPath.get(apiModel, "$..[?(@.traits)]");
         for (Map<String, Object> traitParent : traitsParents) {
@@ -97,7 +86,7 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
         Map<String, Object> channels = JSONPath.get(apiModel, "$.channels", Collections.emptyMap());
         for (Map.Entry<String, Object> channel : channels.entrySet()) {
             Map<String, Map<String, Object>> value = (Map) channel.getValue();
-            if(value != null){
+            if (value != null) {
                 addChannelNameToOperation(value.get("publish"), channel.getKey());
                 addChannelNameToOperation(value.get("subscribe"), channel.getKey());
                 addOperationType(value.get("publish"), "publish");
@@ -112,8 +101,8 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
         }
 
         Map<String, Map> componentsMessages = JSONPath.get(apiModel, "$.components.messages", Collections.emptyMap());
-        for(Map.Entry<String, Map> message: componentsMessages.entrySet()) {
-            if(!message.getValue().containsKey("name")) {
+        for (Map.Entry<String, Map> message : componentsMessages.entrySet()) {
+            if (!message.getValue().containsKey("name")) {
                 message.getValue().put("name", message.getKey());
             }
         }
@@ -143,11 +132,11 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
         }
     }
 
-     public void collectMessages(Map<String, Object> operation) {
+    public void collectMessages(Map<String, Object> operation) {
         if (operation != null) {
             Map message = (Map) operation.get("message");
             List messages = new ArrayList();
-            if(message.containsKey("oneOf")) {
+            if (message.containsKey("oneOf")) {
                 messages.addAll((List) message.get("oneOf"));
             } else {
                 messages.add(message);
@@ -159,40 +148,40 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
     public void calculateMessageParamType(Map<String, Object> message) {
         String schemaFormat = normalizeSchemaFormat((String) message.get("schemaFormat"));
         String javaType = null;
-        if("avro".equals(schemaFormat)) {
+        if ("avro".equals(schemaFormat)) {
             String name = JsonPath.read(message, "payload.name");
             String namespace = JsonPath.read(message, "payload.namespace");
             javaType = namespace + "." + name;
         }
-        if("jsonSchema".equals(schemaFormat)) {
+        if ("jsonSchema".equals(schemaFormat)) {
             javaType = JsonPath.read(message, "payload.javaType");
         }
-        if("asyncapi".equals(schemaFormat) || "openapi".equals(schemaFormat)) {
+        if ("asyncapi".equals(schemaFormat) || "openapi".equals(schemaFormat)) {
             javaType = normalizeTagName(JSONPath.get(message, "payload.x--schema-name"));
-            if(javaType == null) {
+            if (javaType == null) {
                 javaType = normalizeTagName((String) message.getOrDefault("x-javaType", message.get("name")));
             }
         }
 
-        if(javaType != null) {
+        if (javaType != null) {
             message.put("x--javaType", javaType);
         }
     }
 
     private String normalizeSchemaFormat(String schemaFormat) {
-        if(schemaFormat == null) {
+        if (schemaFormat == null) {
             return "asyncapi";
         }
-        if(schemaFormat.matches("application\\/vnd\\.aai\\.asyncapi(\\+json|\\+yaml)*;version=[\\d.]+")) {
+        if (schemaFormat.matches("application\\/vnd\\.aai\\.asyncapi(\\+json|\\+yaml)*;version=[\\d.]+")) {
             return "asyncapi";
         }
-        if(schemaFormat.matches("application\\/vnd\\.oai\\.openapi(\\+json|\\+yaml)*;version=[\\d.]+")) {
+        if (schemaFormat.matches("application\\/vnd\\.oai\\.openapi(\\+json|\\+yaml)*;version=[\\d.]+")) {
             return "openapi";
         }
-        if(schemaFormat.matches("application\\/schema(\\+json|\\+yaml)*;version=draft-\\d+")) {
+        if (schemaFormat.matches("application\\/schema(\\+json|\\+yaml)*;version=draft-\\d+")) {
             return "jsonSchema";
         }
-        if(schemaFormat.matches("application\\/vnd\\.apache\\.avro(\\+json|\\+yaml)*;version=[\\d.]+")) {
+        if (schemaFormat.matches("application\\/vnd\\.apache\\.avro(\\+json|\\+yaml)*;version=[\\d.]+")) {
             return "avro";
         }
         return null;

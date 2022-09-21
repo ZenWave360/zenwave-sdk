@@ -1,7 +1,10 @@
 package io.zenwave360.generator.mongodb2jdl;
 
 import java.io.Serializable;
-import javax.validation.constraints.*;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -107,10 +110,10 @@ public class Blog implements Serializable {
     @Override
     public String toString() {
         return "Blog{" +
-            "id=" + getId() +
-            ", name='" + getName() + "'" +
-            ", handle='" + getHandle() + "'" +
-            ", login='" + getLogin() + "'" +
-            "}";
+                "id=" + getId() +
+                ", name='" + getName() + "'" +
+                ", handle='" + getHandle() + "'" +
+                ", login='" + getLogin() + "'" +
+                "}";
     }
 }

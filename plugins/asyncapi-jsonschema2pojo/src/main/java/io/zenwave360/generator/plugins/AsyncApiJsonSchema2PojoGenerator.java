@@ -1,40 +1,7 @@
 package io.zenwave360.generator.plugins;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.sun.codemodel.CodeWriter;
-import com.sun.codemodel.JCodeModel;
-import com.sun.codemodel.JPackage;
-import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.generator.generators.AbstractAsyncapiGenerator;
-import io.zenwave360.generator.parsers.Model;
-import io.zenwave360.generator.processors.AsyncApiProcessor;
-import io.zenwave360.generator.templating.TemplateOutput;
-import io.zenwave360.generator.utils.JSONPath;
-import io.zenwave360.generator.utils.NamingUtils;
-import io.zenwave360.jsonrefparser.$Ref;
-import org.apache.commons.lang3.RegExUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.jsonschema2pojo.AnnotationStyle;
-import org.jsonschema2pojo.Annotator;
-import org.jsonschema2pojo.AnnotatorFactory;
-import org.jsonschema2pojo.ContentResolver;
-import org.jsonschema2pojo.DefaultGenerationConfig;
-import org.jsonschema2pojo.FileCodeWriterWithEncoding;
-import org.jsonschema2pojo.GenerationConfig;
-import org.jsonschema2pojo.Jackson2Annotator;
-import org.jsonschema2pojo.Jsonschema2Pojo;
-import org.jsonschema2pojo.Schema;
-import org.jsonschema2pojo.SchemaGenerator;
-import org.jsonschema2pojo.SchemaMapper;
-import org.jsonschema2pojo.SchemaStore;
-import org.jsonschema2pojo.SourceType;
-import org.jsonschema2pojo.rules.RuleFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.jsonschema2pojo.SourceType.JSONSCHEMA;
+import static org.jsonschema2pojo.SourceType.YAMLSCHEMA;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,8 +13,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.jsonschema2pojo.SourceType.JSONSCHEMA;
-import static org.jsonschema2pojo.SourceType.YAMLSCHEMA;
+import org.apache.commons.lang3.RegExUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jsonschema2pojo.FileCodeWriterWithEncoding;
+import org.jsonschema2pojo.Jackson2Annotator;
+import org.jsonschema2pojo.Jsonschema2Pojo;
+import org.jsonschema2pojo.SchemaGenerator;
+import org.jsonschema2pojo.SchemaMapper;
+import org.jsonschema2pojo.SchemaStore;
+import org.jsonschema2pojo.SourceType;
+import org.jsonschema2pojo.rules.RuleFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.sun.codemodel.JCodeModel;
+
+import io.zenwave360.generator.doc.DocumentedOption;
+import io.zenwave360.generator.generators.AbstractAsyncapiGenerator;
+import io.zenwave360.generator.parsers.Model;
+import io.zenwave360.generator.processors.AsyncApiProcessor;
+import io.zenwave360.generator.templating.TemplateOutput;
+import io.zenwave360.generator.utils.JSONPath;
+import io.zenwave360.generator.utils.NamingUtils;
+import io.zenwave360.jsonrefparser.$Ref;
 
 public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator {
 
@@ -75,17 +67,17 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     }
 
     Model getApiModel(Map<String, Object> contextModel) {
-        return(Model) contextModel.get(sourceProperty);
+        return (Model) contextModel.get(sourceProperty);
     }
 
     @Override
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {
         Model apiModel = getApiModel(contextModel);
 
-        String operationIdsRegex = operationIds.isEmpty()? "" : " =~ /(" + StringUtils.join(operationIds, "|") + ")/";
+        String operationIdsRegex = operationIds.isEmpty() ? "" : " =~ /(" + StringUtils.join(operationIds, "|") + ")/";
         List<Map<String, Object>> operations = JSONPath.get(apiModel, "$.channels[*][*][?(@.operationId" + operationIdsRegex + ")]");
 
-        String messageNamesRegex = messageNames.isEmpty()? "" : " =~ /(" + StringUtils.join(messageNames, "|") + ")/";
+        String messageNamesRegex = messageNames.isEmpty() ? "" : " =~ /(" + StringUtils.join(messageNames, "|") + ")/";
         List<Map<String, Object>> messages = JSONPath.get(operations, "$[*].x--messages[*][?(@.name" + operationIdsRegex + ")]", Collections.emptyList());
         List<Map<String, Object>> oneOfMessages = JSONPath.get(operations, "$[*].x--messages[*].oneOf[?(@.name" + operationIdsRegex + ")]", Collections.emptyList());
 
@@ -100,15 +92,15 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             throw new RuntimeException(e);
         }
 
-        //        for (final File file : this.getExtraFiles(this.settings, this.api.getFile().getParentFile())) {
-        //            config.setSource(Arrays.asList(file.toURI().toURL()).iterator());
-        //            if (file.getName().endsWith(".yml") || file.getName().endsWith(".yaml")) {
-        //                config.setSourceType(SourceType.YAMLSCHEMA);
-        //            } else {
-        //                config.setSourceType(SourceType.JSONSCHEMA);
-        //            }
-        //            Jsonschema2Pojo.generate(config, null);
-        //        }
+        // for (final File file : this.getExtraFiles(this.settings, this.api.getFile().getParentFile())) {
+        // config.setSource(Arrays.asList(file.toURI().toURL()).iterator());
+        // if (file.getName().endsWith(".yml") || file.getName().endsWith(".yaml")) {
+        // config.setSourceType(SourceType.YAMLSCHEMA);
+        // } else {
+        // config.setSourceType(SourceType.JSONSCHEMA);
+        // }
+        // Jsonschema2Pojo.generate(config, null);
+        // }
 
         return Collections.emptyList();
     }
@@ -128,7 +120,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             config.setTargetPackage(modelPackage);
 
             String messageClassName = NamingUtils.asJavaTypeName(name); // TODO
-            if(AsyncApiProcessor.SchemaFormatType.isNativeFormat(schemaFormatType)) {
+            if (AsyncApiProcessor.SchemaFormatType.isNativeFormat(schemaFormatType)) {
                 generateFromNativeFormat(config, payload, modelPackage, messageClassName);
             } else {
                 generateFromJsonSchemaFile(config, payloadRef.getUrl(), modelPackage, messageClassName);
@@ -139,16 +131,17 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     public void generateFromJsonSchemaFile(JsonSchema2PojoConfiguration config, URL url, String packageName, String className) throws IOException {
         config.setSource(List.of(url).iterator());
         config.setTargetPackage(packageName);
-        if(config.getSourceType() == null) {
-            SourceType sourceType = url.getFile().endsWith(".yml") || url.getFile().endsWith(".yaml")? YAMLSCHEMA : JSONSCHEMA;
+        if (config.getSourceType() == null) {
+            SourceType sourceType = url.getFile().endsWith(".yml") || url.getFile().endsWith(".yaml") ? YAMLSCHEMA : JSONSCHEMA;
             config.setSourceType(sourceType);
         }
         Jsonschema2Pojo.generate(config, null);
     }
+
     public void generateFromNativeFormat(JsonSchema2PojoConfiguration config, Map<String, Object> payload, String packageName, String className) throws IOException {
         var json = this.convertToJson(payload, packageName);
 
-        SchemaMapper mapper = new SchemaMapper(new RuleFactory(config , new Jackson2Annotator(config), new SchemaStore()), new SchemaGenerator());
+        SchemaMapper mapper = new SchemaMapper(new RuleFactory(config, new Jackson2Annotator(config), new SchemaStore()), new SchemaGenerator());
         var sourcesWriter = new FileCodeWriterWithEncoding(targetFolder, config.getOutputEncoding());
         var resourcesWriter = new FileCodeWriterWithEncoding(targetFolder, config.getOutputEncoding());
         var codeModel = new JCodeModel();

@@ -21,7 +21,7 @@ public class JDLBackendApplicationDefaultConfiguration extends Configuration {
 
     @Override
     public <T extends Configuration> T processOptions() {
-        if(!getOptions().containsKey("targetFolder")) {
+        if (!getOptions().containsKey("targetFolder")) {
             replaceInChain(TemplateFileWriter.class, TemplateStdoutWriter.class);
         }
         return (T) this;

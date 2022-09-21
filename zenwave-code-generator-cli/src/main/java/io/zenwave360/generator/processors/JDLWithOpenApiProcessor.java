@@ -1,14 +1,15 @@
 package io.zenwave360.generator.processors;
 
-import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.generator.utils.JSONPath;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+
+import io.zenwave360.generator.doc.DocumentedOption;
+import io.zenwave360.generator.utils.JSONPath;
 
 /**
  * Depends on {@link io.zenwave360.generator.processors.OpenApiProcessor} to run before.
@@ -34,7 +35,6 @@ public class JDLWithOpenApiProcessor extends AbstractBaseProcessor {
     public Map<String, String> dtoToEntityNameMap = new HashMap<>();
 
     private Map<String, Map<String, Object>> dtoToEntityMap = new HashMap<>();
-
 
     public <T extends AbstractBaseProcessor> T withJdlProperty(String jdlProperty) {
         this.jdlProperty = jdlProperty;
@@ -102,7 +102,7 @@ public class JDLWithOpenApiProcessor extends AbstractBaseProcessor {
             response.put("x--response-entity", dtoToEntityMap.get(dtoName));
 
             var paginatedDtoSchema = getPaginatedDtoSchema(response);
-            if(paginatedDtoSchema != null) {
+            if (paginatedDtoSchema != null) {
                 String paginatedDtoName = (String) paginatedDtoSchema.get("x--schema-name");
                 response.put("x--response-entity-paginated", dtoToEntityMap.get(paginatedDtoName));
             }
@@ -113,10 +113,10 @@ public class JDLWithOpenApiProcessor extends AbstractBaseProcessor {
         List<Map<String, Object>> schemas = JSONPath.get(openApiModel, "$.components.schemas[*]");
         for (Map<String, Object> schema : schemas) {
             String schemaName = (String) schema.get("x--schema-name");
-            String entityName =  dtoToEntityNameMap.getOrDefault(schemaName, (String) schema.get(jdlBusinessEntityProperty));
+            String entityName = dtoToEntityNameMap.getOrDefault(schemaName, (String) schema.get(jdlBusinessEntityProperty));
             entityName = StringUtils.defaultString(entityName, StringUtils.capitalize(schemaName));
             Map<String, Object> entity = JSONPath.get(jdlModel, "$.entities." + entityName);
-            if(entity != null) {
+            if (entity != null) {
                 var dtos = JSONPath.get(entity, "$.options.dtos", new ArrayList<Map>());
                 var copiedSchema = new HashMap<>(schema);
                 copiedSchema.remove("x--entity");
@@ -126,7 +126,7 @@ public class JDLWithOpenApiProcessor extends AbstractBaseProcessor {
         }
     }
 
-    protected Map<String, Object> getPaginatedDtoSchema(Map<String, Object> schemaOrResponse){
+    protected Map<String, Object> getPaginatedDtoSchema(Map<String, Object> schemaOrResponse) {
         var schema = JSONPath.get(schemaOrResponse, "x--response-schema", schemaOrResponse);
         return paginatedDtoItemsJsonPath.stream()
                 .map(jsonPath -> (Map) JSONPath.get(schema, jsonPath))
@@ -134,14 +134,14 @@ public class JDLWithOpenApiProcessor extends AbstractBaseProcessor {
                 .findFirst().orElse(null);
     }
 
-    protected void buildDtoToEntityMap(Map<String, Object> openApiModel, Map<String, Object> jdlModel){
+    protected void buildDtoToEntityMap(Map<String, Object> openApiModel, Map<String, Object> jdlModel) {
         List<Map<String, Object>> schemas = JSONPath.get(openApiModel, "$.components.schemas[*]");
         for (Map<String, Object> schema : schemas) {
             String schemaName = (String) schema.get("x--schema-name");
-            String entityName =  dtoToEntityNameMap.getOrDefault(schemaName, (String) schema.get(jdlBusinessEntityProperty));
+            String entityName = dtoToEntityNameMap.getOrDefault(schemaName, (String) schema.get(jdlBusinessEntityProperty));
             entityName = StringUtils.defaultString(entityName, StringUtils.capitalize(schemaName));
             Map<String, Object> entity = JSONPath.get(jdlModel, "$.entities." + entityName);
-            if(entity != null) {
+            if (entity != null) {
                 dtoToEntityMap.put(schemaName, entity);
             }
         }

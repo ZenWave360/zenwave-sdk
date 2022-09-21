@@ -1,5 +1,14 @@
 package io.zenwave360.generator.plugins;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+
 import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.generators.AbstractOpenAPIGenerator;
 import io.zenwave360.generator.parsers.Model;
@@ -7,15 +16,6 @@ import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.TemplateEngine;
 import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
-import io.zenwave360.generator.utils.JSONPath;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
 
@@ -52,7 +52,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
     }
 
     Model getApiModel(Map<String, Object> contextModel) {
-        return(Model) contextModel.get(sourceProperty);
+        return (Model) contextModel.get(sourceProperty);
     }
 
     @Override
@@ -60,13 +60,13 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
         List<TemplateOutput> templateOutputList = new ArrayList<>();
         Model apiModel = getApiModel(contextModel);
         Map<String, List<Map<String, Object>>> operationsByService = getOperationsGroupedByTag(apiModel);
-        if(groupBy == GroupByType.SERVICE) {
+        if (groupBy == GroupByType.SERVICE) {
             templateOutputList.add(generateTestSet(contextModel, testSetTemplate, operationsByService.keySet()));
             for (Map.Entry<String, List<Map<String, Object>>> entry : operationsByService.entrySet()) {
                 templateOutputList.add(generateTemplateOutput(contextModel, serviceTestTemplate, entry.getKey(), entry.getValue()));
             }
         }
-        if(groupBy == GroupByType.OPERATION) {
+        if (groupBy == GroupByType.OPERATION) {
             List<Map<String, Object>> operations = operationsByService.values().stream().flatMap(List::stream).collect(Collectors.toList());
             List<String> operationNames = operations.stream().map(o -> "" + o).collect(Collectors.toList());
             templateOutputList.add(generateTestSet(contextModel, testSetTemplate, operationNames));
@@ -74,7 +74,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
                 templateOutputList.add(generateTemplateOutput(contextModel, operationTestTemplate, null, List.of(operation)));
             }
         }
-        if(groupBy == GroupByType.PARTIAL) {
+        if (groupBy == GroupByType.PARTIAL) {
             List<Map<String, Object>> operations = operationsByService.values().stream().flatMap(List::stream).collect(Collectors.toList());
             templateOutputList.add(generateTemplateOutput(contextModel, partialTemplate, null, operations));
         }
@@ -83,7 +83,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
 
     {
         handlebarsEngine.getHandlebars().registerHelper("asDtoName", (context, options) -> {
-            return StringUtils.isNotBlank((String) context)? openApiModelNamePrefix + context + openApiModelNameSuffix : null;
+            return StringUtils.isNotBlank((String) context) ? openApiModelNamePrefix + context + openApiModelNameSuffix : null;
         });
     }
 

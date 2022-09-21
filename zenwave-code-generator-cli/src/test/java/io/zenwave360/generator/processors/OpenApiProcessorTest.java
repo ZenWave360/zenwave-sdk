@@ -1,16 +1,18 @@
 package io.zenwave360.generator.processors;
 
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.Option;
-import io.zenwave360.generator.parsers.DefaultYamlParser;
-import io.zenwave360.generator.parsers.Model;
-import io.zenwave360.generator.utils.JSONPath;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.Option;
+
+import io.zenwave360.generator.parsers.DefaultYamlParser;
+import io.zenwave360.generator.parsers.Model;
+import io.zenwave360.generator.utils.JSONPath;
 
 public class OpenApiProcessorTest {
 
@@ -28,15 +30,14 @@ public class OpenApiProcessorTest {
         Map<String, Object> model = loadOpenAPIModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         OpenApiProcessor processor = new OpenApiProcessor().withTargetProperty(targetProperty);;
         Model processed = (Model) processor.process(model).get(targetProperty);
-        List httpVerbs = JSONPath.get(processed,"$.paths..x--httpVerb");
+        List httpVerbs = JSONPath.get(processed, "$.paths..x--httpVerb");
         Assertions.assertFalse(httpVerbs.isEmpty());
 
-        List<Map<String, Object>> pathItems = JSONPath.get(processed,"$.paths[*][*]");
+        List<Map<String, Object>> pathItems = JSONPath.get(processed, "$.paths[*][*]");
         for (Map<String, Object> pathItem : pathItems) {
             Assertions.assertTrue(pathItem.containsKey("x--httpVerb"));
             Assertions.assertTrue(pathItem.containsKey("x--path"));
         }
     }
-
 
 }

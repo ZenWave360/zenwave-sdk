@@ -1,16 +1,16 @@
 package io.zenwave360.generator.generators;
 
-import io.zenwave360.generator.generators.AbstractOpenAPIGenerator;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.parsers.Model;
 import io.zenwave360.generator.processors.OpenApiProcessor;
 import io.zenwave360.generator.templating.TemplateOutput;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.util.List;
-import java.util.Map;
 
 public class AbstractOpenAPIGeneratorTest {
 
@@ -29,7 +29,6 @@ public class AbstractOpenAPIGeneratorTest {
             }
         };
     }
-
 
     @Test
     public void test_filter_operations_by_tag_and_verb() throws Exception {

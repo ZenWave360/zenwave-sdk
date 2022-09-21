@@ -1,14 +1,15 @@
 package io.zenwave360.generator.processors;
 
-import io.zenwave360.generator.parsers.DefaultYamlParser;
-import io.zenwave360.generator.utils.JSONPath;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import static io.zenwave360.generator.processors.JDLWithOpenApiProcessor.OPENAPI_DEFAULT_PROPERTY;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.zenwave360.generator.processors.JDLWithOpenApiProcessor.OPENAPI_DEFAULT_PROPERTY;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import io.zenwave360.generator.parsers.DefaultYamlParser;
+import io.zenwave360.generator.utils.JSONPath;
 
 public class JDLWithDummyDataProcessorTest {
 

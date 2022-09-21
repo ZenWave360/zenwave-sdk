@@ -1,18 +1,16 @@
 package io.zenwave360.generator.processors;
 
-import io.zenwave360.generator.parsers.DefaultYamlParser;
-import io.zenwave360.generator.parsers.JDLParser;
-import io.zenwave360.generator.utils.JSONPath;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import static io.zenwave360.generator.processors.JDLWithOpenApiProcessor.JDL_DEFAULT_PROPERTY;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.zenwave360.generator.processors.JDLWithOpenApiProcessor.JDL_DEFAULT_PROPERTY;
-import static io.zenwave360.generator.processors.JDLWithOpenApiProcessor.OPENAPI_DEFAULT_PROPERTY;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import io.zenwave360.generator.parsers.JDLParser;
+import io.zenwave360.generator.utils.JSONPath;
 
 public class JDLProcessorTest {
 
@@ -28,7 +26,7 @@ public class JDLProcessorTest {
     @Test
     public void testProcessJDL_WithSemanticAnnotations() throws Exception {
         var model = loadJDL("classpath:io/zenwave360/generator/resources/jdl/orders-model-semantic-annotations.jdl");
-        List entitiesWithCriteria = JSONPath.get(model,"$..[?(@.options.searchCriteriaObject)]");
+        List entitiesWithCriteria = JSONPath.get(model, "$..[?(@.options.searchCriteriaObject)]");
         Assertions.assertFalse(entitiesWithCriteria.isEmpty());
         Assertions.assertEquals(2, entitiesWithCriteria.size());
         Assertions.assertTrue(containsEntity(entitiesWithCriteria, "Customer"));
@@ -36,10 +34,10 @@ public class JDLProcessorTest {
     }
 
     @Test
-//    @Disabled
+    // @Disabled
     public void testProcessJDL_registry() throws Exception {
         var model = loadJDL("../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/orders-model.jdl");
-        List entitiesWithCriteria = JSONPath.get(model,"$..[?(@.options.searchCriteriaObject)]");
+        List entitiesWithCriteria = JSONPath.get(model, "$..[?(@.options.searchCriteriaObject)]");
         Assertions.assertFalse(entitiesWithCriteria.isEmpty());
     }
 }

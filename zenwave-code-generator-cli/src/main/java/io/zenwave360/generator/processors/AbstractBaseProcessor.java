@@ -1,12 +1,12 @@
 package io.zenwave360.generator.processors;
 
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.PathNotFoundException;
-import io.zenwave360.generator.utils.NamingUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.List;
 import java.util.Map;
+
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
+
+import io.zenwave360.generator.utils.NamingUtils;
 
 public abstract class AbstractBaseProcessor implements Processor {
 
@@ -24,7 +24,7 @@ public abstract class AbstractBaseProcessor implements Processor {
     protected <T> T getJsonPath(Object model, String jsonPath) {
         try {
             return JsonPath.read(model, jsonPath);
-        } catch(PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             return null;
         }
     }
@@ -33,8 +33,8 @@ public abstract class AbstractBaseProcessor implements Processor {
         if (operation != null) {
             String normalizedTagName = null;
             List tags = (List) operation.get("tags");
-            if(tags != null) {
-                String tag = (String) (tags.get(0) instanceof Map? (String) ((Map) tags.get(0)).get("name") : tags.get(0));
+            if (tags != null) {
+                String tag = (String) (tags.get(0) instanceof Map ? (String) ((Map) tags.get(0)).get("name") : tags.get(0));
                 normalizedTagName = normalizeTagName(tag);
             }
             operation.put("x--normalizedTagName", normalizedTagName);

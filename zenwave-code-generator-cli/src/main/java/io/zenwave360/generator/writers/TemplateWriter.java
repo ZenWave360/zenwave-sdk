@@ -1,8 +1,8 @@
 package io.zenwave360.generator.writers;
 
-import io.zenwave360.generator.templating.TemplateOutput;
-
 import java.util.List;
+
+import io.zenwave360.generator.templating.TemplateOutput;
 
 public interface TemplateWriter {
 

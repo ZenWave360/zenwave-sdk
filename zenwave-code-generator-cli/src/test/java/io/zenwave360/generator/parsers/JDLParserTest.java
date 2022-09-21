@@ -1,13 +1,14 @@
 package io.zenwave360.generator.parsers;
 
-import io.zenwave360.generator.utils.JSONPath;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import io.zenwave360.generator.utils.JSONPath;
 
 public class JDLParserTest {
 
@@ -23,6 +24,6 @@ public class JDLParserTest {
         Map<String, Object> model = (Map) parser.parse().get(targetProperty);
         System.out.println("JDLParser load time: " + (System.currentTimeMillis() - startTime));
         Assertions.assertNotNull(model);
-        Assertions.assertEquals("Integer", JSONPath.get(model,"$.entities.Points.fields.exercise.type"));
+        Assertions.assertEquals("Integer", JSONPath.get(model, "$.entities.Points.fields.exercise.type"));
     }
 }

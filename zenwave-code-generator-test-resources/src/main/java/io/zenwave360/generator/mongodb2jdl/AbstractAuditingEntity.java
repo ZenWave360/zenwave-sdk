@@ -1,15 +1,16 @@
 package io.zenwave360.generator.mongodb2jdl;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.time.Instant;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
- * Base abstract class for entities which will hold definitions for created, last modified, created by,
- * last modified by attributes.
+ * Base abstract class for entities which will hold definitions for created, last modified, created by, last modified by attributes.
  */
 public abstract class AbstractAuditingEntity implements Serializable {
 

@@ -1,17 +1,18 @@
 package io.zenwave360.generator.generators;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.zenwave360.generator.parsers.JDLParser;
-import io.zenwave360.generator.processors.JDLProcessor;
-import io.zenwave360.generator.utils.JSONPath;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.zenwave360.generator.parsers.JDLParser;
+import io.zenwave360.generator.processors.JDLProcessor;
+import io.zenwave360.generator.utils.JSONPath;
 
 public class JDLEntitiesToSchemasConverterTest {
 
@@ -30,7 +31,6 @@ public class JDLEntitiesToSchemasConverterTest {
         List<Map> entitiesAndEnums = new ArrayList<>();
         entitiesAndEnums.addAll(entities);
         entitiesAndEnums.addAll(enums);
-
 
         List<Map> schemas = new ArrayList<>();
 

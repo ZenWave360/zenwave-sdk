@@ -1,5 +1,12 @@
 package io.zenwave360.generator.plugins;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.generators.AbstractAsyncapiGenerator;
 import io.zenwave360.generator.parsers.Model;
@@ -8,13 +15,6 @@ import io.zenwave360.generator.templating.TemplateEngine;
 import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
 import io.zenwave360.generator.utils.JSONPath;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
@@ -58,9 +58,9 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
             return String.format("%s%s%s", servicePrefix, context, serviceSuffix);
         });
         handlebarsEngine.getHandlebars().registerHelper("methodSuffix", (context, options) -> {
-            if(exposeMessage || style == ProgrammingStyle.REACTIVE) {
+            if (exposeMessage || style == ProgrammingStyle.REACTIVE) {
                 int messagesCount = JSONPath.get(options.param(0), "$.x--messages.length()", 0);
-                if(messagesCount > 0) {
+                if (messagesCount > 0) {
                     String messageJavaType = JSONPath.get(context, "$.x--javaType");
                     return String.format("%s%s", methodAndMessageSeparator, messageJavaType);
                 }
@@ -101,7 +101,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     }
 
     Model getApiModel(Map<String, Object> contextModel) {
-        return(Model) contextModel.get(sourceProperty);
+        return (Model) contextModel.get(sourceProperty);
     }
 
     @Override
@@ -111,12 +111,12 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         Map<String, List<Map<String, Object>>> subscribeOperations = getSubscribeOperationsGroupedByTag(apiModel);
         Map<String, List<Map<String, Object>>> publishOperations = getPublishOperationsGroupedByTag(apiModel);
         for (Map.Entry<String, List<Map<String, Object>>> entry : subscribeOperations.entrySet()) {
-//            boolean isProducer = isProducer(role, OperationType.SUBSCRIBE);
+            // boolean isProducer = isProducer(role, OperationType.SUBSCRIBE);
             OperationRoleType operationRoleType = OperationRoleType.valueOf(role, OperationType.SUBSCRIBE);
             templateOutputList.addAll(generateTemplateOutput(contextModel, entry.getKey(), entry.getValue(), operationRoleType));
         }
         for (Map.Entry<String, List<Map<String, Object>>> entry : publishOperations.entrySet()) {
-//            boolean isProducer = isProducer(role, OperationType.PUBLISH);
+            // boolean isProducer = isProducer(role, OperationType.PUBLISH);
             OperationRoleType operationRoleType = OperationRoleType.valueOf(role, OperationType.PUBLISH);
             templateOutputList.addAll(generateTemplateOutput(contextModel, entry.getKey(), entry.getValue(), operationRoleType));
         }

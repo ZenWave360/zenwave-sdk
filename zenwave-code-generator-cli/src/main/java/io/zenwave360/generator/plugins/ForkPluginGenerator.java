@@ -1,15 +1,5 @@
 package io.zenwave360.generator.plugins;
 
-import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.generator.generators.Generator;
-import io.zenwave360.generator.templating.TemplateOutput;
-import io.zenwave360.generator.utils.NamingUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,10 +7,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +18,17 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.zenwave360.generator.doc.DocumentedOption;
+import io.zenwave360.generator.generators.Generator;
+import io.zenwave360.generator.templating.TemplateOutput;
+import io.zenwave360.generator.utils.NamingUtils;
 
 public class ForkPluginGenerator implements Generator {
 
@@ -47,8 +46,7 @@ public class ForkPluginGenerator implements Generator {
     @DocumentedOption
     public String targetFolder;
 
-    public ForkPluginGenerator() throws MalformedURLException {
-    }
+    public ForkPluginGenerator() throws MalformedURLException {}
 
     @Override
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {
@@ -60,7 +58,7 @@ public class ForkPluginGenerator implements Generator {
             File mavenModuleFile = findMavenModuleRootFolder(javaFile);
             File targetFolderFile = new File(targetFolder);
             copyFolders(mavenModuleFile, targetFolderFile);
-            renameArtifactAndGroupId( new File(targetFolderFile, "pom.xml"), sourcePluginClassName, targetPluginClassName);
+            renameArtifactAndGroupId(new File(targetFolderFile, "pom.xml"), sourcePluginClassName, targetPluginClassName);
             movePackageFolders(targetFolderFile, sourcePluginClassName, targetPluginClassName);
             deleteEmptyFolders(targetFolderFile);
             searchAndReplace(targetFolderFile, sourcePluginClassName, targetPluginClassName);
@@ -80,6 +78,7 @@ public class ForkPluginGenerator implements Generator {
         target.mkdirs();
         FileUtils.copyDirectory(source, target);
     }
+
     protected void movePackageFolders(File folder, String sourcePluginClassName, String targetPluginClassName) throws IOException {
         log.debug("Renaming packages from {} to {}", sourcePluginClassName, targetPluginClassName);
         String[] sourcePackageAndClass = splitPackageAndClass(sourcePluginClassName);
@@ -102,7 +101,7 @@ public class ForkPluginGenerator implements Generator {
         File targetTestsResourcesPackageFolder = new File(testsResourcesFolder, targetPackageDir);
 
         targetPackageFolder.mkdirs();
-        Collection<File> javaFiles = FileUtils.listFiles(sourcePackageFolder, new String[]{"java"}, true);
+        Collection<File> javaFiles = FileUtils.listFiles(sourcePackageFolder, new String[] {"java"}, true);
         for (File javaFile : javaFiles) {
             log.debug("Moving {} to folder {}", javaFile, targetPackageFolder);
             String relativeFileName = asRelative(sourcePackageFolder.getPath(), javaFile.getPath());
@@ -139,7 +138,7 @@ public class ForkPluginGenerator implements Generator {
     }
 
     private void moveFile(File src, File target) throws IOException {
-        if(src.equals(target)) {
+        if (src.equals(target)) {
             log.debug("Skip moving file to itself {}", src);
             return;
         }
@@ -151,7 +150,7 @@ public class ForkPluginGenerator implements Generator {
     }
 
     private String renameTargetClass(String relativeFileName, String sourceClass, String targetClass) {
-        String prefix = relativeFileName.contains(File.separator)? File.separator : "";
+        String prefix = relativeFileName.contains(File.separator) ? File.separator : "";
         return relativeFileName.replace(prefix + sourceClass + ".java", prefix + targetClass + ".java");
     }
 
@@ -159,21 +158,20 @@ public class ForkPluginGenerator implements Generator {
         String[] sourcePackageAndClass = splitPackageAndClass(sourcePluginClassName);
         String[] targetPackageAndClass = splitPackageAndClass(targetPluginClassName);
         List replacements = List.of(
-                //                Pair.of(sourcePluginClassName, targetPluginClassName),
+                // Pair.of(sourcePluginClassName, targetPluginClassName),
                 Pair.of(sourcePackageAndClass[0], targetPackageAndClass[0]),
                 Pair.of(sourcePackageAndClass[1], targetPackageAndClass[1]),
                 Pair.of(sourcePluginClassName.replaceAll("\\.", "/"), targetPluginClassName.replaceAll("\\.", "/")),
-                Pair.of(sourcePackageAndClass[0].replaceAll("\\.", "/"), targetPackageAndClass[0].replaceAll("\\.", "/"))
-        );
+                Pair.of(sourcePackageAndClass[0].replaceAll("\\.", "/"), targetPackageAndClass[0].replaceAll("\\.", "/")));
         log.debug("Replacing packages and class names in files {}", replacements);
         searchAndReplaceInFolder(targetFolderFile, replacements);
     }
 
     protected void searchAndReplaceInFolder(File root, List<Pair<String, String>> replacements) throws IOException {
-        for(File file : root.listFiles()) {
-            if(file.isDirectory()) {
+        for (File file : root.listFiles()) {
+            if (file.isDirectory()) {
                 searchAndReplaceInFolder(file, replacements);
-            } else if(file.isFile() && !file.getName().contentEquals("pom.xml")) {
+            } else if (file.isFile() && !file.getName().contentEquals("pom.xml")) {
                 searchAndReplaceInFile(file, replacements);
             }
         }
@@ -208,8 +206,8 @@ public class ForkPluginGenerator implements Generator {
 
     private String[] splitPackageAndClass(String fullClassName) {
         Matcher matcher = packageClassSplitPattern.matcher(fullClassName);
-        if(matcher.find()) {
-            return new String[]{ matcher.group(1), matcher.group(2) };
+        if (matcher.find()) {
+            return new String[] {matcher.group(1), matcher.group(2)};
         }
         return new String[2];
     }
@@ -220,7 +218,7 @@ public class ForkPluginGenerator implements Generator {
         Matcher matcher = pattern.matcher(pom);
         while (matcher.find()) {
             int indent = matcher.group(1).replaceAll("\t", "  ").length();
-            if(indent < shorterIndent) {
+            if (indent < shorterIndent) {
                 shorterIndent = indent;
                 shorterMatch = matcher.group();
             }
@@ -230,10 +228,10 @@ public class ForkPluginGenerator implements Generator {
 
     protected File findMavenModuleRootFolder(File file) {
         File pomFile = new File(file, "pom.xml");
-        if(pomFile.exists()) {
+        if (pomFile.exists()) {
             log.debug("Found maven module root at {}", pomFile.getParentFile());
             return pomFile.getParentFile();
-        } else if(file.getParentFile().exists()) {
+        } else if (file.getParentFile().exists()) {
             return findMavenModuleRootFolder(file.getParentFile());
         }
         return null;
@@ -241,10 +239,10 @@ public class ForkPluginGenerator implements Generator {
 
     protected File findJavaFileInFolder(File repoDirectory, String javaClassName) {
         File javaFile = new File(repoDirectory, "src/main/java/" + javaClassName.replace('.', '/') + ".java");
-        if(javaFile.exists()) {
+        if (javaFile.exists()) {
             return javaFile;
         }
-        for(File file : repoDirectory.listFiles()) {
+        for (File file : repoDirectory.listFiles()) {
             if (file.isDirectory()) {
                 javaFile = findJavaFileInFolder(file, javaClassName);
                 if (javaFile != null) {
@@ -259,7 +257,7 @@ public class ForkPluginGenerator implements Generator {
         List<Path> files = Files.walk(root.toPath()).sorted().collect(Collectors.toList());
         Collections.reverse(files);
         for (Path path : files) {
-            if(Files.isDirectory(path) && Files.list(path).count() == 0) {
+            if (Files.isDirectory(path) && Files.list(path).count() == 0) {
                 Files.delete(path);
             }
         }
@@ -312,6 +310,7 @@ public class ForkPluginGenerator implements Generator {
 
     /**
      * This method guards against writing files to the file system outside of the target folder. This vulnerability is called Zip Slip, and we can read more about it here https://snyk.io/research/zip-slip-vulnerability.
+     * 
      * @param destinationDir
      * @param zipEntry
      * @return

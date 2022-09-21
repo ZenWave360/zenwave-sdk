@@ -1,5 +1,11 @@
 package io.zenwave360.generator;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -7,12 +13,6 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Goal which generates code with the configured ZenWave Code Generator plugin.
@@ -38,10 +38,8 @@ public class GeneratorMojo extends AbstractMojo {
     @Parameter(name = "targetFolder", property = "zenwave.output", defaultValue = "${project.build.directory}/generated-sources/zenwave")
     private File targetFolder;
 
-
     /**
-     * Add the output directory to the project as a source root, so that the generated java types
-     * are compiled and included in the project artifact.
+     * Add the output directory to the project as a source root, so that the generated java types are compiled and included in the project artifact.
      */
     @Parameter(defaultValue = "true")
     private boolean addCompileSourceRoot = true;
@@ -84,7 +82,7 @@ public class GeneratorMojo extends AbstractMojo {
                 options.putAll(configOptions);
             }
 
-            if(StringUtils.isNotBlank(configKeyValueOptions)) {
+            if (StringUtils.isNotBlank(configKeyValueOptions)) {
                 options.putAll(buildConfigOptions(configKeyValueOptions));
             }
 
@@ -101,7 +99,7 @@ public class GeneratorMojo extends AbstractMojo {
             getLog().error(e);
             throw new MojoExecutionException("Code generation failed. See above for the full exception.");
         }
-     }
+    }
 
     protected Map<String, String> buildConfigOptions(String configOptions) {
         Map<String, String> configMap = Arrays.asList(configOptions.split("\n"))
@@ -115,7 +113,7 @@ public class GeneratorMojo extends AbstractMojo {
     private String getCompileSourceRoot() {
         final Object sourceFolderObject = configOptions == null ? null : configOptions.get("sourceFolder");
         final String sourceFolder = sourceFolderObject == null ? "src/main/java" : sourceFolderObject.toString();
-//        return new File(targetFolder, sourceFolder).getAbsolutePath();
+        // return new File(targetFolder, sourceFolder).getAbsolutePath();
         return targetFolder.getAbsolutePath();
     }
 

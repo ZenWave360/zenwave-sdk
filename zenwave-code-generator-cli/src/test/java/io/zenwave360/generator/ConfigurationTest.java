@@ -1,8 +1,9 @@
 package io.zenwave360.generator;
 
-import io.zenwave360.generator.plugins.NoOpPluginConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import io.zenwave360.generator.plugins.NoOpPluginConfiguration;
 
 public class ConfigurationTest {
 
@@ -28,7 +29,6 @@ public class ConfigurationTest {
         Assertions.assertNotNull(config);
         Assertions.assertEquals(NoOpPluginConfiguration.class, config.getClass());
     }
-
 
     @Test
     public void testLoadConfigSimplifiedKebabCase() throws Exception {

@@ -18,12 +18,12 @@ public class NamingUtils {
     }
 
     public static String asCamelCase(String name) {
-        if(name == null) {
+        if (name == null) {
             return null;
         }
         String[] tokens = RegExUtils.replaceAll(name, "[\\s-.]", " ").split(" ");
         for (int i = 0; i < tokens.length; i++) {
-            if(StringUtils.isAllUpperCase(tokens[i])) {
+            if (StringUtils.isAllUpperCase(tokens[i])) {
                 tokens[i] = tokens[i].toLowerCase();
             }
             tokens[i] = StringUtils.capitalize(tokens[i]);
@@ -32,7 +32,7 @@ public class NamingUtils {
     }
 
     public static String asKebabCase(String value) {
-//        value = value.replaceAll("([A-Z])([a-z])", "-$1$2").toLowerCase();
+        // value = value.replaceAll("([A-Z])([a-z])", "-$1$2").toLowerCase();
         value = value.replaceAll("([a-z])([A-Z])", "$1-$2");
         value = value.replaceAll(" ", "-");
         value = value.replaceAll("--", "-");

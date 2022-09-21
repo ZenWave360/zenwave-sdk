@@ -1,22 +1,24 @@
 package io.zenwave360.generator;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.zenwave360.generator.formatters.Formatter;
 import io.zenwave360.generator.generators.Generator;
 import io.zenwave360.generator.parsers.Parser;
 import io.zenwave360.generator.processors.Processor;
 import io.zenwave360.generator.templating.TemplateOutput;
 import io.zenwave360.generator.writers.TemplateWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class MainGenerator {
 
@@ -30,29 +32,30 @@ public class MainGenerator {
         List<TemplateOutput> templateOutputList = new ArrayList<>();
 
         int chainIndex = 0;
-        for (Class pluginClass: configuration.getChain()) {
+        for (Class pluginClass : configuration.getChain()) {
             log.debug("Executing chained pluginClass {}", pluginClass);
             Object plugin = pluginClass.getDeclaredConstructor().newInstance();
             applyConfiguration(chainIndex++, plugin, configuration);
 
-            if(plugin instanceof Parser) {
+            if (plugin instanceof Parser) {
                 Map parsed = ((Parser) plugin).parse();
                 model.putAll(parsed);
             }
-            if(plugin instanceof Processor) {
+            if (plugin instanceof Processor) {
                 model = ((Processor) plugin).process(model);
             }
-            if(plugin instanceof Generator) {
+            if (plugin instanceof Generator) {
                 templateOutputList.addAll(((Generator) plugin).generate(model));
             }
-            if(plugin instanceof Formatter) {
+            if (plugin instanceof Formatter) {
                 templateOutputList = ((Formatter) plugin).format(templateOutputList);
             }
-            if(plugin instanceof TemplateWriter) {
+            if (plugin instanceof TemplateWriter) {
                 ((TemplateWriter) plugin).write(templateOutputList);
             }
         }
     }
+
     public static void applyConfiguration(int chainIndex, Object processor, Configuration configuration) throws JsonMappingException {
         Map<String, Object> options = configuration.getOptions();
         Object processorFullClassOptions = options.get(processor.getClass().getName());

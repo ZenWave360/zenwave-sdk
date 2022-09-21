@@ -1,5 +1,12 @@
 package io.zenwave360.generator;
 
+import java.util.Map;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.parsers.JDLParser;
 import io.zenwave360.generator.plugins.NoOpGenerator;
@@ -7,12 +14,6 @@ import io.zenwave360.generator.processors.AsyncApiProcessor;
 import io.zenwave360.generator.processors.OpenApiProcessor;
 import io.zenwave360.generator.writers.TemplateFileWriter;
 import nl.altindag.log.LogCaptor;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import java.util.Map;
 
 public class MainGeneratorTest {
 
@@ -35,7 +36,7 @@ public class MainGeneratorTest {
 
     @Test
     public void testGenerator() throws Exception {
-//        File file = new File(getClass().getClassLoader().getResource("io/zenwave360/generator/parsers/asyncapi-circular-refs.yml").toURI());
+        // File file = new File(getClass().getClassLoader().getResource("io/zenwave360/generator/parsers/asyncapi-circular-refs.yml").toURI());
         Configuration configuration = new Configuration()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml")
                 .withTargetFolder("target/zenwave630/out")
@@ -48,7 +49,7 @@ public class MainGeneratorTest {
 
     @Test
     public void testGeneratorWithMultipleFiles() throws Exception {
-        //        File file = new File(getClass().getClassLoader().getResource("io/zenwave360/generator/parsers/asyncapi-circular-refs.yml").toURI());
+        // File file = new File(getClass().getClassLoader().getResource("io/zenwave360/generator/parsers/asyncapi-circular-refs.yml").toURI());
         Configuration configuration = new Configuration()
                 .withTargetFolder("target/zenwave630/out")
                 .withOption("0.specFile", "classpath:io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml")

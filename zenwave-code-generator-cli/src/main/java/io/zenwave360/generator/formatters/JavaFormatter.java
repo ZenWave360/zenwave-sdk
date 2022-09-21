@@ -1,14 +1,16 @@
 package io.zenwave360.generator.formatters;
 
-import com.google.googlejavaformat.java.FormatterException;
-import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.generator.templating.OutputFormatType;
-import io.zenwave360.generator.templating.TemplateOutput;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.google.googlejavaformat.java.FormatterException;
+
+import io.zenwave360.generator.doc.DocumentedOption;
+import io.zenwave360.generator.templating.OutputFormatType;
+import io.zenwave360.generator.templating.TemplateOutput;
 
 public class JavaFormatter implements Formatter {
 
@@ -21,18 +23,17 @@ public class JavaFormatter implements Formatter {
         return templateOutputList.stream().map(t -> format(t)).collect(Collectors.toList());
     }
 
-
     public TemplateOutput format(TemplateOutput templateOutput) {
-        if(skipFormatting) {
+        if (skipFormatting) {
             log.debug("Skipping java formatting");
             return templateOutput;
         }
-        if(templateOutput.getMimeType() != null && templateOutput.getMimeType().equals(OutputFormatType.JAVA.toString())) {
+        if (templateOutput.getMimeType() != null && templateOutput.getMimeType().equals(OutputFormatType.JAVA.toString())) {
             try {
                 String formattedSource = new com.google.googlejavaformat.java.Formatter().formatSourceAndFixImports(templateOutput.getContent());
                 return new TemplateOutput(templateOutput.getTargetFile(), formattedSource, templateOutput.getMimeType());
             } catch (FormatterException e) {
-                if(e.diagnostics() != null && e.diagnostics().size() > 0) {
+                if (e.diagnostics() != null && e.diagnostics().size() > 0) {
                     int line = e.diagnostics().get(0).line();
                     String lineText = getLine(templateOutput.getContent(), line + 1);
                     log.error("Formatting error at {}:{} -> \"{}\"", templateOutput.getTargetFile(), line, lineText, e);

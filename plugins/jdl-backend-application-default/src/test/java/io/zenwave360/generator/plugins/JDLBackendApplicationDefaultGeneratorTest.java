@@ -1,5 +1,14 @@
 package io.zenwave360.generator.plugins;
 
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
 import io.zenwave360.generator.Configuration;
 import io.zenwave360.generator.MainGenerator;
 import io.zenwave360.generator.formatters.JavaFormatter;
@@ -7,15 +16,6 @@ import io.zenwave360.generator.parsers.JDLParser;
 import io.zenwave360.generator.processors.JDLProcessor;
 import io.zenwave360.generator.templating.TemplateOutput;
 import nl.altindag.log.LogCaptor;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.util.List;
-import java.util.Map;
 
 public class JDLBackendApplicationDefaultGeneratorTest {
 
@@ -49,7 +49,6 @@ public class JDLBackendApplicationDefaultGeneratorTest {
 
         List<TemplateOutput> outputTemplates = generator.generate(model);
 
-
         for (TemplateOutput outputTemplate : outputTemplates) {
             System.out.println(" ----------- " + outputTemplate.getTargetFile());
             System.out.println(outputTemplate.getContent());
@@ -64,14 +63,13 @@ public class JDLBackendApplicationDefaultGeneratorTest {
                 .withTargetFolder("target/out")
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", JDLBackendApplicationDefaultGenerator.PersistenceType.mongodb)
-                .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative)
-                ;
+                .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative);
 
         new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
-//        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
-//        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
     }
 
     @Test
@@ -82,14 +80,13 @@ public class JDLBackendApplicationDefaultGeneratorTest {
                 .withTargetFolder("../../examples/spring-boot-mongo-elasticsearch")
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", JDLBackendApplicationDefaultGenerator.PersistenceType.mongodb)
-                .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative)
-                ;
+                .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative);
 
         new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
-        //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
-        //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
     }
 
     @Test
@@ -101,13 +98,12 @@ public class JDLBackendApplicationDefaultGeneratorTest {
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", JDLBackendApplicationDefaultGenerator.PersistenceType.mongodb)
                 .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative)
-                .withOption("entities", List.of("Organization"))
-                ;
+                .withOption("entities", List.of("Organization"));
 
         new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
-        //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
-        //        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
     }
 }

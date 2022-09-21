@@ -1,11 +1,11 @@
 package io.zenwave360.generator.writers;
 
-import io.zenwave360.generator.templating.TemplateOutput;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.List;
+import io.zenwave360.generator.templating.TemplateOutput;
 
 public class TemplateStdoutWriter implements TemplateWriter {
 

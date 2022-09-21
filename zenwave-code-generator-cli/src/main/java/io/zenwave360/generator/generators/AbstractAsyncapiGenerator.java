@@ -1,11 +1,5 @@
 package io.zenwave360.generator.generators;
 
-import com.jayway.jsonpath.JsonPath;
-import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.generator.generators.Generator;
-import io.zenwave360.generator.parsers.Model;
-import org.apache.commons.lang3.ObjectUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,6 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.ObjectUtils;
+
+import com.jayway.jsonpath.JsonPath;
+
+import io.zenwave360.generator.doc.DocumentedOption;
+import io.zenwave360.generator.parsers.Model;
 
 public abstract class AbstractAsyncapiGenerator implements Generator {
 
@@ -25,10 +25,7 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
     }
 
     public enum OperationRoleType {
-        EVENT_PRODUCER("EventsProducer"),
-        EVENT_CONSUMER("EventsConsumer"),
-        COMMAND_PRODUCER("CommandsProducer"),
-        COMMAND_CONSUMER("CommandsConsumer");
+        EVENT_PRODUCER("EventsProducer"), EVENT_CONSUMER("EventsConsumer"), COMMAND_PRODUCER("CommandsProducer"), COMMAND_CONSUMER("CommandsConsumer");
 
         private String serviceSuffix;
 
@@ -42,10 +39,10 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
 
         public static OperationRoleType valueOf(RoleType roleType, OperationType operationType) {
 
-            if(operationType == OperationType.PUBLISH) {
-                return roleType == RoleType.PROVIDER? EVENT_PRODUCER : EVENT_CONSUMER;
+            if (operationType == OperationType.PUBLISH) {
+                return roleType == RoleType.PROVIDER ? EVENT_PRODUCER : EVENT_CONSUMER;
             } else if (operationType == OperationType.SUBSCRIBE) {
-                return roleType == RoleType.PROVIDER? COMMAND_CONSUMER : COMMAND_PRODUCER;
+                return roleType == RoleType.PROVIDER ? COMMAND_CONSUMER : COMMAND_PRODUCER;
             }
             return null;
         }
@@ -113,7 +110,7 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
         Map<String, Object> bindings = ObjectUtils.defaultIfNull((Map<String, Object>) operation.get("bindings"), Collections.emptyMap());
         Set<String> bindingNames = bindings.keySet();
         for (String bindingName : bindingNames) {
-            if(bindingTypes.contains(bindingName)) {
+            if (bindingTypes.contains(bindingName)) {
                 return true;
             }
         }
@@ -128,7 +125,7 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
      */
     public boolean isProducer(Map<String, Object> operation) {
         var operationType = OperationType.valueOf(operation.get("x--operationType").toString().toUpperCase());
-        return isProducer(this. role, operationType);
+        return isProducer(this.role, operationType);
     }
 
     /**

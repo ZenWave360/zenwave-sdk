@@ -10,8 +10,7 @@ public class TemplateInput {
     private String mimeType;
     private Function<Map<String, Object>, Boolean> skip;
 
-    public TemplateInput() {
-    }
+    public TemplateInput() {}
 
     public TemplateInput(String templateLocation, String targetFile) {
         this.templateLocation = templateLocation;
@@ -52,7 +51,7 @@ public class TemplateInput {
     }
 
     public TemplateInput withMimeType(OutputFormatType mimeType) {
-        this.mimeType = mimeType != null? mimeType.toString() : null;
+        this.mimeType = mimeType != null ? mimeType.toString() : null;
         return this;
     }
 

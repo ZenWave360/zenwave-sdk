@@ -1,25 +1,14 @@
 package io.zenwave360.generator;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.zenwave360.generator.formatters.Formatter;
-import io.zenwave360.generator.generators.Generator;
-import io.zenwave360.generator.parsers.Parser;
-import io.zenwave360.generator.processors.Processor;
-import io.zenwave360.generator.templating.TemplateOutput;
-import io.zenwave360.generator.writers.TemplateWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import picocli.CommandLine;
-import picocli.CommandLine.Option;
-
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import picocli.CommandLine;
+import picocli.CommandLine.Option;
 
 /**
  * @author ivangsa
@@ -46,9 +35,9 @@ public class Main implements Callable<Integer> {
     public static void main(String... args) {
         var main = new Main();
         CommandLine cmd = new CommandLine(main);
-        CommandLine.ParseResult parsed  = cmd.parseArgs(args);
+        CommandLine.ParseResult parsed = cmd.parseArgs(args);
 
-        if(parsed.hasMatchedOption("h") && (parsed.hasMatchedOption("p") || parsed.hasMatchedOption("f"))) {
+        if (parsed.hasMatchedOption("h") && (parsed.hasMatchedOption("p") || parsed.hasMatchedOption("f"))) {
             try {
                 main.help();
             } catch (Exception e) {
@@ -58,7 +47,7 @@ public class Main implements Callable<Integer> {
         }
 
         int returnCode = cmd.execute(args);
-        if(returnCode != 0) {
+        if (returnCode != 0) {
             System.exit(returnCode);
         }
     }

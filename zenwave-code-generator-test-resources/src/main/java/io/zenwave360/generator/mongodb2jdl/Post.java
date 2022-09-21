@@ -1,15 +1,18 @@
 package io.zenwave360.generator.mongodb2jdl;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
-import javax.validation.constraints.*;
+
+import javax.validation.constraints.NotNull;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * A Post.
@@ -39,7 +42,7 @@ public class Post implements Serializable {
 
     @Field("tags")
     @DBRef
-    @JsonIgnoreProperties(value = { "posts" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"posts"}, allowSetters = true)
     private Set<Tag> tags = new HashSet<>();
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
@@ -157,10 +160,10 @@ public class Post implements Serializable {
     @Override
     public String toString() {
         return "Post{" +
-            "id=" + getId() +
-            ", title='" + getTitle() + "'" +
-            ", content='" + getContent() + "'" +
-            ", date='" + getDate() + "'" +
-            "}";
+                "id=" + getId() +
+                ", title='" + getTitle() + "'" +
+                ", content='" + getContent() + "'" +
+                ", date='" + getDate() + "'" +
+                "}";
     }
 }

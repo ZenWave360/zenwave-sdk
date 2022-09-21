@@ -1,13 +1,13 @@
 package io.zenwave360.generator.generators;
 
-import io.zenwave360.generator.generators.AbstractJDLGenerator;
-import io.zenwave360.generator.parsers.JDLParser;
-import io.zenwave360.generator.templating.TemplateOutput;
-import org.junit.jupiter.api.Test;
-
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+
+import io.zenwave360.generator.parsers.JDLParser;
+import io.zenwave360.generator.templating.TemplateOutput;
 
 public class AbstractJDLGeneratorTest {
 
@@ -25,7 +25,6 @@ public class AbstractJDLGeneratorTest {
             }
         };
     }
-
 
     @Test
     public void test_todo() throws Exception {

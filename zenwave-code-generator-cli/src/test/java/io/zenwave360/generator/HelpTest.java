@@ -1,7 +1,8 @@
 package io.zenwave360.generator;
 
-import io.zenwave360.generator.plugins.NoOpPluginConfiguration;
 import org.junit.jupiter.api.Test;
+
+import io.zenwave360.generator.plugins.NoOpPluginConfiguration;
 
 public class HelpTest {
 

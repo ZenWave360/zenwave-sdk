@@ -1,14 +1,15 @@
 package io.zenwave360.generator.plugins;
 
-import io.zenwave360.generator.parsers.DefaultYamlParser;
-import io.zenwave360.generator.processors.OpenApiProcessor;
-import io.zenwave360.generator.templating.TemplateOutput;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import io.zenwave360.generator.parsers.DefaultYamlParser;
+import io.zenwave360.generator.processors.OpenApiProcessor;
+import io.zenwave360.generator.templating.TemplateOutput;
 
 public class SpringWebTestClientGeneratorTest {
 

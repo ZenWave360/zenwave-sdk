@@ -1,20 +1,5 @@
 package io.zenwave360.generator.plugins;
 
-import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.generator.generators.Generator;
-import io.zenwave360.generator.templating.TemplateOutput;
-import org.reflections.Reflections;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
-
-import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -28,6 +13,23 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Transient;
+
+import org.reflections.Reflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import io.zenwave360.generator.doc.DocumentedOption;
+import io.zenwave360.generator.generators.Generator;
+import io.zenwave360.generator.templating.TemplateOutput;
 
 public class JavaToJDLGenerator implements Generator {
 
@@ -59,7 +61,7 @@ public class JavaToJDLGenerator implements Generator {
 
     @Override
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {
-        Class entityAnnotationClass = persistenceType == PersistenceType.JPA? Entity.class : Document.class;
+        Class entityAnnotationClass = persistenceType == PersistenceType.JPA ? Entity.class : Document.class;
         Set<Class> entitySubClasses = getAnnotatedEntities(entityAnnotationClass);
 
         // scan enum types in entities field type
@@ -84,7 +86,7 @@ public class JavaToJDLGenerator implements Generator {
 
         StringBuilder relationShips = new StringBuilder();
         for (Class<?> e : entitySubClasses) {
-            if(persistenceType == PersistenceType.JPA) {
+            if (persistenceType == PersistenceType.JPA) {
                 generateJPA2Jdl(jdl, relationShips, e);
             } else {
                 generateMongodb2Jdl(jdl, relationShips, e);
@@ -196,7 +198,7 @@ public class JavaToJDLGenerator implements Generator {
                 String targetEntityClassName = targetEntityClass != null ? targetEntityClass.getSimpleName() : "";
 
                 if (fromMany && toMany
-                    // fieldName.equals("")
+                // fieldName.equals("")
                 ) {
                     log.info("ManyToMany .. mappedBy ??");
                 }
@@ -223,7 +225,6 @@ public class JavaToJDLGenerator implements Generator {
         out.append("}\n\n");
     }
 
-
     protected void generateMongodb2Jdl(StringBuilder out, StringBuilder relationShips, Class<?> e) {
         String entityClassName = e.getSimpleName();
         boolean firstField = true;
@@ -247,7 +248,7 @@ public class JavaToJDLGenerator implements Generator {
             if (dbRefAnnotation != null) {
                 targetEntityClass = f.getType();
                 boolean isCollection = Collection.class.isAssignableFrom(targetEntityClass);
-                relationType = isCollection? "OneToMany" : "ManyToOne";
+                relationType = isCollection ? "OneToMany" : "ManyToOne";
                 fromMany = false;
                 toMany = isCollection;
                 mappedBy = null;
@@ -279,7 +280,7 @@ public class JavaToJDLGenerator implements Generator {
                 String targetEntityClassName = targetEntityClass != null ? targetEntityClass.getSimpleName() : "";
 
                 if (fromMany && toMany
-                    // fieldName.equals("")
+                // fieldName.equals("")
                 ) {
                     log.info("ManyToMany .. mappedBy ??");
                 }
@@ -305,7 +306,6 @@ public class JavaToJDLGenerator implements Generator {
         out.append("\n");
         out.append("}\n\n");
     }
-
 
     protected void generateEnum2Jdl(StringBuilder out, Class<?> e) {
         String entityClassName = e.getSimpleName();

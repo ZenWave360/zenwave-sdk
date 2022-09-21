@@ -1,17 +1,17 @@
 package io.zenwave360.generator.generators;
 
-import io.zenwave360.generator.generators.AbstractAsyncapiGenerator;
-import io.zenwave360.generator.parsers.DefaultYamlParser;
-import io.zenwave360.generator.parsers.Model;
-import io.zenwave360.generator.processors.AsyncApiProcessor;
-import io.zenwave360.generator.templating.TemplateOutput;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import io.zenwave360.generator.parsers.DefaultYamlParser;
+import io.zenwave360.generator.parsers.Model;
+import io.zenwave360.generator.processors.AsyncApiProcessor;
+import io.zenwave360.generator.templating.TemplateOutput;
 
 public class AbstractAsyncapiGeneratorTest {
 
@@ -30,7 +30,6 @@ public class AbstractAsyncapiGeneratorTest {
             }
         };
     }
-
 
     @Test
     public void test_filter_operations_for_provider_nobindings() throws Exception {
@@ -55,6 +54,7 @@ public class AbstractAsyncapiGeneratorTest {
         Assertions.assertEquals(1, consumerOperations.size());
         Assertions.assertTrue(producerOperations.isEmpty());
     }
+
     @Test
     public void test_filter_operations_for_provider_with_no_matching_bindings() throws Exception {
         Model model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml");

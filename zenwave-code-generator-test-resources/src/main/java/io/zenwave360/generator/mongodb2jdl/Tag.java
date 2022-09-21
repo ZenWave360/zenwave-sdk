@@ -1,14 +1,18 @@
 package io.zenwave360.generator.mongodb2jdl;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-import javax.validation.constraints.*;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * A Tag.
@@ -28,7 +32,7 @@ public class Tag implements Serializable {
 
     @Field("posts")
     @DBRef
-    @JsonIgnoreProperties(value = { "blog", "tags" }, allowSetters = true)
+    @JsonIgnoreProperties(value = {"blog", "tags"}, allowSetters = true)
     private Set<Post> posts = new HashSet<>();
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
@@ -113,8 +117,8 @@ public class Tag implements Serializable {
     @Override
     public String toString() {
         return "Tag{" +
-            "id=" + getId() +
-            ", name='" + getName() + "'" +
-            "}";
+                "id=" + getId() +
+                ", name='" + getName() + "'" +
+                "}";
     }
 }
