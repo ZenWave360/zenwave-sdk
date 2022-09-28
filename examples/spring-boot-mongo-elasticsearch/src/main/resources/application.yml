@@ -1,10 +1,80 @@
+logging:
+  level:
+    io.zenwave360.example: DEBUG
+#    org.springframework.cloud.stream: DEBUG
+#    org.apache.kafka: DEBUG
 spring:
   security:
     user:
       name: user
       password: password
       roles: USER
-
   data:
     mongodb:
       database: zenwave360-example
+  kafka:
+    bootstrap-servers: localhost:9092
+#    producer:
+#      client-id: zenwave360-example-producer
+#      key-serializer: org.apache.kafka.common.serialization.LongSerializer
+#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#      schema.registry.url: http://localhost:8081
+#    consumer:
+#      client-id: zenwave360-example-consumer
+#      key-serializer: org.apache.kafka.common.serialization.LongSerializer
+#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#      schema.registry.url: http://localhost:8081
+  cloud:
+    stream:
+      function:
+        definition: on-customer-event;on-customer-order-event
+      bindings:
+        on-customer-event-out-0:
+          destination: customer.events
+          content-type: application/json
+        on-customer-order-event-out-0:
+          destination: customer-order.events
+          content-type: application/json
+        on-customer-event-in-0:
+          group: zenwave360-example
+          destination: customer.events
+          content-type: application/x-java-object
+          dead-letter-queue-binding-name: on-customer-event-out-0
+          consumer:
+            maxAttempts: 6
+            concurrency: 1
+        on-customer-order-event-in-0:
+          group: zenwave360-example
+          destination: customer-order.events
+          content-type: application/x-java-object
+          dead-letter-queue-binding-name: on-customer-order-event-out-0
+          consumer:
+            maxAttempts: 6
+            concurrency: 1
+      kafka:
+        bindings:
+          on-customer-event-out-0:
+            producer:
+              configuration:
+                key.serializer: org.apache.kafka.common.serialization.LongSerializer
+                schema.registry.url: http://localhost:8081
+          on-customer-order-event-out-0:
+            producer:
+              configuration:
+                key.serializer: org.apache.kafka.common.serialization.LongSerializer
+                schema.registry.url: http://localhost:8081
+          on-customer-event-in-0:
+            consumer:
+              startOffset: latest
+              configuration:
+                value.serializer: org.springframework.kafka.support.serializer.JsonSerializer
+                max.poll.records: 50
+                max.poll.interval.ms: 120000
+#                schema.registry.url: http://localhost:8081
+          on-customer-order-event-in-0:
+            consumer:
+              startOffset: latest
+              configuration:
+                max.poll.records: 50
+                max.poll.interval.ms: 120000
+#                schema.registry.url: http://localhost:8081

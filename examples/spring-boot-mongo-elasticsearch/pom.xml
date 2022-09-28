@@ -76,6 +76,11 @@
 			<artifactId>spring-cloud-starter-stream-kafka</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-stream-schema</artifactId>
+			<version>2.2.1.RELEASE</version>
+		</dependency>
+		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct</artifactId>
 			<version>${mapstruct.version}</version>
@@ -250,6 +255,7 @@
 				<artifactId>zenwave-code-generator-mojo</artifactId>
 				<version>${zenwave.version}</version>
 				<executions>
+					<!-- Generate PRODUCER -->
 					<execution>
 						<id>generate-asyncapi-producer</id>
 						<phase>generate-sources</phase>
@@ -278,8 +284,43 @@
 							<inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
 							<addCompileSourceRoot>false</addCompileSourceRoot>
 							<configOptions>
-								<apiPackage>io.zenwave360.example.adapters.events</apiPackage>
 								<modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
+								<jsonschema2pojo.includeTypeInfo>true</jsonschema2pojo.includeTypeInfo>
+							</configOptions>
+						</configuration>
+					</execution>
+
+					<!-- Generate CONSUMER -->
+					<execution>
+						<id>generate-asyncapi-consumer</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<generatorName>spring-cloud-streams3</generatorName>
+							<inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
+							<configOptions>
+								<role>CLIENT</role>
+								<style>IMPERATIVE</style>
+								<apiPackage>io.zenwave360.example.core.inbound.events</apiPackage>
+								<modelPackage>io.zenwave360.example.core.inbound.events.model</modelPackage>
+							</configOptions>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate-asyncapi-consumer-dtos</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<generatorName>jsonschema2pojo</generatorName>
+							<inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
+							<addCompileSourceRoot>false</addCompileSourceRoot>
+							<configOptions>
+								<modelPackage>io.zenwave360.example.core.inbound.events.model</modelPackage>
+								<jsonschema2pojo.includeTypeInfo>true</jsonschema2pojo.includeTypeInfo>
 							</configOptions>
 						</configuration>
 					</execution>

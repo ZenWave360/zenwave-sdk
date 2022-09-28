@@ -1,22 +1,6 @@
-# This configuration is intended for development purpose, it's **your** responsibility to harden it for production
-version: '3.8'
+---
+version: '3.2'
 services:
-  mongodb:
-    image: mongo:4.4.10
-    ports:
-      - 127.0.0.1:27017:27017
-    # volumes:
-    #   - ~/volumes/zenwave/ZenWaveApiExample/mongodb/:/data/db/
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.3
-    # volumes:
-    #   - ~/volumes/zeneave/ZenWaveApiExample/elasticsearch/:/usr/share/elasticsearch/data/
-    ports:
-      - 127.0.0.1:9200:9200
-      - 127.0.0.1:9300:9300
-    environment:
-      - 'ES_JAVA_OPTS=-Xms1024m -Xmx1024m'
-      - 'discovery.type=single-node'
 
   kafka:
     image: confluentinc/cp-kafka:7.2.1
@@ -59,21 +43,4 @@ services:
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
-      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
-
-#
-#  kafka-ui:
-#    container_name: kafka-ui
-#    image: provectuslabs/kafka-ui:latest
-#    ports:
-#      - 8888:8080
-#    depends_on:
-#      - zookeeper
-#      - kafka
-#      - schema-registry
-#    environment:
-#      KAFKA_CLUSTERS_0_NAME: local
-#      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
-#      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
-#      KAFKA_CLUSTERS_0_JMXPORT: 9101
-#      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8085
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:7777
