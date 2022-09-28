@@ -48,7 +48,7 @@ public class GeneratorMojo extends AbstractMojo {
      * A map of specific options for the called generator plugin.
      */
     @Parameter(name = "configOptions")
-    private Map<String, String> configOptions;
+    private Map<String, Object> configOptions;
 
     /**
      * A configOptions string as 'key=value1,value2\nkey2=value3'.

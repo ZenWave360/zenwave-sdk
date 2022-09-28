@@ -44,6 +44,9 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     @DocumentedOption(description = "Business/Service interface suffix")
     public String serviceSuffix = "ConsumerService";
 
+    @DocumentedOption(description = "Spring-Boot binding suffix. It will be appended to the operation name kebab-cased. E.g. <operation-id>-in-0")
+    public String bindingSuffix = "-0";
+
     public SpringCloudStreams3Generator withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;
         return this;

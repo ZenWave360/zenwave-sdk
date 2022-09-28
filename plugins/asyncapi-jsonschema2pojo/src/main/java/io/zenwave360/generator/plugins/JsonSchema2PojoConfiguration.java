@@ -32,7 +32,7 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
 
     private static final Logger log = LoggerFactory.getLogger(JsonSchema2PojoConfiguration.class);
 
-    private static final String PREFIX = "jsonschema2pojo.";
+//    private static final String PREFIX = "jsonschema2pojo.";
 
     private AnnotationStyle annotationStyle = AnnotationStyle.JACKSON2;
     private String dateTimeType = "java.time.OffsetDateTime";
@@ -45,7 +45,7 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
     private boolean includeDynamicGetters = true;
     private boolean includeDynamicSetters = true;
     private boolean includeDynamicBuilders = true;
-    private boolean includeTypeInfo = true;
+    private boolean includeTypeInfo = false;
     private boolean serializable = true;
     private Map<String, String> formatTypeMapping = new HashMap<String, String>();
     private boolean includeConstructorPropertiesAnnotation = false;
@@ -119,19 +119,19 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
         Object value = null;
 
         if (f.getType().isEnum()) {
-            value = s.containsKey(PREFIX + f.getName()) ? Enum.valueOf((Class) f.getType(), s.get(PREFIX + f.getName()).toUpperCase()) : defaultValue;
+            value = s.containsKey(f.getName()) ? Enum.valueOf((Class) f.getType(), s.get(f.getName()).toUpperCase()) : defaultValue;
         } else if (f.getType().isArray()) {
-            value = s.containsKey(PREFIX + f.getName()) ? getArray(s, PREFIX + f.getName()) : defaultValue;
+            value = s.containsKey(f.getName()) ? getArray(s, f.getName()) : defaultValue;
         } else if (f.getType().isAssignableFrom(boolean.class) || f.getType().isAssignableFrom(Boolean.class)) {
-            value = getBoolean(s, PREFIX + f.getName(), (Boolean) defaultValue);
+            value = getBoolean(s, f.getName(), (Boolean) defaultValue);
         } else if (f.getType().isAssignableFrom(String.class)) {
-            value = s.getOrDefault(PREFIX + f.getName(), (String) defaultValue);
+            value = s.getOrDefault(f.getName(), (String) defaultValue);
         } else if (f.getType().isAssignableFrom(Map.class)) {
-            value = s.containsKey(PREFIX + f.getName()) ? getMap(s, PREFIX + f.getName()) : defaultValue;
+            value = s.containsKey(f.getName()) ? getMap(s, f.getName()) : defaultValue;
         } else if (f.getType().isAssignableFrom(File.class)) {
-            value = s.containsKey(PREFIX + f.getName()) ? new File(s.get(PREFIX + f.getName())) : defaultValue;
+            value = s.containsKey(f.getName()) ? new File(s.get(f.getName())) : defaultValue;
         } else if (f.getType().isAssignableFrom(Class.class)) {
-            value = s.containsKey(PREFIX + f.getName()) ? Class.forName(s.get(PREFIX + f.getName())) : defaultValue;
+            value = s.containsKey(f.getName()) ? Class.forName(s.get(f.getName())) : defaultValue;
         }
 
         if (value != null && value != defaultValue) {
@@ -141,7 +141,7 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
 
     private static boolean getBoolean(Map<String, String> s, String key, boolean defaultValue) {
         if (s.containsKey(key)) {
-            return Boolean.getBoolean(s.get(key));
+            return Boolean.valueOf(s.get(key));
         }
         return defaultValue;
     }

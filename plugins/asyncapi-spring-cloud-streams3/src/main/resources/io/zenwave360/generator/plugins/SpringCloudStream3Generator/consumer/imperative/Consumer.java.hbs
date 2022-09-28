@@ -1,10 +1,15 @@
 package {{apiPackage}};
 
+import java.util.function.Consumer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
-import java.util.function.Consumer;
 
 {{#if modelPackage}}
 import {{modelPackage}}.*;
@@ -13,21 +18,44 @@ import {{modelPackage}}.*;
 @Component("{{operation.x--operationIdKebabCase}}")
 public class {{consumerName operation.x--operationIdCamelCase}} implements Consumer<Message<Object>> {
 
+    private Logger log = LoggerFactory.getLogger(getClass());
+
     @Autowired
     private {{serviceName operation.x--operationIdCamelCase}} service;
 
+    @Autowired(required = false)
+    private StreamBridge streamBridge;
+
+    @Value("${spring.cloud.stream.bindings.{{operation.x--operationIdKebabCase}}-in-0.dead-letter-queue-binding-name:null}")
+    private String deadLetterQueue;
+
     @Override
     public void accept(Message<Object> message) {
-        Object payload = message.getPayload();
-        {{#each operation.x--messages as |message|}}
-        if(payload instanceof {{message.x--javaType}}) {
-            {{#if exposeMessage}}
-            service.{{operation.operationId}}{{methodSuffix message operation}}(MessageBuilder.createMessage(({{message.x--javaType}}) payload, message.getHeaders()));
-            {{else}}
-            service.{{operation.operationId}}{{methodSuffix message operation}}(({{message.x--javaType}}) payload);
-            {{/if}}
-            return;
+        log.debug("Received message: {}", message);
+        try {
+            Object payload = message.getPayload();
+            {{~#each operation.x--messages as |message|}}
+            if(payload instanceof {{message.x--javaType}}) {
+                {{~#if exposeMessage}}
+                service.{{operation.operationId}}{{methodSuffix message operation}}(MessageBuilder.createMessage(({{message.x--javaType}}) payload, message.getHeaders()));
+                {{~else}}
+                service.{{operation.operationId}}{{methodSuffix message operation}}(({{message.x--javaType}}) payload, message.getHeaders());
+                {{~/if}}
+                return;
+            }
+            {{~/each}}
+            log.warn("Received message without any business handler: [payload: {}, message: {}]", payload.getClass().getName(), message);
+        } catch (Exception e) {
+            log.error("Error processing message: {}", message, e);
+            if (streamBridge != null && deadLetterQueue != null) {
+                log.debug("Sending message to dead letter queue: {}", deadLetterQueue);
+                try {
+                    streamBridge.send(deadLetterQueue, MessageBuilder.fromMessage(message).build());
+                } catch (Exception e1) {
+                    log.error("Error sending message to dead letter queue: {}", deadLetterQueue, e1);
+                }
+            }
+            throw e;
         }
-        {{/each}}
     }
 }

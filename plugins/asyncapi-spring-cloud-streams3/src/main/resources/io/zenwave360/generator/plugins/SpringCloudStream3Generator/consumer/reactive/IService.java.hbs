@@ -13,7 +13,7 @@ import {{modelPackage}}.*;
 public interface {{serviceName operation.x--operationIdCamelCase}} {
 
 {{#each operation.x--messages as |message|}}
-    Mono<Void> {{operation.operationId}}{{methodSuffix message operation}}(Flux<{{message.x--javaType}}> msg);
+    default Mono<Void> {{operation.operationId}}{{methodSuffix message operation}}(Flux<{{message.x--javaType}}> msg) { return Mono.empty(); };
 {{/each}}
 
 }

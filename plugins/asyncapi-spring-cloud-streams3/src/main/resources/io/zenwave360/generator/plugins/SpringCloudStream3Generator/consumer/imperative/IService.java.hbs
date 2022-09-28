@@ -1,5 +1,6 @@
 package {{apiPackage}};
 
+import java.util.Map;
 {{#if modelPackage}}
 import {{modelPackage}}.*;
 {{/if}}
@@ -13,7 +14,11 @@ public interface {{serviceName operation.x--operationIdCamelCase}} {
     /**
      * {{operation.description}}
      */
-    boolean {{operation.operationId}}{{methodSuffix message operation}}({{message.x--javaType}} msg);
+    {{~#if exposeMessage}}
+    default void {{operation.operationId}}{{methodSuffix message operation}}({{message.x--javaType}} msg) {};
+    {{else}}
+    default void {{operation.operationId}}{{methodSuffix message operation}}({{message.x--javaType}} payload, Map<String, Object> headers) {};
+    {{/if}}
 {{/each}}
 
 }

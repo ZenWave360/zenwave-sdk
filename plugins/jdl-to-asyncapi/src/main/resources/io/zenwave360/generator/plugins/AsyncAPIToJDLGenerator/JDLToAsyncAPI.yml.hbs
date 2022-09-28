@@ -65,24 +65,21 @@ components:
       type: object
       properties:
         {{entity.instanceName}}Id:
-          type: integer
-          format: int64
+          type: string
         {{entity.instanceName}}:
           $ref: "#/components/schemas/{{entity.className}}"
     {{entity.className}}UpdatedPayload:
       type: object
       properties:
         {{entity.instanceName}}Id:
-          type: integer
-          format: int64
+          type: string
         {{entity.instanceName}}:
           $ref: "#/components/schemas/{{entity.className}}"
     {{entity.className}}DeletedPayload:
       type: object
       properties:
         {{entity.instanceName}}Id:
-          type: integer
-          format: int64
+          type: string
   {{/unless}}
 {{~/each}}
 {{~/if}}

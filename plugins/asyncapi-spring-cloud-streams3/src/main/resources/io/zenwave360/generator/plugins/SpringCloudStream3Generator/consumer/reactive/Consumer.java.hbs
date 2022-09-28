@@ -27,11 +27,11 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Funct
         return messageFlux.flatMap(m -> {
         {{#each operation.x--messages as |message|}}
             if(m.getPayload() instanceof {{message.x--javaType}}) {
-            {{#if exposeMessage}}
+            {{~#if exposeMessage}}
                 service.{{operation.operationId}}{{methodSuffix message operation}}(Flux.just(MessageBuilder.<{{message.x--javaType}}>createMessage(({{message.x--javaType}}) m.getPayload(), m.getHeaders())));
-            {{else}}
+            {{~else}}
                 service.{{operation.operationId}}{{methodSuffix message operation}}(Flux.just(({{message.x--javaType}}) m.getPayload()));
-            {{/if}}
+            {{~/if}}
             }
         {{/each}}
             return Mono.empty();
