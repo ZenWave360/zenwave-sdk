@@ -3,7 +3,9 @@ package io.zenwave360.generator.processors;
 import static io.zenwave360.generator.processors.JDLWithOpenApiProcessor.JDL_DEFAULT_PROPERTY;
 import static io.zenwave360.generator.processors.JDLWithOpenApiProcessor.OPENAPI_DEFAULT_PROPERTY;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +19,14 @@ import io.zenwave360.generator.utils.JSONPath;
 
 public class JDLWithOpenApiProcessorTest {
 
+    private Map<String, Object> loadOpenApi(File file) throws Exception {
+        return loadOpenApi(file.getAbsoluteFile().toURI().toString());
+    }
+    private Map<String, Object> loadJDL(File file) throws Exception {
+        return loadJDL(file.getAbsolutePath());
+    }
     private Map<String, Object> loadOpenApi(String resource) throws Exception {
-        Map<String, Object> model = new DefaultYamlParser().withSpecFile(resource).withTargetProperty(OPENAPI_DEFAULT_PROPERTY).parse();
+        Map<String, Object> model = new DefaultYamlParser().withSpecFile(URI.create(resource)).withTargetProperty(OPENAPI_DEFAULT_PROPERTY).parse();
         return new OpenApiProcessor().withTargetProperty(OPENAPI_DEFAULT_PROPERTY).process(model);
     }
 
@@ -45,8 +53,8 @@ public class JDLWithOpenApiProcessorTest {
     @Test
     // @Disabled
     public void testProcessJDLWithOpenAPI_registry() throws Exception {
-        var openapiModel = loadOpenApi("../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/openapi.yml");
-        var jdlModel = loadJDL("../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/orders-model.jdl");
+        var openapiModel = loadOpenApi(new File("../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/openapi.yml"));
+        var jdlModel = loadJDL(new File("../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/orders-model.jdl"));
         var model = new HashMap<String, Object>();
         model.putAll(openapiModel);
         model.putAll(jdlModel);

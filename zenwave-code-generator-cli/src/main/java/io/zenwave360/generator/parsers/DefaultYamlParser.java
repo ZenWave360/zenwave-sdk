@@ -4,7 +4,7 @@ import static io.zenwave360.jsonrefparser.$RefParserOptions.OnCircular.SKIP;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -15,11 +15,24 @@ import io.zenwave360.jsonrefparser.$RefParserOptions;
 public class DefaultYamlParser implements io.zenwave360.generator.parsers.Parser {
 
     @DocumentedOption(description = "API Specification File")
-    public String specFile;
+    public URI specFile;
     public String targetProperty = "api";
 
-    public DefaultYamlParser withSpecFile(String specFile) {
+    private ClassLoader projectClassLoader;
+
+    @Override
+    public DefaultYamlParser withProjectClassLoader(ClassLoader projectClassLoader) {
+        this.projectClassLoader = projectClassLoader;
+        return this;
+    }
+
+    public DefaultYamlParser withSpecFile(URI specFile) {
         this.specFile = specFile;
+        return this;
+    }
+
+    public DefaultYamlParser withSpecFile(File specFile) {
+        this.specFile = specFile.getAbsoluteFile().toURI();
         return this;
     }
 
@@ -28,23 +41,13 @@ public class DefaultYamlParser implements io.zenwave360.generator.parsers.Parser
         return this;
     }
 
-    protected File findSpecFile(String specFile) {
-        if (specFile.startsWith("classpath:")) {
-            try {
-                return new File(getClass().getClassLoader().getResource(specFile.replaceFirst("classpath:", "")).toURI());
-            } catch (URISyntaxException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return new File(specFile);
-    }
-
     @Override
     public Map<String, Object> parse() throws IOException {
-        File file = findSpecFile(specFile);
-        $RefParser parser = new $RefParser(file).withOptions(new $RefParserOptions().withOnCircular(SKIP));
+        $RefParser parser = new $RefParser(specFile)
+                .withResourceClassLoader(this.projectClassLoader)
+                .withOptions(new $RefParserOptions().withOnCircular(SKIP));
         Map model = new LinkedHashMap<>();
-        model.put(targetProperty, new Model(file, parser.parse().dereference().mergeAllOf().getRefs()));
+        model.put(targetProperty, new Model(specFile, parser.parse().dereference().mergeAllOf().getRefs()));
         return model;
     }
 }

@@ -22,7 +22,7 @@ public class OpenApiProcessor extends AbstractBaseProcessor implements Processor
             }
         });
 
-        List<Map<String, Object>> parametersParents = getJsonPath(apiModel, "$.paths[*][?(@.parameters)]");
+        List<Map<String, Object>> parametersParents = JSONPath.get(apiModel, "$.paths[*][?(@.parameters)]", Collections.emptyList());
         for (Map<String, Object> parametersParent : parametersParents) {
             List<Map<String, Object>> parameters = (List<Map<String, Object>>) parametersParent.remove("parameters");
             for (Object pathItemEntry : parametersParent.values()) {
@@ -40,7 +40,7 @@ public class OpenApiProcessor extends AbstractBaseProcessor implements Processor
             }
         }
 
-        List<Map<String, Object>> operations = getJsonPath(apiModel, "$.paths[*][*][?(@.operationId)]");
+        List<Map<String, Object>> operations = JSONPath.get(apiModel, "$.paths[*][*][?(@.operationId)]");
         for (Map<String, Object> operation : operations) {
             prepareOperationRequestInfo(apiModel, operation);
             simplifyOperationResponseInfo(apiModel, operation);
@@ -84,7 +84,7 @@ public class OpenApiProcessor extends AbstractBaseProcessor implements Processor
     }
 
     private void prepareOperationRequestInfo(Model apiModel, Map<String, Object> operation) {
-        Map<String, Object> requestBodySchema = getJsonPath(operation, "$.requestBody.content['application/json'].schema");
+        Map<String, Object> requestBodySchema = JSONPath.get(operation, "$.requestBody.content['application/json'].schema");
         if (requestBodySchema != null) {
             $Ref ref = apiModel.getRefs().getOriginalRef(requestBodySchema);
             operation.put("x--content-type", "application/json");
@@ -94,7 +94,7 @@ public class OpenApiProcessor extends AbstractBaseProcessor implements Processor
     }
 
     private void simplifyOperationResponseInfo(Model apiModel, Map<String, Object> operation) {
-        Map<String, Map<String, Object>> responses = getJsonPath(operation, "$.responses");
+        Map<String, Map<String, Object>> responses = JSONPath.get(operation, "$.responses");
         if (responses != null) {
             operation.put("x--response", getSimplifiedResponseInfo(apiModel, responses.entrySet().stream().findFirst().get()));
             for (Map.Entry<String, Map<String, Object>> responseEntry : responses.entrySet()) {
@@ -107,7 +107,7 @@ public class OpenApiProcessor extends AbstractBaseProcessor implements Processor
     private Map<String, Object> getSimplifiedResponseInfo(Model apiModel, Map.Entry<String, Map<String, Object>> response) {
         Map<String, Object> simplified = new HashMap<>();
         simplified.put("x--statusCode", response.getKey());
-        Map<String, Object> responseBodySchema = getJsonPath(response.getValue(), "$.content['application/json'].schema");
+        Map<String, Object> responseBodySchema = JSONPath.get(response.getValue(), "$.content['application/json'].schema");
         if (responseBodySchema != null) {
             $Ref ref = apiModel.getRefs().getOriginalRef(responseBodySchema);
             simplified.put("x--content-type", "application/json");

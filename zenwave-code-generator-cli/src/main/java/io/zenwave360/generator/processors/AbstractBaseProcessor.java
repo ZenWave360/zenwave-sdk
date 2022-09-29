@@ -21,14 +21,6 @@ public abstract class AbstractBaseProcessor implements Processor {
         this.targetProperty = targetProperty;
     }
 
-    protected <T> T getJsonPath(Object model, String jsonPath) {
-        try {
-            return JsonPath.read(model, jsonPath);
-        } catch (PathNotFoundException e) {
-            return null;
-        }
-    }
-
     protected void addNormalizedTagName(Map<String, Object> operation) {
         if (operation != null) {
             String normalizedTagName = null;

@@ -1,6 +1,7 @@
 package io.zenwave360.generator.generators;
 
 import java.io.File;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -16,8 +17,7 @@ public class AbstractOpenAPIGeneratorTest {
 
     private Model loadAsyncapiModelFromResource(String resource) throws Exception {
         String targetProperty = "api";
-        File file = new File(getClass().getClassLoader().getResource(resource).toURI());
-        Map<String, Object> model = new DefaultYamlParser().withSpecFile(file.getAbsolutePath()).withTargetProperty(targetProperty).parse();
+        Map<String, Object> model = new DefaultYamlParser().withSpecFile(URI.create(resource)).withTargetProperty(targetProperty).parse();
         return (Model) new OpenApiProcessor().withTargetProperty(targetProperty).process(model).get(targetProperty);
     }
 
@@ -32,7 +32,7 @@ public class AbstractOpenAPIGeneratorTest {
 
     @Test
     public void test_filter_operations_by_tag_and_verb() throws Exception {
-        Model model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
+        Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
         AbstractOpenAPIGenerator openapiGenerator = newAbstractAsyncapiGenerator();
         Map<String, List<Map<String, Object>>> allOperations = openapiGenerator.getOperationsGroupedByTag(model);
         Map<String, List<Map<String, Object>>> getOperations = openapiGenerator.getOperationsGroupedByTag(model, AbstractOpenAPIGenerator.OperationType.GET);

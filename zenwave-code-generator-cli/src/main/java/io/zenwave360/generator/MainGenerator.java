@@ -38,7 +38,7 @@ public class MainGenerator {
             applyConfiguration(chainIndex++, plugin, configuration);
 
             if (plugin instanceof Parser) {
-                Map parsed = ((Parser) plugin).parse();
+                Map parsed = ((Parser) plugin).withProjectClassLoader(configuration.getProjectClassLoader()).parse();
                 model.putAll(parsed);
             }
             if (plugin instanceof Processor) {

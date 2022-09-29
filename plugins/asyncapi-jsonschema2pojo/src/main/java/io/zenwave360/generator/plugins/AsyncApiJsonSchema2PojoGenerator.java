@@ -5,6 +5,8 @@ import static org.jsonschema2pojo.SourceType.YAMLSCHEMA;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -106,8 +108,6 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     }
 
     public void generate(Model apiModel, List<Map<String, Object>> messages) throws IOException, URISyntaxException {
-        File apiFile = new File(apiModel.getRefs().file.toURI());
-
         for (final Map<String, Object> message : messages) {
             final String name = (String) message.get("name");
             Map<String, Object> payload = (Map) message.get("payload");
@@ -123,11 +123,17 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             if (AsyncApiProcessor.SchemaFormatType.isNativeFormat(schemaFormatType)) {
                 generateFromNativeFormat(config, payload, modelPackage, messageClassName);
             } else {
-                generateFromJsonSchemaFile(config, payloadRef.getUrl(), modelPackage, messageClassName);
+                generateFromJsonSchemaFile(config, resolveClasspathURI(payloadRef.getURI()), modelPackage, messageClassName);
             }
         }
     }
 
+    private URL resolveClasspathURI(URI classpathURI) throws MalformedURLException {
+        if("classpath".equals(classpathURI.getScheme())) {
+            return getClass().getClassLoader().getResource(classpathURI.toString().replaceFirst("classpath:/", ""));
+        }
+        return classpathURI.toURL();
+    }
     public void generateFromJsonSchemaFile(JsonSchema2PojoConfiguration config, URL url, String packageName, String className) throws IOException {
         config.setSource(List.of(url).iterator());
         config.setTargetPackage(packageName);

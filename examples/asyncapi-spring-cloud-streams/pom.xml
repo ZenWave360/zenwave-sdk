@@ -213,7 +213,7 @@
 						</goals>
 						<configuration>
 							<generatorName>spring-cloud-streams3</generatorName>
-							<inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
+							<inputSpec>classpath:model/asyncapi.yml</inputSpec>
 							<configOptions>
 								<role>PROVIDER</role>
 								<style>IMPERATIVE</style>

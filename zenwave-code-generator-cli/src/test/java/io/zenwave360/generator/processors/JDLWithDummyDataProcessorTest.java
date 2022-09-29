@@ -2,6 +2,7 @@ package io.zenwave360.generator.processors;
 
 import static io.zenwave360.generator.processors.JDLWithOpenApiProcessor.OPENAPI_DEFAULT_PROPERTY;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ import io.zenwave360.generator.utils.JSONPath;
 public class JDLWithDummyDataProcessorTest {
 
     private Map<String, Object> loadOpenApi(String resource) throws Exception {
-        Map<String, Object> model = new DefaultYamlParser().withSpecFile(resource).withTargetProperty(OPENAPI_DEFAULT_PROPERTY).parse();
+        Map<String, Object> model = new DefaultYamlParser().withSpecFile(URI.create(resource)).withTargetProperty(OPENAPI_DEFAULT_PROPERTY).parse();
         return new OpenApiProcessor().withTargetProperty(OPENAPI_DEFAULT_PROPERTY).process(model);
     }
 

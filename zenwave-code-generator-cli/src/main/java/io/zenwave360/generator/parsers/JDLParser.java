@@ -20,6 +20,8 @@ public class JDLParser implements Parser {
 
     public Map<String, String> options = new HashMap<>();
 
+    private ClassLoader projectClassLoader;
+
     @DocumentedOption(description = "JDL file to parse")
     public void setSpecFile(String specFile) {
         this.specFiles = new String[] {specFile};
@@ -37,6 +39,11 @@ public class JDLParser implements Parser {
 
     public JDLParser withOptions(String option, String value) {
         this.options.put(option, value);
+        return this;
+    }
+
+    public JDLParser withProjectClassLoader(ClassLoader projectClassLoader) {
+        this.projectClassLoader = projectClassLoader;
         return this;
     }
 

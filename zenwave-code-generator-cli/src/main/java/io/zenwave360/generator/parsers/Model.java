@@ -1,6 +1,7 @@
 package io.zenwave360.generator.parsers;
 
 import java.io.File;
+import java.net.URI;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Set;
@@ -9,11 +10,11 @@ import io.zenwave360.jsonrefparser.$Refs;
 
 public class Model extends AbstractMap<String, Object> {
 
-    private File file;
+    private URI uri;
     private $Refs refs;
 
-    public Model(File file, $Refs refs) {
-        this.file = file;
+    public Model(URI uri, $Refs refs) {
+        this.uri = uri;
         this.refs = refs;
     }
 

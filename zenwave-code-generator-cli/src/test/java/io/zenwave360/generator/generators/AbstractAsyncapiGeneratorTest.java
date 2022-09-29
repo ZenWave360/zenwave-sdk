@@ -1,6 +1,7 @@
 package io.zenwave360.generator.generators;
 
 import java.io.File;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +18,7 @@ public class AbstractAsyncapiGeneratorTest {
 
     private Model loadAsyncapiModelFromResource(String resource) throws Exception {
         String targetProperty = "api";
-        File file = new File(getClass().getClassLoader().getResource(resource).toURI());
-        Map<String, Object> model = new DefaultYamlParser().withSpecFile(file.getAbsolutePath()).withTargetProperty(targetProperty).parse();
+        Map<String, Object> model = new DefaultYamlParser().withSpecFile(URI.create(resource)).withTargetProperty(targetProperty).parse();
         return (Model) new AsyncApiProcessor().withTargetProperty(targetProperty).process(model).get(targetProperty);
     }
 
@@ -33,7 +33,7 @@ public class AbstractAsyncapiGeneratorTest {
 
     @Test
     public void test_filter_operations_for_provider_nobindings() throws Exception {
-        Model model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml");
+        Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml");
         AbstractAsyncapiGenerator asyncapiGenerator = newAbstractAsyncapiGenerator();
         asyncapiGenerator.role = AbstractAsyncapiGenerator.RoleType.PROVIDER;
         Map<String, List<Map<String, Object>>> consumerOperations = asyncapiGenerator.getSubscribeOperationsGroupedByTag(model);
@@ -45,7 +45,7 @@ public class AbstractAsyncapiGeneratorTest {
 
     @Test
     public void test_filter_operations_for_provider_with_matching_bindings() throws Exception {
-        Model model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml");
+        Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml");
         AbstractAsyncapiGenerator asyncapiGenerator = newAbstractAsyncapiGenerator();
         asyncapiGenerator.role = AbstractAsyncapiGenerator.RoleType.PROVIDER;
         asyncapiGenerator.bindingTypes = Arrays.asList("kafka");
@@ -57,7 +57,7 @@ public class AbstractAsyncapiGeneratorTest {
 
     @Test
     public void test_filter_operations_for_provider_with_no_matching_bindings() throws Exception {
-        Model model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml");
+        Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml");
         AbstractAsyncapiGenerator asyncapiGenerator = newAbstractAsyncapiGenerator();
         asyncapiGenerator.role = AbstractAsyncapiGenerator.RoleType.PROVIDER;
         asyncapiGenerator.bindingTypes = Arrays.asList("nomatchingbinding");

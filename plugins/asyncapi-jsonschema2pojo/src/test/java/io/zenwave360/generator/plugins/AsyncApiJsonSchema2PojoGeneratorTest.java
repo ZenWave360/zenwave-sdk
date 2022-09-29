@@ -32,6 +32,7 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
 
     @Test
     public void test_generator_for_json_schemas() throws Exception {
+        var url = getClass().getClassLoader().getResource("/io/zenwave360/generator/resources/asyncapi/json-schemas/asyncapi.yml");
         Configuration configuration = new AsyncApiJsonSchema2PojoConfiguration()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/asyncapi/json-schemas/asyncapi.yml")
                 .withTargetFolder("target/zenwave630/out");

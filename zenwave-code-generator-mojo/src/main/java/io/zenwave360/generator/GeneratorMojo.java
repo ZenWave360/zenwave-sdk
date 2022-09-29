@@ -1,25 +1,29 @@
 package io.zenwave360.generator;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 /**
  * Goal which generates code with the configured ZenWave Code Generator plugin.
  */
-@Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
+@Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class GeneratorMojo extends AbstractMojo {
 
+      @Parameter( defaultValue = "${project.artifact}", readonly = true, required = true )
+      private Artifact projectArtifact;
     /**
      * The name of the generator to use.
      */
@@ -66,7 +70,6 @@ public class GeneratorMojo extends AbstractMojo {
     private MavenProject project;
 
     public void execute() throws MojoExecutionException {
-        File inputSpecFile = new File(inputSpec);
         addCompileSourceRootIfConfigured();
 
         if (skip) {
@@ -86,9 +89,14 @@ public class GeneratorMojo extends AbstractMojo {
                 options.putAll(buildConfigOptions(configKeyValueOptions));
             }
 
+            var classpathFiles = getProjectClasspathElements(project);
+            URLClassLoader projectClassLoader = new URLClassLoader(classpathFiles.toArray(new URL[0]), this.getClass().getClassLoader());
+
+            String specFile = inputSpec.startsWith("classpath:") ? inputSpec : new File(inputSpec).getAbsolutePath();
             Configuration configuration = Configuration.of(this.generatorName)
-                    .withSpecFile(inputSpecFile.getAbsolutePath())
+                    .withSpecFile(specFile)
                     .withTargetFolder(targetFolder.getAbsolutePath())
+                    .withProjectClassLoader(projectClassLoader)
                     .withOptions(options);
 
             new MainGenerator().generate(configuration);
@@ -96,6 +104,7 @@ public class GeneratorMojo extends AbstractMojo {
             // Maven logs exceptions thrown by plugins only if invoked with -e
             // I find it annoying to jump through hoops to get basic diagnostic information,
             // so let's log it in any case:
+            e.printStackTrace();
             getLog().error(e);
             throw new MojoExecutionException("Code generation failed. See above for the full exception.");
         }
@@ -122,5 +131,19 @@ public class GeneratorMojo extends AbstractMojo {
             System.out.println("Adding source root " + getCompileSourceRoot());
             project.addCompileSourceRoot(getCompileSourceRoot());
         }
+    }
+
+    private List<URL> getProjectClasspathElements(MavenProject project) {
+        List<File> list = new ArrayList<>();
+        project.getResources().stream().map(r -> new File(r.getDirectory())).forEach(list::add);
+        list.add(new File(project.getBuild().getOutputDirectory()));
+        list.addAll(project.getArtifacts().stream().map(Artifact::getFile).collect(Collectors.toList()));
+        return list.stream().map(file -> {
+            try {
+                return file.toURI().toURL();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.toList());
     }
 }

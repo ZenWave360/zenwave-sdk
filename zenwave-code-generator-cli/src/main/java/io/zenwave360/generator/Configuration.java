@@ -26,6 +26,8 @@ public class Configuration {
 
     private Map<String, Object> options = new HashMap<>();
 
+    private ClassLoader projectClassLoader;
+
     public static Configuration of(String pluginConfigAsString) throws Exception {
         if (pluginConfigAsString != null) {
             if (pluginConfigAsString.contains(".")) {
@@ -54,8 +56,8 @@ public class Configuration {
     }
 
     public Configuration withSpecFile(String specFile) {
-        this.specFile = specFile;
-        this.options.put("specFile", specFile);
+        this.specFile = specFile != null? specFile.replaceAll("\\\\", "/") : specFile;
+        this.options.put("specFile", this.specFile);
         return this;
     }
 
@@ -64,6 +66,11 @@ public class Configuration {
             this.targetFolder = targetFolder;
             this.options.put("targetFolder", targetFolder);
         }
+        return this;
+    }
+
+    public Configuration withProjectClassLoader(ClassLoader projectClassLoader) {
+        this.projectClassLoader = projectClassLoader;
         return this;
     }
 
@@ -177,5 +184,9 @@ public class Configuration {
 
     public void setTargetFolder(String targetFolder) {
         this.targetFolder = targetFolder;
+    }
+
+    public ClassLoader getProjectClassLoader() {
+        return this.projectClassLoader;
     }
 }
