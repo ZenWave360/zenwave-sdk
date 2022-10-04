@@ -54,6 +54,9 @@ public class {{service.name}}Test  {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        {{~#each entities as |entity|}}
+        {{entity.instanceName}}Repository.insert(new {{entity.className}}());
+        {{~/each}}
     }
 
 {{#each entities as |entity|}}

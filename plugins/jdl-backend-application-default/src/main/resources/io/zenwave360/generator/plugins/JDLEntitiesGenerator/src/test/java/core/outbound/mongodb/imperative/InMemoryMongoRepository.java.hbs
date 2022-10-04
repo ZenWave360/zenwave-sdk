@@ -3,6 +3,7 @@ package {{basePackage}}.core.outbound.mongodb.inmemory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -28,8 +29,14 @@ public class InMemoryMongoRepository<T> implements MongoRepository<T, String> {
 
     private final Map<String, T> entities = new HashMap<>();
 
-    private final PrimaryKeyGenerator<String> primaryKeyGenerator = () -> UUID.randomUUID().toString();
-
+    // private final PrimaryKeyGenerator<String> primaryKeyGenerator = () -> UUID.randomUUID().toString();
+    private final PrimaryKeyGenerator<String> primaryKeyGenerator = new PrimaryKeyGenerator<String>() {
+        private int next = 0;
+        @Override
+        public String next() {
+          return String.valueOf(next++);
+        }
+    };
 
     public Map<String, T> getEntities() {
         return entities;
@@ -165,7 +172,10 @@ public class InMemoryMongoRepository<T> implements MongoRepository<T, String> {
     }
 
     public Page<T> findAll(Pageable pageable) {
-        return null;
+        int total = (int) count();
+        int offset = (int) pageable.getOffset();
+        int limit = pageable.getPageSize();
+        return new PageImpl<>(findAll().subList(offset, Math.min(offset + limit, total)), pageable, total);
     }
 
     public <S extends T> S insert(S entity) {
