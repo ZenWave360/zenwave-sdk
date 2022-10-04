@@ -14,7 +14,7 @@
         {{~/each}}
     {{~/if}}
 
-        webTestClient.{{operation.x--httpVerb}}().uri("{{operation.x--path}}")
+        webTestClient.method({{upper operation.x--httpVerb}}).uri("{{operation.x--path}}")
             .accept(MediaType.APPLICATION_JSON)
     {{~#if operation.x--request-dto}}
             .contentType(MediaType.APPLICATION_JSON)
