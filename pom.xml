@@ -68,8 +68,6 @@
         <reflections.version>0.10.2</reflections.version>
         <junit.version>5.8.2</junit.version>
         <logcaptor.version>2.7.10</logcaptor.version>
-
-        <zenwave-code-generator-test-resources.folder>${pom.basedir}/zenwave-code-generator-test-resources/src/test/resources</zenwave-code-generator-test-resources.folder>
     </properties>
     <dependencies>
         <dependency>
@@ -100,14 +98,6 @@
     </modules>
 
     <build>
-        <testResources>
-            <testResource>
-                <directory>${basedir}/src/test/resources</directory>
-            </testResource>
-            <testResource>
-                <directory>${zenwave-code-generator-test-resources.folder}</directory>
-            </testResource>
-        </testResources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

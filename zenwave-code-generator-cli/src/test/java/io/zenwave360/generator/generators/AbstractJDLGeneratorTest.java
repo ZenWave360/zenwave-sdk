@@ -13,8 +13,7 @@ public class AbstractJDLGeneratorTest {
 
     private Map<String, Object> loadAsyncapiModelFromResource(String resource) throws Exception {
         String targetProperty = "jdl";
-        File file = new File(getClass().getClassLoader().getResource(resource).toURI());
-        return new JDLParser().withSpecFile(file.getAbsolutePath()).withTargetProperty(targetProperty).parse();
+        return new JDLParser().withSpecFile(resource).withTargetProperty(targetProperty).parse();
     }
 
     private AbstractJDLGenerator newAbstractJDLGenerator() {
@@ -28,7 +27,7 @@ public class AbstractJDLGeneratorTest {
 
     @Test
     public void test_todo() throws Exception {
-        Map<String, Object> model = loadAsyncapiModelFromResource("io/zenwave360/generator/resources/jdl/21-points.jh");
+        Map<String, Object> model = loadAsyncapiModelFromResource("classpath:io/zenwave360/generator/resources/jdl/21-points.jh");
         AbstractJDLGenerator jdlGenerator = newAbstractJDLGenerator();
         List<TemplateOutput> generated = jdlGenerator.generate(model);
     }

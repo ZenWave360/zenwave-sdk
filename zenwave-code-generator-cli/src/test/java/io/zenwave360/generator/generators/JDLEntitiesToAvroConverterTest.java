@@ -17,15 +17,14 @@ import io.zenwave360.generator.utils.JSONPath;
 public class JDLEntitiesToAvroConverterTest {
 
     private Map<String, Object> loadJDLModelFromResource(String resource) throws Exception {
-        File file = new File(getClass().getClassLoader().getResource(resource).toURI());
-        Map<String, Object> model = new JDLParser().withSpecFile(file.getAbsolutePath()).parse();
+        Map<String, Object> model = new JDLParser().withSpecFile(resource).parse();
         return (Map) new JDLProcessor().process(model).get("jdl");
     }
 
     @Test
     public void testConvertEntityToSchema() throws Exception {
         JDLEntitiesToAvroConverter converter = new JDLEntitiesToAvroConverter().withIdType("string").withNamespace("io.example");
-        Map<String, Object> model = loadJDLModelFromResource("io/zenwave360/generator/resources/jdl/orders-model.jdl");
+        Map<String, Object> model = loadJDLModelFromResource("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl");
         List<Map> entities = JSONPath.get(model, "entities[*]");
         List<Map> enums = JSONPath.get(model, "enums.enums[*]");
         List<Map> entitiesAndEnums = new ArrayList<>();

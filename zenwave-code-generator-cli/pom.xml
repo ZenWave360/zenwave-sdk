@@ -9,10 +9,6 @@
   <artifactId>zenwave-code-generator-cli</artifactId>
   <name>${project.groupId}:${project.artifactId}</name>
 
-  <properties>
-    <zenwave-code-generator-test-resources.folder>${pom.basedir}/../zenwave-code-generator-test-resources/src/test/resources</zenwave-code-generator-test-resources.folder>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>info.picocli</groupId>

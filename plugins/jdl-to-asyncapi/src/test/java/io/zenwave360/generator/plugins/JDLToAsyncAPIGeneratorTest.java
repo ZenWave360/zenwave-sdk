@@ -20,14 +20,13 @@ public class JDLToAsyncAPIGeneratorTest {
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
     private Map<String, Object> loadJDLModelFromResource(String resource) throws Exception {
-        File file = new File(getClass().getClassLoader().getResource(resource).toURI());
-        Map<String, Object> model = new JDLParser().withSpecFile(file.getAbsolutePath()).parse();
+        Map<String, Object> model = new JDLParser().withSpecFile(resource).parse();
         return new JDLProcessor().process(model);
     }
 
     @Test
     public void test_jdl_to_asyncapi() throws Exception {
-        Map<String, Object> model = loadJDLModelFromResource("io/zenwave360/generator/resources/jdl/orders-model.jdl");
+        Map<String, Object> model = loadJDLModelFromResource("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl");
         JDLToAsyncAPIGenerator generator = new JDLToAsyncAPIGenerator();
 
         List<TemplateOutput> outputTemplates = generator.generate(model);
@@ -48,7 +47,7 @@ public class JDLToAsyncAPIGeneratorTest {
 
     @Test
     public void test_jdl_to_asyncapi_with_avro() throws Exception {
-        Map<String, Object> model = loadJDLModelFromResource("io/zenwave360/generator/resources/jdl/orders-model.jdl");
+        Map<String, Object> model = loadJDLModelFromResource("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl");
         JDLToAsyncAPIGenerator generator = new JDLToAsyncAPIGenerator();
         generator.schemaFormat = JDLToAsyncAPIGenerator.SchemaFormat.avro;
 

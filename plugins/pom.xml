@@ -10,15 +10,17 @@
     <artifactId>plugins-parent</artifactId>
     <packaging>pom</packaging>
 
-    <properties>
-        <zenwave-code-generator-test-resources.folder>${pom.basedir}/../../zenwave-code-generator-test-resources/src/test/resources</zenwave-code-generator-test-resources.folder>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
             <artifactId>zenwave-code-generator-cli</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
+            <artifactId>zenwave-code-generator-test-resources</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
