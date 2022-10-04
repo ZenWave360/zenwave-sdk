@@ -111,6 +111,10 @@
 			<artifactId>mongodb</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -204,6 +208,9 @@
 				<groupId>io.github.zenwave360.zenwave-code-generator</groupId>
 				<artifactId>zenwave-code-generator-mojo</artifactId>
 				<version>${zenwave.version}</version>
+				<configuration>
+					<addCompileSourceRoot>true</addCompileSourceRoot>
+				</configuration>
 				<executions>
 					<execution>
 						<id>generate-asyncapi-producer</id>
@@ -217,8 +224,44 @@
 							<configOptions>
 								<role>PROVIDER</role>
 								<style>IMPERATIVE</style>
-								<apiPackage>io.zenwave360.example.adapters.events.producer</apiPackage>
-								<modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
+								<apiPackage>io.zenwave360.example.core.events.outbound.outbox.none</apiPackage>
+								<modelPackage>io.zenwave360.example.core.events.model</modelPackage>
+							</configOptions>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate-asyncapi-producer-outbox-mongodb</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<generatorName>spring-cloud-streams3</generatorName>
+							<inputSpec>classpath:model/asyncapi.yml</inputSpec>
+							<configOptions>
+								<role>PROVIDER</role>
+								<style>IMPERATIVE</style>
+								<transactionalOutbox>mongodb</transactionalOutbox>
+								<apiPackage>io.zenwave360.example.core.events.outbound.outbox.mongodb</apiPackage>
+								<modelPackage>io.zenwave360.example.core.events.model</modelPackage>
+							</configOptions>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate-asyncapi-producer-outbox-jdbc</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<generatorName>spring-cloud-streams3</generatorName>
+							<inputSpec>classpath:model/asyncapi.yml</inputSpec>
+							<configOptions>
+								<role>PROVIDER</role>
+								<style>IMPERATIVE</style>
+								<transactionalOutbox>jdbc</transactionalOutbox>
+								<apiPackage>io.zenwave360.example.core.events.outbound.outbox.jdbc</apiPackage>
+								<modelPackage>io.zenwave360.example.core.events.model</modelPackage>
 							</configOptions>
 						</configuration>
 					</execution>
@@ -232,8 +275,7 @@
 							<generatorName>jsonschema2pojo</generatorName>
 							<inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
 							<configOptions>
-								<apiPackage>io.zenwave360.example.adapters.events</apiPackage>
-								<modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
+								<modelPackage>io.zenwave360.example.core.events.model</modelPackage>
 							</configOptions>
 						</configuration>
 					</execution>
@@ -249,8 +291,7 @@
 							<configOptions>
 								<role>PROVIDER</role>
 								<style>IMPERATIVE</style>
-								<apiPackage>io.zenwave360.example.adapters.events.producer_avro</apiPackage>
-								<modelPackage>io.zenwave360.example.adapters.events.avro</modelPackage>
+								<apiPackage>io.zenwave360.example.core.events.outbound.avro</apiPackage>
 							</configOptions>
 						</configuration>
 					</execution>
@@ -267,8 +308,8 @@
 							<configOptions>
 								<role>CLIENT</role>
 								<style>IMPERATIVE</style>
-								<apiPackage>io.zenwave360.example.adapters.events.consumer.imperative</apiPackage>
-								<modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
+								<apiPackage>io.zenwave360.example.core.events.inbound.imperative</apiPackage>
+								<modelPackage>io.zenwave360.example.core.events.model</modelPackage>
 							</configOptions>
 						</configuration>
 					</execution>
@@ -284,8 +325,8 @@
 							<configOptions>
 								<role>CLIENT</role>
 								<style>REACTIVE</style>
-								<apiPackage>io.zenwave360.example.adapters.events.consumer.reactive</apiPackage>
-								<modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
+								<apiPackage>io.zenwave360.example.core.events.inbound.reactive</apiPackage>
+								<modelPackage>io.zenwave360.example.core.events.model</modelPackage>
 							</configOptions>
 						</configuration>
 					</execution>

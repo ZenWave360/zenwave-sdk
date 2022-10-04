@@ -1,0 +1,76 @@
+package {{apiPackage}};
+
+import java.util.Map;
+
+import com.mongodb.client.model.changestream.ChangeStreamDocument;
+import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.messaging.MessageListener;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.stereotype.Component;
+import org.springframework.util.MimeType;
+
+{{#if modelPackage}}
+import {{modelPackage}}.*;
+{{/if}}
+
+/**
+ * {{asyncapi.description}}
+ */
+@Component
+public class {{apiClassName}} implements I{{apiClassName}} {
+
+    private Logger log = LoggerFactory.getLogger(getClass());
+
+    @Autowired
+    private StreamBridge streamBridge;
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+{{~#each operations as |operation|}}
+    public String {{operation.operationId}}BindingName = "{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
+    public void set{{operation.operationId}}BindingName(String bindingName) {
+        this.{{operation.operationId}}BindingName = bindingName;
+    }
+{{/each}}
+
+{{~#each operations as |operation|}}
+    public final MessageListener<ChangeStreamDocument<Document>, Map> {{operation.operationId}}MongoChangeStreamsListener = (outboxMessage) -> {
+        log.info("Received message: {}", outboxMessage);
+        try {
+            MimeType outputContentType = MimeType.valueOf("application/json");
+            Message message = MessageBuilder.createMessage(outboxMessage.getBody().get("payload"), new MessageHeaders((Map<String, Object>) outboxMessage.getBody().get("headers")));
+            streamBridge.send({{operation.operationId}}BindingName, message, outputContentType);
+        } catch (Exception e) {
+            log.error("Error sending message to stream", e);
+        }
+    };
+{{/each}}
+
+{{~#each operations as |operation|}}
+    {{#each operation.x--messages as |message|}}
+    /**
+     * {{operation.description}}
+     */
+    public boolean {{operation.operationId}}({{message.x--javaType}} payload, Header... headers) {
+        MimeType outputContentType = MimeType.valueOf("{{defaultIfEmpty operation.operation.message.contentType 'application/json'}}");
+        Message message = MessageBuilder.createMessage(payload, asMessageHeaders(headers));
+        mongoTemplate.insert(message, {{operation.operationId}}BindingName);
+        // return streamBridge.send({{operation.operationId}}BindingName, message, outputContentType);
+        return true;
+    }
+
+    {{/each}}
+{{/each}}
+
+    protected MessageHeaders asMessageHeaders(Header... headers) {
+        Map<String, Object> map = Header.asMap(headers);
+        return new MessageHeaders(map);
+    }
+}

@@ -197,45 +197,39 @@ components:
       type: object
       properties:
         customerId:
-          type: integer
-          format: int64
+          type: string
         customer:
           $ref: "#/components/schemas/Customer"
     CustomerUpdatedPayload:
       type: object
       properties:
         customerId:
-          type: integer
-          format: int64
+          type: string
         customer:
           $ref: "#/components/schemas/Customer"
     CustomerDeletedPayload:
       type: object
       properties:
         customerId:
-          type: integer
-          format: int64
+          type: string
   
     CustomerOrderCreatedPayload:
       type: object
       properties:
         customerOrderId:
-          type: integer
-          format: int64
+          type: string
         customerOrder:
           $ref: "#/components/schemas/CustomerOrder"
     CustomerOrderUpdatedPayload:
       type: object
       properties:
         customerOrderId:
-          type: integer
-          format: int64
+          type: string
         customerOrder:
           $ref: "#/components/schemas/CustomerOrder"
     CustomerOrderDeletedPayload:
       type: object
       properties:
         customerOrderId:
-          type: integer
-          format: int64
+          type: string
   

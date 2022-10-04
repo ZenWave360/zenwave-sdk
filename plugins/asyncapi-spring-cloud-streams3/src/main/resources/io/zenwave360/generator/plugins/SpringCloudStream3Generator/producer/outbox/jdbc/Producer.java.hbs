@@ -1,0 +1,73 @@
+package {{apiPackage}};
+
+import java.util.Map;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.stereotype.Component;
+import org.springframework.util.MimeType;
+
+{{#if modelPackage}}
+import {{modelPackage}}.*;
+{{/if}}
+
+/**
+ * {{asyncapi.description}}
+ */
+@Component
+public class {{apiClassName}} implements I{{apiClassName}} {
+
+    @Autowired
+    private StreamBridge streamBridge;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+{{~#each operations as |operation|}}
+    private String {{operation.operationId}}BindingName = "{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
+    public void set{{operation.operationId}}BindingName(String bindingName) {
+        this.{{operation.operationId}}BindingName = bindingName;
+    }
+{{/each}}
+
+{{~#each operations as |operation|}}
+    {{#each operation.x--messages as |message|}}
+    /**
+     * {{operation.description}}
+     */
+    public boolean {{operation.operationId}}({{message.x--javaType}} payload, Header... headers) {
+        MimeType outputContentType = MimeType.valueOf("{{defaultIfEmpty operation.operation.message.contentType 'application/json'}}");
+        Message message = MessageBuilder.createMessage(payload, asMessageHeaders(headers));
+        //return streamBridge.send(onCustomerEventBindingName, message, outputContentType);
+        jdbcTemplate.update("TODO", asString(message.getPayload()), asString(message.getHeaders()));
+        return true;
+    }
+
+    {{/each}}
+{{/each}}
+
+    protected String asString(Object value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            return objectMapper.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected MessageHeaders asMessageHeaders(Header... headers) {
+        Map<String, Object> map = Header.asMap(headers);
+        return new MessageHeaders(map);
+    }
+}

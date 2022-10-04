@@ -1,19 +1,45 @@
-# This configuration is intended for development purpose, it's **your** responsibility to harden it for production
 version: '3.8'
+
 services:
-  zenwaveexample-mongodb:
+  mongo1:
+    container_name: mongo1
     image: mongo:4.4.10
-    # If you want to expose these ports outside your dev PC,
-    # remove the "127.0.0.1:" prefix
+    volumes:
+      - ./scripts/rs-init.sh:/scripts/rs-init.sh
+      - ./scripts/init.js:/scripts/init.js
+    networks:
+      - mongo-network
     ports:
-      - 127.0.0.1:27017:27017
-    command: mongos --configdb csvr/zenwaveexample-mongodb-config --bind_ip 0.0.0.0
-  zenwaveexample-mongodb-node:
-    build:
-      context: .
-      dockerfile: mongodb/MongoDB.Dockerfile
-    command: mongod --shardsvr --replSet rs1
-  zenwaveexample-mongodb-config:
+      - 27017:27017
+    depends_on:
+      - mongo2
+#      - mongo3
+    links:
+      - mongo2
+#      - mongo3
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
+#    command: "bash -c 'sleep 15; /scripts/rs-init.sh'"
+
+  mongo2:
+    container_name: mongo2
     image: mongo:4.4.10
-    container_name: zenwaveexample-mongodb-config
-    command: mongod --configsvr --dbpath /data/db --replSet csvr
+    networks:
+      - mongo-network
+    ports:
+      - 27018:27017
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
+#  mongo3:
+#    container_name: mongo3
+#    image: mongo:4.4.10
+#    networks:
+#      - mongo-network
+#    ports:
+#      - 27019:27017
+#    restart: always
+#    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
+
+networks:
+  mongo-network:
+    driver: bridge

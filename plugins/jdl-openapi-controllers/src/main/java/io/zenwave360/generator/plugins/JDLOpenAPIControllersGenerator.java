@@ -255,7 +255,7 @@ public class JDLOpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
             return "Boolean";
         }
         if ("array".equals(type)) {
-            return "List<Object>";
+            return "List<String>";
         }
 
         return "String";

@@ -1,12 +1,12 @@
 # This configuration is intended for development purpose, it's **your** responsibility to harden it for production
 version: '3.8'
 services:
-  mongodb:
-    image: mongo:4.4.10
-    ports:
-      - 127.0.0.1:27017:27017
-    # volumes:
-    #   - ~/volumes/zenwave/ZenWaveApiExample/mongodb/:/data/db/
+#  mongodb:
+#    image: mongo:4.4.10
+#    ports:
+#      - 127.0.0.1:27017:27017
+#    # volumes:
+#    #   - ~/volumes/zenwave/ZenWaveApiExample/mongodb/:/data/db/
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.13.3
     # volumes:
@@ -21,10 +21,10 @@ services:
   kafka:
     image: confluentinc/cp-kafka:7.2.1
     hostname: kafka
-    container_name: kafka
     ports:
       - "9092:9092"
       - "9101:9101"
+    container_name: kafka
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'

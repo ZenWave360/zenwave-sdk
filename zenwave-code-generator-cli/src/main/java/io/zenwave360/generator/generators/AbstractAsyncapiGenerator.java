@@ -49,9 +49,9 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
     }
 
     @DocumentedOption(description = "Java API package name")
-    public String apiPackage = "io.example.api";
+    public String apiPackage;
     @DocumentedOption(description = "Java Models package name")
-    public String modelPackage = "io.example.api.model";
+    public String modelPackage;
     @DocumentedOption(description = "Binding names to include in code generation. Generates code for ALL bindings if left empty")
     public List<String> bindingTypes;
     @DocumentedOption(description = "Project role: PROVIDER\\|CLIENT")

@@ -12,18 +12,9 @@ spring:
   data:
     mongodb:
       database: zenwave360-example
+#      uri: mongodb://localhost:27017,localhost:27018,localhost:27019/zenwave360-example?replicaSet=dbrs
   kafka:
     bootstrap-servers: localhost:9092
-#    producer:
-#      client-id: zenwave360-example-producer
-#      key-serializer: org.apache.kafka.common.serialization.LongSerializer
-#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-#      schema.registry.url: http://localhost:8081
-#    consumer:
-#      client-id: zenwave360-example-consumer
-#      key-serializer: org.apache.kafka.common.serialization.LongSerializer
-#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-#      schema.registry.url: http://localhost:8081
   cloud:
     stream:
       function:
@@ -57,12 +48,12 @@ spring:
             producer:
               configuration:
                 key.serializer: org.apache.kafka.common.serialization.LongSerializer
-                schema.registry.url: http://localhost:8081
+#                schema.registry.url: http://localhost:8081
           on-customer-order-event-out-0:
             producer:
               configuration:
                 key.serializer: org.apache.kafka.common.serialization.LongSerializer
-                schema.registry.url: http://localhost:8081
+#                schema.registry.url: http://localhost:8081
           on-customer-event-in-0:
             consumer:
               startOffset: latest

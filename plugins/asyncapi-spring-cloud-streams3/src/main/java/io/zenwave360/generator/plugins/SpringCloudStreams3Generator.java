@@ -22,9 +22,16 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         IMPERATIVE, REACTIVE
     }
 
+    public enum TransactionalOutboxType {
+        none, mongodb, jdbc
+    }
+
     public String sourceProperty = "api";
     @DocumentedOption(description = "Programming style")
     public ProgrammingStyle style = ProgrammingStyle.IMPERATIVE;
+
+    @DocumentedOption(description = "Transactional outbox type for message producers.")
+    public TransactionalOutboxType transactionalOutbox = TransactionalOutboxType.none;
 
     @DocumentedOption(description = "Whether to expose underlying spring Message to consumers or not. Default: false")
     public boolean exposeMessage = false;
@@ -74,8 +81,8 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
     protected List<TemplateInput> producerTemplates = Arrays.asList(
             new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/common/Header.java", "{{apiPackageFolder}}/Header.java"),
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/producer/IProducer.java", "{{apiPackageFolder}}/I{{apiClassName}}.java"),
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/producer/Producer.java", "{{apiPackageFolder}}/{{apiClassName}}.java"));
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/producer/outbox/{{transactionalOutbox}}/IProducer.java", "{{apiPackageFolder}}/I{{apiClassName}}.java"),
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/producer/outbox/{{transactionalOutbox}}/Producer.java", "{{apiPackageFolder}}/{{apiClassName}}.java"));
     protected List<TemplateInput> consumerReactiveTemplates = Arrays.asList(
             new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/reactive/Consumer.java", "{{apiPackageFolder}}/{{consumerName operation.x--operationIdCamelCase}}.java"),
             new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/reactive/IService.java", "{{apiPackageFolder}}/{{serviceName operation.x--operationIdCamelCase}}.java"));

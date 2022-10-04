@@ -7,6 +7,12 @@ https://github.com/ZenWave360/zenwave-code-generator/tree/main/examples/spring-b
 ### Install ZenWave
 
 ```shell
+jbang alias add -name=zw zw-release@zenwave360/zenwave-code-generator
+```
+
+or if you prefer to use the latest **snapshot** versions:
+
+```shell
 jbang alias add --name=zw \
     -m=io.zenwave360.generator.Main \
     --repos=mavencentral,snapshots=https://s01.oss.sonatype.org/content/repositories/snapshots \

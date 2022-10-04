@@ -254,6 +254,9 @@
 				<groupId>io.github.zenwave360.zenwave-code-generator</groupId>
 				<artifactId>zenwave-code-generator-mojo</artifactId>
 				<version>${zenwave.version}</version>
+				<configuration>
+					<addCompileSourceRoot>true</addCompileSourceRoot>
+				</configuration>
 				<executions>
 					<!-- Generate PRODUCER -->
 					<execution>
@@ -268,8 +271,9 @@
 							<configOptions>
 								<role>PROVIDER</role>
 								<style>IMPERATIVE</style>
-								<apiPackage>io.zenwave360.example.adapters.events</apiPackage>
-								<modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
+								<transactionalOutbox>mongodb</transactionalOutbox>
+								<apiPackage>io.zenwave360.example.core.outbound.events</apiPackage>
+								<modelPackage>io.zenwave360.example.core.outbound.events.model</modelPackage>
 							</configOptions>
 						</configuration>
 					</execution>
@@ -284,7 +288,7 @@
 							<inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
 							<addCompileSourceRoot>false</addCompileSourceRoot>
 							<configOptions>
-								<modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
+								<modelPackage>io.zenwave360.example.core.outbound.events.model</modelPackage>
 								<jsonschema2pojo.includeTypeInfo>true</jsonschema2pojo.includeTypeInfo>
 							</configOptions>
 						</configuration>
