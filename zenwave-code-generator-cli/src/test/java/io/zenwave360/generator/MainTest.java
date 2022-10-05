@@ -52,7 +52,6 @@ public class MainTest {
     }
 
     @Test
-    @Disabled
     public void testMain_with_array_options() {
         List<String> processors = List.of(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class)
                 .stream().map(c -> c.getName()).collect(Collectors.toList());
@@ -63,6 +62,6 @@ public class MainTest {
                 "targetFolder=target/zenwave/out",
                 "inner.specFile=target/zenwave/out",
                 "inner.targetFolder=target/zenwave/out",
-                "array.0=one");
+                "array=one,two");
     }
 }

@@ -87,6 +87,9 @@ public class Configuration {
                 nestedTempObject = (Map<String, Object>) nestedTempObject.get(lastPath);
             }
         }
+        if(value instanceof String && ((String) value).contains(",")) {
+            value = Arrays.asList(((String) value).split(","));
+        }
         nestedTempObject.put(lastPath, value);
 
         try {
