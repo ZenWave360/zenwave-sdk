@@ -77,8 +77,8 @@ public class JDLBackendApplicationDefaultGeneratorTest {
     // @Disabled
     public void test_generator_hexagonal_mongodb_imperative_registry() throws Exception {
         Configuration configuration = new JDLBackendApplicationDefaultConfiguration()
-                .withSpecFile("../../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/orders-model.jdl")
-                .withTargetFolder("../../examples/spring-boot-mongo-elasticsearch")
+                .withSpecFile("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl")
+                .withTargetFolder("target/examples/spring-boot-mongo-elasticsearch")
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", JDLBackendApplicationDefaultGenerator.PersistenceType.mongodb)
                 .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative);
@@ -94,8 +94,8 @@ public class JDLBackendApplicationDefaultGeneratorTest {
     // @Disabled
     public void test_generator_hexagonal_mongodb_imperative_registry_only_some_entities() throws Exception {
         Configuration configuration = new JDLBackendApplicationDefaultConfiguration()
-                .withSpecFile("../../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/orders-model.jdl")
-                .withTargetFolder("../../examples/spring-boot-mongo-elasticsearch")
+                .withSpecFile("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl")
+                .withTargetFolder("target/examples/spring-boot-mongo-elasticsearch")
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", JDLBackendApplicationDefaultGenerator.PersistenceType.mongodb)
                 .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative)

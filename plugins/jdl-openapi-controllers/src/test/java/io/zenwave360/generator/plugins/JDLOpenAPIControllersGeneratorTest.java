@@ -54,15 +54,15 @@ public class JDLOpenAPIControllersGeneratorTest {
     // @Disabled
     public void test_generator_jdl_openapi_controllers_registry() throws Exception {
         Configuration configuration = new JDLOpenAPIControllersConfiguration()
-                .withSpecFile("../../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/openapi.yml")
-                .withOption("jdlFile", "../../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/orders-model.jdl")
+                .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/openapi-orders.yml")
+                .withOption("jdlFile", "classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl")
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("openApiApiPackage", "io.zenwave360.example.adapters.web")
                 .withOption("openApiModelPackage", "io.zenwave360.example.adapters.web.model")
                 .withOption("openApiModelNameSuffix", "DTO")
                 // .withOption("operationIds", List.of("addPet", "updatePet"))
                 .withOption("style", JDLOpenAPIControllersGenerator.ProgrammingStyle.imperative)
-                .withTargetFolder("../../examples/spring-boot-mongo-elasticsearch");
+                .withTargetFolder("target/examples/spring-boot-mongo-elasticsearch");
 
         new MainGenerator().generate(configuration);
 
@@ -75,7 +75,7 @@ public class JDLOpenAPIControllersGeneratorTest {
     // @Disabled
     public void test_generator_jdl_openapi_controllers_registry_no_jdl() throws Exception {
         Configuration configuration = new JDLOpenAPIControllersConfiguration()
-                .withSpecFile("../../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/openapi.yml")
+                .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/openapi-petstore.yml")
                 // .withOption("jdlFile", "../../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/orders-model.jdl")
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("controllersPackage", "io.zenwave360.example.nojdl.adapters.web")
@@ -84,7 +84,7 @@ public class JDLOpenAPIControllersGeneratorTest {
                 .withOption("openApiModelNameSuffix", "DTO")
                 // .withOption("operationIds", List.of("addPet", "updatePet"))
                 .withOption("style", JDLOpenAPIControllersGenerator.ProgrammingStyle.imperative)
-                .withTargetFolder("../../examples/spring-boot-mongo-elasticsearch");
+                .withTargetFolder("target/examples/spring-boot-mongo-elasticsearch");
 
         new MainGenerator().generate(configuration);
 

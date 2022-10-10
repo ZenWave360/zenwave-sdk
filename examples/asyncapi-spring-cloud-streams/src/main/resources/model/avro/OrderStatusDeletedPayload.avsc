@@ -1,9 +1,0 @@
-{
-  "type" : "record",
-  "name" : "OrderStatusDeletedPayload",
-  "namespace" : "io.zenwave360.example.adapters.events.avro",
-  "fields" : [ {
-    "name" : "id",
-    "type" : "string"
-  } ]
-}

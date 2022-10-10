@@ -94,7 +94,6 @@
         <module>zenwave-code-generator-cli</module>
         <module>plugins</module>
         <module>zenwave-code-generator-mojo</module>
-        <module>examples</module>
     </modules>
 
     <build>

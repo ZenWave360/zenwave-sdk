@@ -36,7 +36,7 @@ public class JDLProcessorTest {
     @Test
     // @Disabled
     public void testProcessJDL_registry() throws Exception {
-        var model = loadJDL("../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/orders-model.jdl");
+        var model = loadJDL("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl");
         List entitiesWithCriteria = JSONPath.get(model, "$..[?(@.options.searchCriteriaObject)]");
         Assertions.assertFalse(entitiesWithCriteria.isEmpty());
     }

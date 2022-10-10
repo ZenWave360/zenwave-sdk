@@ -1,9 +1,0 @@
-{
-  "type" : "record",
-  "name" : "PaymentDetails",
-  "namespace" : "io.zenwave360.example.adapters.events.avro",
-  "fields" : [ {
-    "name" : "creditCardNumber",
-    "type" : [ "null", "string" ]
-  } ]
-}

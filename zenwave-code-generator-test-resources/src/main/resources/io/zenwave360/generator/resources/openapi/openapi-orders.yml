@@ -10,10 +10,10 @@ tags:
   - name: "CustomerOrder"
 
 paths:
-  /customers:
-    get:
-      summary: Find Customers
-      operationId: findCustomers
+  /customers/search:
+    post:
+      summary: Search Customers
+      operationId: searchCustomers
       tags: [Customer]
       parameters:
         - $ref: '#/components/parameters/page'
@@ -23,7 +23,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Customer"
+              $ref: "#/components/schemas/CustomerCriteria"
+      responses:
+        "200":
+          description: Customers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerPaginated"
+  /customers:
+    get:
+      summary: Find Customers
+      operationId: listCustomers
+      tags: [Customer]
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
       responses:
         "200":
           description: Customers
@@ -85,10 +101,10 @@ paths:
                 $ref: "#/components/schemas/Customer"
   
 
-  /customer-orders:
-    get:
-      summary: Find CustomerOrders
-      operationId: findCustomerOrders
+  /customer-orders/search:
+    post:
+      summary: Search CustomerOrders
+      operationId: searchCustomerOrders
       tags: [CustomerOrder]
       parameters:
         - $ref: '#/components/parameters/page'
@@ -98,7 +114,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CustomerOrder"
+              $ref: "#/components/schemas/CustomerOrderSearchCriteria"
+      responses:
+        "200":
+          description: CustomerOrders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerOrderPaginated"
+  /customer-orders:
+    get:
+      summary: Find CustomerOrders
+      operationId: listCustomerOrders
+      tags: [CustomerOrder]
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
       responses:
         "200":
           description: CustomerOrders
@@ -159,6 +191,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/CustomerOrder"
   
+
 
 
 
@@ -320,6 +353,31 @@ components:
             type: "array"
             items:
               $ref: "#/components/schemas/OrderedItem"
+    CustomerCriteria:
+      type: "object"
+      x-business-entity: "CustomerCriteria"
+      properties:
+        id:
+          type: "string"
+        firstName:
+          type: "string"
+        lastName:
+          type: "string"
+        password:
+          type: "string"
+        email:
+          type: "string"
+        username:
+          type: "string"
+    CustomerCriteriaPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "CustomerCriteria"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/CustomerCriteria"
     OrderStatus:
       type: "string"
       x-business-entity: "OrderStatus"

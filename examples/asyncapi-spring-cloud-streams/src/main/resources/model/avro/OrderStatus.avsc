@@ -1,6 +1,0 @@
-{
-  "type" : "enum",
-  "name" : "OrderStatus",
-  "namespace" : "io.zenwave360.example.adapters.events.avro",
-  "symbols" : [ "DELIVERED", "CONFIRMED", "SHIPPED" ]
-}
