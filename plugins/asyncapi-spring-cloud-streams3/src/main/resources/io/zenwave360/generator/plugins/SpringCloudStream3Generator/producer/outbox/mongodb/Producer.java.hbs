@@ -1,8 +1,11 @@
 package {{apiPackage}};
 
+import java.util.HashMap;
 import java.util.Map;
 
+import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
+import org.bson.BsonDocument;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,23 +38,51 @@ public class {{apiClassName}} implements I{{apiClassName}} {
 
 {{~#each operations as |operation|}}
     public String {{operation.operationId}}BindingName = "{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
-    public void set{{operation.operationId}}BindingName(String bindingName) {
-        this.{{operation.operationId}}BindingName = bindingName;
-    }
+    public String {{operation.operationId}}OutboxCollection = {{operation.operationId}}BindingName;
 {{/each}}
+    public String resumeTokensCollectionName = "ChangeStreamResumeTokens";
+    public int persistResumeTokenAfterMessages = 100;
 
-{{~#each operations as |operation|}}
+    private Map<String, Integer> messageCounters = new HashMap();
+{{#each operations as |operation| }}
     public final MessageListener<ChangeStreamDocument<Document>, Map> {{operation.operationId}}MongoChangeStreamsListener = (outboxMessage) -> {
-        log.info("Received message: {}", outboxMessage);
         try {
-            MimeType outputContentType = MimeType.valueOf("application/json");
-            Message message = MessageBuilder.createMessage(outboxMessage.getBody().get("payload"), new MessageHeaders((Map<String, Object>) outboxMessage.getBody().get("headers")));
-            streamBridge.send({{operation.operationId}}BindingName, message, outputContentType);
+            log.info("Received outbox collection change for '{}'", {{operation.operationId}}OutboxCollection);
+            log.trace("Received outbox collection change message: {}", outboxMessage.getBody());
+            sendOutboxMessage(outboxMessage, {{operation.operationId}}OutboxCollection, {{operation.operationId}}BindingName);
         } catch (Exception e) {
             log.error("Error sending message to stream", e);
         }
     };
 {{/each}}
+
+    private void sendOutboxMessage(org.springframework.data.mongodb.core.messaging.Message<ChangeStreamDocument<Document>, Map> outboxMessage, String collectionName, String eventBindingName) {
+        // send message to the stream
+        MimeType outputContentType = MimeType.valueOf("application/json");
+        Message message = MessageBuilder.createMessage(outboxMessage.getBody().get("payload"), new MessageHeaders((Map<String, Object>) outboxMessage.getBody().get("headers")));
+        streamBridge.send(eventBindingName, message, outputContentType);
+
+        // persist resume token
+        int messageCount = messageCounters.getOrDefault(collectionName, 0) + 1;
+        messageCounters.put(collectionName, messageCount);
+        if(messageCount > persistResumeTokenAfterMessages) {
+            messageCounters.put(collectionName, 0);
+            BsonDocument resumeToken = outboxMessage.getRaw().getResumeToken();
+            long timestamp = (long) outboxMessage.getBody().get("timestamp");
+            mongoTemplate.getCollection(resumeTokensCollectionName).updateOne(new Document("collectionName", collectionName),
+                    new Document("collectionName", collectionName).append("resumeToken", resumeToken).append("timestamp", timestamp),
+                    new UpdateOptions().upsert(true));
+        }
+    }
+
+    private boolean saveMessageToOutbox(Message message, String collectionName) {
+        Map outboxMessage = new java.util.HashMap();
+        outboxMessage.put("timestamp", System.nanoTime());
+        outboxMessage.put("payload", message.getPayload());
+        outboxMessage.put("headers", message.getHeaders());
+        mongoTemplate.insert(outboxMessage, collectionName);
+        return true;
+    }
 
 {{~#each operations as |operation|}}
     {{#each operation.x--messages as |message|}}
@@ -61,9 +92,8 @@ public class {{apiClassName}} implements I{{apiClassName}} {
     public boolean {{operation.operationId}}({{message.x--javaType}} payload, Header... headers) {
         MimeType outputContentType = MimeType.valueOf("{{defaultIfEmpty operation.operation.message.contentType 'application/json'}}");
         Message message = MessageBuilder.createMessage(payload, asMessageHeaders(headers));
-        mongoTemplate.insert(message, {{operation.operationId}}BindingName);
         // return streamBridge.send({{operation.operationId}}BindingName, message, outputContentType);
-        return true;
+        return saveMessageToOutbox(message, {{operation.operationId}}OutboxCollection);
     }
 
     {{/each}}
