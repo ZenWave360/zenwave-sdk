@@ -133,7 +133,7 @@ public class Configuration {
     }
 
     public Configuration replaceInChain(Class current, Class replacement) {
-        chain.replaceAll(chainedProcessor -> chainedProcessor.equals(current) ? replacement : current);
+        chain.replaceAll(chainedProcessor -> chainedProcessor.equals(current) ? replacement : chainedProcessor);
         return this;
     }
 

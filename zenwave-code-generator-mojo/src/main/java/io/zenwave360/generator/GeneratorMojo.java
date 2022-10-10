@@ -122,14 +122,15 @@ public class GeneratorMojo extends AbstractMojo {
     private String getCompileSourceRoot() {
         final Object sourceFolderObject = configOptions == null ? null : configOptions.get("sourceFolder");
         final String sourceFolder = sourceFolderObject == null ? "src/main/java" : sourceFolderObject.toString();
-        // return new File(targetFolder, sourceFolder).getAbsolutePath();
-        return targetFolder.getAbsolutePath();
+        return new File(targetFolder, sourceFolder).getAbsolutePath();
+//        return targetFolder.getAbsolutePath();
     }
 
     private void addCompileSourceRootIfConfigured() {
         if (addCompileSourceRoot) {
-            System.out.println("Adding source root " + getCompileSourceRoot());
-            project.addCompileSourceRoot(getCompileSourceRoot());
+            String compileSourceRoot = getCompileSourceRoot();
+            System.out.println("Adding source root " + compileSourceRoot);
+            project.addCompileSourceRoot(compileSourceRoot);
         }
     }
 

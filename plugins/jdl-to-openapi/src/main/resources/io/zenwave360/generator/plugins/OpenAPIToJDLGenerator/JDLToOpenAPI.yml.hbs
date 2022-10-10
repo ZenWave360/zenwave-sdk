@@ -13,22 +13,38 @@ tags:
 paths:
 {{~#each jdlModel.entities as |entity|}}
   {{~#unless (skipOperations entity)}}
-  /{{entity.kebabCasePlural}}:
-    get:
-      summary: Find {{entity.classNamePlural}}
-      operationId: find{{entity.classNamePlural}}
+{{~#if entity.options.searchCriteria}}
+  /{{entity.kebabCasePlural}}/search:
+    post:
+      summary: Search {{entity.classNamePlural}}
+      operationId: search{{entity.classNamePlural}}
       tags: [{{asTagName entity.options.service}}]
       parameters:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/sort'
-{{~#if entity.options.searchCriteria}}
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/{{entity.className}}{{criteriaDTOSuffix}}"
+              $ref: "#/components/schemas/{{entity.options.searchCriteria}}"
+      responses:
+        "200":
+          description: {{entity.classNamePlural}}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/{{entity.className}}Paginated"
 {{~/if}}
+  /{{entity.kebabCasePlural}}:
+    get:
+      summary: Find {{entity.classNamePlural}}
+      operationId: list{{entity.classNamePlural}}
+      tags: [{{asTagName entity.options.service}}]
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
       responses:
         "200":
           description: {{entity.classNamePlural}}

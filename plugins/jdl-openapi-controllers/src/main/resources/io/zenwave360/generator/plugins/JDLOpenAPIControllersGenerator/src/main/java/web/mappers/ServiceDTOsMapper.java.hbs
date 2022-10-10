@@ -25,7 +25,9 @@ public interface {{service.name}}DTOsMapper {
     {{dtoClassName}} as{{dtoName}}({{entity.className}} {{entity.instanceName}});
     {{entityClassName}} as{{entityClassName}}({{dtoClassName}} dto);
     {{~#if inputDTOSuffix}}
+        {{~#unless entity.options.isCriteria}}
         {{entityInputClassName}} as{{entityInputClassName}}({{dtoClassName}} dto);
+        {{/unless}}
     {{/if}}
     {{~#if entity.options.searchCriteria}}
         {{entityCriteriaClassName}} as{{entityCriteriaClassName}}({{dtoClassName}} dto);

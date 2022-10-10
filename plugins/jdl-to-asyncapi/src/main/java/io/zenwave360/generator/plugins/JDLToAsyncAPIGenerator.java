@@ -138,14 +138,14 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         List<TemplateOutput> outputList = new ArrayList<>();
         String targetFolder = getTargetAvroFolder();
         if(includeCommands) {
-            Map enumEntity = Map.of("type", "enum", "name", "RequestTypes", "values", Map.of("create", Map.of("name", "create"), "update", Map.of("name", "update"), "delete", Map.of("name", "delete")));
+            Map enumEntity = Map.of("type", "enum", "name", "RequestType", "values", Map.of("create", Map.of("name", "create"), "update", Map.of("name", "update"), "delete", Map.of("name", "delete")));
             String avroString = writeAsString(jsonMapper, converter.convertEnumToAvro(enumEntity));
-            outputList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, "RequestTypes"), avroString, OutputFormatType.JSON.toString()));
+            outputList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, "RequestType"), avroString, OutputFormatType.JSON.toString()));
         }
         if(includeEvents) {
-            Map enumEntity = Map.of("type", "enum", "name", "RequestTypes", "values", Map.of("created", Map.of("name", "created"), "updated", Map.of("name", "updated"), "deleted", Map.of("name", "deleted")));
+            Map enumEntity = Map.of("type", "enum", "name", "EventType", "values", Map.of("created", Map.of("name", "created"), "updated", Map.of("name", "updated"), "deleted", Map.of("name", "deleted")));
             String avroString = writeAsString(jsonMapper, converter.convertEnumToAvro(enumEntity));
-            outputList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, "EventTypes"), avroString, OutputFormatType.JSON.toString()));
+            outputList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, "EventType"), avroString, OutputFormatType.JSON.toString()));
         }
         return outputList;
     }
@@ -171,7 +171,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
             fields.put("payload", Map.of("isEntity", true, "isEnum", false, "name", "payload", "type", name));
 
             if(includeCommands) {
-                fields.put("eventType", Map.of("isEntity", false, "isEnum", true, "name", "eventType", "type", "RequestTypes"));
+                fields.put("eventType", Map.of("isEntity", false, "isEnum", true, "name", "requestType", "type", "RequestType"));
 
                 Map<String, Object> requestPayload = new HashMap<>();
                 requestPayload.put("name", name + "RequestPayload");
@@ -181,7 +181,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
             }
 
             if(includeEvents) {
-                fields.put("eventType", Map.of("isEntity", false, "isEnum", true, "name", "eventType", "type", "EventTypes"));
+                fields.put("eventType", Map.of("isEntity", false, "isEnum", true, "name", "eventType", "type", "EventType"));
 
                 Map<String, Object> eventPayload = new HashMap<>();
                 eventPayload.put("name", name + "EventPayload");

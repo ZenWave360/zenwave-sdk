@@ -1,8 +1,12 @@
 package io.zenwave360.generator.formatters;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.google.googlejavaformat.java.JavaFormatterOptions;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +18,7 @@ import io.zenwave360.generator.templating.TemplateOutput;
 
 public class JavaFormatter implements Formatter {
 
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private static Logger log = LoggerFactory.getLogger(JavaFormatter.class);
 
     @DocumentedOption(description = "Skip java sources output formatting")
     public boolean skipFormatting = false;

@@ -62,7 +62,11 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
         {{~#if requestEntity}}
             {{~#assign "requestEntityClassName"}}{{requestEntity.className}}{{inputDTOSuffix}}{{/assign}}
             {{~#assign "requestEntityInstance"}}{{requestEntity.instanceName}}{{inputDTOSuffix}}{{/assign}}
-            {{~#assign "requestEntityCriteriaClassName"}}{{requestEntity.className}}{{criteriaDTOSuffix}}{{/assign}}
+            {{~#assign "requestEntityCriteriaClassName"}}{{requestEntity.options.searchCriteria}}{{/assign}}
+            {{~#if requestEntity.options.isCriteria}}
+                {{~#assign "requestEntityClassName"}}{{requestEntity.className}}{{/assign}}
+                {{~#assign "requestEntityInstance"}}{{requestEntity.instanceName}}{{/assign}}
+            {{~/if}}
         {{/if}}
     {{/if}}
     {{~#if operation.x--response.x--response-dto}}
@@ -106,7 +110,7 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
             }
         {{~/if~}}
     {{else if responseEntityPaginated~}}
-        {{{responseEntityClassName}}} {{responseEntityInstance}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}({{requestEntityInstance}});
+        {{{responseEntityClassName}}} {{responseEntityInstance}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}({{requestEntityInstance}}, pageOf(page, limit, sort));
         {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{responseEntityInstance}});
         return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
     {{else}}
@@ -114,4 +118,8 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
     {{/if~}}
     }
 {{/each}}
+
+  protected Pageable pageOf(Optional<Integer> page, Optional<Integer> limit, Optional<List<String>> sort) {
+    return PageRequest.of(page.orElse(0), limit.orElse(10));
+  }
 }

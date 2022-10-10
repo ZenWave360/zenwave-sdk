@@ -58,8 +58,13 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     @DocumentedOption(description = "JsonSchema2Pojo settings")
     public Map<String, String> jsonschema2pojo = new HashMap<>();
 
-    @DocumentedOption(description = "Target folder to generate code to. If left empty, it will print to stdout.")
+    @DocumentedOption(description = "Target folder to generate code to.")
     public File targetFolder;
+
+    @DocumentedOption(description = "Source folder inside folder to generate code to.")
+    public String sourceFolder = "src/main/java";
+
+    private File targetSourceFolder;
 
     public String originalRefProperty = "x--original-\\$ref";
 
@@ -87,8 +92,10 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
         allMessages.addAll(messages);
         allMessages.addAll(oneOfMessages);
 
+        targetSourceFolder = new File(targetFolder, sourceFolder);
+
         try {
-            targetFolder.mkdirs();
+            targetSourceFolder.mkdirs();
             generate(apiModel, messages);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -116,7 +123,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             AsyncApiProcessor.SchemaFormatType schemaFormatType = AsyncApiProcessor.SchemaFormatType.getFormat(schemaFormat);
 
             final JsonSchema2PojoConfiguration config = JsonSchema2PojoConfiguration.of(jsonschema2pojo);
-            config.setTargetDirectory(targetFolder);
+            config.setTargetDirectory(targetSourceFolder);
             config.setTargetPackage(modelPackage);
 
             String messageClassName = NamingUtils.asJavaTypeName(name); // TODO
@@ -148,8 +155,8 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
         var json = this.convertToJson(payload, packageName);
 
         SchemaMapper mapper = new SchemaMapper(new RuleFactory(config, new Jackson2Annotator(config), new SchemaStore()), new SchemaGenerator());
-        var sourcesWriter = new FileCodeWriterWithEncoding(targetFolder, config.getOutputEncoding());
-        var resourcesWriter = new FileCodeWriterWithEncoding(targetFolder, config.getOutputEncoding());
+        var sourcesWriter = new FileCodeWriterWithEncoding(targetSourceFolder, config.getOutputEncoding());
+        var resourcesWriter = new FileCodeWriterWithEncoding(targetSourceFolder, config.getOutputEncoding());
         var codeModel = new JCodeModel();
         mapper.generate(codeModel, className, packageName, json);
         codeModel.build(sourcesWriter, resourcesWriter);

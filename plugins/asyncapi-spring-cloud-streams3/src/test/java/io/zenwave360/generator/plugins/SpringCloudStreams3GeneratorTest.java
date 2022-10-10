@@ -45,8 +45,8 @@ public class SpringCloudStreams3GeneratorTest {
         new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_events/IDefaultServiceEventsProducer.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_events/DefaultServiceEventsProducer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/IDefaultServiceEventsProducer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/DefaultServiceEventsProducer.java"));
     }
 
     @Test
@@ -61,8 +61,8 @@ public class SpringCloudStreams3GeneratorTest {
         new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_imperative/DoCreateProductConsumer.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_imperative/IDoCreateProductConsumerService.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_commands_imperative/DoCreateProductConsumer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_commands_imperative/IDoCreateProductConsumerService.java"));
     }
 
     @Test
@@ -78,8 +78,8 @@ public class SpringCloudStreams3GeneratorTest {
         new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_imperative_expose_message/DoCreateProductConsumer.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_imperative_expose_message/IDoCreateProductConsumerService.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_commands_imperative_expose_message/DoCreateProductConsumer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_commands_imperative_expose_message/IDoCreateProductConsumerService.java"));
     }
 
     @Test
@@ -95,8 +95,8 @@ public class SpringCloudStreams3GeneratorTest {
         new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/IDoCreateProductConsumerService.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_commands_reactive/IDoCreateProductConsumerService.java"));
     }
 
     @Test
@@ -113,8 +113,8 @@ public class SpringCloudStreams3GeneratorTest {
         new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive_expose_message/DoCreateProductConsumer.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive_expose_message/IDoCreateProductConsumerService.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_commands_reactive_expose_message/DoCreateProductConsumer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_commands_reactive_expose_message/IDoCreateProductConsumerService.java"));
     }
 
     @Test
@@ -129,8 +129,8 @@ public class SpringCloudStreams3GeneratorTest {
         new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/client_for_commands/IDefaultServiceCommandsProducer.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/client_for_commands/DefaultServiceCommandsProducer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/client_for_commands/IDefaultServiceCommandsProducer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/client_for_commands/DefaultServiceCommandsProducer.java"));
     }
 
     @Test
@@ -146,8 +146,8 @@ public class SpringCloudStreams3GeneratorTest {
         new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/client_for_events_imperative/OnProductCreatedConsumer.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/client_for_events_imperative/IOnProductCreated2ConsumerService.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/client_for_events_imperative/OnProductCreatedConsumer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/client_for_events_imperative/IOnProductCreated2ConsumerService.java"));
     }
 
     @Test
@@ -164,8 +164,8 @@ public class SpringCloudStreams3GeneratorTest {
         new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/client_for_events_imperative_expose_message/OnProductCreatedConsumer.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/client_for_events_imperative_expose_message/IOnProductCreatedConsumerService.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/client_for_events_imperative_expose_message/OnProductCreatedConsumer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/client_for_events_imperative_expose_message/IOnProductCreatedConsumerService.java"));
     }
 
     @Test
@@ -181,8 +181,8 @@ public class SpringCloudStreams3GeneratorTest {
         new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/client_for_events_reactive/IDefaultServiceCommandsProducer.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/client_for_events_reactive/DefaultServiceCommandsProducer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/client_for_events_reactive/IDefaultServiceCommandsProducer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/client_for_events_reactive/DefaultServiceCommandsProducer.java"));
     }
 
     @Test
@@ -199,7 +199,7 @@ public class SpringCloudStreams3GeneratorTest {
         new MainGenerator().generate(configuration);
 
         List<String> logs = logCaptor.getLogs();
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/client_for_events_reactive_expose_message/IDefaultServiceCommandsProducer.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/client_for_events_reactive_expose_message/DefaultServiceCommandsProducer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/client_for_events_reactive_expose_message/IDefaultServiceCommandsProducer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/client_for_events_reactive_expose_message/DefaultServiceCommandsProducer.java"));
     }
 }

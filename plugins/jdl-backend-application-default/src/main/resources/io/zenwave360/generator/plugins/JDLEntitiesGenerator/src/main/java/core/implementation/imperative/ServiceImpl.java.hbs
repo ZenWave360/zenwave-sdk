@@ -68,10 +68,19 @@ public {{service.name}}Impl({{#joinWithTemplate service.entities ", "}}{{classNa
     }
 
     @Override
-    public Page<{{entity.className}}> find{{entity.classNamePlural}}({{criteriaClassName entity}} criteria) {
-        log.debug("Request to find {{entity.classNamePlural}}: {}", criteria);
+    public Page<{{entity.className}}> list{{entity.classNamePlural}}(Pageable pageable) {
+        log.debug("Request list of {{entity.classNamePlural}}: {}", pageable);
+        return {{entity.instanceName}}Repository.findAll(pageable);
+    }
+
+    {{~#if entity.options.searchCriteria}}
+    @Override
+    public Page<{{entity.className}}> search{{entity.classNamePlural}}({{criteriaClassName entity}} criteria, Pageable pageable) {
+        log.debug("Request to search {{entity.classNamePlural}}: {} - {}", criteria, pageable);
+        // TODO implement this search by criteria
         return {{entity.instanceName}}Repository.findAll(criteria);
     }
+    {{~/if}}
 
     @Override
     public Optional<{{entity.className}}> get{{entity.className}}(String id) {

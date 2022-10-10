@@ -80,15 +80,15 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     }
 
     protected List<TemplateInput> producerTemplates = Arrays.asList(
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/common/Header.java", "{{apiPackageFolder}}/Header.java"),
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/producer/outbox/{{transactionalOutbox}}/IProducer.java", "{{apiPackageFolder}}/I{{apiClassName}}.java"),
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/producer/outbox/{{transactionalOutbox}}/Producer.java", "{{apiPackageFolder}}/{{apiClassName}}.java"));
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/common/Header.java", "src/main/java/{{apiPackageFolder}}/Header.java"),
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/producer/outbox/{{transactionalOutbox}}/IProducer.java", "src/main/java/{{apiPackageFolder}}/I{{apiClassName}}.java"),
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/producer/outbox/{{transactionalOutbox}}/Producer.java", "src/main/java/{{apiPackageFolder}}/{{apiClassName}}.java"));
     protected List<TemplateInput> consumerReactiveTemplates = Arrays.asList(
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/reactive/Consumer.java", "{{apiPackageFolder}}/{{consumerName operation.x--operationIdCamelCase}}.java"),
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/reactive/IService.java", "{{apiPackageFolder}}/{{serviceName operation.x--operationIdCamelCase}}.java"));
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/reactive/Consumer.java", "src/main/java/{{apiPackageFolder}}/{{consumerName operation.x--operationIdCamelCase}}.java"),
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/reactive/IService.java", "src/main/java/{{apiPackageFolder}}/{{serviceName operation.x--operationIdCamelCase}}.java"));
     protected List<TemplateInput> consumerImperativeTemplates = Arrays.asList(
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/imperative/Consumer.java", "{{apiPackageFolder}}/{{consumerName operation.x--operationIdCamelCase}}.java"),
-            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/imperative/IService.java", "{{apiPackageFolder}}/{{serviceName operation.x--operationIdCamelCase}}.java"));
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/imperative/Consumer.java", "src/main/java/{{apiPackageFolder}}/{{consumerName operation.x--operationIdCamelCase}}.java"),
+            new TemplateInput("io/zenwave360/generator/plugins/SpringCloudStream3Generator/consumer/imperative/IService.java", "src/main/java/{{apiPackageFolder}}/{{serviceName operation.x--operationIdCamelCase}}.java"));
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;

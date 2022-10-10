@@ -45,6 +45,9 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. Examples: '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
     public List<String> paginatedDtoItemsJsonPath = List.of("$.items", "$.properties.content.items");
 
+    @DocumentedOption(description = "Suffix for search criteria DTOs (default: Criteria)")
+    public String criteriaDTOSuffix = "Criteria";
+
     public JDLToOpenAPIGenerator withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;
         return this;
