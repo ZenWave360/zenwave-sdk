@@ -1,9 +1,11 @@
 package io.zenwave360.generator.plugins;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.maven.shared.invoker.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -104,5 +106,15 @@ public class JDLBackendApplicationDefaultGeneratorTest {
         List<String> logs = logCaptor.getLogs();
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
+    }
+
+    public void compile() throws MavenInvocationException {
+        InvocationRequest request = new DefaultInvocationRequest();
+        request.setPomFile(new File("/path/to/pom.xml"));
+        request.setBaseDirectory(new File("/path/to/base/dir"));
+        request.setGoals(Collections.singletonList("test-compile"));
+
+        Invoker invoker = new DefaultInvoker();
+        invoker.execute(request);
     }
 }
