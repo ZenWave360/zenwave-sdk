@@ -18,8 +18,12 @@ spring:
   cloud:
     stream:
       function:
-        definition: on-customer-event;on-customer-order-event
+        definition: do-customer-request;on-customer-event;on-customer-order-event
       bindings:
+        do-customer-request-in-0:
+          destination: customer.requests
+          group: customer
+          contentType: application/json
         on-customer-event-out-0:
           destination: customer.events
           content-type: application/json

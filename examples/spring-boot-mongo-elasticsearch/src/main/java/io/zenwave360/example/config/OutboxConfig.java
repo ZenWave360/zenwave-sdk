@@ -13,18 +13,28 @@ import java.util.Map;
 @Configuration
 public class OutboxConfig {
 
-    @Bean(destroyMethod = "stop")
-    public MessageListenerContainer configOutboxChangeStreams(MongoTemplate template, CustomerEventsProducer customerEventsProducer, CustomerOrderEventsProducer customerOrderEventsProducer) {
-        MessageListenerContainer container = new DefaultMessageListenerContainer(template);
-        ChangeStreamRequest.ChangeStreamRequestOptions options = new ChangeStreamRequest.ChangeStreamRequestOptions(
-                null, customerEventsProducer.onCustomerEventBindingName, ChangeStreamOptions.empty());
-
-        // Register all listeners for the outbox collections here
-        container.register(new ChangeStreamRequest<>(customerEventsProducer.onCustomerEventMongoChangeStreamsListener, options), Map.class);
-        container.register(new ChangeStreamRequest<>(customerOrderEventsProducer.onCustomerOrderEventMongoChangeStreamsListener, options), Map.class);
-
-
-        container.start();
-        return container;
-    }
+//    @Bean(destroyMethod = "stop")
+//    public MessageListenerContainer configCustomerEventOutboxCollectionChangeStreams(MongoTemplate template, CustomerEventsProducer customerEventsProducer) {
+//        MessageListenerContainer container = new DefaultMessageListenerContainer(template);
+//        ChangeStreamRequest.ChangeStreamRequestOptions options = new ChangeStreamRequest.ChangeStreamRequestOptions(
+//                null, customerEventsProducer.onCustomerEventOutboxCollection, ChangeStreamOptions.empty());
+//
+//        container.register(new ChangeStreamRequest<>(customerEventsProducer.onCustomerEventMongoChangeStreamsListener, options), Map.class);
+//
+//        container.start();
+//        return container;
+//    }
+//
+//    @Bean(destroyMethod = "stop")
+//    public MessageListenerContainer configCustomerOrderEventOutboxCollectionChangeStreams(MongoTemplate template, CustomerOrderEventsProducer customerOrderEventsProducer) {
+//        MessageListenerContainer container = new DefaultMessageListenerContainer(template);
+//        ChangeStreamRequest.ChangeStreamRequestOptions options = new ChangeStreamRequest.ChangeStreamRequestOptions(
+//                null, customerOrderEventsProducer.onCustomerOrderEventOutboxCollection, ChangeStreamOptions.empty());
+//
+//        // Register all listeners for the outbox collections here
+//        container.register(new ChangeStreamRequest<>(customerOrderEventsProducer.onCustomerOrderEventMongoChangeStreamsListener, options), Map.class);
+//
+//        container.start();
+//        return container;
+//    }
 }
