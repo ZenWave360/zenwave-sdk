@@ -42,6 +42,12 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "Skip generating operations for entities annotated with these")
     public List<String> skipForAnnotations = List.of("vo", "embedded", "skip");
 
+    @DocumentedOption(description = "Include channels and messages to publish domain events")
+    public boolean includeEvents = true;
+
+    @DocumentedOption(description = "Include channels and messages to listen for async command requests")
+    public boolean includeCommands = false;
+
     @DocumentedOption(description = "Target file")
     public String targetFile = "asyncapi.yml";
     @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
@@ -104,6 +110,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
                 schemas.put(entityName, asyncAPISchema);
             }
             if (schemaFormat == SchemaFormat.avro) {
+                outputList.addAll(createAvroRequestAndEventTypeEnums(toAvroConverter));
                 outputList.addAll(convertToAvro(toAvroConverter, entity));
             }
         }
@@ -127,12 +134,32 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         }
     }
 
+    protected List<TemplateOutput> createAvroRequestAndEventTypeEnums(JDLEntitiesToAvroConverter converter) {
+        List<TemplateOutput> outputList = new ArrayList<>();
+        String targetFolder = getTargetAvroFolder();
+        if(includeCommands) {
+            Map enumEntity = Map.of("type", "enum", "name", "RequestTypes", "values", Map.of("create", Map.of("name", "create"), "update", Map.of("name", "update"), "delete", Map.of("name", "delete")));
+            String avroString = writeAsString(jsonMapper, converter.convertEnumToAvro(enumEntity));
+            outputList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, "RequestTypes"), avroString, OutputFormatType.JSON.toString()));
+        }
+        if(includeEvents) {
+            Map enumEntity = Map.of("type", "enum", "name", "RequestTypes", "values", Map.of("created", Map.of("name", "created"), "updated", Map.of("name", "updated"), "deleted", Map.of("name", "deleted")));
+            String avroString = writeAsString(jsonMapper, converter.convertEnumToAvro(enumEntity));
+            outputList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, "EventTypes"), avroString, OutputFormatType.JSON.toString()));
+        }
+        return outputList;
+    }
+
+    protected String getTargetAvroFolder() {
+        String targetFolder = new File(targetFile).getParent();
+        return targetFolder == null ? "avro" : targetFolder + "/avro";
+    }
+
     protected List<TemplateOutput> convertToAvro(JDLEntitiesToAvroConverter converter, Map<String, Object> entityOrEnum) {
         String name = (String) entityOrEnum.get("name");
         Map avro = converter.convertToAvro(entityOrEnum);
         String avroJson = writeAsString(jsonMapper, avro);
-        String targetFolder = new File(targetFile).getParent();
-        targetFolder = targetFolder == null ? "avro" : targetFolder + "/avro";
+        String targetFolder = getTargetAvroFolder();
         List<TemplateOutput> avroList = new ArrayList<>();
 
         avroList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name), avroJson, OutputFormatType.JSON.toString()));
@@ -141,28 +168,27 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
             // creating 'fake' jdl entities for message payloads for created/updated/deleted as { id: <id>, payload: <entity> }
 
             Map<String, Object> fields = new HashMap<>();
-            // id will be created automatically
-            // fields.put("id", Map.of("isEntity", false, "isEnum", false, "name", "id", "type", converter.idType));
-
-            Map<String, Object> deleteMessagePayload = new HashMap<>();
-            deleteMessagePayload.put("name", name + "DeletedPayload");
-            deleteMessagePayload.put("fields", fields);
-            avroJson = writeAsString(jsonMapper, converter.convertToAvro(deleteMessagePayload));
-            avroList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name + "DeletedPayload"), avroJson, OutputFormatType.JSON.toString()));
-
             fields.put("payload", Map.of("isEntity", true, "isEnum", false, "name", "payload", "type", name));
 
-            Map<String, Object> createdMessagePayload = new HashMap<>();
-            createdMessagePayload.put("name", name + "CreatedPayload");
-            createdMessagePayload.put("fields", fields);
-            avroJson = writeAsString(jsonMapper, converter.convertToAvro(createdMessagePayload));
-            avroList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name + "CreatedPayload"), avroJson, OutputFormatType.JSON.toString()));
+            if(includeCommands) {
+                fields.put("eventType", Map.of("isEntity", false, "isEnum", true, "name", "eventType", "type", "RequestTypes"));
 
-            Map<String, Object> updatedMessagePayload = new HashMap<>();
-            updatedMessagePayload.put("name", name + "UpdatedPayload");
-            updatedMessagePayload.put("fields", fields);
-            avroJson = writeAsString(jsonMapper, converter.convertToAvro(updatedMessagePayload));
-            avroList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name + "UpdatedPayload"), avroJson, OutputFormatType.JSON.toString()));
+                Map<String, Object> requestPayload = new HashMap<>();
+                requestPayload.put("name", name + "RequestPayload");
+                requestPayload.put("fields", fields);
+                avroJson = writeAsString(jsonMapper, converter.convertToAvro(requestPayload));
+                avroList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name + "RequestPayload"), avroJson, OutputFormatType.JSON.toString()));
+            }
+
+            if(includeEvents) {
+                fields.put("eventType", Map.of("isEntity", false, "isEnum", true, "name", "eventType", "type", "EventTypes"));
+
+                Map<String, Object> eventPayload = new HashMap<>();
+                eventPayload.put("name", name + "EventPayload");
+                eventPayload.put("fields", fields);
+                avroJson = writeAsString(jsonMapper, converter.convertToAvro(eventPayload));
+                avroList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name + "EventPayload"), avroJson, OutputFormatType.JSON.toString()));
+            }
         }
 
         return avroList;
@@ -206,11 +232,11 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
 
         handlebarsEngine.getHandlebars().registerHelper("payloadRef", (context, options) -> {
             Map entity = (Map) context;
-            String eventTypeName = options.param(0);
+            String messageType = options.param(0);
             if (schemaFormat == SchemaFormat.avro) {
-                return String.format("avro/%s%sPayload.avsc", entity.get("className"), eventTypeName);
+                return String.format("avro/%s%sPayload.avsc", entity.get("className"), messageType);
             }
-            return String.format("#/components/schemas/%s%sPayload", entity.get("className"), eventTypeName);
+            return String.format("#/components/schemas/%s%sPayload", entity.get("className"), messageType);
         });
     }
 }

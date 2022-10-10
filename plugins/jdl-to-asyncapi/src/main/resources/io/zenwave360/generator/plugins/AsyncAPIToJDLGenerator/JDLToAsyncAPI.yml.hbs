@@ -14,17 +14,26 @@ tags:
 channels:
 {{~#each jdlModel.entities as |entity|}}
   {{~#unless (skipOperations entity)}}
-  {{entity.kebabCasePlural}}:
+  {{~#if includeCommands}}
+  {{entity.kebabCase}}.requests:
+    subscribe:
+      summary: {{entity.className}} Async Requests
+      operationId: do{{entity.className}}Request
+      tags:
+        - name: {{asTagName entity.options.service}}
+      message:
+        $ref: "#/components/messages/{{entity.className}}RequestMessage"
+   {{~/if}}
+  {{~#if includeEvents}}
+  {{entity.kebabCase}}.events:
     publish:
-      summary: {{entity.className}} Channel Events
+      summary: {{entity.className}} Domain Events
       operationId: on{{entity.className}}Event
       tags:
         - name: {{asTagName entity.options.service}}
       message:
-        oneOf:
-          - $ref: "#/components/messages/{{entity.className}}CreatedMessage"
-          - $ref: "#/components/messages/{{entity.className}}UpdatedMessage"
-          - $ref: "#/components/messages/{{entity.className}}DeletedMessage"
+        $ref: "#/components/messages/{{entity.className}}EventMessage"
+   {{~/if}}
   {{/unless}}
 {{~/each}}
 
@@ -32,27 +41,24 @@ components:
   messages:
 {{~#each jdlModel.entities as |entity|}}
   {{~#unless (skipOperations entity)}}
-    {{entity.className}}CreatedMessage:
-      name: {{entity.className}}Created
-      title: Message for {{entity.className}} Created Event
-      summary: Message for {{entity.className}} Created Event
+    {{~#if includeCommands}}
+    {{entity.className}}RequestMessage:
+      name: {{entity.className}}RequestMessage
+      title: Async Command/Request for a {{entity.className}}
+      summary: Async Command/Request for a {{entity.className}}
       schemaFormat: {{{schemaFormatString}}}
       payload:
-        $ref: "{{payloadRef entity "Created"}}"
-    {{entity.className}}UpdatedMessage:
-      name: {{entity.className}}Updated
-      title: Message for {{entity.className}} Updated Event
-      summary: Message for {{entity.className}} Updated Event
+        $ref: "{{payloadRef entity "Request" }}"
+    {{~/if}}
+    {{~#if includeEvents}}
+    {{entity.className}}EventMessage:
+      name: {{entity.className}}EventMessage
+      title: Message for a {{entity.className}} Event
+      summary: Message for a {{entity.className}} Event
       schemaFormat: {{{schemaFormatString}}}
       payload:
-        $ref: "{{payloadRef entity "Updated"}}"
-    {{entity.className}}DeletedMessage:
-      name: {{entity.className}}Deleted
-      title: Message for {{entity.className}} Deleted Event
-      summary: Message for {{entity.className}} Deleted Event
-      schemaFormat: {{{schemaFormatString}}}
-      payload:
-        $ref: "{{payloadRef entity "Deleted"}}"
+        $ref: "{{payloadRef entity "Event"}}"
+    {{~/if}}
   {{/unless}}
 {{~/each}}
 
@@ -61,25 +67,36 @@ components:
 {{~#if schemasAsString}}
 {{~#each jdlModel.entities as |entity|}}
   {{~#unless (skipOperations entity)}}
-    {{entity.className}}CreatedPayload:
+    {{~#if includeCommands}}
+    {{entity.className}}RequestPayload:
       type: object
       properties:
         {{entity.instanceName}}Id:
           type: string
+        eventType:
+          type: string
+          enum:
+          - "create"
+          - "update"
+          - "delete"
         {{entity.instanceName}}:
           $ref: "#/components/schemas/{{entity.className}}"
-    {{entity.className}}UpdatedPayload:
+    {{~/if}}
+    {{~#if includeEvents}}
+    {{entity.className}}EventPayload:
       type: object
       properties:
         {{entity.instanceName}}Id:
           type: string
+        eventType:
+          type: string
+          enum:
+          - "created"
+          - "updated"
+          - "deleted"
         {{entity.instanceName}}:
           $ref: "#/components/schemas/{{entity.className}}"
-    {{entity.className}}DeletedPayload:
-      type: object
-      properties:
-        {{entity.instanceName}}Id:
-          type: string
+    {{~/if}}
   {{/unless}}
 {{~/each}}
 {{~/if}}
