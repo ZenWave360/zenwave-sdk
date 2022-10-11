@@ -141,6 +141,7 @@ Whether you are:
       - [ ] OpenAPI to Karate E2E Tests
       - [ ] OpenAPI to Karate/ApiMock Stateful Mocks
     - [ ] OpenAPI to REST-assured
+    - [ ] OpenAPI to Pact
   - [x] Reverser Engineering
     - [x] OpenAPI 2 JDL
     - [x] Java 2 JDL

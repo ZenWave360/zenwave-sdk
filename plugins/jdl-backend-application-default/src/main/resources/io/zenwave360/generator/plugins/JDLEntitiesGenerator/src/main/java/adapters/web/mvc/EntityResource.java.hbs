@@ -79,9 +79,9 @@ public class {{entity.className}}Resource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of {{entity.instanceName}}s in body.
      */
     @GetMapping("/{{entity.kebabCasePlural}}")
-    public Page<{{entity.className}}> find{{entity.classNamePlural}}({{criteriaClassName entity}} criteria) {
+    public Page<{{entity.className}}> list{{entity.classNamePlural}}(Pageable pageable) {
         log.debug("REST request to get all {{entity.classNamePlural}}s");
-        return {{serviceInstance}}.find{{entity.classNamePlural}}(criteria);
+        return {{serviceInstance}}.list{{entity.classNamePlural}}(pageable);
     }
 
     /**

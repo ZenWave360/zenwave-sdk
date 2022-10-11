@@ -6,6 +6,7 @@ import java.util.Map;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import org.bson.BsonDocument;
+import org.bson.BsonString;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.messaging.MessageListener;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
@@ -41,10 +45,16 @@ public class {{apiClassName}} implements I{{apiClassName}} {
     public String {{operation.operationId}}OutboxCollection = {{operation.operationId}}BindingName;
 {{/each}}
     public String resumeTokensCollectionName = "ChangeStreamResumeTokens";
-    public int persistResumeTokenAfterMessages = 100;
+    public int skipMessagesBeforePersistingResumeToken = 100;
+
 
     private Map<String, Integer> messageCounters = new HashMap();
 {{#each operations as |operation| }}
+    public BsonDocument get{{asJavaTypeName operation.operationId}}ResumeToken() {
+        var tokens = mongoTemplate.getCollection(resumeTokensCollectionName).find(new Document("collectionName", {{operation.operationId}}OutboxCollection)).first();
+        return tokens != null ? new BsonDocument("_data", new BsonString((String) tokens.get("resumeToken"))) : null;
+    }
+
     public final MessageListener<ChangeStreamDocument<Document>, Map> {{operation.operationId}}MongoChangeStreamsListener = (outboxMessage) -> {
         try {
             log.info("Received outbox collection change for '{}'", {{operation.operationId}}OutboxCollection);
@@ -65,13 +75,13 @@ public class {{apiClassName}} implements I{{apiClassName}} {
         // persist resume token
         int messageCount = messageCounters.getOrDefault(collectionName, 0) + 1;
         messageCounters.put(collectionName, messageCount);
-        if(messageCount > persistResumeTokenAfterMessages) {
+        if(messageCount > skipMessagesBeforePersistingResumeToken) {
             messageCounters.put(collectionName, 0);
-            BsonDocument resumeToken = outboxMessage.getRaw().getResumeToken();
-            long timestamp = (long) outboxMessage.getBody().get("timestamp");
-            mongoTemplate.getCollection(resumeTokensCollectionName).updateOne(new Document("collectionName", collectionName),
-                    new Document("collectionName", collectionName).append("resumeToken", resumeToken).append("timestamp", timestamp),
-                    new UpdateOptions().upsert(true));
+            var resumeToken = outboxMessage.getRaw().getResumeToken().getString("_data").getValue();
+            var timestamp = outboxMessage.getBody().get("timestamp");
+            var clusterTime = outboxMessage.getRaw().getClusterTime();
+            mongoTemplate.upsert(new Query(Criteria.where("collectionName").is(collectionName)),
+                    new Update().set("resumeToken", resumeToken).set("timestamp", timestamp).set("clusterTime", clusterTime), resumeTokensCollectionName);
         }
     }
 

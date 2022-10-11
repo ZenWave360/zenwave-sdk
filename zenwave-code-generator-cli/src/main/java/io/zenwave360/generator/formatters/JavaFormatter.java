@@ -1,12 +1,9 @@
 package io.zenwave360.generator.formatters;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.google.googlejavaformat.java.JavaFormatterOptions;
-import org.apache.commons.lang3.reflect.FieldUtils;
+import com.google.googlejavaformat.java.CustomFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +31,7 @@ public class JavaFormatter implements Formatter {
         }
         if (templateOutput.getMimeType() != null && templateOutput.getMimeType().equals(OutputFormatType.JAVA.toString())) {
             try {
-                String formattedSource = new com.google.googlejavaformat.java.Formatter().formatSourceAndFixImports(templateOutput.getContent());
+                String formattedSource = new CustomFormatter().formatSourceAndFixImports(templateOutput.getContent());
                 return new TemplateOutput(templateOutput.getTargetFile(), formattedSource, templateOutput.getMimeType());
             } catch (FormatterException e) {
                 if (e.diagnostics() != null && e.diagnostics().size() > 0) {

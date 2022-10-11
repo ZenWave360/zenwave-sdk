@@ -24,10 +24,7 @@ public class {{apiClassName}} implements I{{apiClassName}} {
     private StreamBridge streamBridge;
 
 {{~#each operations as |operation|}}
-    private String {{operation.operationId}}BindingName = "{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
-    public void set{{operation.operationId}}BindingName(String bindingName) {
-        this.{{operation.operationId}}BindingName = bindingName;
-    }
+    public String {{operation.operationId}}BindingName = "{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
 {{/each}}
 
 {{~#each operations as |operation|}}
