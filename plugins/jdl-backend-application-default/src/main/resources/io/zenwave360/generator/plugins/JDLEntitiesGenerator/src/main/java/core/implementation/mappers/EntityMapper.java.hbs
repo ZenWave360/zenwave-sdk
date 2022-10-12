@@ -4,6 +4,7 @@ import {{basePackage}}.core.domain.*;
 import {{basePackage}}.core.inbound.dtos.*;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
@@ -11,5 +12,6 @@ public interface {{entity.className}}Mapper {
 
     {{entity.className}} asEntity({{entity.className}}{{inputDTOSuffix}} input);
 
+    {{#unless (skipEntityId entity)~}}@Mapping(target = "id", ignore = true){{/unless~}}
     {{entity.className}} update(@MappingTarget {{entity.className}} entity, {{entity.className}}{{inputDTOSuffix}} input);
 }

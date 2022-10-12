@@ -6,23 +6,12 @@ import java.math.*;
 import java.time.*;
 import java.util.*;
 import javax.validation.constraints.*;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 /**
  *
  */
 {{#assign "_criteriaClassName"}}{{criteriaClassName entity}}{{/assign}}
-public class {{_criteriaClassName}} extends PageRequest implements Serializable, Pageable {
-
-    public {{_criteriaClassName}}() {
-        this(0, 10, Sort.unsorted());
-    }
-
-    public {{_criteriaClassName}}(int page, int size, Sort sort) {
-        super(page, size, sort);
-    }
+public class {{_criteriaClassName}} implements Serializable {
 
 {{#with entity.options.searchCriteriaObject as |entity| }}
 

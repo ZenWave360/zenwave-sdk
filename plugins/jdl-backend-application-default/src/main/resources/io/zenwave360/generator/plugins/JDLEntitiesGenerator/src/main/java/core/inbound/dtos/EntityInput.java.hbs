@@ -12,6 +12,10 @@ import javax.validation.constraints.*;
  */
 public class {{entity.className}}{{inputDTOSuffix}} implements Serializable {
 
+{{#unless (skipEntityId entity)~}}
+    private String id;
+{{/unless~}}
+
 {{#each entity.fields as |field|}}
     {{#each field.validations as |validation|}}
     // @{{validation.name}}("{{validation.value}}")
@@ -19,6 +23,19 @@ public class {{entity.className}}{{inputDTOSuffix}} implements Serializable {
     {{#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix}}{{/if}}{{/assign}}
     private {{{fieldType field suffix=typeSuffix}}} {{field.name}};
 {{/each}}
+
+{{#unless (skipEntityId entity)~}}
+    public String getId() {
+        return id;
+    }
+    public {{entity.className}}{{inputDTOSuffix}} withId(String id) {
+        this.id = id;
+        return this;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
+{{/unless~}}
 
 {{#each entity.fields as |field|}}
     {{#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix}}{{/if}}{{/assign}}
