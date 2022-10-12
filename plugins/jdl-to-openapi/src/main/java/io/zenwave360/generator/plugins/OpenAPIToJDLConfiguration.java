@@ -18,10 +18,10 @@ public class OpenAPIToJDLConfiguration extends Configuration {
     }
 
     @Override
-    public Configuration withOptions(Map<String, Object> options) {
-        if (!options.containsKey("targetFolder") && !options.containsKey("targetFile")) {
-            withChain(DefaultYamlParser.class, OpenApiProcessor.class, OpenAPIToJDLGenerator.class, TemplateStdoutWriter.class);
+    public <T extends Configuration> T processOptions() {
+        if (!getOptions().containsKey("targetFolder") && !getOptions().containsKey("targetFile")) {
+            replaceInChain(TemplateFileWriter.class, TemplateStdoutWriter.class);
         }
-        return super.withOptions(options);
+        return (T) this;
     }
 }

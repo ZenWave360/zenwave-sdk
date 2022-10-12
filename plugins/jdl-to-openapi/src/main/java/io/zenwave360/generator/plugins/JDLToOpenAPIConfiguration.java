@@ -15,14 +15,14 @@ public class JDLToOpenAPIConfiguration extends Configuration {
 
     public JDLToOpenAPIConfiguration() {
         super();
-        withChain(JDLParser.class, JDLProcessor.class, JDLToOpenAPIGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
+        withChain(JDLParser.class, JDLProcessor.class, JDLToOpenAPIGenerator.class, TemplateFileWriter.class);
     }
 
     @Override
-    public Configuration withOptions(Map<String, Object> options) {
-        if (!options.containsKey("targetFolder") && !options.containsKey("targetFile")) {
-            withChain(JDLParser.class, JDLProcessor.class, JDLToOpenAPIGenerator.class, JavaFormatter.class, TemplateStdoutWriter.class);
+    public <T extends Configuration> T processOptions() {
+        if (!getOptions().containsKey("targetFolder") && !getOptions().containsKey("targetFile")) {
+            replaceInChain(TemplateFileWriter.class, TemplateStdoutWriter.class);
         }
-        return super.withOptions(options);
+        return (T) this;
     }
 }

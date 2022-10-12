@@ -104,6 +104,13 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/{{entity.className}}"
+    delete:
+      summary: Delete {{entity.className}}
+      operationId: delete{{entity.className}}
+      tags: [{{entity.className}}]
+      responses:
+        "204":
+          description: {{entity.className}} deleted
   {{/unless}}
 {{/each~}}
 
