@@ -16,14 +16,14 @@ import {{modelPackage}}.*;
 {{/if}}
 
 @Component("{{operation.x--operationIdKebabCase}}")
-public class {{consumerName operation.x--operationIdCamelCase}} implements Function<Flux<Message<?>>, Mono<Void>> {
+public class {{consumerName operation.x--operationIdCamelCase}} implements Function<Flux<Message<{{messageType operation}}>>, Mono<Void>> {
 
     @Autowired
     private {{serviceName operation.x--operationIdCamelCase}} service;
 
 
     @Override
-    public Mono<Void> apply(Flux<Message<?>> messageFlux) {
+    public Mono<Void> apply(Flux<Message<{{messageType operation}}>> messageFlux) {
         return messageFlux.flatMap(m -> {
         {{#each operation.x--messages as |message|}}
             if(m.getPayload() instanceof {{message.x--javaType}}) {

@@ -15,8 +15,10 @@ import org.springframework.stereotype.Component;
 import {{modelPackage}}.*;
 {{/if}}
 
+{{#assign "messageCount"}}{{size operation.x--messages}}{{/assign~}}
+
 @Component("{{operation.x--operationIdKebabCase}}")
-public class {{consumerName operation.x--operationIdCamelCase}} implements Consumer<Message<Object>> {
+public class {{consumerName operation.x--operationIdCamelCase}} implements Consumer<Message<{{messageType operation}}>> {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -30,7 +32,7 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
     private String deadLetterQueue;
 
     @Override
-    public void accept(Message<Object> message) {
+    public void accept(Message<{{messageType operation}}> message) {
         log.debug("Received message: {}", message);
         try {
             Object payload = message.getPayload();

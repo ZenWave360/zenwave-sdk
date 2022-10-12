@@ -1,7 +1,9 @@
 package {{apiPackage}};
 
 import java.util.function.Consumer;
+{{~#if exposeMessage}}
 import org.springframework.messaging.Message;
+{{~/if}}
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -13,7 +15,11 @@ import {{modelPackage}}.*;
 public interface {{serviceName operation.x--operationIdCamelCase}} {
 
 {{#each operation.x--messages as |message|}}
+    {{~#if exposeMessage}}
+    default Mono<Void> {{operation.operationId}}{{methodSuffix message operation}}(Flux<Message<{{message.x--javaType}}>> msg) { return Mono.empty(); };
+    {{~else}}
     default Mono<Void> {{operation.operationId}}{{methodSuffix message operation}}(Flux<{{message.x--javaType}}> msg) { return Mono.empty(); };
+    {{~/if}}
 {{/each}}
 
 }

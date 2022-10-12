@@ -1,10 +1,6 @@
 package io.zenwave360.generator.plugins;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import io.zenwave360.generator.doc.DocumentedOption;
@@ -64,13 +60,17 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         handlebarsEngine.getHandlebars().registerHelper("consumerName", (context, options) -> {
             return String.format("%s%s%s", consumerPrefix, context, consumerSuffix);
         });
+        handlebarsEngine.getHandlebars().registerHelper("messageType", (operation, options) -> {
+            List<String> messageTypes = JSONPath.get(operation, "$.x--messages[*].x--javaType");
+            return messageTypes.size() == 1 ? messageTypes.get(0) : "Object";
+        });
         handlebarsEngine.getHandlebars().registerHelper("serviceName", (context, options) -> {
             return String.format("%s%s%s", servicePrefix, context, serviceSuffix);
         });
         handlebarsEngine.getHandlebars().registerHelper("methodSuffix", (context, options) -> {
             if (exposeMessage || style == ProgrammingStyle.REACTIVE) {
                 int messagesCount = JSONPath.get(options.param(0), "$.x--messages.length()", 0);
-                if (messagesCount > 0) {
+                if (messagesCount > 1) {
                     String messageJavaType = JSONPath.get(context, "$.x--javaType");
                     return String.format("%s%s", methodAndMessageSeparator, messageJavaType);
                 }
