@@ -54,6 +54,8 @@ import org.openjdk.tools.javac.util.Log;
 import org.openjdk.tools.javac.util.Options;
 
 /**
+ * <b>NOTE: Overwrites options.maxLineLength() to 150.</b>
+ *
  * This is google-java-format, a new Java formatter that follows the Google Java Style Guide quite
  * precisely---to the letter and to the spirit.
  *
