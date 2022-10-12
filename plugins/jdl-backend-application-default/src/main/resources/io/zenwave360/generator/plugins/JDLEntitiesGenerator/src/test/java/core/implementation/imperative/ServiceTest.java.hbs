@@ -13,6 +13,7 @@ import {{basePackage}}.core.outbound.search.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -39,7 +40,7 @@ public class {{service.name}}Test  {
 
 {{#each entities as |entity|}}
     @Spy
-    {{entity.className}}Mapper {{entity.instanceName}}Mapper = new {{entity.className}}MapperImpl();
+    {{entity.className}}Mapper {{entity.instanceName}}Mapper = Mappers.getMapper({{entity.className}}Mapper.class);
     @Spy
     {{entity.className}}RepositoryInMemory {{entity.instanceName}}Repository = new {{entity.className}}RepositoryInMemory();
     {{~#if options.search}}

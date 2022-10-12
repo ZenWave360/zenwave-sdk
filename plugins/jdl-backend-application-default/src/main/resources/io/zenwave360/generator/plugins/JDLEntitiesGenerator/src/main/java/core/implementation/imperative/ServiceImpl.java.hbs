@@ -51,20 +51,21 @@ public {{service.name}}Impl({{#joinWithTemplate service.entities ", "}}{{classNa
     @Override
     public {{entity.className}} create{{entity.className}}({{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
         log.debug("Request to save {{entity.className}}{{inputDTOSuffix}} : {}", {{entity.instanceName}}{{inputDTOSuffix}});
-        var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), {{entity.instanceName}}{{inputDTOSuffix}});
-        return {{entity.instanceName}}Repository.save({{entity.instanceName}});
+        var {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}}Mapper.update(new {{entity.className}}(), {{entity.instanceName}}{{inputDTOSuffix}}));
+        return {{entity.instanceName}};
     }
 
     @Override
     public Optional<{{entity.className}}> update{{entity.className}}(String id, {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
         log.debug("Request to update {{entity.className}} : {}", {{entity.instanceName}}{{inputDTOSuffix}});
 
-        return {{entity.instanceName}}Repository
+        var {{entity.instanceName}} = {{entity.instanceName}}Repository
                 .findById(id)
                 .map(existing{{entity.className}} -> {
                     return {{entity.instanceName}}Mapper.update(existing{{entity.className}}, {{entity.instanceName}}{{inputDTOSuffix}});
                 })
                 .map({{entity.instanceName}}Repository::save);
+        return {{entity.instanceName}};
     }
 
     @Override
