@@ -60,7 +60,7 @@ io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient
 io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient,io.zenwave360.generator.plugins,SpringWebTestClientConfiguration,53,0,2,0,8,0,3,0,2,0
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default,io.zenwave360.generator.plugins,JDLBackendApplicationDefaultGenerator.ProgrammingStyle,0,15,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default,io.zenwave360.generator.plugins,JDLBackendApplicationDefaultConfiguration,5,35,1,1,1,5,1,2,0,2
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default,io.zenwave360.generator.plugins,JDLBackendApplicationDefaultGenerator,78,972,20,44,7,99,19,38,3,22
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default,io.zenwave360.generator.plugins,JDLBackendApplicationDefaultGenerator,138,1091,28,58,14,128,27,43,3,24
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default,io.zenwave360.generator.plugins,JDLBackendApplicationDefaultGenerator.PersistenceType,0,9,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-code-generator.plugins:java-to-jdl,io.zenwave360.generator.plugins,JavaToJDLGenerator.PersistenceType,0,15,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-code-generator.plugins:java-to-jdl,io.zenwave360.generator.plugins,JavaToJDLGenerator,182,582,55,73,48,146,43,31,1,9
