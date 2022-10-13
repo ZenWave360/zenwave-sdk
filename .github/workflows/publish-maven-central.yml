@@ -25,6 +25,11 @@ jobs:
 
 
 
+      - name: Checkout badges branch to a badges directory nested inside first checkout
+        uses: actions/checkout@v2
+        with:
+          ref: badges
+          path: badges
 
       - name: Generate JaCoCo Badge
         id: jacoco
