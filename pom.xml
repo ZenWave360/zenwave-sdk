@@ -180,7 +180,7 @@
                 <configuration>
                     <excludes>
                         <exclude>com/intuit/karate/core/**</exclude>
-                        <exclude>com/google/googlejavaformat/java</exclude>
+                        <exclude>com/google/googlejavaformat/java/**</exclude>
                     </excludes>
                 </configuration>
                 <executions>
