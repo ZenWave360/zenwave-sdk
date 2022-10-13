@@ -19,7 +19,7 @@ enum OrderStatus { CONFIRMED, SHIPPED, DELIVERED }
 entity CustomerOrder { // Order is a reserved word
 	date Instant,
 	status OrderStatus
-	customer Customer
+	@DocumentReference	customer Customer
 	orderedItems OrderedItem[]
 	paymentDetails PaymentDetails[]
 	shippingDetails ShippingDetails

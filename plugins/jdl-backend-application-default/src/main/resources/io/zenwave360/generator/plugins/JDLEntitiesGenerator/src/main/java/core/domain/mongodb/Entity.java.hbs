@@ -6,7 +6,9 @@ import java.time.*;
 import java.util.*;
 import javax.validation.constraints.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 /**
@@ -22,10 +24,8 @@ public class {{entity.className}} implements Serializable {
     private String id;
 {{/unless~}}
 {{#each entity.fields as |field|}}
-    @Field
-    {{#each field.validations as |validation|~}}
-        // @{{validation.name}}("{{validation.value}}")
-    {{~/each}}
+    {{fieldPersistenceAnnotations field}}
+    {{{fieldValidationAnnotations field}}}
     private {{{fieldType field}}} {{field.name}};
 {{/each}}
 

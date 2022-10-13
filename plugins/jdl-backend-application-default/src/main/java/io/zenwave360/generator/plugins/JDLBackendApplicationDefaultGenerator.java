@@ -166,6 +166,56 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
             return String.format("%s%s%s", prefix, type, suffix);
         });
 
+        handlebarsEngine.getHandlebars().registerHelper("fieldPersistenceAnnotations", (context, options) -> {
+            Map field = (Map) context;
+            if(persistence == PersistenceType.mongodb) {
+                // filtering with lowerFirst and upperFirst for forward jdl compatibility
+                int dbRef = ((List) JSONPath.get(field, "options[?(@.dBRef || @.DBRef)]")).size();
+                int documentedOptions = ((List) JSONPath.get(field, "options[?(@.documentReference || @.DocumentReference)]")).size();
+                if(dbRef > 0) {
+                    return "@DBRef";
+                }
+                if(documentedOptions > 0) {
+                    return "@DocumentReference";
+                }
+                return "@Field";
+            }
+            return "";
+        });
+
+        handlebarsEngine.getHandlebars().registerHelper("fieldValidationAnnotations", (context, options) -> {
+            Map field = (Map) context;
+            var required = JSONPath.get(field, "validations.required.value");
+            var min = JSONPath.get(field, "validations.min.value");
+            var max = JSONPath.get(field, "validations.max.value");
+            var minlength = JSONPath.get(field, "validations.minlength.value");
+            var maxlength = JSONPath.get(field, "validations.maxlength.value");
+            var pattern = JSONPath.get(field, "validations.pattern.value");
+            var unique = JSONPath.get(field, "validations.unique.value");
+            List<String> annotations = new ArrayList<>();
+            if (required != null) {
+                annotations.add("@NotNull");
+            }
+            if (min != null) {
+                annotations.add(String.format("@Min(%s)", min));
+            }
+            if (max != null) {
+                annotations.add(String.format("@Max(%s)", max));
+            }
+            if (minlength != null || maxlength != null) {
+                annotations.add(String.format("@Size(min = %s, max = %s)", minlength, maxlength));
+            } else if (maxlength != null) {
+                annotations.add(String.format("@Size(max = %s)", maxlength));
+            } else if (minlength != null) {
+                annotations.add(String.format("@Size(min = %s)", minlength));
+            }
+            if (pattern != null) {
+                annotations.add(String.format("@Pattern(regexp = \"%s\")", pattern));
+            }
+
+            return annotations.stream().collect(Collectors.joining(" "));
+        });
+
         handlebarsEngine.getHandlebars().registerHelper("criteriaClassName", (context, options) -> {
             Map entity = (Map) context;
             Object criteria = JSONPath.get(entity, "$.options.searchCriteria");
