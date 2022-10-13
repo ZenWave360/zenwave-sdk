@@ -61,16 +61,15 @@ public class {{apiClassName}} implements I{{apiClassName}} {
             log.trace("Received outbox collection change message: {}", outboxMessage.getBody());
             sendOutboxMessage(outboxMessage, {{operation.operationId}}OutboxCollection, {{operation.operationId}}BindingName);
         } catch (Exception e) {
-            log.error("Error sending message to stream", e);
+            log.error("Error sending message to stream {}", {{operation.operationId}}BindingName, e);
         }
     };
 {{/each}}
 
-    private void sendOutboxMessage(org.springframework.data.mongodb.core.messaging.Message<ChangeStreamDocument<Document>, Map> outboxMessage, String collectionName, String eventBindingName) {
+    public void sendOutboxMessage(org.springframework.data.mongodb.core.messaging.Message<ChangeStreamDocument<Document>, Map> outboxMessage, String collectionName, String eventBindingName) {
         // send message to the stream
-        MimeType outputContentType = MimeType.valueOf("application/json");
         Message message = MessageBuilder.createMessage(outboxMessage.getBody().get("payload"), new MessageHeaders((Map<String, Object>) outboxMessage.getBody().get("headers")));
-        streamBridge.send(eventBindingName, message, outputContentType);
+        streamBridge.send(eventBindingName, message);
 
         // persist resume token
         int messageCount = messageCounters.getOrDefault(collectionName, 0) + 1;
@@ -85,7 +84,7 @@ public class {{apiClassName}} implements I{{apiClassName}} {
         }
     }
 
-    private boolean saveMessageToOutbox(Message message, String collectionName) {
+    protected boolean saveMessageToOutbox(Message message, String collectionName) {
         Map outboxMessage = new java.util.HashMap();
         outboxMessage.put("timestamp", System.nanoTime());
         outboxMessage.put("payload", message.getPayload());

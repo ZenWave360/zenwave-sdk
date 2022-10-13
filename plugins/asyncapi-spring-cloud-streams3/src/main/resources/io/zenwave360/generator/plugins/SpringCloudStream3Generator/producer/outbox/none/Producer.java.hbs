@@ -2,6 +2,8 @@ package {{apiPackage}};
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
@@ -33,9 +35,8 @@ public class {{apiClassName}} implements I{{apiClassName}} {
      * {{operation.description}}
      */
     public boolean {{operation.operationId}}({{message.x--javaType}} payload, Header... headers) {
-        MimeType outputContentType = MimeType.valueOf("{{defaultIfEmpty operation.operation.message.contentType 'application/json'}}");
         Message message = MessageBuilder.createMessage(payload, asMessageHeaders(headers));
-        return streamBridge.send({{operation.operationId}}BindingName, message, outputContentType);
+        return streamBridge.send({{operation.operationId}}BindingName, message);
     }
 
     {{/each}}

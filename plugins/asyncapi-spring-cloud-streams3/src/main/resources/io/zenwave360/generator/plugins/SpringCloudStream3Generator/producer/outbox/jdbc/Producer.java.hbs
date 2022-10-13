@@ -4,15 +4,16 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.function.StreamBridge;
-import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MimeType;
 
 {{#if modelPackage}}
 import {{modelPackage}}.*;
@@ -24,20 +25,42 @@ import {{modelPackage}}.*;
 @Component
 public class {{apiClassName}} implements I{{apiClassName}} {
 
-    @Autowired
-    private StreamBridge streamBridge;
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    protected StreamBridge streamBridge;
+    @Autowired
+    protected JdbcTemplate jdbcTemplate;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    protected ObjectMapper objectMapper = new ObjectMapper();
 
 {{~#each operations as |operation|}}
-    private String {{operation.operationId}}BindingName = "{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
-    public void set{{operation.operationId}}BindingName(String bindingName) {
-        this.{{operation.operationId}}BindingName = bindingName;
-    }
+    public String {{operation.operationId}}BindingName = "{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
+    public String {{operation.operationId}}OutboxTableName = "{{operation.x--operationIdKebabCase}}-outbox";
 {{/each}}
+    public String sqlSaveMessageToOutbox = "INSERT INTO {tableName} (payload, headers) VALUES (?, ?)";
+    public String sqlUpdateSentOutbox = "UPDATE {tableName} SET sent = true WHERE id = ?";
+
+    public void sendOutboxMessage(String id, String payloadJson, String headersJson, String tableName, String bindingName) {
+        try {
+            var payload = objectMapper.readValue(payloadJson, Map.class);
+            var headers = objectMapper.readValue(headersJson, Map.class);
+            Message message = MessageBuilder.createMessage(payload, new MessageHeaders(headers));
+            streamBridge.send(bindingName, message);
+            String sql = sqlSaveMessageToOutbox.replace("{tableName}", tableName);
+            jdbcTemplate.update(sql, id);
+        } catch (JsonProcessingException e) {
+            log.error("Error unmarshalling outbox messages [payload= {}, headers= , binding={}]", payloadJson, headersJson, bindingName, e);
+        } catch (DataAccessException dataAccessException) {
+            log.error("Error updating outbox while sending message [table={}]", tableName, dataAccessException);
+        }
+    }
+
+    protected boolean saveMessageToOutbox(Message message, String tableName) {
+        String sql = sqlSaveMessageToOutbox.replace("{tableName}", tableName);
+        return jdbcTemplate.update(sql, asString(message.getPayload()), asString(message.getHeaders())) == 1;
+    }
+
 
 {{~#each operations as |operation|}}
     {{#each operation.x--messages as |message|}}
@@ -45,11 +68,9 @@ public class {{apiClassName}} implements I{{apiClassName}} {
      * {{operation.description}}
      */
     public boolean {{operation.operationId}}({{message.x--javaType}} payload, Header... headers) {
-        MimeType outputContentType = MimeType.valueOf("{{defaultIfEmpty operation.operation.message.contentType 'application/json'}}");
         Message message = MessageBuilder.createMessage(payload, asMessageHeaders(headers));
-        //return streamBridge.send(onCustomerEventBindingName, message, outputContentType);
-        jdbcTemplate.update("TODO", asString(message.getPayload()), asString(message.getHeaders()));
-        return true;
+        //return streamBridge.send(onCustomerEventBindingName, message);
+        return saveMessageToOutbox(message, {{operation.operationId}}OutboxTableName);
     }
 
     {{/each}}
