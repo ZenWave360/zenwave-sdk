@@ -54,7 +54,10 @@ jobs:
 
       - name: Packs Jacoco Reports
         run: |
+          rm -rf badges/jacoco
           mkdir -p badges/jacoco
+          echo "GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED" > badges/jacoco/jacoco-report.csv
+          find -name 'jacoco.csv' -exec sed '1d' {} \; >> badges/jacoco/jacoco-report.csv
           tar -c `find -name jacoco.csv` `find -name jacoco.exec` `find -name jacoco.xml` | tar -C badges/jacoco -x
 
 
