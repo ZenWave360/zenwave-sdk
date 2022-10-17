@@ -195,7 +195,7 @@ jbang zw -p io.zenwave360.generator.plugins.ForkPluginConfiguration -h
 | `targetFolder`          |                                                                                            | String   |                                                                                   |            |
 | `sourcePluginClassName` | Plugin Configuration class to fork                                                         | String   |                                                                                   |            |
 | `targetPluginClassName` | New Plugin Configuration class. It will be used for class name, package and maven groupId. | String   |                                                                                   |            |
-| `downloadURL`           | Download URL for the source code of original plugin in zip format                          | URL      | https://github.com/ZenWave360/zenwave-code-generator/archive/refs/tags/v0.7.0.zip |            |
+| `downloadURL`           | Download URL for the source code of original plugin in zip format                          | URL      | https://github.com/ZenWave360/zenwave-code-generator/archive/refs/tags/v0.8.1.zip |            |
 
 Example:
 
