@@ -59,9 +59,10 @@ public class JDLBackendApplicationDefaultGeneratorTest {
 
     @Test
     public void test_generator_hexagonal_mongodb_imperative() throws Exception {
+        String targetFolder = "target/test_generator_hexagonal_mongodb_imperative";
         Configuration configuration = new JDLBackendApplicationDefaultConfiguration()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl")
-                .withTargetFolder("target/out")
+                .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", JDLBackendApplicationDefaultGenerator.PersistenceType.mongodb)
                 .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative);
@@ -71,14 +72,17 @@ public class JDLBackendApplicationDefaultGeneratorTest {
         List<String> logs = logCaptor.getLogs();
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
+
+        compile("src/test/resources/mongodb-elasticsearch-scs3-pom.xml", targetFolder);
     }
 
     @Test
     // @Disabled
     public void test_generator_hexagonal_mongodb_imperative_registry() throws Exception {
+        String targetFolder = "target/test_generator_hexagonal_mongodb_imperative_registry";
         Configuration configuration = new JDLBackendApplicationDefaultConfiguration()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl")
-                .withTargetFolder("target/examples/spring-boot-mongo-elasticsearch")
+                .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", JDLBackendApplicationDefaultGenerator.PersistenceType.mongodb)
                 .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative);
@@ -93,9 +97,10 @@ public class JDLBackendApplicationDefaultGeneratorTest {
     @Test
     // @Disabled
     public void test_generator_hexagonal_mongodb_imperative_registry_only_some_entities() throws Exception {
+        String targetFolder = "target/test_generator_hexagonal_mongodb_imperative_registry_only_some_entities";
         Configuration configuration = new JDLBackendApplicationDefaultConfiguration()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl")
-                .withTargetFolder("target/examples/spring-boot-mongo-elasticsearch")
+                .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", JDLBackendApplicationDefaultGenerator.PersistenceType.mongodb)
                 .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative)
@@ -108,13 +113,15 @@ public class JDLBackendApplicationDefaultGeneratorTest {
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
     }
 
-    public void compile() throws MavenInvocationException {
+    public void compile(String pom, String baseDir) throws MavenInvocationException {
+        System.out.println("Maven Invoker - compile:" + pom + " - " + baseDir);
         InvocationRequest request = new DefaultInvocationRequest();
-        request.setPomFile(new File("/path/to/pom.xml"));
-        request.setBaseDirectory(new File("/path/to/base/dir"));
+        request.setPomFile(new File(pom));
+        request.setBaseDirectory(new File(baseDir));
         request.setGoals(Collections.singletonList("test-compile"));
 
         Invoker invoker = new DefaultInvoker();
+//        invoker.setMavenHome(new File("C:\\Users\\ivan.garcia\\workspace\\bin\\apache-maven-3.2.3"));
         invoker.execute(request);
     }
 }
