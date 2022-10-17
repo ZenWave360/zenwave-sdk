@@ -21,6 +21,8 @@
         <mapstruct.version>1.5.1.Final</mapstruct.version>
         <spring-cloud.version>2021.0.3</spring-cloud.version>
         <avro.version>1.11.1</avro.version>
+        <testcontainers.version>1.17.2</testcontainers.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
 
         <!-- Plugin versions -->
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
@@ -79,6 +81,10 @@
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
             <version>${mapstruct.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
         </dependency>
 
         <dependency>

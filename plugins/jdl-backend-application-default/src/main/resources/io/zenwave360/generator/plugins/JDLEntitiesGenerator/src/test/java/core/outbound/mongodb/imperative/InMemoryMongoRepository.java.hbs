@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
@@ -67,7 +68,7 @@ public class InMemoryMongoRepository<T> implements MongoRepository<T, String> {
     }
 
     protected <F> List<T> findByField(String fieldName, F value) {
-        return entities.values().stream().filter(entity -> isSameValue(value, readField(entity, fieldName))).toList();
+        return entities.values().stream().filter(entity -> isSameValue(value, readField(entity, fieldName))).collect(Collectors.toList());
     }
 
     protected <F> T findByUniqueField(String fieldName, F value) {
@@ -107,7 +108,7 @@ public class InMemoryMongoRepository<T> implements MongoRepository<T, String> {
         if (entitiesToSave == null) {
             throw new IllegalArgumentException("entitiesToSave must not be null");
         }
-        return StreamSupport.stream(entitiesToSave.spliterator(), false).map(e -> save(e)).toList();
+        return StreamSupport.stream(entitiesToSave.spliterator(), false).map(e -> save(e)).collect(Collectors.toList());
     }
 
     public Optional<T> findById(String id) {
@@ -123,7 +124,7 @@ public class InMemoryMongoRepository<T> implements MongoRepository<T, String> {
     }
 
     public Iterable<T> findAllById(Iterable<String> ids) {
-        return entities.values().stream().filter(e -> contains(ids, readField(e, "id"))).toList();
+        return entities.values().stream().filter(e -> contains(ids, readField(e, "id"))).collect(Collectors.toList());
     }
 
     public long count() {

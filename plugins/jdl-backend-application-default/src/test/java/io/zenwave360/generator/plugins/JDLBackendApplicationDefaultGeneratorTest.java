@@ -1,15 +1,14 @@
 package io.zenwave360.generator.plugins;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.shared.invoker.*;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import io.zenwave360.generator.Configuration;
 import io.zenwave360.generator.MainGenerator;
@@ -92,6 +91,8 @@ public class JDLBackendApplicationDefaultGeneratorTest {
         List<String> logs = logCaptor.getLogs();
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
+
+        compile("src/test/resources/mongodb-elasticsearch-scs3-pom.xml", targetFolder);
     }
 
     @Test
@@ -111,17 +112,20 @@ public class JDLBackendApplicationDefaultGeneratorTest {
         List<String> logs = logCaptor.getLogs();
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
+
+        compile("src/test/resources/mongodb-elasticsearch-scs3-pom.xml", targetFolder);
     }
 
-    public void compile(String pom, String baseDir) throws MavenInvocationException {
+    public void compile(String pom, String baseDir) throws MavenInvocationException, IOException {
         System.out.println("Maven Invoker - compile:" + pom + " - " + baseDir);
+        FileUtils.copyFile(new File(pom), new File(baseDir, "pom.xml"));
+
         InvocationRequest request = new DefaultInvocationRequest();
-        request.setPomFile(new File(pom));
         request.setBaseDirectory(new File(baseDir));
         request.setGoals(Collections.singletonList("test-compile"));
 
         Invoker invoker = new DefaultInvoker();
-//        invoker.setMavenHome(new File("C:\\Users\\ivan.garcia\\workspace\\bin\\apache-maven-3.2.3"));
-        invoker.execute(request);
+        var results = invoker.execute(request);
+        Assertions.assertEquals(0, results.getExitCode());
     }
 }
