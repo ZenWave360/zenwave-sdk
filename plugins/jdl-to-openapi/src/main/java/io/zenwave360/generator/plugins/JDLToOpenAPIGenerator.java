@@ -48,6 +48,9 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "Suffix for search criteria DTOs (default: Criteria)")
     public String criteriaDTOSuffix = "Criteria";
 
+    @DocumentedOption(description = "JsonSchema type for id fields and parameters.")
+    public String idType = "string";
+
     public JDLToOpenAPIGenerator withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;
         return this;
@@ -84,7 +87,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
         Map<String, Object> schemas = new LinkedHashMap<>();
         JSONPath.set(oasSchemas, "components.schemas", schemas);
 
-        JDLEntitiesToSchemasConverter converter = new JDLEntitiesToSchemasConverter().withIdType("string").withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
+        JDLEntitiesToSchemasConverter converter = new JDLEntitiesToSchemasConverter().withIdType(idType).withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
 
         List<Map<String, Object>> entities = (List) JSONPath.get(jdlModel, "$.entities[*]");
         for (Map<String, Object> entity : entities) {

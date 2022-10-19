@@ -76,7 +76,7 @@ paths:
       description: {{entity.className}} id
       required: true
       schema:
-        type: string
+        type: {{idType}}
     get:
       summary: Get {{entity.className}} by id
       operationId: get{{entity.className}}
