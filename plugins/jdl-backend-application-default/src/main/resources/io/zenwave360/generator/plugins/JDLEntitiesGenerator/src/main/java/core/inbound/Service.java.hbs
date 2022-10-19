@@ -28,7 +28,7 @@ public interface {{service.name}} {
      * @param {{entity.instanceName}} the entity to update.
      * @return the persisted entity.
      */
-    Optional<{{entity.className}}> update{{entity.className}}(String id, {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}});
+    Optional<{{entity.className}}> update{{entity.className}}({{idJavaType}} id, {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}});
 
     /**
      * Get all the {{entity.classNamePlural}}.
@@ -54,13 +54,13 @@ public interface {{service.name}} {
      * @param id the id of the entity.
      * @return the entity.
      */
-    Optional<{{entity.className}}> get{{entity.className}}(String id);
+    Optional<{{entity.className}}> get{{entity.className}}({{idJavaType}} id);
 
     /**
      * Delete the "id" {{entity.instanceName}}.
      *
      * @param id the id of the entity.
      */
-    void delete{{entity.className}}(String id);
+    void delete{{entity.className}}({{idJavaType}} id);
 {{/each}}
 }

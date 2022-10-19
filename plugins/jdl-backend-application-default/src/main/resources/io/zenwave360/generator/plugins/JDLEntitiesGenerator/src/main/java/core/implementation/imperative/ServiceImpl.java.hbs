@@ -37,7 +37,7 @@ public class {{service.name}}Impl implements {{service.name}} {
     /**
      * Constructor.
      */
-public {{service.name}}Impl({{#joinWithTemplate service.entities ", "}}{{className}}Mapper {{instanceName}}Mapper{{#unless (skipEntityRepository this)}}, {{className}}Repository {{instanceName}}Repository{{/unless}}{{#if options.search}}, {{className}}SearchRepository {{instanceName}}SearchRepository{{/if}}{{/joinWithTemplate}}) {
+    public {{service.name}}Impl({{#joinWithTemplate service.entities ", "}}{{className}}Mapper {{instanceName}}Mapper{{#unless (skipEntityRepository this)}}, {{className}}Repository {{instanceName}}Repository{{/unless}}{{#if options.search}}, {{className}}SearchRepository {{instanceName}}SearchRepository{{/if}}{{/joinWithTemplate}}) {
         {{~#joinWithTemplate service.entities ~}}
             this.{{instanceName}}Mapper = {{instanceName}}Mapper;
             {{#unless (skipEntityRepository this)}}this.{{instanceName}}Repository = {{instanceName}}Repository;{{/unless}}
@@ -56,7 +56,7 @@ public {{service.name}}Impl({{#joinWithTemplate service.entities ", "}}{{classNa
     }
 
     @Override
-    public Optional<{{entity.className}}> update{{entity.className}}(String id, {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
+    public Optional<{{entity.className}}> update{{entity.className}}({{idJavaType}} id, {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
         log.debug("Request to update {{entity.className}} : {}", {{entity.instanceName}}{{inputDTOSuffix}});
 
         var {{entity.instanceName}} = {{entity.instanceName}}Repository
@@ -84,13 +84,13 @@ public {{service.name}}Impl({{#joinWithTemplate service.entities ", "}}{{classNa
     {{~/if}}
 
     @Override
-    public Optional<{{entity.className}}> get{{entity.className}}(String id) {
+    public Optional<{{entity.className}}> get{{entity.className}}({{idJavaType}} id) {
         log.debug("Request to get {{entity.className}} : {}", id);
         return {{entity.instanceName}}Repository.findById(id);
     }
 
     @Override
-    public void delete{{entity.className}}(String id) {
+    public void delete{{entity.className}}({{idJavaType}} id) {
         log.debug("Request to delete {{entity.className}} : {}", id);
         {{entity.instanceName}}Repository.deleteById(id);
     }

@@ -66,7 +66,7 @@ public class {{entity.className}}Resource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{{entity.kebabCasePlural}}/{id}")
-    public ResponseEntity<{{entity.className}}> update{{entity.className}}(@PathVariable(value = "id", required = false) final String id, @Valid @RequestBody {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}})
+    public ResponseEntity<{{entity.className}}> update{{entity.className}}(@PathVariable(value = "id", required = false) final {{idJavaType}} id, @Valid @RequestBody {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}})
             throws URISyntaxException {
         log.debug("REST request to update {{entity.className}} : {}, {}", id, {{entity.instanceName}});
         Optional<{{entity.className}}> result = {{serviceInstance}}.update{{entity.className}}(id, {{entity.instanceName}});
@@ -91,7 +91,7 @@ public class {{entity.className}}Resource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the {{entity.instanceName}}, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/{{entity.kebabCasePlural}}/{id}")
-    public ResponseEntity<{{entity.className}}> get{{entity.className}}(@PathVariable String id) {
+    public ResponseEntity<{{entity.className}}> get{{entity.className}}(@PathVariable {{idJavaType}} id) {
         log.debug("REST request to get {{entity.className}} : {}", id);
         Optional<{{entity.className}}> {{entity.instanceName}} = {{serviceInstance}}.get{{entity.className}}(id);
         return wrapOrNotFound({{entity.instanceName}});
@@ -104,7 +104,7 @@ public class {{entity.className}}Resource {
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{{entity.kebabCasePlural}}/{id}")
-    public ResponseEntity<Void> delete{{entity.className}}(@PathVariable String id) {
+    public ResponseEntity<Void> delete{{entity.className}}(@PathVariable {{idJavaType}} id) {
         log.debug("REST request to delete {{entity.className}} : {}", id);
         {{serviceInstance}}.delete{{entity.className}}(id);
         return ResponseEntity.noContent().build();

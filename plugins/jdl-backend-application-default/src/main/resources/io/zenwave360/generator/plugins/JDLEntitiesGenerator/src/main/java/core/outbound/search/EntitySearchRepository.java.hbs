@@ -16,7 +16,7 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 /**
  * Spring Data Elasticsearch repository for the {@link {{entity.className}}{{searchDTOSuffix}} } entity.
  */
-public interface {{entity.className}}SearchRepository extends ElasticsearchRepository<{{entity.className}}{{searchDTOSuffix}}, String>, {{entity.className}}SearchRepositoryInternal {}
+public interface {{entity.className}}SearchRepository extends ElasticsearchRepository<{{entity.className}}{{searchDTOSuffix}}, {{idJavaType}}>, {{entity.className}}SearchRepositoryInternal {}
 
 interface {{entity.className}}SearchRepositoryInternal {
     Page<{{entity.className}}{{searchDTOSuffix}}> search(String query, Pageable pageable);

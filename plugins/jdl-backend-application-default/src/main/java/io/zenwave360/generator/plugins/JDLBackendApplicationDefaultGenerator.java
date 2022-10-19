@@ -23,7 +23,8 @@ import io.zenwave360.generator.utils.JSONPath;
 public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator {
 
     enum PersistenceType {
-        mongodb;
+        mongodb,
+        jpa;
     }
 
     enum ProgrammingStyle {
@@ -154,6 +155,10 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
         return templateOutputList;
     }
 
+    protected String getIdJavaType() {
+        return this.persistence == PersistenceType.jpa ? "Long" : "String";
+    }
+
     {
         handlebarsEngine.getHandlebars().registerHelper("fieldType", (context, options) -> {
             Map field = (Map) context;
@@ -264,6 +269,7 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
         model.putAll(this.asConfigurationMap());
         model.put("context", contextModel);
         model.put("jdl", getJDLModel(contextModel));
+        model.put("idJavaType", getIdJavaType());
         model.put("webFlavor", style == ProgrammingStyle.imperative ? "mvc" : "webflux");
         model.putAll(extModel);
         return getTemplateEngine().processTemplates(model, List.of(template));
