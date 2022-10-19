@@ -17,10 +17,8 @@ public class {{entity.className}}{{inputDTOSuffix}} implements Serializable {
 {{/unless~}}
 
 {{#each entity.fields as |field|}}
-    {{#each field.validations as |validation|}}
-    // @{{validation.name}}("{{validation.value}}")
-    {{/each}}
-    {{#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix}}{{/if}}{{/assign}}
+    {{{fieldValidationAnnotations field}}}
+    {{~#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix}}{{/if}}{{/assign}}
     private {{{fieldType field suffix=typeSuffix}}} {{field.name}};
 {{/each}}
 
