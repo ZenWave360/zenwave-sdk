@@ -23,8 +23,8 @@ In the following example we are configuring the `asyncapi-spring-cloud-streams3`
                 <generatorName>spring-cloud-streams3</generatorName>
                 <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
                 <configOptions>
-                    <role>PROVIDER</role>
-                    <style>IMPERATIVE</style>
+                    <role>provider</role>
+                    <style>imperative</style>
                     <apiPackage>io.zenwave360.example.adapters.events.producer</apiPackage>
                     <modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
                 </configOptions>

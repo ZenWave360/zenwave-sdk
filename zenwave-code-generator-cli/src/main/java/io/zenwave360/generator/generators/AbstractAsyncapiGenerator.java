@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import io.zenwave360.generator.options.asyncapi.AsyncapiOperationType;
+import io.zenwave360.generator.options.asyncapi.AsyncapiRoleType;
 import org.apache.commons.lang3.ObjectUtils;
 
 import com.jayway.jsonpath.JsonPath;
@@ -15,14 +17,6 @@ import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.parsers.Model;
 
 public abstract class AbstractAsyncapiGenerator implements Generator {
-
-    public enum RoleType {
-        PROVIDER, CLIENT
-    }
-
-    public enum OperationType {
-        PUBLISH, SUBSCRIBE
-    }
 
     public enum OperationRoleType {
         EVENT_PRODUCER("EventsProducer"), EVENT_CONSUMER("EventsConsumer"), COMMAND_PRODUCER("CommandsProducer"), COMMAND_CONSUMER("CommandsConsumer");
@@ -37,12 +31,12 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
             return serviceSuffix;
         }
 
-        public static OperationRoleType valueOf(RoleType roleType, OperationType operationType) {
+        public static OperationRoleType valueOf(AsyncapiRoleType roleType, AsyncapiOperationType operationType) {
 
-            if (operationType == OperationType.PUBLISH) {
-                return roleType == RoleType.PROVIDER ? EVENT_PRODUCER : EVENT_CONSUMER;
-            } else if (operationType == OperationType.SUBSCRIBE) {
-                return roleType == RoleType.PROVIDER ? COMMAND_CONSUMER : COMMAND_PRODUCER;
+            if (operationType == AsyncapiOperationType.publish) {
+                return roleType == AsyncapiRoleType.provider ? EVENT_PRODUCER : EVENT_CONSUMER;
+            } else if (operationType == AsyncapiOperationType.subscribe) {
+                return roleType == AsyncapiRoleType.provider ? COMMAND_CONSUMER : COMMAND_PRODUCER;
             }
             return null;
         }
@@ -54,8 +48,8 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
     public String modelPackage;
     @DocumentedOption(description = "Binding names to include in code generation. Generates code for ALL bindings if left empty")
     public List<String> bindingTypes;
-    @DocumentedOption(description = "Project role: PROVIDER\\|CLIENT")
-    public RoleType role = RoleType.PROVIDER;
+    @DocumentedOption(description = "Project role: provider\\|client")
+    public AsyncapiRoleType role = AsyncapiRoleType.provider;
 
     @DocumentedOption(description = "Operation ids to include in code generation. Generates code for ALL if left empty")
     public List<String> operationIds = new ArrayList<>();
@@ -69,14 +63,14 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
     }
 
     public Map<String, List<Map<String, Object>>> getPublishOperationsGroupedByTag(Model apiModel) {
-        return getOperationsGroupedByTag(apiModel, OperationType.PUBLISH);
+        return getOperationsGroupedByTag(apiModel, AsyncapiOperationType.publish);
     }
 
     public Map<String, List<Map<String, Object>>> getSubscribeOperationsGroupedByTag(Model model) {
-        return getOperationsGroupedByTag(model, OperationType.SUBSCRIBE);
+        return getOperationsGroupedByTag(model, AsyncapiOperationType.subscribe);
     }
 
-    public Map<String, List<Map<String, Object>>> getOperationsGroupedByTag(Model apiModel, OperationType operationType) {
+    public Map<String, List<Map<String, Object>>> getOperationsGroupedByTag(Model apiModel, AsyncapiOperationType operationType) {
         Map<String, List<Map<String, Object>>> operationsByTag = new HashMap<>();
         List<Map<String, Object>> operations = JsonPath.read(apiModel, "$.channels[*].*");
         for (Map<String, Object> operation : operations) {
@@ -91,8 +85,8 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
         return operationsByTag;
     }
 
-    public boolean matchesFilters(Map<String, Object> operation, OperationType operationType) {
-        var operationOperationType = OperationType.valueOf(operation.get("x--operationType").toString().toUpperCase());
+    public boolean matchesFilters(Map<String, Object> operation, AsyncapiOperationType operationType) {
+        var operationOperationType = AsyncapiOperationType.valueOf(operation.get("x--operationType").toString());
         return operationOperationType == operationType && matchesBindingTypes(operation, bindingTypes);
     }
 
@@ -118,25 +112,25 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
     }
 
     /**
-     * Returns true if generating code for a PROVIDER and operation is an event(operationType=publish) or project is a CLIENT and operation is a command(operationType=subscribe).
+     * Returns true if generating code for a provider and operation is an event(operationType=publish) or project is a client and operation is a command(operationType=subscribe).
      *
      * @param operation
      * @return
      */
     public boolean isProducer(Map<String, Object> operation) {
-        var operationType = OperationType.valueOf(operation.get("x--operationType").toString().toUpperCase());
+        var operationType = AsyncapiOperationType.valueOf(operation.get("x--operationType").toString());
         return isProducer(this.role, operationType);
     }
 
     /**
-     * Returns true for a PROVIDER and operation is an event(operationType=publish) or a CLIENT and operation is a command(operationType=subscribe).
+     * Returns true for a provider and operation is an event(operationType=publish) or a client and operation is a command(operationType=subscribe).
      *
      * @param roleType
      * @param operationType
      * @return
      */
-    public boolean isProducer(RoleType roleType, OperationType operationType) {
-        if (RoleType.PROVIDER == role && OperationType.PUBLISH == operationType || RoleType.CLIENT == role && OperationType.SUBSCRIBE == operationType) {
+    public boolean isProducer(AsyncapiRoleType roleType, AsyncapiOperationType operationType) {
+        if (AsyncapiRoleType.provider == role && AsyncapiOperationType.publish == operationType || AsyncapiRoleType.client == role && AsyncapiOperationType.subscribe == operationType) {
             return true;
         }
         return false;

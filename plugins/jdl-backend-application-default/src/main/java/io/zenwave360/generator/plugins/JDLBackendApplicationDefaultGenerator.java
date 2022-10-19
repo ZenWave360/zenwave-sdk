@@ -2,34 +2,18 @@ package io.zenwave360.generator.plugins;
 
 import static io.zenwave360.generator.templating.OutputFormatType.JAVA;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.generators.AbstractJDLGenerator;
-import io.zenwave360.generator.templating.HandlebarsEngine;
-import io.zenwave360.generator.templating.OutputFormatType;
-import io.zenwave360.generator.templating.TemplateEngine;
-import io.zenwave360.generator.templating.TemplateInput;
-import io.zenwave360.generator.templating.TemplateOutput;
+import io.zenwave360.generator.options.PersistenceType;
+import io.zenwave360.generator.options.ProgrammingStyle;
+import io.zenwave360.generator.templating.*;
 import io.zenwave360.generator.utils.JSONPath;
 
 public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator {
-
-    enum PersistenceType {
-        mongodb,
-        jpa;
-    }
-
-    enum ProgrammingStyle {
-        imperative, reactive;
-    }
 
     public String sourceProperty = "jdl";
 

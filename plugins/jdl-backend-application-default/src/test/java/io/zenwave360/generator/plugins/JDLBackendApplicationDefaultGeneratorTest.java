@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import io.zenwave360.generator.options.PersistenceType;
+import io.zenwave360.generator.options.ProgrammingStyle;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.shared.invoker.*;
 import org.junit.jupiter.api.*;
@@ -63,8 +65,8 @@ public class JDLBackendApplicationDefaultGeneratorTest {
                 .withSpecFile("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl")
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
-                .withOption("persistence", JDLBackendApplicationDefaultGenerator.PersistenceType.mongodb)
-                .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative);
+                .withOption("persistence", PersistenceType.mongodb)
+                .withOption("style", ProgrammingStyle.imperative);
 
         new MainGenerator().generate(configuration);
 
@@ -83,8 +85,8 @@ public class JDLBackendApplicationDefaultGeneratorTest {
                 .withSpecFile("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl")
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
-                .withOption("persistence", JDLBackendApplicationDefaultGenerator.PersistenceType.mongodb)
-                .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative);
+                .withOption("persistence", PersistenceType.mongodb)
+                .withOption("style", ProgrammingStyle.imperative);
 
         new MainGenerator().generate(configuration);
 
@@ -103,8 +105,8 @@ public class JDLBackendApplicationDefaultGeneratorTest {
                 .withSpecFile("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl")
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
-                .withOption("persistence", JDLBackendApplicationDefaultGenerator.PersistenceType.mongodb)
-                .withOption("style", JDLBackendApplicationDefaultGenerator.ProgrammingStyle.imperative)
+                .withOption("persistence", PersistenceType.mongodb)
+                .withOption("style", ProgrammingStyle.imperative)
                 .withOption("entities", List.of("Organization"));
 
         new MainGenerator().generate(configuration);

@@ -2,6 +2,8 @@ package io.zenwave360.generator.plugins;
 
 import java.util.List;
 
+import io.zenwave360.generator.options.ProgrammingStyle;
+import io.zenwave360.generator.options.asyncapi.AsyncapiRoleType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -10,7 +12,6 @@ import org.junit.jupiter.api.Test;
 
 import io.zenwave360.generator.Configuration;
 import io.zenwave360.generator.MainGenerator;
-import io.zenwave360.generator.generators.AbstractAsyncapiGenerator;
 import nl.altindag.log.LogCaptor;
 
 public class SpringCloudStreams3GeneratorTest {
@@ -39,8 +40,8 @@ public class SpringCloudStreams3GeneratorTest {
                 .withTargetFolder("target/zenwave630/out")
                 .withOption("apiPackage", "io.example.integration.test.api.provider_for_events")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
-                .withOption("role", AbstractAsyncapiGenerator.RoleType.PROVIDER)
-                .withOption("style", SpringCloudStreams3Generator.ProgrammingStyle.IMPERATIVE);
+                .withOption("role", AsyncapiRoleType.provider)
+                .withOption("style", ProgrammingStyle.imperative);
 
         new MainGenerator().generate(configuration);
 
@@ -56,7 +57,7 @@ public class SpringCloudStreams3GeneratorTest {
                 .withTargetFolder("target/zenwave630/out")
                 .withOption("apiPackage", "io.example.integration.test.api.provider_for_commands_imperative")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
-                .withOption("role", AbstractAsyncapiGenerator.RoleType.PROVIDER);
+                .withOption("role", AsyncapiRoleType.provider);
 
         new MainGenerator().generate(configuration);
 
@@ -72,7 +73,7 @@ public class SpringCloudStreams3GeneratorTest {
                 .withTargetFolder("target/zenwave630/out")
                 .withOption("apiPackage", "io.example.integration.test.api.provider_for_commands_imperative_expose_message")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
-                .withOption("role", AbstractAsyncapiGenerator.RoleType.PROVIDER)
+                .withOption("role", AsyncapiRoleType.provider)
                 .withOption("exposeMessage", true);
 
         new MainGenerator().generate(configuration);
@@ -89,8 +90,8 @@ public class SpringCloudStreams3GeneratorTest {
                 .withTargetFolder("target/zenwave630/out")
                 .withOption("apiPackage", "io.example.integration.test.api.provider_for_commands_reactive")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
-                .withOption("role", AbstractAsyncapiGenerator.RoleType.PROVIDER)
-                .withOption("style", SpringCloudStreams3Generator.ProgrammingStyle.REACTIVE);
+                .withOption("role", AsyncapiRoleType.provider)
+                .withOption("style", ProgrammingStyle.reactive);
 
         new MainGenerator().generate(configuration);
 
@@ -106,8 +107,8 @@ public class SpringCloudStreams3GeneratorTest {
                 .withTargetFolder("target/zenwave630/out")
                 .withOption("apiPackage", "io.example.integration.test.api.provider_for_commands_reactive_expose_message")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
-                .withOption("role", AbstractAsyncapiGenerator.RoleType.PROVIDER)
-                .withOption("style", SpringCloudStreams3Generator.ProgrammingStyle.REACTIVE)
+                .withOption("role", AsyncapiRoleType.provider)
+                .withOption("style", ProgrammingStyle.reactive)
                 .withOption("exposeMessage", true);
 
         new MainGenerator().generate(configuration);
@@ -124,7 +125,7 @@ public class SpringCloudStreams3GeneratorTest {
                 .withTargetFolder("target/zenwave630/out")
                 .withOption("apiPackage", "io.example.integration.test.api.client_for_commands")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
-                .withOption("role", AbstractAsyncapiGenerator.RoleType.CLIENT);
+                .withOption("role", AsyncapiRoleType.client);
 
         new MainGenerator().generate(configuration);
 
@@ -140,8 +141,8 @@ public class SpringCloudStreams3GeneratorTest {
                 .withTargetFolder("target/zenwave630/out")
                 .withOption("apiPackage", "io.example.integration.test.api.client_for_events_imperative")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
-                .withOption("role", AbstractAsyncapiGenerator.RoleType.CLIENT)
-                .withOption("style", SpringCloudStreams3Generator.ProgrammingStyle.IMPERATIVE);
+                .withOption("role", AsyncapiRoleType.client)
+                .withOption("style", ProgrammingStyle.imperative);
 
         new MainGenerator().generate(configuration);
 
@@ -157,8 +158,8 @@ public class SpringCloudStreams3GeneratorTest {
                 .withTargetFolder("target/zenwave630/out")
                 .withOption("apiPackage", "io.example.integration.test.api.client_for_events_imperative_expose_message")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
-                .withOption("role", AbstractAsyncapiGenerator.RoleType.CLIENT)
-                .withOption("style", SpringCloudStreams3Generator.ProgrammingStyle.IMPERATIVE)
+                .withOption("role", AsyncapiRoleType.client)
+                .withOption("style", ProgrammingStyle.imperative)
                 .withOption("exposeMessage", true);
 
         new MainGenerator().generate(configuration);
@@ -175,8 +176,8 @@ public class SpringCloudStreams3GeneratorTest {
                 .withTargetFolder("target/zenwave630/out")
                 .withOption("apiPackage", "io.example.integration.test.api.client_for_events_reactive")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
-                .withOption("role", AbstractAsyncapiGenerator.RoleType.CLIENT)
-                .withOption("style", SpringCloudStreams3Generator.ProgrammingStyle.REACTIVE);
+                .withOption("role", AsyncapiRoleType.client)
+                .withOption("style", ProgrammingStyle.reactive);
 
         new MainGenerator().generate(configuration);
 
@@ -192,8 +193,8 @@ public class SpringCloudStreams3GeneratorTest {
                 .withTargetFolder("target/zenwave630/out")
                 .withOption("apiPackage", "io.example.integration.test.api.client_for_events_reactive_expose_message")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
-                .withOption("role", AbstractAsyncapiGenerator.RoleType.CLIENT)
-                .withOption("style", SpringCloudStreams3Generator.ProgrammingStyle.REACTIVE)
+                .withOption("role", AsyncapiRoleType.client)
+                .withOption("style", ProgrammingStyle.reactive)
                 .withOption("exposeMessage", true);
 
         new MainGenerator().generate(configuration);

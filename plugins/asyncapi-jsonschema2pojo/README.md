@@ -15,7 +15,7 @@ ${javadoc}
 | `apiPackage`      | Java API package name                                                                                          | String   | io.example.api       |                  |
 | `modelPackage`    | Java Models package name                                                                                       | String   | io.example.api.model |                  |
 | `bindingTypes`    | Binding names to include in code generation. Generates code for ALL bindings if left empty                     | List     |                      |                  |
-| `role`            | Project role: PROVIDER\|CLIENT                                                                                 | RoleType | PROVIDER             | PROVIDER, CLIENT |
+| `role`            | Project role: provider\|client                                                                                 | RoleType | provider             | provider, client |
 | `operationIds`    | Operation ids to include in code generation. Generates code for ALL if left empty                              | List     | []                   |                  |
 
 ## Getting Help
@@ -47,8 +47,8 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
                 <generatorName>spring-cloud-streams3</generatorName>
                 <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
                 <configOptions>
-                    <role>PROVIDER</role>
-                    <style>IMPERATIVE</style>
+                    <role>provider</role>
+                    <style>imperative</style>
                     <apiPackage>io.zenwave360.example.adapters.events.producer</apiPackage>
                     <modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
                 </configOptions>

@@ -377,8 +377,8 @@ jbang zw -p io.zenwave360.generator.plugins.SpringCloudStream3Configuration \
     specFile=asyncapi.yml targetFolder=target/out \
     apiPackage=io.example.integration.test.api \
     modelPackage=io.example.integration.test.api.model \
-    role=<PROVIDER | CLIENT> \
-    style=<IMPERATIVE | REACTIVE>
+    role=<provider | client> \
+    style=<imperative | reactive>
 ```
 
 ## AsyncAPI interfaces Mocks and Contract Tests (ToBeDefined)

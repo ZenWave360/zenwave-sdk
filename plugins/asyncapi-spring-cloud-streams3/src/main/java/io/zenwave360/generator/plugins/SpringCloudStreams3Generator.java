@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.generators.AbstractAsyncapiGenerator;
+import io.zenwave360.generator.options.asyncapi.AsyncapiOperationType;
+import io.zenwave360.generator.options.ProgrammingStyle;
 import io.zenwave360.generator.parsers.Model;
 import io.zenwave360.generator.templating.HandlebarsEngine;
 import io.zenwave360.generator.templating.TemplateEngine;
@@ -14,17 +16,13 @@ import io.zenwave360.generator.utils.JSONPath;
 
 public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
-    public enum ProgrammingStyle {
-        IMPERATIVE, REACTIVE
-    }
-
     public enum TransactionalOutboxType {
         none, mongodb, jdbc
     }
 
     public String sourceProperty = "api";
     @DocumentedOption(description = "Programming style")
-    public ProgrammingStyle style = ProgrammingStyle.IMPERATIVE;
+    public ProgrammingStyle style = ProgrammingStyle.imperative;
 
     @DocumentedOption(description = "Transactional outbox type for message producers.")
     public TransactionalOutboxType transactionalOutbox = TransactionalOutboxType.none;
@@ -68,7 +66,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
             return String.format("%s%s%s", servicePrefix, context, serviceSuffix);
         });
         handlebarsEngine.getHandlebars().registerHelper("methodSuffix", (context, options) -> {
-            if (exposeMessage || style == ProgrammingStyle.REACTIVE) {
+            if (exposeMessage || style == ProgrammingStyle.reactive) {
                 int messagesCount = JSONPath.get(options.param(0), "$.x--messages.length()", 0);
                 if (messagesCount > 1) {
                     String messageJavaType = JSONPath.get(context, "$.x--javaType");
@@ -103,7 +101,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     }
 
     public List<TemplateInput> getConsumerTemplates() {
-        return style == ProgrammingStyle.IMPERATIVE ? consumerImperativeTemplates : consumerReactiveTemplates;
+        return style == ProgrammingStyle.imperative ? consumerImperativeTemplates : consumerReactiveTemplates;
     }
 
     public String getApiClassName(String serviceName, OperationRoleType operationRoleType) {
@@ -122,12 +120,12 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         Map<String, List<Map<String, Object>>> publishOperations = getPublishOperationsGroupedByTag(apiModel);
         for (Map.Entry<String, List<Map<String, Object>>> entry : subscribeOperations.entrySet()) {
             // boolean isProducer = isProducer(role, OperationType.SUBSCRIBE);
-            OperationRoleType operationRoleType = OperationRoleType.valueOf(role, OperationType.SUBSCRIBE);
+            OperationRoleType operationRoleType = OperationRoleType.valueOf(role, AsyncapiOperationType.subscribe);
             templateOutputList.addAll(generateTemplateOutput(contextModel, entry.getKey(), entry.getValue(), operationRoleType));
         }
         for (Map.Entry<String, List<Map<String, Object>>> entry : publishOperations.entrySet()) {
             // boolean isProducer = isProducer(role, OperationType.PUBLISH);
-            OperationRoleType operationRoleType = OperationRoleType.valueOf(role, OperationType.PUBLISH);
+            OperationRoleType operationRoleType = OperationRoleType.valueOf(role, AsyncapiOperationType.publish);
             templateOutputList.addAll(generateTemplateOutput(contextModel, entry.getKey(), entry.getValue(), operationRoleType));
         }
         return templateOutputList;

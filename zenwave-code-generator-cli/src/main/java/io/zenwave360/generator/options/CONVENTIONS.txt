@@ -1,0 +1,1 @@
+Enums inside this package are used as user-facing configuration options for cli and maven plugin, so they are kept lowercase to improve readability.

@@ -9,23 +9,23 @@ It encapsulates SpringCloud Streams 3 API creating abstractions for many Enterpr
 
 Because APIs mediated by a broker are inherently **asymmetric** it's difficult to establish the roles of client/server: what represents a `publish` operation from one side will be a `subscribe` operation seen from the other side. Also, a given service can act as a publisher and subscriber on the same API.
 
-For these reasons, to avoid defining the same API operations multiple times from each perspective, we propose to define de API only once from the perspective of the PROVIDER of the functionality, which may be a producer, a consumer or both. 
+For these reasons, to avoid defining the same API operations multiple times from each perspective, we propose to define de API only once from the perspective of the provider of the functionality, which may be a producer, a consumer or both. 
 
 Some definitions:
 
 - SERVICE: An independent piece of software, typically a microservice, that provides a set of capabilities to other services.
-- PROVIDER: The service that implements the functionality of the API. It may be accepting asynchronous command request or publishing business domain events.
-- CLIENT/s: The service/s that makes use of the funcionality of the API. It may be requesting asynchronous commands or subscribing to business domain events.
+- provider: The service that implements the functionality of the API. It may be accepting asynchronous command request or publishing business domain events.
+- client/s: The service/s that makes use of the funcionality of the API. It may be requesting asynchronous commands or subscribing to business domain events.
 - PRODUCER: A service that writes a given message.
 - CONSUMER: A service that reads a given message.
 
 
-Use the table to understand which section of AsyncAPI (publish or subscribe) to use for each topic, and which role (PROVIDER or CLIENT) to use on the plugin configuration.
+Use the table to understand which section of AsyncAPI (publish or subscribe) to use for each topic, and which role (provider or client) to use on the plugin configuration.
 
 |                              | Events                | Commands                |
 |------------------------------|-----------------------|-------------------------|
-| PROVIDER                     | Produces (publish)    | Consumes (subscribe)    |
-| CLIENT                       | Consumes (subscribe)  | Produces (publish)      |
+| provider                     | Produces (publish)    | Consumes (subscribe)    |
+| client                       | Consumes (subscribe)  | Produces (publish)      |
 | OperationId Suggested Prefix | **on**&lt;Event Name> | **do**&lt;Command Name> |
 
 ## Enterprise Integration Patterns
@@ -49,7 +49,7 @@ jbang zw -p io.zenwave360.generator.plugins.SpringCloudStream3Configuration --he
 |-----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------|-----------------|----------------------|
 | `specFile`                  | API Specification File                                                                                                                                                                  | URI                     |                 |                      |
 | `targetFolder`              | Target folder to generate code to. If left empty, it will print to stdout.                                                                                                              | File                    |                 |                      |
-| `style`                     | Programming style                                                                                                                                                                       | ProgrammingStyle        | IMPERATIVE      | IMPERATIVE, REACTIVE |
+| `style`                     | Programming style                                                                                                                                                                       | ProgrammingStyle        | imperative      | imperative, reactive |
 | `transactionalOutbox`       | Transactional outbox type for message producers.                                                                                                                                        | TransactionalOutboxType | none            | none, mongodb, jdbc  |
 | `exposeMessage`             | Whether to expose underlying spring Message to consumers or not. Default: false                                                                                                         | boolean                 | false           |                      |
 | `methodAndMessageSeparator` | To avoid method erasure conflicts, when exposeMessage or reactive style this character will be used as separator to append message payload type to method names in consumer interfaces. | String                  | $               |                      |
@@ -61,7 +61,7 @@ jbang zw -p io.zenwave360.generator.plugins.SpringCloudStream3Configuration --he
 | `apiPackage`                | Java API package name                                                                                                                                                                   | String                  |                 |                      |
 | `modelPackage`              | Java Models package name                                                                                                                                                                | String                  |                 |                      |
 | `bindingTypes`              | Binding names to include in code generation. Generates code for ALL bindings if left empty                                                                                              | List                    |                 |                      |
-| `role`                      | Project role: PROVIDER\                                                                                                                                                                 | CLIENT                  | RoleType        | PROVIDER             | PROVIDER, CLIENT  |
+| `role`                      | Project role: provider\                                                                                                                                                                 | client                  | RoleType        | provider             | provider, client  |
 | `operationIds`              | Operation ids to include in code generation. Generates code for ALL if left empty                                                                                                       | List                    | []              |                      |
 | `skipFormatting`            | Skip java sources output formatting                                                                                                                                                     | boolean                 | false           |                      |
 
@@ -127,8 +127,8 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
         <generatorName>spring-cloud-streams3</generatorName>
         <inputSpec>classpath:model/asyncapi.yml</inputSpec>
         <configOptions>
-            <role>PROVIDER</role>
-            <style>IMPERATIVE</style>
+            <role>provider</role>
+            <style>imperative</style>
             <apiPackage>io.zenwave360.example.core.events.outbound.outbox.none</apiPackage>
             <modelPackage>io.zenwave360.example.core.events.model</modelPackage>
         </configOptions>
@@ -149,8 +149,8 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
         <generatorName>spring-cloud-streams3</generatorName>
         <inputSpec>classpath:model/asyncapi.yml</inputSpec>
         <configOptions>
-            <role>PROVIDER</role>
-            <style>IMPERATIVE</style>
+            <role>provider</role>
+            <style>imperative</style>
             <transactionalOutbox>mongodb</transactionalOutbox>
             <apiPackage>io.zenwave360.example.core.events.outbound.outbox.mongodb</apiPackage>
             <modelPackage>io.zenwave360.example.core.events.model</modelPackage>
@@ -172,8 +172,8 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
         <generatorName>spring-cloud-streams3</generatorName>
         <inputSpec>classpath:model/asyncapi.yml</inputSpec>
         <configOptions>
-            <role>PROVIDER</role>
-            <style>IMPERATIVE</style>
+            <role>provider</role>
+            <style>imperative</style>
             <transactionalOutbox>jdbc</transactionalOutbox>
             <apiPackage>io.zenwave360.example.core.events.outbound.outbox.jdbc</apiPackage>
             <modelPackage>io.zenwave360.example.core.events.model</modelPackage>
@@ -214,8 +214,8 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
         <generatorName>spring-cloud-streams3</generatorName>
         <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi-avro.yml</inputSpec>
         <configOptions>
-            <role>PROVIDER</role>
-            <style>IMPERATIVE</style>
+            <role>provider</role>
+            <style>imperative</style>
             <apiPackage>io.zenwave360.example.core.events.outbound.avro</apiPackage>
         </configOptions>
     </configuration>
@@ -236,8 +236,8 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
         <generatorName>spring-cloud-streams3</generatorName>
         <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
         <configOptions>
-            <role>CLIENT</role>
-            <style>IMPERATIVE</style>
+            <role>client</role>
+            <style>imperative</style>
             <apiPackage>io.zenwave360.example.core.events.inbound.imperative</apiPackage>
             <modelPackage>io.zenwave360.example.core.events.model</modelPackage>
         </configOptions>
@@ -258,8 +258,8 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
         <generatorName>spring-cloud-streams3</generatorName>
         <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
         <configOptions>
-            <role>CLIENT</role>
-            <style>REACTIVE</style>
+            <role>client</role>
+            <style>reactive</style>
             <apiPackage>io.zenwave360.example.core.events.inbound.reactive</apiPackage>
             <modelPackage>io.zenwave360.example.core.events.model</modelPackage>
         </configOptions>
