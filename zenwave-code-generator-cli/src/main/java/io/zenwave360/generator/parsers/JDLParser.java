@@ -47,21 +47,6 @@ public class JDLParser implements Parser {
         return this;
     }
 
-    protected String loadSpecFile(String specFile) {
-        if (specFile.startsWith("classpath:")) {
-            try {
-                return new String(getClass().getClassLoader().getResourceAsStream(specFile.replaceFirst("classpath:", "")).readAllBytes(), StandardCharsets.UTF_8);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        try {
-            return Files.readString(Paths.get(specFile), StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @Override
     public Map<String, Object> parse() throws IOException {
         String jdlString = Arrays.stream(specFiles).map(file -> loadSpecFile(file)).collect(Collectors.joining());
