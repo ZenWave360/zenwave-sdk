@@ -28,7 +28,13 @@ Using JHipster Domain Language as **Ubiquitous Language** for [Data on the Insid
 
 ZenWave Code Generator is designed to be easily extensible and adaptable to your project or your organization needs and likes. You can always [fork an existing, standard or custom plugin](https://github.com/ZenWave360/zenwave-code-generator/#forking-an-standard-or-custom-plugin).
 
-Please refer to [**ZenWave Code Generator**](https://github.com/ZenWave360/zenwave-code-generator/) in GitHub for install instructions.
+You can install the latest release using [jbang](https://www.jbang.dev) running the following command:
+
+```shell
+jbang alias add --name=zw release@zenwave360/zenwave-code-generator --fresh
+```
+
+Please refer to [**ZenWave Code Generator**](https://github.com/ZenWave360/zenwave-code-generator/) for more detailed installation options.
 
 **Note:** Official plugins are designed to generate functional code and tests on top of existing projects. Creating a base project is out of scope, but you can always go to [start.spring.io](http://start.spring.io) or [start.jhipster.tech](https://start.jhipster.tech/), in case your company doesn't already have a project starter or archetype.
 
