@@ -1,0 +1,18 @@
+@media only screen and (min-width: 1400px) {
+  #site-nav, .site-header {
+     width: 350px;
+  }
+  .main {
+    max-width: 1000px;
+  }
+  .nav-list-item.active li:before {
+    content: "\2713";
+    position: relative;
+    left: -8px;
+    color: #7253ed;
+  }
+  .nav-list-item.active li {
+    list-style-type: none;
+    margin-left: 10px;
+  }
+}

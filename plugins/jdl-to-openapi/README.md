@@ -1,4 +1,4 @@
-# JDLToOpenAPIConfiguration
+# JDL To OpenAPI Generator
 
 Generates a full OpenAPI definitions for CRUD operations from JDL models
 

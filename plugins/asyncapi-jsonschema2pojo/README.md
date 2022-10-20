@@ -1,4 +1,4 @@
-# AsyncApiJsonSchema2PojoConfiguration
+# AsyncAPI and JsonSchema2Pojo (with maven plugin)
 
 Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files
 

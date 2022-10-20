@@ -1,4 +1,4 @@
-# JDLBackendApplicationDefaultConfiguration
+# JDL 2 Backend Application Generator
 
 Generates a full backend application using a flexible hexagonal architecture
 

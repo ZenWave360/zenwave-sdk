@@ -1,4 +1,4 @@
-# JDLToAsyncAPIConfiguration
+# JDL To AsyncAPI Generator
 
 Generates a full AsyncAPI definitions for CRUD operations from JDL models
 

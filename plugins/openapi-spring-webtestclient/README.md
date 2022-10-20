@@ -1,4 +1,4 @@
-# SpringWebTestClientConfiguration
+# Spring WebTestClient Generator
 
 Generates spring WebTestClient tests from OpenAPI defined endpoints.
 

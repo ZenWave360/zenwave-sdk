@@ -10,6 +10,8 @@
 [![branches coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-code-generator/badges/branches.svg)](https://github.com/ZenWave360/zenwave-code-generator/actions/workflows/build.yml)
 [![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-code-generator)](https://github.com/ZenWave360/zenwave-code-generator/blob/main/LICENSE)
 
+## Domain Driven Design (DDD) and API-First for Event Driven Microservices
+
 ZenWave Code Generator is a configurable and extensible code generator tool for **Domain Driven Design (DDD)** and **API-First** for **Event Driven Microservices** that can generate code from a mix of different models including:
 
 - [JHipster Domain Language (JDL)](https://www.jhipster.tech/jdl/intro)
@@ -30,7 +32,7 @@ Please refer to [**ZenWave Code Generator**](https://github.com/ZenWave360/zenwa
 
 **Note:** Official plugins are designed to generate functional code and tests on top of existing projects. Creating a base project is out of scope, but you can always go to [start.spring.io](http://start.spring.io) or [start.jhipster.tech](https://start.jhipster.tech/), in case your company doesn't already have a project starter or archetype.
 
-# Not (just) a Code Generator
+## Not (just) a Code Generator
 
 ZenWave Code Generator is not a Code Generator but a **Modeling Tool** for Domain Driven Design and API-First in disguise of a _code generator_.
 
@@ -40,7 +42,7 @@ Its purpose is to produce successful software projects by dramatically shortenin
 
 In this way all team members: **Domain Experts**, **Product Owners**, **Software Archytechts**, **Developers** and **Testers** can provide early feedback based on an **Ubiquitous Language (JDL)** and the software and tests generated from that model.
 
-# Why Domain Driven Design?
+## Why Domain Driven Design?
 
 > "There are three types of developers implementing microservices. Those who use DDD, those who don't realise they do, and those who fail."
 
@@ -51,35 +53,36 @@ In this way all team members: **Domain Experts**, **Product Owners**, **Software
 ![Design to Code](docs/ZenWave360-Design-Code-Loop.excalidraw.svg)
 
 
-# Table of Contents
+## Table of Contents
 
 <!-- TOC -->
 * [ZenWave Code Generator](#zenwave-code-generator)
-* [Not (just) a Code Generator](#not--just--a-code-generator)
-* [Why Domain Driven Design?](#why-domain-driven-design)
-* [Table of Contents](#table-of-contents)
-* [Generate complete Event Driven Microservices using DDD and API-First](#generate-complete-event-driven-microservices-using-ddd-and-api-first)
-* [What can we generate for you today?](#what-can-we-generate-for-you-today)
-  * [Example: Generate a complete Backend Application from a JDL model](#example--generate-a-complete-backend-application-from-a-jdl-model)
-  * [Describe your core business model using JDL:](#describe-your-core-business-model-using-jdl-)
-  * [Generate Backend Application](#generate-backend-application)
-  * [Generate OpenAPI draft from JDL model](#generate-openapi-draft-from-jdl-model)
-  * [Generate AsyncAPI definition from JDL model](#generate-asyncapi-definition-from-jdl-model)
-  * [Configure ZenWave Maven Plugin for AsyncAPI generation](#configure-zenwave-maven-plugin-for-asyncapi-generation)
-  * [Spring REST Controllers from OpenAPI](#spring-rest-controllers-from-openapi)
-  * [Integration Test for your Controllers using Spring WebTestClient](#integration-test-for-your-controllers-using-spring-webtestclient)
-  * [E2E and Contract Testing](#e2e-and-contract-testing)
-    * [KarateDSL Ent-to-End tests for REST APIs (using sister project ZenWave KarateIDE)](#karatedsl-ent-to-end-tests-for-rest-apis--using-sister-project-zenwave-karateide-)
-    * [High Fidelity Stateful REST API Mocks (using sister project ZenWave ApiMock)](#high-fidelity-stateful-rest-api-mocks--using-sister-project-zenwave-apimock-)
-    * [AsyncAPI interfaces Mocks and Contract Tests (ToBeDefined)](#asyncapi-interfaces-mocks-and-contract-tests--tobedefined-)
+  * [Domain Driven Design (DDD) and API-First for Event Driven Microservices](#domain-driven-design--ddd--and-api-first-for-event-driven-microservices)
+  * [Not (just) a Code Generator](#not--just--a-code-generator)
+  * [Why Domain Driven Design?](#why-domain-driven-design)
+  * [Table of Contents](#table-of-contents)
+  * [Generate complete Event Driven Microservices using DDD and API-First](#generate-complete-event-driven-microservices-using-ddd-and-api-first)
+  * [What can we generate for you today?](#what-can-we-generate-for-you-today)
+    * [Example: Generate a complete Backend Application from a JDL model](#example--generate-a-complete-backend-application-from-a-jdl-model)
+    * [Describe your core business model using JDL:](#describe-your-core-business-model-using-jdl-)
+    * [Generate Backend Application](#generate-backend-application)
+    * [Generate OpenAPI draft from JDL model](#generate-openapi-draft-from-jdl-model)
+    * [Generate AsyncAPI definition from JDL model](#generate-asyncapi-definition-from-jdl-model)
+    * [Configure ZenWave Maven Plugin for AsyncAPI generation](#configure-zenwave-maven-plugin-for-asyncapi-generation)
+    * [Spring REST Controllers from OpenAPI](#spring-rest-controllers-from-openapi)
+    * [Integration Test for your Controllers using Spring WebTestClient](#integration-test-for-your-controllers-using-spring-webtestclient)
+    * [E2E and Contract Testing](#e2e-and-contract-testing)
+      * [KarateDSL Ent-to-End tests for REST APIs (using sister project ZenWave KarateIDE)](#karatedsl-ent-to-end-tests-for-rest-apis--using-sister-project-zenwave-karateide-)
+      * [High Fidelity Stateful REST API Mocks (using sister project ZenWave ApiMock)](#high-fidelity-stateful-rest-api-mocks--using-sister-project-zenwave-apimock-)
+      * [AsyncAPI interfaces Mocks and Contract Tests (ToBeDefined)](#asyncapi-interfaces-mocks-and-contract-tests--tobedefined-)
 * [Refactoring a legacy monolith](#refactoring-a-legacy-monolith)
-  * [Reverse engineering JDL from Java classes (JPA and MongoDB)](#reverse-engineering-jdl-from-java-classes--jpa-and-mongodb-)
+    * [Reverse engineering JDL from Java classes (JPA and MongoDB)](#reverse-engineering-jdl-from-java-classes--jpa-and-mongodb-)
 * [Adding functionality on top of an existent microservices architecture](#adding-functionality-on-top-of-an-existent-microservices-architecture)
-  * [Reverse engineering JDL from Java classes (JPA and MongoDB)](#reverse-engineering-jdl-from-java-classes--jpa-and-mongodb-)
-  * [Reverse engineering JDL from OpenAPI definition schemas](#reverse-engineering-jdl-from-openapi-definition-schemas)
+    * [Reverse engineering JDL from Java classes (JPA and MongoDB)](#reverse-engineering-jdl-from-java-classes--jpa-and-mongodb-)
+    * [Reverse engineering JDL from OpenAPI definition schemas](#reverse-engineering-jdl-from-openapi-definition-schemas)
 <!-- TOC -->
 
-# Generate complete Event Driven Microservices using DDD and API-First
+## Generate complete Event Driven Microservices using DDD and API-First
 
 You can generate complete Event Driven Microservices using DDD and API-First
 
@@ -95,7 +98,7 @@ You can generate complete Event Driven Microservices using DDD and API-First
 ![ZenWave Features MindMap](docs/ZenWave-MindMap.svg)
 
 
-# What can we generate for you today?
+## What can we generate for you today?
 
 Whether you are:
 
@@ -151,11 +154,12 @@ Whether you are:
       - [x] Spring Data MongoDB annotations
       - [x] JPA annotations
 
-## Example: Generate a complete Backend Application from a JDL model
+### Example: Generate a complete Backend Application from a JDL model
 
-The following instructions were executed on top of a standard https://start.spring.io generated application for MongoDB, ElasticSearch and Mapstruct with the following JDL model as only input:
+You can navigate the [complete example](https://github.com/ZenWave360/zenwave-examples/tree/main/examples/spring-boot-mongodb-elasticsearch-kafka-example) or use [this skeleton](https://github.com/ZenWave360/zenwave-examples/tree/main/skeletons/spring-boot-mongodb-elasticsearch-kafka-skeleton) to follow along these instructions.
 
-## Describe your core business model using JDL:
+
+### Describe your core business model using JDL:
 
 <details open markdown="1">
   <summary>orders-model.jdl (expand to see)</summary>
@@ -235,7 +239,7 @@ Default backend generator supports the following @annotations:
 **@skip** entities used as search criteria should be marked with @skip
 
 
-## Generate Backend Application
+### Generate Backend Application
 
 ```shell
 jbang zw -p io.zenwave360.generator.plugins.JDLBackendApplicationDefaultConfiguration \
@@ -311,7 +315,7 @@ src/test/java/io/zenwave360/example/core/outbound/mongodb/inmemory/ShippingDetai
 
 </details>
 
-## Generate OpenAPI draft from JDL model
+### Generate OpenAPI draft from JDL model
 
 Generate a baseline OpenAPI definition from JDL entities:
 
@@ -324,7 +328,7 @@ jbang zw -p io.zenwave360.generator.plugins.JDLToOpenAPIConfiguration \
     targetFile=src/main/resources/model/openapi.yml
 ```
 
-## Generate AsyncAPI definition from JDL model
+### Generate AsyncAPI definition from JDL model
 
 Generate AsyncAPI definition from JDL entities:
 
@@ -338,7 +342,7 @@ jbang zw -p io.zenwave360.generator.plugins.JDLToAsyncAPIConfiguration \
     targetFile=src/main/resources/model/asyncapi.yml
 ```
 
-## Configure ZenWave Maven Plugin for AsyncAPI generation
+### Configure ZenWave Maven Plugin for AsyncAPI generation
 
 <details open markdown="1">
   <summary>ZenWave Code Generator Maven Plugin (expand to see)</summary>
@@ -439,7 +443,7 @@ jbang zw -p io.zenwave360.generator.plugins.JDLToAsyncAPIConfiguration \
 </details>
 
 
-## Spring REST Controllers from OpenAPI
+### Spring REST Controllers from OpenAPI
 
 You can generate SpringMVC controllers that implements the interfaces generated by the official OpenAPI generator.
 
@@ -467,7 +471,7 @@ src/main/java/io/zenwave360/example/adapters/web/mappers/CustomerOrderDTOsMapper
 ```
 </details>
 
-## Integration Test for your Controllers using Spring WebTestClient
+### Integration Test for your Controllers using Spring WebTestClient
 
 Generates test for SpringMVC or Spring WebFlux using WebTestClient based on OpenAPI specification.
 
@@ -483,9 +487,9 @@ jbang zw -p io.zenwave360.generator.plugins.SpringWebTestClientConfiguration \
     groupBy=SERVICE
 ```
 
-## E2E and Contract Testing
+### E2E and Contract Testing
 
-### KarateDSL Ent-to-End tests for REST APIs (using sister project ZenWave KarateIDE)
+#### KarateDSL Ent-to-End tests for REST APIs (using sister project ZenWave KarateIDE)
 
 Use sister project [ZenWave KarateIDE](https://marketplace.visualstudio.com/items?itemName=KarateIDE.karate-ide)
 
@@ -496,19 +500,19 @@ You can also find to deep dives into Contract Testing and API Mocking in this tw
 - [Generating Karate Test Features from OpenAPI @medium](https://medium.com/@ivangsa/from-manual-to-contract-testing-with-karatedsl-and-karateide-i-5884f1732680#8311)
 - [Generate Tests that simulates end-user Business Flows @medium](https://medium.com/@ivangsa/from-manual-to-contract-testing-with-karatedsl-and-karateide-i-5884f1732680#9b70)
 
-### High Fidelity Stateful REST API Mocks (using sister project ZenWave ApiMock)
+#### High Fidelity Stateful REST API Mocks (using sister project ZenWave ApiMock)
 
 See sister project [ZenWave ApiMock](https://github.com/ZenWave360/zenwave-apimock)
 
 See also medium article: [High Fidelity Stateful Mocks (Consumer Contracts) with OpenAPI and KarateDSL @medium](https://medium.com/@ivangsa/high-fidelity-stateful-mocks-consumer-contracts-with-openapi-and-karatedsl-85a7f31cf84e)
 
-### AsyncAPI interfaces Mocks and Contract Tests (ToBeDefined)
+#### AsyncAPI interfaces Mocks and Contract Tests (ToBeDefined)
 
 _TODO_: Use Pact.io? Spring Cloud Contract? Roll your own?
 
 # Refactoring a legacy monolith
 
-## Reverse engineering JDL from Java classes (JPA and MongoDB)
+### Reverse engineering JDL from Java classes (JPA and MongoDB)
 
 If starting with legacy project, you can reverse engineer JDL from Java entity classes. JPA and MongoDB are supported.
 
@@ -532,11 +536,11 @@ System.out.println(jdl);
 
 # Adding functionality on top of an existent microservices architecture
 
-## Reverse engineering JDL from Java classes (JPA and MongoDB)
+### Reverse engineering JDL from Java classes (JPA and MongoDB)
 
 When your domain java code evolves you may want to regenerate entities back from java code, see: [Reverse engineering JDL from Java classes (JPA and MongoDB)](#reverse-engineering-jdl-from-java-classes-jpa-and-mongodb)
 
-## Reverse engineering JDL from OpenAPI definition schemas
+### Reverse engineering JDL from OpenAPI definition schemas
 
 Reverse engineer JDL entities from OpenAPI schemas:
 

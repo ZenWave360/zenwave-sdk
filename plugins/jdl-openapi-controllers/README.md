@@ -1,4 +1,4 @@
-# JDLOpenAPIControllersConfiguration
+# OpenAPI: REST Controllers Generator
 
 Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.
 
