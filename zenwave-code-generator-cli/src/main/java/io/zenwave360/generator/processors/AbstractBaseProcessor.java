@@ -3,9 +3,6 @@ package io.zenwave360.generator.processors;
 import java.util.List;
 import java.util.Map;
 
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.PathNotFoundException;
-
 import io.zenwave360.generator.utils.NamingUtils;
 
 public abstract class AbstractBaseProcessor implements Processor {
@@ -40,7 +37,7 @@ public abstract class AbstractBaseProcessor implements Processor {
     protected void addOperationIdVariants(Map<String, Object> operation) {
         if (operation != null) {
             operation.put("x--operationIdCamelCase", NamingUtils.asCamelCase((String) operation.get("operationId")));
-            operation.put("x--operationIdKebabCase", NamingUtils.asKebabCase((String) operation.get("operationId")));
+            operation.put("x--operationIdKebabCase", NamingUtils.kebabCase((String) operation.get("operationId")));
         }
     }
 }

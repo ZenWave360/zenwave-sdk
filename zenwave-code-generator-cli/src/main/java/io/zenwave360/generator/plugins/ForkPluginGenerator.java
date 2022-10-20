@@ -190,7 +190,7 @@ public class ForkPluginGenerator implements Generator {
         String[] sourcePackageAndClass = splitPackageAndClass(sourcePluginClassName);
         String[] targetPackageAndClass = splitPackageAndClass(targetPluginClassName);
 
-        String targetArtifactId = NamingUtils.asKebabCase(targetPackageAndClass[1]).replace("-configuration", "");
+        String targetArtifactId = NamingUtils.kebabCase(targetPackageAndClass[1]).replace("-configuration", "");
 
         String pom = Files.readString(Path.of(pomFile.toURI()));
         String artifactIdMatch = findMatchWithShorterIndent(pom, artifactIdPattern);

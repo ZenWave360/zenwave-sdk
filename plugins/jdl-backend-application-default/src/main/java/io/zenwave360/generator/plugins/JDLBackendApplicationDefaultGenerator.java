@@ -76,8 +76,8 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
 
     protected List<Object[]> templatesByService = List.of(
             new Object[] {"src/main/java", "core/inbound/Service.java", "core/inbound/{{service.name}}.java", JAVA},
-            new Object[] {"src/main/java", "core/implementation/{{style}}/ServiceImpl.java", "core/implementation/{{service.name}}Impl.java", JAVA},
-            new Object[] {"src/test/java", "core/implementation/{{style}}/ServiceTest.java", "core/implementation/{{service.name}}Test.java", JAVA});
+            new Object[] {"src/main/java", "core/implementation/{{persistence}}/{{style}}/ServiceImpl.java", "core/implementation/{{service.name}}Impl.java", JAVA},
+            new Object[] {"src/test/java", "core/implementation/{{persistence}}/{{style}}/ServiceTest.java", "core/implementation/{{service.name}}Test.java", JAVA});
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;

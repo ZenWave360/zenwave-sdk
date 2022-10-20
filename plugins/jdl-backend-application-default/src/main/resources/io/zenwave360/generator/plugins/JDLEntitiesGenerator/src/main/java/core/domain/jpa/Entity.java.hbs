@@ -23,10 +23,8 @@ public class {{entity.className}} implements Serializable {
     private {{idJavaType}} id;
 
 {{#each entity.fields as |field|}}
-    @Column(name = "field.name")
-    {{#each field.validations as |validation|}}
-        {{#if validation.name eq 'required'}}@Required{{/if}}
-    {{/each}}
+    {{{fieldValidationAnnotations field}}}
+    @Column(name = "{{snakeCase field.name}}")
     private {{field.type}} {{field.name}};
 {{/each}}
 

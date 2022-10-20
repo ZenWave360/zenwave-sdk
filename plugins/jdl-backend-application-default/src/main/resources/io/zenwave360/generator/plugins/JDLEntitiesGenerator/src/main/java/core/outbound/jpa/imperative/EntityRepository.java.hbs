@@ -1,0 +1,12 @@
+package {{basePackage}}.core.outbound.mongodb;
+
+import {{basePackage}}.core.domain.{{entity.className}};
+import org.springframework.data.jpa.repository.*;
+import org.springframework.stereotype.Repository;
+
+/**
+ * Spring Data JPA repository for the {{entity.className}} entity.
+ */
+@SuppressWarnings("unused")
+@Repository
+public interface {{entity.className}}Repository extends JpaRepository<{{entity.className}}, {{idJavaType}}> {}

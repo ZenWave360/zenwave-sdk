@@ -54,7 +54,11 @@ public class CustomHandlebarsHelpers {
     }
 
     public static String kebabCase(String text, Options options) throws IOException {
-        return text != null ? NamingUtils.asKebabCase(text) : null;
+        return text != null ? NamingUtils.kebabCase(text) : null;
+    }
+
+    public static String snakeCase(String text, Options options) throws IOException {
+        return text != null ? NamingUtils.snakeCase(text) : null;
     }
 
     public static String joinWithTemplate(Collection<Object> context, Options options) throws IOException {

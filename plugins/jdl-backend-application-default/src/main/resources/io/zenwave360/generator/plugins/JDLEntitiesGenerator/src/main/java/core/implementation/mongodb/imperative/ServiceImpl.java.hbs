@@ -1,0 +1,98 @@
+package {{basePackage}}.core.implementation;
+
+import {{basePackage}}.core.domain.*;
+import {{basePackage}}.core.inbound.*;
+import {{basePackage}}.core.inbound.dtos.*;
+import {{basePackage}}.core.implementation.mappers.*;
+import {{basePackage}}.core.outbound.mongodb.*;
+{{#if jdl.options.options.search}}
+import {{basePackage}}.core.outbound.search.*;
+{{/if}}
+
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+/**
+ * Service Implementation for managing {{service.entityNames}}.
+ */
+@Service
+public class {{service.name}}Impl implements {{service.name}} {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
+{{#each entities as |entity|}}
+    private final {{entity.className}}Mapper {{entity.instanceName}}Mapper;
+    {{~#unless (skipEntityRepository this)}}
+    private final {{entity.className}}Repository {{entity.instanceName}}Repository;
+    {{~/unless}}
+    {{~#if options.search}}
+    private final {{entity.className}}SearchRepository {{entity.instanceName}}SearchRepository;
+    {{~/if}}
+{{/each}}
+
+    /**
+     * Constructor.
+     */
+    public {{service.name}}Impl({{#joinWithTemplate service.entities ", "}}{{className}}Mapper {{instanceName}}Mapper{{#unless (skipEntityRepository this)}}, {{className}}Repository {{instanceName}}Repository{{/unless}}{{#if options.search}}, {{className}}SearchRepository {{instanceName}}SearchRepository{{/if}}{{/joinWithTemplate}}) {
+        {{~#joinWithTemplate service.entities ~}}
+            this.{{instanceName}}Mapper = {{instanceName}}Mapper;
+            {{#unless (skipEntityRepository this)}}this.{{instanceName}}Repository = {{instanceName}}Repository;{{/unless}}
+            {{#if options.search}}this.{{instanceName}}SearchRepository = {{instanceName}}SearchRepository;{{/if}}
+        {{~/joinWithTemplate~}}
+    }
+
+{{#each entities as |entity|}}
+    // {{entity.name}}
+
+    @Override
+    public {{entity.className}} create{{entity.className}}({{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
+        log.debug("Request to save {{entity.className}}{{inputDTOSuffix}} : {}", {{entity.instanceName}}{{inputDTOSuffix}});
+        var {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}}Mapper.update(new {{entity.className}}(), {{entity.instanceName}}{{inputDTOSuffix}}));
+        return {{entity.instanceName}};
+    }
+
+    @Override
+    public Optional<{{entity.className}}> update{{entity.className}}({{idJavaType}} id, {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
+        log.debug("Request to update {{entity.className}} : {}", {{entity.instanceName}}{{inputDTOSuffix}});
+
+        var {{entity.instanceName}} = {{entity.instanceName}}Repository
+                .findById(id)
+                .map(existing{{entity.className}} -> {
+                    return {{entity.instanceName}}Mapper.update(existing{{entity.className}}, {{entity.instanceName}}{{inputDTOSuffix}});
+                })
+                .map({{entity.instanceName}}Repository::save);
+        return {{entity.instanceName}};
+    }
+
+    @Override
+    public Page<{{entity.className}}> list{{entity.classNamePlural}}(Pageable pageable) {
+        log.debug("Request list of {{entity.classNamePlural}}: {}", pageable);
+        return {{entity.instanceName}}Repository.findAll(pageable);
+    }
+
+    {{~#if entity.options.searchCriteria}}
+    @Override
+    public Page<{{entity.className}}> search{{entity.classNamePlural}}({{criteriaClassName entity}} criteria, Pageable pageable) {
+        log.debug("Request to search {{entity.classNamePlural}}: {} - {}", criteria, pageable);
+        // TODO implement this search by criteria
+        return {{entity.instanceName}}Repository.findAll(pageable);
+    }
+    {{~/if}}
+
+    @Override
+    public Optional<{{entity.className}}> get{{entity.className}}({{idJavaType}} id) {
+        log.debug("Request to get {{entity.className}} : {}", id);
+        return {{entity.instanceName}}Repository.findById(id);
+    }
+
+    @Override
+    public void delete{{entity.className}}({{idJavaType}} id) {
+        log.debug("Request to delete {{entity.className}} : {}", id);
+        {{entity.instanceName}}Repository.deleteById(id);
+    }
+{{/each}}
+}

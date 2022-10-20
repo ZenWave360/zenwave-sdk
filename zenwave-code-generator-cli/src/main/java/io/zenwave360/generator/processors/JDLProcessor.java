@@ -1,7 +1,6 @@
 package io.zenwave360.generator.processors;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +38,7 @@ public class JDLProcessor extends AbstractBaseProcessor {
 
             List.of("name", "instanceName", "className", "classNamePlural", "instanceNamePlural", "tableName")
                     .forEach(field -> searchCriteriaObject.put(field, entity.get(field) + criteriaDTOSuffix));
-            List.of("kebabCase", "kebabCasePlural").forEach(field -> searchCriteriaObject.put(field, entity.get(field) + "-" + NamingUtils.asKebabCase(criteriaDTOSuffix)));
+            List.of("kebabCase", "kebabCasePlural").forEach(field -> searchCriteriaObject.put(field, entity.get(field) + "-" + NamingUtils.kebabCase(criteriaDTOSuffix)));
 
             ((List) JSONPath.get(searchCriteriaObject, "$.fields.*.validations")).forEach(h -> ((Map) h).clear());
 

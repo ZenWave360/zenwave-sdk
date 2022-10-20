@@ -31,11 +31,15 @@ public class NamingUtils {
         return StringUtils.join(tokens);
     }
 
-    public static String asKebabCase(String value) {
+    public static String kebabCase(String value) {
         // value = value.replaceAll("([A-Z])([a-z])", "-$1$2").toLowerCase();
         value = value.replaceAll("([a-z])([A-Z])", "$1-$2");
         value = value.replaceAll(" ", "-");
         value = value.replaceAll("--", "-");
         return value.toLowerCase();
+    }
+
+    public static String snakeCase(String value) {
+        return kebabCase(value).replaceAll("-", "_");
     }
 }
