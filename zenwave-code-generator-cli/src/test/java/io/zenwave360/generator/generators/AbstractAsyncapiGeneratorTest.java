@@ -42,6 +42,8 @@ public class AbstractAsyncapiGeneratorTest {
 
         Assertions.assertTrue(newAbstractAsyncapiGenerator().isProducer(AsyncapiRoleType.provider, AsyncapiOperationType.publish));
         Assertions.assertTrue(newAbstractAsyncapiGenerator().isProducer(AsyncapiRoleType.client, AsyncapiOperationType.subscribe));
+        Assertions.assertFalse(newAbstractAsyncapiGenerator().isProducer(AsyncapiRoleType.provider, AsyncapiOperationType.subscribe));
+        Assertions.assertFalse(newAbstractAsyncapiGenerator().isProducer(AsyncapiRoleType.client, AsyncapiOperationType.publish));
     }
 
     @Test
