@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import io.zenwave360.generator.generators.AbstractAsyncapiGenerator.OperationRoleType;
+import io.zenwave360.generator.options.asyncapi.AsyncapiOperationType;
 import io.zenwave360.generator.options.asyncapi.AsyncapiRoleType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,17 @@ public class AbstractAsyncapiGeneratorTest {
                 return null;
             }
         };
+    }
+
+    @Test
+    public void testOperationRoleType() {
+        Assertions.assertEquals(OperationRoleType.EVENT_PRODUCER, OperationRoleType.valueOf(AsyncapiRoleType.provider, AsyncapiOperationType.publish));
+        Assertions.assertEquals(OperationRoleType.COMMAND_CONSUMER, OperationRoleType.valueOf(AsyncapiRoleType.provider, AsyncapiOperationType.subscribe));
+        Assertions.assertEquals(OperationRoleType.EVENT_CONSUMER, OperationRoleType.valueOf(AsyncapiRoleType.client, AsyncapiOperationType.publish));
+        Assertions.assertEquals(OperationRoleType.COMMAND_PRODUCER, OperationRoleType.valueOf(AsyncapiRoleType.client, AsyncapiOperationType.subscribe));
+
+        Assertions.assertTrue(newAbstractAsyncapiGenerator().isProducer(AsyncapiRoleType.provider, AsyncapiOperationType.publish));
+        Assertions.assertTrue(newAbstractAsyncapiGenerator().isProducer(AsyncapiRoleType.client, AsyncapiOperationType.subscribe));
     }
 
     @Test

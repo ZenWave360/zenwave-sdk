@@ -130,7 +130,7 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
      * @return
      */
     public boolean isProducer(AsyncapiRoleType roleType, AsyncapiOperationType operationType) {
-        if (AsyncapiRoleType.provider == role && AsyncapiOperationType.publish == operationType || AsyncapiRoleType.client == role && AsyncapiOperationType.subscribe == operationType) {
+        if ((AsyncapiRoleType.provider == roleType && AsyncapiOperationType.publish == operationType) || (AsyncapiRoleType.client == roleType && AsyncapiOperationType.subscribe == operationType)) {
             return true;
         }
         return false;
