@@ -1,0 +1,304 @@
+# An "Online Food Delivery Service"
+
+We are going to use an hypothetical **Online Food Delivery Service** system as an example to showcase how you can model and design a complex distributed system using JDL, OpenAPI and AsyncAPI...
+
+# Designing a system from scratch with DDD and API-First
+
+## DDD: From Idea to JDL
+
+- **Domain Map:** Sketch your full domain model
+
+![01-DomainMap](docs/01-DomainMap.excalidraw.svg)
+
+- **Domain Subdomains:** Decompose your model into manageable subdomains
+
+![02-DomainSubdomains](docs/02-DomainSubdomains.excalidraw.svg)
+
+- **Domain Bounded Contexts:** Separate your subdomains as separated bounded contexts. Entities from different bounded context can only be linked by _id_ but you can implement _query views_ and caches using patterns like CQRS to synchronize data from different BCs.
+
+![03-DomainBoundedContexts](docs/03-DomainBoundedContexts.excalidraw.svg)
+
+- **Define Aggregates and Entities in your Bounded Contexts:** Now you can describe your aggregate roots and their composing entities into separate JDL files (click to expand to see file contents):
+
+<details markdown="1">
+  <summary>Orders Bounded Context.jdl</summary>
+
+```
+//==========================================================
+// Orders BC
+//==========================================================
+
+/**
+ * The Order entity.
+ */
+ @AggregateRoot
+entity Order {
+    state OrderState /** state */
+    customerId String /** customerId */
+    // orderLines OrderLineItem /** orderLines */
+    // paymentInfo OrderPaymentInfo
+    // deliveryInfo OrderDeliveryInfo
+}
+
+enum OrderState {
+    CREATED, CONFIRMED, CANCELLED
+}
+
+entity OrderLineItem {
+    menuItemId Integer
+    quantity Integer
+}
+
+/**
+ * The OrderPaymentInfo entity.
+ */
+entity OrderPaymentInfo {
+    creditCardId String
+}
+
+/**
+ * The OrderDeliveryInfo entity.
+ */
+entity OrderDeliveryInfo {
+    addressId String
+}
+
+relationship OneToMany {
+    Order to OrderLineItem
+}
+
+relationship OneToOne {
+	Order to OrderPaymentInfo
+    Order to OrderDeliveryInfo
+}
+```
+
+</details>
+
+<details markdown="1">
+  <summary>Restaurants Bounded Context.jdl</summary>
+
+```
+//==========================================================
+// Restaurants BC
+//==========================================================
+
+/**
+ * The Restaurant entity.
+ */
+@AggregateRoot
+entity Restaurant {
+    name String
+}
+
+entity MenuItem {
+    name String
+    price Integer
+}
+
+entity RestaurantAddress {
+    address String
+}
+
+entity RestaurantOrder {
+	orderId String
+    status RestaurantOrderStatus
+}
+
+enum RestaurantOrderStatus {
+    ACCEPTED, READY, DELIVERED
+}
+
+relationship OneToMany {
+	Restaurant to MenuItem
+}
+
+relationship OneToOne {
+	Restaurant to RestaurantAddress
+}
+
+relationship ManyToOne {
+	Restaurant to RestaurantOrder
+}
+```
+
+</details>
+
+<details markdown="1">
+  <summary>Delivery Bounded Context.jdl</summary>
+
+```
+//==========================================================
+// Delivery BC
+//==========================================================
+entity DeliveryOrder {
+    orderId String
+    status DeliveryOrderStatus
+}
+
+enum DeliveryOrderStatus {
+    ACCEPTED, ONTRANSIT, DELIVERED
+}
+```
+
+</details>
+
+<details  markdown="1">
+  <summary>Customers Bounded Context.jdl</summary>
+
+```
+//==========================================================
+// Customers BC
+//==========================================================
+
+/**
+ * The Customer entity.
+ */
+@AggregateRoot
+entity Customer {
+    fullName String /** fullName */
+}
+
+entity CustomerAddress {}
+
+entity CreditCard {
+    cardNumber String
+}
+
+relationship OneToMany {
+	Customer to CustomerAddress
+    Customer to CreditCard
+}
+```
+
+</details>
+
+![04-DDD-Agreggates-BoundedContexts-Orders_JDL.png](docs/04-DDD-Agreggates-BoundedContexts-Orders_JDL.png)
+
+![04-DDD-Agreggates-BoundedContexts](docs/04-DDD-Agreggates-BoundedContexts.excalidraw.svg)
+
+## API-First: Designing Inter-Service Communication
+
+When you separate your domain model into subdomains and bounded context, bounded contexts become a natural boundary to split your system into separate services and microservices you need to define a way to:
+
+- Access data from other bounded contexts
+- Coordinate inter process communications
+
+We will use **OpenAPI**, **AsyncAPI** and other specs to define the communication between these services.
+
+### Access data owned by other bounded contexts: Direct Access, Event Sourcing and CQRS
+
+- **Direct Access:** [Generates a full OpenAPI definitions for CRUD operations from JDL models](https://zenwave360.github.io/zenwave-code-generator/plugins/jdl-to-openapi/)
+- **Event Sourcing:** _TODO_
+  - from entities.jdl (aggregates)
+  - generate AsyncAPI definition and SpringData event listeners with SpringCloudStreams client that writes event to a topic
+- **Transactional Outbox:** _TODO_
+  - from asyncapi.yml
+  - generate an event client that writes to a transactional outbox and a Pulling Publisher that reads from the outbox and sends events to a topic
+- **Event Sourcing and CQRS:** _TODO_
+  - combine direct access, transactional outbox and event sourcing
+
+### Event Sourcing and CQRS
+
+- Publish events of @RootAggregates changes (Create, Update, Delete) to a shared event broker as a publish-subscribe services.
+- Publish read access owned @RootAggregates as request-response services like a REST API, gRPC, GraphQL...
+
+This is commonly enough for other services to implement either direct synchronous access or create CQRS views.
+
+![05-DDD-CQRS-And-Direct-Access](docs/05-DDD-CQRS-And-Direct-Access.excalidraw.svg)
+
+Because APIs do evolve:
+
+- By their synchronous nature REST APIs, if up to date, clients and services should be compatible with each other.
+- But event messages depending on the event broker retention policy may live indefinitely and that complicates consumers implementation as they may need to know how to process different evolving message formats.
+
+An easy way to simplify consumers implementation, regarding evolving message formats:
+
+- Just publish the aggregate ID and the event type (Create, Update, Delete) to the event broker.
+- Let the consumers use the REST API to fetch data synchronously.
+
+![05-DDD-CQRS-And-Evolving-Message-Schemas](docs/05-DDD-CQRS-And-Evolving-Message-Schemas.excalidraw.svg)
+
+### Sagas
+
+> _TODO_ Code generation for Sagas based on AsyncAPI 3 proposal for channels menu and request-response (see expandable examples below)
+
+Currently, you can use AsyncAPI 2 specification to describe message schemas and the channels they are written to but is not enough to describe the inter process communication between services like SAGAs but [ongoing work for version 3](https://github.com/asyncapi/spec/issues/618) is very promising regarding documenting IPCs like SAGAs and CQRS.
+
+With new upcoming version of AsyncAPI 3, you can separate how you describe on separate files:
+
+- Channels, messages and servers
+- Applications connected to those channels
+
+<details markdown="1">
+  <summary>Food Delivery Service Order's Saga Asyncapi.yml example</summary>
+
+```yaml
+asyncapi: 3.0.0
+
+info:
+  title: Food Delivery Service Order's Saga
+  version: 0.1.0
+
+components:
+  servers:
+
+  channels:
+    ordersSagaCommonChannel:
+      address: orders/saga
+      message:
+        oneOf:
+          - $ref: "#/components/messages/onOrderCreated"
+          - $ref: "#/components/messages/onOrderAcceptedAtRestaurant"
+          - $ref: "#/components/messages/onOrderReadyForPickup"
+          - $ref: "#/components/messages/onOrderAcceptedAtDelivery"
+          - $ref: "#/components/messages/onOrderPickedUp"
+          - $ref: "#/components/messages/onOrderDeliveryStatusUpdated"
+          - $ref: "#/components/messages/onOrderDelivered"
+```
+
+</details>
+
+<details markdown="1">
+  <summary>Applications connected to those channels: Restaurant Service Asyncapi.yml example</summary>
+
+```yaml
+asyncapi: 3.0.0
+
+info:
+  title: Restaurant Service
+  version: 1.0.0
+
+servers:
+  kafka:
+    $ref: "orders.saga.asyncapi.yaml#/components/servers/kafka"
+
+channels:
+  ordersSagaCommonChannel:
+    $ref: "orders.saga.asyncapi.yaml#/components/channels/ordersSagaCommonChannel"
+
+# Notice how each operation specifies/overrides which message/s is interested in
+operations:
+  onOrderCreated:
+    description: Join the orders saga.
+    action: receive
+    channel: ordersSagaCommonChannel
+    message:
+      $ref: "orders.saga.asyncapi.yaml#/components/messages/onOrderCreated"
+  onOrderAcceptedAtRestaurant:
+    description: Restaurant informs is committed to prepare the order.
+    action: send
+    channel: ordersSagaCommonChannel
+    message:
+      $ref: "orders.saga.asyncapi.yaml#/components/messages/onOrderAcceptedAtRestaurant"
+  onOrderReadyForPickup:
+    description: Restaurant informs order is ready to pick up.
+    action: send
+    channel: ordersSagaCommonChannel
+    message:
+      $ref: "orders.saga.asyncapi.yaml#/components/messages/onOrderReadyForPickup"
+```
+
+</details>
+
+![05-InterProcessComunication-API-First](docs/05-InterProcessComunication-API-First.excalidraw.svg)
