@@ -20,6 +20,9 @@ public class JavaFormatter implements Formatter {
     @DocumentedOption(description = "Skip java sources output formatting")
     public boolean skipFormatting = false;
 
+    @DocumentedOption(description = "Halt on formatting errors")
+    public boolean haltOnFailFormatting = true;
+
     public List<TemplateOutput> format(List<TemplateOutput> templateOutputList) {
         return templateOutputList.stream().map(t -> format(t)).collect(Collectors.toList());
     }
@@ -39,7 +42,9 @@ public class JavaFormatter implements Formatter {
                     String lineText = getLine(templateOutput.getContent(), line + 1);
                     log.error("Formatting error at {}:{} -> \"{}\"", templateOutput.getTargetFile(), line, lineText, e);
                 }
-                throw new RuntimeException(e);
+                if(haltOnFailFormatting) {
+                    throw new RuntimeException(e);
+                }
             }
         }
         return templateOutput;

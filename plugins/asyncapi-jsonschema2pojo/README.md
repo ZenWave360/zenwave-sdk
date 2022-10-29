@@ -1,5 +1,8 @@
 # AsyncAPI and JsonSchema2Pojo (with maven plugin)
 
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360.zenwave-code-generator/zenwave-code-generator.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360.zenwave-code-generator/zenwave-code-generator)
+[![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-code-generator)](https://github.com/ZenWave360/zenwave-code-generator/blob/main/LICENSE)
+
 Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files
 
 ${javadoc}

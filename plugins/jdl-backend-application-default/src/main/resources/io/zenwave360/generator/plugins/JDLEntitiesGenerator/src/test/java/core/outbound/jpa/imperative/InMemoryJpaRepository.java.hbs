@@ -1,4 +1,4 @@
-package {{basePackage}}.core.outbound.mongodb.inmemory;
+package {{basePackage}}.core.outbound.jpa.inmemory;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Example;
@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.FluentQuery;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
@@ -22,28 +22,28 @@ import java.util.stream.StreamSupport;
 
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
-public class InMemoryMongoRepository<T> implements MongoRepository<T, String> {
+public class InMemoryJpaRepository<T> implements JpaRepository<T, {{idJavaType}}> {
 
-    public interface PrimaryKeyGenerator<String> {
-        String next();
+    public interface PrimaryKeyGenerator<{{idJavaType}}> {
+        {{idJavaType}} next();
     }
 
-    private final Map<String, T> entities = new HashMap<>();
+    private final Map<{{idJavaType}}, T> entities = new HashMap<>();
 
-    // private final PrimaryKeyGenerator<String> primaryKeyGenerator = () -> UUID.randomUUID().toString();
-    private final PrimaryKeyGenerator<String> primaryKeyGenerator = new PrimaryKeyGenerator<String>() {
-        private int next = 0;
+    // private final PrimaryKeyGenerator<{{idJavaType}}> primaryKeyGenerator = () -> UUID.randomUUID().toString();
+    private final PrimaryKeyGenerator<{{idJavaType}}> primaryKeyGenerator = new PrimaryKeyGenerator<{{idJavaType}}>() {
+        private long next = 0;
         @Override
-        public String next() {
-          return String.valueOf(next++);
+        public {{idJavaType}} next() {
+          return next++;
         }
     };
 
-    public Map<String, T> getEntities() {
+    public Map<{{idJavaType}}, T> getEntities() {
         return entities;
     }
 
-    public boolean containsKey(String key) {
+    public boolean containsKey({{idJavaType}} key) {
         return entities.containsKey(key);
     }
 
@@ -94,11 +94,23 @@ public class InMemoryMongoRepository<T> implements MongoRepository<T, String> {
         }
     }
 
+    public T getReferenceById({{idJavaType}} id) {
+        return findByUniqueField("id", id);
+    }
+
+    public T getOne({{idJavaType}} id) {
+        return getReferenceById(id);
+    }
+
+    public T getById({{idJavaType}} id) {
+        return getReferenceById(id);
+    }
+
     public <S extends T> S save(S entity) {
         if (entity == null) {
             throw new IllegalArgumentException("entity must not be null");
         }
-        String id = firstNonNull(readField(entity, "id"), primaryKeyGenerator.next());
+        {{idJavaType}} id = firstNonNull(readField(entity, "id"), primaryKeyGenerator.next());
         writeField(entity, "id", id);
         entities.put(id, entity);
         return entity;
@@ -111,11 +123,23 @@ public class InMemoryMongoRepository<T> implements MongoRepository<T, String> {
         return StreamSupport.stream(entitiesToSave.spliterator(), false).map(e -> save(e)).collect(Collectors.toList());
     }
 
-    public Optional<T> findById(String id) {
+    public void flush() {
+
+    }
+
+    public <S extends T> S saveAndFlush(S entity) {
+        return null;
+    }
+
+    public <S extends T> List<S> saveAllAndFlush(Iterable<S> entities) {
+        return null;
+    }
+
+    public Optional<T> findById({{idJavaType}} id) {
         return Optional.ofNullable(findByUniqueField("id", id));
     }
 
-    public boolean existsById(String id) {
+    public boolean existsById({{idJavaType}} id) {
         return findById(id).isPresent();
     }
 
@@ -123,7 +147,7 @@ public class InMemoryMongoRepository<T> implements MongoRepository<T, String> {
         return new ArrayList(entities.values());
     }
 
-    public Iterable<T> findAllById(Iterable<String> ids) {
+    public List<T> findAllById(Iterable<{{idJavaType}}> ids) {
         return entities.values().stream().filter(e -> contains(ids, readField(e, "id"))).collect(Collectors.toList());
     }
 
@@ -131,7 +155,7 @@ public class InMemoryMongoRepository<T> implements MongoRepository<T, String> {
         return entities.size();
     }
 
-    public void deleteById(String id) {
+    public void deleteById({{idJavaType}} id) {
         if (id == null) {
             throw new IllegalArgumentException("id must not be null");
         }
@@ -148,7 +172,7 @@ public class InMemoryMongoRepository<T> implements MongoRepository<T, String> {
         entities.remove(readField(entity, "id"));
     }
 
-    public void deleteAllById(Iterable<? extends String> ids) {
+    public void deleteAllById(Iterable<? extends {{idJavaType}}> ids) {
         if (ids == null) {
             throw new IllegalArgumentException("ids must not be null");
         }
@@ -168,6 +192,18 @@ public class InMemoryMongoRepository<T> implements MongoRepository<T, String> {
         entities.clear();
     }
 
+    public void deleteAllInBatch(Iterable<T> entities) {
+
+    }
+
+    public void deleteAllByIdInBatch(Iterable<{{idJavaType}}> longs) {
+
+    }
+
+    public void deleteAllInBatch() {
+
+    }
+
     public List<T> findAll(Sort sort) {
         return null;
     }
@@ -177,14 +213,6 @@ public class InMemoryMongoRepository<T> implements MongoRepository<T, String> {
         int offset = (int) pageable.getOffset();
         int limit = pageable.getPageSize();
         return new PageImpl<>(findAll().subList(offset, Math.min(offset + limit, total)), pageable, total);
-    }
-
-    public <S extends T> S insert(S entity) {
-        return save(entity);
-    }
-
-    public <S extends T> List<S> insert(Iterable<S> entities) {
-        return saveAll(entities);
     }
 
     public <S extends T> Optional<S> findOne(Example<S> example) {

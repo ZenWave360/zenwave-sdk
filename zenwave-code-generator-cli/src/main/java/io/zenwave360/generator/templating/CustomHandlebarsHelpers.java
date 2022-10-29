@@ -1,11 +1,13 @@
 package io.zenwave360.generator.templating;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.jknack.handlebars.Options;
@@ -14,9 +16,35 @@ import io.zenwave360.generator.utils.NamingUtils;
 
 public class CustomHandlebarsHelpers {
 
+    public static String partial(String context, Options options) {
+        var baseDir = FilenameUtils.getPath(options.fn.filename());
+        var tokens = new ArrayList<String>();
+        tokens.add(context);
+        ((List) tokens).addAll(List.of(options.params));
+        tokens.replaceAll(t -> t.replaceAll("^\\./", "").replaceAll("^/", "").replaceAll("/$", ""));
+        return baseDir + StringUtils.join(tokens, "/");
+    }
+
+    public static String concat(String context, Options options) {
+        var tokens = new ArrayList<>();
+        tokens.add(context);
+        tokens.addAll(List.of(options.params));
+        return StringUtils.join(tokens, "");
+    }
+
     public static boolean eq(String first, Options options) throws IOException {
         String second = options.param(0);
         return StringUtils.equals(first, second);
+    }
+
+    public static boolean not(Object value, Options options) throws IOException {
+        if (value == null) {
+            return true;
+        }
+        if(value instanceof Boolean) {
+            return !((Boolean) value);
+        }
+        return Boolean.valueOf(String.valueOf(value)) == false;
     }
 
     public static Object size(List list, Options options) throws IOException {

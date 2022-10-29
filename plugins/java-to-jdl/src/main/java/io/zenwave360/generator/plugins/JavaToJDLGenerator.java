@@ -21,6 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class JavaToJDLGenerator implements Generator {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    enum PersistenceType {
+    public enum PersistenceType {
         JPA, MONGODB
     }
 
@@ -67,7 +68,7 @@ public class JavaToJDLGenerator implements Generator {
         // scan enum types in entities field type
         Set<Class<?>> enums = new LinkedHashSet<>();
         for (Class<?> e : entitySubClasses) {
-            Field[] declaredFields = e.getDeclaredFields();
+            Field[] declaredFields = e.getFields();
             for (Field f : declaredFields) {
                 Class<?> fieldType = f.getType();
                 if (fieldType.isEnum()) {
@@ -78,23 +79,33 @@ public class JavaToJDLGenerator implements Generator {
                 }
             }
         }
+
         // ** generate **
         StringBuilder jdl = new StringBuilder();
         for (Class<?> e : enums) {
             generateEnum2Jdl(jdl, e);
         }
 
+        // ** generate **
+        generateClasses(entitySubClasses, jdl);
+
+        return List.of(new TemplateOutput("", jdl.toString(), "text/jdl"));
+    }
+
+    protected void generateClasses(Collection<Class> entityClasses, StringBuilder jdl) {
+        Set<Class> embeddedClasses = new HashSet<>();
         StringBuilder relationShips = new StringBuilder();
-        for (Class<?> e : entitySubClasses) {
+        for (Class<?> e : entityClasses) {
             if (persistenceType == PersistenceType.JPA) {
                 generateJPA2Jdl(jdl, relationShips, e);
             } else {
-                generateMongodb2Jdl(jdl, relationShips, e);
+                embeddedClasses.addAll(generateMongodb2Jdl(jdl, e));
+                if(!embeddedClasses.isEmpty()) {
+                    generateClasses(embeddedClasses, jdl); // may be repeated classes
+                }
             }
         }
         jdl.append(relationShips);
-
-        return List.of(new TemplateOutput("", jdl.toString(), "text/jdl"));
     }
 
     protected Set<Class> getAnnotatedEntities(Class<? extends Annotation> entityAnnotationClass) {
@@ -120,9 +131,9 @@ public class JavaToJDLGenerator implements Generator {
     protected void generateJPA2Jdl(StringBuilder out, StringBuilder relationShips, Class<?> e) {
         String entityClassName = e.getSimpleName();
         boolean firstField = true;
-        out.append("entity " + entityClassName + " {\n"); // inheritance NOT SUPPORTED YET in JDL ???
+        out.append("entity " + entityClassName + " {\n");
 
-        Field[] declaredFields = e.getDeclaredFields();
+        Field[] declaredFields = FieldUtils.getAllFields(e);
         for (Field f : declaredFields) {
             String fieldName = f.getName();
             Type fieldType = f.getType();
@@ -225,86 +236,57 @@ public class JavaToJDLGenerator implements Generator {
         out.append("}\n\n");
     }
 
-    protected void generateMongodb2Jdl(StringBuilder out, StringBuilder relationShips, Class<?> e) {
-        String entityClassName = e.getSimpleName();
+    protected Set<Class> generateMongodb2Jdl(StringBuilder out, Class<?> entityClass) {
+        Set<Class> embeddedClasses = new HashSet<>();
+        String entityClassName = entityClass.getSimpleName();
         boolean firstField = true;
-        out.append("entity " + entityClassName + " {\n"); // inheritance NOT SUPPORTED YET in JDL ???
+        if(entityClass.getAnnotation(Document.class) == null) {
+            out.append("@embedded\n");
+        }
+        out.append("entity " + entityClassName + " {\n");
 
-        Field[] declaredFields = e.getDeclaredFields();
+        Field[] declaredFields = FieldUtils.getAllFields(entityClass);
         for (Field f : declaredFields) {
             String fieldName = f.getName();
-            Type fieldType = f.getType();
             if (f.isSynthetic() || Modifier.isStatic(f.getModifiers()) || Modifier.isTransient(f.getModifiers())) {
                 continue;
             }
-            // Annotation[] fieldAnnotations = f.getDeclaredAnnotations();
 
-            String relationType = null;
-            Class<?> targetEntityClass = null;
-            boolean fromMany = false;
-            boolean toMany = false;
-            String mappedBy = "";
             DBRef dbRefAnnotation = f.getDeclaredAnnotation(DBRef.class);
-            if (dbRefAnnotation != null) {
-                targetEntityClass = f.getType();
-                boolean isCollection = Collection.class.isAssignableFrom(targetEntityClass);
-                relationType = isCollection ? "OneToMany" : "ManyToOne";
-                fromMany = false;
-                toMany = isCollection;
-                mappedBy = null;
+            DocumentedOption documentedOptionAnnotation = f.getDeclaredAnnotation(DocumentedOption.class);
+            Class<?> targetEntityClass = f.getType();
+            boolean isCollection = Collection.class.isAssignableFrom(targetEntityClass);
+            if (isCollection) {
+                targetEntityClass = typeToClass(f.getGenericType());
+            }
+            if(targetEntityClass.getAnnotation(Document.class) == null &&
+                    targetEntityClass.getPackage() != null && targetEntityClass.getPackage().getName().startsWith(packageName))
+            {
+                embeddedClasses.add(targetEntityClass);
             }
 
-            if (relationType != null) {
-                // relationship
-                relationShips.append("relationship " + relationType + " {\n");
-
-                if (targetEntityClass == void.class || targetEntityClass == null) {
-                    targetEntityClass = typeToClass(fieldType);
-                }
-
-                if (toMany && targetEntityClass != null) {
-                    if (Collection.class.isAssignableFrom(targetEntityClass)) {
-                        Class<?> compType = targetEntityClass.getComponentType();
-                        if (compType != null) {
-                            targetEntityClass = compType;
-                        } else {
-                            Type fieldGenericType = f.getGenericType();
-                            if (fieldGenericType instanceof ParameterizedType) {
-                                ParameterizedType pt = (ParameterizedType) fieldGenericType;
-                                targetEntityClass = typeToClass(pt.getActualTypeArguments()[0]);
-                            }
-                        }
-                    }
-                }
-
-                String targetEntityClassName = targetEntityClass != null ? targetEntityClass.getSimpleName() : "";
-
-                if (fromMany && toMany
-                // fieldName.equals("")
-                ) {
-                    log.info("ManyToMany .. mappedBy ??");
-                }
-                relationShips.append("  " + entityClassName + "{" + fieldName);
-                if (mappedBy != null && !"".equals(mappedBy)) {
-                    relationShips.append("(" + mappedBy + ")");
-                }
-                relationShips.append("} to " + targetEntityClassName + "\n");
-
-                relationShips.append("}\n\n");
+            if (firstField) {
+                firstField = false;
             } else {
-                // simple field
-                if (firstField) {
-                    firstField = false;
-                } else {
-                    out.append(",\n");
-                }
-                out.append("  " + fieldName + " " + f.getType().getSimpleName());
+                out.append(",\n");
             }
 
+            out.append("  ");
+            if(dbRefAnnotation != null) {
+                out.append("@DBRef ");
+            } else if (documentedOptionAnnotation != null) {
+                out.append("@DocumentedOption ");
+            }
+            out.append(fieldName + " " + targetEntityClass.getSimpleName());
+            if(isCollection) {
+                out.append("[]");
+            }
         }
 
         out.append("\n");
         out.append("}\n\n");
+
+        return embeddedClasses;
     }
 
     protected void generateEnum2Jdl(StringBuilder out, Class<?> e) {
@@ -339,7 +321,7 @@ public class JavaToJDLGenerator implements Generator {
         if (type instanceof Class) {
             return (Class<?>) type;
         } else if (type instanceof ParameterizedType) {
-            return typeToClass(((ParameterizedType) type).getRawType());
+            return typeToClass(((ParameterizedType) type).getActualTypeArguments()[0]);
         } else if (type instanceof GenericArrayType) {
             Type componentType = ((GenericArrayType) type).getGenericComponentType();
             Class<?> componentClass = typeToClass(componentType);

@@ -19,10 +19,10 @@ enum OrderStatus { CONFIRMED, SHIPPED, DELIVERED }
 entity CustomerOrder { // Order is a reserved word
 	date Instant,
 	status OrderStatus
-	@DocumentReference	customer Customer
-	orderedItems OrderedItem[]
-	paymentDetails PaymentDetails[]
-	shippingDetails ShippingDetails
+//	customer Customer
+//	orderedItems OrderedItem[]
+//	paymentDetails PaymentDetails[]
+//	shippingDetails ShippingDetails
 }
 
 @skip
@@ -48,6 +48,19 @@ entity PaymentDetails {
 @embedded
 entity ShippingDetails {
 	address String
+}
+
+relationship OneToOne {
+	CustomerOrder{paymentDetails(creditCardNumber)} to PaymentDetails
+}
+
+relationship ManyToOne {
+	CustomerOrder{customer(username)} to Customer,
+	CustomerOrder{shippingDetails(address)} to ShippingDetails
+}
+
+relationship ManyToMany {
+	CustomerOrder{orderedItems(name)} to OrderedItem{customerOrders(username)}
 }
 
 service Customer with CustomerUseCases

@@ -1,6 +1,9 @@
-package {{domainModelPackage}};
+package {{basePackage}}.core.domain;
 
 import java.io.Serializable;
+import java.math.*;
+import java.time.*;
+import java.util.*;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import org.hibernate.annotations.Cache;
@@ -10,7 +13,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 * {{entity.comment}}
 */
 @Entity
-@Table(name = "{{entity.tableName}}")
+@Table(name = "{{snakeCase entity.tableName}}")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class {{entity.className}} implements Serializable {
 
@@ -24,9 +27,30 @@ public class {{entity.className}} implements Serializable {
 
 {{#each entity.fields as |field|}}
     {{{fieldValidationAnnotations field}}}
-    @Column(name = "{{snakeCase field.name}}")
+    @Column(name = "{{snakeCase field.name}}" {{#if field.validations.required}}, nullable = false{{/if}}{{#if field.validations.unique}}, unique = true{{/if}}{{#if field.validations.maxlength}}, length = {{field.validations.maxlength.value}}{{/if}})
+    {{~#if field.isEnum}} @Enumerated(EnumType.STRING){{/if}}
     private {{field.type}} {{field.name}};
 {{/each}}
+
+{{#each entity.relationships as |relationship|}}
+{{#if relationship.fieldName~}}
+    {{> (partial 'partials/' relationship.type)}}
+    private {{{relationshipFieldType relationship}}} {{relationship.fieldName}};
+{{/if~}}
+{{/each}}
+
+{{#unless (skipEntityId entity)~}}
+    public {{idJavaType}} getId() {
+        return id;
+    }
+    public {{entity.className}} withId({{idJavaType}} id) {
+        this.id = id;
+        return this;
+    }
+    public void setId({{idJavaType}} id) {
+        this.id = id;
+    }
+{{/unless~}}
 
 {{#each entity.fields as |field|}}
     public {{entity.name}} with{{capitalize field.name}}({{field.type}} {{field.name}}) {
@@ -43,6 +67,18 @@ public class {{entity.className}} implements Serializable {
     public void set{{capitalize field.name}}({{field.type}} {{field.name}}) {
         this.{{field.name}} = {{field.name}};
     }
+{{/each}}
+
+{{#each entity.relationships as |relationship|}}
+{{#if relationship.fieldName~}}
+    public {{{relationshipFieldType relationship}}} get{{capitalize relationship.fieldName}}() {
+        return {{relationship.fieldName}};
+    }
+
+    public void set{{capitalize relationship.otherEntityName}}({{{relationshipFieldType relationship}}} {{relationship.fieldName}}) {
+        this.{{relationship.fieldName}} = {{relationship.fieldName}};
+    }
+{{/if~}}
 {{/each}}
 
 }

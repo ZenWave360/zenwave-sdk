@@ -20,3 +20,9 @@ asPackageFolder {{asPackageFolder "io.zenwave360.generator.templating"}}
 {{else}}
     Inside else 2
 {{/if}}
+
+{{> (partial 'partial')}}
+
+Not with string: {{not 'true'}}
+Not with boolean: {{not booleanValue}}
+Not with null: {{not nullValue}}

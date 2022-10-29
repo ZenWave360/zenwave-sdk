@@ -41,6 +41,10 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
     }
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
+    {
+        handlebarsEngine.getHandlebars().registerHelpers(new JDLBackendApplicationDefaultHelpers(this));
+        handlebarsEngine.getHandlebars().registerHelpers(new JDLBackendApplicationDefaultJpaHelpers(this));
+    }
 
     private String templatesFolder = "io/zenwave360/generator/plugins/JDLEntitiesGenerator/";
 
@@ -71,7 +75,7 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
             new Object[] {"src/main/java", "core/outbound/search/EntityDocument.java", "core/outbound/search/{{entity.className}}{{searchDTOSuffix}}.java", JAVA, skipElasticSearch},
             new Object[] {"src/main/java", "core/outbound/search/EntitySearchRepository.java", "core/outbound/search/{{entity.className}}SearchRepository.java", JAVA, skipElasticSearch},
 
-            new Object[] {"src/test/java", "core/outbound/{{persistence}}/{{style}}/InMemoryMongoRepository.java", "core/outbound/{{persistence}}/inmemory/InMemoryMongoRepository.java", JAVA, skipEntityRepository},
+            new Object[] {"src/test/java","core/outbound/{{persistence}}/{{style}}/InMemory{{capitalizeFirst persistence}}Repository.java", "core/outbound/{{persistence}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository},
             new Object[] {"src/test/java", "core/outbound/{{persistence}}/{{style}}/EntityRepositoryInMemory.java", "core/outbound/{{persistence}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA, skipEntityRepository});
 
     protected List<Object[]> templatesByService = List.of(
@@ -141,91 +145,6 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
 
     protected String getIdJavaType() {
         return this.persistence == PersistenceType.jpa ? "Long" : "String";
-    }
-
-    {
-        handlebarsEngine.getHandlebars().registerHelper("fieldType", (context, options) -> {
-            Map field = (Map) context;
-            String type = (String) field.get("type");
-            String prefix = (String) options.hash.getOrDefault("prefix", "");
-            String suffix = (String) options.hash.getOrDefault("suffix", "");
-            if (field.get("isArray") == Boolean.TRUE) {
-                return String.format("List<%s%s%s>", prefix, type, suffix);
-            }
-            return String.format("%s%s%s", prefix, type, suffix);
-        });
-
-        handlebarsEngine.getHandlebars().registerHelper("fieldPersistenceAnnotations", (context, options) -> {
-            Map field = (Map) context;
-            if(persistence == PersistenceType.mongodb) {
-                // filtering with lowerFirst and upperFirst for forward jdl compatibility
-                int dbRef = ((List) JSONPath.get(field, "options[?(@.dBRef || @.DBRef)]")).size();
-                int documentedOptions = ((List) JSONPath.get(field, "options[?(@.documentReference || @.DocumentReference)]")).size();
-                if(dbRef > 0) {
-                    return "@DBRef";
-                }
-                if(documentedOptions > 0) {
-                    return "@DocumentReference";
-                }
-                return "@Field";
-            }
-            return "";
-        });
-
-        handlebarsEngine.getHandlebars().registerHelper("fieldValidationAnnotations", (context, options) -> {
-            Map field = (Map) context;
-            var required = JSONPath.get(field, "validations.required.value");
-            var min = JSONPath.get(field, "validations.min.value");
-            var max = JSONPath.get(field, "validations.max.value");
-            var minlength = JSONPath.get(field, "validations.minlength.value");
-            var maxlength = JSONPath.get(field, "validations.maxlength.value");
-            var pattern = JSONPath.get(field, "validations.pattern.value");
-            var unique = JSONPath.get(field, "validations.unique.value");
-            List<String> annotations = new ArrayList<>();
-            if (required != null) {
-                annotations.add("@NotNull");
-            }
-            if (min != null) {
-                annotations.add(String.format("@Min(%s)", min));
-            }
-            if (max != null) {
-                annotations.add(String.format("@Max(%s)", max));
-            }
-            if (minlength != null || maxlength != null) {
-                annotations.add(String.format("@Size(min = %s, max = %s)", minlength, maxlength));
-            } else if (maxlength != null) {
-                annotations.add(String.format("@Size(max = %s)", maxlength));
-            } else if (minlength != null) {
-                annotations.add(String.format("@Size(min = %s)", minlength));
-            }
-            if (pattern != null) {
-                annotations.add(String.format("@Pattern(regexp = \"%s\")", pattern));
-            }
-
-            return annotations.stream().collect(Collectors.joining(" "));
-        });
-
-        handlebarsEngine.getHandlebars().registerHelper("criteriaClassName", (context, options) -> {
-            Map entity = (Map) context;
-            Object criteria = JSONPath.get(entity, "$.options.searchCriteria");
-            if (criteria instanceof String) {
-                return criteria;
-            }
-            if (criteria == Boolean.TRUE) {
-                return String.format("%s%s", entity.get("className"), criteriaDTOSuffix);
-            }
-            return "Pageable";
-        });
-
-        handlebarsEngine.getHandlebars().registerHelper("skipEntityRepository", (context, options) -> {
-            Map entity = (Map) context;
-            return skipEntityRepository.apply(Map.of("entity", entity));
-        });
-
-        handlebarsEngine.getHandlebars().registerHelper("skipEntityId", (context, options) -> {
-            Map entity = (Map) context;
-            return skipEntityId.apply(Map.of("entity", entity));
-        });
     }
 
     protected boolean isGenerateEntity(Map entity) {

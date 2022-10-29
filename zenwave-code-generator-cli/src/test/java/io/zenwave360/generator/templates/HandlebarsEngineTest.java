@@ -19,8 +19,10 @@ public class HandlebarsEngineTest {
 
         Map<String, Object> model = new HashMap<>();
         model.put("list", List.of(1, 2, 3));
+        model.put("booleanValue", true);
+        model.put("nullValue", null);
         TemplateOutput templateOutput = handlebarsEngine.processTemplate(model, new TemplateInput("io/zenwave360/generator/templating/handlebars-test", "")).get(0);
-        // System.out.println(templateOutput.getContent());
+//         System.out.println(templateOutput.getContent());
 
         Assertions.assertTrue(templateOutput.getContent().contains("This is the assigned value"));
         Assertions.assertTrue(templateOutput.getContent().contains("List size is 3"));
@@ -32,5 +34,9 @@ public class HandlebarsEngineTest {
         Assertions.assertTrue(templateOutput.getContent().contains("Prefix2Suffix"));
         Assertions.assertTrue(templateOutput.getContent().contains("Inside if 1"));
         Assertions.assertTrue(templateOutput.getContent().contains("Inside else 2"));
+        Assertions.assertTrue(templateOutput.getContent().contains("This is from partial"));
+        Assertions.assertTrue(templateOutput.getContent().contains("Not with string: false"));
+        Assertions.assertTrue(templateOutput.getContent().contains("Not with boolean: false"));
+        Assertions.assertTrue(templateOutput.getContent().contains("Not with null: true"));
     }
 }

@@ -2,7 +2,18 @@
 
 If starting with legacy project, you can reverse engineer JDL from Java entity classes. JPA and MongoDB are supported.
 
-It requires access to your project classpath so you can just paste the following code on any test class or main method:
+Inspecting your java classes requires access to your project classpath. Add this dependency to your pom.xml:
+
+```xml
+<dependency>
+    <groupId>io.github.zenwave360.zenwave-code-generator.plugins</groupId>
+    <artifactId>java-to-jdl</artifactId>
+    <version>${zenwave.version}</version>
+</dependency>
+```
+
+And then just paste the following code snippets on any test class or main method:
+
 
 ```java
 String jdl = new JavaToJDLGenerator()

@@ -1,5 +1,8 @@
 # ZenWave Code Generator Maven Plugin
 
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360.zenwave-code-generator/zenwave-code-generator.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360.zenwave-code-generator/zenwave-code-generator)
+[![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-code-generator)](https://github.com/ZenWave360/zenwave-code-generator/blob/main/LICENSE)
+
 You can use ZenWave Maven Plugin to generate code as part of your build process:
 
 - Add each generator jar as dependency to zenwave maven plugin.

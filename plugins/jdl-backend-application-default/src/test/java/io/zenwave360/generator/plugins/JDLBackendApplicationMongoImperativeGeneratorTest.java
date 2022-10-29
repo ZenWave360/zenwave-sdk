@@ -20,7 +20,7 @@ import io.zenwave360.generator.processors.JDLProcessor;
 import io.zenwave360.generator.templating.TemplateOutput;
 import nl.altindag.log.LogCaptor;
 
-public class JDLBackendApplicationDefaultGeneratorTest {
+public class JDLBackendApplicationMongoImperativeGeneratorTest {
 
     private static LogCaptor logCaptor = LogCaptor.forRoot();
 
