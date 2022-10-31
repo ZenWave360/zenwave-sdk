@@ -39,6 +39,6 @@ io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwav
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.processors,AsyncApiProcessor,16,381,8,42,3,79,8,25,0,8
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.processors,AbstractBaseProcessor,8,70,1,7,0,19,1,9,0,6
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.processors,JDLProcessor,1,365,3,15,0,56,3,15,0,9
-io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.utils,Maps,3,72,1,7,0,17,2,7,1,4
+io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.utils,Maps,9,66,2,6,1,16,3,6,1,4
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.utils,NamingUtils,18,62,2,4,4,13,4,6,2,5
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.utils,JSONPath,3,93,1,3,1,18,2,5,1,4
