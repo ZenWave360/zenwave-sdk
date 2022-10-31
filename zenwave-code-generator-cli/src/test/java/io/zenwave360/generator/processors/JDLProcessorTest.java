@@ -25,7 +25,7 @@ public class JDLProcessorTest {
 
     @Test
     public void testProcessJDL_WithSemanticAnnotations() throws Exception {
-        var model = loadJDL("classpath:io/zenwave360/generator/resources/jdl/orders-model-semantic-annotations.jdl");
+        var model = loadJDL("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl");
         List entitiesWithCriteria = JSONPath.get(model, "$..[?(@.options.searchCriteriaObject)]");
         Assertions.assertFalse(entitiesWithCriteria.isEmpty());
         Assertions.assertEquals(2, entitiesWithCriteria.size());
@@ -33,11 +33,4 @@ public class JDLProcessorTest {
         Assertions.assertTrue(containsEntity(entitiesWithCriteria, "CustomerOrder"));
     }
 
-    @Test
-    // @Disabled
-    public void testProcessJDL_registry() throws Exception {
-        var model = loadJDL("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl");
-        List entitiesWithCriteria = JSONPath.get(model, "$..[?(@.options.searchCriteriaObject)]");
-        Assertions.assertFalse(entitiesWithCriteria.isEmpty());
-    }
 }
