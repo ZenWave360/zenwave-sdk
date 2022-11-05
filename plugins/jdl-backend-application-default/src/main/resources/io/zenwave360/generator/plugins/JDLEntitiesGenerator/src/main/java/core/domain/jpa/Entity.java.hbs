@@ -33,22 +33,29 @@ public class {{entity.className}} implements Serializable {
 {{/unless~}}
 
 {{#each entity.fields as |field|}}
-    {{{fieldValidationAnnotations field}}}
-    {{~#if field.isEntity}}
+  {{{fieldValidationAnnotations field}}}
+  {{~#if field.isEntity}}
     @Embedded
-    {{~ assign 'embeddedFields' (jsonPath jdl 'entities["' field.type '"].fields[*]') ~}}
+    {{~ assign 'embeddedFields' (jsonPath jdl 'entities.' field.type '.fields[*]') ~}}
+    {{#unless (skipEntityId (jsonPath jdl 'entities.' field.type))~}}
+    @AttributeOverride( name = "id", column = @Column(name = "{{snakeCase field.name}}_id"))
+    {{/unless~}}
     {{~#joinWithTemplate embeddedFields as |it|}}
     @AttributeOverride( name = "{{it.name}}", column = @Column(name = "{{snakeCase field.name}}_{{name}}"))
     {{~/joinWithTemplate~}}
-    {{~else~}}
+  {{~else~}}
     @Column(name = "{{snakeCase field.name}}" {{#if field.validations.required}}, nullable = false{{/if}}{{#if field.validations.unique}}, unique = true{{/if}}{{#if field.validations.maxlength}}, length = {{field.validations.maxlength.value}}{{/if}})
-    {{~/if~}}
+  {{~/if~}}
     {{~#if field.isEnum}} @Enumerated(EnumType.STRING){{/if}}
     private {{field.type}} {{field.name}};
 {{/each}}
 
 {{#each entity.relationships as |relationship|}}
 {{#if relationship.fieldName~}}
+    {{#if (jsonPath jdl 'entities.' relationship.otherEntityName '.options.aggregate')}}
+    @Column(name = "{{snakeCase relationship.fieldName}}_id")
+    private {{idJavaType}} {{relationship.fieldName}}Id;
+    {{~/if}}
     {{> (partial 'partials/' relationship.type)}}
     private {{{relationshipFieldType relationship}}} {{relationship.fieldName}};
 {{/if~}}
@@ -86,10 +93,17 @@ public class {{entity.className}} implements Serializable {
 
 {{#each entity.relationships as |relationship|}}
 {{#if relationship.fieldName~}}
+    {{~#if (jsonPath jdl 'entities.' relationship.otherEntityName '.options.aggregate')}}
+    public {{idJavaType}} get{{capitalize relationship.fieldName}}Id() {
+        return {{relationship.fieldName}}Id;
+    }
+    public void set{{capitalize relationship.fieldName}}Id({{idJavaType}} {{relationship.fieldName}}Id) {
+        this.{{relationship.fieldName}}Id = {{relationship.fieldName}}Id;
+    }
+    {{~/if}}
     public {{{relationshipFieldType relationship}}} get{{capitalize relationship.fieldName}}() {
         return {{relationship.fieldName}};
     }
-
     public void set{{capitalize relationship.fieldName}}({{{relationshipFieldType relationship}}} {{relationship.fieldName}}) {
         this.{{relationship.fieldName}} = {{relationship.fieldName}};
     }

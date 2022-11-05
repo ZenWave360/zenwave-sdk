@@ -24,7 +24,11 @@ public class {{entity.className}}{{inputDTOSuffix}} implements Serializable {
 
 {{#each entity.relationships as |relationship|}}
 {{#if relationship.fieldName~}}
+    {{#if (jsonPath jdl 'entities.' relationship.otherEntityName '.options.aggregate')}}
+    private {{idJavaType}} {{relationship.fieldName}}Id;
+    {{~else~}}
     private {{{relationshipFieldType relationship suffix=inputDTOSuffix}}} {{relationship.fieldName}};
+    {{~/if}}
 {{/if~}}
 {{/each}}
 
@@ -68,6 +72,14 @@ public class {{entity.className}}{{inputDTOSuffix}} implements Serializable {
 
 {{#each entity.relationships as |relationship|}}
 {{#if relationship.fieldName~}}
+    {{#if (jsonPath jdl 'entities.' relationship.otherEntityName '.options.aggregate')}}
+    public {{idJavaType}} get{{capitalize relationship.fieldName}}Id() {
+        return {{relationship.fieldName}}Id;
+    }
+    public void set{{capitalize relationship.fieldName}}Id({{idJavaType}} {{relationship.fieldName}}Id) {
+        this.{{relationship.fieldName}}Id = {{relationship.fieldName}}Id;
+    }
+    {{~else}}
     public {{{relationshipFieldType relationship suffix=inputDTOSuffix}}} get{{capitalize relationship.fieldName}}() {
         return {{relationship.fieldName}};
     }
@@ -75,6 +87,7 @@ public class {{entity.className}}{{inputDTOSuffix}} implements Serializable {
     public void set{{capitalize relationship.otherEntityName}}({{{relationshipFieldType relationship suffix=inputDTOSuffix}}} {{relationship.fieldName}}) {
         this.{{relationship.fieldName}} = {{relationship.fieldName}};
     }
+    {{~/if}}
 {{/if~}}
 {{/each}}
 }

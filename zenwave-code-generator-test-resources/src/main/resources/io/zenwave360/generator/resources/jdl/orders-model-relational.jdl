@@ -39,22 +39,25 @@ entity OrderedItem {
 	quantity Integer
 }
 
+@aggregate
+@embeddable
 entity PaymentDetails {
 	creditCardNumber String
+	cardHolderName String
 }
 
-@embeddable
 @aggregate
+@embeddable
 entity ShippingDetails {
 	address String
 	phone String
 }
 
-relationship OneToOne {
-	CustomerOrder{paymentDetails(creditCardNumber)} to PaymentDetails
-}
+//relationship OneToOne {
+//}
 
 relationship ManyToOne {
+	CustomerOrder{paymentDetails(creditCardNumber)} to PaymentDetails
 	CustomerOrder{customer(username)} to Customer,
 //	CustomerOrder{shippingDetails(address)} to ShippingDetails
 }
