@@ -43,7 +43,7 @@ public class JDLToOpenAPIGeneratorTest {
 
     @Test
     public void test_jdl_to_openapi_integer_id() throws Exception {
-        Map<String, Object> model = loadJDLModelFromResource("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl");
+        Map<String, Object> model = loadJDLModelFromResource("classpath:io/zenwave360/generator/resources/jdl/orders-model-relational.jdl");
         JDLToOpenAPIGenerator generator = new JDLToOpenAPIGenerator();
         generator.idType = "integer";
 

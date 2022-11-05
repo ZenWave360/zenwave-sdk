@@ -235,11 +235,11 @@ public class JDLOpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         if ("date-time".equals(format)) {
             return "Instant";
         }
-        if ("integer".equals(type) && "int32".equals(format)) {
-            return "Integer";
-        }
         if ("integer".equals(type) && "int64".equals(format)) {
             return "Long";
+        }
+        if ("integer".equals(type)) {
+            return "Integer";
         }
         if ("number".equals(type)) {
             return "BigDecimal";

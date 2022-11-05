@@ -1,9 +1,6 @@
 package io.zenwave360.generator.generators;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import io.zenwave360.generator.utils.JSONPath;
 import io.zenwave360.generator.utils.Maps;
@@ -127,6 +124,21 @@ public class JDLEntitiesToSchemasConverter {
             }
 
             properties.put((String) field.get("name"), property);
+        }
+
+        List<Map<String, Object>> relationships = JSONPath.get(entity, "$.relationships[*]", Collections.emptyList());
+        for (Map<String, Object> relationship : relationships) {
+            if(relationship.get("fieldName") != null) {
+                Map<String, Object> property = new LinkedHashMap<>();
+                if (relationship.get("comment") != null) {
+                    property.put("description", relationship.get("comment"));
+                }
+                property.put("$ref", "#/components/schemas/" + relationship.get("otherEntityName"));
+                if (relationship.get("isCollection") == Boolean.TRUE) {
+                    property = Maps.of("type", "array", "items", property);
+                }
+                properties.put((String) relationship.get("fieldName"), property);
+            }
         }
 
         if (requiredProperties.size() == 0) {
