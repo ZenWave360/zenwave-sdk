@@ -68,7 +68,7 @@ public class {{service.name}}Test  {
     void testCRUD{{entity.className}}() {
         var input = new {{entity.className}}Input();
         // TODO fill input data
-        var {{entity.instanceName}} = {{entity.instanceName}}UseCases.create{{entity.className}}(input);
+        var {{entity.instanceName}} = {{serviceInstance}}.create{{entity.className}}(input);
         assertNotNull({{entity.instanceName}}.getId());
         assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}));
 
@@ -76,12 +76,12 @@ public class {{service.name}}Test  {
         var {{entity.instanceName}}Update = new {{entity.className}}Input();
         // TODO fill update data
         assertTrue({{entity.instanceName}}Repository.containsKey(id));
-        var {{entity.instanceName}}Updated = {{entity.instanceName}}UseCases.update{{entity.className}}(id, {{entity.instanceName}}Update);
+        var {{entity.instanceName}}Updated = {{serviceInstance}}.update{{entity.className}}(id, {{entity.instanceName}}Update);
         assertTrue({{entity.instanceName}}Updated.isPresent());
         assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}Updated.get()));
 
         assertTrue({{entity.instanceName}}Repository.containsKey(id));
-        {{entity.instanceName}}UseCases.delete{{entity.className}}(id);
+        {{serviceInstance}}.delete{{entity.className}}(id);
         assertFalse({{entity.instanceName}}Repository.containsKey(id));
     }
 

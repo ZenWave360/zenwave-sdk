@@ -39,7 +39,7 @@ public class {{service.name}}Impl implements {{service.name}} {
     /**
      * Constructor.
      */
-    public {{service.name}}Impl({{#joinWithTemplate service.entities ", "}}{{className}}Mapper {{instanceName}}Mapper{{#unless (skipEntityRepository this)}}, {{className}}Repository {{instanceName}}Repository{{/unless}}{{#if options.search}}, {{className}}SearchRepository {{instanceName}}SearchRepository{{/if}}{{/joinWithTemplate}}) {
+    public {{service.name}}Impl({{#joinWithTemplate service.entities delimiter=", "}}{{className}}Mapper {{instanceName}}Mapper{{#unless (skipEntityRepository this)}}, {{className}}Repository {{instanceName}}Repository{{/unless}}{{#if options.search}}, {{className}}SearchRepository {{instanceName}}SearchRepository{{/if}}{{/joinWithTemplate}}) {
         {{~#joinWithTemplate service.entities ~}}
             this.{{instanceName}}Mapper = {{instanceName}}Mapper;
             {{#unless (skipEntityRepository this)}}this.{{instanceName}}Repository = {{instanceName}}Repository;{{/unless}}

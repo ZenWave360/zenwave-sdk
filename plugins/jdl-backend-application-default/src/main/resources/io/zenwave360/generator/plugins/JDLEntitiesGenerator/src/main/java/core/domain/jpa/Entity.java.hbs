@@ -12,22 +12,37 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 /**
 * {{entity.comment}}
 */
+{{#unless entity.options.embedded}}
 @Entity
 @Table(name = "{{snakeCase entity.tableName}}")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+{{~/unless}}
+{{~#if (or entity.options.embedded entity.options.embeddable)}}
+@Embeddable
+{{~/if}}
 public class {{entity.className}} implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+{{#unless (skipEntityId entity)~}}
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")
     @Column(name = "id")
     private {{idJavaType}} id;
+{{/unless~}}
 
 {{#each entity.fields as |field|}}
     {{{fieldValidationAnnotations field}}}
+    {{~#if field.isEntity}}
+    @Embedded
+    {{~ assign 'embeddedFields' (jsonPath jdl 'entities["' field.type '"].fields[*]') ~}}
+    {{~#joinWithTemplate embeddedFields as |it|}}
+    @AttributeOverride( name = "{{it.name}}", column = @Column(name = "{{snakeCase field.name}}_{{name}}"))
+    {{~/joinWithTemplate~}}
+    {{~else~}}
     @Column(name = "{{snakeCase field.name}}" {{#if field.validations.required}}, nullable = false{{/if}}{{#if field.validations.unique}}, unique = true{{/if}}{{#if field.validations.maxlength}}, length = {{field.validations.maxlength.value}}{{/if}})
+    {{~/if~}}
     {{~#if field.isEnum}} @Enumerated(EnumType.STRING){{/if}}
     private {{field.type}} {{field.name}};
 {{/each}}
@@ -75,7 +90,7 @@ public class {{entity.className}} implements Serializable {
         return {{relationship.fieldName}};
     }
 
-    public void set{{capitalize relationship.otherEntityName}}({{{relationshipFieldType relationship}}} {{relationship.fieldName}}) {
+    public void set{{capitalize relationship.fieldName}}({{{relationshipFieldType relationship}}} {{relationship.fieldName}}) {
         this.{{relationship.fieldName}} = {{relationship.fieldName}};
     }
 {{/if~}}

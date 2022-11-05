@@ -1,9 +1,12 @@
 package io.zenwave360.generator.templates;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.zenwave360.generator.parsers.JDLParser;
+import io.zenwave360.generator.processors.JDLProcessor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -14,15 +17,17 @@ import io.zenwave360.generator.templating.TemplateOutput;
 public class HandlebarsEngineTest {
 
     @Test
-    public void testHandlebarsEngine() {
+    public void testHandlebarsEngine() throws IOException {
         HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
         Map<String, Object> model = new HashMap<>();
         model.put("list", List.of(1, 2, 3));
         model.put("booleanValue", true);
         model.put("nullValue", null);
+        model.put("name", "nameFromParent");
+        model.put("entities", Map.of("entity1", Map.of("name", "entity1"), "entity2", Map.of("name", "entity2")));
         TemplateOutput templateOutput = handlebarsEngine.processTemplate(model, new TemplateInput("io/zenwave360/generator/templating/handlebars-test", "")).get(0);
-//         System.out.println(templateOutput.getContent());
+         System.out.println(templateOutput.getContent());
 
         Assertions.assertTrue(templateOutput.getContent().contains("This is the assigned value"));
         Assertions.assertTrue(templateOutput.getContent().contains("List size is 3"));

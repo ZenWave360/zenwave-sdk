@@ -22,6 +22,12 @@ public class {{entity.className}}{{inputDTOSuffix}} implements Serializable {
     private {{{fieldType field suffix=typeSuffix}}} {{field.name}};
 {{/each}}
 
+{{#each entity.relationships as |relationship|}}
+{{#if relationship.fieldName~}}
+    private {{{relationshipFieldType relationship suffix=inputDTOSuffix}}} {{relationship.fieldName}};
+{{/if~}}
+{{/each}}
+
 {{#unless (skipEntityId entity)~}}
     public {{idJavaType}} getId() {
         return id;
@@ -58,5 +64,17 @@ public class {{entity.className}}{{inputDTOSuffix}} implements Serializable {
     public void set{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
         this.{{field.name}} = {{field.name}};
     }
+{{/each}}
+
+{{#each entity.relationships as |relationship|}}
+{{#if relationship.fieldName~}}
+    public {{{relationshipFieldType relationship suffix=inputDTOSuffix}}} get{{capitalize relationship.fieldName}}() {
+        return {{relationship.fieldName}};
+    }
+
+    public void set{{capitalize relationship.otherEntityName}}({{{relationshipFieldType relationship suffix=inputDTOSuffix}}} {{relationship.fieldName}}) {
+        this.{{relationship.fieldName}} = {{relationship.fieldName}};
+    }
+{{/if~}}
 {{/each}}
 }

@@ -26,3 +26,15 @@ asPackageFolder {{asPackageFolder "io.zenwave360.generator.templating"}}
 Not with string: {{not 'true'}}
 Not with boolean: {{not booleanValue}}
 Not with null: {{not nullValue}}
+
+Name in parent is: {{name}}
+{{#joinWithTemplate entities delimiter=',' as |it|}}
+    Entity Name is: {{name}}
+    Key: {{@key}}
+    This: {{{this}}}
+    This: {{{.}}}
+    It: {{{it}}}
+    Value: {{{@value}}}
+    Value.name: {{{@value.name}}}
+{{/joinWithTemplate}}
+Name in parent is: {{name}}

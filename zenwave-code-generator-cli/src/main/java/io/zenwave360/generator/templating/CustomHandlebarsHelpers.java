@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.zenwave360.generator.utils.JSONPath;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -15,6 +16,12 @@ import com.github.jknack.handlebars.Options;
 import io.zenwave360.generator.utils.NamingUtils;
 
 public class CustomHandlebarsHelpers {
+
+    public static Object jsonPath(Object entity, Options options) throws IOException {
+        String jsonPath = StringUtils.join(options.params, "");
+        Object defaultValue = options.hash.get("default");
+        return JSONPath.get(entity, jsonPath, defaultValue);
+    }
 
     public static String partial(String context, Options options) {
         var baseDir = FilenameUtils.getPath(options.fn.filename());
@@ -45,6 +52,21 @@ public class CustomHandlebarsHelpers {
             return !((Boolean) value);
         }
         return Boolean.valueOf(String.valueOf(value)) == false;
+    }
+
+    public static boolean or(Object first, Options options) throws IOException {
+        Object second = options.param(0);
+        return isTruthy(first) || isTruthy(second);
+    }
+
+    private static boolean isTruthy(Object value) {
+        if (value == null) {
+            return false;
+        }
+        if (value instanceof Boolean) {
+            return (Boolean) value;
+        }
+        return !"false".equalsIgnoreCase(String.valueOf(value));
     }
 
     public static Object size(List list, Options options) throws IOException {
@@ -89,15 +111,16 @@ public class CustomHandlebarsHelpers {
         return text != null ? NamingUtils.snakeCase(text) : null;
     }
 
-    public static String joinWithTemplate(Collection<Object> context, Options options) throws IOException {
-        String delimiter = options.params.length > 0 ? options.params[0].toString() : "\n";
+    public static String joinWithTemplate(Object context, Options options) throws IOException {
+        Collection<?> items = context instanceof Map? ((Map<?, ?>) context).entrySet() : (Collection<?>) context;
+        String delimiter = options.hash("delimiter", "\n");
         boolean removeDuplicates = options.hash("removeDuplicates", false);
         if (removeDuplicates) {
-            context = context.stream().distinct().collect(Collectors.toList());
+            items = items.stream().distinct().collect(Collectors.toList());
         }
-        return context.stream().map(token -> {
+        return items.stream().map(token -> {
             try {
-                return options.apply(options.fn, token);
+                return options.fn(token);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
