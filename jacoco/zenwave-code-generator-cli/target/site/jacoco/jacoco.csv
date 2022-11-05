@@ -10,7 +10,7 @@ io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwav
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.templating,OutputFormatType,27,0,0,0,2,0,1,0,1,0
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.templating,TemplateInput,39,34,2,0,12,13,5,8,4,8
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.templating,TemplateOutput,3,27,0,0,1,11,1,4,1,4
-io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.templating,CustomHandlebarsHelpers,53,162,9,13,9,31,11,16,3,13
+io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.templating,CustomHandlebarsHelpers,96,170,18,14,19,32,18,17,6,13
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.options,ProgrammingStyle,15,0,0,0,2,0,1,0,1,0
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.options,PersistenceType,15,0,0,0,2,0,1,0,1,0
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.parsers,Model,0,22,0,0,0,7,0,4,0,4
@@ -25,7 +25,7 @@ io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwav
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.formatters,JavaFormatter,124,0,12,0,22,0,12,0,6,0
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.doc,PluginAnnotationProcessor,195,0,16,0,46,0,12,0,4,0
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.generators,AbstractOpenAPIGenerator.OperationType,0,45,0,0,0,2,0,1,0,1
-io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.generators,JDLEntitiesToSchemasConverter,107,385,14,42,21,71,15,21,1,7
+io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.generators,JDLEntitiesToSchemasConverter,166,397,21,43,30,73,19,21,1,7
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.generators,AbstractAsyncapiGenerator,24,155,2,24,4,29,5,18,3,7
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.generators,JDLEntitiesToAvroConverter,100,387,13,37,14,58,14,20,1,8
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.generators,AbstractAsyncapiGenerator.OperationRoleType,5,59,1,7,2,9,2,6,1,3
