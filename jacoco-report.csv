@@ -2,7 +2,7 @@ GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi,io.zenwave360.generator.plugins,OpenAPIToJDLConfiguration,41,0,4,0,6,0,4,0,2,0
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi,io.zenwave360.generator.plugins,JDLToOpenAPIConfiguration,41,0,4,0,6,0,4,0,2,0
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi,io.zenwave360.generator.plugins,OpenAPIToJDLGenerator,10,502,4,42,5,93,5,25,1,6
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi,io.zenwave360.generator.plugins,JDLToOpenAPIGenerator,19,339,6,12,6,67,6,13,1,9
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi,io.zenwave360.generator.plugins,JDLToOpenAPIGenerator,21,384,9,17,7,72,9,15,1,10
 io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient,io.zenwave360.generator.plugins,SpringWebTestClientGenerator.GroupByType,0,21,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient,io.zenwave360.generator.plugins,SpringWebTestClientGenerator,56,258,3,9,8,44,4,11,2,7
 io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient,io.zenwave360.generator.plugins,SpringWebTestClientConfiguration,53,0,2,0,8,0,3,0,2,0
@@ -15,9 +15,9 @@ io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-defa
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default,io.zenwave360.generator.plugins,JDLBackendApplicationDefaultGenerator,57,880,16,44,4,83,16,36,3,19
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi,io.zenwave360.generator.plugins,JDLToAsyncAPIGenerator.SchemaFormat,0,15,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi,io.zenwave360.generator.plugins,JDLToAsyncAPIConfiguration,65,0,4,0,6,0,4,0,2,0
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi,io.zenwave360.generator.plugins,JDLToAsyncAPIGenerator,39,757,18,32,8,115,18,23,2,14
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi,io.zenwave360.generator.plugins,JDLToAsyncAPIGenerator,39,758,18,32,8,115,18,23,2,14
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers,io.zenwave360.generator.plugins,JDLOpenAPIControllersGenerator.ProgrammingStyle,0,15,0,0,0,2,0,1,0,1
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers,io.zenwave360.generator.plugins,JDLOpenAPIControllersGenerator,39,737,11,53,6,122,11,48,0,27
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers,io.zenwave360.generator.plugins,JDLOpenAPIControllersGenerator,43,733,14,50,8,120,14,45,0,27
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers,io.zenwave360.generator.plugins,JDLOpenAPIControllersConfiguration,5,148,1,3,1,20,1,3,0,2
 io.github.zenwave360.zenwave-code-generator.plugins:java-to-jdl,io.zenwave360.generator.plugins,JavaToJDLGenerator.PersistenceType,0,15,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-code-generator.plugins:java-to-jdl,io.zenwave360.generator.plugins,JavaToJDLGenerator,180,553,47,69,48,134,37,32,1,10
@@ -50,7 +50,7 @@ io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwav
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.formatters,JavaFormatter,124,0,12,0,22,0,12,0,6,0
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.doc,PluginAnnotationProcessor,195,0,16,0,46,0,12,0,4,0
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.generators,AbstractOpenAPIGenerator.OperationType,0,45,0,0,0,2,0,1,0,1
-io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.generators,JDLEntitiesToSchemasConverter,166,397,21,43,30,73,19,21,1,7
+io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.generators,JDLEntitiesToSchemasConverter,233,415,34,44,41,78,27,22,2,8
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.generators,AbstractAsyncapiGenerator,24,155,2,24,4,29,5,18,3,7
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.generators,JDLEntitiesToAvroConverter,100,387,13,37,14,58,14,20,1,8
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.generators,AbstractAsyncapiGenerator.OperationRoleType,5,59,1,7,2,9,2,6,1,3
