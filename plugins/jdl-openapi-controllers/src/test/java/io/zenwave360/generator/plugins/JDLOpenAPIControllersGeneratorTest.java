@@ -2,10 +2,7 @@ package io.zenwave360.generator.plugins;
 
 import java.util.List;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import io.zenwave360.generator.Configuration;
 import io.zenwave360.generator.MainGenerator;
@@ -51,7 +48,7 @@ public class JDLOpenAPIControllersGeneratorTest {
     }
 
     @Test
-    // @Disabled
+    @Disabled
     public void test_generator_jdl_openapi_controllers_registry() throws Exception {
         Configuration configuration = new JDLOpenAPIControllersConfiguration()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/openapi-orders.yml")
@@ -70,6 +67,28 @@ public class JDLOpenAPIControllersGeneratorTest {
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
     }
+
+    @Test
+    @Disabled
+    public void test_generator_jdl_openapi_controllers_relational() throws Exception {
+        Configuration configuration = new JDLOpenAPIControllersConfiguration()
+                .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/openapi-orders-relational.yml")
+                .withOption("jdlFile", "classpath:io/zenwave360/generator/resources/jdl/orders-model-relational.jdl")
+                .withOption("basePackage", "io.zenwave360.example")
+                .withOption("openApiApiPackage", "io.zenwave360.example.adapters.web")
+                .withOption("openApiModelPackage", "io.zenwave360.example.adapters.web.model")
+                .withOption("openApiModelNameSuffix", "DTO")
+                // .withOption("operationIds", List.of("addPet", "updatePet"))
+                .withOption("style", JDLOpenAPIControllersGenerator.ProgrammingStyle.imperative)
+                .withTargetFolder("target/examples/spring-boot-jpa-elasticsearch");
+
+        new MainGenerator().generate(configuration);
+
+        List<String> logs = logCaptor.getLogs();
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
+    }
+
 
     @Test
     // @Disabled

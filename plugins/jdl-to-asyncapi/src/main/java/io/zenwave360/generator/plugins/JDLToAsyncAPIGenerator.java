@@ -106,7 +106,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
             }
             if (schemaFormat == SchemaFormat.schema) {
                 String entityName = (String) entity.get("name");
-                Map<String, Object> asyncAPISchema = toSchemasConverter.convertToSchema(entity);
+                Map<String, Object> asyncAPISchema = toSchemasConverter.convertToSchema(entity, jdlModel);
                 schemas.put(entityName, asyncAPISchema);
             }
             if (schemaFormat == SchemaFormat.avro) {

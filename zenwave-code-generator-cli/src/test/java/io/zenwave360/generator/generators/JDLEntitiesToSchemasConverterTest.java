@@ -34,7 +34,7 @@ public class JDLEntitiesToSchemasConverterTest {
         List<Map> schemas = new ArrayList<>();
 
         for (Map entity : entitiesAndEnums) {
-            Map<String, Object> result = converter.convertToSchema(entity);
+            Map<String, Object> result = converter.convertToSchema(entity, model);
             Assertions.assertEquals(entity.get(converter.jdlBusinessEntityProperty), result.get("name"));
             schemas.add(result);
         }

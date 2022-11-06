@@ -77,6 +77,9 @@ paths:
       required: true
       schema:
         type: {{idType}}
+        {{~#if idTypeFormat}}
+        format: {{idTypeFormat}}
+        {{~/if}}
     get:
       summary: Get {{entity.className}} by id
       operationId: get{{entity.className}}
@@ -107,7 +110,7 @@ paths:
     delete:
       summary: Delete {{entity.className}}
       operationId: delete{{entity.className}}
-      tags: [{{entity.className}}]
+      tags: [{{asTagName entity.options.service}}]
       responses:
         "204":
           description: {{entity.className}} deleted

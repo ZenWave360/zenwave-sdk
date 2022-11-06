@@ -11,10 +11,26 @@ public class JDLEntitiesToSchemasConverter {
     public String jdlBusinessEntityProperty = "x-business-entity";
 
     public String idType = "string";
+    public String idTypeFormat = null;
 
     public JDLEntitiesToSchemasConverter withIdType(String idType) {
         this.idType = idType;
         return this;
+    }
+
+    public JDLEntitiesToSchemasConverter withIdType(String idType, String idTypeFormat) {
+        this.idType = idType;
+        this.idTypeFormat = idTypeFormat;
+        return this;
+    }
+
+    protected Map idTypeMap() {
+        Map idType = new LinkedHashMap();
+        idType.put("type", this.idType);
+        if (this.idTypeFormat != null) {
+            idType.put("format", this.idTypeFormat);
+        }
+        return idType;
     }
 
     public JDLEntitiesToSchemasConverter withJdlBusinessEntityProperty(String jdlBusinessEntityProperty) {
@@ -22,12 +38,12 @@ public class JDLEntitiesToSchemasConverter {
         return this;
     }
 
-    public Map<String, Object> convertToSchema(Map<String, Object> entityOrEnum) {
+    public Map<String, Object> convertToSchema(Map<String, Object> entityOrEnum, Map<String, Object> jdlModel) {
         boolean isEnum = entityOrEnum.get("values") != null;
-        return isEnum ? convertEnumToSchema(entityOrEnum) : convertEntityToSchema(entityOrEnum);
+        return isEnum ? convertEnumToSchema(entityOrEnum, jdlModel) : convertEntityToSchema(entityOrEnum, jdlModel);
     }
 
-    public Map<String, Object> convertEnumToSchema(Map<String, Object> enumValue) {
+    public Map<String, Object> convertEnumToSchema(Map<String, Object> enumValue, Map<String, Object> jdlModelv) {
         Map<String, Object> enumSchema = new LinkedHashMap<>();
         enumSchema.put("type", "string");
         enumSchema.put(jdlBusinessEntityProperty, enumValue.get("name"));
@@ -39,7 +55,7 @@ public class JDLEntitiesToSchemasConverter {
         return enumSchema;
     }
 
-    public Map<String, Object> convertEntityToSchema(Map<String, Object> entity) {
+    public Map<String, Object> convertEntityToSchema(Map<String, Object> entity, Map<String, Object> jdlModel) {
         Map<String, Object> schema = new LinkedHashMap<>();
         schema.put("type", "object");
         schema.put(jdlBusinessEntityProperty, entity.get("name"));
@@ -52,7 +68,7 @@ public class JDLEntitiesToSchemasConverter {
         schema.put("properties", properties);
 
         if (!JSONPath.get(entity, "options.embedded", false)) {
-            properties.put("id", Map.of("type", idType));
+            properties.put("id", idTypeMap());
         }
 
         List<Map<String, Object>> fields = (List) JSONPath.get(entity, "$.fields[*]");
@@ -128,16 +144,27 @@ public class JDLEntitiesToSchemasConverter {
 
         List<Map<String, Object>> relationships = JSONPath.get(entity, "$.relationships[*]", Collections.emptyList());
         for (Map<String, Object> relationship : relationships) {
-            if(relationship.get("fieldName") != null) {
+            if((relationship.get("fieldName") != null) && (boolean) relationship.getOrDefault("ownerSide", false)) {
+                var fieldName = (String) relationship.get("fieldName");
+                var isOtherEntityAggregate = JSONPath.get(jdlModel, "entities." + relationship.get("otherEntityName") + ".options.aggregate", false);
+                var isCollection = relationship.get("isCollection") == Boolean.TRUE;
+                if(isOtherEntityAggregate) {
+                    if(isCollection) {
+                        properties.put(fieldName + "Id", Map.of("type", "array", "items", idTypeMap()));
+                    } else {
+                        properties.put(fieldName + "Id", idTypeMap());
+                    }
+                }
                 Map<String, Object> property = new LinkedHashMap<>();
-                if (relationship.get("comment") != null) {
-                    property.put("description", relationship.get("comment"));
+                if (relationship.get("comment") != null || isOtherEntityAggregate) {
+                    var readOnlyWarning = isOtherEntityAggregate ? "(read-only) " : "";
+                    // TODO desc+$ref: property.put("description", readOnlyWarning + relationship.getOrDefault("comment", ""));
                 }
                 property.put("$ref", "#/components/schemas/" + relationship.get("otherEntityName"));
-                if (relationship.get("isCollection") == Boolean.TRUE) {
+                if (isCollection) {
                     property = Maps.of("type", "array", "items", property);
                 }
-                properties.put((String) relationship.get("fieldName"), property);
+                properties.put(fieldName, property);
             }
         }
 

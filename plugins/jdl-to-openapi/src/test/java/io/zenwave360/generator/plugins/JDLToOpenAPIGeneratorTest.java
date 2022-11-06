@@ -46,6 +46,7 @@ public class JDLToOpenAPIGeneratorTest {
         Map<String, Object> model = loadJDLModelFromResource("classpath:io/zenwave360/generator/resources/jdl/orders-model-relational.jdl");
         JDLToOpenAPIGenerator generator = new JDLToOpenAPIGenerator();
         generator.idType = "integer";
+        generator.idTypeFormat = "int64";
 
         List<TemplateOutput> outputTemplates = generator.generate(model);
         Assertions.assertEquals(1, outputTemplates.size());

@@ -32,6 +32,8 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
     public List<String> entities = new ArrayList<>();
 
     @DocumentedOption(description = "Skip generating operations for entities annotated with these")
+    public List<String> annotationsToGenerate = List.of("aggregate");
+    @DocumentedOption(description = "Skip generating operations for entities annotated with these")
     public List<String> skipForAnnotations = List.of("vo", "embedded", "skip");
 
     @DocumentedOption(description = "Target file")
@@ -50,6 +52,9 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
 
     @DocumentedOption(description = "JsonSchema type for id fields and parameters.")
     public String idType = "string";
+
+    @DocumentedOption(description = "JsonSchema type format for id fields and parameters.")
+    public String idTypeFormat = null;
 
     public JDLToOpenAPIGenerator withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;
@@ -72,8 +77,11 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
     {
         handlebarsEngine.getHandlebars().registerHelper("skipOperations", (context, options) -> {
             Map entity = (Map) context;
-            String annotationsFilter = skipForAnnotations.stream().map(a -> "@." + a).collect(Collectors.joining(" || "));
-            return skipForAnnotations.isEmpty() || !((List) JSONPath.get(entity, "$.options[?(" + annotationsFilter + ")]")).isEmpty();
+            String annotationsFilter = annotationsToGenerate.stream().map(a -> "@." + a).collect(Collectors.joining(" || "));
+            String skipAnnotationsFilter = skipForAnnotations.stream().map(a -> "@." + a).collect(Collectors.joining(" || "));
+            boolean isGenerate = annotationsToGenerate.isEmpty() || !((List) JSONPath.get(entity, "$.options[?(" + annotationsFilter + ")]")).isEmpty();
+            boolean isSkip = skipForAnnotations.isEmpty() || !((List) JSONPath.get(entity, "$.options[?(" + skipAnnotationsFilter + ")]")).isEmpty();
+            return !isGenerate || isSkip;
         });
     }
 
@@ -87,7 +95,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
         Map<String, Object> schemas = new LinkedHashMap<>();
         JSONPath.set(oasSchemas, "components.schemas", schemas);
 
-        JDLEntitiesToSchemasConverter converter = new JDLEntitiesToSchemasConverter().withIdType(idType).withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
+        JDLEntitiesToSchemasConverter converter = new JDLEntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
 
         List<Map<String, Object>> entities = (List) JSONPath.get(jdlModel, "$.entities[*]");
         for (Map<String, Object> entity : entities) {
@@ -95,7 +103,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
                 continue;
             }
             String entityName = (String) entity.get("name");
-            Map<String, Object> openAPISchema = converter.convertToSchema(entity);
+            Map<String, Object> openAPISchema = converter.convertToSchema(entity, jdlModel);
             schemas.put(entityName, openAPISchema);
 
             Map<String, Object> paginatedSchema = new HashMap<>();
@@ -113,7 +121,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
             if (!isGenerateSchemaEntity(enumValue)) {
                 continue;
             }
-            Map<String, Object> enumSchema = converter.convertToSchema(enumValue);
+            Map<String, Object> enumSchema = converter.convertToSchema(enumValue, jdlModel);
             schemas.put((String) enumValue.get("name"), enumSchema);
         }
 
