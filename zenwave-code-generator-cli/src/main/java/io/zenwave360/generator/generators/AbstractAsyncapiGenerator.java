@@ -48,7 +48,7 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
     public String modelPackage;
     @DocumentedOption(description = "Binding names to include in code generation. Generates code for ALL bindings if left empty")
     public List<String> bindingTypes;
-    @DocumentedOption(description = "Project role: provider\\|client")
+    @DocumentedOption(description = "Project role: provider/client")
     public AsyncapiRoleType role = AsyncapiRoleType.provider;
 
     @DocumentedOption(description = "Operation ids to include in code generation. Generates code for ALL if left empty")

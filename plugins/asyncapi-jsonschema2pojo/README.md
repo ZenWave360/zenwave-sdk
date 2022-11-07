@@ -9,17 +9,20 @@ ${javadoc}
 
 ## Options
 
-| **Option**        | **Description**                                                                                                | **Type** | **Default**          | **Values**       |
-| ----------------- | -------------------------------------------------------------------------------------------------------------- | -------- | -------------------- | ---------------- |
-| `specFile`        | API Specification File                                                                                         | String   |                      |                  |
-| `targetFolder`    | Target folder to generate code to. If left empty, it will print to stdout.                                     | File     |                      |                  |
-| `messageNames`    | Message names to include in code generation (combined with operationIds). Generates code for ALL if left empty | List     | []                   |                  |
-| `jsonschema2pojo` | JsonSchema2Pojo settings                                                                                       | Map      | {}                   |                  |
-| `apiPackage`      | Java API package name                                                                                          | String   | io.example.api       |                  |
-| `modelPackage`    | Java Models package name                                                                                       | String   | io.example.api.model |                  |
-| `bindingTypes`    | Binding names to include in code generation. Generates code for ALL bindings if left empty                     | List     |                      |                  |
-| `role`            | Project role: provider\|client                                                                                 | RoleType | provider             | provider, client |
-| `operationIds`    | Operation ids to include in code generation. Generates code for ALL if left empty                              | List     | []                   |                  |
+| **Option**        | **Description**                                                                                                | **Type**         | **Default**   | **Values**       |
+|-------------------|----------------------------------------------------------------------------------------------------------------|------------------|---------------|------------------|
+| `specFile`        | API Specification File                                                                                         | String           |               |                  |
+| `targetFolder`    | Target folder to generate code to.                                                                             | File             |               |                  |
+| `messageNames`    | Message names to include in code generation (combined with operationIds). Generates code for ALL if left empty | List             | []            |                  |
+| `jsonschema2pojo` | JsonSchema2Pojo settings                                                                                       | Map              | {}            |                  |
+| `sourceFolder`    | Source folder inside folder to generate code to.                                                               | String           | src/main/java |                  |
+| `apiPackage`      | Java API package name                                                                                          | String           |               |                  |
+| `modelPackage`    | Java Models package name                                                                                       | String           |               |                  |
+| `bindingTypes`    | Binding names to include in code generation. Generates code for ALL bindings if left empty                     | List             |               |                  |
+| `role`            | Project role: provider/client                                                                                  | AsyncapiRoleType | provider      | provider, client |
+| `operationIds`    | Operation ids to include in code generation. Generates code for ALL if left empty                              | List             | []            |                  |
+
+
 
 ## Getting Help
 

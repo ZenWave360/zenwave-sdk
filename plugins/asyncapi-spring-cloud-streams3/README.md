@@ -18,8 +18,8 @@ For these reasons, to avoid defining the same API operations multiple times from
 Some definitions:
 
 - SERVICE: An independent piece of software, typically a microservice, that provides a set of capabilities to other services.
-- provider: The service that implements the functionality of the API. It may be accepting asynchronous command request or publishing business domain events.
-- client/s: The service/s that makes use of the funcionality of the API. It may be requesting asynchronous commands or subscribing to business domain events.
+- PROVIDER: The service that implements the functionality of the API. It may be accepting asynchronous command request or publishing business domain events.
+- CLIENT/s: The service/s that makes use of the funcionality of the API. It may be requesting asynchronous commands or subscribing to business domain events.
 - PRODUCER: A service that writes a given message.
 - CONSUMER: A service that reads a given message.
 
@@ -65,9 +65,10 @@ jbang zw -p io.zenwave360.generator.plugins.SpringCloudStream3Configuration --he
 | `apiPackage`                | Java API package name                                                                                                                                                                   | String                  |                 |                      |
 | `modelPackage`              | Java Models package name                                                                                                                                                                | String                  |                 |                      |
 | `bindingTypes`              | Binding names to include in code generation. Generates code for ALL bindings if left empty                                                                                              | List                    |                 |                      |
-| `role`                      | Project role: provider\                                                                                                                                                                 | client                  | RoleType        | provider             | provider, client  |
+| `role`                      | Project role: provider/client                                                                                                                                                           | AsyncapiRoleType        | provider        | provider, client     |
 | `operationIds`              | Operation ids to include in code generation. Generates code for ALL if left empty                                                                                                       | List                    | []              |                      |
 | `skipFormatting`            | Skip java sources output formatting                                                                                                                                                     | boolean                 | false           |                      |
+| `haltOnFailFormatting`      | Halt on formatting errors                                                                                                                                                               | boolean                 | true            |                      |
 
 ## Maven Plugin Configuration (API-First)
 
