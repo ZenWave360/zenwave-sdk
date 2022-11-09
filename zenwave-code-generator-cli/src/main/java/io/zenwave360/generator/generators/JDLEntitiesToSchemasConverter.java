@@ -3,6 +3,7 @@ package io.zenwave360.generator.generators;
 import java.util.*;
 
 import io.zenwave360.generator.utils.JSONPath;
+import io.zenwave360.generator.utils.Lists;
 import io.zenwave360.generator.utils.Maps;
 
 public class JDLEntitiesToSchemasConverter {
@@ -77,6 +78,11 @@ public class JDLEntitiesToSchemasConverter {
         }
 
         List<Map<String, Object>> fields = (List) JSONPath.get(entity, "$.fields[*]");
+        String superClassName = JSONPath.get(entity, "$.options.extends");
+        if (superClassName != null) {
+            List superClassFields = (List) JSONPath.get(jdlModel, "$.entities['" + superClassName + "'].fields[*]");
+            fields = Lists.concat(superClassFields, fields);
+        }
         for (Map<String, Object> field : fields) {
             Map<String, Object> property = new LinkedHashMap<>();
 
@@ -148,12 +154,16 @@ public class JDLEntitiesToSchemasConverter {
         }
 
         List<Map<String, Object>> relationships = JSONPath.get(entity, "$.relationships[*]", Collections.emptyList());
+        if (superClassName != null) {
+            List superClassRelationships = (List) JSONPath.get(jdlModel, "$.entities['" + superClassName + "'].relationships[*]");
+            relationships = Lists.concat(superClassRelationships, relationships);
+        }
         for (Map<String, Object> relationship : relationships) {
             if((relationship.get("fieldName") != null) && (boolean) relationship.getOrDefault("ownerSide", false)) {
                 var fieldName = (String) relationship.get("fieldName");
-                var isOtherEntityAggregate = JSONPath.get(jdlModel, "entities." + relationship.get("otherEntityName") + ".options.aggregate", false);
+                var isAddRelationshipById = isAddRelationshipById(relationship);
                 var isCollection = relationship.get("isCollection") == Boolean.TRUE;
-                if(isOtherEntityAggregate) {
+                if(isAddRelationshipById) {
                     if(isCollection) {
                         properties.put(fieldName + "Id", Map.of("type", "array", "items", idTypeMap()));
                     } else {
@@ -161,8 +171,8 @@ public class JDLEntitiesToSchemasConverter {
                     }
                 }
                 Map<String, Object> property = new LinkedHashMap<>();
-                if (relationship.get("comment") != null || isOtherEntityAggregate) {
-                    var readOnlyWarning = isOtherEntityAggregate ? "(read-only) " : "";
+                if (relationship.get("comment") != null || isAddRelationshipById) {
+                    var readOnlyWarning = isAddRelationshipById ? "(read-only) " : "";
                     // TODO desc+$ref: property.put("description", readOnlyWarning + relationship.getOrDefault("comment", ""));
                 }
                 property.put("$ref", "#/components/schemas/" + relationship.get("otherEntityName"));
@@ -178,6 +188,12 @@ public class JDLEntitiesToSchemasConverter {
         }
 
         return schema;
+    }
+
+    public boolean isAddRelationshipById(Object relationship) {
+        boolean isOwnerSide = JSONPath.get(relationship, "ownerSide", false);
+        String relationType = JSONPath.get(relationship, "type");
+        return "ManyToOne".contentEquals(relationType) && isOwnerSide;
     }
 
     private static Object asNumber(String number) {

@@ -42,4 +42,26 @@ public class JDLEntitiesToSchemasConverterTest {
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writeValueAsString(schemas));
     }
+
+    @Test
+    public void testConvertEntityToSchemaRelational() throws Exception {
+        JDLEntitiesToSchemasConverter converter = new JDLEntitiesToSchemasConverter().withIdType("string");
+        Map<String, Object> model = loadJDLModelFromResource("classpath:io/zenwave360/generator/resources/jdl/orders-model-relational.jdl");
+        List<Map> entities = JSONPath.get(model, "entities[*]");
+        List<Map> enums = JSONPath.get(model, "enums.enums[*]");
+        List<Map> entitiesAndEnums = new ArrayList<>();
+        entitiesAndEnums.addAll(entities);
+        entitiesAndEnums.addAll(enums);
+
+        List<Map> schemas = new ArrayList<>();
+
+        for (Map entity : entitiesAndEnums) {
+            Map<String, Object> result = converter.convertToSchema(entity, model);
+            Assertions.assertEquals(entity.get(converter.jdlBusinessEntityProperty), result.get("name"));
+            schemas.add(result);
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writeValueAsString(schemas));
+    }
 }

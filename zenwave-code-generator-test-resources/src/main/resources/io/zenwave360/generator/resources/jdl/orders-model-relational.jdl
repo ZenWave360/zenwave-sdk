@@ -62,12 +62,15 @@ entity ShippingDetails {
 @copy(ShippingDetails)
 entity OrderShippingDetails {}
 
-//relationship OneToOne {
+//relationship OneToMany {
+//	Customer{shipmentDetails} to ShippingDetails{customer}
+//	Customer{paymentDetails} to PaymentDetails{customer}
 //}
 
 relationship ManyToOne {
-	Customer{shipmentDetails} to ShippingDetails{customer}
-	Customer{paymentDetails} to PaymentDetails{customer}
+	ShippingDetails{customer} to Customer{shipmentDetails}
+	PaymentDetails{customer} to Customer{paymentDetails}
+
 	CustomerOrder{paymentDetails(creditCardNumber)} to PaymentDetails
 	CustomerOrder{customer(username)} to Customer
 }

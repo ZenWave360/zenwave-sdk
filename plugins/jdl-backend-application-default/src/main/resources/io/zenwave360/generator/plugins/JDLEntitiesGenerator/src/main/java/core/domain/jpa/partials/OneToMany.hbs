@@ -1,1 +1,7 @@
-@OneToMany(mappedBy = "{{relationship.otherEntityName}}")
+{{#if relationship.ownerSide}}
+@OneToMany
+@JoinColumn(name = "{{snakeCase relationship.fieldName}}_id")
+{{else}}
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "{{snakeCase relationship.fieldName}}_id", insertable = false, updatable = false)
+{{/if}}

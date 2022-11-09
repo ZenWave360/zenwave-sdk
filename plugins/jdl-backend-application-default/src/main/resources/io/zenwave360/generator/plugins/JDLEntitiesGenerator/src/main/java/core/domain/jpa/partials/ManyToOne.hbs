@@ -1,6 +1,6 @@
-{{#if (jsonPath jdl 'entities.' relationship.otherEntityName '.options.aggregate')}}
-@ManyToOne(optional = false, fetch = FetchType.LAZY)
+{{#if relationship.ownerSide}}
+@ManyToOne()
 @JoinColumn(name = "{{snakeCase relationship.fieldName}}_id", updatable = false, insertable = false)
 {{else}}
-@ManyToOne(cascade = CascadeType.ALL)
+@OneToMany(mappedBy="{{relationship.otherEntityFieldName}}", fetch = FetchType.LAZY)
 {{/if}}

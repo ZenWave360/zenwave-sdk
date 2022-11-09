@@ -1,12 +1,9 @@
 package io.zenwave360.generator.generators;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import io.zenwave360.generator.utils.JSONPath;
+import io.zenwave360.generator.utils.Lists;
 import io.zenwave360.generator.utils.Maps;
 
 public class JDLEntitiesToAvroConverter {
@@ -26,9 +23,9 @@ public class JDLEntitiesToAvroConverter {
 
     private static final List blobTypes = List.of("Blob", "AnyBlob", "ImageBlob");
 
-    public Map<String, Object> convertToAvro(Map<String, Object> entityOrEnum) {
+    public Map<String, Object> convertToAvro(Map<String, Object> entityOrEnum, Map<String, Object> jdlModel) {
         boolean isEnum = entityOrEnum.get("values") != null;
-        return isEnum ? convertEnumToAvro(entityOrEnum) : convertEntityToAvro(entityOrEnum);
+        return isEnum ? convertEnumToAvro(entityOrEnum) : convertEntityToAvro(entityOrEnum, jdlModel);
     }
 
     public Map<String, Object> convertEnumToAvro(Map<String, Object> enumValue) {
@@ -44,7 +41,7 @@ public class JDLEntitiesToAvroConverter {
         return schema;
     }
 
-    public Map<String, Object> convertEntityToAvro(Map<String, Object> entity) {
+    public Map<String, Object> convertEntityToAvro(Map<String, Object> entity, Map<String, Object> jdlModel) {
         Map<String, Object> schema = new LinkedHashMap<>();
         schema.put("type", "record");
         schema.put("name", entity.get("name"));
@@ -60,6 +57,11 @@ public class JDLEntitiesToAvroConverter {
         }
 
         List<Map<String, Object>> entityFields = (List) JSONPath.get(entity, "$.fields[*]");
+        String superClassName = JSONPath.get(entity, "$.options.extends");
+        if (superClassName != null) {
+            List superClassFields = (List) JSONPath.get(jdlModel, "$.entities['" + superClassName + "'].fields[*]");
+            fields = Lists.concat(superClassFields, fields);
+        }
         for (Map<String, Object> entityField : entityFields) {
             boolean isRequired = JSONPath.get(entityField, "$.validations.required.value") != null;
             Map<String, Object> field = new LinkedHashMap<>();
@@ -127,6 +129,28 @@ public class JDLEntitiesToAvroConverter {
 
             fields.add(field);
         }
+
+        List<Map<String, Object>> relationships = JSONPath.get(entity, "$.relationships[*]", Collections.emptyList());
+        if (superClassName != null) {
+            List superClassRelationships = (List) JSONPath.get(jdlModel, "$.entities['" + superClassName + "'].relationships[*]");
+            relationships = Lists.concat(superClassRelationships, relationships);
+        }
+        for (Map<String, Object> relationship : relationships) {
+            if((relationship.get("fieldName") != null) && (boolean) relationship.getOrDefault("ownerSide", false)) {
+                var isCollection = relationship.get("isCollection") == Boolean.TRUE;
+                Map<String, Object> field = new LinkedHashMap<>();
+                field.put("name", relationship.get("name"));
+                if (relationship.get("comment") != null) {
+                    field.put("doc", relationship.get("comment"));
+                }
+                field.put("type", relationship.get("otherEntityName"));
+                if (isCollection) {
+                    field = Maps.of("type", "array", "items", field);
+                }
+                fields.add(field);
+            }
+        }
+
 
         return schema;
     }

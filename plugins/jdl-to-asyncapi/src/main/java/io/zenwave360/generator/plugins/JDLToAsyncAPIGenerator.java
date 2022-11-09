@@ -112,7 +112,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
             }
             if (schemaFormat == SchemaFormat.avro) {
                 outputList.addAll(createAvroRequestAndEventTypeEnums(toAvroConverter));
-                outputList.addAll(convertToAvro(toAvroConverter, entity));
+                outputList.addAll(convertToAvro(toAvroConverter, entity, jdlModel));
             }
         }
 
@@ -156,9 +156,9 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         return targetFolder == null ? "avro" : targetFolder + "/avro";
     }
 
-    protected List<TemplateOutput> convertToAvro(JDLEntitiesToAvroConverter converter, Map<String, Object> entityOrEnum) {
+    protected List<TemplateOutput> convertToAvro(JDLEntitiesToAvroConverter converter, Map<String, Object> entityOrEnum, Map<String, Object> jdlModel) {
         String name = (String) entityOrEnum.get("name");
-        Map avro = converter.convertToAvro(entityOrEnum);
+        Map avro = converter.convertToAvro(entityOrEnum, jdlModel);
         String avroJson = writeAsString(jsonMapper, avro);
         String targetFolder = getTargetAvroFolder();
         List<TemplateOutput> avroList = new ArrayList<>();
@@ -177,7 +177,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
                 Map<String, Object> requestPayload = new HashMap<>();
                 requestPayload.put("name", name + "RequestPayload");
                 requestPayload.put("fields", fields);
-                avroJson = writeAsString(jsonMapper, converter.convertToAvro(requestPayload));
+                avroJson = writeAsString(jsonMapper, converter.convertToAvro(requestPayload, jdlModel));
                 avroList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name + "RequestPayload"), avroJson, OutputFormatType.JSON.toString()));
             }
 
@@ -187,7 +187,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
                 Map<String, Object> eventPayload = new HashMap<>();
                 eventPayload.put("name", name + "EventPayload");
                 eventPayload.put("fields", fields);
-                avroJson = writeAsString(jsonMapper, converter.convertToAvro(eventPayload));
+                avroJson = writeAsString(jsonMapper, converter.convertToAvro(eventPayload, jdlModel));
                 avroList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name + "EventPayload"), avroJson, OutputFormatType.JSON.toString()));
             }
         }

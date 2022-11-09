@@ -10,10 +10,10 @@ import java.util.TimeZone;
 public abstract class BaseMapper {
 
     public Instant asInstant(OffsetDateTime date) {
-        return date.toInstant();
+        return date != null? date.toInstant() : null;
     }
 
     public OffsetDateTime asOffsetDateTime(Instant date) {
-        return OffsetDateTime.ofInstant(date, TimeZone.getTimeZone("UTC").toZoneId());
+        return date != null? OffsetDateTime.ofInstant(date, TimeZone.getTimeZone("UTC").toZoneId()) : null;
     }
 }

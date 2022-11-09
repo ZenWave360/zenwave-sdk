@@ -17,4 +17,10 @@ public class JDLBackendApplicationDefaultJpaHelpers {
     JDLBackendApplicationDefaultJpaHelpers(JDLBackendApplicationDefaultGenerator generator) {
         this.generator = generator;
     }
+
+    public Boolean addRelationshipById(Object relationship, Options options) {
+        boolean isOwnerSide = JSONPath.get(relationship, "ownerSide", false);
+        String relationType = JSONPath.get(relationship, "type");
+        return "ManyToOne".contentEquals(relationType) && isOwnerSide;
+    }
 }
