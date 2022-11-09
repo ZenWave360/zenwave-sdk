@@ -27,11 +27,36 @@ public class JDLProcessor extends AbstractBaseProcessor {
             if(JSONPath.get(entity, "options.searchCriteria") != null) {
                 fillCriteriaObject(entity, jdlModel);
             }
+            if(JSONPath.get(entity, "options.extends") != null) {
+                fillExtendsEntities(entity, jdlModel);
+            }
+            if(JSONPath.get(entity, "options.copy") != null) {
+                fillCopyEntities(entity, jdlModel);
+            }
             fillEntityRelationships(entity, jdlModel);
         }
         return contextModel;
     }
 
+    protected void fillExtendsEntities(Map<String, Object> entity, Map<String, Object> jdlModel) {
+        String superClassName = JSONPath.get(entity, "options.extends");
+        JSONPath.set(jdlModel, "$.entities['" + superClassName + "'].options.isSuperClass", true);
+    }
+
+    protected void fillCopyEntities(Map<String, Object> entity, Map<String, Object> jdlModel) {
+        String entityName = JSONPath.get(entity, "name");
+        String superClassName = JSONPath.get(entity, "options.copy");
+        Map<String, Object> superClass = JSONPath.get(jdlModel, "$.entities['" + superClassName + "']");
+        if(superClass != null) {
+            Map<String, Map> fields = JSONPath.get(entity, "$.fields");
+            Map<String, Map> superClassFields = JSONPath.get(superClass, "$.fields");
+            for (var fieldEntry : superClassFields.entrySet()) {
+                if(!fields.containsKey(fieldEntry.getKey())) {
+                    fields.put(fieldEntry.getKey(), fieldEntry.getValue());
+                }
+            }
+        }
+    }
     protected void fillCriteriaObject(Map<String, Object> entity, Map<String, Object> jdlModel) {
         Object searchCriteria = JSONPath.get(entity, "$.options.searchCriteria");
         if (searchCriteria == Boolean.TRUE) {

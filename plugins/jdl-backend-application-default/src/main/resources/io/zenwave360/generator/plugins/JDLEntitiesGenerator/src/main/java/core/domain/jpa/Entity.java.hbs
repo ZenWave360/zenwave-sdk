@@ -12,15 +12,16 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 /**
 * {{entity.comment}}
 */
-{{#unless entity.options.embedded}}
+{{#if entity.options.embedded}}
+@Embeddable
+{{else if entity.options.isSuperClass}}
+@MappedSuperclass
+{{else}}
 @Entity
 @Table(name = "{{snakeCase entity.tableName}}")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-{{~/unless}}
-{{~#if (or entity.options.embedded entity.options.embeddable)}}
-@Embeddable
 {{~/if}}
-public class {{entity.className}} implements Serializable {
+public class {{entity.className}} {{addExtends entity}} implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

@@ -126,4 +126,13 @@ public class JDLBackendApplicationDefaultHelpers {
         return generator.skipEntityId.apply(Map.of("entity", entity));
     };
 
+    public Object addExtends(Object entity, Options options) {
+        String superClassName = JSONPath.get(entity, "options.extends");
+        String suffix = options.hash("suffix", "");
+        if(superClassName != null) {
+            return String.format("extends %s%s", superClassName, suffix);
+        }
+        return "";
+    };
+
 }

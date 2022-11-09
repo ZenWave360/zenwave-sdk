@@ -16,7 +16,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 * {{entity.comment}}
 */
 {{#unless (skipEntityId entity)~}}@Document(collection = "{{entity.tableName}}"){{/unless~}}
-public class {{entity.className}} implements Serializable {
+public class {{entity.className}} {{addExtends entity}} implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

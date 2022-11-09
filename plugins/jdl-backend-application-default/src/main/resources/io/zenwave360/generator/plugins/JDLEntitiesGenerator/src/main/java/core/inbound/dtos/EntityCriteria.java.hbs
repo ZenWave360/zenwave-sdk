@@ -11,7 +11,7 @@ import javax.validation.constraints.*;
  *
  */
 {{#assign "_criteriaClassName"}}{{criteriaClassName entity}}{{/assign}}
-public class {{_criteriaClassName}} implements Serializable {
+public class {{_criteriaClassName}} {{addExtends entity suffix=inputDTOSuffix}} implements Serializable {
 
 {{#with entity.options.searchCriteriaObject as |entity| }}
 

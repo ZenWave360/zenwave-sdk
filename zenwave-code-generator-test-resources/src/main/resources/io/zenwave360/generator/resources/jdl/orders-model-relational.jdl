@@ -1,7 +1,13 @@
+entity BaseEntity {
+  createdAt Instant
+  updatedAt Instant
+}
+
 /* Customers */
 @aggregate
 @search(elasticsearch)
 @searchCriteria
+@extends(BaseEntity)
 entity Customer {
 	username String required minlength(3) maxlength(250),
 	password String required minlength(3) maxlength(250),
@@ -23,7 +29,7 @@ entity CustomerOrder { // Order is a reserved word
 //	orderedItems OrderedItem[]
 //	paymentDetails PaymentDetails[]
 	/** Shipping Details are stored embedded so they don't change if the original shipping address changes */
-	shippingDetails ShippingDetails
+	shippingDetails OrderShippingDetails
 }
 
 @skip
@@ -47,19 +53,23 @@ entity PaymentDetails {
 }
 
 @aggregate
-@embeddable
 entity ShippingDetails {
 	address String
 	phone String
 }
 
+@embedded
+@copy(ShippingDetails)
+entity OrderShippingDetails {}
+
 //relationship OneToOne {
 //}
 
 relationship ManyToOne {
+	Customer{shipmentDetails} to ShippingDetails{customer}
+	Customer{paymentDetails} to PaymentDetails{customer}
 	CustomerOrder{paymentDetails(creditCardNumber)} to PaymentDetails
-	CustomerOrder{customer(username)} to Customer,
-//	CustomerOrder{shippingDetails(address)} to ShippingDetails
+	CustomerOrder{customer(username)} to Customer
 }
 
 relationship ManyToMany {

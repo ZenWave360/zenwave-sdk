@@ -33,4 +33,14 @@ public class JDLProcessorTest {
         Assertions.assertTrue(containsEntity(entitiesWithCriteria, "CustomerOrder"));
     }
 
+    @Test
+    public void testProcessJDL_Relational() throws Exception {
+        var model = loadJDL("classpath:io/zenwave360/generator/resources/jdl/orders-model-relational.jdl");
+        List entitiesWithCriteria = JSONPath.get(model, "$..[?(@.options.searchCriteriaObject)]");
+        Assertions.assertFalse(entitiesWithCriteria.isEmpty());
+        Assertions.assertEquals(2, entitiesWithCriteria.size());
+        Assertions.assertTrue(containsEntity(entitiesWithCriteria, "Customer"));
+        Assertions.assertTrue(containsEntity(entitiesWithCriteria, "CustomerOrder"));
+    }
+
 }

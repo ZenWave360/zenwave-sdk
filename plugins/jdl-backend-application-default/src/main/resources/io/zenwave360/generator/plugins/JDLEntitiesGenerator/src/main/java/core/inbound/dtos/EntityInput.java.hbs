@@ -10,7 +10,7 @@ import javax.validation.constraints.*;
 /**
  *
  */
-public class {{entity.className}}{{inputDTOSuffix}} implements Serializable {
+public class {{entity.className}}{{inputDTOSuffix}} {{addExtends entity suffix=inputDTOSuffix}} implements Serializable {
 
 {{#unless (skipEntityId entity)~}}
     private {{idJavaType}} id;

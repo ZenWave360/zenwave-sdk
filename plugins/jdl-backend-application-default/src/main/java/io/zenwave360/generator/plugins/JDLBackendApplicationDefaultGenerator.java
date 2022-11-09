@@ -58,7 +58,7 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
     }
 
     Function<Map<String, Object>, Boolean> skipEntityRepository = (model) -> useSemanticAnnotations && !is(model, "aggregate");
-    Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo");
+    Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo", "isSuperClass");
     Function<Map<String, Object>, Boolean> skipEntity = (model) -> is(model, "vo");
     Function<Map<String, Object>, Boolean> skipVO = (model) -> useSemanticAnnotations && !is(model, "vo");
     Function<Map<String, Object>, Boolean> skipEntityResource = (model) -> is(model, "vo") || !is(model, "service");
