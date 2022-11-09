@@ -26,6 +26,9 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
+          server-id: ossrh
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
 
       - name: Build with Maven
         run: mvn -B test
@@ -86,3 +89,11 @@ jobs:
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to the Maven Central Repository
+        run: mvn --batch-mode deploy -DupdateReleaseInfo=true
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          SIGN_KEY: ${{ secrets.SIGN_KEY }}
+          SIGN_KEY_PASS: ${{ secrets.SIGN_KEY_PASS }}
