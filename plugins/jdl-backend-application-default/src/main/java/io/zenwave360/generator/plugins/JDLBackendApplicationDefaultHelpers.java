@@ -42,15 +42,26 @@ public class JDLBackendApplicationDefaultHelpers {
         return String.format("%s%s%s", prefix, type, suffix);
     };
 
+    public String relationshipFieldTypeInitialized(Object context, Options options) {
+        Map field = (Map) context;
+//        String type = (String) field.get("otherEntityName");
+//        String prefix = (String) options.hash.getOrDefault("prefix", "");
+//        String suffix = (String) options.hash.getOrDefault("suffix", "");
+        if (field.get("isCollection") == Boolean.TRUE) {
+            return "new HashSet<>()";
+        }
+        return null;
+    };
+
     public String fieldPersistenceAnnotations(Object context, Options options) {
         Map field = (Map) context;
         if (generator.persistence == PersistenceType.mongodb) {
             // filtering with lowerFirst and upperFirst for forward jdl compatibility
-            int dbRef = ((List) JSONPath.get(field, "options[?(@.dBRef || @.DBRef)]")).size();
-            int documentedOptions = ((List) JSONPath.get(field, "options[?(@.documentReference || @.DocumentReference)]")).size();
-            if (dbRef > 0) {
-                return "@DBRef";
-            }
+//            int dbRef = ((List) JSONPath.get(field, "options[?(@.dBRef || @.DBRef)]")).size();
+//            if (dbRef > 0) {
+//                return "@DBRef";
+//            }
+            int documentedOptions = ((List) JSONPath.get(field, "options[?(@.ref || @.dbref)]")).size();
             if (documentedOptions > 0) {
                 return "@DocumentReference";
             }

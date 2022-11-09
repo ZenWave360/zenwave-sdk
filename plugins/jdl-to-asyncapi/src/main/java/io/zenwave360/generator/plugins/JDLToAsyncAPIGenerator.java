@@ -93,6 +93,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
 
         JDLEntitiesToAvroConverter toAvroConverter = new JDLEntitiesToAvroConverter().withIdType("string").withNamespace(avroPackage);
         JDLEntitiesToSchemasConverter toSchemasConverter = new JDLEntitiesToSchemasConverter().withIdType("string").withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
+        toSchemasConverter.includeVersion = false;
 
         List<Map<String, Object>> entities = (List) JSONPath.get(jdlModel, "$.entities[*]");
         List<Map<String, Object>> enums = (List) JSONPath.get(jdlModel, "$.enums.enums[*]");

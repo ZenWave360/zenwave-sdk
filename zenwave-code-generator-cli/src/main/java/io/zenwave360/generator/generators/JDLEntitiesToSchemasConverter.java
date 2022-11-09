@@ -13,6 +13,8 @@ public class JDLEntitiesToSchemasConverter {
     public String idType = "string";
     public String idTypeFormat = null;
 
+    public boolean includeVersion = true;
+
     public JDLEntitiesToSchemasConverter withIdType(String idType) {
         this.idType = idType;
         return this;
@@ -69,6 +71,9 @@ public class JDLEntitiesToSchemasConverter {
 
         if (!JSONPath.get(entity, "options.embedded", false)) {
             properties.put("id", idTypeMap());
+            if (includeVersion) {
+                properties.put("version", Maps.of("type", "integer"));
+            }
         }
 
         List<Map<String, Object>> fields = (List) JSONPath.get(entity, "$.fields[*]");

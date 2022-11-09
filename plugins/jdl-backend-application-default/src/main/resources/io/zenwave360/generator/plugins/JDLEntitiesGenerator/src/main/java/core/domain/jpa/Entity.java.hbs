@@ -30,6 +30,9 @@ public class {{entity.className}} implements Serializable {
     @SequenceGenerator(name = "sequenceGenerator")
     @Column(name = "id")
     private {{idJavaType}} id;
+
+    @Version
+    private Integer version;
 {{/unless~}}
 
 {{#each entity.fields as |field|}}
@@ -37,9 +40,6 @@ public class {{entity.className}} implements Serializable {
   {{~#if field.isEntity}}
     @Embedded
     {{~ assign 'embeddedFields' (jsonPath jdl 'entities.' field.type '.fields[*]') ~}}
-    {{#unless (skipEntityId (jsonPath jdl 'entities.' field.type))~}}
-    @AttributeOverride( name = "id", column = @Column(name = "{{snakeCase field.name}}_id"))
-    {{/unless~}}
     {{~#joinWithTemplate embeddedFields as |it|}}
     @AttributeOverride( name = "{{it.name}}", column = @Column(name = "{{snakeCase field.name}}_{{name}}"))
     {{~/joinWithTemplate~}}
@@ -71,6 +71,12 @@ public class {{entity.className}} implements Serializable {
     }
     public void setId({{idJavaType}} id) {
         this.id = id;
+    }
+    public Integer getVersion() {
+        return version;
+    }
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 {{/unless~}}
 

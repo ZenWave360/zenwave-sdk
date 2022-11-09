@@ -1,4 +1,4 @@
-@ManyToMany{{#if (not relationship.ownerSide)}}(mappedBy = "{{relationship.otherEntityFieldName}}"){{/if}}
+@ManyToMany{{#if relationship.ownerSide}}(cascade = CascadeType.ALL){{else}}(mappedBy = "{{relationship.otherEntityFieldName}}"){{/if}}
 {{~#if relationship.ownerSide}}
 @JoinTable(name = "{{snakeCase (concat entity.name relationship.otherEntityName)}}",
    joinColumns = @JoinColumn(name = "{{snakeCase (concat entity.name '_id')}}", referencedColumnName = "id"),

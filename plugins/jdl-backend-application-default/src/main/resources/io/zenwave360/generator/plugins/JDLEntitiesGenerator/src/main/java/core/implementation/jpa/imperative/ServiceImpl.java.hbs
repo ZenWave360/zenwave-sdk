@@ -54,6 +54,7 @@ public class {{service.name}}Impl implements {{service.name}} {
     public {{entity.className}} create{{entity.className}}({{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
         log.debug("Request to save {{entity.className}}{{inputDTOSuffix}} : {}", {{entity.instanceName}}{{inputDTOSuffix}});
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}}Mapper.update(new {{entity.className}}(), {{entity.instanceName}}{{inputDTOSuffix}}));
+        // TODO: you may need to reload the entity here to fetch all the relationships
         return {{entity.instanceName}};
     }
 
@@ -63,9 +64,7 @@ public class {{service.name}}Impl implements {{service.name}} {
 
         var {{entity.instanceName}} = {{entity.instanceName}}Repository
                 .findById(id)
-                .map(existing{{entity.className}} -> {
-                    return {{entity.instanceName}}Mapper.update(existing{{entity.className}}, {{entity.instanceName}}{{inputDTOSuffix}});
-                })
+                .map(existing{{entity.className}} -> {{entity.instanceName}}Mapper.update(existing{{entity.className}}, {{entity.instanceName}}{{inputDTOSuffix}}))
                 .map({{entity.instanceName}}Repository::save);
         return {{entity.instanceName}};
     }

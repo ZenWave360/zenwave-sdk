@@ -256,7 +256,7 @@ jbang zw -p io.zenwave360.generator.plugins.JDLBackendApplicationDefaultConfigur
     targetFolder=.
 ```
 
-<details open markdown="1">
+<details markdown="1">
   <summary>generated files (expand to see)</summary>
 
 ```shell
@@ -299,12 +299,6 @@ src/main/java/io/zenwave360/example/core/implementation/mappers/CustomerOrderMap
 src/main/java/io/zenwave360/example/core/implementation/mappers/OrderedItemMapper.java
 src/main/java/io/zenwave360/example/core/implementation/mappers/PaymentDetailsMapper.java
 src/main/java/io/zenwave360/example/core/implementation/mappers/ShippingDetailsMapper.java
-
-# CRUD SpringMVC REST Controllers (these will be removed)
-src/main/java/io/zenwave360/example/adapters/web/CustomerOrderResource.java
-src/main/java/io/zenwave360/example/adapters/web/CustomerResource.java
-src/main/java/io/zenwave360/example/adapters/web/PaymentDetailsResource.java
-src/main/java/io/zenwave360/example/adapters/web/ShippingDetailsResource.java
 
 # Core UseCases acceptance tests
 src/test/java/io/zenwave360/example/core/implementation/CustomerUseCasesTest.java

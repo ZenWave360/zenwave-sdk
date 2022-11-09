@@ -14,6 +14,8 @@ public class {{entity.className}}{{inputDTOSuffix}} implements Serializable {
 
 {{#unless (skipEntityId entity)~}}
     private {{idJavaType}} id;
+
+    private Integer version;
 {{/unless~}}
 
 {{#each entity.fields as |field|}}
@@ -27,7 +29,7 @@ public class {{entity.className}}{{inputDTOSuffix}} implements Serializable {
     {{#if (jsonPath jdl 'entities.' relationship.otherEntityName '.options.aggregate')}}
     private {{idJavaType}} {{relationship.fieldName}}Id;
     {{~else~}}
-    private {{{relationshipFieldType relationship suffix=inputDTOSuffix}}} {{relationship.fieldName}};
+    private {{{relationshipFieldType relationship suffix=inputDTOSuffix}}} {{relationship.fieldName}}{{#if relationship.isCollection}} = {{{relationshipFieldTypeInitialized relationship}}}{{/if}};
     {{~/if}}
 {{/if~}}
 {{/each}}
@@ -42,6 +44,12 @@ public class {{entity.className}}{{inputDTOSuffix}} implements Serializable {
     }
     public void setId({{idJavaType}} id) {
         this.id = id;
+    }
+    public Integer getVersion() {
+        return version;
+    }
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 {{/unless~}}
 
