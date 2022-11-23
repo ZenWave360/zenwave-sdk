@@ -68,5 +68,6 @@
         <module>jdl-backend-application-default</module>
         <module>jdl-openapi-controllers</module>
         <module>openapi-spring-webtestclient</module>
+<!--        <module>openapi-pact-consumer</module>-->
     </modules>
 </project>

@@ -1,0 +1,38 @@
+{{~#each operations as |operation|~}}
+    {{~#each operation.responses as |response|}}
+    {{~#assign "requestDTOClassName"}}{{asDtoName operation.x--request-dto }}{{/assign}}
+    @Pact(consumer = "consumer", provider = "provider")
+    public RequestResponsePact pactFor{{asJavaTypeName operation.operationId}}(PactDslWithProvider builder) {
+        return builder.given("{{operation.operationId}} initial state")
+                .uponReceiving("{{operation.operationId}}")
+                .path("{{operation.x--path}}")
+                .method("{{upper operation.x--httpVerb}}")
+                .willRespondWith()
+                .status({{response.x--statusCode}})
+                .headers(Map.of("Content-Type", "application/json"))
+                .body(newJsonBody(object -> {
+                    {{~#each operation.x--request-schema.properties as |property|}}
+                    object.stringType("{{@key}}", "1");
+                    {{~/each}}
+                }).build())
+                .toPact();
+    }
+
+    @Test
+    @PactTestFor(pactMethod = "pactFor{{asJavaTypeName operation.operationId}}")
+    void test{{asJavaTypeName operation.operationId}}(MockServer mockServer) {
+    {{~#if requestDTOClassName}}
+        {{requestDTOClassName}} requestBody = new {{requestDTOClassName}}();
+        {{~#each operation.x--request-schema.properties as |property|}}
+        requestBody.set{{asJavaTypeName @key}}(null);
+        {{~/each}}
+    {{~/if}}
+
+// TODO perform test
+//        RestTemplate restTemplate = new RestTemplateBuilder().rootUri(mockServer.getUrl()).build();
+//        Student student = new StudentService(restTemplate).getStudent("1");
+
+//        assertEquals(expected, student);
+    }
+    {{~/each~}}
+{{~/each~}}

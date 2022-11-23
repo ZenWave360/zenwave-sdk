@@ -24,7 +24,7 @@ import static org.springframework.http.HttpMethod.*;
 @SpringBootTest
 @AutoConfigureWebTestClient
 @WithMockUser
-class {{asCapitalizedJavaProperty operationId}}{{testSuffix}} {
+class {{asJavaTypeName operationId}}{{testSuffix}} {
 
     @Autowired
     private WebTestClient webTestClient;

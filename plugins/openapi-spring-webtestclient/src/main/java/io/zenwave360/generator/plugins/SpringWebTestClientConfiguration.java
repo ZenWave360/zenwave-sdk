@@ -17,7 +17,6 @@ public class SpringWebTestClientConfiguration extends Configuration {
 
     @Override
     public <T extends Configuration> T processOptions() {
-        System.out.println("options: " + getOptions());
         if (!getOptions().containsKey("targetFolder")) {
             replaceInChain(TemplateFileWriter.class, TemplateStdoutWriter.class);
             withOption(SpringWebTestClientGenerator.class.getName() + ".groupBy", SpringWebTestClientGenerator.GroupByType.PARTIAL.toString());
