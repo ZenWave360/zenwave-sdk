@@ -1,4 +1,4 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.generator.plugins,SpringCloudStreams3Generator.TransactionalOutboxType,0,21,0,0,0,2,0,1,0,1
-io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.generator.plugins,SpringCloudStream3Configuration,5,36,1,1,1,5,1,2,0,2
+io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.generator.plugins,SpringCloudStream3Plugin,5,36,1,1,1,5,1,2,0,2
 io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.generator.plugins,SpringCloudStreams3Generator,5,493,0,22,2,70,1,27,1,16
