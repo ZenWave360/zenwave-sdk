@@ -8,6 +8,7 @@ import java.util.Map;
 
 import io.zenwave360.generator.options.PersistenceType;
 import io.zenwave360.generator.options.ProgrammingStyle;
+import io.zenwave360.generator.testutils.MavenCompiler;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.shared.invoker.*;
 import org.junit.jupiter.api.*;
@@ -74,7 +75,8 @@ public class JDLBackendApplicationMongoImperativeGeneratorTest {
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
 
-        compile("src/test/resources/mongodb-elasticsearch-scs3-pom.xml", targetFolder);
+        int exitCode = MavenCompiler.compile("src/test/resources/mongodb-elasticsearch-scs3-pom.xml", targetFolder);
+        Assertions.assertEquals(0, exitCode);
     }
 
     @Test
@@ -94,7 +96,8 @@ public class JDLBackendApplicationMongoImperativeGeneratorTest {
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
 
-        compile("src/test/resources/mongodb-elasticsearch-scs3-pom.xml", targetFolder);
+        int exitCode = MavenCompiler.compile("src/test/resources/mongodb-elasticsearch-scs3-pom.xml", targetFolder);
+        Assertions.assertEquals(0, exitCode);
     }
 
     @Test
@@ -115,19 +118,7 @@ public class JDLBackendApplicationMongoImperativeGeneratorTest {
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
 
-        compile("src/test/resources/mongodb-elasticsearch-scs3-pom.xml", targetFolder);
-    }
-
-    public void compile(String pom, String baseDir) throws MavenInvocationException, IOException {
-        System.out.println("Maven Invoker - compile:" + pom + " - " + baseDir);
-        FileUtils.copyFile(new File(pom), new File(baseDir, "pom.xml"));
-
-        InvocationRequest request = new DefaultInvocationRequest();
-        request.setBaseDirectory(new File(baseDir));
-        request.setGoals(Collections.singletonList("test-compile"));
-
-        Invoker invoker = new DefaultInvoker();
-        var results = invoker.execute(request);
-        Assertions.assertEquals(0, results.getExitCode());
+        int exitCode = MavenCompiler.compile("src/test/resources/mongodb-elasticsearch-scs3-pom.xml", targetFolder);
+        Assertions.assertEquals(0, exitCode);
     }
 }

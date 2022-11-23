@@ -56,6 +56,12 @@
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-mongodb</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.apache.maven.shared</groupId>
+      <artifactId>maven-invoker</artifactId>
+      <version>3.2.0</version>
+    </dependency>
   </dependencies>
 
 </project>

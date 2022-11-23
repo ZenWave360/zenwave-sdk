@@ -20,7 +20,7 @@ import io.zenwave360.generator.templating.TemplateOutput;
 public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
 
     enum GroupByType {
-        SERVICE, OPERATION, PARTIAL
+        service, operation, partial
     }
 
     public String sourceProperty = "api";
@@ -29,7 +29,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
     public String controllersPackage = "{{basePackage}}.adapters.web";
 
     @DocumentedOption(description = "Generate test classes grouped by", required = true)
-    public GroupByType groupBy = GroupByType.SERVICE;
+    public GroupByType groupBy = GroupByType.service;
 
     @DocumentedOption(description = "Class name suffix for generated test classes")
     public String testSuffix = "IT";
@@ -42,10 +42,10 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
     private String prefix = "io/zenwave360/generator/plugins/SpringWebTestClientGenerator/";
-    private final TemplateInput partialTemplate = new TemplateInput(prefix + "partials/Operation.java", "{{apiPackageFolder}}/Operation.java");
-    private final TemplateInput testSetTemplate = new TemplateInput(prefix + "ControllersTestSet.java", "{{apiPackageFolder}}/ControllersTestSet.java");
-    private final TemplateInput serviceTestTemplate = new TemplateInput(prefix + "ServiceIT.java", "{{apiPackageFolder}}/{{serviceName}}{{testSuffix}}.java");
-    private final TemplateInput operationTestTemplate = new TemplateInput(prefix + "OperationIT.java", "{{apiPackageFolder}}/{{operation.operationId}}{{testSuffix}}.java");
+    private final TemplateInput partialTemplate = new TemplateInput(prefix + "partials/Operation.java", "{{asPackageFolder controllersPackage}}/Operation.java");
+    private final TemplateInput testSetTemplate = new TemplateInput(prefix + "ControllersTestSet.java", "{{asPackageFolder controllersPackage}}/ControllersTestSet.java");
+    private final TemplateInput serviceTestTemplate = new TemplateInput(prefix + "ServiceIT.java", "{{asPackageFolder controllersPackage}}/{{serviceName}}{{testSuffix}}.java");
+    private final TemplateInput operationTestTemplate = new TemplateInput(prefix + "OperationIT.java", "{{asPackageFolder controllersPackage}}/{{operation.operationId}}{{testSuffix}}.java");
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;
@@ -60,13 +60,13 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
         List<TemplateOutput> templateOutputList = new ArrayList<>();
         Model apiModel = getApiModel(contextModel);
         Map<String, List<Map<String, Object>>> operationsByService = getOperationsGroupedByTag(apiModel);
-        if (groupBy == GroupByType.SERVICE) {
+        if (groupBy == GroupByType.service) {
             templateOutputList.add(generateTestSet(contextModel, testSetTemplate, operationsByService.keySet()));
             for (Map.Entry<String, List<Map<String, Object>>> entry : operationsByService.entrySet()) {
                 templateOutputList.add(generateTemplateOutput(contextModel, serviceTestTemplate, entry.getKey(), entry.getValue()));
             }
         }
-        if (groupBy == GroupByType.OPERATION) {
+        if (groupBy == GroupByType.operation) {
             List<Map<String, Object>> operations = operationsByService.values().stream().flatMap(List::stream).collect(Collectors.toList());
             List<String> operationNames = operations.stream().map(o -> "" + o).collect(Collectors.toList());
             templateOutputList.add(generateTestSet(contextModel, testSetTemplate, operationNames));
@@ -74,7 +74,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
                 templateOutputList.add(generateTemplateOutput(contextModel, operationTestTemplate, null, List.of(operation)));
             }
         }
-        if (groupBy == GroupByType.PARTIAL) {
+        if (groupBy == GroupByType.partial) {
             List<Map<String, Object>> operations = operationsByService.values().stream().flatMap(List::stream).collect(Collectors.toList());
             templateOutputList.add(generateTemplateOutput(contextModel, partialTemplate, null, operations));
         }

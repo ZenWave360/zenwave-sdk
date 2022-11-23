@@ -467,7 +467,7 @@ paths:
             schema:
               "$ref": "#/components/schemas/User"
       responses:
-        default:
+        201:
           description: successful operation
           content:
             application/json:
@@ -500,8 +500,6 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/User"
-        default:
-          description: successful operation
   "/user/login":
     get:
       tags:
@@ -554,7 +552,7 @@ paths:
       operationId: logoutUser
       parameters: []
       responses:
-        default:
+        '200':
           description: successful operation
   "/user/{username}":
     get:
@@ -610,7 +608,7 @@ paths:
             schema:
               "$ref": "#/components/schemas/User"
       responses:
-        default:
+        '200':
           description: successful operation
     delete:
       tags:

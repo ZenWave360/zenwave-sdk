@@ -2,15 +2,24 @@ package io.zenwave360.generator.plugins;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import io.zenwave360.generator.MainGenerator;
+import io.zenwave360.generator.Plugin;
+import io.zenwave360.generator.processors.Processor;
+import io.zenwave360.generator.testutils.MavenCompiler;
+import io.zenwave360.generator.writers.TemplateWriter;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.processors.OpenApiProcessor;
 import io.zenwave360.generator.templating.TemplateOutput;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 public class SpringWebTestClientGeneratorTest {
 
@@ -19,51 +28,86 @@ public class SpringWebTestClientGeneratorTest {
         return new OpenApiProcessor().process(model);
     }
 
-    @Test
-    public void test_output_partial_one_operation() throws Exception {
-        Map<String, Object> model = loadApiModelFromResource("classpath:io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
-        SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
-        generator.groupBy = SpringWebTestClientGenerator.GroupByType.PARTIAL;
-        generator.basePackage = "io.example";
-        generator.openApiApiPackage = "io.example.api";
-        generator.openApiModelPackage = "io.example.api.model";
-        generator.operationIds = List.of("addPet");
-        List<TemplateOutput> outputTemplates = generator.generate(model);
-        Assertions.assertEquals(1, outputTemplates.size());
-        Assertions.assertEquals("io/example/api/Operation.java", outputTemplates.get(0).getTargetFile());
-        System.out.println(outputTemplates.get(0).getContent());
+    @ParameterizedTest(name = "[{index}] {displayName} {0}")
+    @CsvSource({ "openapi-petstore.yml, addPet", "openapi-orders.yml, addCustomer", "openapi-orders-relational.yml, addCustomer"})
+    public void test_output_partial_one_operation(String openapi, String operationId) throws Exception {
+        Plugin plugin = new SpringWebTestClientPlugin()
+                .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/" + openapi)
+                .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.partial)
+                .withOption("controllersPackage", "io.example.controller.tests")
+                .withOption("openApiApiPackage", "io.example.api")
+                .withOption("openApiModelPackage",  "io.example.api.model")
+                .withOption("operationIds",  List.of(operationId));
+
+        plugin.addAfterInChain(SpringWebTestClientGenerator.class, CapturingTemplateWriter.class);
+
+        new MainGenerator().generate(plugin);
+
+        var templateOutputList = CapturingTemplateWriter.templateOutputList;
+        Assertions.assertEquals(1, templateOutputList.size());
+        Assertions.assertEquals("io/example/controller/tests/Operation.java", templateOutputList.get(0).getTargetFile());
     }
 
-    @Test
-    public void test_output_by_one_service() throws Exception {
-        Map<String, Object> model = loadApiModelFromResource("classpath:io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
-        SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
-        generator.groupBy = SpringWebTestClientGenerator.GroupByType.SERVICE;
-        generator.basePackage = "io.example";
-        generator.openApiApiPackage = "io.example.api";
-        generator.openApiModelPackage = "io.example.api.model";
-        generator.operationIds = List.of("addPet");
-        List<TemplateOutput> outputTemplates = generator.generate(model);
-        Assertions.assertEquals(2, outputTemplates.size());
-        Assertions.assertEquals("io/example/api/ControllersTestSet.java", outputTemplates.get(0).getTargetFile());
-        Assertions.assertEquals("io/example/api/PetApiControllerIT.java", outputTemplates.get(1).getTargetFile());
-        System.out.println(outputTemplates.get(1).getContent());
+    @ParameterizedTest(name = "[{index}] {displayName} {0}")
+    @CsvSource({
+            "openapi-petstore.yml, addPet, 'PetApiControllerIT,ControllersTestSet'",
+            "openapi-orders.yml, createCustomer, 'CustomerApiControllerIT,ControllersTestSet'"
+    })
+    public void test_output_by_one_service(String openapi, String operationId, String controllers) throws Exception {
+        String targetFolder = "target/test_output_by_one_service_" + openapi.replaceAll("\\.", "_");
+        Plugin plugin = new SpringWebTestClientPlugin()
+                .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/" + openapi)
+                .withTargetFolder(targetFolder + "/src/test/java")
+                .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.service)
+                .withOption("controllersPackage", "io.example.controller.tests")
+                .withOption("openApiApiPackage", "io.example.api")
+                .withOption("openApiModelPackage",  "io.example.api.model")
+                .withOption("openApiModelNameSuffix", "DTO")
+                .withOption("operationIds",  List.of(operationId));
+
+        new MainGenerator().generate(plugin);
+
+        Arrays.stream(controllers.split(",")).forEach(controller -> {
+            File file = new File(targetFolder + "/src/test/java/io/example/controller/tests/" + controller + ".java");
+            Assertions.assertTrue(file.exists(), "File " + file.getAbsolutePath() + " does not exist");
+        });
+
+        int exitCode = MavenCompiler.compile("src/test/resources/pom.xml", targetFolder, "openapi.yml=../../../../zenwave-code-generator-test-resources/src/main/resources/io/zenwave360/generator/resources/openapi/" + openapi);
+        Assertions.assertEquals(0, exitCode);
     }
 
-    @Test
-    public void test_output_by_all_services() throws Exception {
-        Map<String, Object> model = loadApiModelFromResource("classpath:io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
-        SpringWebTestClientGenerator generator = new SpringWebTestClientGenerator();
-        generator.groupBy = SpringWebTestClientGenerator.GroupByType.SERVICE;
-        generator.basePackage = "io.example";
-        generator.openApiApiPackage = "io.example.api";
-        generator.openApiModelPackage = "io.example.api.model";
-        List<TemplateOutput> outputTemplates = generator.generate(model);
-        Assertions.assertEquals(4, outputTemplates.size());
-        Assertions.assertEquals("io/example/api/ControllersTestSet.java", outputTemplates.get(0).getTargetFile());
-        Assertions.assertEquals("io/example/api/UserApiControllerIT.java", outputTemplates.get(1).getTargetFile());
-        Assertions.assertEquals("io/example/api/StoreApiControllerIT.java", outputTemplates.get(2).getTargetFile());
-        Assertions.assertEquals("io/example/api/PetApiControllerIT.java", outputTemplates.get(3).getTargetFile());
-        System.out.println(outputTemplates.get(3).getContent());
+    @ParameterizedTest(name = "[{index}] {displayName} {0}")
+    @CsvSource({
+            "openapi-petstore.yml, 'PetApiControllerIT,ControllersTestSet'",
+            "openapi-orders.yml, 'CustomerApiControllerIT,ControllersTestSet'"
+    })
+    public void test_output_by_service(String openapi, String controllers) throws Exception {
+        String targetFolder = "target/test_output_by_service_" + openapi.replaceAll("\\.", "_");
+        Plugin plugin = new SpringWebTestClientPlugin()
+                .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/" + openapi)
+                .withTargetFolder(targetFolder + "/src/test/java")
+                .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.service)
+                .withOption("controllersPackage", "io.example.controller.tests")
+                .withOption("openApiApiPackage", "io.example.api")
+                .withOption("openApiModelPackage",  "io.example.api.model")
+                .withOption("openApiModelNameSuffix", "DTO");
+
+        new MainGenerator().generate(plugin);
+
+        Arrays.stream(controllers.split(",")).forEach(controller -> {
+            File file = new File(targetFolder + "/src/test/java/io/example/controller/tests/" + controller + ".java");
+            Assertions.assertTrue(file.exists(), "File " + file.getAbsolutePath() + " does not exist");
+        });
+
+        int exitCode = MavenCompiler.compile("src/test/resources/pom.xml", targetFolder, "openapi.yml=../../../../zenwave-code-generator-test-resources/src/main/resources/io/zenwave360/generator/resources/openapi/" + openapi);
+        Assertions.assertEquals(0, exitCode);
     }
+    public static class CapturingTemplateWriter implements TemplateWriter {
+        static List<TemplateOutput> templateOutputList;
+        @Override
+        public void write(List<TemplateOutput> templateOutputList) {
+            this.templateOutputList = templateOutputList;
+        }
+    }
+
 }

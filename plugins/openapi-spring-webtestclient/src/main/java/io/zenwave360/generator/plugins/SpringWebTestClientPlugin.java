@@ -19,7 +19,7 @@ public class SpringWebTestClientPlugin extends Plugin {
     public <T extends Plugin> T processOptions() {
         if (!getOptions().containsKey("targetFolder")) {
             replaceInChain(TemplateFileWriter.class, TemplateStdoutWriter.class);
-            withOption(SpringWebTestClientGenerator.class.getName() + ".groupBy", SpringWebTestClientGenerator.GroupByType.PARTIAL.toString());
+            withOption(SpringWebTestClientGenerator.class.getName() + ".groupBy", SpringWebTestClientGenerator.GroupByType.partial.toString());
         }
         return (T) this;
     }
