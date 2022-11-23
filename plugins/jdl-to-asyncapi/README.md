@@ -28,5 +28,5 @@ ${javadoc}
 ## Getting Help
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.JDLToAsyncAPIConfiguration --help
+jbang zw -p io.zenwave360.generator.plugins.JDLToAsyncAPIPlugin --help
 ```

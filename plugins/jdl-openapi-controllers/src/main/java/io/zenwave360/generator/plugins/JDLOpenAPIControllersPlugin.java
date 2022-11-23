@@ -1,8 +1,8 @@
 package io.zenwave360.generator.plugins;
 
+import io.zenwave360.generator.Plugin;
 import org.apache.commons.lang3.StringUtils;
 
-import io.zenwave360.generator.Configuration;
 import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.doc.DocumentedPlugin;
 import io.zenwave360.generator.formatters.JavaFormatter;
@@ -16,18 +16,18 @@ import io.zenwave360.generator.writers.TemplateFileWriter;
 import io.zenwave360.generator.writers.TemplateStdoutWriter;
 
 @DocumentedPlugin(value = "Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.", shortCode = "jdl-openapi-controllers")
-public class JDLOpenAPIControllersConfiguration extends Configuration {
+public class JDLOpenAPIControllersPlugin extends Plugin {
 
     @DocumentedOption(description = "JDL file to parse", required = false)
     public String jdlFile;
 
-    public JDLOpenAPIControllersConfiguration() {
+    public JDLOpenAPIControllersPlugin() {
         super();
         withChain(DefaultYamlParser.class, OpenApiProcessor.class, JDLParser.class, JDLProcessor.class, JDLWithOpenApiProcessor.class, JDLOpenAPIControllersGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
     }
 
     @Override
-    public <T extends Configuration> T processOptions() {
+    public <T extends Plugin> T processOptions() {
         if (!getOptions().containsKey("targetFolder")) {
             replaceInChain(TemplateFileWriter.class, TemplateStdoutWriter.class);
         }

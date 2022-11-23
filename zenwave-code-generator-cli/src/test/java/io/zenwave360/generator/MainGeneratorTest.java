@@ -37,12 +37,12 @@ public class MainGeneratorTest {
     @Test
     public void testGenerator() throws Exception {
         // File file = new File(getClass().getClassLoader().getResource("io/zenwave360/generator/parsers/asyncapi-circular-refs.yml").toURI());
-        Configuration configuration = new Configuration()
+        Plugin plugin = new Plugin()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml")
                 .withTargetFolder("target/zenwave630/out")
                 .withChain(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class);
 
-        new MainGenerator().generate(configuration);
+        new MainGenerator().generate(plugin);
 
         logCaptor.getLogs();
     }
@@ -50,7 +50,7 @@ public class MainGeneratorTest {
     @Test
     public void testGeneratorWithMultipleFiles() throws Exception {
         // File file = new File(getClass().getClassLoader().getResource("io/zenwave360/generator/parsers/asyncapi-circular-refs.yml").toURI());
-        Configuration configuration = new Configuration()
+        Plugin plugin = new Plugin()
                 .withTargetFolder("target/zenwave630/out")
                 .withOption("0.specFile", "classpath:io/zenwave360/generator/resources/asyncapi/asyncapi-circular-refs.yml")
                 .withOption("1.specFile", "classpath:io/zenwave360/generator/resources/openapi/openapi-petstore.yml")
@@ -62,7 +62,7 @@ public class MainGeneratorTest {
                 .withOption("4.targetProperty", "openapi")
                 .withChain(DefaultYamlParser.class, DefaultYamlParser.class, JDLParser.class, AsyncApiProcessor.class, OpenApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class);
 
-        new MainGenerator().generate(configuration);
+        new MainGenerator().generate(plugin);
 
         Map<String, Object> contextModel = NoOpGenerator.context;
 

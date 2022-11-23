@@ -38,5 +38,5 @@ ${javadoc}
 ## Getting Help
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.JDLOpenAPIControllersConfiguration --help
+jbang zw -p io.zenwave360.generator.plugins.JDLOpenAPIControllersPlugin --help
 ```

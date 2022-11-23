@@ -6,7 +6,7 @@
 You can use ZenWave Maven Plugin to generate code as part of your build process:
 
 - Add each generator jar as dependency to zenwave maven plugin.
-- Pass any generator configuration as <configOptions>.
+- Pass any generator plugin as <configOptions>.
 
 In the following example we are configuring the `asyncapi-spring-cloud-streams3` and `asyncapi-jsonschema2pojo` generators to generate Spring Cloud Streams 3.x code and DTOs from an AsyncAPI definition:
 
@@ -22,7 +22,7 @@ In the following example we are configuring the `asyncapi-spring-cloud-streams3`
             <goals>
                 <goal>generate</goal>
             </goals>
-            <configuration>
+            <plugin>
                 <generatorName>spring-cloud-streams3</generatorName>
                 <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
                 <configOptions>
@@ -31,7 +31,7 @@ In the following example we are configuring the `asyncapi-spring-cloud-streams3`
                     <apiPackage>io.zenwave360.example.adapters.events.producer</apiPackage>
                     <modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
                 </configOptions>
-            </configuration>
+            </plugin>
         </execution>
         <execution>
             <id>generate-asyncapi-producer-dtos</id>
@@ -39,14 +39,14 @@ In the following example we are configuring the `asyncapi-spring-cloud-streams3`
             <goals>
                 <goal>generate</goal>
             </goals>
-            <configuration>
+            <plugin>
                 <generatorName>jsonschema2pojo</generatorName>
                 <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
                 <configOptions>
                     <apiPackage>io.zenwave360.example.adapters.events</apiPackage>
                     <modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
                 </configOptions>
-            </configuration>
+            </plugin>
         </execution>
     </executions>
     <dependencies>

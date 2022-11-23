@@ -27,5 +27,5 @@ ${javadoc}
 ## Getting Help
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.SpringWebTestClientConfiguration --help
+jbang zw -p io.zenwave360.generator.plugins.SpringWebTestClientPlugin --help
 ```

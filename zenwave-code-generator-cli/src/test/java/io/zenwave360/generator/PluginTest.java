@@ -5,12 +5,12 @@ import org.junit.jupiter.api.Test;
 
 import io.zenwave360.generator.plugins.NoOpPluginConfiguration;
 
-public class ConfigurationTest {
+public class PluginTest {
 
     @Test
     public void testLoadConfigFromFullClassName() throws Exception {
         String simpleClassName = NoOpPluginConfiguration.class.getName();
-        Configuration config = Configuration.of(simpleClassName);
+        Plugin config = Plugin.of(simpleClassName);
         Assertions.assertNotNull(config);
         Assertions.assertEquals(NoOpPluginConfiguration.class, config.getClass());
     }
@@ -18,36 +18,36 @@ public class ConfigurationTest {
     @Test
     public void testLoadConfigFromSimpleClassName() throws Exception {
         String simpleClassName = NoOpPluginConfiguration.class.getSimpleName();
-        Configuration config = Configuration.of(simpleClassName);
+        Plugin config = Plugin.of(simpleClassName);
         Assertions.assertNotNull(config);
         Assertions.assertEquals(NoOpPluginConfiguration.class, config.getClass());
     }
 
     @Test
     public void testLoadConfigKebabCase() throws Exception {
-        Configuration config = Configuration.of("no-op-plugin-configuration");
+        Plugin config = Plugin.of("no-op-plugin-configuration");
         Assertions.assertNotNull(config);
         Assertions.assertEquals(NoOpPluginConfiguration.class, config.getClass());
     }
 
     @Test
     public void testLoadConfigSimplifiedKebabCase() throws Exception {
-        Configuration config = Configuration.of("no-op-plugin");
+        Plugin config = Plugin.of("no-op-plugin");
         Assertions.assertNotNull(config);
         Assertions.assertEquals(NoOpPluginConfiguration.class, config.getClass());
     }
 
     @Test
     public void testLoadConfigFromConfigId() throws Exception {
-        Configuration config = Configuration.of("no-op");
+        Plugin config = Plugin.of("no-op");
         Assertions.assertNotNull(config);
         Assertions.assertEquals(NoOpPluginConfiguration.class, config.getClass());
     }
 
     @Test
     public void testLoadConfigNotFound() throws Exception {
-        Configuration config = Configuration.of("not-found");
+        Plugin config = Plugin.of("not-found");
         Assertions.assertNotNull(config);
-        Assertions.assertEquals(config.getClass(), Configuration.class);
+        Assertions.assertEquals(config.getClass(), Plugin.class);
     }
 }

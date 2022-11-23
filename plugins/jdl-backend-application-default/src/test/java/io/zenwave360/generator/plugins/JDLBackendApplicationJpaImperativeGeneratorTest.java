@@ -6,18 +6,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import io.zenwave360.generator.Plugin;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.shared.invoker.*;
 import org.junit.jupiter.api.*;
 
-import io.zenwave360.generator.Configuration;
 import io.zenwave360.generator.MainGenerator;
-import io.zenwave360.generator.formatters.JavaFormatter;
 import io.zenwave360.generator.options.PersistenceType;
 import io.zenwave360.generator.options.ProgrammingStyle;
 import io.zenwave360.generator.parsers.JDLParser;
 import io.zenwave360.generator.processors.JDLProcessor;
-import io.zenwave360.generator.templating.TemplateOutput;
 import nl.altindag.log.LogCaptor;
 
 public class JDLBackendApplicationJpaImperativeGeneratorTest {
@@ -47,7 +45,7 @@ public class JDLBackendApplicationJpaImperativeGeneratorTest {
     @Test
     public void test_generator_hexagonal_jpa_imperative() throws Exception {
         String targetFolder = "target/test_generator_hexagonal_jpa_imperative";
-        Configuration configuration = new JDLBackendApplicationDefaultConfiguration()
+        Plugin plugin = new JDLBackendApplicationDefaultPlugin()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/jdl/orders-model-relational.jdl")
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
@@ -55,7 +53,7 @@ public class JDLBackendApplicationJpaImperativeGeneratorTest {
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("haltOnFailFormatting", false);
 
-        new MainGenerator().generate(configuration);
+        new MainGenerator().generate(plugin);
 
         List<String> logs = logCaptor.getLogs();
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));

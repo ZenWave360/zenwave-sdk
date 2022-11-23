@@ -2,9 +2,9 @@ package io.zenwave360.generator.plugins;
 
 import java.util.List;
 
+import io.zenwave360.generator.Plugin;
 import org.junit.jupiter.api.*;
 
-import io.zenwave360.generator.Configuration;
 import io.zenwave360.generator.MainGenerator;
 import nl.altindag.log.LogCaptor;
 
@@ -29,7 +29,7 @@ public class JDLOpenAPIControllersGeneratorTest {
 
     @Test
     public void test_generator_jdl_openapi_controllers() throws Exception {
-        Configuration configuration = new JDLOpenAPIControllersConfiguration()
+        Plugin plugin = new JDLOpenAPIControllersPlugin()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/openapi-petstore.yml")
                 .withOption("jdlFile", "classpath:io/zenwave360/generator/resources/jdl/petstore.jdl")
                 .withOption("basePackage", "io.zenwave360.example")
@@ -40,7 +40,7 @@ public class JDLOpenAPIControllersGeneratorTest {
                 .withOption("style", JDLOpenAPIControllersGenerator.ProgrammingStyle.imperative)
                 .withTargetFolder("target/out");
 
-        new MainGenerator().generate(configuration);
+        new MainGenerator().generate(plugin);
 
         List<String> logs = logCaptor.getLogs();
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
@@ -50,7 +50,7 @@ public class JDLOpenAPIControllersGeneratorTest {
     @Test
     @Disabled
     public void test_generator_jdl_openapi_controllers_registry() throws Exception {
-        Configuration configuration = new JDLOpenAPIControllersConfiguration()
+        Plugin plugin = new JDLOpenAPIControllersPlugin()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/openapi-orders.yml")
                 .withOption("jdlFile", "classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl")
                 .withOption("basePackage", "io.zenwave360.example")
@@ -61,7 +61,7 @@ public class JDLOpenAPIControllersGeneratorTest {
                 .withOption("style", JDLOpenAPIControllersGenerator.ProgrammingStyle.imperative)
                 .withTargetFolder("target/examples/spring-boot-mongo-elasticsearch");
 
-        new MainGenerator().generate(configuration);
+        new MainGenerator().generate(plugin);
 
         List<String> logs = logCaptor.getLogs();
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
@@ -71,7 +71,7 @@ public class JDLOpenAPIControllersGeneratorTest {
     @Test
     @Disabled
     public void test_generator_jdl_openapi_controllers_relational() throws Exception {
-        Configuration configuration = new JDLOpenAPIControllersConfiguration()
+        Plugin plugin = new JDLOpenAPIControllersPlugin()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/openapi-orders-relational.yml")
                 .withOption("jdlFile", "classpath:io/zenwave360/generator/resources/jdl/orders-model-relational.jdl")
                 .withOption("basePackage", "io.zenwave360.example")
@@ -82,7 +82,7 @@ public class JDLOpenAPIControllersGeneratorTest {
                 .withOption("style", JDLOpenAPIControllersGenerator.ProgrammingStyle.imperative)
                 .withTargetFolder("target/examples/spring-boot-jpa-elasticsearch");
 
-        new MainGenerator().generate(configuration);
+        new MainGenerator().generate(plugin);
 
         List<String> logs = logCaptor.getLogs();
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
@@ -93,7 +93,7 @@ public class JDLOpenAPIControllersGeneratorTest {
     @Test
     // @Disabled
     public void test_generator_jdl_openapi_controllers_registry_no_jdl() throws Exception {
-        Configuration configuration = new JDLOpenAPIControllersConfiguration()
+        Plugin plugin = new JDLOpenAPIControllersPlugin()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/openapi-petstore.yml")
                 // .withOption("jdlFile", "../../examples/spring-boot-mongo-elasticsearch/src/main/resources/model/orders-model.jdl")
                 .withOption("basePackage", "io.zenwave360.example")
@@ -105,7 +105,7 @@ public class JDLOpenAPIControllersGeneratorTest {
                 .withOption("style", JDLOpenAPIControllersGenerator.ProgrammingStyle.imperative)
                 .withTargetFolder("target/examples/spring-boot-mongo-elasticsearch");
 
-        new MainGenerator().generate(configuration);
+        new MainGenerator().generate(plugin);
 
         List<String> logs = logCaptor.getLogs();
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));

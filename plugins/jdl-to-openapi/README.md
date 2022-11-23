@@ -24,10 +24,10 @@ Generates a full OpenAPI definitions for CRUD operations from JDL models
 ## Getting Help
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.JDLToOpenAPIConfiguration --help
+jbang zw -p io.zenwave360.generator.plugins.JDLToOpenAPIPlugin --help
 ```
 
-#OpenAPIToJDLConfiguration
+#OpenAPIToJDLPlugin
 
 Generates JDL model from OpenAPI schemas
 
@@ -47,5 +47,5 @@ ${javadoc}
 ## Getting Help
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.OpenAPIToJDLConfiguration --help
+jbang zw -p io.zenwave360.generator.plugins.OpenAPIToJDLPlugin --help
 ```

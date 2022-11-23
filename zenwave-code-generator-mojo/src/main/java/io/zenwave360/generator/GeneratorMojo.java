@@ -93,13 +93,13 @@ public class GeneratorMojo extends AbstractMojo {
             URLClassLoader projectClassLoader = new URLClassLoader(classpathFiles.toArray(new URL[0]), this.getClass().getClassLoader());
 
             String specFile = inputSpec.startsWith("classpath:") ? inputSpec : new File(inputSpec).getAbsolutePath();
-            Configuration configuration = Configuration.of(this.generatorName)
+            Plugin plugin = Plugin.of(this.generatorName)
                     .withSpecFile(specFile)
                     .withTargetFolder(targetFolder.getAbsolutePath())
                     .withProjectClassLoader(projectClassLoader)
                     .withOptions(options);
 
-            new MainGenerator().generate(configuration);
+            new MainGenerator().generate(plugin);
         } catch (Exception e) {
             // Maven logs exceptions thrown by plugins only if invoked with -e
             // I find it annoying to jump through hoops to get basic diagnostic information,

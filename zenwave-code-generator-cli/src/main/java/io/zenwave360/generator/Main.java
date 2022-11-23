@@ -23,7 +23,7 @@ public class Main implements Callable<Integer> {
     @Option(names = {"-f", "--help-format"}, arity = "0..1", description = "Help output format", defaultValue = "help")
     Help.Format helpFormat = Help.Format.help;
 
-    @Option(names = {"-p", "--plugin"}, arity = "0..1", description = "Plugin Configuration class")
+    @Option(names = {"-p", "--plugin"}, arity = "0..1", description = "Plugin Class or short-code")
     String pluginConfigClass;
 
     @Option(names = {"-c", "--chain"}, split = ",", description = "<undocumented> use --plugin instead")
@@ -54,22 +54,22 @@ public class Main implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        Configuration configuration = Configuration.of(this.pluginConfigClass)
+        Plugin plugin = Plugin.of(this.pluginConfigClass)
                 .withSpecFile((String) options.get("specFile"))
                 .withTargetFolder((String) options.get("targetFolder"))
                 .withOptions(options)
                 .withChain(chain);
-        new MainGenerator().generate(configuration);
+        new MainGenerator().generate(plugin);
         return 0;
     }
 
     public void help() throws Exception {
-        Configuration configuration = Configuration.of(this.pluginConfigClass)
+        Plugin plugin = Plugin.of(this.pluginConfigClass)
                 .withSpecFile((String) options.get("specFile"))
                 .withTargetFolder((String) options.get("targetFolder"))
                 .withOptions(options)
                 .withChain(chain);
-        String help = new Help().help(configuration, helpFormat);
+        String help = new Help().help(plugin, helpFormat);
         System.out.println(help);
     }
 }

@@ -15,7 +15,7 @@ import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.doc.DocumentedPlugin;
 import io.zenwave360.generator.utils.NamingUtils;
 
-public class Configuration {
+public class Plugin {
 
     @DocumentedOption(description = "Spec file to parse", required = true)
     public String specFile;
@@ -28,19 +28,19 @@ public class Configuration {
 
     private ClassLoader projectClassLoader;
 
-    public static Configuration of(String pluginConfigAsString) throws Exception {
+    public static Plugin of(String pluginConfigAsString) throws Exception {
         if (pluginConfigAsString != null) {
             if (pluginConfigAsString.contains(".")) {
-                return (Configuration) Configuration.class.getClassLoader().loadClass(pluginConfigAsString).getDeclaredConstructor().newInstance();
+                return (Plugin) Plugin.class.getClassLoader().loadClass(pluginConfigAsString).getDeclaredConstructor().newInstance();
             }
             String simpleClassName = NamingUtils.asJavaTypeName(pluginConfigAsString);
-            var allConfigClasses = new Reflections("io.zenwave360.generator.plugins").getSubTypesOf(Configuration.class);
-            Optional<Class<? extends Configuration>> pluginClass = allConfigClasses.stream().filter(c -> matchesClassName(c, pluginConfigAsString, simpleClassName)).findFirst();
+            var allConfigClasses = new Reflections("io.zenwave360.generator.plugins").getSubTypesOf(Plugin.class);
+            Optional<Class<? extends Plugin>> pluginClass = allConfigClasses.stream().filter(c -> matchesClassName(c, pluginConfigAsString, simpleClassName)).findFirst();
             if (pluginClass.isPresent()) {
                 return pluginClass.get().getDeclaredConstructor().newInstance();
             }
         }
-        return new Configuration();
+        return new Plugin();
     }
 
     private static boolean matchesClassName(Class c, String pluginConfigAsString, String simpleClassName) {
@@ -51,17 +51,17 @@ public class Configuration {
         return c.getSimpleName().matches(simpleClassName + "(Configuration){0,1}$");
     }
 
-    public <T extends Configuration> T processOptions() {
+    public <T extends Plugin> T processOptions() {
         return (T) this;
     }
 
-    public Configuration withSpecFile(String specFile) {
+    public Plugin withSpecFile(String specFile) {
         this.specFile = specFile != null? specFile.replaceAll("\\\\", "/") : specFile;
         this.options.put("specFile", this.specFile);
         return this;
     }
 
-    public Configuration withTargetFolder(String targetFolder) {
+    public Plugin withTargetFolder(String targetFolder) {
         if (targetFolder != null) {
             this.targetFolder = targetFolder;
             this.options.put("targetFolder", targetFolder);
@@ -69,12 +69,12 @@ public class Configuration {
         return this;
     }
 
-    public Configuration withProjectClassLoader(ClassLoader projectClassLoader) {
+    public Plugin withProjectClassLoader(ClassLoader projectClassLoader) {
         this.projectClassLoader = projectClassLoader;
         return this;
     }
 
-    public Configuration withOption(String name, Object value) {
+    public Plugin withOption(String name, Object value) {
         String lastPath = name;
         Map<String, Object> nestedTempObject = options;
         String[] paths = name.split("\\.");
@@ -102,19 +102,19 @@ public class Configuration {
         return this;
     }
 
-    public Configuration withOptions(Map<String, Object> options) {
+    public Plugin withOptions(Map<String, Object> options) {
         options.entrySet().forEach(o -> withOption(o.getKey(), o.getValue()));
         return this;
     }
 
-    public Configuration withChain(Class... processorClasses) {
+    public Plugin withChain(Class... processorClasses) {
         if (processorClasses != null) {
             chain = new ArrayList<>(List.of(processorClasses));
         }
         return this;
     }
 
-    public Configuration withChain(String... processorClasses) {
+    public Plugin withChain(String... processorClasses) {
         if (processorClasses != null) {
             chain = Arrays.stream(processorClasses).map(c -> {
                 try {
@@ -127,17 +127,17 @@ public class Configuration {
         return this;
     }
 
-    public Configuration removeFromChain(Class... processorClasses) {
+    public Plugin removeFromChain(Class... processorClasses) {
         Arrays.stream(processorClasses).forEach(processorClass -> chain.remove(processorClass));
         return this;
     }
 
-    public Configuration replaceInChain(Class current, Class replacement) {
+    public Plugin replaceInChain(Class current, Class replacement) {
         chain.replaceAll(chainedProcessor -> chainedProcessor.equals(current) ? replacement : chainedProcessor);
         return this;
     }
 
-    public Configuration addAfterInChain(Class pivot, Class newProcessor) {
+    public Plugin addAfterInChain(Class pivot, Class newProcessor) {
         int index = chain.indexOf(pivot) + 1;
         if (index == -1) {
             chain.add(newProcessor);
@@ -147,7 +147,7 @@ public class Configuration {
         return this;
     }
 
-    public Configuration addBeforeInChain(Class pivot, Class newProcessor) {
+    public Plugin addBeforeInChain(Class pivot, Class newProcessor) {
         int index = chain.indexOf(pivot);
         if (index >= 0) {
             chain.add(index, newProcessor);

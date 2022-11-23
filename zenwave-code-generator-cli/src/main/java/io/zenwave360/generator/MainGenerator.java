@@ -24,7 +24,7 @@ public class MainGenerator {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    public void generate(Configuration configuration) throws Exception {
+    public void generate(Plugin configuration) throws Exception {
         log.debug("Executing 'generate' with config Options {}", configuration.getOptions());
         log.debug("Processed Options {}", configuration.processOptions());
         log.debug("Processors chain is {}", configuration.getChain().stream().map(c -> c.getName()).collect(Collectors.toList()));
@@ -56,8 +56,8 @@ public class MainGenerator {
         }
     }
 
-    public static void applyConfiguration(int chainIndex, Object processor, Configuration configuration) throws JsonMappingException {
-        Map<String, Object> options = configuration.getOptions();
+    public static void applyConfiguration(int chainIndex, Object processor, Plugin plugin) throws JsonMappingException {
+        Map<String, Object> options = plugin.getOptions();
         Object processorFullClassOptions = options.get(processor.getClass().getName());
         Object processorSimpleClassOptions = options.get(processor.getClass().getSimpleName());
         Object chainIndexOptions = options.get(String.valueOf(chainIndex));

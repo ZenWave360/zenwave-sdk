@@ -34,7 +34,7 @@ public class Help {
     private ObjectMapper objectMapper = new ObjectMapper();
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
-    protected Map<String, Object> buildHelpModel(Configuration configuration) {
+    protected Map<String, Object> buildHelpModel(Plugin configuration) {
         var model = new LinkedHashMap<String, Object>();
         var options = new LinkedHashMap<String, Object>();
         var undocumentedOptions = new LinkedHashMap<String, Map<String, Object>>();
@@ -86,10 +86,10 @@ public class Help {
 
     protected Map<String, Object> discoverAvailablePlugins() {
         var plugins = new ArrayList<>();
-        var allConfigClasses = new Reflections("io", "com", "org").getSubTypesOf(Configuration.class);
-        for (Class<? extends Configuration> pluginClass : allConfigClasses) {
+        var allConfigClasses = new Reflections("io", "com", "org").getSubTypesOf(Plugin.class);
+        for (Class<? extends Plugin> pluginClass : allConfigClasses) {
             try {
-                plugins.add(buildHelpModel(Configuration.of(pluginClass.getName())));
+                plugins.add(buildHelpModel(Plugin.of(pluginClass.getName())));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -116,8 +116,8 @@ public class Help {
         return Map.of("description", documentedOption.description(), "type", type.getSimpleName(), "defaultValue", defaultValue, "values", values);
     }
 
-    public String help(Configuration configuration, Format format) {
-        var model = format == Format.list ? discoverAvailablePlugins() : buildHelpModel(configuration);
+    public String help(Plugin plugin, Format format) {
+        var model = format == Format.list ? discoverAvailablePlugins() : buildHelpModel(plugin);
         model.put("version", getClass().getPackage().getImplementationVersion());
         if (format == Format.json) {
             try {

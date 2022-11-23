@@ -12,7 +12,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.maven.shared.invoker.*;
 import org.junit.jupiter.api.*;
 
-import io.zenwave360.generator.Configuration;
+import io.zenwave360.generator.Plugin;
 import io.zenwave360.generator.MainGenerator;
 import io.zenwave360.generator.formatters.JavaFormatter;
 import io.zenwave360.generator.parsers.JDLParser;
@@ -61,14 +61,14 @@ public class JDLBackendApplicationMongoImperativeGeneratorTest {
     @Test
     public void test_generator_hexagonal_mongodb_imperative() throws Exception {
         String targetFolder = "target/test_generator_hexagonal_mongodb_imperative";
-        Configuration configuration = new JDLBackendApplicationDefaultConfiguration()
+        Plugin plugin = new JDLBackendApplicationDefaultPlugin()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl")
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.mongodb)
                 .withOption("style", ProgrammingStyle.imperative);
 
-        new MainGenerator().generate(configuration);
+        new MainGenerator().generate(plugin);
 
         List<String> logs = logCaptor.getLogs();
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
@@ -81,14 +81,14 @@ public class JDLBackendApplicationMongoImperativeGeneratorTest {
     // @Disabled
     public void test_generator_hexagonal_mongodb_imperative_registry() throws Exception {
         String targetFolder = "target/test_generator_hexagonal_mongodb_imperative_registry";
-        Configuration configuration = new JDLBackendApplicationDefaultConfiguration()
+        Plugin plugin = new JDLBackendApplicationDefaultPlugin()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl")
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.mongodb)
                 .withOption("style", ProgrammingStyle.imperative);
 
-        new MainGenerator().generate(configuration);
+        new MainGenerator().generate(plugin);
 
         List<String> logs = logCaptor.getLogs();
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
@@ -101,7 +101,7 @@ public class JDLBackendApplicationMongoImperativeGeneratorTest {
     // @Disabled
     public void test_generator_hexagonal_mongodb_imperative_registry_only_some_entities() throws Exception {
         String targetFolder = "target/test_generator_hexagonal_mongodb_imperative_registry_only_some_entities";
-        Configuration configuration = new JDLBackendApplicationDefaultConfiguration()
+        Plugin plugin = new JDLBackendApplicationDefaultPlugin()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl")
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
@@ -109,7 +109,7 @@ public class JDLBackendApplicationMongoImperativeGeneratorTest {
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("entities", List.of("Organization"));
 
-        new MainGenerator().generate(configuration);
+        new MainGenerator().generate(plugin);
 
         List<String> logs = logCaptor.getLogs();
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));

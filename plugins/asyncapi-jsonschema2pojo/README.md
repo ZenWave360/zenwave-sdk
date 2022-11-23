@@ -27,7 +27,7 @@ ${javadoc}
 ## Getting Help
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.AsyncApiJsonSchema2PojoConfiguration --help
+jbang zw -p io.zenwave360.generator.plugins.AsyncApiJsonSchema2PojoPlugin --help
 ```
 
 ## Maven Plugin Configuration (API-First)

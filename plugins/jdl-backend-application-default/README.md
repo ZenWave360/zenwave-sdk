@@ -42,5 +42,5 @@ This generator supports the following JDL extensions:
 ## Getting Help
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.JDLBackendApplicationDefaultConfiguration --help
+jbang zw -p io.zenwave360.generator.plugins.JDLBackendApplicationDefaultPlugin --help
 ```
