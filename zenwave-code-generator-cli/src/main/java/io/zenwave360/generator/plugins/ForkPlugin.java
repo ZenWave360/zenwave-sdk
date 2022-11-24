@@ -4,9 +4,9 @@ import io.zenwave360.generator.Plugin;
 import io.zenwave360.generator.doc.DocumentedPlugin;
 
 @DocumentedPlugin(value = "Creates a new standalone maven module cloning an existing plugin", shortCode = "fork-plugin", description = "${javadoc}")
-public class ForkPluginConfiguration extends Plugin {
+public class ForkPlugin extends Plugin {
 
-    public ForkPluginConfiguration() {
+    public ForkPlugin() {
         withChain(ForkPluginGenerator.class);
     }
 }
