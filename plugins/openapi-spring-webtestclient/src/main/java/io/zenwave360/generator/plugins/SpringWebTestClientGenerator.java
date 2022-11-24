@@ -1,5 +1,6 @@
 package io.zenwave360.generator.plugins;
 
+import java.rmi.Naming;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.zenwave360.generator.utils.NamingUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import io.zenwave360.generator.doc.DocumentedOption;
@@ -45,7 +47,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
     private final TemplateInput partialTemplate = new TemplateInput(prefix + "partials/Operation.java", "{{asPackageFolder controllersPackage}}/Operation.java");
     private final TemplateInput testSetTemplate = new TemplateInput(prefix + "ControllersTestSet.java", "{{asPackageFolder controllersPackage}}/ControllersTestSet.java");
     private final TemplateInput serviceTestTemplate = new TemplateInput(prefix + "ServiceIT.java", "{{asPackageFolder controllersPackage}}/{{serviceName}}{{testSuffix}}.java");
-    private final TemplateInput operationTestTemplate = new TemplateInput(prefix + "OperationIT.java", "{{asPackageFolder controllersPackage}}/{{operation.operationId}}{{testSuffix}}.java");
+    private final TemplateInput operationTestTemplate = new TemplateInput(prefix + "OperationIT.java", "{{asPackageFolder controllersPackage}}/{{serviceName}}/{{asJavaTypeName operationId}}{{testSuffix}}.java");
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;
@@ -59,40 +61,66 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {
         List<TemplateOutput> templateOutputList = new ArrayList<>();
         Model apiModel = getApiModel(contextModel);
-        Map<String, List<Map<String, Object>>> operationsByService = getOperationsGroupedByTag(apiModel);
-        if (groupBy == GroupByType.service) {
-            templateOutputList.add(generateTestSet(contextModel, testSetTemplate, operationsByService.keySet()));
-            for (Map.Entry<String, List<Map<String, Object>>> entry : operationsByService.entrySet()) {
-                templateOutputList.add(generateTemplateOutput(contextModel, serviceTestTemplate, entry.getKey(), entry.getValue()));
-            }
-        }
-        if (groupBy == GroupByType.operation) {
-            List<Map<String, Object>> operations = operationsByService.values().stream().flatMap(List::stream).collect(Collectors.toList());
-            List<String> operationNames = operations.stream().map(o -> "" + o).collect(Collectors.toList());
-            templateOutputList.add(generateTestSet(contextModel, testSetTemplate, operationNames));
-            for (Map<String, Object> operation : operations) {
-                templateOutputList.add(generateTemplateOutput(contextModel, operationTestTemplate, null, List.of(operation)));
-            }
-        }
+        Map<String, List<Map<String, Object>>> operationsByTag = getOperationsGroupedByTag(apiModel);
+
         if (groupBy == GroupByType.partial) {
-            List<Map<String, Object>> operations = operationsByService.values().stream().flatMap(List::stream).collect(Collectors.toList());
+            List<Map<String, Object>> operations = operationsByTag.values().stream().flatMap(List::stream).collect(Collectors.toList());
             templateOutputList.add(generateTemplateOutput(contextModel, partialTemplate, null, operations));
         }
+
+        if (groupBy == GroupByType.service || groupBy == GroupByType.operation) {
+
+            List<String> includedTestNames = new ArrayList<>();
+            List<String> includedImports = new ArrayList<>();
+
+            for (Map.Entry<String, List<Map<String, Object>>> entry : operationsByTag.entrySet()) {
+                String serviceName = apiServiceName(entry.getKey());
+                if(groupBy == GroupByType.service) {
+                    includedTestNames.add(serviceName);
+                    templateOutputList.add(generateTemplateOutput(contextModel, serviceTestTemplate, serviceName, entry.getValue()));
+                } else {
+                    List<Map<String, Object>> operations = entry.getValue();
+                    includedTestNames.addAll(operations.stream().map(o -> NamingUtils.asJavaTypeName((String) o.get("operationId"))).collect(Collectors.toList()));
+                    includedImports.add(serviceName);
+                    for (Map<String, Object> operation : operations) {
+                        templateOutputList.add(generateTemplateOutput(contextModel, operationTestTemplate, serviceName, List.of(operation)));
+                    }
+                }
+            }
+
+            templateOutputList.add(generateTestSet(contextModel, testSetTemplate, includedImports, includedTestNames));
+        }
+
         return templateOutputList;
     }
 
     {
         handlebarsEngine.getHandlebars().registerHelper("asDtoName", (context, options) -> {
-            return StringUtils.isNotBlank((String) context) ? openApiModelNamePrefix + context + openApiModelNameSuffix : null;
+            return asDtoName((String) context);
+        });
+        handlebarsEngine.getHandlebars().registerHelper("newPropertyObject", (context, options) -> {
+            Map<String, Object> property = (Map<String, Object>) context;
+            boolean isObject = "object".equals(property.get("type"));
+            boolean isArray = "array".equals(property.get("type"));
+            String schemaName = (String) property.get("x--schema-name");
+            return isArray? "new java.util.ArrayList<>()" : isObject? String.format("new %s()", asDtoName(schemaName)) : "null";
         });
     }
 
-    public TemplateOutput generateTestSet(Map<String, Object> contextModel, TemplateInput template, Collection<String> includedTestsNames) {
+    private String asDtoName(String name) {
+        return StringUtils.isNotBlank(name) ? openApiModelNamePrefix + name + openApiModelNameSuffix : null;
+    }
+    private String apiServiceName(String tag) {
+        return NamingUtils.asJavaTypeName(tag) + "Api";
+    }
+
+    public TemplateOutput generateTestSet(Map<String, Object> contextModel, TemplateInput template, Collection<String> includedImports, Collection<String> includedTestNames) {
         Map<String, Object> model = new HashMap<>();
         model.putAll(this.asConfigurationMap());
         model.put("context", contextModel);
         model.put("openapi", getApiModel(contextModel));
-        model.put("includedTestsNames", includedTestsNames);
+        model.put("includedImports", includedImports);
+        model.put("includedTestNames", includedTestNames);
         model.put("apiPackageFolder", getApiPackageFolder());
         return getTemplateEngine().processTemplate(model, template).get(0);
     }
@@ -102,8 +130,11 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
         model.putAll(this.asConfigurationMap());
         model.put("context", contextModel);
         model.put("openapi", getApiModel(contextModel));
-        model.put("serviceName", serviceName + "ApiController");
+        model.put("serviceName", serviceName);
         model.put("operations", operations);
+        if(operations.size() == 1) {
+            model.put("operationId", operations.get(0).get("operationId"));
+        }
         model.put("apiPackageFolder", getApiPackageFolder());
         return getTemplateEngine().processTemplate(model, template).get(0);
     }

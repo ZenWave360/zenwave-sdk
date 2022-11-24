@@ -53,7 +53,7 @@ public abstract class AbstractOpenAPIGenerator implements Generator {
         List<Map<String, Object>> operations = JsonPath.read(apiModel, "$.paths[*].*");
         for (Map<String, Object> operation : operations) {
             if (matchesFilters(operation, operationTypes)) {
-                String tag = (String) ObjectUtils.firstNonNull(operation.get("x--normalizedTagName"), "DefaultService");
+                String tag = (String) ObjectUtils.firstNonNull(operation.get("x--normalizedTagName"), "Default");
                 if (!operationsByTag.containsKey(tag)) {
                     operationsByTag.put(tag, new ArrayList<>());
                 }

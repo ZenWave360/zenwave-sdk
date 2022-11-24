@@ -9,8 +9,18 @@
     {{~#assign "requestDTOClassName"}}{{asDtoName operation.x--request-dto }}{{/assign}}
     {{~#if requestDTOClassName}}
         {{requestDTOClassName}} requestBody = new {{requestDTOClassName}}();
-        {{~#each operation.x--request-schema.properties as |property|}}
-        requestBody.set{{asJavaTypeName @key}}(null);
+        {{~#each operation.x--request-schema.properties as |property parentPropertyName|}}
+        requestBody.set{{asJavaTypeName @key}}({{{newPropertyObject property}}});
+            {{~#if (eq property.type 'object')}}
+                {{~#each property.properties as |innerProperty|}}
+        requestBody.get{{asJavaTypeName parentPropertyName}}().set{{asJavaTypeName @key}}(null);
+                {{~/each}}
+            {{~else if (eq property.type 'array')}}
+                {{~#each property.items.properties as |innerProperty|}}
+        requestBody.get{{asJavaTypeName parentPropertyName}}().get(0).set{{asJavaTypeName @key}}(null);
+                {{~/each}}
+            {{~else}}
+            {{~/if}}
         {{~/each}}
     {{~/if}}
 
@@ -26,8 +36,19 @@
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
             .expectBody()
     {{~/if}}
-    {{~#each response.x--response-schema.properties as |property|}}
+    {{~#each response.x--response-schema.properties as |property parentPropertyName|}}
             .jsonPath("$.{{@key}}").isNotEmpty()
+            {{~#if (eq property.type 'object')}}
+                {{~#each property.properties as |innerProperty|}}
+            .jsonPath("$.{{parentPropertyName}}.{{@key}}").isNotEmpty()
+                {{~/each}}
+            {{~else if (eq property.type 'array')}}
+            .jsonPath("$.{{@key}}").isArray()
+                {{~#each property.items.properties as |innerProperty|}}
+            .jsonPath("$.{{parentPropertyName}}[0].{{@key}}").isNotEmpty()
+                {{~/each}}
+            {{~else}}
+            {{~/if}}
     {{~/each}};
     }
     {{~/each~}}
