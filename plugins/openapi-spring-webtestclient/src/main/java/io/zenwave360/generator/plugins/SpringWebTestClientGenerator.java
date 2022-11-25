@@ -1,13 +1,10 @@
 package io.zenwave360.generator.plugins;
 
 import java.rmi.Naming;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import io.zenwave360.generator.utils.JSONPath;
 import io.zenwave360.generator.utils.NamingUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -105,6 +102,12 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
             String schemaName = (String) property.get("x--schema-name");
             return isArray? "new java.util.ArrayList<>()" : isObject? String.format("new %s()", asDtoName(schemaName)) : "null";
         });
+
+        handlebarsEngine.getHandlebars().registerHelper("queryParams", (operation, options)
+                -> JSONPath.get(operation, "parameters", Collections.<Map>emptyList()).stream().filter(p -> "query" .equals(p.get("in"))).collect(Collectors.toList()));
+
+        handlebarsEngine.getHandlebars().registerHelper("pathParams", (operation, options)
+                -> JSONPath.get(operation, "parameters", Collections.<Map>emptyList()).stream().filter(p -> "path" .equals(p.get("in"))).collect(Collectors.toList()));
     }
 
     private String asDtoName(String name) {

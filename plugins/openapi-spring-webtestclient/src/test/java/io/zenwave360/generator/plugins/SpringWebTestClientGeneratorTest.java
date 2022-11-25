@@ -31,7 +31,7 @@ public class SpringWebTestClientGeneratorTest {
     }
 
     @ParameterizedTest(name = "[{index}] {displayName} {0}")
-    @CsvSource({ "openapi-petstore.yml, addPet", "openapi-orders.yml, addCustomer", "openapi-orders-relational.yml, addCustomer"})
+    @CsvSource({ "openapi-petstore.yml, getPetById", "openapi-orders.yml, searchCustomers", "openapi-orders-relational.yml, createCustomer"})
     public void test_output_partial_one_operation(String openapi, String operationId) throws Exception {
         Plugin plugin = new SpringWebTestClientPlugin()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/" + openapi)

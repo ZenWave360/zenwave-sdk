@@ -24,11 +24,11 @@ import static org.springframework.http.HttpMethod.*;
 @SpringBootTest
 @AutoConfigureWebTestClient
 @WithMockUser
-class {{serviceName}}{{testSuffix}} {
+public class {{serviceName}}{{testSuffix}} {
 
     @Autowired
     private WebTestClient webTestClient;
 
-{{> io/zenwave360/generator/plugins/SpringWebTestClientGenerator/partials/Operation.java}}
+{{> (partial 'partials/Operation.java')}}
 
 }

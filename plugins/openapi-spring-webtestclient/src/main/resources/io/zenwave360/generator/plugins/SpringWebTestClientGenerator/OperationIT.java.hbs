@@ -1,4 +1,4 @@
-package {{controllersPackage}};
+package {{controllersPackage}}.{{serviceName}};
 
 {{#if openApiApiPackage~}}
 import {{openApiApiPackage}}.*;
@@ -24,11 +24,11 @@ import static org.springframework.http.HttpMethod.*;
 @SpringBootTest
 @AutoConfigureWebTestClient
 @WithMockUser
-class {{asJavaTypeName operationId}}{{testSuffix}} {
+public class {{asJavaTypeName operationId}}{{testSuffix}} {
 
     @Autowired
     private WebTestClient webTestClient;
 
-{{> io/zenwave360/generator/plugins/SpringWebTestClientGenerator/partials/Operation.java}}
+{{> (partial 'partials/Operation.java')}}
 
 }
