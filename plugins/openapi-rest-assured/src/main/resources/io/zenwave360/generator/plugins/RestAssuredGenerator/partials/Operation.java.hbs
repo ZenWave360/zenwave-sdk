@@ -1,0 +1,47 @@
+{{~#each operations as |operation|~}}
+    {{~#each operation.responses as |response|}}
+
+    /**
+    * Test: {{operation.description}} for {{response.description}}.
+    */
+    @Test
+    public void test{{asJavaTypeName operation.operationId}}_{{response.x--statusCode}}() {
+    {{~#assign "requestDTOClassName"}}{{asDtoName operation.x--request-dto }}{{/assign}}
+    {{~#if requestDTOClassName}}
+        {{requestDTOClassName}} requestBody = new {{requestDTOClassName}}();
+        {{~#each operation.x--request-schema.properties as |property parentPropertyName|}}
+        requestBody.set{{asJavaTypeName @key}}({{{newPropertyObject property}}});
+            {{~#if (eq property.type 'object')}}
+                {{~#each property.properties as |innerProperty|}}
+        requestBody.get{{asJavaTypeName parentPropertyName}}().set{{asJavaTypeName @key}}(null);
+                {{~/each}}
+            {{~else if (eq property.type 'array')}}
+                {{~#each property.items.properties as |innerProperty|}}
+        requestBody.get{{asJavaTypeName parentPropertyName}}().get(0).set{{asJavaTypeName @key}}(null);
+                {{~/each}}
+            {{~else}}
+            {{~/if}}
+        {{~/each}}
+    {{~/if}}
+    {{~#each operation.parameters as |param|}}
+        var {{param.name}} = "{{param.example}}";
+    {{~/each}}
+
+        given()
+        {{~#each (queryParams operation) as |param|}}
+            .queryParam("{{param.name}}", {{param.name}})
+        {{~/each}}
+        {{~#if operation.x--request-dto}}
+            .contentType(ContentType.JSON)
+            .body(requestBody)
+        {{~/if}}
+        .when().{{operation.x--httpVerb}}("{{operation.x--path}}" {{~#each (pathParams operation) as |param|}}, {{param.name}}{{/each}})
+        .then()
+            .statusCode({{response.x--statusCode}})
+            .log().ifValidationFails()
+        {{~#each response.x--response-schema.properties as |property parentPropertyName|}}
+            .body("{{@key}}", not(blankOrNullString()))
+        {{~/each}};
+    }
+    {{~/each~}}
+{{~/each~}}

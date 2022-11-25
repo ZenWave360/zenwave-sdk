@@ -57,6 +57,7 @@ org.slf4j:slf4j-simple:1.7.36,\
 io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:0.9.4-SNAPSHOT,\
 io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-jsonschema2pojo:0.9.4-SNAPSHOT,\
 io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:0.9.4-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:openapi-rest-assured:0.9.4-SNAPSHOT,\
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:0.9.4-SNAPSHOT,\
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.9.4-SNAPSHOT,\
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi:0.9.4-SNAPSHOT,\
@@ -107,12 +108,13 @@ JBang will use you maven settings for repository resolution, but you can also sp
     - [x] JDL to AsyncAPI
       - [x] AsyncAPI schemas
       - [x] AVRO schemas
-  - [ ] Testing
-    - [ ] KarateDSL
-      - [ ] OpenAPI to Karate E2E Tests
-      - [ ] OpenAPI to Karate/ApiMock Stateful Mocks
-    - [ ] OpenAPI to REST-assured
-    - [ ] OpenAPI to Pact
+  - [x] Testing
+    - [x] KarateDSL
+      - [x] OpenAPI to Karate E2E Tests (please use [KarateIDE VSCode Extension](https://github.com/ZenWave360/karate-ide) instead)
+      - [x] OpenAPI to Karate/ApiMock Stateful Mocks (please use [KarateIDE VSCode Extension](https://github.com/ZenWave360/karate-ide) and [ZenWave ApiMock](https://github.com/ZenWave360/zenwave-apimock) instead)
+    - [x] OpenAPI to Spring WebTestClient
+    - [x] OpenAPI to REST-assured
+    - [ ] ~~OpenAPI to Pact (_postponed sine die_)~~
   - [x] Reverser Engineering
     - [x] OpenAPI 2 JDL
     - [x] Java 2 JDL
@@ -150,6 +152,7 @@ openapi-to-jdl                 io.zenwave360.generator.plugins.OpenAPIToJDLPlugi
 spring-cloud-streams3          io.zenwave360.generator.plugins.SpringCloudStream3Plugin: Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI
 fork-plugin                    io.zenwave360.generator.plugins.ForkPlugin: Creates a new standalone maven module cloning an existing plugin
 spring-webtestclient           io.zenwave360.generator.plugins.SpringWebTestClientPlugin: Generates spring WebTestClient tests from OpenAPI defined endpoints.
+rest-assured                   io.zenwave360.generator.plugins.RestAssuredPlugin: Generates REST-assured tests from OpenAPI defined endpoints.
 ```
 
 NOTE: it will list any available plugin, standard or custom, inside any of these root java packages "io", "com" or "org".
