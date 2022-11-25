@@ -19,7 +19,7 @@ io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwav
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.parsers,JDLParser,8,64,0,0,2,16,1,7,1,7
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.parsers,Parser,19,18,1,1,5,2,1,1,0,1
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.plugins,ForkPluginGenerator,33,925,9,53,7,180,8,43,0,20
-io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.plugins,ForkPluginConfiguration,0,12,0,0,0,3,0,1,0,1
+io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.plugins,ForkPlugin,0,12,0,0,0,3,0,1,0,1
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.options.asyncapi,AsyncapiRoleType,0,15,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.options.asyncapi,AsyncapiOperationType,0,15,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.formatters,JavaFormatter,124,0,12,0,22,0,12,0,6,0
