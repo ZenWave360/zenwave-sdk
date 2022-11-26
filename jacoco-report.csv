@@ -58,9 +58,9 @@ io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi,io.zenwave360
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers,io.zenwave360.generator.plugins,JDLOpenAPIControllersPlugin,5,148,1,3,1,20,1,3,0,2
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers,io.zenwave360.generator.plugins,JDLOpenAPIControllersGenerator.ProgrammingStyle,0,15,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers,io.zenwave360.generator.plugins,JDLOpenAPIControllersGenerator,45,731,15,49,8,120,15,44,0,27
-io.zenwave360.generator.plugins:openapi-rest-assured,io.zenwave360.generator.plugins,RestAssuredGenerator,5,446,0,20,2,69,1,25,1,15
-io.zenwave360.generator.plugins:openapi-rest-assured,io.zenwave360.generator.plugins,RestAssuredPlugin,0,48,0,2,0,7,0,3,0,2
-io.zenwave360.generator.plugins:openapi-rest-assured,io.zenwave360.generator.plugins,RestAssuredGenerator.GroupByType,0,21,0,0,0,2,0,1,0,1
+io.github.zenwave360.zenwave-code-generator.plugins:openapi-rest-assured,io.zenwave360.generator.plugins,RestAssuredGenerator,5,446,0,20,2,69,1,25,1,15
+io.github.zenwave360.zenwave-code-generator.plugins:openapi-rest-assured,io.zenwave360.generator.plugins,RestAssuredPlugin,0,48,0,2,0,7,0,3,0,2
+io.github.zenwave360.zenwave-code-generator.plugins:openapi-rest-assured,io.zenwave360.generator.plugins,RestAssuredGenerator.GroupByType,0,21,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.generator.plugins,SpringCloudStreams3Generator.TransactionalOutboxType,0,21,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.generator.plugins,SpringCloudStream3Plugin,5,36,1,1,1,5,1,2,0,2
 io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.generator.plugins,SpringCloudStreams3Generator,5,493,0,22,2,70,1,27,1,16
