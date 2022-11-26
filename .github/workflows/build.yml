@@ -92,7 +92,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to the Maven Central Repository
-        run: mvn --batch-mode deploy -DupdateReleaseInfo=true
+        run: mvn --batch-mode deploy -DupdateReleaseInfo=true -DskipTests
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
