@@ -8,7 +8,7 @@ import io.zenwave360.generator.processors.OpenApiProcessor;
 import io.zenwave360.generator.writers.TemplateFileWriter;
 import io.zenwave360.generator.writers.TemplateStdoutWriter;
 
-@DocumentedPlugin(value = "Generates REST-Assured tests from OpenAPI defined endpoints.", shortCode = "rest-assured")
+@DocumentedPlugin(value = "Generates REST-Assured tests based on OpenAPI specification.", shortCode = "rest-assured")
 public class RestAssuredPlugin extends Plugin {
     public RestAssuredPlugin() {
         super();

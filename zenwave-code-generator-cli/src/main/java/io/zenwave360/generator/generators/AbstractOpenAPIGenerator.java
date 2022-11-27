@@ -37,7 +37,7 @@ public abstract class AbstractOpenAPIGenerator implements Generator {
     @DocumentedOption(description = "OpenAPI operationIds to generate code for")
     public List<String> operationIds = new ArrayList<>();
 
-    @DocumentedOption(description = "Status codes to generate code for (default: 200, 201, 202 and 400")
+    @DocumentedOption(description = "Status codes to generate code for")
     public List<String> statusCodes = List.of("200", "201", "202", "400");
 
     public String getApiPackageFolder() {

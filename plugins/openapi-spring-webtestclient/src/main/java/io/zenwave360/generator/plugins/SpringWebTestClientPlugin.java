@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import static io.zenwave360.generator.plugins.SpringWebTestClientGenerator.GroupByType.businessFlow;
 
-@DocumentedPlugin(value = "Generates spring WebTestClient tests from OpenAPI defined endpoints.", shortCode = "spring-webtestclient")
+@DocumentedPlugin(value = "Generates test for SpringMVC or Spring WebFlux using WebTestClient based on OpenAPI specification.", shortCode = "spring-webtestclient")
 public class SpringWebTestClientPlugin extends Plugin {
 
     private Logger log = LoggerFactory.getLogger(getClass());

@@ -1,8 +1,21 @@
+> ZenWave360 Helps You Create Software Easy to Understand
+
 # OpenAPI: REST Controllers Generator
 
 Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.
 
-${javadoc}
+After you have generated SpringMVC interfaces and DTOs with OpenAPI generator, you can use this command to generate implementations (skeletons) and mappers for those interfaces and dtos:
+
+```shell
+jbang zw -p io.zenwave360.generator.plugins.JDLOpenAPIControllersPlugin \
+    specFile=src/main/resources/model/openapi.yml \
+    jdlFile=src/main/resources/model/orders-model.jdl \
+    basePackage=io.zenwave360.example \
+    openApiApiPackage=io.zenwave360.example.adapters.web \
+    openApiModelPackage=io.zenwave360.example.adapters.web.model \
+    openApiModelNameSuffix=DTO \
+    targetFolder=.
+```
 
 ## Options
 

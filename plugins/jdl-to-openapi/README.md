@@ -1,3 +1,5 @@
+> ZenWave360 Helps You Create Software Easy to Understand
+
 # JDL To OpenAPI Generator
 
 Generates a full OpenAPI definitions for CRUD operations from JDL models
@@ -19,7 +21,6 @@ Generates a full OpenAPI definitions for CRUD operations from JDL models
 | `criteriaDTOSuffix`                  | Suffix for search criteria DTOs (default: Criteria)                                                                                                                             | String   | Criteria                              |            |
 | `idType`                             | JsonSchema type for id fields and parameters.                                                                                                                                   | String   | string                                |            |
 | `idTypeFormat`                       | JsonSchema type format for id fields and parameters.                                                                                                                            | String   |                                       |            |
-| `basePackage`                        | Java Models package name                                                                                                                                                        | String   | io.example.domain.model               |            |
 
 ## Getting Help
 
@@ -35,14 +36,15 @@ ${javadoc}
 
 ## Options
 
-| **Option**         | **Description**                                 | **Type** | **Default**             | **Values** |
-| ------------------ | ----------------------------------------------- | -------- | ----------------------- | ---------- |
-| `specFile`         | API Specification File                          | String   |                         |            |
-| `targetFolder`     | Target folder for generated output              | String   |                         |            |
-| `entities`         | Entities to generate code for                   | List     | []                      |            |
-| `targetFile`       | Target file                                     | String   | entities.jdl            |            |
-| `useRelationships` | Whether to use JDL relationships or plain field | boolean  | true                    |            |
-| `basePackage`      | Java Models package name                        | String   | io.example.domain.model |            |
+| **Option**         | **Description**                                                            | **Type** | **Default**             | **Values** |
+|--------------------|----------------------------------------------------------------------------|----------|-------------------------|------------|
+| `specFile`         | API Specification File                                                     | URI      |                         |            |
+| `targetFolder`     | Target folder to generate code to. If left empty, it will print to stdout. | File     |                         |            |
+| `entities`         | Entities to generate code for                                              | List     | []                      |            |
+| `targetFile`       | Target file                                                                | String   | entities.jdl            |            |
+| `useRelationships` | Whether to use JDL relationships or plain field                            | boolean  | true                    |            |
+| `basePackage`      | Java Models package name                                                   | String   | io.example.domain.model |            |
+
 
 ## Getting Help
 
