@@ -1,0 +1,66 @@
+package {{testsPackage}};
+
+{{#if openApiApiPackage~}}
+import {{openApiApiPackage}}.*;
+{{~/if}}
+{{#if openApiModelPackage~}}
+import {{openApiModelPackage}}.*;
+{{~/if}}
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
+
+import static org.springframework.http.HttpMethod.*;
+
+/**
+* Business Flow Test for: {{~#joinWithTemplate operations delimiter=', ' as |operation|}}{{operation.operationId}}{{/joinWithTemplate}}.
+*/
+@SpringBootTest
+@AutoConfigureWebTestClient
+@WithMockUser
+{{~#if transactional}}@{{transactionalAnnotationClass}}{{/if}}
+public class {{businessFlowTestName}} {
+
+    @Autowired
+    private WebTestClient webTestClient;
+
+    /**
+    * Business Flow Test for: {{#joinWithTemplate operations delimiter=', ' as |operation|}}{{operation.operationId}}{{/joinWithTemplate}}.
+    */
+    @Test
+    public void test{{asJavaTypeName businessFlowTestName}}() {
+    {{~#each operations as |operation|}}
+        // {{operation.operationId}}: {{operation.description}}
+        {{~assign "i" @index}}
+        {{~#assign "requestDTOClassName"}}{{asDtoName operation.x--request-dto }}{{/assign~}}
+        {{~#assign "requestBodyVar"}}{{asInstanceName operation.x--request-dto }}RequestBody{{i}}{{/assign~}}
+        {{~assign "response" operation.x--response~}}
+        {{~#assign "responseDTOClassName"}}{{asDtoName response.x--response-dto }}{{/assign~}}
+        {{> (partial 'partials/requestSetup') }}
+
+        {{#if response.x--response-schema}}var {{operation.operationId}}Response{{i}} = {{/if~}}
+        webTestClient.method({{upper operation.x--httpVerb}}).uri({{> (partial 'partials/uriBuilder')}})
+            .accept(MediaType.APPLICATION_JSON)
+        {{~#if operation.x--request-dto}}
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(Mono.just({{requestBodyVar}}), {{requestDTOClassName}}.class)
+        {{~/if}}
+            .exchange()
+            .expectStatus().isEqualTo({{operation.x--response.x--statusCode}})
+        {{~#if response.x--response-schema}}
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .returnResult({{responseDTOClassName}}.class)
+        {{~/if~}}
+        ;
+
+    {{/each}}
+    }
+
+
+}

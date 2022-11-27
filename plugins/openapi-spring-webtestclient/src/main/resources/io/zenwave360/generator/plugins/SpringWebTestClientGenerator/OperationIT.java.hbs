@@ -1,4 +1,4 @@
-package {{controllersPackage}}.{{serviceName}};
+package {{testsPackage}}.{{serviceName}};
 
 {{#if openApiApiPackage~}}
 import {{openApiApiPackage}}.*;
@@ -24,6 +24,7 @@ import static org.springframework.http.HttpMethod.*;
 @SpringBootTest
 @AutoConfigureWebTestClient
 @WithMockUser
+{{~#if transactional}}@{{transactionalAnnotationClass}}{{/if}}
 public class {{asJavaTypeName operationId}}{{testSuffix}} {
 
     @Autowired

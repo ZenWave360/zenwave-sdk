@@ -1,6 +1,5 @@
 package io.zenwave360.generator.plugins;
 
-import java.rmi.Naming;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,19 +18,28 @@ import io.zenwave360.generator.templating.TemplateOutput;
 public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
 
     enum GroupByType {
-        service, operation, partial
+        service, operation, partial, businessFlow
     }
 
     public String sourceProperty = "api";
 
-    @DocumentedOption(description = "The package to generate REST Controllers")
-    public String controllersPackage = "{{basePackage}}.adapters.web";
+    @DocumentedOption(description = "Package name for generated tests")
+    public String testsPackage = "{{basePackage}}.adapters.web";
 
     @DocumentedOption(description = "Generate test classes grouped by", required = true)
     public GroupByType groupBy = GroupByType.service;
 
     @DocumentedOption(description = "Class name suffix for generated test classes")
     public String testSuffix = "IT";
+
+    @DocumentedOption(description = "Business Flow Test name")
+    public String businessFlowTestName;
+
+    @DocumentedOption(description = "Annotate tests as @Transactional")
+    public boolean transactional = true;
+
+    @DocumentedOption(description = "@Transactional annotation class name")
+    public String transactionalAnnotationClass = "org.springframework.transaction.annotation.Transactional";
 
     public SpringWebTestClientGenerator withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;
@@ -41,10 +49,12 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
     private String prefix = "io/zenwave360/generator/plugins/SpringWebTestClientGenerator/";
-    private final TemplateInput partialTemplate = new TemplateInput(prefix + "partials/Operation.java", "{{asPackageFolder controllersPackage}}/Operation.java");
-    private final TemplateInput testSetTemplate = new TemplateInput(prefix + "ControllersTestSet.java", "{{asPackageFolder controllersPackage}}/ControllersTestSet.java");
-    private final TemplateInput serviceTestTemplate = new TemplateInput(prefix + "ServiceIT.java", "{{asPackageFolder controllersPackage}}/{{serviceName}}{{testSuffix}}.java");
-    private final TemplateInput operationTestTemplate = new TemplateInput(prefix + "OperationIT.java", "{{asPackageFolder controllersPackage}}/{{serviceName}}/{{asJavaTypeName operationId}}{{testSuffix}}.java");
+    private final TemplateInput partialTemplate = new TemplateInput(prefix + "partials/Operation.java", "{{asPackageFolder testsPackage}}/Operation.java");
+    private final TemplateInput testSetTemplate = new TemplateInput(prefix + "ControllersTestSet.java", "{{asPackageFolder testsPackage}}/ControllersTestSet.java");
+
+    private final TemplateInput businessFlowTestTemplate = new TemplateInput(prefix + "BusinessFlowTest.java", "{{asPackageFolder testsPackage}}/{{businessFlowTestName}}.java");
+    private final TemplateInput serviceTestTemplate = new TemplateInput(prefix + "ServiceIT.java", "{{asPackageFolder testsPackage}}/{{serviceName}}{{testSuffix}}.java");
+    private final TemplateInput operationTestTemplate = new TemplateInput(prefix + "OperationIT.java", "{{asPackageFolder testsPackage}}/{{serviceName}}/{{asJavaTypeName operationId}}{{testSuffix}}.java");
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;
@@ -63,6 +73,11 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
         if (groupBy == GroupByType.partial) {
             List<Map<String, Object>> operations = operationsByTag.values().stream().flatMap(List::stream).collect(Collectors.toList());
             templateOutputList.add(generateTemplateOutput(contextModel, partialTemplate, null, operations));
+        }
+
+        if (groupBy == GroupByType.businessFlow) {
+            List<Map<String, Object>> operations = operationsByTag.values().stream().flatMap(List::stream).collect(Collectors.toList());
+            templateOutputList.add(generateTemplateOutput(contextModel, businessFlowTestTemplate, null, operations));
         }
 
         if (groupBy == GroupByType.service || groupBy == GroupByType.operation) {

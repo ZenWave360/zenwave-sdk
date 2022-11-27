@@ -6,40 +6,23 @@
     */
     @Test
     public void test{{asJavaTypeName operation.operationId}}_{{response.x--statusCode}}() {
-    {{~#assign "requestDTOClassName"}}{{asDtoName operation.x--request-dto }}{{/assign}}
-    {{~#if requestDTOClassName}}
-        {{requestDTOClassName}} requestBody = new {{requestDTOClassName}}();
-        {{~#each operation.x--request-schema.properties as |property parentPropertyName|}}
-        requestBody.set{{asJavaTypeName @key}}({{{newPropertyObject property}}});
-            {{~#if (eq property.type 'object')}}
-                {{~#each property.properties as |innerProperty|}}
-        requestBody.get{{asJavaTypeName parentPropertyName}}().set{{asJavaTypeName @key}}(null);
-                {{~/each}}
-            {{~else if (eq property.type 'array')}}
-                {{~#each property.items.properties as |innerProperty|}}
-        requestBody.get{{asJavaTypeName parentPropertyName}}().get(0).set{{asJavaTypeName @key}}(null);
-                {{~/each}}
-            {{~else}}
-            {{~/if}}
-        {{~/each}}
-    {{~/if}}
-    {{~#each operation.parameters as |param|}}
-        var {{param.name}} = "{{param.example}}";
-    {{~/each}}
+        {{~#assign "requestDTOClassName"}}{{asDtoName operation.x--request-dto }}{{/assign~}}
+        {{~#assign "requestBodyVar"}}requestBody{{/assign~}}
+        {{> (partial 'requestSetup')}}
 
-        webTestClient.method({{upper operation.x--httpVerb}}).uri({{> (partial 'UriBuilder')}})
+        webTestClient.method({{upper operation.x--httpVerb}}).uri({{> (partial 'uriBuilder')}})
             .accept(MediaType.APPLICATION_JSON)
-    {{~#if operation.x--request-dto}}
+        {{~#if operation.x--request-dto}}
             .contentType(MediaType.APPLICATION_JSON)
-            .body(Mono.just(requestBody), {{requestDTOClassName}}.class)
-    {{~/if}}
+            .body(Mono.just({{requestBodyVar}}), {{requestDTOClassName}}.class)
+        {{~/if}}
             .exchange()
             .expectStatus().isEqualTo({{response.x--statusCode}})
-    {{~#if response.x--response-schema}}
+        {{~#if response.x--response-schema}}
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
             .expectBody()
-    {{~/if}}
-    {{~#each response.x--response-schema.properties as |property parentPropertyName|}}
+        {{~/if}}
+        {{~#each response.x--response-schema.properties as |property parentPropertyName|}}
             .jsonPath("$.{{@key}}").isNotEmpty()
             {{~#if (eq property.type 'object')}}
                 {{~#each property.properties as |innerProperty|}}
@@ -52,7 +35,7 @@
                 {{~/each}}
             {{~else}}
             {{~/if}}
-    {{~/each}};
+        {{~/each}};
     }
     {{~/each~}}
 {{~/each~}}

@@ -1,5 +1,0 @@
-{{#if (queryParams operation)~}}
-uriBuilder -> uriBuilder.path("/customers/search"){{#each (queryParams operation) as |param|}}.queryParam("{{param.name}}", {{param.name}}){{/each}}.build({{~#joinWithTemplate (queryParams operation) delimiter=', ' as |param|}}{{param.name}}{{/joinWithTemplate}})
-{{~else~}}
-"{{operation.x--path}}"{{#each (pathParams operation) as |param|}}, {{param.name}}{{/each}}
-{{~/if~}}

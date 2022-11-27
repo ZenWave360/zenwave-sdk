@@ -37,7 +37,7 @@ public class RestAssuredGeneratorTest {
         Plugin plugin = new RestAssuredPlugin()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/" + openapi)
                 .withOption("groupBy", RestAssuredGenerator.GroupByType.partial)
-                .withOption("controllersPackage", "io.example.controller.tests")
+                .withOption("testsPackage", "io.example.controller.tests")
                 .withOption("openApiApiPackage", "io.example.api")
                 .withOption("openApiModelPackage",  "io.example.api.model")
                 .withOption("operationIds",  List.of(operationId));
@@ -62,7 +62,7 @@ public class RestAssuredGeneratorTest {
                 .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/" + openapi)
                 .withTargetFolder(targetFolder + "/src/test/java")
                 .withOption("groupBy", RestAssuredGenerator.GroupByType.service)
-                .withOption("controllersPackage", "io.example.controller.tests")
+                .withOption("testsPackage", "io.example.controller.tests")
                 .withOption("openApiApiPackage", "io.example.api")
                 .withOption("openApiModelPackage",  "io.example.api.model")
                 .withOption("openApiModelNameSuffix", "DTO")
@@ -90,7 +90,7 @@ public class RestAssuredGeneratorTest {
                 .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/" + openapi)
                 .withTargetFolder(targetFolder + "/src/test/java")
                 .withOption("groupBy", RestAssuredGenerator.GroupByType.service)
-                .withOption("controllersPackage", "io.example.controller.tests")
+                .withOption("testsPackage", "io.example.controller.tests")
                 .withOption("openApiApiPackage", "io.example.api")
                 .withOption("openApiModelPackage",  "io.example.api.model")
                 .withOption("openApiModelNameSuffix", "DTO");
@@ -117,7 +117,7 @@ public class RestAssuredGeneratorTest {
                 .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/" + openapi)
                 .withTargetFolder(targetFolder + "/src/test/java")
                 .withOption("groupBy", RestAssuredGenerator.GroupByType.operation)
-                .withOption("controllersPackage", "io.example.controller.tests")
+                .withOption("testsPackage", "io.example.controller.tests")
                 .withOption("openApiApiPackage", "io.example.api")
                 .withOption("openApiModelPackage",  "io.example.api.model")
                 .withOption("openApiModelNameSuffix", "DTO");

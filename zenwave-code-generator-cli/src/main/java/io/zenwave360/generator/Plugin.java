@@ -157,6 +157,17 @@ public class Plugin {
         return this;
     }
 
+    public boolean hasOption(String name) {
+        return options.containsKey(name);
+    }
+
+    public boolean hasOption(String name, Object value) {
+        if(name == null || options.get(name) == null || value == null) {
+            return false;
+        }
+        return options.get(name).toString().equals(value.toString());
+    }
+
     public String getSpecFile() {
         return specFile;
     }

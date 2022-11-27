@@ -10,7 +10,7 @@ ${javadoc}
 |--------------------------|------------------------------------------------------------------------------|-------------|------------------------------|-----------------------------|
 | `specFile`               | API Specification File                                                       | URI         |                              |                             |
 | `targetFolder`           | Target folder to generate code to. If left empty, it will print to stdout.   | File        |                              |                             |
-| `controllersPackage`     | The package to generate REST Controllers                                     | String      | {{basePackage}}.adapters.web |                             |
+| `testsPackage`     | The package to generate REST Controllers                                     | String      | {{basePackage}}.adapters.web |                             |
 | `groupBy`                | Generate test classes grouped by                                             | GroupByType | service                      | service, operation, partial |
 | `testSuffix`             | Class name suffix for generated test classes                                 | String      | IT                           |                             |
 | `basePackage`            | Applications base package                                                    | String      |                              |                             |

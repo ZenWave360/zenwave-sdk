@@ -1,0 +1,19 @@
+    {{~#if requestDTOClassName}}
+        {{requestDTOClassName}} {{requestBodyVar}} = new {{requestDTOClassName}}();
+        {{~#each operation.x--request-schema.properties as |property parentPropertyName|}}
+        {{requestBodyVar}}.set{{asJavaTypeName @key}}({{{newPropertyObject property}}});
+            {{~#if (eq property.type 'object')}}
+                {{~#each property.properties as |innerProperty|}}
+        {{requestBodyVar}}.get{{asJavaTypeName parentPropertyName}}().set{{asJavaTypeName @key}}(null);
+                {{~/each}}
+            {{~else if (eq property.type 'array')}}
+                {{~#each property.items.properties as |innerProperty|}}
+        {{requestBodyVar}}.get{{asJavaTypeName parentPropertyName}}().get(0).set{{asJavaTypeName @key}}(null);
+                {{~/each}}
+            {{~else}}
+            {{~/if}}
+        {{~/each}}
+    {{~/if}}
+    {{~#each operation.parameters as |param|}}
+        var {{param.name}}{{i}} = "{{param.example}}";
+    {{~/each~}}
