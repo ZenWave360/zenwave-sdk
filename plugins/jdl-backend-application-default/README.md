@@ -1,4 +1,4 @@
-> :point_right: ZenWave360 Helps You Create Software Easy to Understand
+> 👉 ZenWave360 Helps You Create Software Easy to Understand
 
 # JDL 2 Backend Application Generator
 
