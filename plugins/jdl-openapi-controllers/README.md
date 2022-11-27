@@ -1,4 +1,4 @@
-> ZenWave360 Helps You Create Software Easy to Understand
+> :point_right: ZenWave360 Helps You Create Software Easy to Understand
 
 # OpenAPI: REST Controllers Generator
 
