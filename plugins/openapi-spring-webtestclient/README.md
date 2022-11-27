@@ -1,5 +1,5 @@
 # Spring WebTestClient Generator
-> 👉 ZenWave360 Helps You Create Software Easy to Understand
+> 👉 ZenWave360 Helps You Create Software that's Easy to Understand
 
 Generates test for SpringMVC or Spring WebFlux using WebTestClient based on OpenAPI specification.
 
