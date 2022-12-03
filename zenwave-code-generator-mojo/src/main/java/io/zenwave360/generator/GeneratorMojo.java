@@ -49,6 +49,12 @@ public class GeneratorMojo extends AbstractMojo {
     private boolean addCompileSourceRoot = true;
 
     /**
+     * Include project classpath to the classpath of the generator. Useful to generate code from specs inside project dependencies.
+     */
+    @Parameter(defaultValue = "false")
+    private boolean includeProjectClasspath = false;
+
+    /**
      * A map of specific options for the called generator plugin.
      */
     @Parameter(name = "configOptions")
@@ -89,8 +95,11 @@ public class GeneratorMojo extends AbstractMojo {
                 options.putAll(buildConfigOptions(configKeyValueOptions));
             }
 
-            var classpathFiles = getProjectClasspathElements(project);
-            URLClassLoader projectClassLoader = new URLClassLoader(classpathFiles.toArray(new URL[0]), this.getClass().getClassLoader());
+            URLClassLoader projectClassLoader = null;
+            if(includeProjectClasspath) {
+                var classpathFiles = getProjectClasspathElements(project);
+                projectClassLoader = new URLClassLoader(classpathFiles.toArray(new URL[0]), this.getClass().getClassLoader());
+            }
 
             String specFile = inputSpec.startsWith("classpath:") ? inputSpec : new File(inputSpec).getAbsolutePath();
             Plugin plugin = Plugin.of(this.generatorName)
