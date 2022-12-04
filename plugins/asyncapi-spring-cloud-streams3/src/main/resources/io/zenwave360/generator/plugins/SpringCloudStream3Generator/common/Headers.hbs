@@ -1,0 +1,21 @@
+
+    static class {{message.x--javaTypeSimpleName}}Headers extends java.util.HashMap<String, Object> {
+    {{~#each message.headers.properties as |header|}}
+        {{~#if header.description}}
+        /** {{{header.description}}} */
+        {{~/if}}
+        {{~#if isProducer}}
+        public {{message.x--javaTypeSimpleName}}Headers {{asInstanceName @key}}(String {{asInstanceName @key}}) {
+            return set("{{@key}}", {{asInstanceName @key}});
+        }
+        {{~else}}
+        public String {{asInstanceName @key}}() {
+            return (String) get("{{@key}}");
+        }
+        {{~/if}}
+    {{~/each}}
+        public {{message.x--javaTypeSimpleName}}Headers set(String header, Object value) {
+            put(header, value);
+            return this;
+        }
+    }

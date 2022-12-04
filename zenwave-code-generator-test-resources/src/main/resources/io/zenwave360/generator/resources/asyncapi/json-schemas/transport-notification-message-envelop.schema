@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "http://logistica.inditex.com/schemas/nds-agenda-p2p-message.json",
+  "$id": "http://logistics.example.com/schemas/nds-agenda-p2p-message.json",
   "javaType": "io.example.transport.schema.TransportNotificationEvent",
   "type": "object",
   "additionalProperties": false,

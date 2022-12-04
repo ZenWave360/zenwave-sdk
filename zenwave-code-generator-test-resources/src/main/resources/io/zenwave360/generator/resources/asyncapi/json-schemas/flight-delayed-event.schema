@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "http://logistica.inditex.com/schemas/flight-delayed-event.json",
+  "$id": "http://logistics.example.com/schemas/flight-delayed-event.json",
   "javaType": "io.example.transport.schema.FlightDelayedEvent",
   "type": "object",
   "additionalProperties": false,

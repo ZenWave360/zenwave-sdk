@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "http://logistica.inditex.com/schemas/master-data.json",
+  "$id": "http://logistics.example.com/schemas/master-data.json",
   "javaType": "io.example.transport.schema.MasterData",
   "type": "object",
   "additionalProperties": false,

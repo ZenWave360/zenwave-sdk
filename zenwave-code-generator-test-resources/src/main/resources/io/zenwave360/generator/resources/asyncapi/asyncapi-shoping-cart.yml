@@ -41,6 +41,11 @@ components:
       summary: Contains information about the recent cart and lines added
       contentType: application/*+avro
       schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+      headers:
+        type: object
+        properties:
+          some-header:
+            type: string
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:

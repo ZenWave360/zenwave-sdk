@@ -1,6 +1,6 @@
 asyncapi: '2.0.0'
 info:
-  title: Logistica - NDS WMQ async api spec
+  title: logistics - NDS WMQ async api spec
   version: '1.0.0'
 
 defaultContentType: application/json
@@ -13,7 +13,7 @@ channels:
       message:
         name: TransportNotificationEventBatchMessage
         hedaer:
-          $ref: '#/components/schemas/logistica.wmq.header.v1'
+          $ref: '#/components/schemas/logistics.wmq.header.v1'
         schemaFormat: 'application/schema+json;version=draft-07'
         payload:
           $ref: 'transport-notification-batch-message-envelop.schema'
@@ -23,7 +23,7 @@ channels:
       message:
         name:  TransportNotificationEventMessage
         header:
-          $ref: '#/components/schemas/logistica.wmq.header.v1'
+          $ref: '#/components/schemas/logistics.wmq.header.v1'
         schemaFormat: 'application/schema+json;version=draft-07'
         payload:
           $ref: 'transport-notification-message-envelop.schema'
@@ -33,13 +33,13 @@ channels:
       message:
         name: NotificationEventSubscriptionsMessage
         hedaer:
-          $ref: '#/components/schemas/logistica.wmq.header.v1'
+          $ref: '#/components/schemas/logistics.wmq.header.v1'
         schemaFormat: 'application/schema+json;version=draft-07'
         payload:
           $ref: 'transport-notification-batch-message-envelop.schema'
 components:
   schemas:
-    logistica.wmq.header.v1:
+    logistics.wmq.header.v1:
       type: object
       required:
         - fileName
@@ -54,4 +54,3 @@ components:
     FlightDelayedEvent:
       $ref: 'flight-delayed-event.schema'
 
-      

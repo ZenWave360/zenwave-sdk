@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "http://logistica.inditex.com/schemas/agenda-nds-p2p-message.json",
+  "$id": "http://logistics.example.com/schemas/agenda-nds-p2p-message.json",
   "javaType": "io.example.transport.schema.NotificationEventSubscriptions",
   "type": "object",
   "additionalProperties": false,
@@ -51,7 +51,7 @@
             "selectedLanguage": "en",
             "data": {
               "username": "sumitka",
-              "email": "sumitka@ext.inditex.com"
+              "email": "sumitka@ext.example.com"
             },
             "notifications": [
               {
@@ -103,7 +103,7 @@
             "default": {},
             "examples": [
               {
-                "email": "sumitka@ext.inditex.com",
+                "email": "sumitka@ext.example.com",
                 "username": "sumitka"
               }
             ],
@@ -113,7 +113,7 @@
                 "type": "string",
                 "title": "User's email",
                 "examples": [
-                  "sumitka@ext.inditex.com"
+                  "sumitka@ext.example.com"
                 ]
               },
               "username": {
