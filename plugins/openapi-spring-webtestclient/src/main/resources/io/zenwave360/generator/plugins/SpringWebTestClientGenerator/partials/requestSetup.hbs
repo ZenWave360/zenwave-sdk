@@ -15,5 +15,5 @@
         {{~/each}}
     {{~/if}}
     {{~#each operation.parameters as |param|}}
-        var {{param.name}}{{i}} = "{{param.example}}";
+        var {{asInstanceName param.name}}{{i}} = "{{param.example}}";
     {{~/each~}}

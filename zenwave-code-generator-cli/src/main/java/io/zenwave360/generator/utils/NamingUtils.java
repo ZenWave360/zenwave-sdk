@@ -10,14 +10,14 @@ public class NamingUtils {
     }
 
     public static String asJavaTypeName(String name) {
-        return RegExUtils.removePattern(asCamelCase(name), "^(\\d+)");
+        return RegExUtils.removePattern(camelCase(name), "^(\\d+)");
     }
 
     public static String asInstanceName(String name) {
-        return StringUtils.uncapitalize(asCamelCase(name));
+        return StringUtils.uncapitalize(camelCase(name));
     }
 
-    public static String asCamelCase(String name) {
+    public static String camelCase(String name) {
         if (name == null) {
             return null;
         }

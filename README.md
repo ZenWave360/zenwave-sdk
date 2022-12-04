@@ -174,7 +174,7 @@ jbang zw --help --help-format markdown -p <pluginConfigClass>
 Refer to individual plugin's documentation for more information:
 
 | **Plugin**                                                                               | **Description**                    | **Model Types**            |
-| ---------------------------------------------------------------------------------------- | ---------------------------------- | -------------------------- |
+|------------------------------------------------------------------------------------------|------------------------------------| -------------------------- |
 | [AsyncAPI JSON Schema to POJO](./plugins/asyncapi-jsonschema2pojo/README.md)             | AsyncAPI JSON Schema to POJO       | AsyncAPI, JsonSchema       |
 | [AsyncAPI to Spring Cloud Streams 3](./plugins/asyncapi-spring-cloud-streams3/README.md) | AsyncAPI to Spring Cloud Streams 3 | AsyncAPI, AVRO, JsonSchema |
 | [JDL Backend Application Default](./plugins/jdl-backend-application-default/README.md)   | JDL Backend Application Default    | JDL                        |
@@ -182,6 +182,7 @@ Refer to individual plugin's documentation for more information:
 | [JDL OpenAPI Controllers](./plugins/jdl-openapi-controllers/README.md)                   | JDL OpenAPI Controllers            | OpenAPI, JDL               |
 | [JDL to OpenAPI](./plugins/jdl-to-openapi/README.md)                                     | JDL to OpenAPI and OpenAPI to JDL  | JDL, OpenAPI               |
 | [OpenAPI to Spring WebTestClient](./plugins/openapi-spring-webtestclient/README.md)      | OpenAPI to Spring WebTestClient    | OpenAPI                    |
+| [REST-Assured](./plugins/openapi-rest-assured/README.md)                                 | OpenAPI to REST-Assured            | OpenAPI                    |
 
 ## Forking an Standard or Custom Plugin
 

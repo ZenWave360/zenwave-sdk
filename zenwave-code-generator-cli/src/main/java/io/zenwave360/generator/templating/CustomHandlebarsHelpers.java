@@ -103,6 +103,10 @@ public class CustomHandlebarsHelpers {
         return text != null ? text.replaceAll("\\.", "/") : null;
     }
 
+    public static String camelCase(String text, Options options) throws IOException {
+        return text != null ? NamingUtils.camelCase(text) : null;
+    }
+
     public static String kebabCase(String text, Options options) throws IOException {
         return text != null ? NamingUtils.kebabCase(text) : null;
     }

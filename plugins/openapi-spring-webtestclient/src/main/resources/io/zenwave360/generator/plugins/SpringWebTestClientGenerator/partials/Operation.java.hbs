@@ -14,7 +14,7 @@
             .accept(MediaType.APPLICATION_JSON)
         {{~#if operation.x--request-dto}}
             .contentType(MediaType.APPLICATION_JSON)
-            .body(Mono.just({{requestBodyVar}}), {{requestDTOClassName}}.class)
+            .bodyValue({{requestBodyVar}})
         {{~/if}}
             .exchange()
             .expectStatus().isEqualTo({{response.x--statusCode}})

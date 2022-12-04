@@ -11,6 +11,7 @@ import java.util.Map;
 import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.jsonrefparser.$RefParser;
 import io.zenwave360.jsonrefparser.$RefParserOptions;
+import io.zenwave360.jsonrefparser.$RefParserOptions.OnMissing;
 
 public class DefaultYamlParser implements io.zenwave360.generator.parsers.Parser {
 
@@ -45,7 +46,7 @@ public class DefaultYamlParser implements io.zenwave360.generator.parsers.Parser
     public Map<String, Object> parse() throws IOException {
         $RefParser parser = new $RefParser(specFile)
                 .withResourceClassLoader(this.projectClassLoader)
-                .withOptions(new $RefParserOptions().withOnCircular(SKIP));
+                .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing(OnMissing.SKIP));
         Map model = new LinkedHashMap<>();
         model.put(targetProperty, new Model(specFile, parser.parse().dereference().mergeAllOf().getRefs()));
         return model;

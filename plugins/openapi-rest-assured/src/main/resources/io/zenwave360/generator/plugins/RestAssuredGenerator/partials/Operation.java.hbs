@@ -24,18 +24,18 @@
         {{~/each}}
     {{~/if}}
     {{~#each operation.parameters as |param|}}
-        var {{param.name}} = "{{param.example}}";
+        var {{asInstanceName param.name}} = "{{param.example}}";
     {{~/each}}
 
         given()
         {{~#each (queryParams operation) as |param|}}
-            .queryParam("{{param.name}}", {{param.name}})
+            .queryParam("{{param.name}}", {{asInstanceName param.name}})
         {{~/each}}
         {{~#if operation.x--request-dto}}
             .contentType(ContentType.JSON)
             .body(requestBody)
         {{~/if}}
-        .when().{{operation.x--httpVerb}}("{{operation.x--path}}" {{~#each (pathParams operation) as |param|}}, {{param.name}}{{/each}})
+        .when().{{operation.x--httpVerb}}("{{operation.x--path}}" {{~#each (pathParams operation) as |param|}}, {{asInstanceName param.name}}{{/each}})
         .then()
             .statusCode({{response.x--statusCode}})
             .log().ifValidationFails()

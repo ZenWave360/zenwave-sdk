@@ -8,15 +8,11 @@ import java.util.Map;
 
 import io.zenwave360.generator.MainGenerator;
 import io.zenwave360.generator.Plugin;
-import io.zenwave360.generator.processors.Processor;
 import io.zenwave360.generator.testutils.MavenCompiler;
-import io.zenwave360.generator.utils.NamingUtils;
 import io.zenwave360.generator.writers.TemplateFileWriter;
 import io.zenwave360.generator.writers.TemplateStdoutWriter;
 import io.zenwave360.generator.writers.TemplateWriter;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.processors.OpenApiProcessor;
@@ -24,7 +20,7 @@ import io.zenwave360.generator.templating.TemplateOutput;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static io.zenwave360.generator.utils.NamingUtils.asCamelCase;
+import static io.zenwave360.generator.utils.NamingUtils.camelCase;
 
 public class SpringWebTestClientGeneratorTest {
 
@@ -71,7 +67,7 @@ public class SpringWebTestClientGeneratorTest {
                 .withSpecFile("classpath:io/zenwave360/generator/resources/openapi/" + openapi)
                 .withTargetFolder(targetFolder + "/src/test/java")
                 .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.businessFlow)
-                .withOption("businessFlowTestName", asCamelCase(operationIds.replaceAll(",", "_")))
+                .withOption("businessFlowTestName", camelCase(operationIds.replaceAll(",", "_")))
                 .withOption("transactional", false)
                 .withOption("testsPackage", "io.example.controller.tests")
                 .withOption("openApiApiPackage", "io.example.api")
@@ -86,7 +82,7 @@ public class SpringWebTestClientGeneratorTest {
 
         var templateOutputList = CapturingTemplateWriter.templateOutputList;
         Assertions.assertEquals(1, templateOutputList.size());
-        Assertions.assertEquals("io/example/controller/tests/" + asCamelCase(operationIds.replaceAll(",", "_")) +".java", templateOutputList.get(0).getTargetFile());
+        Assertions.assertEquals("io/example/controller/tests/" + camelCase(operationIds.replaceAll(",", "_")) +".java", templateOutputList.get(0).getTargetFile());
 
         int exitCode = MavenCompiler.compile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
         Assertions.assertEquals(0, exitCode);

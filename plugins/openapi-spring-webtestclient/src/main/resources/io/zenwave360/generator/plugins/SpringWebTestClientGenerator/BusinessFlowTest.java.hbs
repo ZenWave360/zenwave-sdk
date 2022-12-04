@@ -12,9 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Mono;
 
 import static org.springframework.http.HttpMethod.*;
 
@@ -23,8 +21,7 @@ import static org.springframework.http.HttpMethod.*;
 */
 @SpringBootTest
 @AutoConfigureWebTestClient
-@WithMockUser
-{{~#if transactional}}@{{transactionalAnnotationClass}}{{/if}}
+{{#if transactional}}@{{transactionalAnnotationClass}}{{/if}}
 public class {{businessFlowTestName}} {
 
     @Autowired
@@ -49,7 +46,7 @@ public class {{businessFlowTestName}} {
             .accept(MediaType.APPLICATION_JSON)
         {{~#if operation.x--request-dto}}
             .contentType(MediaType.APPLICATION_JSON)
-            .body(Mono.just({{requestBodyVar}}), {{requestDTOClassName}}.class)
+            .bodyValue({{requestBodyVar}})
         {{~/if}}
             .exchange()
             .expectStatus().isEqualTo({{operation.x--response.x--statusCode}})
