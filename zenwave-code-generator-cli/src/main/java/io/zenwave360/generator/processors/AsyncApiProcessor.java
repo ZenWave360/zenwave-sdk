@@ -1,15 +1,12 @@
 package io.zenwave360.generator.processors;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.jayway.jsonpath.JsonPath;
 
 import io.zenwave360.generator.parsers.Model;
 import io.zenwave360.generator.utils.JSONPath;
+import io.zenwave360.generator.utils.Maps;
 
 public class AsyncApiProcessor extends AbstractBaseProcessor implements Processor {
 
@@ -75,11 +72,23 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
             }
         });
 
-        List<Map<String, Object>> traitsParents = JSONPath.get(apiModel, "$..[?(@.traits)]");
-        for (Map<String, Object> traitParent : traitsParents) {
-            List<Map<String, Object>> traitsList = (List) traitParent.get("traits");
-            for (Map<String, Object> traits : traitsList) {
-                traitParent.putAll(traits);
+        List<Map<String, Map>> traitsParents = JSONPath.get(apiModel, "$..[?(@.traits)]");
+        for (Map<String, Map> traitParent : traitsParents) {
+            List<Map<String, Map>> traitsList = (List) traitParent.get("traits");
+            // merge traits into parent
+            for (Map<String, Map> traits : traitsList) {
+                for (Map.Entry<String, Map> trait : traits.entrySet()) {
+                    String traitName = trait.getKey();
+                    if(traitName.startsWith("x--")) {
+                        continue; // do not merge internal extensions
+                    }
+                    if(traitParent.containsKey(traitName)) {
+                        var merged = Maps.deepMerge(Maps.copy(trait.getValue()), traitParent.get(traitName));
+                        traitParent.put(traitName, merged);
+                    } else {
+                        traitParent.put(traitName, trait.getValue());
+                    }
+                }
             }
         }
 
@@ -159,12 +168,13 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
         if ("asyncapi".equals(schemaFormat) || "openapi".equals(schemaFormat)) {
             javaType = normalizeTagName(JSONPath.get(message, "payload.x--schema-name"));
             if (javaType == null) {
-                javaType = normalizeTagName((String) message.getOrDefault("x-javaType", message.get("name")));
+                javaType = normalizeTagName((String) message.getOrDefault("x-javaType", message.getOrDefault("messageId", message.get("name"))));
             }
         }
 
         if (javaType != null) {
             message.put("x--javaType", javaType);
+            message.put("x--javaTypeSimpleName", javaType.substring(javaType.lastIndexOf(".") + 1));
         }
     }
 

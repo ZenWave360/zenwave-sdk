@@ -37,4 +37,20 @@ public interface Maps {
         }
         return source;
     }
+
+    static Map deepMerge(Map target, Map extra) {
+        for (Object key : extra.keySet()) {
+            if (extra.get(key) instanceof Map) {
+                Map subTarget = (Map) target.get(key);
+                if (subTarget == null) {
+                    subTarget = new HashMap();
+                    target.put(key, subTarget);
+                }
+                deepMerge(subTarget, (Map) extra.get(key));
+            } else {
+                target.put(key, extra.get(key));
+            }
+        }
+        return target;
+    }
 }

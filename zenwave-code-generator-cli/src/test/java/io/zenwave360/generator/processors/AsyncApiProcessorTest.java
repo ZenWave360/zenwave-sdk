@@ -52,8 +52,23 @@ public class AsyncApiProcessorTest {
 
         AsyncApiProcessor processor = new AsyncApiProcessor().withTargetProperty(targetProperty);
         Model processed = (Model) processor.process(model).get(targetProperty);
-        String headerType = get(processed, "$.components.messages.LinesRemoved.headers.properties.ecommerce-metadata-session.type");
+        String headerType = get(processed, "$.components.messages.LinesAdded.headers.properties.ecommerce-metadata-session.type");
         Assertions.assertEquals("string", headerType);
+    }
+
+    @Test
+    public void testProcessAsyncApiMergeTraits() throws Exception {
+        Map<String, Object> model = loadAsyncapiModelFromResource("classpath:io/zenwave360/generator/resources/asyncapi/asyncapi-shoping-cart.yml");
+
+        Object headers = get(model.get(targetProperty), "$.components.messages.LinesAdded.headers");
+        Assertions.assertNotNull(get(headers, "$.properties.some-header.type"));
+
+        AsyncApiProcessor processor = new AsyncApiProcessor().withTargetProperty(targetProperty);
+        Model processed = (Model) processor.process(model).get(targetProperty);
+        String headerType = get(processed, "$.components.messages.LinesAdded.headers.properties.some-header.type");
+        Assertions.assertEquals("string", headerType);
+        String headerType2 = get(processed, "$.components.messages.LinesAdded.headers.properties.ecommerce-metadata-session.type");
+        Assertions.assertEquals("string", headerType2);
     }
 
     @Test

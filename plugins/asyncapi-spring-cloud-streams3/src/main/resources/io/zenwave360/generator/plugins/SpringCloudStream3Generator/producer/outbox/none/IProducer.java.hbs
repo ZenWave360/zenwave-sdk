@@ -11,10 +11,11 @@ public interface I{{apiClassName}} {
 
 {{#each operations as |operation|}}
     {{#each operation.x--messages as |message|}}
+    {{~> (lookup . 'headersPartial') isProducer=true}}
     /**
-     * {{operation.description}}
+     * {{{operation.summary}}}
      */
-    boolean {{operation.operationId}}({{message.x--javaType}} payload, Header... headers);
+    boolean {{operation.operationId}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers);
     {{/each}}
 {{/each}}
 }

@@ -14,13 +14,15 @@ import {{modelPackage}}.*;
 public interface {{serviceName operation.x--operationIdCamelCase}} {
 
 {{#each operation.x--messages as |message|}}
+    {{~> (lookup . 'headersPartial') isProducer=false}}
+
     /**
-     * {{operation.description}}
+     * {{{operation.summary}}}
      */
     {{~#if exposeMessage}}
     default void {{operation.operationId}}{{methodSuffix message operation}}(Message<{{message.x--javaType}}> msg) {};
     {{~else}}
-    default void {{operation.operationId}}{{methodSuffix message operation}}({{message.x--javaType}} payload, Map<String, Object> headers) {};
+    default void {{operation.operationId}}{{methodSuffix message operation}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers) {};
     {{~/if}}
 {{/each~}}
 

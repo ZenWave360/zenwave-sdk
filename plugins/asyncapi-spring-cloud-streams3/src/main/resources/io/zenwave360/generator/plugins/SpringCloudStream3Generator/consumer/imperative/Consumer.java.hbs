@@ -20,16 +20,22 @@ import {{modelPackage}}.*;
 @Component("{{operation.x--operationIdKebabCase}}")
 public class {{consumerName operation.x--operationIdCamelCase}} implements Consumer<Message<{{messageType operation}}>> {
 
-    private Logger log = LoggerFactory.getLogger(getClass());
+    protected Logger log = LoggerFactory.getLogger(getClass());
 
-    @Autowired
-    private {{serviceName operation.x--operationIdCamelCase}} service;
+    protected {{serviceName operation.x--operationIdCamelCase}} service;
+    protected StreamBridge streamBridge;
 
-    @Autowired(required = false)
-    private StreamBridge streamBridge;
+    protected String deadLetterQueue;
+
+    public {{consumerName operation.x--operationIdCamelCase}}({{serviceName operation.x--operationIdCamelCase}} service, @Autowired(required=false) StreamBridge streamBridge) {
+        this.service = service;
+        this.streamBridge = streamBridge;
+    }
 
     @Value("${spring.cloud.stream.bindings.{{operation.x--operationIdKebabCase}}-in-0.dead-letter-queue-binding-name:null}")
-    private String deadLetterQueue;
+    public void setDeadLetterQueue(String deadLetterQueue) {
+        this.deadLetterQueue = deadLetterQueue;
+    }
 
     @Override
     public void accept(Message<{{messageType operation}}> message) {
@@ -41,7 +47,9 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
                 {{~#if exposeMessage}}
                 service.{{operation.operationId}}{{methodSuffix message operation}}(MessageBuilder.createMessage(({{message.x--javaType}}) payload, message.getHeaders()));
                 {{~else}}
-                service.{{operation.operationId}}{{methodSuffix message operation}}(({{message.x--javaType}}) payload, message.getHeaders());
+                var headers = new {{serviceName operation.x--operationIdCamelCase}}.{{message.x--javaTypeSimpleName}}Headers();
+                headers.putAll(message.getHeaders());
+                service.{{operation.operationId}}{{methodSuffix message operation}}(({{message.x--javaType}}) payload, headers);
                 {{~/if}}
                 return;
             }

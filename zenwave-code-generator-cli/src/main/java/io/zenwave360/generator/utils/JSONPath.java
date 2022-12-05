@@ -49,6 +49,6 @@ public class JSONPath {
                 }
             }
         }
-        JsonPath.parse(object).set(jsonPath, value);;
+        JsonPath.parse(object).set(jsonPath, value);
     }
 }

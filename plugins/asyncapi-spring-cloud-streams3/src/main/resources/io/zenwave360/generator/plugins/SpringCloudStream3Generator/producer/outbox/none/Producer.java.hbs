@@ -10,7 +10,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MimeType;
 
 {{#if modelPackage}}
 import {{modelPackage}}.*;
@@ -22,8 +21,13 @@ import {{modelPackage}}.*;
 @Component
 public class {{apiClassName}} implements I{{apiClassName}} {
 
-    @Autowired
-    private StreamBridge streamBridge;
+    protected Logger log = LoggerFactory.getLogger(getClass());
+
+    protected StreamBridge streamBridge;
+
+    public {{apiClassName}}(StreamBridge streamBridge) {
+        this.streamBridge = streamBridge;
+    }
 
 {{~#each operations as |operation|}}
     public String {{operation.operationId}}BindingName = "{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
@@ -32,18 +36,15 @@ public class {{apiClassName}} implements I{{apiClassName}} {
 {{~#each operations as |operation|}}
     {{#each operation.x--messages as |message|}}
     /**
-     * {{operation.description}}
+     * {{{operation.summary}}}
      */
-    public boolean {{operation.operationId}}({{message.x--javaType}} payload, Header... headers) {
-        Message message = MessageBuilder.createMessage(payload, asMessageHeaders(headers));
+    public boolean {{operation.operationId}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers) {
+        log.debug("Sending message to topic: {}", {{operation.operationId}}BindingName);
+        Message message = MessageBuilder.createMessage(payload, new MessageHeaders(headers));
         return streamBridge.send({{operation.operationId}}BindingName, message);
     }
 
     {{/each}}
 {{/each}}
 
-    protected MessageHeaders asMessageHeaders(Header... headers) {
-        Map<String, Object> map = Header.asMap(headers);
-        return new MessageHeaders(map);
-    }
 }

@@ -21,7 +21,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MimeType;
 
 {{#if modelPackage}}
 import {{modelPackage}}.*;
@@ -35,10 +34,13 @@ public class {{apiClassName}} implements I{{apiClassName}} {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    @Autowired
-    private StreamBridge streamBridge;
-    @Autowired
-    private MongoTemplate mongoTemplate;
+    protected StreamBridge streamBridge;
+    protected MongoTemplate mongoTemplate;
+
+    public {{apiClassName}}(StreamBridge streamBridge, MongoTemplate mongoTemplate) {
+        this.streamBridge = streamBridge;
+        this.mongoTemplate = mongoTemplate;
+    }
 
 {{~#each operations as |operation|}}
     public String {{operation.operationId}}BindingName = "{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
@@ -67,6 +69,7 @@ public class {{apiClassName}} implements I{{apiClassName}} {
 {{/each}}
 
     public void sendOutboxMessage(org.springframework.data.mongodb.core.messaging.Message<ChangeStreamDocument<Document>, Map> outboxMessage, String collectionName, String eventBindingName) {
+        log.debug("Sending outbox message to stream {}", eventBindingName);
         // send message to the stream
         Message message = MessageBuilder.createMessage(outboxMessage.getBody().get("payload"), new MessageHeaders((Map<String, Object>) outboxMessage.getBody().get("headers")));
         streamBridge.send(eventBindingName, message);
@@ -85,6 +88,7 @@ public class {{apiClassName}} implements I{{apiClassName}} {
     }
 
     protected boolean saveMessageToOutbox(Message message, String collectionName) {
+        log.debug("Saving message to outbox collection {}", collectionName);
         Map outboxMessage = new java.util.HashMap();
         outboxMessage.put("timestamp", System.nanoTime());
         outboxMessage.put("payload", message.getPayload());
@@ -96,11 +100,11 @@ public class {{apiClassName}} implements I{{apiClassName}} {
 {{~#each operations as |operation|}}
     {{#each operation.x--messages as |message|}}
     /**
-     * {{operation.description}}
+     * {{{operation.summary}}}
      */
-    public boolean {{operation.operationId}}({{message.x--javaType}} payload, Header... headers) {
-        MimeType outputContentType = MimeType.valueOf("{{defaultIfEmpty operation.operation.message.contentType 'application/json'}}");
-        Message message = MessageBuilder.createMessage(payload, asMessageHeaders(headers));
+    public boolean {{operation.operationId}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers) {
+        log.debug("Sending message to stream {} via outbox", {{operation.operationId}}BindingName);
+        Message message = MessageBuilder.createMessage(payload, new MessageHeaders(headers));
         // return streamBridge.send({{operation.operationId}}BindingName, message, outputContentType);
         return saveMessageToOutbox(message, {{operation.operationId}}OutboxCollection);
     }
@@ -108,8 +112,4 @@ public class {{apiClassName}} implements I{{apiClassName}} {
     {{/each}}
 {{/each}}
 
-    protected MessageHeaders asMessageHeaders(Header... headers) {
-        Map<String, Object> map = Header.asMap(headers);
-        return new MessageHeaders(map);
-    }
 }

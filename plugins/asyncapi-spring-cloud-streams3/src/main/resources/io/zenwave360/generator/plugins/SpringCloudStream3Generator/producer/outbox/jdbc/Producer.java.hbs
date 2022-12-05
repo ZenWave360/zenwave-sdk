@@ -27,12 +27,15 @@ public class {{apiClassName}} implements I{{apiClassName}} {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    @Autowired
     protected StreamBridge streamBridge;
-    @Autowired
     protected JdbcTemplate jdbcTemplate;
 
     protected ObjectMapper objectMapper = new ObjectMapper();
+
+    public {{apiClassName}}(StreamBridge streamBridge, JdbcTemplate jdbcTemplate) {
+        this.streamBridge = streamBridge;
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
 {{~#each operations as |operation|}}
     public String {{operation.operationId}}BindingName = "{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
@@ -42,6 +45,7 @@ public class {{apiClassName}} implements I{{apiClassName}} {
     public String sqlUpdateSentOutbox = "UPDATE {tableName} SET sent = true WHERE id = ?";
 
     public void sendOutboxMessage(String id, String payloadJson, String headersJson, String tableName, String bindingName) {
+        log.debug("Sending outbox message to stream {}", bindingName);
         try {
             var payload = objectMapper.readValue(payloadJson, Map.class);
             var headers = objectMapper.readValue(headersJson, Map.class);
@@ -57,6 +61,7 @@ public class {{apiClassName}} implements I{{apiClassName}} {
     }
 
     protected boolean saveMessageToOutbox(Message message, String tableName) {
+        log.debug("Saving message to outbox tableName {}", tableName);
         String sql = sqlSaveMessageToOutbox.replace("{tableName}", tableName);
         return jdbcTemplate.update(sql, asString(message.getPayload()), asString(message.getHeaders())) == 1;
     }
@@ -65,10 +70,11 @@ public class {{apiClassName}} implements I{{apiClassName}} {
 {{~#each operations as |operation|}}
     {{#each operation.x--messages as |message|}}
     /**
-     * {{operation.description}}
+     * {{{operation.summary}}}
      */
-    public boolean {{operation.operationId}}({{message.x--javaType}} payload, Header... headers) {
-        Message message = MessageBuilder.createMessage(payload, asMessageHeaders(headers));
+    public boolean {{operation.operationId}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers) {
+        log.debug("Sending message to stream {} via outbox", {{operation.operationId}}BindingName);
+        Message message = MessageBuilder.createMessage(payload, new MessageHeaders(headers));
         //return streamBridge.send(onCustomerEventBindingName, message);
         return saveMessageToOutbox(message, {{operation.operationId}}OutboxTableName);
     }
@@ -87,8 +93,4 @@ public class {{apiClassName}} implements I{{apiClassName}} {
         }
     }
 
-    protected MessageHeaders asMessageHeaders(Header... headers) {
-        Map<String, Object> map = Header.asMap(headers);
-        return new MessageHeaders(map);
-    }
 }

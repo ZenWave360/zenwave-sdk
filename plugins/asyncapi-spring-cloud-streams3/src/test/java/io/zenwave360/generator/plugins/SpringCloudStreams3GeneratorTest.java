@@ -1,10 +1,13 @@
 package io.zenwave360.generator.plugins;
 
+import java.io.IOException;
 import java.util.List;
 
 import io.zenwave360.generator.Plugin;
 import io.zenwave360.generator.options.ProgrammingStyle;
 import io.zenwave360.generator.options.asyncapi.AsyncapiRoleType;
+import io.zenwave360.generator.testutils.MavenCompiler;
+import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -203,4 +206,5 @@ public class SpringCloudStreams3GeneratorTest {
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/client_for_events_reactive_expose_message/IDefaultServiceCommandsProducer.java"));
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/client_for_events_reactive_expose_message/DefaultServiceCommandsProducer.java"));
     }
+
 }
