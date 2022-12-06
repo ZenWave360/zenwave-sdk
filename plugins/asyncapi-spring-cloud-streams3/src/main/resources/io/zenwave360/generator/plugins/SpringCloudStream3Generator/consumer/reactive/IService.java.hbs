@@ -18,9 +18,9 @@ public interface {{serviceName operation.x--operationIdCamelCase}} {
     {{~> (lookup . 'headersPartial') isProducer=false}}
 
     {{~#if exposeMessage}}
-    default Mono<Void> {{operation.operationId}}{{methodSuffix message operation}}(Flux<Message<{{message.x--javaType}}>> msg) { return Mono.empty(); };
+    default void {{operation.operationId}}{{methodSuffix message operation}}(Flux<Message<{{message.x--javaType}}>> messageFlux) { };
     {{~else}}
-    default Mono<Void> {{operation.operationId}}{{methodSuffix message operation}}(Flux<{{message.x--javaType}}> msg) { return Mono.empty(); };
+    default void {{operation.operationId}}{{methodSuffix message operation}}(Flux<{{message.x--javaType}}> messageFlux) { };
     {{~/if}}
 {{/each}}
 

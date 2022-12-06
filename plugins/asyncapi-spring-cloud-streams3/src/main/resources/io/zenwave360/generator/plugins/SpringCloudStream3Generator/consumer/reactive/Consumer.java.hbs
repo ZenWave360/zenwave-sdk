@@ -2,7 +2,7 @@ package {{apiPackage}};
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.function.Function;
+import java.util.function.Consumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 {{#if exposeMessage}}
@@ -18,7 +18,7 @@ import {{modelPackage}}.*;
 {{/if}}
 
 @Component("{{operation.x--operationIdKebabCase}}")
-public class {{consumerName operation.x--operationIdCamelCase}} implements Function<Flux<Message<{{messageType operation}}>>, Mono<Void>> {
+public class {{consumerName operation.x--operationIdCamelCase}} implements Consumer<Flux<Message<{{messageType operation}}>>> {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
@@ -30,9 +30,9 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Funct
 
 
     @Override
-    public Mono<Void> apply(Flux<Message<{{messageType operation}}>> messageFlux) {
-        log.debug("Received message: {}", messageFlux);
-        return messageFlux.flatMap(m -> {
+    public void accept(Flux<Message<{{messageType operation}}>> messageFlux) {
+        messageFlux.subscribe(m -> {
+            log.debug("Received message: {}", m);
         {{#each operation.x--messages as |message|}}
             if(m.getPayload() instanceof {{message.x--javaType}}) {
             {{~#if exposeMessage}}
@@ -42,7 +42,6 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Funct
             {{~/if}}
             }
         {{/each}}
-            return Mono.empty();
-        }).then();
+        });
     }
 }

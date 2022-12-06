@@ -1,5 +1,7 @@
 package {{apiPackage}};
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
@@ -8,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
@@ -25,17 +28,18 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
     protected {{serviceName operation.x--operationIdCamelCase}} service;
     protected StreamBridge streamBridge;
 
-    protected String deadLetterQueue;
+    protected Map<Class<? extends Exception>, String> errorQueueMap;
 
     public {{consumerName operation.x--operationIdCamelCase}}({{serviceName operation.x--operationIdCamelCase}} service, @Autowired(required=false) StreamBridge streamBridge) {
         this.service = service;
         this.streamBridge = streamBridge;
     }
 
-    @Value("${spring.cloud.stream.bindings.{{operation.x--operationIdKebabCase}}-in-0.dead-letter-queue-binding-name:null}")
-    public void setDeadLetterQueue(String deadLetterQueue) {
-        this.deadLetterQueue = deadLetterQueue;
+    @Value("#{${spring.cloud.stream.bindings.on-customer-event-in-0.dead-letter-queue-error-map:{:}}}")
+    public void setErrorQueueMap(Map<Class<? extends Exception>, String> errorQueueMap) {
+        this.errorQueueMap = errorQueueMap;
     }
+
 
     @Override
     public void accept(Message<{{messageType operation}}> message) {
@@ -56,16 +60,39 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
             {{~/each}}
             log.warn("Received message without any business handler: [payload: {}, message: {}]", payload.getClass().getName(), message);
         } catch (Exception e) {
-            log.error("Error processing message: {}", message, e);
-            if (streamBridge != null && deadLetterQueue != null) {
-                log.debug("Sending message to dead letter queue: {}", deadLetterQueue);
+            if(log.isDebugEnabled()) {
+                log.error("Error processing message: {}", message, e);
+            } else {
+                log.error("Error processing message: {}", message);
+            }
+
+            String resolvedDLQ = resolveDeadLetterQueue(e, message);
+            if (streamBridge != null && resolvedDLQ != null) {
                 try {
-                    streamBridge.send(deadLetterQueue, MessageBuilder.fromMessage(message).build());
+                    log.debug("Sending message to dead letter queue: {}", resolvedDLQ);
+                    var headers = new HashMap(message.getHeaders());
+                    headers.put("x-exception-type", e.getClass().getName());
+                    headers.put("x-exception-message", e.getMessage());
+                    headers.put("x-exception-stacktrace ", e.getStackTrace());
+                    headers.put("x-exception-payload-type", message.getPayload().getClass());
+                    streamBridge.send(resolvedDLQ, MessageBuilder.createMessage(message.getPayload(), new MessageHeaders(headers)));
+                    return;
                 } catch (Exception e1) {
-                    log.error("Error sending message to dead letter queue: {}", deadLetterQueue, e1);
+                    log.error("Error sending message to dead letter queue: {}", resolvedDLQ, e1);
                 }
             }
             throw e;
         }
+    }
+
+    protected String resolveDeadLetterQueue(Exception e, Message message) {
+        if(errorQueueMap != null) {
+            for (Map.Entry<Class<? extends Exception>, String> entry : errorQueueMap.entrySet()) {
+                if(entry.getKey().isAssignableFrom(e.getClass())) {
+                    return entry.getValue();
+                }
+            }
+        }
+        return null;
     }
 }
