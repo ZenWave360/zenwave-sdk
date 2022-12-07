@@ -54,6 +54,25 @@ public class SpringCloudStreams3GeneratorTest {
     }
 
     @Test
+    public void test_generator_provider_for_events_with_envelope() throws Exception {
+        Plugin plugin = new SpringCloudStream3Plugin()
+                .withSpecFile("classpath:io/zenwave360/generator/resources/asyncapi/asyncapi-events.yml")
+                .withTargetFolder("target/zenwave630/out")
+                .withOption("apiPackage", "io.example.integration.test.api.client_for_events_with_envelope")
+                .withOption("modelPackage", "io.example.integration.test.api.model")
+                .withOption("useEnterpriseEnvelope", true)
+                .withOption("operationIds", List.of("onProductCreated"))
+                .withOption("role", AsyncapiRoleType.client)
+                .withOption("style", ProgrammingStyle.imperative);
+
+        new MainGenerator().generate(plugin);
+
+        List<String> logs = logCaptor.getLogs();
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/client_for_events_with_envelope/OnProductCreatedConsumer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/client_for_events_with_envelope/IOnProductCreatedConsumerService.java"));
+    }
+
+    @Test
     public void test_generator_provider_for_commands_imperative() throws Exception {
         Plugin plugin = new SpringCloudStream3Plugin()
                 .withSpecFile("classpath:io/zenwave360/generator/resources/asyncapi/asyncapi-commands.yml")

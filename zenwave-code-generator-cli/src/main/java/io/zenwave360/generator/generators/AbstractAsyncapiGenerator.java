@@ -87,7 +87,7 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
 
     public boolean matchesFilters(Map<String, Object> operation, AsyncapiOperationType operationType) {
         var operationOperationType = AsyncapiOperationType.valueOf(operation.get("x--operationType").toString());
-        return operationOperationType == operationType && matchesBindingTypes(operation, bindingTypes);
+        return operationOperationType == operationType && matchesBindingTypes(operation, bindingTypes) && !isSkipOperation(operation);
     }
 
     /**
@@ -121,6 +121,14 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
         var operationType = AsyncapiOperationType.valueOf(operation.get("x--operationType").toString());
         return isProducer(this.role, operationType);
     }
+
+    public boolean isSkipOperation(Map<String, Object> operation) {
+        if(operationIds == null || operationIds.isEmpty()) {
+            return false;
+        }
+        return !operationIds.contains((String) operation.get("operationId"));
+    }
+
 
     /**
      * Returns true for a provider and operation is an event(operationType=publish) or a client and operation is a command(operationType=subscribe).

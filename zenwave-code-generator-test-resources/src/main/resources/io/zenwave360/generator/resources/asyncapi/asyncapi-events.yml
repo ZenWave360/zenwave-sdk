@@ -10,6 +10,7 @@ channels:
     publish:
       summary: On new Product (Async Event)
       operationId: onProductCreated
+      x-envelope-java-type: io.zenwave360.generator.plugins.envelope.Envelope
       message:
         $ref: "#/components/messages/createProductMsg"
       bindings:

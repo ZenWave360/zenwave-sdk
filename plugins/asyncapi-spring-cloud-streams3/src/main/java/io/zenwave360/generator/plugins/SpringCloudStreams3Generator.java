@@ -13,8 +13,12 @@ import io.zenwave360.generator.templating.TemplateEngine;
 import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
 import io.zenwave360.generator.utils.JSONPath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
+
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     public enum TransactionalOutboxType {
         none, mongodb, jdbc
@@ -27,8 +31,14 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     @DocumentedOption(description = "Transactional outbox type for message producers.")
     public TransactionalOutboxType transactionalOutbox = TransactionalOutboxType.none;
 
-    @DocumentedOption(description = "Whether to expose underlying spring Message to consumers or not. Default: false")
+    @DocumentedOption(description = "Whether to expose underlying spring Message to consumers or not.")
     public boolean exposeMessage = false;
+
+    @DocumentedOption(description = "Include support for enterprise envelop wrapping/unwrapping.")
+    public boolean useEnterpriseEnvelope = false;
+
+    @DocumentedOption(description = "AsyncAPI Message extension name for the envelop java type for wrapping/unwrapping.")
+    public String envelopeJavaTypeExtensionName = "x-envelope-java-type";
 
     @DocumentedOption(description = "To avoid method erasure conflicts, when exposeMessage or reactive style this character will be used as separator to append message payload type to method names in consumer interfaces.")
     public String methodAndMessageSeparator = "$";
@@ -60,7 +70,23 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         });
         handlebarsEngine.getHandlebars().registerHelper("messageType", (operation, options) -> {
             List<String> messageTypes = JSONPath.get(operation, "$.x--messages[*].x--javaType");
+            List<String> envelopTypes = JSONPath.get(operation, "$.x--messages[*]." + envelopeJavaTypeExtensionName);
+            String operationEnvelop = JSONPath.get(operation, "$." + envelopeJavaTypeExtensionName);
+            if(operationEnvelop != null) {
+                envelopTypes.add(operationEnvelop);
+            }
+            if(useEnterpriseEnvelope && !envelopTypes.isEmpty()) {
+                return envelopTypes.size() == 1 ? envelopTypes.get(0) : "Object";
+            }
             return messageTypes.size() == 1 ? messageTypes.get(0) : "Object";
+        });
+        handlebarsEngine.getHandlebars().registerHelper("hasEnterpriseEnvelope", (operation, options) -> {
+            List<String> envelopTypes = JSONPath.get(operation, "$.x--messages[*]." + envelopeJavaTypeExtensionName);
+            String operationEnvelop = JSONPath.get(operation, "$." + envelopeJavaTypeExtensionName);
+            if(operationEnvelop != null) {
+                envelopTypes.add(operationEnvelop);
+            }
+            return useEnterpriseEnvelope && !envelopTypes.isEmpty();
         });
         handlebarsEngine.getHandlebars().registerHelper("serviceName", (context, options) -> {
             return String.format("%s%s%s", servicePrefix, context, serviceSuffix);
@@ -120,12 +146,10 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         Map<String, List<Map<String, Object>>> subscribeOperations = getSubscribeOperationsGroupedByTag(apiModel);
         Map<String, List<Map<String, Object>>> publishOperations = getPublishOperationsGroupedByTag(apiModel);
         for (Map.Entry<String, List<Map<String, Object>>> entry : subscribeOperations.entrySet()) {
-            // boolean isProducer = isProducer(role, OperationType.SUBSCRIBE);
             OperationRoleType operationRoleType = OperationRoleType.valueOf(role, AsyncapiOperationType.subscribe);
             templateOutputList.addAll(generateTemplateOutput(contextModel, entry.getKey(), entry.getValue(), operationRoleType));
         }
         for (Map.Entry<String, List<Map<String, Object>>> entry : publishOperations.entrySet()) {
-            // boolean isProducer = isProducer(role, OperationType.PUBLISH);
             OperationRoleType operationRoleType = OperationRoleType.valueOf(role, AsyncapiOperationType.publish);
             templateOutputList.addAll(generateTemplateOutput(contextModel, entry.getKey(), entry.getValue(), operationRoleType));
         }

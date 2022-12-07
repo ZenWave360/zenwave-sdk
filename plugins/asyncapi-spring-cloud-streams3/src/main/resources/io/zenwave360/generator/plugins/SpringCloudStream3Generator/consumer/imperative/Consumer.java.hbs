@@ -27,8 +27,10 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
 
     protected {{serviceName operation.x--operationIdCamelCase}} service;
     protected StreamBridge streamBridge;
-
     protected Map<Class<? extends Exception>, String> errorQueueMap;
+{{~#if useEnterpriseEnvelope}}
+    public EnvelopeUnWrapper envelopeUnWrapper;
+{{~/if}}
 
     public {{consumerName operation.x--operationIdCamelCase}}({{serviceName operation.x--operationIdCamelCase}} service, @Autowired(required=false) StreamBridge streamBridge) {
         this.service = service;
@@ -39,13 +41,18 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
     public void setErrorQueueMap(Map<Class<? extends Exception>, String> errorQueueMap) {
         this.errorQueueMap = errorQueueMap;
     }
-
+{{~#if useEnterpriseEnvelope}}
+    @Autowired(required = false)
+    public void setEnvelopeUnWrapper(EnvelopeUnWrapper envelopeUnWrapper) {
+        this.envelopeUnWrapper = envelopeUnWrapper;
+    }
+{{~/if}}
 
     @Override
     public void accept(Message<{{messageType operation}}> message) {
         log.debug("Received message: {}", message);
         try {
-            Object payload = message.getPayload();
+            Object payload = {{#if (hasEnterpriseEnvelope operation)}}unwrap(message.getPayload()){{else}}message.getPayload(){{/if}};
             {{~#each operation.x--messages as |message|}}
             if(payload instanceof {{message.x--javaType}}) {
                 {{~#if exposeMessage}}
@@ -95,4 +102,17 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
         }
         return null;
     }
+
+{{~#if useEnterpriseEnvelope}}
+    protected Object unwrap(Object payload) {
+        if(envelopeUnWrapper != null) {
+            return envelopeUnWrapper.unwrap(payload);
+        }
+        return payload;
+    }
+
+    public interface EnvelopeUnWrapper {
+        public Object unwrap(Object payload);
+    }
+{{/if}}
 }
