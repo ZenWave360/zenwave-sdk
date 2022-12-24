@@ -1,5 +1,5 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi,io.zenwave360.generator.plugins,OpenAPIToJDLPlugin,41,0,4,0,6,0,4,0,2,0
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi,io.zenwave360.generator.plugins,JDLToOpenAPIGenerator,21,384,9,17,7,72,9,15,1,10
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi,io.zenwave360.generator.plugins,OpenAPIToJDLGenerator,10,502,4,42,5,93,5,25,1,6
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi,io.zenwave360.generator.plugins,JDLToOpenAPIGenerator,21,384,9,17,7,72,9,15,1,10
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi,io.zenwave360.generator.plugins,JDLToOpenAPIPlugin,41,0,4,0,6,0,4,0,2,0
