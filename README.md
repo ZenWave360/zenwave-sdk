@@ -94,6 +94,10 @@ JBang will use you maven settings for repository resolution, but you can also sp
       - [ ] JPA
         - [ ] Imperative
         - [ ] Reactive
+    - [ ] Unit/Integration Testing
+      - [ ] Solitary Unit Testing: minimal
+      - [ ] Sociable Unit Testing: manual dependency setup with in memory infrastructure _test-doubles_
+      - [ ] Integration Testing: spring-boot context with testcontainers 
   - [x] JDL OpenAPI Controllers
   - [x] OpenAPI to Spring WebTestClient
   - [x] AsyncAPI Spring Cloud Streams3
@@ -108,7 +112,7 @@ JBang will use you maven settings for repository resolution, but you can also sp
     - [x] JDL to AsyncAPI
       - [x] AsyncAPI schemas
       - [x] AVRO schemas
-  - [x] Testing
+  - [x] API Testing
     - [x] KarateDSL
       - [x] OpenAPI to Karate E2E Tests (please use [KarateIDE VSCode Extension](https://github.com/ZenWave360/karate-ide) instead)
       - [x] OpenAPI to Karate/ApiMock Stateful Mocks (please use [KarateIDE VSCode Extension](https://github.com/ZenWave360/karate-ide) and [ZenWave ApiMock](https://github.com/ZenWave360/zenwave-apimock) instead)
