@@ -136,7 +136,7 @@ Whether you are:
         - [ ] Reactive
     - [ ] Unit/Integration Testing
       - [ ] Solitary Unit Testing: minimal
-      - [ ] Sociable Unit Testing: manual dependency setup with in memory infrastructure _test-doubles_
+      - [ ] Sociable Vertical Testing: manual dependency setup with in memory infrastructure _test-doubles_
       - [ ] Integration Testing: spring-boot context with testcontainers
   - [x] JDL OpenAPI Controllers
   - [x] OpenAPI to Spring WebTestClient
