@@ -56,6 +56,9 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     @DocumentedOption(description = "SC Streams Binder class suffix")
     public String consumerSuffix = "Consumer";
 
+    @DocumentedOption(description = "SC Streams Binding Name Prefix (used in @Component name)"  )
+    public String bindingPrefix = "";
+
     @DocumentedOption(description = "Business/Service interface prefix")
     public String servicePrefix = "I";
 
@@ -70,6 +73,9 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
     @DocumentedOption(description = "Spring bean id for the tracing id supplier for runtime header with expression: '$tracingIdSupplier'")
     public String tracingIdSupplierQualifier = "tracingIdSupplier";
+
+    @DocumentedOption(description = "Include Kafka common headers 'kafka_messageKey' as x-runtime-header")
+    private boolean includeKafkaCommonHeaders = false;
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
     {

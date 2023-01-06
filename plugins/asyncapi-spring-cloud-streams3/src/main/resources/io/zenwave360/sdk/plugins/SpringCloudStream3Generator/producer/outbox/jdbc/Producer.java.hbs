@@ -23,7 +23,7 @@ import {{modelPackage}}.*;
 /**
  * {{asyncapi.description}}
  */
-@Component
+@Component("{{bindingPrefix}}{{apiClassName}}")
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
 public class {{apiClassName}} implements I{{apiClassName}} {
 
@@ -31,7 +31,7 @@ public class {{apiClassName}} implements I{{apiClassName}} {
 
     public String sqlSaveMessageToOutbox = "INSERT INTO {tableName} (binding_name, type, payload, headers) VALUES (?, ?, ?, ?)";
 {{~#each operations as |operation|}}
-    public String {{operation.operationId}}BindingName = "{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
+    public String {{operation.operationId}}BindingName = "{{bindingPrefix}}{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
     public String {{operation.operationId}}OutboxTableName = "{{snakeCase operation.operationId}}_outbox";
 {{~/each}}
 

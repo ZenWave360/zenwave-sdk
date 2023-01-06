@@ -24,7 +24,7 @@ public class {{apiClassName}}Captor implements I{{apiClassName}} {
     protected Logger log = LoggerFactory.getLogger(getClass());
 
 {{~#each operations as |operation|}}
-    public String {{operation.operationId}}BindingName = "{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
+    public String {{operation.operationId}}BindingName = "{{bindingPrefix}}{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
 {{~/each}}
 
 {{> (partial '../partials/tracing-id-supplier')}}

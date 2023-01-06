@@ -38,8 +38,8 @@ components:
     {{message.name}}Message:
       messageId: {{message.name}}Message
       name: {{message.name}}Message
-      title: {{message.javadoc}}
-      summary: {{message.javadoc}}
+      title: "{{message.javadoc}}"
+      summary: "{{message.javadoc}}"
       schemaFormat: {{{schemaFormatString}}}
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
@@ -52,13 +52,15 @@ components:
       headers:
         type: object
         properties:
+{{~#if includeKafkaCommonHeaders}}
           kafka_messageKey:
             type: string
             description: This header value will be populated automatically at runtime
             x-runtime-expression: $message.payload#/id
+{{~/if}}
           tracingId:
             type: string
-            description: This header value will be populated automatically at runtime
+            description: This header value will be populated automatically at runtime (when using ZenWave code generator)
             x-runtime-expression: $tracingIdSupplier
 
 {{{schemasAsString}}}

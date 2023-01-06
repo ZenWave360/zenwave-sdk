@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Service Implementation for managing {{service.entityNames}}.
  */
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class {{service.name}}Impl implements {{service.name}} {
 
     private final Logger log = LoggerFactory.getLogger(getClass());

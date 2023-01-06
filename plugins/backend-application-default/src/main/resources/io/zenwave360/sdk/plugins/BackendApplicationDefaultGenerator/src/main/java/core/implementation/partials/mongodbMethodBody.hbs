@@ -18,7 +18,7 @@
         var page = {{entity.instanceName}}Repository.findAll(pageable);
         return {{wrapWithMapper entity}};
     {{~else if (isCrudMethod 'search' method=method entity=entity )}}
-        log.debug("Request to search {{entity.classNamePlural}}: {} - {}", criteria, pageable);
+        log.debug("Request to search {{entity.classNamePlural}}: {} - {}", input, pageable);
         // TODO implement this search by criteria
         var page = {{entity.instanceName}}Repository.findAll(pageable);
         return {{wrapWithMapper entity}};

@@ -22,7 +22,7 @@ import {{modelPackage}}.*;
 
 {{#assign "messageCount"}}{{size operation.x--messages}}{{/assign~}}
 
-@Component("{{operation.x--operationIdKebabCase}}")
+@Component("{{bindingPrefix}}{{operation.x--operationIdKebabCase}}")
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
 public class {{consumerName operation.x--operationIdCamelCase}} implements Consumer<Message<{{messageType operation}}>> {
 
@@ -40,7 +40,7 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
         this.streamBridge = streamBridge;
     }
 
-    @Value("#{${spring.cloud.stream.bindings.{{operation.x--operationIdKebabCase}}-in-0.dead-letter-queue-error-map:{:}}}")
+    @Value("#{${spring.cloud.stream.bindings.{{bindingPrefix}}{{operation.x--operationIdKebabCase}}-in-0.dead-letter-queue-error-map:{:}}}")
     public void setErrorQueueMap(Map<Class<? extends Exception>, String> errorQueueMap) {
         this.errorQueueMap = errorQueueMap;
     }

@@ -29,14 +29,14 @@ import {{modelPackage}}.*;
 /**
  * {{asyncapi.description}}
  */
-@Component
+@Component("{{bindingPrefix}}{{apiClassName}}")
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
 public class {{apiClassName}} implements I{{apiClassName}} {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
 {{~#each operations as |operation|}}
-    public String {{operation.operationId}}BindingName = "{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
+    public String {{operation.operationId}}BindingName = "{{bindingPrefix}}{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
     public String {{operation.operationId}}OutboxCollection = {{operation.operationId}}BindingName;
 {{~/each}}
 

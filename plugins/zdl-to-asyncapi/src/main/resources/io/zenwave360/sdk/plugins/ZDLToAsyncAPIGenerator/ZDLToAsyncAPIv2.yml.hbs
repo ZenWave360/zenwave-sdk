@@ -17,7 +17,7 @@ channels:
     x-address: "{{channel.x-address}}"
   {{~#each channel.operations as |operation|}}
     {{@key}}:
-      summary: {{operation.summary}}
+      summary: "{{operation.summary}}"
       operationId: {{operation.operationId}}
       tags:
         - name: {{asTagName operation.serviceName}}
@@ -39,8 +39,8 @@ components:
     {{message.name}}Message:
       messageId: {{message.name}}Message
       name: {{message.name}}Message
-      title: {{message.summary}}
-      summary: {{message.summary}}
+      title: "{{message.summary}}"
+      summary: "{{message.summary}}"
       schemaFormat: {{{schemaFormatString}}}
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'

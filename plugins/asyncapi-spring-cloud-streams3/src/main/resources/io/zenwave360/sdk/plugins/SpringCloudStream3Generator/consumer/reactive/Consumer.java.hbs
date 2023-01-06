@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
 import {{modelPackage}}.*;
 {{/if}}
 
-@Component("{{operation.x--operationIdKebabCase}}")
+@Component("{{bindingPrefix}}{{operation.x--operationIdKebabCase}}")
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
 public class {{consumerName operation.x--operationIdCamelCase}} implements Consumer<Flux<Message<{{messageType operation}}>>> {
 
