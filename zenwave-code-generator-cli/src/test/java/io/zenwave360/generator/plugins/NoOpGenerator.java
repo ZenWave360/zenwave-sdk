@@ -20,6 +20,6 @@ public class NoOpGenerator implements Generator {
     @Override
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {
         context = contextModel;
-        return List.of(new TemplateOutput("nop.txt", "nop"));
+        return List.of(new TemplateOutput("nop.txt", "nop"), new TemplateOutput("nop.txt", "nop", "text/plain", true));
     }
 }

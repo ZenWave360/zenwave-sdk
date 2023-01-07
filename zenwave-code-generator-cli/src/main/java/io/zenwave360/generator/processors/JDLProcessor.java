@@ -41,6 +41,10 @@ public class JDLProcessor extends AbstractBaseProcessor {
     protected void fillExtendsEntities(Map<String, Object> entity, Map<String, Object> jdlModel) {
         String superClassName = JSONPath.get(entity, "options.extends");
         JSONPath.set(jdlModel, "$.entities['" + superClassName + "'].options.isSuperClass", true);
+        boolean isExtendsAuditing = JSONPath.get(jdlModel, "$.entities['" + superClassName + "'].options.auditing") != null;
+        if(isExtendsAuditing) {
+            JSONPath.set(entity, "options.extendsAuditing", true);
+        }
     }
 
     protected void fillCopyEntities(Map<String, Object> entity, Map<String, Object> jdlModel) {

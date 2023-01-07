@@ -1,0 +1,18 @@
+package {{basePackage}}.config;
+
+import {{basePackage}}.core.implementation.*;
+
+public class InMemoryTestsManualContext extends InMemoryTestsConfig {
+
+    public static final InMemoryTestsManualContext INSTANCE = new InMemoryTestsManualContext();
+
+{{~#each services as |service|}}
+    public {{service.name}}Impl {{asInstanceName service.name}}() {
+        return new {{service.name}}Impl(
+        {{~#joinWithTemplate service.entities delimiter=", " as |entity| ~}}
+{{#unless (skipEntityRepository entity)}}{{entity.instanceName}}Repository(){{/unless}}{{#if entity.options.search}}, {{entity.instanceName}}SearchRepository(){{/if}}
+        {{~/joinWithTemplate~}}
+        );
+    }
+{{~/each}}
+}

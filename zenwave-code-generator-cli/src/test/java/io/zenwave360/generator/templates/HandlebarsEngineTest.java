@@ -26,8 +26,8 @@ public class HandlebarsEngineTest {
         model.put("nullValue", null);
         model.put("name", "nameFromParent");
         model.put("entities", Map.of("entity1", Map.of("name", "entity1"), "entity2", Map.of("name", "entity2")));
-        TemplateOutput templateOutput = handlebarsEngine.processTemplate(model, new TemplateInput("io/zenwave360/generator/templating/handlebars-test", "")).get(0);
-         System.out.println(templateOutput.getContent());
+        TemplateOutput templateOutput = handlebarsEngine.processTemplate(model, new TemplateInput("io/zenwave360/generator/templating/handlebars-test", "").withSkipOverwrite(true)).get(0);
+        System.out.println(templateOutput.getContent());
 
         Assertions.assertTrue(templateOutput.getContent().contains("This is the assigned value"));
         Assertions.assertTrue(templateOutput.getContent().contains("List size is 3"));
@@ -39,6 +39,7 @@ public class HandlebarsEngineTest {
         Assertions.assertTrue(templateOutput.getContent().contains("Prefix2Suffix"));
         Assertions.assertTrue(templateOutput.getContent().contains("Inside if 1"));
         Assertions.assertTrue(templateOutput.getContent().contains("Inside else 2"));
+        Assertions.assertTrue(templateOutput.getContent().contains("path: 'api/v1/users'"));
         Assertions.assertTrue(templateOutput.getContent().contains("This is from partial"));
         Assertions.assertTrue(templateOutput.getContent().contains("Not with string: false"));
         Assertions.assertTrue(templateOutput.getContent().contains("Not with boolean: false"));

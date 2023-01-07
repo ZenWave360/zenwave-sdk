@@ -9,7 +9,7 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360.zenwave-code-generator/zenwave-code-generator.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360.zenwave-code-generator/zenwave-code-generator)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/ZenWave360/zenwave-code-generator?logo=GitHub)](https://github.com/ZenWave360/zenwave-code-generator/releases)
-![Alpha](https://img.shields.io/badge/lifecycle-alpha-yellow)
+![Beta](https://img.shields.io/badge/lifecycle-beta-red)
 [![build](https://github.com/ZenWave360/zenwave-code-generator/workflows/build/badge.svg)](https://github.com/ZenWave360/zenwave-code-generator/actions/workflows/build.yml)
 [![coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-code-generator/badges/jacoco.svg)](https://github.com/ZenWave360/zenwave-code-generator/actions/workflows/build.yml)
 [![branches coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-code-generator/badges/branches.svg)](https://github.com/ZenWave360/zenwave-code-generator/actions/workflows/build.yml)
@@ -54,15 +54,15 @@ jbang alias add --name=zw \
     --repos=mavencentral,snapshots=https://s01.oss.sonatype.org/content/repositories/snapshots \
     --deps=\
 org.slf4j:slf4j-simple:1.7.36,\
-io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:0.9.4-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-jsonschema2pojo:0.9.4-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:0.9.4-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:openapi-rest-assured:0.9.4-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:0.9.4-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.9.4-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi:0.9.4-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:0.9.4-SNAPSHOT \
-    io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli:0.9.4-SNAPSHOT
+io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:0.9.6-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-jsonschema2pojo:0.9.6-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:0.9.6-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:openapi-rest-assured:0.9.6-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:0.9.6-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.9.6-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi:0.9.6-SNAPSHOT,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:0.9.6-SNAPSHOT \
+    io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli:0.9.6-SNAPSHOT
 ```
 
 You can include any **custom plugin** jars in the `--deps` option.
@@ -91,23 +91,23 @@ JBang will use you maven settings for repository resolution, but you can also sp
       - [x] MongoDB
         - [x] Imperative
         - [ ] Reactive
-      - [ ] JPA
-        - [ ] Imperative
+      - [x] JPA
+        - [x] Imperative
         - [ ] Reactive
     - [ ] Unit/Integration Testing
       - [ ] Solitary Unit Testing: minimal
       - [ ] Sociable Vertical Testing: manual dependency setup with in memory infrastructure _test-doubles_
-      - [ ] Edge Integration Testing: partial spring-boot context with testcontainers 
-      - [ ] Vertical Integration Testing: full spring-boot context with testcontainers
+      - [ ] Edge Integration Testing: partial spring-boot context for outbound adapters with testcontainers
+      - [ ] Vertical Integration Testing: full spring-boot context for inbound adapters with testcontainers
   - [x] JDL OpenAPI Controllers
   - [x] OpenAPI to Spring WebTestClient
   - [x] AsyncAPI Spring Cloud Streams3
     - [x] Consumer and Producer. Imperative and Reactive.
-      - [x] Dead Letter Queue
-    - [ ] Producer with Transactional Outbox pattern
+      - [x] Business Exceptions Dead Letter Queues Routing
+    - [x] Producer with Transactional Outbox pattern
       - [x] For MongoDB
-      - [ ] For JPA/SQL
-    - [ ] Enterprise Envelop Pattern (x-envelop-javaType)
+      - [x] For JDBC
+    - [x] Enterprise Envelop Pattern
   - [x] JDL to Specs
     - [x] JDL to OpenAPI
     - [x] JDL to AsyncAPI

@@ -1,0 +1,70 @@
+package {{basePackage}}.infrastructure.jpa;
+
+import {{basePackage}}.core.domain.*;
+import {{basePackage}}.core.outbound.jpa.{{entity.className}}Repository;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositoryIntegrationTest {
+
+    @Autowired
+    {{entity.className}}Repository {{entity.instanceName}}Repository;
+
+    @Test
+    public void findAllTest() {
+        var results = {{entity.instanceName}}Repository.findAll();
+        Assertions.assertFalse(results.isEmpty());
+    }
+
+
+    @Test
+    public void findByIdTest() {
+        var id = 1L;
+        var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).orElseThrow();
+        Assertions.assertTrue({{entity.instanceName}}.getId() != null);
+        Assertions.assertTrue({{entity.instanceName}}.getVersion() != null);
+        {{~#if (or entity.options.auditing entity.options.extendsAuditing)}}
+        Assertions.assertTrue({{entity.instanceName}}.getCreatedBy() != null);
+        Assertions.assertTrue({{entity.instanceName}}.getCreatedDate() != null);
+        {{~/if}}
+    }
+
+    @Test
+    public void saveTest() {
+        {{entity.className}} {{entity.instanceName}} = new {{entity.className}}();
+        {{~#each entity.fields as |field|}}
+        {{entity.instanceName}}.set{{capitalize field.name}}(null);
+        {{~/each}}
+
+        var created = {{entity.instanceName}}Repository.save({{entity.instanceName}});
+        Assertions.assertTrue(created.getId() != null);
+        Assertions.assertTrue(created.getVersion() != null);
+        {{~#if (or entity.options.auditing entity.options.extendsAuditing)}}
+        Assertions.assertTrue(created.getCreatedBy() != null);
+        Assertions.assertTrue(created.getCreatedDate() != null);
+        {{~/if}}
+    }
+
+    @Test
+    public void updateTest() {
+        var id = 1L;
+        var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).orElseThrow();
+        {{~#each entity.fields as |field|}}
+        {{entity.instanceName}}.set{{capitalize field.name}}(null);
+        {{~/each}}
+
+        {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}});
+        {{~#each entity.fields as |field|}}
+        Assertions.assertEquals("", {{entity.instanceName}}.get{{capitalize field.name}}());
+        {{~/each}}
+    }
+
+    @Test
+    public void deleteTest() {
+        var id = 1L;
+        {{entity.instanceName}}Repository.deleteById(id);
+        var notFound = {{entity.instanceName}}Repository.findById(id);
+        Assertions.assertFalse(notFound.isPresent());
+    }
+}

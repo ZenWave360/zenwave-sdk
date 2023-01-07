@@ -76,15 +76,22 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
             new Object[] {"src/main/java", "core/domain/search/EntityDocument.java", "core/domain/search/{{entity.className}}{{searchDTOSuffix}}.java", JAVA, skipElasticSearch},
             new Object[] {"src/main/java", "core/outbound/search/EntitySearchRepository.java", "core/outbound/search/{{entity.className}}SearchRepository.java", JAVA, skipElasticSearch},
 
-            new Object[] {"src/test/java","infrastructure/{{persistence}}/{{style}}/InMemory{{capitalizeFirst persistence}}Repository.java", "infrastructure/{{persistence}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository},
-            new Object[] {"src/test/java", "infrastructure/{{persistence}}/{{style}}/EntityRepositoryInMemory.java", "infrastructure/{{persistence}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA, skipEntityRepository});
+            new Object[] {"src/test/java", "infrastructure/{{persistence}}/{{style}}/BaseRepositoryIntegrationTest.java", "infrastructure/{{persistence}}/BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository},
+            new Object[] {"src/test/java", "infrastructure/{{persistence}}/{{style}}/EntityRepositoryIntegrationTest.java", "infrastructure/{{persistence}}/{{entity.className}}RepositoryIntegrationTest.java", JAVA, skipEntityRepository},
+            new Object[] {"src/test/java", "infrastructure/{{persistence}}/{{style}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", "infrastructure/{{persistence}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository},
+            new Object[] {"src/test/java", "infrastructure/{{persistence}}/{{style}}/inmemory/EntityRepositoryInMemory.java", "infrastructure/{{persistence}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA, skipEntityRepository}
+    );
 
     protected List<Object[]> templatesByService = List.of(
             new Object[] {"src/main/java", "core/inbound/Service.java", "core/inbound/{{service.name}}.java", JAVA},
             new Object[] {"src/main/java", "core/implementation/{{persistence}}/{{style}}/ServiceImpl.java", "core/implementation/{{service.name}}Impl.java", JAVA},
             new Object[] {"src/test/java", "core/implementation/{{persistence}}/{{style}}/ServiceTest.java", "core/implementation/{{service.name}}Test.java", JAVA});
 
-    protected List<Object[]> templatesSingle = List.of(
+    protected List<Object[]> templatesForAllServices = List.of(
+            new Object[] {"src/test/java", "config/InMemoryTestsConfig.java", "config/InMemoryTestsConfig.java", JAVA},
+            new Object[] {"src/test/java", "config/InMemoryTestsManualContext.java", "config/InMemoryTestsManualContext.java", JAVA});
+
+    protected List<Object[]> singleTemplates = List.of(
             new Object[] {"src/main/java", "infrastructure/package-info.java", "infrastructure/package-info.java", JAVA},
             new Object[] {"src/test/java", "ArchitectureTest.java", "ArchitectureTest.java", JAVA});
 
@@ -131,6 +138,7 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
         }
 
         Map<String, Map<String, Object>> services = JSONPath.get(apiModel, "$.options.options.service", Collections.emptyMap());
+        List<Map<String, Object>> servicesList = new ArrayList<>();
         for (Map<String, Object> service : services.values()) {
             String serviceName = ((String) service.get("value"));
             service.put("name", serviceName);
@@ -140,12 +148,18 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
             if (!isGenerateService) {
                 continue;
             }
+            servicesList.add(service);
             for (Object[] templateValues : templatesByService) {
                 templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(templateValues), Map.of("service", service, "entities", entitiesByService)));
             }
         }
 
-        for (Object[] templateValues : templatesSingle) {
+        for (Object[] templateValues : templatesForAllServices) {
+            templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(templateValues), Map.of("services", servicesList)));
+        }
+
+
+        for (Object[] templateValues : singleTemplates) {
             templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(templateValues), Collections.emptyMap()));
         }
 
