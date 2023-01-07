@@ -5,14 +5,14 @@
 [![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-code-generator)](https://github.com/ZenWave360/zenwave-code-generator/blob/main/LICENSE)
 
 
-With ZenWave's `spring-cloud-streams3` plugin you can generate strongly typed business interfaces and DTOs from AsyncAPI definitions.
+With ZenWave's `spring-cloud-streams3` plugin you can generate strongly typed **business interfaces**, **payload DTOs** and **header objects** from AsyncAPI definitions.
 
 It encapsulates SpringCloud Streams 3 API creating abstractions for many Enterprise Integration Patterns for Event Driven Architectures like: Transactional Outbox, Business DeadLetterQueue, Enterprise Envelop, Async Request/Response... behind business oriented interfaces.
 
 
 ![AsyncAPI and Spring Cloud Streams 3](../../docs/ZenWave360-AsyncAPI-SpringCloudStreams.excalidraw.svg)
 
-Because APIs mediated by a broker are inherently **asymmetric** it's difficult to establish the roles of client/server: what represents a `publish` operation from one side will be a `subscribe` operation seen from the other side. Also, a given service can act as a publisher and subscriber on the same API.
+Because APIs mediated by a broker are inherently **symmetrical** it's difficult to establish the roles of client/server: what represents a `publish` operation from one side will be a `subscribe` operation seen from the other side. Also, a given service can act as a publisher and subscriber on the same API.
 
 For these reasons, to avoid defining the same API operations multiple times from each perspective, we propose to define de API only once from the perspective of the provider of the functionality, which may be a producer, a consumer or both. 
 
@@ -20,17 +20,17 @@ Some definitions:
 
 - SERVICE: An independent piece of software, typically a microservice, that provides a set of capabilities to other services.
 - PROVIDER: The service that implements the functionality of the API. It may be accepting asynchronous command request or publishing business domain events.
-- CLIENT/s: The service/s that makes use of the funcionality of the API. It may be requesting asynchronous commands or subscribing to business domain events.
+- CLIENT/s: The service/s that makes use of the functionality of the API. It may be requesting asynchronous commands or subscribing to business domain events.
 - PRODUCER: A service that writes a given message.
 - CONSUMER: A service that reads a given message.
 
 
-Use the table to understand which section of AsyncAPI (publish or subscribe) to use for each topic, and which role (provider or client) to use on the plugin plugin.
+Use the table to understand which section of AsyncAPI (publish or subscribe) to use for each topic, and which role (provider or client) to use on the plugin configuration.
 
 |                              | Events                | Commands                |
 |------------------------------|-----------------------|-------------------------|
-| provider                     | Produces (publish)    | Consumes (subscribe)    |
-| client                       | Consumes (subscribe)  | Produces (publish)      |
+| Provider                     | Produces (publish)    | Consumes (subscribe)    |
+| Client                       | Consumes (subscribe)  | Produces (publish)      |
 | OperationId Suggested Prefix | **on**&lt;Event Name> | **do**&lt;Command Name> |
 
 ## Enterprise Integration Patterns
@@ -38,9 +38,9 @@ Use the table to understand which section of AsyncAPI (publish or subscribe) to 
 Because access to the underlying broker is encapsulated behind the generated interfaces, it's possible to implement many Enterprise Integration Patterns (EIP) on top of them.
 
 - Transactional Outbox: for mongodb and jdbc
-- Business DeadLetterQueue
-- Enterprise Envelop (comming soon)
-- Async Request/Response (comming soon)
+- Business DeadLetter Queue
+- Enterprise Envelope
+- Async Request/Response (coming soon)
 
 ## Getting Help
 

@@ -61,7 +61,6 @@ public class JDLEntitiesToSchemasConverter {
     public Map<String, Object> convertEntityToSchema(Map<String, Object> entity, Map<String, Object> jdlModel) {
         Map<String, Object> schema = new LinkedHashMap<>();
         schema.put("type", "object");
-        schema.put("messageId", entity.get("name"));
         schema.put(jdlBusinessEntityProperty, entity.get("name"));
         if (entity.get("comment") != null) {
             schema.put("description", entity.get("comment"));

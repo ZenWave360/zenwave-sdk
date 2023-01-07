@@ -91,6 +91,9 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         handlebarsEngine.getHandlebars().registerHelper("serviceName", (context, options) -> {
             return String.format("%s%s%s", servicePrefix, context, serviceSuffix);
         });
+        handlebarsEngine.getHandlebars().registerHelper("testDoubleName", (context, options) -> {
+            return String.format("%s%s%s", context, serviceSuffix, "TestDouble");
+        });
         handlebarsEngine.getHandlebars().registerHelper("methodSuffix", (context, options) -> {
             if (exposeMessage || style == ProgrammingStyle.reactive) {
                 int messagesCount = JSONPath.get(options.param(0), "$.x--messages.length()", 0);
@@ -106,14 +109,12 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     private String templatesPath = "io/zenwave360/generator/plugins/SpringCloudStream3Generator";
 
     protected List<TemplateInput> producerTemplates = Arrays.asList(
-            new TemplateInput(templatesPath + "/producer/outbox/{{transactionalOutbox}}/IProducer.java", "src/main/java/{{apiPackageFolder}}/I{{apiClassName}}.java"),
-            new TemplateInput(templatesPath + "/producer/outbox/{{transactionalOutbox}}/Producer.java", "src/main/java/{{apiPackageFolder}}/{{apiClassName}}.java"));
-    protected List<TemplateInput> consumerReactiveTemplates = Arrays.asList(
-            new TemplateInput(templatesPath + "/consumer/reactive/Consumer.java", "src/main/java/{{apiPackageFolder}}/{{consumerName operation.x--operationIdCamelCase}}.java"),
-            new TemplateInput(templatesPath + "/consumer/reactive/IService.java", "src/main/java/{{apiPackageFolder}}/{{serviceName operation.x--operationIdCamelCase}}.java"));
-    protected List<TemplateInput> consumerImperativeTemplates = Arrays.asList(
-            new TemplateInput(templatesPath + "/consumer/imperative/Consumer.java", "src/main/java/{{apiPackageFolder}}/{{consumerName operation.x--operationIdCamelCase}}.java"),
-            new TemplateInput(templatesPath + "/consumer/imperative/IService.java", "src/main/java/{{apiPackageFolder}}/{{serviceName operation.x--operationIdCamelCase}}.java"));
+            new TemplateInput(templatesPath + "/producer/outbox/IProducer.java", "src/main/java/{{apiPackageFolder}}/I{{apiClassName}}.java"),
+            new TemplateInput(templatesPath + "/producer/outbox/{{transactionalOutbox}}/Producer.java", "src/main/java/{{apiPackageFolder}}/{{apiClassName}}.java"),
+            new TemplateInput(templatesPath + "/producer/outbox/ProducerCaptor.java", "src/test/java/{{apiPackageFolder}}/{{apiClassName}}Captor.java"));
+    protected List<TemplateInput> consumerTemplates = Arrays.asList(
+            new TemplateInput(templatesPath + "/consumer/{{style}}/Consumer.java", "src/main/java/{{apiPackageFolder}}/{{consumerName operation.x--operationIdCamelCase}}.java"),
+            new TemplateInput(templatesPath + "/consumer/{{style}}/IService.java", "src/main/java/{{apiPackageFolder}}/{{serviceName operation.x--operationIdCamelCase}}.java"));
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;
@@ -128,7 +129,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     }
 
     public List<TemplateInput> getConsumerTemplates() {
-        return style == ProgrammingStyle.imperative ? consumerImperativeTemplates : consumerReactiveTemplates;
+        return consumerTemplates;
     }
 
     public String getApiClassName(String serviceName, OperationRoleType operationRoleType) {

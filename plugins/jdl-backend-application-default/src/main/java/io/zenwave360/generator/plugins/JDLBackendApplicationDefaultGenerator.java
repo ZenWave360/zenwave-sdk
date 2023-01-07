@@ -10,6 +10,7 @@ import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.generators.AbstractJDLGenerator;
 import io.zenwave360.generator.options.PersistenceType;
 import io.zenwave360.generator.options.ProgrammingStyle;
+import io.zenwave360.generator.options.WebFlavorType;
 import io.zenwave360.generator.templating.*;
 import io.zenwave360.generator.utils.JSONPath;
 
@@ -72,16 +73,20 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
             new Object[] {"src/main/java", "core/inbound/dtos/EntityInput.java", "core/inbound/dtos/{{entity.className}}{{inputDTOSuffix}}.java", JAVA, skipEntity},
             new Object[] {"src/main/java", "core/implementation/mappers/EntityMapper.java", "core/implementation/mappers/{{entity.className}}Mapper.java", JAVA, skipEntity},
 //            new Object[] {"src/main/java", "adapters/web/{{webFlavor}}/EntityResource.java", "adapters/web/{{entity.className}}Resource.java", JAVA, skipEntityResource},
-            new Object[] {"src/main/java", "core/outbound/search/EntityDocument.java", "core/outbound/search/{{entity.className}}{{searchDTOSuffix}}.java", JAVA, skipElasticSearch},
+            new Object[] {"src/main/java", "core/domain/search/EntityDocument.java", "core/domain/search/{{entity.className}}{{searchDTOSuffix}}.java", JAVA, skipElasticSearch},
             new Object[] {"src/main/java", "core/outbound/search/EntitySearchRepository.java", "core/outbound/search/{{entity.className}}SearchRepository.java", JAVA, skipElasticSearch},
 
-            new Object[] {"src/test/java","core/outbound/{{persistence}}/{{style}}/InMemory{{capitalizeFirst persistence}}Repository.java", "core/outbound/{{persistence}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository},
-            new Object[] {"src/test/java", "core/outbound/{{persistence}}/{{style}}/EntityRepositoryInMemory.java", "core/outbound/{{persistence}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA, skipEntityRepository});
+            new Object[] {"src/test/java","infrastructure/{{persistence}}/{{style}}/InMemory{{capitalizeFirst persistence}}Repository.java", "infrastructure/{{persistence}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository},
+            new Object[] {"src/test/java", "infrastructure/{{persistence}}/{{style}}/EntityRepositoryInMemory.java", "infrastructure/{{persistence}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA, skipEntityRepository});
 
     protected List<Object[]> templatesByService = List.of(
             new Object[] {"src/main/java", "core/inbound/Service.java", "core/inbound/{{service.name}}.java", JAVA},
             new Object[] {"src/main/java", "core/implementation/{{persistence}}/{{style}}/ServiceImpl.java", "core/implementation/{{service.name}}Impl.java", JAVA},
             new Object[] {"src/test/java", "core/implementation/{{persistence}}/{{style}}/ServiceTest.java", "core/implementation/{{service.name}}Test.java", JAVA});
+
+    protected List<Object[]> templatesSingle = List.of(
+            new Object[] {"src/main/java", "infrastructure/package-info.java", "infrastructure/package-info.java", JAVA},
+            new Object[] {"src/test/java", "ArchitectureTest.java", "ArchitectureTest.java", JAVA});
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;
@@ -140,6 +145,10 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
             }
         }
 
+        for (Object[] templateValues : templatesSingle) {
+            templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(templateValues), Collections.emptyMap()));
+        }
+
         return templateOutputList;
     }
 
@@ -173,7 +182,7 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
         model.put("context", contextModel);
         model.put("jdl", getJDLModel(contextModel));
         model.put("idJavaType", getIdJavaType());
-        model.put("webFlavor", style == ProgrammingStyle.imperative ? "mvc" : "webflux");
+        model.put("webFlavor", style == ProgrammingStyle.imperative ? WebFlavorType.mvc : WebFlavorType.webflux);
         model.putAll(extModel);
         return getTemplateEngine().processTemplates(model, List.of(template));
     }

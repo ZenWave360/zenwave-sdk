@@ -9,6 +9,7 @@ public class TemplateInput {
 
     private String mimeType;
     private Function<Map<String, Object>, Boolean> skip;
+    private boolean skipOverwrite = false;
 
     public TemplateInput() {}
 
@@ -34,6 +35,10 @@ public class TemplateInput {
 
     public Function<Map<String, Object>, Boolean> getSkip() {
         return skip;
+    }
+
+    public boolean isSkipOverwrite() {
+        return skipOverwrite;
     }
 
     public String getMimeType() {
@@ -62,6 +67,11 @@ public class TemplateInput {
 
     public TemplateInput withSkip(Function<Map<String, Object>, Boolean> skip) {
         this.skip = skip;
+        return this;
+    }
+
+    public TemplateInput withSkipOverwrite(boolean overwrite) {
+        this.skipOverwrite = overwrite;
         return this;
     }
 }

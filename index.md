@@ -137,7 +137,8 @@ Whether you are:
     - [ ] Unit/Integration Testing
       - [ ] Solitary Unit Testing: minimal
       - [ ] Sociable Vertical Testing: manual dependency setup with in memory infrastructure _test-doubles_
-      - [ ] Integration Testing: spring-boot context with testcontainers
+      - [ ] Edge Integration Testing: partial spring-boot context with testcontainers
+      - [ ] Vertical Integration Testing: full spring-boot context with testcontainers
   - [x] JDL OpenAPI Controllers
   - [x] OpenAPI to Spring WebTestClient
   - [x] AsyncAPI Spring Cloud Streams3
@@ -292,7 +293,7 @@ src/main/java/io/zenwave360/example/core/outbound/mongodb/PaymentDetailsReposito
 src/main/java/io/zenwave360/example/core/outbound/mongodb/ShippingDetailsRepository.java
 
 # Outbound Interfaces and annotated DTO for ElasticSearch
-src/main/java/io/zenwave360/example/core/outbound/search/CustomerDocument.java
+src/main/java/io/zenwave360/example/core/domain/search/CustomerDocument.java
 src/main/java/io/zenwave360/example/core/outbound/search/CustomerSearchRepository.java
 
 # Services/UseCases Implementation
@@ -309,13 +310,13 @@ src/main/java/io/zenwave360/example/core/implementation/mappers/ShippingDetailsM
 src/test/java/io/zenwave360/example/core/implementation/CustomerUseCasesTest.java
 src/test/java/io/zenwave360/example/core/implementation/CustomerOrderUseCasesTest.java
 
-# In Memory Mocks for outbound ports
-src/test/java/io/zenwave360/example/core/outbound/mongodb/inmemory/InMemoryMongoRepository.java
-src/test/java/io/zenwave360/example/core/outbound/mongodb/inmemory/PaymentDetailsRepositoryInMemory.java
-src/test/java/io/zenwave360/example/core/outbound/mongodb/inmemory/CustomerRepositoryInMemory.java
-src/test/java/io/zenwave360/example/core/outbound/mongodb/inmemory/OrderedItemRepositoryInMemory.java
-src/test/java/io/zenwave360/example/core/outbound/mongodb/inmemory/CustomerOrderRepositoryInMemory.java
-src/test/java/io/zenwave360/example/core/outbound/mongodb/inmemory/ShippingDetailsRepositoryInMemory.java
+# In Memory Mocks for infrastructure ports
+src/test/java/io/zenwave360/example/infrastructure/mongodb/inmemory/InMemoryMongoRepository.java
+src/test/java/io/zenwave360/example/infrastructure/mongodb/inmemory/PaymentDetailsRepositoryInMemory.java
+src/test/java/io/zenwave360/example/infrastructure/mongodb/inmemory/CustomerRepositoryInMemory.java
+src/test/java/io/zenwave360/example/infrastructure/mongodb/inmemory/OrderedItemRepositoryInMemory.java
+src/test/java/io/zenwave360/example/infrastructure/mongodb/inmemory/CustomerOrderRepositoryInMemory.java
+src/test/java/io/zenwave360/example/infrastructure/mongodb/inmemory/ShippingDetailsRepositoryInMemory.java
 ```
 
 </details>

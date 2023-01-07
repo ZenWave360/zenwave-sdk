@@ -1,5 +1,7 @@
 package {{apiPackage}};
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -81,7 +83,7 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
                     headers.put("x-exception-type", e.getClass().getName());
                     headers.put("x-exception-message", e.getMessage());
                     headers.put("x-exception-stacktrace ", e.getStackTrace());
-                    headers.put("x-exception-payload-type", message.getPayload().getClass());
+                    headers.put("x-exception-payload-type", message.getPayload().getClass().getName());
                     streamBridge.send(resolvedDLQ, MessageBuilder.createMessage(message.getPayload(), new MessageHeaders(headers)));
                     return;
                 } catch (Exception e1) {
@@ -101,6 +103,13 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
             }
         }
         return null;
+    }
+
+    protected String getStackTraceAsString(Exception e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        return sw.toString();
     }
 
 {{~#if useEnterpriseEnvelope}}

@@ -1,17 +1,19 @@
 package io.zenwave360.generator;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
+import io.zenwave360.generator.utils.CommaSeparatedCollectionDeserializationHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.zenwave360.generator.formatters.Formatter;
 import io.zenwave360.generator.generators.Generator;
@@ -64,6 +66,7 @@ public class MainGenerator {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.addHandler(new CommaSeparatedCollectionDeserializationHandler());
 
         mapper.updateValue(processor, options);
         if (processorSimpleClassOptions != null) {

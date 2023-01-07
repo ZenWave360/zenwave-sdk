@@ -1,6 +1,5 @@
+@auditing
 entity BaseEntity {
-  createdAt Instant
-  updatedAt Instant
 }
 
 /* Customers */

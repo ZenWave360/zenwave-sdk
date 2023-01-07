@@ -60,7 +60,7 @@ public class HandlebarsEngine implements TemplateEngine {
                     String targetFile = handlebars.compileInline(templateInput.getTargetFile()).apply(context);
                     String templateLocation = handlebars.compileInline(templateInput.getTemplateLocation()).apply(context);
                     String content = handlebars.compile(templateLocation).apply(context);
-                    templateOutputList.add(new TemplateOutput(targetFile, content, templateInput.getMimeType()));
+                    templateOutputList.add(new TemplateOutput(targetFile, content, templateInput.getMimeType(), templateInput.isSkipOverwrite()));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

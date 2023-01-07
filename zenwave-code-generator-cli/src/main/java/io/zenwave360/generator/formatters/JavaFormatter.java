@@ -33,9 +33,13 @@ public class JavaFormatter implements Formatter {
             return templateOutput;
         }
         if (templateOutput.getMimeType() != null && templateOutput.getMimeType().equals(OutputFormatType.JAVA.toString())) {
+            if(templateOutput.getContent().startsWith("// formatter:off")) {
+                log.debug("Skipping java formatting for file {}", templateOutput.getTargetFile());
+                return templateOutput;
+            }
             try {
                 String formattedSource = new CustomFormatter().formatSourceAndFixImports(templateOutput.getContent());
-                return new TemplateOutput(templateOutput.getTargetFile(), formattedSource, templateOutput.getMimeType());
+                return new TemplateOutput(templateOutput.getTargetFile(), formattedSource, templateOutput.getMimeType(), templateOutput.isSkipOverwrite());
             } catch (FormatterException e) {
                 if (e.diagnostics() != null && e.diagnostics().size() > 0) {
                     int line = e.diagnostics().get(0).line();

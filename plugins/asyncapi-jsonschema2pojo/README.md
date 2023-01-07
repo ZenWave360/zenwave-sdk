@@ -4,7 +4,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360.zenwave-code-generator/zenwave-code-generator.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360.zenwave-code-generator/zenwave-code-generator)
 [![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-code-generator)](https://github.com/ZenWave360/zenwave-code-generator/blob/main/LICENSE)
 
-Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files
+Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files using https://www.jsonschema2pojo.org/ library.
 
 ## Options
 
@@ -36,6 +36,8 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
 - Adding this generator jar as dependency to zenwave maven plugin.
 - Passing any configuration as <configOptions>.
 
+Use jsonschema2pojo prefix to pass any option to https://www.jsonschema2pojo.org/ underlying library.
+
 ```xml
 <plugin>
     <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
@@ -49,13 +51,12 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
                 <goal>generate</goal>
             </goals>
             <configuration>
-                <generatorName>spring-cloud-streams3</generatorName>
+                <generatorName>jsonschema2pojo</generatorName>
                 <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
                 <configOptions>
-                    <role>provider</role>
-                    <style>imperative</style>
-                    <apiPackage>io.zenwave360.example.adapters.events.producer</apiPackage>
                     <modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
+                    <!-- use jsonschema2pojo prefix to pass any option to jsonschema2pojo underlying library -->
+                    <jsonschema2pojo.includeTypeInfo>true</jsonschema2pojo.includeTypeInfo>
                 </configOptions>
             </configuration>
         </execution>

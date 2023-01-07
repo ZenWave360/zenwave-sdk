@@ -4,8 +4,8 @@ public class TemplateOutput {
 
     private String targetFile;
     private String content;
-
     private String mimeType;
+    private boolean skipOverwrite = false;
 
     public TemplateOutput(String targetFile, String content) {
         this.targetFile = targetFile;
@@ -18,6 +18,13 @@ public class TemplateOutput {
         this.mimeType = mimeType;
     }
 
+    public TemplateOutput(String targetFile, String content, String mimeType, boolean skipOverwrite) {
+        this.targetFile = targetFile;
+        this.content = content;
+        this.mimeType = mimeType;
+        this.skipOverwrite = skipOverwrite;
+    }
+
     public String getTargetFile() {
         return targetFile;
     }
@@ -28,5 +35,9 @@ public class TemplateOutput {
 
     public String getMimeType() {
         return mimeType;
+    }
+
+    public boolean isSkipOverwrite() {
+        return skipOverwrite;
     }
 }

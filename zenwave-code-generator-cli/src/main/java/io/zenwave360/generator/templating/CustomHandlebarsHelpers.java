@@ -39,6 +39,13 @@ public class CustomHandlebarsHelpers {
         return StringUtils.join(tokens, "");
     }
 
+    public static String path(String context, Options options) {
+        var tokens = new ArrayList<>();
+        tokens.add(context);
+        tokens.addAll(List.of(options.params));
+        return StringUtils.join(tokens, "/").replaceAll("/+", "/");
+    }
+
     public static boolean eq(String first, Options options) throws IOException {
         String second = options.param(0);
         return StringUtils.equals(first, second);

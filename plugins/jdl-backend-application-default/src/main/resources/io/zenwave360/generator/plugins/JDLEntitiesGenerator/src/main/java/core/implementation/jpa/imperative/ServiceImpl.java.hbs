@@ -10,6 +10,7 @@ import {{basePackage}}.core.outbound.search.*;
 {{/if}}
 
 import java.util.Optional;
+import org.mapstruct.factory.Mappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -27,7 +28,7 @@ public class {{service.name}}Impl implements {{service.name}} {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
 {{#each entities as |entity|}}
-    private final {{entity.className}}Mapper {{entity.instanceName}}Mapper;
+    private final {{entity.className}}Mapper {{entity.instanceName}}Mapper = Mappers.getMapper({{entity.className}}Mapper.class);
     {{~#unless (skipEntityRepository this)}}
     private final {{entity.className}}Repository {{entity.instanceName}}Repository;
     {{~/unless}}
@@ -39,9 +40,8 @@ public class {{service.name}}Impl implements {{service.name}} {
     /**
      * Constructor.
      */
-    public {{service.name}}Impl({{#joinWithTemplate service.entities delimiter=", "}}{{className}}Mapper {{instanceName}}Mapper{{#unless (skipEntityRepository this)}}, {{className}}Repository {{instanceName}}Repository{{/unless}}{{#if options.search}}, {{className}}SearchRepository {{instanceName}}SearchRepository{{/if}}{{/joinWithTemplate}}) {
+    public {{service.name}}Impl({{#joinWithTemplate service.entities delimiter=", "}}{{#unless (skipEntityRepository this)}}{{className}}Repository {{instanceName}}Repository{{/unless}}{{#if options.search}}, {{className}}SearchRepository {{instanceName}}SearchRepository{{/if}}{{/joinWithTemplate}}) {
         {{~#joinWithTemplate service.entities ~}}
-            this.{{instanceName}}Mapper = {{instanceName}}Mapper;
             {{#unless (skipEntityRepository this)}}this.{{instanceName}}Repository = {{instanceName}}Repository;{{/unless}}
             {{#if options.search}}this.{{instanceName}}SearchRepository = {{instanceName}}SearchRepository;{{/if}}
         {{~/joinWithTemplate~}}
@@ -52,21 +52,19 @@ public class {{service.name}}Impl implements {{service.name}} {
 
     @Override
     public {{entity.className}} create{{entity.className}}({{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
-        log.debug("Request to save {{entity.className}}{{inputDTOSuffix}} : {}", {{entity.instanceName}}{{inputDTOSuffix}});
-        var {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}}Mapper.update(new {{entity.className}}(), {{entity.instanceName}}{{inputDTOSuffix}}));
+        log.debug("Request to save {{entity.className}}: {}", {{entity.instanceName}}{{inputDTOSuffix}});
+        var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), {{entity.instanceName}}Input);
+        {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}});
         // TODO: you may need to reload the entity here to fetch all the relationships
         return {{entity.instanceName}};
     }
 
     @Override
     public Optional<{{entity.className}}> update{{entity.className}}({{idJavaType}} id, {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
-        log.debug("Request to update {{entity.className}} : {}", {{entity.instanceName}}{{inputDTOSuffix}});
-
-        var {{entity.instanceName}} = {{entity.instanceName}}Repository
-                .findById(id)
-                .map(existing{{entity.className}} -> {{entity.instanceName}}Mapper.update(existing{{entity.className}}, {{entity.instanceName}}{{inputDTOSuffix}}))
-                .map({{entity.instanceName}}Repository::save);
-        return {{entity.instanceName}};
+        log.debug("Request to update {{entity.className}}: {}", {{entity.instanceName}}{{inputDTOSuffix}});
+        var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id);
+        {{entity.instanceName}} = {{entity.instanceName}}.map(existing{{entity.instanceName}} -> {{entity.instanceName}}Mapper.update(existing{{entity.instanceName}}, {{entity.instanceName}}Input));
+        return {{entity.instanceName}}.map({{entity.instanceName}}Repository::save);
     }
 
     @Override

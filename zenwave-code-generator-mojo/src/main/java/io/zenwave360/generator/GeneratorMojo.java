@@ -47,6 +47,12 @@ public class GeneratorMojo extends AbstractMojo {
      */
     @Parameter(defaultValue = "true")
     private boolean addCompileSourceRoot = true;
+    /**
+     * Add the 'src/test/java' directory to the project as a tests source, so that the generated java types are compiled and included in the project tests classpath.
+     */
+    @Parameter(defaultValue = "false")
+    private boolean addTestCompileSourceRoot = false;
+
 
     /**
      * Include project classpath to the classpath of the generator. Useful to generate code from specs inside project dependencies.
@@ -132,7 +138,12 @@ public class GeneratorMojo extends AbstractMojo {
         final Object sourceFolderObject = configOptions == null ? null : configOptions.get("sourceFolder");
         final String sourceFolder = sourceFolderObject == null ? "src/main/java" : sourceFolderObject.toString();
         return new File(targetFolder, sourceFolder).getAbsolutePath();
-//        return targetFolder.getAbsolutePath();
+    }
+
+    private String getTestCompileSourceRoot() {
+        final Object sourceFolderObject = configOptions == null ? null : configOptions.get("testSourceFolder");
+        final String sourceFolder = sourceFolderObject == null ? "src/test/java" : sourceFolderObject.toString();
+        return new File(targetFolder, sourceFolder).getAbsolutePath();
     }
 
     private void addCompileSourceRootIfConfigured() {
@@ -140,6 +151,11 @@ public class GeneratorMojo extends AbstractMojo {
             String compileSourceRoot = getCompileSourceRoot();
             System.out.println("Adding source root " + compileSourceRoot);
             project.addCompileSourceRoot(compileSourceRoot);
+        }
+        if (addTestCompileSourceRoot) {
+            String testCompileSourceRoot = getTestCompileSourceRoot();
+            System.out.println("Adding tests source root " + testCompileSourceRoot);
+            project.addTestCompileSourceRoot(testCompileSourceRoot);
         }
     }
 

@@ -1,5 +1,5 @@
 {{#if (queryParams operation)~}}
-uriBuilder -> uriBuilder.path("{{operation.x--path}}"){{#each (queryParams operation) as |param|}}.queryParam("{{param.name}}", {{asInstanceName param.name}}{{i}}){{/each}}.build({{~#joinWithTemplate (queryParams operation) delimiter=', ' as |param|}}{{asInstanceName param.name}}{{i}}{{/joinWithTemplate}})
+uriBuilder -> uriBuilder.path("{{path '/api' operation.x--path}}"){{#each (queryParams operation) as |param|}}.queryParam("{{param.name}}", {{asInstanceName param.name}}{{i}}){{/each}}.build({{~#joinWithTemplate (queryParams operation) delimiter=', ' as |param|}}{{asInstanceName param.name}}{{i}}{{/joinWithTemplate}})
 {{~else~}}
-"{{operation.x--path}}"{{#each (pathParams operation) as |param|}}, {{asInstanceName param.name}}{{i}}{{/each}}
+"{{path '/api' operation.x--path}}"{{#each (pathParams operation) as |param|}}, {{asInstanceName param.name}}{{i}}{{/each}}
 {{~/if~}}

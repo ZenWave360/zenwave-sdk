@@ -97,7 +97,8 @@ JBang will use you maven settings for repository resolution, but you can also sp
     - [ ] Unit/Integration Testing
       - [ ] Solitary Unit Testing: minimal
       - [ ] Sociable Vertical Testing: manual dependency setup with in memory infrastructure _test-doubles_
-      - [ ] Integration Testing: spring-boot context with testcontainers 
+      - [ ] Edge Integration Testing: partial spring-boot context with testcontainers 
+      - [ ] Vertical Integration Testing: full spring-boot context with testcontainers
   - [x] JDL OpenAPI Controllers
   - [x] OpenAPI to Spring WebTestClient
   - [x] AsyncAPI Spring Cloud Streams3

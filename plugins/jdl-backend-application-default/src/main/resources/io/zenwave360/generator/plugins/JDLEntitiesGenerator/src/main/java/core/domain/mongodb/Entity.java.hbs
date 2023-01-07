@@ -11,6 +11,10 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 import org.springframework.data.mongodb.core.mapping.Field;
+{{~#if entity.options.auditing}}
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+{{/if}}
 
 /**
 * {{entity.comment}}
@@ -31,6 +35,13 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
     {{{fieldValidationAnnotations field}}}
     private {{{fieldType field}}} {{field.name}};
 {{/each}}
+
+{{~#if entity.options.auditing}}
+    @CreatedDate
+    private OffsetDateTime createdDate;
+    @LastModifiedDate
+    private OffsetDateTime lastModifiedDate;
+{{/if~}}
 
 {{#unless (skipEntityId entity)~}}
     public {{idJavaType}} getId() {
@@ -73,4 +84,22 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
         this.{{field.name}} = {{field.name}};
     }
 {{/each}}
+
+{{~#if entity.options.auditing}}
+  public OffsetDateTime getCreatedDate() {
+    return createdDate;
+  }
+
+  public void setCreatedDate(OffsetDateTime createdDate) {
+    this.createdDate = createdDate;
+  }
+
+  public OffsetDateTime getLastModifiedDate() {
+    return lastModifiedDate;
+  }
+
+  public void setLastModifiedDate(OffsetDateTime lastModifiedDate) {
+    this.lastModifiedDate = lastModifiedDate;
+  }
+{{/if}}
 }

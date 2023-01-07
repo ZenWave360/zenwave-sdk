@@ -81,7 +81,7 @@ public class SpringWebTestClientGeneratorTest {
         new MainGenerator().generate(plugin);
 
         var templateOutputList = CapturingTemplateWriter.templateOutputList;
-        Assertions.assertEquals(1, templateOutputList.size());
+        Assertions.assertEquals(2, templateOutputList.size());
         Assertions.assertEquals("io/example/controller/tests/" + camelCase(operationIds.replaceAll(",", "_")) +".java", templateOutputList.get(0).getTargetFile());
 
         int exitCode = MavenCompiler.compile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);

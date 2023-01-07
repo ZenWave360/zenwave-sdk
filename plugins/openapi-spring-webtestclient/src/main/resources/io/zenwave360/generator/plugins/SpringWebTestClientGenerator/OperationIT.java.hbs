@@ -6,6 +6,7 @@ import {{openApiApiPackage}}.*;
 {{#if openApiModelPackage~}}
 import {{openApiModelPackage}}.*;
 {{~/if}}
+import {{baseTestClassPackage}}.{{baseTestClassName}};
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +20,7 @@ import static org.springframework.http.HttpMethod.*;
 /**
 * Integration tests for the {@link {{serviceName~}}#{{operationId~}} } REST controller.
 */
-@SpringBootTest
-@AutoConfigureWebTestClient
-{{#if transactional}}@{{transactionalAnnotationClass}}{{/if}}
-public class {{asJavaTypeName operationId}}{{testSuffix}} {
-
-    @Autowired
-    private WebTestClient webTestClient;
+public class {{asJavaTypeName operationId}}{{testSuffix}} extends {{baseTestClassName}} {
 
 {{> (partial 'partials/Operation.java')}}
 

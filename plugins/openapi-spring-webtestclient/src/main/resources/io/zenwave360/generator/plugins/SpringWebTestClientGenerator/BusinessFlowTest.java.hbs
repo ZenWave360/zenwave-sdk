@@ -6,6 +6,7 @@ import {{openApiApiPackage}}.*;
 {{#if openApiModelPackage~}}
 import {{openApiModelPackage}}.*;
 {{~/if}}
+import {{baseTestClassPackage}}.{{baseTestClassName}};
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +20,7 @@ import static org.springframework.http.HttpMethod.*;
 /**
 * Business Flow Test for: {{~#joinWithTemplate operations delimiter=', ' as |operation|}}{{operation.operationId}}{{/joinWithTemplate}}.
 */
-@SpringBootTest
-@AutoConfigureWebTestClient
-{{#if transactional}}@{{transactionalAnnotationClass}}{{/if}}
-public class {{businessFlowTestName}} {
-
-    @Autowired
-    private WebTestClient webTestClient;
+public class {{businessFlowTestName}} extends {{baseTestClassName}} {
 
     /**
     * Business Flow Test for: {{#joinWithTemplate operations delimiter=', ' as |operation|}}{{operation.operationId}}{{/joinWithTemplate}}.

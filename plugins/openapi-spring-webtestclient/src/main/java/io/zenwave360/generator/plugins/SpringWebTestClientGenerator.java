@@ -3,6 +3,7 @@ package io.zenwave360.generator.plugins;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.zenwave360.generator.options.WebFlavorType;
 import io.zenwave360.generator.utils.JSONPath;
 import io.zenwave360.generator.utils.NamingUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +30,12 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
     @DocumentedOption(description = "Generate test classes grouped by", required = true)
     public GroupByType groupBy = GroupByType.service;
 
+    public WebFlavorType webFlavor = WebFlavorType.mvc;
+
+    public String baseTestClassName = "BaseWebTestClientTest";
+
+    public String baseTestClassPackage = "{{testsPackage}}";
+
     @DocumentedOption(description = "Class name suffix for generated test classes")
     public String testSuffix = "IT";
 
@@ -51,6 +58,8 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
     private String prefix = "io/zenwave360/generator/plugins/SpringWebTestClientGenerator/";
     private final TemplateInput partialTemplate = new TemplateInput(prefix + "partials/Operation.java", "{{asPackageFolder testsPackage}}/Operation.java");
     private final TemplateInput testSetTemplate = new TemplateInput(prefix + "ControllersTestSet.java", "{{asPackageFolder testsPackage}}/ControllersTestSet.java");
+
+    private final TemplateInput baseTestClassTemplate = new TemplateInput(prefix + "BaseWebTestClientTest.java", "{{asPackageFolder baseTestClassPackage}}/{{baseTestClassName}}.java").withSkipOverwrite(true);
 
     private final TemplateInput businessFlowTestTemplate = new TemplateInput(prefix + "BusinessFlowTest.java", "{{asPackageFolder testsPackage}}/{{businessFlowTestName}}.java");
     private final TemplateInput serviceTestTemplate = new TemplateInput(prefix + "ServiceIT.java", "{{asPackageFolder testsPackage}}/{{serviceName}}{{testSuffix}}.java");
@@ -78,6 +87,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
         if (groupBy == GroupByType.businessFlow) {
             List<Map<String, Object>> operations = operationsByTag.values().stream().flatMap(List::stream).collect(Collectors.toList());
             templateOutputList.add(generateTemplateOutput(contextModel, businessFlowTestTemplate, null, operations));
+            templateOutputList.add(generateTemplateOutput(contextModel, baseTestClassTemplate, null, null));
         }
 
         if (groupBy == GroupByType.service || groupBy == GroupByType.operation) {
@@ -101,6 +111,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
             }
 
             templateOutputList.add(generateTestSet(contextModel, testSetTemplate, includedImports, includedTestNames));
+            templateOutputList.add(generateTemplateOutput(contextModel, baseTestClassTemplate, null, null));
         }
 
         return templateOutputList;
@@ -150,7 +161,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
         model.put("openapi", getApiModel(contextModel));
         model.put("serviceName", serviceName);
         model.put("operations", operations);
-        if(operations.size() == 1) {
+        if(operations != null && operations.size() == 1) {
             model.put("operationId", operations.get(0).get("operationId"));
         }
         model.put("apiPackageFolder", getApiPackageFolder());

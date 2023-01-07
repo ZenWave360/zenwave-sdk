@@ -1,0 +1,74 @@
+package {{apiPackage}};
+
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.MessageBuilder;
+
+{{#if modelPackage}}
+import {{modelPackage}}.*;
+{{/if}}
+
+/**
+ * {{asyncapi.description}}
+ */
+public class {{apiClassName}}Captor implements I{{apiClassName}} {
+
+    protected Logger log = LoggerFactory.getLogger(getClass());
+
+{{~#each operations as |operation|}}
+    public String {{operation.operationId}}BindingName = "{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
+{{~/each}}
+{{~#if useEnterpriseEnvelope}}
+    public EnvelopeWrapper envelopeWrapper;
+    public void setEnvelopeWrapper(EnvelopeWrapper envelopeWrapper) {
+        this.envelopeWrapper = envelopeWrapper;
+    }
+{{~/if}}
+
+    protected Map<String, List<Message>> capturedMessages = new HashMap<>();
+    public Map<String, List<Message>> getCapturedMessages() {
+        return capturedMessages;
+    }
+    public List<Message> getCapturedMessages(String bindingName) {
+        return capturedMessages.getOrDefault(bindingName, List.of());
+    }
+    private boolean appendCapturedMessage(String bindingName, Message message) {
+        if(capturedMessages.containsKey(bindingName)) {
+            capturedMessages.get(bindingName).add(message);
+        } else {
+            capturedMessages.put(bindingName, List.of(message));
+        }
+        return true;
+    }
+
+{{~#each operations as |operation|}}
+    {{#each operation.x--messages as |message|}}
+    /**
+     * {{{operation.summary}}}
+     */
+    public boolean {{operation.operationId}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers) {
+        log.debug("Capturing message to topic: {}", {{operation.operationId}}BindingName);
+        Message message = MessageBuilder.createMessage({{#if (hasEnterpriseEnvelope operation)}}wrap(payload){{else}}payload{{/if}}, new MessageHeaders(headers));
+        return appendCapturedMessage(onCustomerEventBindingName, message);
+    }
+
+    {{/each}}
+{{/each}}
+
+{{~#if useEnterpriseEnvelope}}
+    protected Object wrap(Object payload) {
+        if(envelopeWrapper != null) {
+            return envelopeWrapper.wrap(payload);
+        }
+        return payload;
+    }
+
+    public interface EnvelopeWrapper {
+        public Object wrap(Object payload);
+    }
+{{/if}}
+}

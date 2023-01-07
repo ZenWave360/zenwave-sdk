@@ -43,6 +43,7 @@ components:
   {{~#unless (skipOperations entity)}}
     {{~#if includeCommands}}
     {{entity.className}}RequestMessage:
+      messageId: {{entity.className}}RequestMessage
       name: {{entity.className}}RequestMessage
       title: Async Command/Request for a {{entity.className}}
       summary: Async Command/Request for a {{entity.className}}
@@ -53,6 +54,7 @@ components:
     {{~#if includeEvents}}
     {{entity.className}}EventMessage:
       name: {{entity.className}}EventMessage
+      messageId: {{entity.className}}EventMessage
       title: Message for a {{entity.className}} Event
       summary: Message for a {{entity.className}} Event
       schemaFormat: {{{schemaFormatString}}}
