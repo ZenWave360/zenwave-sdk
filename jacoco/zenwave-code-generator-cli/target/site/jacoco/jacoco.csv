@@ -10,8 +10,9 @@ io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwav
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.templating,OutputFormatType,27,0,0,0,2,0,1,0,1,0
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.templating,TemplateInput,42,48,2,0,12,17,5,10,4,10
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.templating,TemplateOutput,18,39,0,0,6,14,2,5,2,5
-io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.templating,CustomHandlebarsHelpers,112,191,20,14,22,36,21,18,8,14
+io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.templating,CustomHandlebarsHelpers,112,196,20,14,22,36,21,18,8,14
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.options,ProgrammingStyle,15,0,0,0,2,0,1,0,1,0
+io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.options,DatabaseType,15,0,0,0,3,0,1,0,1,0
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.options,WebFlavorType,15,0,0,0,2,0,1,0,1,0
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.options,PersistenceType,15,0,0,0,2,0,1,0,1,0
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.parsers,Model,0,22,0,0,0,7,0,4,0,4
