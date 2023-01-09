@@ -46,7 +46,7 @@ Its purpose is to produce successful software projects by dramatically shortenin
 
 ![Domain Driven Design Feedback Loop](docs/ZenWave-360-DDD-Feedback-Loop-with-ZW-Products.excalidraw.svg)
 
-In this way all team members: **Domain Experts**, **Product Owners**, **Software Archytechts**, **Developers** and **Testers** can provide early feedback based on an **Ubiquitous Language (JDL)** and the software and tests generated from that model.
+In this way all team members: **Domain Experts**, **Product Owners**, **Software Architects**, **Developers** and **Testers** can provide early feedback based on an **Ubiquitous Language (JDL)** and the software and tests generated from that model.
 
 ## Why Domain Driven Design?
 
@@ -266,7 +266,7 @@ jbang zw -p io.zenwave360.generator.plugins.JDLBackendApplicationDefaultPlugin \
   <summary>generated files (expand to see)</summary>
 
 ```shell
-# Domain models annotated for SpringData MondoDB
+# Domain models annotated for SpringData MongoDB
 src/main/java/io/zenwave360/example/core/domain/Customer.java
 src/main/java/io/zenwave360/example/core/domain/CustomerOrder.java
 src/main/java/io/zenwave360/example/core/domain/OrderedItem.java

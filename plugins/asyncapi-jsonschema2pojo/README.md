@@ -13,7 +13,7 @@ Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schem
 | `specFile`        | API Specification File                                                                                         | String           |               |                  |
 | `targetFolder`    | Target folder to generate code to.                                                                             | File             |               |                  |
 | `messageNames`    | Message names to include in code generation (combined with operationIds). Generates code for ALL if left empty | List             | []            |                  |
-| `jsonschema2pojo` | JsonSchema2Pojo settings                                                                                       | Map              | {}            |                  |
+| `jsonschema2pojo` | JsonSchema2Pojo settings to pass any option to https://www.jsonschema2pojo.org/ underlying library.            | Map              | {}            |                  |
 | `sourceFolder`    | Source folder inside folder to generate code to.                                                               | String           | src/main/java |                  |
 | `apiPackage`      | Java API package name                                                                                          | String           |               |                  |
 | `modelPackage`    | Java Models package name                                                                                       | String           |               |                  |

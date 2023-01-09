@@ -50,26 +50,28 @@ jbang zw -p io.zenwave360.generator.plugins.SpringCloudStream3Plugin --help
 
 ## Options
 
-| **Option**                  | **Description**                                                                                                                                                                         | **Type**                | **Default**     | **Values**           |
-|-----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------|-----------------|----------------------|
-| `specFile`                  | API Specification File                                                                                                                                                                  | URI                     |                 |                      |
-| `targetFolder`              | Target folder to generate code to. If left empty, it will print to stdout.                                                                                                              | File                    |                 |                      |
-| `style`                     | Programming style                                                                                                                                                                       | ProgrammingStyle        | imperative      | imperative, reactive |
-| `transactionalOutbox`       | Transactional outbox type for message producers.                                                                                                                                        | TransactionalOutboxType | none            | none, mongodb, jdbc  |
-| `exposeMessage`             | Whether to expose underlying spring Message to consumers or not. Default: false                                                                                                         | boolean                 | false           |                      |
-| `methodAndMessageSeparator` | To avoid method erasure conflicts, when exposeMessage or reactive style this character will be used as separator to append message payload type to method names in consumer interfaces. | String                  | $               |                      |
-| `consumerPrefix`            | SC Streams Binder class prefix                                                                                                                                                          | String                  |                 |                      |
-| `consumerSuffix`            | SC Streams Binder class suffix                                                                                                                                                          | String                  | Consumer        |                      |
-| `servicePrefix`             | Business/Service interface prefix                                                                                                                                                       | String                  | I               |                      |
-| `serviceSuffix`             | Business/Service interface suffix                                                                                                                                                       | String                  | ConsumerService |                      |
-| `bindingSuffix`             | Spring-Boot binding suffix. It will be appended to the operation name kebab-cased. E.g. <operation-id>-in-0                                                                             | String                  | -0              |                      |
-| `apiPackage`                | Java API package name                                                                                                                                                                   | String                  |                 |                      |
-| `modelPackage`              | Java Models package name                                                                                                                                                                | String                  |                 |                      |
-| `bindingTypes`              | Binding names to include in code generation. Generates code for ALL bindings if left empty                                                                                              | List                    |                 |                      |
-| `role`                      | Project role: provider/client                                                                                                                                                           | AsyncapiRoleType        | provider        | provider, client     |
-| `operationIds`              | Operation ids to include in code generation. Generates code for ALL if left empty                                                                                                       | List                    | []              |                      |
-| `skipFormatting`            | Skip java sources output formatting                                                                                                                                                     | boolean                 | false           |                      |
-| `haltOnFailFormatting`      | Halt on formatting errors                                                                                                                                                               | boolean                 | true            |                      |
+| **Option**                      | **Description**                                                                                                                                                                         | **Type**                | **Default**          | **Values**           |
+|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------|----------------------|----------------------|
+| `specFile`                      | API Specification File                                                                                                                                                                  | URI                     |                      |                      |
+| `targetFolder`                  | Target folder to generate code to. If left empty, it will print to stdout.                                                                                                              | File                    |                      |                      |
+| `style`                         | Programming style                                                                                                                                                                       | ProgrammingStyle        | imperative           | imperative, reactive |
+| `transactionalOutbox`           | Transactional outbox type for message producers.                                                                                                                                        | TransactionalOutboxType | none                 | none, mongodb, jdbc  |
+| `exposeMessage`                 | Whether to expose underlying spring Message to consumers or not.                                                                                                                        | boolean                 | false                |                      |
+| `useEnterpriseEnvelope`         | Include support for enterprise envelop wrapping/unwrapping.                                                                                                                             | boolean                 | false                |                      |
+| `envelopeJavaTypeExtensionName` | AsyncAPI Message extension name for the envelop java type for wrapping/unwrapping.                                                                                                      | String                  | x-envelope-java-type |                      |
+| `methodAndMessageSeparator`     | To avoid method erasure conflicts, when exposeMessage or reactive style this character will be used as separator to append message payload type to method names in consumer interfaces. | String                  | $                    |                      |
+| `consumerPrefix`                | SC Streams Binder class prefix                                                                                                                                                          | String                  |                      |                      |
+| `consumerSuffix`                | SC Streams Binder class suffix                                                                                                                                                          | String                  | Consumer             |                      |
+| `servicePrefix`                 | Business/Service interface prefix                                                                                                                                                       | String                  | I                    |                      |
+| `serviceSuffix`                 | Business/Service interface suffix                                                                                                                                                       | String                  | ConsumerService      |                      |
+| `bindingSuffix`                 | Spring-Boot binding suffix. It will be appended to the operation name kebab-cased. E.g. <operation-id>-in-0                                                                             | String                  | -0                   |                      |
+| `apiPackage`                    | Java API package name                                                                                                                                                                   | String                  |                      |                      |
+| `modelPackage`                  | Java Models package name                                                                                                                                                                | String                  |                      |                      |
+| `bindingTypes`                  | Binding names to include in code generation. Generates code for ALL bindings if left empty                                                                                              | List                    |                      |                      |
+| `role`                          | Project role: provider/client                                                                                                                                                           | AsyncapiRoleType        | provider             | provider, client     |
+| `operationIds`                  | Operation ids to include in code generation. Generates code for ALL if left empty                                                                                                       | List                    | []                   |                      |
+| `skipFormatting`                | Skip java sources output formatting                                                                                                                                                     | boolean                 | false                |                      |
+| `haltOnFailFormatting`          | Halt on formatting errors                                                                                                                                                               | boolean                 | true                 |                      |
 
 ## Maven Plugin Plugin (API-First)
 
@@ -85,6 +87,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
     <version>${zenwave.version}</version>
     <plugin>
         <addCompileSourceRoot>true</addCompileSourceRoot><!-- default is true -->
+        <addTestCompileSourceRoot>true</addTestCompileSourceRoot><!-- default is true -->
     </plugin>
     <executions>
         <!-- Add executions for each generation here: -->
@@ -142,7 +145,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
 </execution>
 ```
 
-### Provider Imperative style without Mongodb Transactional Outbox
+### Provider Imperative style with Mongodb Transactional Outbox
 
 ```xml
 <execution>
@@ -165,7 +168,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
 </execution>
 ```
 
-### Provider Imperative style without JDBC Transactional Outbox
+### Provider Imperative style with JDBC Transactional Outbox
 
 ```xml
 <execution>
@@ -229,7 +232,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
 
 ```
 
-### Client Imperative style with Dead Letter Queue.
+### Client Imperative style.
 
 ```xml
 <execution>
@@ -251,7 +254,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
 </execution>
 ```
 
-### Client Reactive style with Dead Letter Queue.
+### Client Reactive style.
 
 ```xml
 <execution>
