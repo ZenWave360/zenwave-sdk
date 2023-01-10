@@ -109,9 +109,12 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     private String templatesPath = "io/zenwave360/generator/plugins/SpringCloudStream3Generator";
 
     protected List<TemplateInput> producerTemplates = Arrays.asList(
-            new TemplateInput(templatesPath + "/producer/outbox/IProducer.java", "src/main/java/{{apiPackageFolder}}/I{{apiClassName}}.java"),
+            new TemplateInput(templatesPath + "/producer/IProducer.java", "src/main/java/{{apiPackageFolder}}/I{{apiClassName}}.java"),
             new TemplateInput(templatesPath + "/producer/outbox/{{transactionalOutbox}}/Producer.java", "src/main/java/{{apiPackageFolder}}/{{apiClassName}}.java"),
-            new TemplateInput(templatesPath + "/producer/outbox/ProducerCaptor.java", "src/test/java/{{apiPackageFolder}}/{{apiClassName}}Captor.java"));
+            new TemplateInput(templatesPath + "/producer/mocks/ProducerCaptor.java", "src/test/java/{{apiPackageFolder}}/{{apiClassName}}Captor.java"));
+
+    protected List<TemplateInput> producerByServicesTemplates = Arrays.asList(
+            new TemplateInput(templatesPath + "/producer/mocks/ProducerInMemoryContext.java", "src/test/java/{{apiPackageFolder}}/ProducerInMemoryContext.java"));
     protected List<TemplateInput> consumerTemplates = Arrays.asList(
             new TemplateInput(templatesPath + "/consumer/{{style}}/Consumer.java", "src/main/java/{{apiPackageFolder}}/{{consumerName operation.x--operationIdCamelCase}}.java"),
             new TemplateInput(templatesPath + "/consumer/{{style}}/IService.java", "src/main/java/{{apiPackageFolder}}/{{serviceName operation.x--operationIdCamelCase}}.java"));
@@ -121,19 +124,11 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     }
 
     public List<TemplateInput> getTemplates(boolean isProducer) {
-        return isProducer ? getProducerTemplates() : getConsumerTemplates();
-    }
-
-    public List<TemplateInput> getProducerTemplates() {
-        return producerTemplates;
-    }
-
-    public List<TemplateInput> getConsumerTemplates() {
-        return consumerTemplates;
+        return isProducer ? producerTemplates : consumerTemplates;
     }
 
     public String getApiClassName(String serviceName, OperationRoleType operationRoleType) {
-        return serviceName + operationRoleType.getServiceSuffix();
+        return operationRoleType != null? serviceName + operationRoleType.getServiceSuffix() : serviceName;
     }
 
     Model getApiModel(Map<String, Object> contextModel) {
@@ -146,22 +141,45 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         Model apiModel = getApiModel(contextModel);
         Map<String, List<Map<String, Object>>> subscribeOperations = getSubscribeOperationsGroupedByTag(apiModel);
         Map<String, List<Map<String, Object>>> publishOperations = getPublishOperationsGroupedByTag(apiModel);
-        for (Map.Entry<String, List<Map<String, Object>>> entry : subscribeOperations.entrySet()) {
+        Map<String, Map<String, Object>> producerServicesMap = new HashMap<>();
+
+        for (Map.Entry<String, List<Map<String, Object>>> operationsByTag : subscribeOperations.entrySet()) {
             OperationRoleType operationRoleType = OperationRoleType.valueOf(role, AsyncapiOperationType.subscribe);
-            templateOutputList.addAll(generateTemplateOutput(contextModel, entry.getKey(), entry.getValue(), operationRoleType));
+            templateOutputList.addAll(generateTemplateOutput(contextModel, operationsByTag.getKey(), operationsByTag.getValue(), operationRoleType));
+
+            // prepare for producerMocksTemplates
+            if(operationRoleType.isProducer()) {
+                producerServicesMap.put(operationsByTag.getKey(), Map.of("operations", operationsByTag.getValue(), "apiClassName", getApiClassName(operationsByTag.getKey(), operationRoleType)));
+            }
         }
-        for (Map.Entry<String, List<Map<String, Object>>> entry : publishOperations.entrySet()) {
+        for (Map.Entry<String, List<Map<String, Object>>> operationsByTag : publishOperations.entrySet()) {
             OperationRoleType operationRoleType = OperationRoleType.valueOf(role, AsyncapiOperationType.publish);
-            templateOutputList.addAll(generateTemplateOutput(contextModel, entry.getKey(), entry.getValue(), operationRoleType));
+            templateOutputList.addAll(generateTemplateOutput(contextModel, operationsByTag.getKey(), operationsByTag.getValue(), operationRoleType));
+
+            // prepare for producerMocksTemplates
+            if(operationRoleType.isProducer()) {
+                producerServicesMap.put(operationsByTag.getKey(), Map.of("operations", operationsByTag.getValue(), "apiClassName", getApiClassName(operationsByTag.getKey(), operationRoleType)));
+            }
         }
+
+        templateOutputList.addAll(generateTemplateOutput(contextModel, producerByServicesTemplates, producerServicesMap));
+
         return templateOutputList;
     }
 
+    protected void populateApiClassName(List<Map<String, Object>> operations, String serviceName, OperationRoleType operationRoleType) {
+        for (Map<String, Object> operation : operations) {
+            operation.put("apiClassName", getApiClassName(serviceName, operationRoleType));
+        }
+    }
+
     public List<TemplateOutput> generateTemplateOutput(Map<String, Object> contextModel, String serviceName, List<Map<String, Object>> operations, OperationRoleType operationRoleType) {
-        boolean isProducer = OperationRoleType.COMMAND_PRODUCER == operationRoleType || OperationRoleType.EVENT_PRODUCER == operationRoleType;
+        boolean isProducer = operationRoleType.isProducer();
         if (isProducer) {
+            // producer operations are grouped by tag
             return generateTemplateOutput(contextModel, getTemplates(isProducer), serviceName, operations, operationRoleType);
         } else {
+            // consumer templates are grouped by operationId
             return operations.stream().flatMap(operation -> generateTemplateOutput(contextModel, getTemplates(isProducer), serviceName, operation, operationRoleType).stream()).collect(Collectors.toList());
         }
     }
@@ -189,6 +207,16 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         model.put("apiPackageFolder", getApiPackageFolder());
         model.put("apiClassName", getApiClassName(serviceName, operationRoleType));
         model.put("headersPartial", templatesPath + "/common/Headers");
+        return getTemplateEngine().processTemplates(model, templates);
+    }
+
+    public List<TemplateOutput> generateTemplateOutput(Map<String, Object> contextModel, List<TemplateInput> templates, Map<String, Map<String, Object>> servicesMap) {
+        Map<String, Object> model = new HashMap<>();
+        model.putAll(this.asConfigurationMap());
+        model.put("context", contextModel);
+        model.put("asyncapi", getApiModel(contextModel));
+        model.put("services", servicesMap);
+        model.put("apiPackageFolder", getApiPackageFolder());
         return getTemplateEngine().processTemplates(model, templates);
     }
 }

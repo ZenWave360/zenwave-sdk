@@ -40,6 +40,10 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
             }
             return null;
         }
+
+        public boolean isProducer() {
+            return this == EVENT_PRODUCER || this == COMMAND_PRODUCER;
+        }
     }
 
     @DocumentedOption(description = "Java API package name")
