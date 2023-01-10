@@ -65,42 +65,46 @@ components:
       name: CustomerRequestMessage
       title: Async Command/Request for a Customer
       summary: Async Command/Request for a Customer
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/Customer"
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/Customer"
     CustomerEventMessage:
       name: CustomerEventMessage
       messageId: CustomerEventMessage
       title: Message for a Customer Event
       summary: Message for a Customer Event
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/Customer"
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/Customer"
 
     CustomerOrderRequestMessage:
       messageId: CustomerOrderRequestMessage
       name: CustomerOrderRequestMessage
       title: Async Command/Request for a CustomerOrder
       summary: Async Command/Request for a CustomerOrder
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/CustomerOrder"
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/CustomerOrder"
     CustomerOrderEventMessage:
       name: CustomerOrderEventMessage
       messageId: CustomerOrderEventMessage
       title: Message for a CustomerOrder Event
       summary: Message for a CustomerOrder Event
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/CustomerOrder"
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/CustomerOrder"
 
 
   messageTraits:

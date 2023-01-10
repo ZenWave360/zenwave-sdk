@@ -36,15 +36,15 @@ components:
   messages:
 {{~#each zdlModel.messages as |message|}}
     {{message.name}}Message:
-      messageId: {{message.name}}Message
       name: {{message.name}}Message
       title: "{{message.javadoc}}"
       summary: "{{message.javadoc}}"
-      schemaFormat: {{{schemaFormatString}}}
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "{{payloadRef message}}"
+        schemaFormat: {{{schemaFormatString}}}
+        schema:
+          $ref: "{{payloadRef message}}"
 {{~/each}}
 
   messageTraits:
@@ -60,7 +60,7 @@ components:
 {{~/if}}
           tracingId:
             type: string
-            description: This header value will be populated automatically at runtime (when using ZenWave code generator)
+            description: This header value can be populated automatically at runtime (when using ZenWave code generator)
             x-runtime-expression: $tracingIdSupplier
 
 {{{schemasAsString}}}

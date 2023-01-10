@@ -7,8 +7,12 @@ import com.jayway.jsonpath.JsonPath;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
 import io.zenwave360.sdk.parsers.Model;
+import io.zenwave360.sdk.utils.AsyncAPIUtils;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
+import org.apache.commons.lang3.ObjectUtils;
+
+import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 public class AsyncApiProcessor extends AbstractBaseProcessor implements Processor {
 
@@ -83,6 +87,7 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
         for (Map<String, Map> traitParent : traitsParents) {
             List<Map<String, Map>> traitsList = (List) traitParent.get("traits");
             // merge traits into parent
+            // TODO this works differently in v2 and v3
             for (Map<String, Map> traits : traitsList) {
                 for (Map.Entry<String, Map> trait : traits.entrySet()) {
                     String traitName = trait.getKey();
@@ -142,7 +147,7 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
 
         List<Map<String, Object>> messages = JSONPath.get(apiModel, "$.channels..x--messages[*]");
         for (Map<String, Object> message : messages) {
-            calculateMessageParamType(message);
+            calculateMessageParamType(apiModel, message);
         }
 
         Map<String, Map> componentsMessages = JSONPath.get(apiModel, "$.components.messages", Collections.emptyMap());
@@ -189,8 +194,14 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
         }
     }
 
-    public void calculateMessageParamType(Map<String, Object> message) {
-        String schemaFormat = normalizeSchemaFormat((String) message.get("schemaFormat"));
+    private String findSchemaFormat(Map<String, Object> apiModel, Map<String, Object> message) {
+        var schemaFormatPath = AsyncAPIUtils.isV3(apiModel) ? "$.payload.schemaFormat" : "$.schemaFormat";
+        var schemaFormat = firstNonNull(JSONPath.get(message, schemaFormatPath), JSONPath.get(apiModel, "$.schemaFormat"));
+        return normalizeSchemaFormat((String) schemaFormat);
+    }
+
+    public void calculateMessageParamType(Map<String, Object> apiModel, Map<String, Object> message) {
+        String schemaFormat = findSchemaFormat(apiModel, message);
         String javaType = null;
         if ("avro".equals(schemaFormat)) {
             String name = JsonPath.read(message, "payload.name");
@@ -201,7 +212,8 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
             javaType = JsonPath.read(message, "payload.javaType");
         }
         if ("asyncapi".equals(schemaFormat) || "openapi".equals(schemaFormat)) {
-            javaType = normalizeTagName(JSONPath.get(message, "payload.x--schema-name"));
+            var schemaNamePath = AsyncAPIUtils.isV3(apiModel) ? "payload.schema.x--schema-name" : "payload.x--schema-name";
+            javaType = normalizeTagName(JSONPath.get(message, schemaNamePath));
             if (javaType == null) {
                 javaType = normalizeTagName((String) message.getOrDefault("x-javaType", message.getOrDefault("messageId", message.get("name"))));
             }
