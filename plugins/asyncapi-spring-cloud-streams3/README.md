@@ -92,7 +92,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
 ```xml
 <plugin>
     <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
-    <artifactId>zenwave-code-generator-mojo</artifactId>
+    <artifactId>zenwave-code-generator-maven-plugin</artifactId>
     <version>${zenwave.version}</version>
     <plugin>
         <addCompileSourceRoot>true</addCompileSourceRoot><!-- default is true -->

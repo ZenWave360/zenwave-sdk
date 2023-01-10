@@ -14,7 +14,7 @@ In the following example we are configuring the `asyncapi-spring-cloud-streams3`
 ```xml
 <plugin>
     <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
-    <artifactId>zenwave-code-generator-mojo</artifactId>
+    <artifactId>zenwave-code-generator-maven-plugin</artifactId>
     <version>${zenwave.version}</version>
     <executions>
         <execution>

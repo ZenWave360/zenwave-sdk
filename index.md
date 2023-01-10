@@ -356,7 +356,7 @@ jbang zw -p io.zenwave360.generator.plugins.JDLToAsyncAPIPlugin \
 ```xml
 <plugin>
   <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
-  <artifactId>zenwave-code-generator-mojo</artifactId>
+  <artifactId>zenwave-code-generator-maven-plugin</artifactId>
   <version>${zenwave.version}</version>
   <plugin>
     <skip>false</skip>

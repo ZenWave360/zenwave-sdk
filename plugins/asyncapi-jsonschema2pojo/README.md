@@ -41,7 +41,7 @@ Use jsonschema2pojo prefix to pass any option to https://www.jsonschema2pojo.org
 ```xml
 <plugin>
     <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
-    <artifactId>zenwave-code-generator-mojo</artifactId>
+    <artifactId>zenwave-code-generator-maven-plugin</artifactId>
     <version>${zenwave.version}</version>
     <executions>
         <execution>
