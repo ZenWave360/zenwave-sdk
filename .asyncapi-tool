@@ -1,0 +1,18 @@
+---
+title: ZenWave Code Generator
+description: DDD and API-First for Event-Driven Microservices
+links:
+  websiteUrl: https://zenwave360.github.io/
+  docsUrl: https://zenwave360.github.io/zenwave-code-generator/plugins/asyncapi-spring-cloud-streams3/
+  repoUrl: https://github.com/zenwave360/zenwave-code-generator
+filters:
+  language: Java
+  technology:
+  - Maven
+  - Spring Cloud Streams
+  categories:
+  - code-generator
+  - dsl
+  - mocking-and-testing
+  - cli
+  hasCommercial: false
