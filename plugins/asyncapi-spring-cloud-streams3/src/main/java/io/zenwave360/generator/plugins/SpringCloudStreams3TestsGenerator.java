@@ -20,14 +20,14 @@ import static io.zenwave360.generator.templating.OutputFormatType.JAVA;
 public class SpringCloudStreams3TestsGenerator extends SpringCloudStreams3Generator {
 
     @DocumentedOption(description = "Package name for generated tests")
-    public String testsPackage = "{{apiPackage}}";
+    public String testsPackage = "{{consumerApiPackage}}";
 
     @DocumentedOption(description = "Class name suffix for generated test classes")
     public String testSuffix = "IT";
 
     public String baseTestClassName = "BaseConsumerTest";
 
-    public String baseTestClassPackage = "{{apiPackage}}";
+    public String baseTestClassPackage = "{{consumerApiPackage}}";
 
     @DocumentedOption(description = "Annotate tests as @Transactional")
     public boolean transactional = true;
@@ -82,7 +82,6 @@ public class SpringCloudStreams3TestsGenerator extends SpringCloudStreams3Genera
         model.put("context", contextModel);
         model.put("asyncapi", getApiModel(contextModel));
         model.put("operation", operation);
-        model.put("apiPackageFolder", getApiPackageFolder());
         return getTemplateEngine().processTemplate(model, template);
     }
 }

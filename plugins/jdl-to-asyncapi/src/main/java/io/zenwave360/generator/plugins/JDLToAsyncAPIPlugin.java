@@ -15,7 +15,7 @@ public class JDLToAsyncAPIPlugin extends Plugin {
 
     public JDLToAsyncAPIPlugin() {
         super();
-        withChain(JDLParser.class, JDLProcessor.class, JDLToAsyncAPIGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
+        withChain(JDLParser.class, JDLProcessor.class, JDLToAsyncAPIGenerator.class, TemplateFileWriter.class);
     }
 
     @Override

@@ -217,9 +217,10 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         }
         String annotationsFilter = annotations.stream().map(a -> "@." + a).collect(Collectors.joining(" || "));
         boolean hasAnnotation = !annotations.isEmpty() && !JSONPath.get(entity, "$.options[?(" + annotationsFilter + ")]", Collections.emptyList()).isEmpty();
-        if (hasAnnotation || skipForAnnotations.isEmpty()) {
-            return false;
+        if(!annotations.isEmpty()) {
+            return !hasAnnotation;
         }
+
         String skipAnnotationsFilter = skipForAnnotations.stream().map(a -> "@." + a).collect(Collectors.joining(" || "));
         boolean hasSkipAnnotation = !JSONPath.get(entity, "$.options[?(" + skipAnnotationsFilter + ")]", Collections.emptyList()).isEmpty();
         return skipForAnnotations.isEmpty() || hasSkipAnnotation;

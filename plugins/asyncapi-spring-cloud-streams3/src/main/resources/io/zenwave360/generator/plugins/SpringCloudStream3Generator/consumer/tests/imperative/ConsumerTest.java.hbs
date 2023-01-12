@@ -1,19 +1,18 @@
 package {{testsPackage}};
 
-{{#if apiPackage~}}
-import {{apiPackage}}.*;
-{{~/if}}
 {{#if modelPackage~}}
 import {{modelPackage}}.*;
 {{~/if}}
+{{#if apiPackage~}}
+import {{apiPackage}}.*;
+{{~/if}}
 {{~#each operation.x--messages as |message|}}
-import {{apiPackage}}.{{serviceInterfaceName operation.x--operationIdCamelCase}}.{{message.x--javaType}}Headers;
+import {{consumerApiPackage}}.{{serviceInterfaceName operation.x--operationIdCamelCase}}.{{message.x--javaType}}Headers;
 {{~/each}}
 import {{baseTestClassPackage}}.{{baseTestClassName}};
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 /**
 * Integration tests for {@link {{serviceInterfaceName operation.x--operationIdCamelCase~}} }.

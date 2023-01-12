@@ -29,6 +29,7 @@ public class JDLToAsyncAPIGeneratorTest {
         Map<String, Object> model = loadJDLModelFromResource("classpath:io/zenwave360/generator/resources/jdl/orders-model.jdl");
         JDLToAsyncAPIGenerator generator = new JDLToAsyncAPIGenerator();
         generator.includeCommands = true;
+        generator.annotations = List.of("aggregate");
 
         List<TemplateOutput> outputTemplates = generator.generate(model);
         Assertions.assertEquals(1, outputTemplates.size());

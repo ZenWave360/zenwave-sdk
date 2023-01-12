@@ -43,6 +43,10 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
 
     @DocumentedOption(description = "Java API package name")
     public String apiPackage;
+    @DocumentedOption(description = "Java API package name for outbound (producer) services. It can override apiPackage for producers.")
+    public String producerApiPackage = "{{apiPackage}}";
+    @DocumentedOption(description = "Java API package name for inbound (consumer) services. It can override apiPackage for consumer.")
+    public String consumerApiPackage = "{{apiPackage}}";
     @DocumentedOption(description = "Java Models package name")
     public String modelPackage;
     @DocumentedOption(description = "Binding names to include in code generation. Generates code for ALL bindings if left empty")
@@ -52,14 +56,6 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
 
     @DocumentedOption(description = "Operation ids to include in code generation. Generates code for ALL if left empty")
     public List<String> operationIds = new ArrayList<>();
-
-    public String getApiPackageFolder() {
-        return this.apiPackage.replaceAll("\\.", "/");
-    }
-
-    public String getModelPackageFolder() {
-        return this.modelPackage.replaceAll("\\.", "/");
-    }
 
     public Map<String, List<Map<String, Object>>> getPublishOperationsGroupedByTag(Model apiModel) {
         return getOperationsGroupedByTag(apiModel, AsyncapiOperationType.publish);

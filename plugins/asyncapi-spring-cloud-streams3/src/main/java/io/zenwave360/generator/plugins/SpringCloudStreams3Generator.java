@@ -113,15 +113,15 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     protected String templatesPath = "io/zenwave360/generator/plugins/SpringCloudStream3Generator";
 
     protected List<TemplateInput> producerTemplates = Arrays.asList(
-            new TemplateInput(templatesPath + "/producer/IProducer.java", "src/main/java/{{apiPackageFolder}}/I{{apiClassName}}.java"),
-            new TemplateInput(templatesPath + "/producer/outbox/{{transactionalOutbox}}/Producer.java", "src/main/java/{{apiPackageFolder}}/{{apiClassName}}.java"),
-            new TemplateInput(templatesPath + "/producer/mocks/ProducerCaptor.java", "src/test/java/{{apiPackageFolder}}/{{apiClassName}}Captor.java"));
+            new TemplateInput(templatesPath + "/producer/IProducer.java", "src/main/java/{{asPackageFolder producerApiPackage}}/I{{apiClassName}}.java"),
+            new TemplateInput(templatesPath + "/producer/outbox/{{transactionalOutbox}}/Producer.java", "src/main/java/{{asPackageFolder producerApiPackage}}/{{apiClassName}}.java"),
+            new TemplateInput(templatesPath + "/producer/mocks/ProducerCaptor.java", "src/test/java/{{asPackageFolder producerApiPackage}}/{{apiClassName}}Captor.java"));
 
     protected List<TemplateInput> producerByServicesTemplates = Arrays.asList(
-            new TemplateInput(templatesPath + "/producer/mocks/ProducerInMemoryContext.java", "src/test/java/{{apiPackageFolder}}/ProducerInMemoryContext.java"));
+            new TemplateInput(templatesPath + "/producer/mocks/ProducerInMemoryContext.java", "src/test/java/{{asPackageFolder producerApiPackage}}/ProducerInMemoryContext.java"));
     protected List<TemplateInput> consumerTemplates = Arrays.asList(
-            new TemplateInput(templatesPath + "/consumer/{{style}}/Consumer.java", "src/main/java/{{apiPackageFolder}}/{{consumerName operation.x--operationIdCamelCase}}.java"),
-            new TemplateInput(templatesPath + "/consumer/{{style}}/IService.java", "src/main/java/{{apiPackageFolder}}/{{serviceInterfaceName operation.x--operationIdCamelCase}}.java"));
+            new TemplateInput(templatesPath + "/consumer/{{style}}/Consumer.java", "src/main/java/{{asPackageFolder consumerApiPackage}}/{{consumerName operation.x--operationIdCamelCase}}.java"),
+            new TemplateInput(templatesPath + "/consumer/{{style}}/IService.java", "src/main/java/{{asPackageFolder consumerApiPackage}}/{{serviceInterfaceName operation.x--operationIdCamelCase}}.java"));
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;
@@ -195,7 +195,6 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         model.put("asyncapi", getApiModel(contextModel));
         model.put("serviceName", serviceName);
         model.put("operation", operation);
-        model.put("apiPackageFolder", getApiPackageFolder());
         model.put("apiClassName", getApiClassName(serviceName, operationRoleType));
         model.put("headersPartial", templatesPath + "/common/Headers");
         return getTemplateEngine().processTemplates(model, templates);
@@ -208,7 +207,6 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         model.put("asyncapi", getApiModel(contextModel));
         model.put("serviceName", serviceName);
         model.put("operations", operations);
-        model.put("apiPackageFolder", getApiPackageFolder());
         model.put("apiClassName", getApiClassName(serviceName, operationRoleType));
         model.put("headersPartial", templatesPath + "/common/Headers");
         return getTemplateEngine().processTemplates(model, templates);
@@ -220,7 +218,6 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         model.put("context", contextModel);
         model.put("asyncapi", getApiModel(contextModel));
         model.put("services", servicesMap);
-        model.put("apiPackageFolder", getApiPackageFolder());
         return getTemplateEngine().processTemplates(model, templates);
     }
 }
