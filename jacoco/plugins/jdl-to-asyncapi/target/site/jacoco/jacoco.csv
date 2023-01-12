@@ -1,4 +1,4 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi,io.zenwave360.generator.plugins,JDLToAsyncAPIGenerator.SchemaFormat,0,15,0,0,0,2,0,1,0,1
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi,io.zenwave360.generator.plugins,JDLToAsyncAPIPlugin,65,0,4,0,6,0,4,0,2,0
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi,io.zenwave360.generator.plugins,JDLToAsyncAPIGenerator,38,784,19,35,7,120,19,24,2,14
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi,io.zenwave360.generator.plugins,JDLToAsyncAPIPlugin,61,0,4,0,6,0,4,0,2,0
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi,io.zenwave360.generator.plugins,JDLToAsyncAPIGenerator,23,801,14,40,6,121,14,29,1,15

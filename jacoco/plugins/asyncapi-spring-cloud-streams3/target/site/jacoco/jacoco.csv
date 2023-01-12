@@ -2,5 +2,5 @@ GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_
 io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.generator.plugins,SpringCloudStreams3TestsPlugin,5,39,1,1,1,6,1,2,0,2
 io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.generator.plugins,SpringCloudStreams3Generator.TransactionalOutboxType,0,21,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.generator.plugins,SpringCloudStreams3Plugin,5,36,1,1,1,5,1,2,0,2
-io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.generator.plugins,SpringCloudStreams3TestsGenerator,0,200,1,5,0,39,1,7,0,5
-io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.generator.plugins,SpringCloudStreams3Generator,44,709,6,34,7,103,8,32,3,17
+io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.generator.plugins,SpringCloudStreams3TestsGenerator,0,194,1,5,0,38,1,7,0,5
+io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.generator.plugins,SpringCloudStreams3Generator,44,691,6,34,7,100,8,32,3,17
