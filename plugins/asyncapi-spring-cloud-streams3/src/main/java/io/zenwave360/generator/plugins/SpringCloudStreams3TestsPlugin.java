@@ -1,5 +1,8 @@
 package io.zenwave360.generator.plugins;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.zenwave360.generator.Plugin;
 import io.zenwave360.generator.doc.DocumentedPlugin;
 import io.zenwave360.generator.formatters.JavaFormatter;
@@ -8,19 +11,20 @@ import io.zenwave360.generator.processors.AsyncApiProcessor;
 import io.zenwave360.generator.writers.TemplateFileWriter;
 import io.zenwave360.generator.writers.TemplateStdoutWriter;
 
-@DocumentedPlugin(value = "Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI", shortCode = "spring-cloud-streams3")
-public class SpringCloudStream3Plugin extends Plugin {
+@DocumentedPlugin(value = "Generates tests for Spring Cloud Streams Consumers.", shortCode = "spring-cloud-streams3-tests")
+public class SpringCloudStreams3TestsPlugin extends Plugin {
 
-    public SpringCloudStream3Plugin() {
+    private Logger log = LoggerFactory.getLogger(getClass());
+    public SpringCloudStreams3TestsPlugin() {
         super();
-        withChain(DefaultYamlParser.class, AsyncApiProcessor.class, SpringCloudStreams3Generator.class, JavaFormatter.class, TemplateFileWriter.class);
+        withChain(DefaultYamlParser.class, AsyncApiProcessor.class, SpringCloudStreams3TestsGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
     }
 
     @Override
     public <T extends Plugin> T processOptions() {
-        if (!getOptions().containsKey("targetFolder")) {
+        if (!hasOption("targetFolder")) {
             replaceInChain(TemplateFileWriter.class, TemplateStdoutWriter.class);
         }
-        return super.processOptions();
+        return (T) this;
     }
 }

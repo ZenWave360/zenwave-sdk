@@ -1,19 +1,14 @@
 package io.zenwave360.generator.generators;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import io.zenwave360.generator.options.asyncapi.AsyncapiOperationType;
-import io.zenwave360.generator.options.asyncapi.AsyncapiRoleType;
 import org.apache.commons.lang3.ObjectUtils;
 
 import com.jayway.jsonpath.JsonPath;
 
 import io.zenwave360.generator.doc.DocumentedOption;
+import io.zenwave360.generator.options.asyncapi.AsyncapiOperationType;
+import io.zenwave360.generator.options.asyncapi.AsyncapiRoleType;
 import io.zenwave360.generator.parsers.Model;
 
 public abstract class AbstractAsyncapiGenerator implements Generator {

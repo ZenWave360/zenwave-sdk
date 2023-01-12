@@ -154,7 +154,7 @@ jdl-backend-application-default io.zenwave360.generator.plugins.JDLBackendApplic
 jdl-to-openapi                 io.zenwave360.generator.plugins.JDLToOpenAPIPlugin: Generates a full OpenAPI definitions for CRUD operations from JDL models
 jdl-openapi-controllers        io.zenwave360.generator.plugins.JDLOpenAPIControllersPlugin: Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.
 openapi-to-jdl                 io.zenwave360.generator.plugins.OpenAPIToJDLPlugin: Generates JDL model from OpenAPI schemas
-spring-cloud-streams3          io.zenwave360.generator.plugins.SpringCloudStream3Plugin: Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI
+spring-cloud-streams3          io.zenwave360.generator.plugins.SpringCloudStreams3Plugin: Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI
 fork-plugin                    io.zenwave360.generator.plugins.ForkPlugin: Creates a new standalone maven module cloning an existing plugin
 spring-webtestclient           io.zenwave360.generator.plugins.SpringWebTestClientPlugin: Generates spring WebTestClient tests from OpenAPI defined endpoints.
 rest-assured                   io.zenwave360.generator.plugins.RestAssuredPlugin: Generates REST-assured tests from OpenAPI defined endpoints.

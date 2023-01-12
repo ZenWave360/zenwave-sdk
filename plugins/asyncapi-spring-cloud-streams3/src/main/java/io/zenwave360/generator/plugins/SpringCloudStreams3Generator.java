@@ -88,14 +88,18 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
             }
             return useEnterpriseEnvelope && !envelopTypes.isEmpty();
         });
-        handlebarsEngine.getHandlebars().registerHelper("serviceName", (context, options) -> {
+        handlebarsEngine.getHandlebars().registerHelper("serviceInterfaceName", (context, options) -> {
             return String.format("%s%s%s", servicePrefix, context, serviceSuffix);
+        });
+        handlebarsEngine.getHandlebars().registerHelper("serviceName", (context, options) -> {
+            return String.format("%s%s", context, serviceSuffix);
         });
         handlebarsEngine.getHandlebars().registerHelper("testDoubleName", (context, options) -> {
             return String.format("%s%s%s", context, serviceSuffix, "TestDouble");
         });
         handlebarsEngine.getHandlebars().registerHelper("methodSuffix", (context, options) -> {
-            if (exposeMessage || style == ProgrammingStyle.reactive) {
+            boolean doExposeMessage = "true".equals(String.valueOf(options.hash.get("exposeMessage")));
+            if (doExposeMessage || exposeMessage || style == ProgrammingStyle.reactive) {
                 int messagesCount = JSONPath.get(options.param(0), "$.x--messages.length()", 0);
                 if (messagesCount > 1) {
                     String messageJavaType = JSONPath.get(context, "$.x--javaTypeSimpleName");
@@ -106,7 +110,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         });
     }
 
-    private String templatesPath = "io/zenwave360/generator/plugins/SpringCloudStream3Generator";
+    protected String templatesPath = "io/zenwave360/generator/plugins/SpringCloudStream3Generator";
 
     protected List<TemplateInput> producerTemplates = Arrays.asList(
             new TemplateInput(templatesPath + "/producer/IProducer.java", "src/main/java/{{apiPackageFolder}}/I{{apiClassName}}.java"),
@@ -117,7 +121,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
             new TemplateInput(templatesPath + "/producer/mocks/ProducerInMemoryContext.java", "src/test/java/{{apiPackageFolder}}/ProducerInMemoryContext.java"));
     protected List<TemplateInput> consumerTemplates = Arrays.asList(
             new TemplateInput(templatesPath + "/consumer/{{style}}/Consumer.java", "src/main/java/{{apiPackageFolder}}/{{consumerName operation.x--operationIdCamelCase}}.java"),
-            new TemplateInput(templatesPath + "/consumer/{{style}}/IService.java", "src/main/java/{{apiPackageFolder}}/{{serviceName operation.x--operationIdCamelCase}}.java"));
+            new TemplateInput(templatesPath + "/consumer/{{style}}/IService.java", "src/main/java/{{apiPackageFolder}}/{{serviceInterfaceName operation.x--operationIdCamelCase}}.java"));
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;
@@ -127,7 +131,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         return isProducer ? producerTemplates : consumerTemplates;
     }
 
-    public String getApiClassName(String serviceName, OperationRoleType operationRoleType) {
+    public static String getApiClassName(String serviceName, OperationRoleType operationRoleType) {
         return operationRoleType != null? serviceName + operationRoleType.getServiceSuffix() : serviceName;
     }
 

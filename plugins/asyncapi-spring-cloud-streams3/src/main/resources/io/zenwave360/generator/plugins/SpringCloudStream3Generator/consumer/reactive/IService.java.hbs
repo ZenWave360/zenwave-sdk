@@ -12,7 +12,7 @@ import {{modelPackage}}.*;
 {{/if}}
 
 
-public interface {{serviceName operation.x--operationIdCamelCase}} {
+public interface {{serviceInterfaceName operation.x--operationIdCamelCase}} {
 
 {{#each operation.x--messages as |message|}}
     {{~> (lookup . 'headersPartial') isProducer=false}}

@@ -22,9 +22,9 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    protected {{serviceName operation.x--operationIdCamelCase}} service;
+    protected {{serviceInterfaceName operation.x--operationIdCamelCase}} service;
 
-    public {{consumerName operation.x--operationIdCamelCase}}({{serviceName operation.x--operationIdCamelCase}} service) {
+    public {{consumerName operation.x--operationIdCamelCase}}({{serviceInterfaceName operation.x--operationIdCamelCase}} service) {
         this.service = service;
     }
 

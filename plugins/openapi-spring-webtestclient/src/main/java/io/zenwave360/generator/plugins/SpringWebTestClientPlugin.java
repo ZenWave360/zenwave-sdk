@@ -18,7 +18,7 @@ public class SpringWebTestClientPlugin extends Plugin {
     private Logger log = LoggerFactory.getLogger(getClass());
     public SpringWebTestClientPlugin() {
         super();
-        withChain(DefaultYamlParser.class, OpenApiProcessor.class, SpringWebTestClientGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
+        withChain(DefaultYamlParser.class, OpenApiProcessor.class, SpringWebTestClientGenerator.class, /* JavaFormatter.class, */ TemplateFileWriter.class);
     }
 
     @Override

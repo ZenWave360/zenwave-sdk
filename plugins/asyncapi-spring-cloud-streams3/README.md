@@ -54,7 +54,7 @@ Because access to the underlying broker is encapsulated behind the generated int
 ## Getting Help
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.SpringCloudStream3Plugin --help
+jbang zw -p io.zenwave360.generator.plugins.SpringCloudStreams3Pluginn --help
 ```
 
 ## Options
