@@ -1,4 +1,4 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient,io.zenwave360.generator.plugins,SpringWebTestClientPlugin,14,61,1,5,3,9,1,4,0,2
+io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient,io.zenwave360.generator.plugins,SpringWebTestClientPlugin,14,57,1,5,3,9,1,4,0,2
 io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient,io.zenwave360.generator.plugins,SpringWebTestClientGenerator.GroupByType,0,27,0,0,0,2,0,1,0,1
-io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient,io.zenwave360.generator.plugins,SpringWebTestClientGenerator,5,526,0,24,2,81,1,27,1,15
+io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient,io.zenwave360.generator.plugins,SpringWebTestClientGenerator,5,536,0,24,2,81,1,27,1,15

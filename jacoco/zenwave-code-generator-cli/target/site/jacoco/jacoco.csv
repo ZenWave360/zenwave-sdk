@@ -44,5 +44,6 @@ io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwav
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.utils,Maps,9,115,2,12,1,27,3,10,1,5
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.utils,NamingUtils,18,62,2,4,4,13,4,6,2,5
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.utils,Lists,3,14,0,0,1,4,1,2,1,2
+io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.utils,DataFaker,5,0,0,0,2,0,2,0,2,0
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.utils,CommaSeparatedCollectionDeserializationHandler,8,95,3,9,1,18,3,6,0,3
 io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli,io.zenwave360.generator.utils,JSONPath,3,93,1,3,1,18,2,5,1,4
