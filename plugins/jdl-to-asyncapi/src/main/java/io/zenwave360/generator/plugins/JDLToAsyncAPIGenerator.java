@@ -37,6 +37,10 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "Entities to generate code for")
     public List<String> entities = new ArrayList<>();
 
+    @DocumentedOption(description = "Entities to skip code generation for")
+    public List<String> skipEntities = new ArrayList<>();
+
+
     @DocumentedOption(description = "Annotations to generate code for (ex. aggregate)")
     public List<String> annotations = new ArrayList<>();
     @DocumentedOption(description = "Skip generating operations for entities annotated with these")
@@ -77,7 +81,9 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
 
     protected boolean isGenerateSchemaEntity(Map<String, Object> entity) {
         String entityName = (String) entity.get("name");
-        return entities.isEmpty() || entities.contains(entityName);
+        boolean isIncluded = entities.isEmpty() || entities.contains(entityName);
+        boolean isExcluded = skipEntities.contains(entityName);
+        return isIncluded && !isExcluded;
     }
 
     @Override
