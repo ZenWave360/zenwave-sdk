@@ -1,48 +1,10 @@
-{{~#each entities as |entity|}}
-    {{~#if (isCrudMethod 'create' method=method entity=entity )}}
-    /**
-     * Creates a {{entity.instanceName}}.
-     *
-     * @param {{entity.instanceName}} the entity to save.
-     * @return the persisted entity.
-     */
-    {{~else if(isCrudMethod 'update' method=method entity=entity )}}
-    /**
-     * Updates a {{entity.instanceName}}.
-     *
-     * @param {{entity.instanceName}} the entity to update.
-     * @return the persisted entity.
-     */
-    {{~else if (isCrudMethod 'list' method=method entity=entity )}}
-    /**
-     * Get all the {{entity.classNamePlural}}.
-     *
-     * @param criteria the criteria with pagination information.
-     * @return the list of entities.
-     */
-    {{~else if (isCrudMethod 'search' method=method entity=entity )}}
-    /**
-     * Get all the {{entity.classNamePlural}} matching the search criteria.
-     *
-     * @param criteria the criteria with pagination information.
-     * @return the list of entities.
-     */
-    {{~else if (isCrudMethod 'get' method=method entity=entity )}}
-    /**
-     * Get the "id" {{entity.instanceName}}.
-     *
-     * @param id the id of the entity.
-     * @return the entity.
-     */
-    {{~else if (isCrudMethod 'delete' method=method entity=entity )}}
-    /**
-     * Delete the "id" {{entity.instanceName}}.
-     *
-     * @param id the id of the entity.
-     */
-    {{~else~}}
      /**
       * {{{method.javadoc}}}
+      *
+{{~#if (methodPolicies method)}}
+      * <ul>{{#joinWithTemplate (methodPolicies method) as |policy| }}<li><b>{{policy.name}}</b>: {{policy.value}}</li>{{/joinWithTemplate}}</ul>
+{{~/if}}
+{{~#if method.withEvents}}
+      * With Events: {{{method.withEvents}}}.
+{{/if}}
       */
-    {{~/if}}
-{{~/each}}

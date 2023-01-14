@@ -3,10 +3,7 @@ package io.zenwave360.sdk.zdl;
 import io.zenwave360.sdk.utils.JSONPath;
 import org.apache.commons.lang3.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ZDLFindUtils {
@@ -89,5 +86,18 @@ public class ZDLFindUtils {
         return methods.stream()
                 .filter(method -> operationId.equals(JSONPath.get(method, "$.name")) || operationId.equals(JSONPath.get(method, "$.options[*].operationId"))
                 ).findFirst().orElse(null);
+    }
+
+    public static  List<String> methodEventsFlatList(Map<String, Object> method) {
+        var events = (List) method.getOrDefault("withEvents", List.of());
+        List<String> allEvents = new ArrayList<>();
+        for (Object event : events) {
+            if(event instanceof String) {
+                allEvents.add((String) event);
+            } else if(event instanceof List) {
+                allEvents.addAll((Collection<? extends String>) event);
+            }
+        }
+        return allEvents;
     }
 }

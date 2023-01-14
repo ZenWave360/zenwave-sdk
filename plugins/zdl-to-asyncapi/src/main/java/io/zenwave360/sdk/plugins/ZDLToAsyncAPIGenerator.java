@@ -18,6 +18,7 @@ import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
+import io.zenwave360.sdk.zdl.ZDLFindUtils;
 
 import static io.zenwave360.sdk.utils.NamingUtils.asJavaTypeName;
 import static org.apache.commons.lang.StringUtils.trimToNull;
@@ -108,7 +109,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
         var methodsWithEvents = JSONPath.get(model, "$.services[*].methods[*][?(@.withEvents.length() > 0)]", Collections.<Map>emptyList());
         for (Map<String, Object> method : methodsWithEvents) {
-            var withEvents = allEvents((List) method.getOrDefault("withEvents", List.of())); // flatten list
+            var withEvents = ZDLFindUtils.methodEventsFlatList(method);
             for (int i = 0; i < withEvents.size(); i++) {
                 String withEvent = (String) withEvents.get(i);
                 var event = JSONPath.get(model, "$.events['" + withEvent + "']", Map.<String, Object>of());
@@ -259,18 +260,6 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         if(topic != null) {
             channel.put("x-address", topic);
         }
-    }
-
-    protected List<String> allEvents(List events) {
-        List<String> allEvents = new ArrayList<>();
-        for (Object event : events) {
-            if(event instanceof String) {
-                allEvents.add((String) event);
-            } else if(event instanceof List) {
-                allEvents.addAll((Collection<? extends String>) event);
-            }
-        }
-        return allEvents;
     }
 
     protected List<Map<String, Object>> filterSchemasToInclude(Map<String, Object> model, List<Map> methodsWithCommands) {

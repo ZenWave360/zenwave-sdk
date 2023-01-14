@@ -3,6 +3,7 @@ package io.zenwave360.sdk.plugins;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.zenwave360.sdk.zdl.ZDLFindUtils;
 import io.zenwave360.sdk.zdl.ZDLJavaSignatureUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -69,6 +70,16 @@ public class BackendApplicationDefaultHelpers {
     public String methodParametersSignature(Map<String, Object> method, Options options) {
         var zdl = (Map) options.get("zdl");
         return ZDLJavaSignatureUtils.methodParametersSignature(generator.getIdJavaType(), method, zdl, generator.inputDTOSuffix);
+    }
+
+    public List<String> methodEventsFlatList(Map<String, Object> method, Options options) {
+        return ZDLFindUtils.methodEventsFlatList(method);
+    }
+
+    public List<Map> methodPolicies(Map<String, Object> method, Options options) {
+        var zdl = (Map) options.get("zdl");
+        var policies = JSONPath.get(method, "optionsList[?(@.name == 'policy')].value", Collections.emptyList());
+        return policies.stream().map(policy -> JSONPath.get(zdl, "$.policies." + policy, Collections.emptyMap())).collect(Collectors.toList());
     }
 
     public String mapperInputSignature(String inputType, Options options) {
