@@ -55,6 +55,9 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
     public String infrastructurePackage = "{{basePackage}}.infrastructure";
     public String adaptersPackage = "{{basePackage}}.adapters";
 
+    public String outboundEventsModelPackage = "{{basePackage}}.core.domain.events";
+    public String outboundEventsPackage = "{{basePackage}}.core.outbound.events";
+
 
     @DocumentedOption(description = "Entities to generate code for")
     public List<String> entities = new ArrayList<>();
@@ -74,12 +77,6 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
     @DocumentedOption(description = "If not empty, it will generate (and use) an `input` DTO for each entity used as command parameter")
     public String inputDTOSuffix = "";
 
-    @DocumentedOption(description = "Suffix for search criteria DTOs (default: Criteria)")
-    public String criteriaDTOSuffix = "Criteria";
-
-    @DocumentedOption(description = "Suffix for elasticsearch document entities (default: Document)")
-    public String searchDTOSuffix = "Document";
-
     {
         getTemplateEngine().getHandlebars().registerHelpers(new BackendApplicationDefaultHelpers(this));
         getTemplateEngine().getHandlebars().registerHelpers(new BackendApplicationDefaultJpaHelpers(this));
@@ -96,9 +93,6 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
     protected Function<Map<String, Object>, Boolean> skipEntityInput = (model) -> inputDTOSuffix == null || inputDTOSuffix.isEmpty();
 
     protected Function<Map<String, Object>, Boolean> skipInput = (model) -> is(model, "inline");
-    protected Function<Map<String, Object>, Boolean> skipSearchCriteria = (model) -> is(model, "vo", "input") || !is(model, "searchCriteria");
-    protected Function<Map<String, Object>, Boolean> skipElasticSearch = (model) -> is(model, "vo", "input") || !is(model, "search");
-
     @Override
     protected ZDLProjectTemplates configureProjectTemplates() {
         var ts = new ZDLProjectTemplates("io/zenwave360/sdk/plugins/BackendApplicationDefaultGenerator");
@@ -107,16 +101,10 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
                 "{{asPackageFolder entitiesPackage}}/{{entity.name}}.java", JAVA, skipEntity, false);
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/outbound/{{persistence}}/{{style}}/EntityRepository.java",
                 "{{asPackageFolder outboundPackage}}/{{persistence}}/{{entity.className}}Repository.java", JAVA, skipEntityRepository, true);
-        ts.addTemplate(ts.entityTemplates, "src/main/java","core/inbound/dtos/EntityCriteria.java",
-                "{{asPackageFolder inboundDtosPackage}}/{{criteriaClassName entity }}.java", JAVA, skipSearchCriteria, false);
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/inbound/dtos/EntityInput.java",
                 "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}{{inputDTOSuffix entity}}.java", JAVA, skipEntityInput, false);
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/implementation/mappers/EntityMapper.java",
                 "{{asPackageFolder coreImplementationPackage}}/mappers/{{entity.className}}Mapper.java", JAVA, skipEntity, true);
-        ts.addTemplate(ts.entityTemplates, "src/main/java","core/domain/search/EntityDocument.java",
-                "{{asPackageFolder entitiesPackage}}/search/{{entity.className}}{{searchDTOSuffix}}.java", JAVA, skipElasticSearch, false);
-        ts.addTemplate(ts.entityTemplates, "src/main/java","core/outbound/search/EntitySearchRepository.java",
-                "{{asPackageFolder outboundPackage}}/search/{{entity.className}}SearchRepository.java", JAVA, skipElasticSearch, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/BaseRepositoryIntegrationTest.java",
                 "{{asPackageFolder infrastructurePackage}}/{{persistence}}/BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/EntityRepositoryIntegrationTest.java",

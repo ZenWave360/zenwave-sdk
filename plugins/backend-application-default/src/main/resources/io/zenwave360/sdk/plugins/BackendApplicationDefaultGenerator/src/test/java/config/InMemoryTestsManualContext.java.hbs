@@ -12,7 +12,7 @@ public class InMemoryTestsManualContext extends InMemoryTestsConfig {
     public {{service.name}}Impl {{asInstanceName service.name}}() {
         return new {{service.name}}Impl(
         {{~#joinWithTemplate service.entities delimiter=", " as |entity| ~}}
-{{#unless (skipEntityRepository entity)}}{{entity.instanceName}}Repository(){{/unless}}{{#if entity.options.search}}, {{entity.instanceName}}SearchRepository(){{/if}}
+{{#unless (skipEntityRepository entity)}}{{entity.instanceName}}Repository(){{/unless}}
         {{~/joinWithTemplate~}}
         );
     }

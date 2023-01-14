@@ -7,9 +7,6 @@ import {{basePackage}}.core.inbound.dtos.*;
 import {{basePackage}}.core.implementation.mappers.*;
 import {{basePackage}}.core.outbound.jpa.*;
 import {{basePackage}}.infrastructure.jpa.inmemory.*;
-{{#if zdl.options.options.search}}
-import {{basePackage}}.core.outbound.search.*;
-{{/if}}
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -45,9 +42,6 @@ public class {{service.name}}Test  {
     {{service.name}}Impl {{serviceInstance}} = context.{{serviceInstance}}();
 {{#each entities as |entity|}}
     {{entity.className}}RepositoryInMemory {{entity.instanceName}}Repository = context.{{entity.instanceName}}Repository();
-    {{~#if options.search}}
-    {{entity.className}}SearchRepository {{entity.instanceName}}SearchRepository = context.{{entity.instanceName}}SearchRepository();
-    {{~/if}}
 {{/each}}
     @BeforeEach
     void setUp() {

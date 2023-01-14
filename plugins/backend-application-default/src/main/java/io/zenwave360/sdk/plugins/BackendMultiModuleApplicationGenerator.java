@@ -15,16 +15,10 @@ public class BackendMultiModuleApplicationGenerator extends BackendDefaultApplic
                 "{{asPackageFolder entitiesPackage}}/{{entity.name}}.java", JAVA, skipEntity, false);
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/outbound/{{persistence}}/{{style}}/EntityRepository.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder outboundPackage}}/{{persistence}}/{{entity.className}}Repository.java", JAVA, skipEntityRepository, true);
-        ts.addTemplate(ts.entityTemplates, "src/main/java","core/inbound/dtos/EntityCriteria.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder inboundDtosPackage}}/{{criteriaClassName entity }}.java", JAVA, skipSearchCriteria, false);
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/inbound/dtos/EntityInput.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}{{inputDTOSuffix entity}}.java", JAVA, skipEntityInput, false);
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/implementation/mappers/EntityMapper.java", "{{mavenModulesPrefix}}-impl",
                 "{{asPackageFolder coreImplementationPackage}}/mappers/{{entity.className}}Mapper.java", JAVA, skipEntity, true);
-        ts.addTemplate(ts.entityTemplates, "src/main/java","core/domain/search/EntityDocument.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder entitiesPackage}}/search/{{entity.className}}{{searchDTOSuffix}}.java", JAVA, skipElasticSearch, false);
-        ts.addTemplate(ts.entityTemplates, "src/main/java","core/outbound/search/EntitySearchRepository.java", "{{mavenModulesPrefix}}-infra",
-                "{{asPackageFolder outboundPackage}}/search/{{entity.className}}SearchRepository.java", JAVA, skipElasticSearch, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/BaseRepositoryIntegrationTest.java", "{{mavenModulesPrefix}}-infra",
                 "{{asPackageFolder infrastructurePackage}}/{{persistence}}/BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/EntityRepositoryIntegrationTest.java", "{{mavenModulesPrefix}}-infra",

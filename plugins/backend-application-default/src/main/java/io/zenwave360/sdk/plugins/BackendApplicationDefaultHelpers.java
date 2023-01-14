@@ -241,18 +241,6 @@ public class BackendApplicationDefaultHelpers {
         return pattern.replace("\\", "").replace("\\", "\\\\");
     }
 
-    public String criteriaClassName(Object context, Options options) {
-        Map entity = (Map) context;
-        Object criteria = JSONPath.get(entity, "$.options.searchCriteria");
-        if (criteria instanceof String) {
-            return (String) criteria;
-        }
-        if (criteria == Boolean.TRUE) {
-            return String.format("%s%s", entity.get("className"), generator.criteriaDTOSuffix);
-        }
-        return "Pageable";
-    };
-
     public Object skipEntityRepository(Object context, Options options) {
         Map entity = (Map) context;
         return generator.skipEntityRepository.apply(Map.of("entity", entity));

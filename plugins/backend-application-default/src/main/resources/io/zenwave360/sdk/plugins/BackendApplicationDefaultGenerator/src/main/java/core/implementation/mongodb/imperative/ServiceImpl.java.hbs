@@ -5,9 +5,6 @@ import {{basePackage}}.core.inbound.*;
 import {{basePackage}}.core.inbound.dtos.*;
 import {{basePackage}}.core.implementation.mappers.*;
 import {{basePackage}}.core.outbound.mongodb.*;
-{{#if zdl.options.options.search}}
-import {{basePackage}}.core.outbound.search.*;
-{{/if}}
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional(readOnly = true)
+{{~#if useLombok}}
+@lombok.AllArgsConstructor
+{{~/if}}
 public class {{service.name}}Impl implements {{service.name}} {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -33,20 +33,18 @@ public class {{service.name}}Impl implements {{service.name}} {
     {{~#unless (skipEntityRepository this)}}
     private final {{entity.className}}Repository {{entity.instanceName}}Repository;
     {{~/unless}}
-    {{~#if options.search}}
-    private final {{entity.className}}SearchRepository {{entity.instanceName}}SearchRepository;
-    {{~/if}}
 {{/each}}
 
+{{#unless useLombok~}}
     /**
      * Constructor.
      */
-    public {{service.name}}Impl({{#joinWithTemplate service.entities delimiter=", "}}{{#unless (skipEntityRepository this)}}{{className}}Repository {{instanceName}}Repository{{/unless}}{{#if options.search}}, {{className}}SearchRepository {{instanceName}}SearchRepository{{/if}}{{/joinWithTemplate}}) {
+    public {{service.name}}Impl({{#joinWithTemplate service.entities delimiter=", "}}{{#unless (skipEntityRepository this)}}{{className}}Repository {{instanceName}}Repository{{/unless}}{{/joinWithTemplate}}) {
         {{~#joinWithTemplate service.entities ~}}
             {{#unless (skipEntityRepository this)}}this.{{instanceName}}Repository = {{instanceName}}Repository;{{/unless}}
-            {{#if options.search}}this.{{instanceName}}SearchRepository = {{instanceName}}SearchRepository;{{/if}}
         {{~/joinWithTemplate~}}
     }
+{{/unless~}}
 
 {{#each service.methods as |method|}}
     {{~> (partial '../../partials/mongodbMethodAnnotations')~}}

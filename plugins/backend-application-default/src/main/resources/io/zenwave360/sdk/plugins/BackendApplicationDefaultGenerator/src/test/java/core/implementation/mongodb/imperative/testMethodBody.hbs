@@ -13,13 +13,8 @@
         var {{entity.instanceName}} = {{serviceInstance}}.update{{entity.className}}(id, input);
         assertTrue({{entity.instanceName}}.isPresent());
         assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}.get()));
-    {{~else if (isCrudMethod 'list' method=method entity=entity )}}
+    {{~else if (or (isCrudMethod 'list' method=method entity=entity) (isCrudMethod 'search' method=method entity=entity ))}}
         var results = {{serviceInstance}}.list{{entity.classNamePlural}}(PageRequest.of(0, 10));
-        assertNotNull(results);
-    {{~else if (isCrudMethod 'search' method=method entity=entity )}}
-        var criteria = new {{criteriaClassName entity}}();
-        // TODO fill criteria
-        var results = {{serviceInstance}}.search{{entity.classNamePlural}}(criteria, PageRequest.of(0, 10));
         assertNotNull(results);
     {{~else if (isCrudMethod 'get' method=method entity=entity )}}
         var id = "1"; // TODO fill id
