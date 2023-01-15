@@ -22,11 +22,17 @@ public class CustomHandlebarsHelpers {
 
     public static String partial(String context, Options options) {
         var baseDir = FilenameUtils.getPath(options.fn.filename());
+        var baseDirTokens = List.of(baseDir.split("/"));
+        while(context.startsWith("../")) {
+            context = context.substring(3);
+            baseDirTokens = baseDirTokens.subList(0, baseDirTokens.size() - 1);
+        }
         var tokens = new ArrayList<String>();
+        tokens.addAll(baseDirTokens);
         tokens.add(context);
-        ((List) tokens).addAll(Arrays.stream(options.params).map(Object::toString).collect(Collectors.toList()));
+        tokens.addAll(Arrays.stream(options.params).map(Object::toString).collect(Collectors.toList()));
         tokens.replaceAll(t -> t.replaceAll("^\\./", "").replaceAll("^/", "").replaceAll("/$", ""));
-        return baseDir + StringUtils.join(tokens, "/");
+        return StringUtils.join(tokens, "/");
     }
 
     public static String concat(String context, Options options) {

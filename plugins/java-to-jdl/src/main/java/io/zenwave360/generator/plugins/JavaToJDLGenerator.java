@@ -7,12 +7,7 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
@@ -21,10 +16,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
+import io.zenwave360.generator.utils.NamingUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -130,7 +129,6 @@ public class JavaToJDLGenerator implements Generator {
 
     protected void generateJPA2Jdl(StringBuilder out, StringBuilder relationShips, Class<?> e) {
         String entityClassName = e.getSimpleName();
-        boolean firstField = true;
         out.append("entity " + entityClassName + " {\n");
 
         Field[] declaredFields = FieldUtils.getAllFields(e);
@@ -141,6 +139,14 @@ public class JavaToJDLGenerator implements Generator {
                 continue;
             }
             // Annotation[] fieldAnnotations = f.getDeclaredAnnotations();
+
+            Id idAnnotation = f.getDeclaredAnnotation(Id.class);
+            javax.persistence.Id jpaIdAnnotation = f.getDeclaredAnnotation(javax.persistence.Id.class);
+            Version versionAnnotation = f.getDeclaredAnnotation(Version.class);
+            javax.persistence.Version jpaVersionAnnotation = f.getDeclaredAnnotation(javax.persistence.Version.class);
+            if(idAnnotation != null || versionAnnotation != null || jpaIdAnnotation != null || jpaVersionAnnotation != null) {
+                continue;
+            }
 
             if (f.getDeclaredAnnotation(Transient.class) != null) {
                 continue;
@@ -222,12 +228,8 @@ public class JavaToJDLGenerator implements Generator {
                 relationShips.append("}\n\n");
             } else {
                 // simple field
-                if (firstField) {
-                    firstField = false;
-                } else {
-                    out.append(",\n");
-                }
                 out.append("  " + fieldName + " " + f.getType().getSimpleName());
+                out.append("\n");
             }
 
         }
@@ -239,7 +241,6 @@ public class JavaToJDLGenerator implements Generator {
     protected Set<Class> generateMongodb2Jdl(StringBuilder out, Class<?> entityClass) {
         Set<Class> embeddedClasses = new HashSet<>();
         String entityClassName = entityClass.getSimpleName();
-        boolean firstField = true;
         if(entityClass.getAnnotation(Document.class) == null) {
             out.append("@embedded\n");
         }
@@ -249,6 +250,12 @@ public class JavaToJDLGenerator implements Generator {
         for (Field f : declaredFields) {
             String fieldName = f.getName();
             if (f.isSynthetic() || Modifier.isStatic(f.getModifiers()) || Modifier.isTransient(f.getModifiers())) {
+                continue;
+            }
+
+            Id idAnnotation = f.getDeclaredAnnotation(Id.class);
+            Version versionAnnotation = f.getDeclaredAnnotation(Version.class);
+            if(idAnnotation != null || versionAnnotation != null) {
                 continue;
             }
 
@@ -265,12 +272,6 @@ public class JavaToJDLGenerator implements Generator {
                 embeddedClasses.add(targetEntityClass);
             }
 
-            if (firstField) {
-                firstField = false;
-            } else {
-                out.append(",\n");
-            }
-
             out.append("  ");
             if(dbRefAnnotation != null) {
                 out.append("@DBRef ");
@@ -281,6 +282,7 @@ public class JavaToJDLGenerator implements Generator {
             if(isCollection) {
                 out.append("[]");
             }
+            out.append("\n");
         }
 
         out.append("\n");
@@ -309,6 +311,19 @@ public class JavaToJDLGenerator implements Generator {
 
         out.append("\n");
         out.append("}\n\n");
+    }
+
+    protected String asJdlType(Class type) {
+        if(Date.class.isAssignableFrom(type)) {
+            return "Instant";
+        }
+        if(type.isPrimitive()) {
+            if(type == int.class) {
+                return "Integer";
+            }
+            return StringUtils.capitalize(type.getSimpleName());
+        }
+        return type.getSimpleName();
     }
 
     /**

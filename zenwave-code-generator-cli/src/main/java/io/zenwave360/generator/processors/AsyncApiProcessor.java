@@ -4,6 +4,7 @@ import java.util.*;
 
 import com.jayway.jsonpath.JsonPath;
 
+import io.zenwave360.generator.doc.DocumentedOption;
 import io.zenwave360.generator.parsers.Model;
 import io.zenwave360.generator.utils.JSONPath;
 import io.zenwave360.generator.utils.Maps;
@@ -62,6 +63,9 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
 
     }
 
+    @DocumentedOption(description = "AsyncAPI extension property name for runtime autoconfiguration of headers.")
+    public String runtimeHeadersProperty = "x-runtime-expression";
+
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
         Model apiModel = targetProperty != null ? (Model) contextModel.get(targetProperty) : (Model) contextModel;
@@ -106,6 +110,8 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
                 addOperationIdVariants(value.get("subscribe"));
                 collectMessages(value.get("publish"));
                 collectMessages(value.get("subscribe"));
+                setHasRuntimeHeaders(value.get("publish"));
+                setHasRuntimeHeaders(value.get("subscribe"));
             }
         }
 
@@ -138,6 +144,15 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
     private void addOperationType(Map<String, Object> operation, String operationType) {
         if (operation != null) {
             operation.put("x--operationType", operationType);
+        }
+    }
+
+    private void setHasRuntimeHeaders(Map operation) {
+        if(operation != null) {
+            boolean hasAutoheader = !JSONPath.get(operation, String.format("$.x--messages..headers..[?(@.%s)]", runtimeHeadersProperty), Collections.emptyList()).isEmpty();
+            if(hasAutoheader) {
+                operation.put("x--has-runtime-headers", true);
+            }
         }
     }
 

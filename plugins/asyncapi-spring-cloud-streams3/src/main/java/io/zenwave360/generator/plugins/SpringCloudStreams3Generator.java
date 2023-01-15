@@ -13,6 +13,8 @@ import io.zenwave360.generator.templating.TemplateEngine;
 import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
 import io.zenwave360.generator.utils.JSONPath;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,10 +61,11 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     @DocumentedOption(description = "Spring-Boot binding suffix. It will be appended to the operation name kebab-cased. E.g. <operation-id>-in-0")
     public String bindingSuffix = "-0";
 
-    public SpringCloudStreams3Generator withSourceProperty(String sourceProperty) {
-        this.sourceProperty = sourceProperty;
-        return this;
-    }
+    @DocumentedOption(description = "AsyncAPI extension property name for runtime auto-configuration of headers.")
+    public String autoHeadersProperty = "x-runtime-expression";
+
+    @DocumentedOption(description = "Spring bean id for the tracing id supplier for runtime header with expression: '$tracingIdSupplier'")
+    public String tracingIdSupplierQualifier = "tracingIdSupplier";
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
     {
@@ -108,6 +111,23 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
                 }
             }
             return null;
+        });
+        handlebarsEngine.getHandlebars().registerHelper("hasRuntimeHeaders", (context, options) -> {
+            // operations[] or message
+            var path = context instanceof List? "$[*].x--messages[*].headers.properties[*]" : "$.headers.properties[*]";
+            return !JSONPath.get(context, path + autoHeadersProperty, Collections.emptyList()).isEmpty();
+        });
+        handlebarsEngine.getHandlebars().registerHelper("runtimeHeadersMap", (message, options) -> {
+            List<String> runtimeHeaders = new ArrayList<>();
+            Map<String, Map> headers = JSONPath.get(message, "$.headers.properties");
+            for (String header : headers.keySet()) {
+                String location = JSONPath.get(headers.get(header), "$." + autoHeadersProperty);
+                if(location != null) {
+                    runtimeHeaders.add("\"" + header + "\"");
+                    runtimeHeaders.add("\"" + location + "\"");
+                }
+            }
+            return runtimeHeaders.stream().collect(Collectors.joining(", "));
         });
     }
 
@@ -197,7 +217,6 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         model.put("serviceName", serviceName);
         model.put("operation", operation);
         model.put("apiClassName", getApiClassName(serviceName, operationRoleType));
-        model.put("headersPartial", templatesPath + "/common/Headers");
         return getTemplateEngine().processTemplates(model, templates);
     }
 
@@ -209,7 +228,6 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         model.put("serviceName", serviceName);
         model.put("operations", operations);
         model.put("apiClassName", getApiClassName(serviceName, operationRoleType));
-        model.put("headersPartial", templatesPath + "/common/Headers");
         return getTemplateEngine().processTemplates(model, templates);
     }
 

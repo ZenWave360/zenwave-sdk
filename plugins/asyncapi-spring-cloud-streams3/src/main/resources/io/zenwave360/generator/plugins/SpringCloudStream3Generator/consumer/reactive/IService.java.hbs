@@ -15,7 +15,7 @@ import {{modelPackage}}.*;
 public interface {{serviceInterfaceName operation.x--operationIdCamelCase}} {
 
 {{#each operation.x--messages as |message|}}
-    {{~> (lookup . 'headersPartial') isProducer=false}}
+    {{~> (partial '../../common/Headers') isProducer=false}}
 
     {{~#if exposeMessage}}
     default void {{operation.operationId}}{{methodSuffix message operation}}(Flux<Message<{{message.x--javaType}}>> messageFlux) { };

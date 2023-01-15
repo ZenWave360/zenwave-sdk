@@ -14,7 +14,7 @@ import {{modelPackage}}.*;
 public interface {{serviceInterfaceName operation.x--operationIdCamelCase}} {
 
 {{#each operation.x--messages as |message|}}
-    {{~> (lookup . 'headersPartial') isProducer=false}}
+    {{~> (partial '../../common/Headers') isProducer=false}}
 
     /**
      * {{{operation.summary}}}

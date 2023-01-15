@@ -70,6 +70,7 @@ components:
           brandId:
             type: number
             description: ""
+            x-runtime-expression: $message.payload#/product/subBrandCode
       payload:
         $ref: "#/components/schemas/CreateProductPayload2"
   schemas:

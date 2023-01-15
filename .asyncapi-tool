@@ -9,7 +9,9 @@ filters:
   language: Java
   technology:
   - Maven
+  - CLI
   - Spring Cloud Streams
+  - JHipster JDL
   categories:
   - code-generator
   - dsl

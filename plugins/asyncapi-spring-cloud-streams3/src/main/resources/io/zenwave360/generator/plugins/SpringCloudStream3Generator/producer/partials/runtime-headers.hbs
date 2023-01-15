@@ -1,0 +1,24 @@
+{{~#if (hasRuntimeHeaders operations)}}
+    protected void processRuntimeHeaders(Object payload, Map<String, Object> headers, Map<String, String> runtimeHeaders) {
+        if(runtimeHeaders == null ||runtimeHeaders.isEmpty()) {
+            return;
+        }
+        for (Map.Entry<String, String> runtimeHeader :runtimeHeaders.entrySet()) {
+            String location = runtimeHeader.getValue().replace("$message.payload#/", "");
+            if(tracingIdSupplier != null && "$tracingIdSupplier".equals(location.trim())) {
+                headers.put(runtimeHeader.getKey(), tracingIdSupplier.get());
+                continue;
+            }
+            try {
+                var parts = java.util.Arrays.asList(location.split("/"));
+                var value = payload;
+                for (String part : parts) {
+                    value = new java.beans.PropertyDescriptor(part, value.getClass()).getReadMethod().invoke(value);
+                }
+                headers.put(runtimeHeader.getKey(), value);
+            } catch (java.beans.IntrospectionException | java.lang.reflect.InvocationTargetException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+{{~/if}}

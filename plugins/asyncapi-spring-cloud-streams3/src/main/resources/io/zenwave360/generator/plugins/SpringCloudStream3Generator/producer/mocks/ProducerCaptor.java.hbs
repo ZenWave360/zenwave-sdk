@@ -24,6 +24,9 @@ public class {{apiClassName}}Captor implements I{{apiClassName}} {
 {{~#each operations as |operation|}}
     public String {{operation.operationId}}BindingName = "{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
 {{~/each}}
+
+{{> (partial '../partials/tracing-id-supplier')}}
+
 {{~#if useEnterpriseEnvelope}}
     public EnvelopeWrapper envelopeWrapper;
     public void setEnvelopeWrapper(EnvelopeWrapper envelopeWrapper) {
@@ -54,6 +57,9 @@ public class {{apiClassName}}Captor implements I{{apiClassName}} {
      */
     public boolean {{operation.operationId}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers) {
         log.debug("Capturing message to topic: {}", {{operation.operationId}}BindingName);
+        {{~#if (hasRuntimeHeaders message)}}
+        processRuntimeHeaders(payload, headers, headers._runtimeheaders);
+        {{~/if}}
         Message message = MessageBuilder.createMessage({{#if (hasEnterpriseEnvelope operation)}}wrap(payload){{else}}payload{{/if}}, new MessageHeaders(headers));
         return appendCapturedMessage({{operation.operationId}}BindingName, message);
     }
@@ -72,5 +78,7 @@ public class {{apiClassName}}Captor implements I{{apiClassName}} {
     public interface EnvelopeWrapper {
         public Object wrap(Object payload);
     }
-{{/if}}
+{{/if~}}
+
+{{> (partial '../partials/runtime-headers') }}
 }

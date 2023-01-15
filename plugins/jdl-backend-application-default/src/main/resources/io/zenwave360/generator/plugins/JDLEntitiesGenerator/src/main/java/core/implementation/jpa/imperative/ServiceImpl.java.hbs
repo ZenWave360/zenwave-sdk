@@ -64,7 +64,9 @@ public class {{service.name}}Impl implements {{service.name}} {
         log.debug("Request to update {{entity.className}}: {}", {{entity.instanceName}}{{inputDTOSuffix}});
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id);
         {{entity.instanceName}} = {{entity.instanceName}}.map(existing{{entity.instanceName}} -> {{entity.instanceName}}Mapper.update(existing{{entity.instanceName}}, {{entity.instanceName}}Input));
-        return {{entity.instanceName}}.map({{entity.instanceName}}Repository::save);
+        // saving is unnecessary (jpa save anti-pattern): https://vladmihalcea.com/best-spring-data-jparepository/
+        // return {{entity.instanceName}}.map({{entity.instanceName}}Repository::save);
+        return {{entity.instanceName}};
     }
 
     @Override

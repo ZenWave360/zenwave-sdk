@@ -1,5 +1,10 @@
 
     static class {{message.x--javaTypeSimpleName}}Headers extends java.util.HashMap<String, Object> {
+    {{~#if isProducer}}
+        {{~#if (hasRuntimeHeaders message)}}
+        java.util.Map<String, String> _runtimeheaders = java.util.Map.of({{{runtimeHeadersMap message}}});
+        {{/if}}
+    {{~/if}}
     {{~#each message.headers.properties as |header|}}
         {{~#if header.description}}
         /** {{{header.description}}} */

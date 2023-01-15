@@ -34,23 +34,25 @@ public class {{apiClassName}} implements I{{apiClassName}} {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
+{{~#each operations as |operation|}}
+    public String {{operation.operationId}}BindingName = "{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
+    public String {{operation.operationId}}OutboxCollection = {{operation.operationId}}BindingName;
+{{~/each}}
+
     protected StreamBridge streamBridge;
     protected MongoTemplate mongoTemplate;
+
+    public String resumeTokensCollectionName = "ChangeStreamResumeTokens";
+    public int skipMessagesBeforePersistingResumeToken = 100;
+    private Map<String, Integer> messageCounters = new HashMap();
+
+{{> (partial '../../partials/tracing-id-supplier')}}
 
     public {{apiClassName}}(StreamBridge streamBridge, MongoTemplate mongoTemplate) {
         this.streamBridge = streamBridge;
         this.mongoTemplate = mongoTemplate;
     }
 
-{{~#each operations as |operation|}}
-    public String {{operation.operationId}}BindingName = "{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
-    public String {{operation.operationId}}OutboxCollection = {{operation.operationId}}BindingName;
-{{/each}}
-    public String resumeTokensCollectionName = "ChangeStreamResumeTokens";
-    public int skipMessagesBeforePersistingResumeToken = 100;
-
-
-    private Map<String, Integer> messageCounters = new HashMap();
 {{#each operations as |operation| }}
     public BsonDocument get{{asJavaTypeName operation.operationId}}ResumeToken() {
         var tokens = mongoTemplate.getCollection(resumeTokensCollectionName).find(new Document("collectionName", {{operation.operationId}}OutboxCollection)).first();
@@ -104,12 +106,17 @@ public class {{apiClassName}} implements I{{apiClassName}} {
      */
     public boolean {{operation.operationId}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers) {
         log.debug("Sending message to stream {} via outbox", {{operation.operationId}}BindingName);
+        {{~#if (hasRuntimeHeaders message)}}
+        processRuntimeHeaders(payload, headers, headers._runtimeheaders);
+        {{~/if}}
         Message message = MessageBuilder.createMessage(payload, new MessageHeaders(headers));
         // return streamBridge.send({{operation.operationId}}BindingName, message, outputContentType);
         return saveMessageToOutbox(message, {{operation.operationId}}OutboxCollection);
     }
 
-    {{/each}}
-{{/each}}
+    {{~/each}}
+{{~/each}}
+
+{{> (partial '../../partials/runtime-headers')}}
 
 }

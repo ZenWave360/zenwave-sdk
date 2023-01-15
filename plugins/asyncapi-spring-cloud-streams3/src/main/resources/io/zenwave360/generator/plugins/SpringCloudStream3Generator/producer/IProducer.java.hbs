@@ -11,7 +11,7 @@ public interface I{{apiClassName}} {
 
 {{#each operations as |operation|}}
     {{#each operation.x--messages as |message|}}
-    {{~> (lookup . 'headersPartial') isProducer=true}}
+    {{~> (partial '../common/Headers') isProducer=true}}
     /**
      * {{{operation.summary}}}
      */

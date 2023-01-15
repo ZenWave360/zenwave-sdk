@@ -96,6 +96,8 @@ components:
       title: Message for a Customer Event
       summary: Message for a Customer Event
       schemaFormat: application/vnd.aai.asyncapi;version=2.4.0
+      headers:
+        $ref: "#/components/headers/CustomerHeaders"
       payload:
         $ref: "#/components/schemas/CustomerEventPayload"
   
@@ -149,7 +151,15 @@ components:
       schemaFormat: application/vnd.aai.asyncapi;version=2.4.0
       payload:
         $ref: "#/components/schemas/PaymentDetailsEventPayload"
-  
+
+  headers:
+    CustomerHeaders:
+      type: object
+      properties:
+        entity-id:
+          type: string
+          description: Customer Entity Id
+          x-runtime-expression: $message.payload#/customer/id
 
   schemas:
     Customer:

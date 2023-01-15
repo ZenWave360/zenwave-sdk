@@ -7,6 +7,18 @@ Generates a full backend application using a flexible hexagonal architecture
 
 This generator supports the following JDL extensions:
 
+### Extensions In JDL Language
+- Field Types: in addition to enums and basic types it allows:
+    - other entities as field type, this is useful for embedded fields which are not relations
+    - array fields `fieldName String[]` or even `fieldName OtherEntity[]`
+- Service: in addition to serviceClass and serviceImpl it allows configuring free text value as serviceName to allow grouping multiple entities in a given service. Then it's up to each generator to generate an interface or just an implementation class.
+
+### Extensions With Annotations
+
+- **@extends(entityName)**
+- **@copy(entityName)**
+- **@auditing**
+
 - if any entity is annotated with @aggregate then the following table applies:
 
 | **Annotation**                  | **Entity** | **@Persistence** | **Repository** | **Id** |
@@ -18,8 +30,10 @@ This generator supports the following JDL extensions:
 | **@searchCriteria(entityName)** |            |                  |                |        |
 | **@skip**                       | no         |                  |                |        |
 
-**@searchCriteria(entityName)** is used to specify the entity name for the search criteria, if empty will take the same fields as the actual entity.
-**@skip** entities used as search criteria should be marked with @skip
+- **@searchCriteria(entityName)** is used to specify the entity name for the search criteria, if empty will take the same fields as the actual entity.
+- **@skip** entities used as search criteria should be marked with @skip
+
+- **@dbref** fields will be mapped as mongodb `@DocumentedReference`
 
 ## Options
 
