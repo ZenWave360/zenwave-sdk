@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import io.zenwave360.generator.options.ProgrammingStyle;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -21,11 +22,7 @@ import io.zenwave360.generator.utils.Maps;
 
 public class JDLOpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
-    enum ProgrammingStyle {
-        imperative, reactive;
-    }
-
-    public String openapiProperty = "openapi";
+    public String apiProperty = "api";
     public String jdlProperty = "jdl";
 
     @DocumentedOption(description = "The package to generate REST Controllers")
@@ -82,7 +79,7 @@ public class JDLOpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     }
 
     protected Map<String, Object> getOpenAPIModel(Map<String, Object> contextModel) {
-        return (Map) contextModel.get(openapiProperty);
+        return (Map) contextModel.get(apiProperty);
     }
 
     @Override

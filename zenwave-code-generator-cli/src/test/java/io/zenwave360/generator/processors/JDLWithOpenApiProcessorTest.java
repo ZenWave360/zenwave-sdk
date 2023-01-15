@@ -1,8 +1,5 @@
 package io.zenwave360.generator.processors;
 
-import static io.zenwave360.generator.processors.JDLWithOpenApiProcessor.JDL_DEFAULT_PROPERTY;
-import static io.zenwave360.generator.processors.JDLWithOpenApiProcessor.OPENAPI_DEFAULT_PROPERTY;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -26,13 +23,13 @@ public class JDLWithOpenApiProcessorTest {
         return loadJDL(file.getAbsolutePath());
     }
     private Map<String, Object> loadOpenApi(String resource) throws Exception {
-        Map<String, Object> model = new DefaultYamlParser().withSpecFile(URI.create(resource)).withTargetProperty(OPENAPI_DEFAULT_PROPERTY).parse();
-        return new OpenApiProcessor().withTargetProperty(OPENAPI_DEFAULT_PROPERTY).process(model);
+        Map<String, Object> model = new DefaultYamlParser().withSpecFile(URI.create(resource)).parse();
+        return new OpenApiProcessor().process(model);
     }
 
     private Map<String, Object> loadJDL(String resource) throws IOException {
-        Map<String, Object> model = new JDLParser().withSpecFile(resource).withTargetProperty(JDL_DEFAULT_PROPERTY).parse();
-        return new JDLProcessor().withTargetProperty(JDL_DEFAULT_PROPERTY).process(model);
+        Map<String, Object> model = new JDLParser().withSpecFile(resource).withTargetProperty("jdl").parse();
+        return new JDLProcessor().process(model);
     }
 
     @Test
@@ -43,7 +40,7 @@ public class JDLWithOpenApiProcessorTest {
         model.putAll(openapiModel);
         model.putAll(jdlModel);
 
-        var processed = new JDLWithOpenApiProcessor().process(model);
+        var processed = new EnrichOpenAPIWithJDLProcessor().process(model);
         List requestEntities = JSONPath.get(processed, "$..[?(@.x--request-entity)]");
         Assertions.assertFalse(requestEntities.isEmpty());
         List responseEntities = JSONPath.get(processed, "$..[?(@.x--response-entity)]");
@@ -59,7 +56,7 @@ public class JDLWithOpenApiProcessorTest {
         model.putAll(openapiModel);
         model.putAll(jdlModel);
 
-        var processed = new JDLWithOpenApiProcessor().process(model);
+        var processed = new EnrichOpenAPIWithJDLProcessor().process(model);
         List requestEntities = JSONPath.get(processed, "$..[?(@.x--request-entity)]");
         Assertions.assertFalse(requestEntities.isEmpty());
         List responseEntities = JSONPath.get(processed, "$..[?(@.x--response-entity)]");

@@ -1,7 +1,5 @@
 package io.zenwave360.generator.processors;
 
-import static io.zenwave360.generator.processors.JDLWithOpenApiProcessor.OPENAPI_DEFAULT_PROPERTY;
-
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,11 +10,11 @@ import org.junit.jupiter.api.Test;
 import io.zenwave360.generator.parsers.DefaultYamlParser;
 import io.zenwave360.generator.utils.JSONPath;
 
-public class JDLWithDummyDataProcessorTest {
+public class JDLDummyDataFromSchemasProcessorTest {
 
     private Map<String, Object> loadOpenApi(String resource) throws Exception {
-        Map<String, Object> model = new DefaultYamlParser().withSpecFile(URI.create(resource)).withTargetProperty(OPENAPI_DEFAULT_PROPERTY).parse();
-        return new OpenApiProcessor().withTargetProperty(OPENAPI_DEFAULT_PROPERTY).process(model);
+        Map<String, Object> model = new DefaultYamlParser().withSpecFile(URI.create(resource)).withTargetProperty("api").parse();
+        return new OpenApiProcessor().process(model);
     }
 
     @Test
@@ -25,7 +23,7 @@ public class JDLWithDummyDataProcessorTest {
         var model = new HashMap<String, Object>();
         model.putAll(openapiModel);
 
-        var processor = new JDLWithDummyDataProcessor();
+        var processor = new JDLDummyDataFromSchemasProcessor();
         var processed = processor.process(model);
         Assertions.assertNotNull(processed.get(processor.jdlProperty));
         Map jdlModel = (Map) processed.get(processor.jdlProperty);

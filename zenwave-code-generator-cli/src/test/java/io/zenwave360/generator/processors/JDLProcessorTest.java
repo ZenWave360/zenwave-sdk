@@ -1,7 +1,5 @@
 package io.zenwave360.generator.processors;
 
-import static io.zenwave360.generator.processors.JDLWithOpenApiProcessor.JDL_DEFAULT_PROPERTY;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +13,8 @@ import io.zenwave360.generator.utils.JSONPath;
 public class JDLProcessorTest {
 
     private Map<String, Object> loadJDL(String resource) throws IOException {
-        Map<String, Object> model = new JDLParser().withSpecFile(resource).withTargetProperty(JDL_DEFAULT_PROPERTY).parse();
-        return new JDLProcessor().withTargetProperty(JDL_DEFAULT_PROPERTY).process(model);
+        Map<String, Object> model = new JDLParser().withSpecFile(resource).parse();
+        return new JDLProcessor().process(model);
     }
 
     private boolean containsEntity(List<Map> entities, String entityName) {

@@ -12,10 +12,10 @@ import io.zenwave360.generator.utils.JSONPath;
 import io.zenwave360.generator.utils.Maps;
 import io.zenwave360.generator.utils.NamingUtils;
 
-public class JDLWithDummyDataProcessor extends AbstractBaseProcessor {
+public class JDLDummyDataFromSchemasProcessor extends AbstractBaseProcessor {
 
     public String jdlProperty = "jdl";
-    public String openapiProperty = "openapi";
+    public String apiProperty = "api";
 
     @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
     public String jdlBusinessEntityProperty = "x-business-entity";
@@ -25,14 +25,15 @@ public class JDLWithDummyDataProcessor extends AbstractBaseProcessor {
 
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
-        var openApiModel = (Map) contextModel.get(openapiProperty);
+        var apiModel = (Map) contextModel.get(apiProperty);
         var jdlModel = (Map) contextModel.getOrDefault(jdlProperty, Maps.of("isDummy", true));
         contextModel.put(jdlProperty, jdlModel);
 
+        // assign entity-service using tags from openapi or asyncapi
         Map<String, String> schemaTagMap = new HashMap<>();
-        List<Map<String, Object>> operations = JSONPath.get(openApiModel, "$.paths[*][*][?(@.operationId)]");
+        List<Map<String, Object>> operations = JSONPath.get(apiModel, "$.[*][*][*][?(@.operationId)]");
         for (Map<String, Object> operation : operations) {
-            var tagName = (String) JSONPath.get(operation, "tags[0]");
+            var tagName = (String) JSONPath.get(operation, "tags[0].name", JSONPath.get(operation, "tags[0]"));
             var schemaName = (String) JSONPath.get(operation, "$.x--response.x--response-dto");
             schemaTagMap.put(schemaName, normalizeTagName(tagName));
         }
@@ -41,7 +42,7 @@ public class JDLWithDummyDataProcessor extends AbstractBaseProcessor {
 
         Map<String, Map<String, Object>> entities = new HashMap();
         jdlModel.put("entities", entities);
-        Map<String, Map> schemas = JSONPath.get(openApiModel, "$.components.schemas");
+        Map<String, Map> schemas = JSONPath.get(apiModel, "$.components.schemas");
         for (Map.Entry<String, Map> schemaEntry : schemas.entrySet()) {
             var entity = new HashMap<String, Object>();
             var schemaName = schemaEntry.getKey();

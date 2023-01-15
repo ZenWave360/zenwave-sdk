@@ -6,6 +6,14 @@
 
 Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files using https://www.jsonschema2pojo.org/ library.
 
+```shell
+jbang zw -p io.zenwave360.generator.plugins.AsyncApiJsonSchema2PojoPlugin \
+    specFile=src/main/resources/model/asyncapi.yml \
+    modelPackage=io.zenwave360.example.core.domain.events \
+    jsonschema2pojo.includeTypeInfo=true \
+    targetFolder=.
+```
+
 ## Options
 
 | **Option**        | **Description**                                                                                                | **Type**         | **Default**   | **Values**       |

@@ -9,15 +9,6 @@ public abstract class AbstractBaseProcessor implements Processor {
 
     public String targetProperty = "api";
 
-    public <T extends AbstractBaseProcessor> T withTargetProperty(String targetProperty) {
-        this.targetProperty = targetProperty;
-        return (T) this;
-    }
-
-    public void setTargetProperty(String targetProperty) {
-        this.targetProperty = targetProperty;
-    }
-
     protected void addNormalizedTagName(Map<String, Object> operation) {
         if (operation != null) {
             String normalizedTagName = null;

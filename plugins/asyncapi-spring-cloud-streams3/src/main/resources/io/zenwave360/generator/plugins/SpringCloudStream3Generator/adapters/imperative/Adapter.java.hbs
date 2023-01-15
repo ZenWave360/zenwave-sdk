@@ -1,0 +1,42 @@
+package {{adaptersPackage}};
+
+{{#if modelPackage~}}
+import {{modelPackage}}.*;
+{{~/if}}
+{{#if consumerApiPackage~}}
+import {{consumerApiPackage}}.*;
+{{~#each operation.x--messages as |message|}}
+import {{consumerApiPackage}}.{{serviceInterfaceName operation.x--operationIdCamelCase}}.{{message.x--javaType}}Headers;
+{{~/each}}
+{{~/if}}
+
+import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+
+@Component
+public class {{serviceName operation.x--operationIdCamelCase}}Adapter implements {{serviceInterfaceName operation.x--operationIdCamelCase}} {
+
+    private EventEntityMapper mapper;
+    // TODO: private EntityService service;
+
+    @Autowired
+    public void setEventEntityMapper(EventEntityMapper mapper) {
+        this.mapper = mapper;
+    }
+
+{{#each operation.x--messages as |message|}}
+    /**
+     * {{{operation.summary}}}
+     */
+    {{~#if exposeMessage}}
+    public void {{operation.operationId}}{{methodSuffix message operation}}(Message<{{message.x--javaType}}> msg) {
+        // TODO: service.{{operation.operationId}}(mapper.asEntity(msg.getPayload()));
+    };
+    {{~else}}
+    public void {{operation.operationId}}{{methodSuffix message operation}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers) {
+        // TODO: service.{{operation.operationId}}(mapper.asEntity(payload));
+    };
+    {{~/if}}
+{{/each~}}
+}
+

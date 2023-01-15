@@ -2,6 +2,7 @@ package io.zenwave360.generator.generators;
 
 import java.util.*;
 
+import io.zenwave360.generator.utils.JSONPath;
 import org.apache.commons.lang3.ObjectUtils;
 
 import com.jayway.jsonpath.JsonPath;
@@ -41,7 +42,7 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
         }
     }
 
-    @DocumentedOption(description = "Java API package name")
+    @DocumentedOption(description = "Java API package name for producerApiPackage and consumerApiPackage if not specified.")
     public String apiPackage;
     @DocumentedOption(description = "Java API package name for outbound (producer) services. It can override apiPackage for producers.")
     public String producerApiPackage = "{{apiPackage}}";
@@ -67,7 +68,7 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
 
     public Map<String, List<Map<String, Object>>> getOperationsGroupedByTag(Model apiModel, AsyncapiOperationType operationType) {
         Map<String, List<Map<String, Object>>> operationsByTag = new HashMap<>();
-        List<Map<String, Object>> operations = JsonPath.read(apiModel, "$.channels[*].*");
+        List<Map<String, Object>> operations = JSONPath.get(apiModel, "$.channels[*].*");
         for (Map<String, Object> operation : operations) {
             if (matchesFilters(operation, operationType)) {
                 String tag = (String) ObjectUtils.firstNonNull(operation.get("x--normalizedTagName"), "DefaultService");

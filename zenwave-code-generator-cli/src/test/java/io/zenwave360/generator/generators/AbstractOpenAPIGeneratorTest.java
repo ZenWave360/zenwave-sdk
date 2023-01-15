@@ -16,9 +16,8 @@ import io.zenwave360.generator.templating.TemplateOutput;
 public class AbstractOpenAPIGeneratorTest {
 
     private Model loadAsyncapiModelFromResource(String resource) throws Exception {
-        String targetProperty = "api";
-        Map<String, Object> model = new DefaultYamlParser().withSpecFile(URI.create(resource)).withTargetProperty(targetProperty).parse();
-        return (Model) new OpenApiProcessor().withTargetProperty(targetProperty).process(model).get(targetProperty);
+        Map<String, Object> model = new DefaultYamlParser().withSpecFile(URI.create(resource)).parse();
+        return (Model) new OpenApiProcessor().process(model).get("api");
     }
 
     private AbstractOpenAPIGenerator newAbstractAsyncapiGenerator() {

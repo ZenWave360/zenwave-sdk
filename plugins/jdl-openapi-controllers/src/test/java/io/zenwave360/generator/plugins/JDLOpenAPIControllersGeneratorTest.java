@@ -3,6 +3,7 @@ package io.zenwave360.generator.plugins;
 import java.util.List;
 
 import io.zenwave360.generator.Plugin;
+import io.zenwave360.generator.options.ProgrammingStyle;
 import org.junit.jupiter.api.*;
 
 import io.zenwave360.generator.MainGenerator;
@@ -37,7 +38,7 @@ public class JDLOpenAPIControllersGeneratorTest {
                 .withOption("openApiModelPackage", "io.zenwave360.example.web.api.model")
                 .withOption("openApiModelNameSuffix", "DTO")
                 // .withOption("operationIds", List.of("addPet", "updatePet"))
-                .withOption("style", JDLOpenAPIControllersGenerator.ProgrammingStyle.imperative)
+                .withOption("style", ProgrammingStyle.imperative)
                 .withTargetFolder("target/out");
 
         new MainGenerator().generate(plugin);
@@ -58,7 +59,7 @@ public class JDLOpenAPIControllersGeneratorTest {
                 .withOption("openApiModelPackage", "io.zenwave360.example.adapters.web.model")
                 .withOption("openApiModelNameSuffix", "DTO")
                 // .withOption("operationIds", List.of("addPet", "updatePet"))
-                .withOption("style", JDLOpenAPIControllersGenerator.ProgrammingStyle.imperative)
+                .withOption("style", ProgrammingStyle.imperative)
                 .withTargetFolder("target/examples/spring-boot-mongo-elasticsearch");
 
         new MainGenerator().generate(plugin);
@@ -79,7 +80,7 @@ public class JDLOpenAPIControllersGeneratorTest {
                 .withOption("openApiModelPackage", "io.zenwave360.example.adapters.web.model")
                 .withOption("openApiModelNameSuffix", "DTO")
                 // .withOption("operationIds", List.of("addPet", "updatePet"))
-                .withOption("style", JDLOpenAPIControllersGenerator.ProgrammingStyle.imperative)
+                .withOption("style", ProgrammingStyle.imperative)
                 .withTargetFolder("target/examples/spring-boot-jpa-elasticsearch");
 
         new MainGenerator().generate(plugin);
@@ -102,7 +103,7 @@ public class JDLOpenAPIControllersGeneratorTest {
                 .withOption("openApiModelPackage", "io.zenwave360.example.adapters.web.model")
                 .withOption("openApiModelNameSuffix", "DTO")
                 // .withOption("operationIds", List.of("addPet", "updatePet"))
-                .withOption("style", JDLOpenAPIControllersGenerator.ProgrammingStyle.imperative)
+                .withOption("style", ProgrammingStyle.imperative)
                 .withTargetFolder("target/examples/spring-boot-mongo-elasticsearch");
 
         new MainGenerator().generate(plugin);

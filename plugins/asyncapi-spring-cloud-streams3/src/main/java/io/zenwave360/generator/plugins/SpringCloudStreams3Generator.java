@@ -25,6 +25,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     }
 
     public String sourceProperty = "api";
+
     @DocumentedOption(description = "Programming style")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
 

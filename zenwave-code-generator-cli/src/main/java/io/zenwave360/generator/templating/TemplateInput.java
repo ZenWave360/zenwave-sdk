@@ -18,6 +18,12 @@ public class TemplateInput {
         this.targetFile = targetFile;
     }
 
+    public TemplateInput(String templateLocation, String targetFile, OutputFormatType mimeType) {
+        this.templateLocation = templateLocation;
+        this.targetFile = targetFile;
+        withMimeType(mimeType);
+    }
+
     public TemplateInput(TemplateInput templateInput) {
         this.templateLocation = templateInput.templateLocation;
         this.targetFile = templateInput.targetFile;

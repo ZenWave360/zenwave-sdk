@@ -1,0 +1,27 @@
+package {{adaptersPackage}};
+
+import org.mapstruct.Mapper;
+{{~#if modelPackage}}
+import {{modelPackage}}.*;
+{{~/if}}
+{{~#if inboundDtosPackage}}
+import {{inboundDtosPackage}}.*;
+{{~/if}}
+
+@Mapper(componentModel = "spring")
+public interface EventEntityMapper {
+
+{{~#each dtoEntityMap as |dtoEntity|}}
+    {{~#assign "dtoClassName"}}{{asJavaTypeName dtoEntity.schemaName}}{{/assign}}
+    {{~#assign "entityClassName"}}{{entity.className}}{{entityDTOSuffix}}{{/assign}}
+    {{~#assign "entityInputClassName"}}{{entity.className}}{{inputDTOSuffix}}{{/assign}}
+
+    {{~#unless entity.options.isCriteria}}
+        {{~#if inputDTOSuffix}}
+    {{asJavaTypeName entityInputClassName}} as{{asJavaTypeName entityInputClassName}}({{dtoClassName}} dto);
+        {{~else}}
+    {{asJavaTypeName entityClassName}} as{{asJavaTypeName entityClassName}}({{dtoClassName}} dto);
+        {{/if}}
+    {{~/unless}}
+{{~/each}}
+}

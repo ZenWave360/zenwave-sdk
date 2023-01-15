@@ -1,6 +1,6 @@
 asyncapi: "2.0.0"
 info:
-  title: GEMA - WMQ Product operations
+  title: Product operations
   version: "0.1.0"
 
 defaultContentType: application/json

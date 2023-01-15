@@ -3,8 +3,8 @@ package {{testsPackage}};
 {{#if modelPackage~}}
 import {{modelPackage}}.*;
 {{~/if}}
-{{#if apiPackage~}}
-import {{apiPackage}}.*;
+{{#if consumerApiPackage~}}
+import {{consumerApiPackage}}.*;
 {{~/if}}
 {{~#each operation.x--messages as |message|}}
 import {{consumerApiPackage}}.{{serviceInterfaceName operation.x--operationIdCamelCase}}.{{message.x--javaType}}Headers;

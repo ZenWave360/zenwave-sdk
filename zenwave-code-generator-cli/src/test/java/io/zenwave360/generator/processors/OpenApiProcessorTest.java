@@ -17,18 +17,17 @@ import io.zenwave360.generator.utils.JSONPath;
 
 public class OpenApiProcessorTest {
 
-    String targetProperty = "_api";
     Configuration config = Configuration.builder().options(Option.DEFAULT_PATH_LEAF_TO_NULL).build();
 
     private Map<String, Object> loadOpenAPIModelFromResource(String resource) throws Exception {
-        return new DefaultYamlParser().withSpecFile(URI.create(resource)).withTargetProperty(targetProperty).parse();
+        return new DefaultYamlParser().withSpecFile(URI.create(resource)).parse();
     }
 
     @Test
     public void testProcessOpenAPI() throws Exception {
         Map<String, Object> model = loadOpenAPIModelFromResource("classpath:io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
-        OpenApiProcessor processor = new OpenApiProcessor().withTargetProperty(targetProperty);;
-        Model processed = (Model) processor.process(model).get(targetProperty);
+        OpenApiProcessor processor = new OpenApiProcessor();;
+        Model processed = (Model) processor.process(model).get("api");
         List httpVerbs = JSONPath.get(processed, "$.paths..x--httpVerb");
         Assertions.assertFalse(httpVerbs.isEmpty());
 
