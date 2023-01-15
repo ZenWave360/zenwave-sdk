@@ -2,7 +2,6 @@ package io.zenwave360.sdk.zdl;
 
 import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.utils.JSONPath;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -34,8 +33,8 @@ public class ZDLJavaSignatureUtils {
         return StringUtils.join(params, ", ");
     }
 
-    public static String methodParametersCallSignature(String idJavaType, Map method, Map zdl, String inputDTOSuffix) {
-        return Arrays.stream(methodParametersSignature(idJavaType, method, zdl, inputDTOSuffix).split(", "))
+    public static String methodParametersCallSignature(Map method, Map zdl, String inputDTOSuffix) {
+        return Arrays.stream(methodParametersSignature("not-used", method, zdl, inputDTOSuffix).split(", "))
                 .map(p -> p.split(" ")[1])
                 .collect(Collectors.joining(", "));
     }

@@ -197,19 +197,15 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                 var operationId = JSONPath.get(operation, "operationId");
                 return String.format("%s(%s)", operationId, "input");
             }
+            var zdl = (Map) options.get("zdl");
             var methodName = JSONPath.get(serviceMethod, "name");
-            var params = new ArrayList<String>();
-            if(JSONPath.get(serviceMethod, "paramId") != null) {
-                var paramId = ZDLHttpUtils.getFirstPathParamsFromMethod((Map) serviceMethod);
-                params.add(ObjectUtils.firstNonNull(paramId, "id"));
-            }
-            if(JSONPath.get(serviceMethod, "parameter") != null) {
-                params.add("input");
-            }
-            if(JSONPath.get(serviceMethod, "options.paginated") != null) {
-                params.add("pageOf(page, limit, sort)");
-            }
-            return String.format("%s(%s)", methodName, StringUtils.join(params, ", "));
+            var methodParametersCallSignature = ZDLJavaSignatureUtils.methodParametersCallSignature((Map) serviceMethod, zdl, inputDTOSuffix);
+            var paramId = ObjectUtils.firstNonNull(ZDLHttpUtils.getFirstPathParamsFromMethod((Map) serviceMethod), "id");
+
+            methodParametersCallSignature = methodParametersCallSignature.replaceFirst("^id, ", paramId + ", ");
+            methodParametersCallSignature = methodParametersCallSignature.replaceAll("pageable", "pageOf(page, limit, sort)");
+
+            return String.format("%s(%s)", methodName, methodParametersCallSignature);
         });
         handlebarsEngine.getHandlebars().registerHelper("findServiceMethod", (operation, options) -> {
             var zdl = options.get("zdl");

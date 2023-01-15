@@ -65,6 +65,7 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
     {{~assign "serviceMethod" (findServiceMethod operation)}}
     {{~assign "methodReturnType" (methodReturnType serviceMethod)}}
     {{~assign "methodReturnTypeInstance" (asInstanceName methodReturnType)}}
+    {{~#assign "TODO"}}{{#unless serviceMethod}}null; // TODO: service{{/unless}}{{/assign}}
 
     @Override
     public ResponseEntity<{{orVoid responseDTOClassName}}> {{operation.operationId}}({{{asMethodParameters operation}}}) {
@@ -72,11 +73,11 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
         {{serviceMethod.parameter}} input = mapper.as{{serviceMethod.parameter}}(reqBody);
     {{/if~}}
     {{~#if (hasPaginatedResponse operation) ~}}
-        {{{methodReturnType}}} {{methodReturnTypeInstance}} = null; // TODO: {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall serviceMethod}};
+        {{{methodReturnType}}} {{methodReturnTypeInstance}} = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall serviceMethod}};
         {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{methodReturnTypeInstance}});
         return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
     {{~else if (hasResponseEntity operation) ~}}
-        {{{methodReturnType}}} {{methodReturnTypeInstance}} = null; // TODO: {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall serviceMethod}};
+        {{{methodReturnType}}} {{methodReturnTypeInstance}} = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall serviceMethod}};
         {{~#if serviceMethod.returnTypeIsOptional }}
         if ({{methodReturnTypeInstance}}.isPresent()) {
             {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{methodReturnTypeInstance}}.get());

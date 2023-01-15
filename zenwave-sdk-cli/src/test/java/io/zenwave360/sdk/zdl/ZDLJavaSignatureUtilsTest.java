@@ -1,7 +1,6 @@
 package io.zenwave360.sdk.zdl;
 
 import io.zenwave360.sdk.parsers.ZDLParser;
-import io.zenwave360.sdk.processors.JDLProcessor;
 import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.utils.JSONPath;
 import org.junit.jupiter.api.Assertions;
@@ -41,7 +40,7 @@ public class ZDLJavaSignatureUtilsTest {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
         var method = JSONPath.get(model, "$.services.AttachmentService.methods.downloadAttachmentFile", Map.of());
         var inputDTOSuffix = "InputDTO";
-        var signature = ZDLJavaSignatureUtils.methodParametersCallSignature("String", method, model, inputDTOSuffix);
+        var signature = ZDLJavaSignatureUtils.methodParametersCallSignature(method, model, inputDTOSuffix);
         Assertions.assertEquals("businessUnit, orderId, documentManagerId", signature);
     }
 

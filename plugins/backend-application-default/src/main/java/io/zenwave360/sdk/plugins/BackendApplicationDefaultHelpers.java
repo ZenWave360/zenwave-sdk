@@ -77,7 +77,7 @@ public class BackendApplicationDefaultHelpers {
 
     public String methodParametersCallSignature(Map<String, Object> method, Options options) {
         var zdl = (Map) options.get("zdl");
-        return ZDLJavaSignatureUtils.methodParametersCallSignature(generator.getIdJavaType(), method, zdl, generator.inputDTOSuffix);
+        return ZDLJavaSignatureUtils.methodParametersCallSignature(method, zdl, generator.inputDTOSuffix);
     }
 
     public List<Map<String, Object>> methodEvents(Map<String, Object> method, Options options) {
@@ -98,7 +98,7 @@ public class BackendApplicationDefaultHelpers {
             var methodEvents = methodEvents(method, options);
             for (Map<String, Object> event : methodEvents) {
                 if (entity == null) {
-                    var key = JSONPath.get(event, "name") + "-method-" + ZDLJavaSignatureUtils.methodParametersCallSignature(generator.getIdJavaType(), method, zdl, generator.inputDTOSuffix);
+                    var key = JSONPath.get(event, "name") + "-method-" + ZDLJavaSignatureUtils.methodParametersCallSignature(method, zdl, generator.inputDTOSuffix);
                     result.put(key, Map.of("event", event, "method", method));
                 } else {
                     var key = JSONPath.get(event, "name") + "-" + entity.get("name");
