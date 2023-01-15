@@ -1,7 +1,7 @@
 {{~#each entities as |entity|}}
     {{~#if (isCrudMethod 'create' method=method entity=entity )}}
         log.debug("Request to save {{entity.className}}: {}", input);
-        var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), {{{mapperInputCallSignature method.parameter}}});
+        var {{entity.instanceName}} = {{asInstanceName service.name}}Mapper.update(new {{entity.className}}(), {{{mapperInputCallSignature method.parameter}}});
         {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}});
         {{~> (partial 'withEvents')}}
         return {{wrapWithMapper entity}};
@@ -10,7 +10,7 @@
         var {{entity.instanceName}} = {{entity.instanceName}}Repository
                 .findById(id)
                 .map(existing{{entity.className}} -> {
-                    return {{entity.instanceName}}Mapper.update(existing{{entity.className}}, {{{mapperInputCallSignature method.parameter}}});
+                    return {{asInstanceName service.name}}Mapper.update(existing{{entity.className}}, {{{mapperInputCallSignature method.parameter}}});
                 })
                 .map({{entity.instanceName}}Repository::save);
         {{~> (partial 'withEvents')}}
@@ -41,7 +41,7 @@
   {{~#if (and entity method.paramId method.returnType method.returnTypeIsOptional)}}
         log.debug("Request {{method.name}}: {}", id);
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).map(existing{{entity.className}} -> {
-            return {{entity.instanceName}}Mapper.update(existing{{entity.className}}, {{{mapperInputCallSignature method.parameter}}});
+            return {{asInstanceName service.name}}Mapper.update(existing{{entity.className}}, {{{mapperInputCallSignature method.parameter}}});
         }).map({{entity.instanceName}}Repository::save);
         {{~> (partial 'withEvents')}}
         return {{entity.instanceName}};
@@ -50,12 +50,12 @@
         log.debug("Request {{method.name}}: {}", id);
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).orElseThrow();
         {{~#if method.parameter}}
-        {{entity.instanceName}} = {{entity.instanceName}}Mapper.update({{entity.instanceName}}, {{{mapperInputCallSignature method.parameter}}});
+        {{entity.instanceName}} = {{asInstanceName service.name}}Mapper.update({{entity.instanceName}}, {{{mapperInputCallSignature method.parameter}}});
         {{~/if}}
       {{~else if method.parameter }}
         log.debug("Request {{method.name}}: {}", input);
         {{~#if (eq entity.name returnEntity.name)}}
-        var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), {{{mapperInputCallSignature method.parameter}}});
+        var {{entity.instanceName}} = {{asInstanceName service.name}}Mapper.update(new {{entity.className}}(), {{{mapperInputCallSignature method.parameter}}});
         {{~/if}}
       {{~else}}
         log.debug("Request {{method.name}}");

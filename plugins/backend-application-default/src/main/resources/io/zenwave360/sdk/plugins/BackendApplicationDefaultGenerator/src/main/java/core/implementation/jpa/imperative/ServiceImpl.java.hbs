@@ -4,8 +4,8 @@ import {{entitiesPackage}}.*;
 import {{inboundPackage}}.*;
 import {{inboundDtosPackage}}.*;
 import {{coreImplementationPackage}}.mappers.*;
-import {{outboundPackage}}.mongodb.*;
-{{#if includeEventsProducerDependencies}}
+import {{outboundPackage}}.jpa.*;
+{{#if includeEmitEventsImplementation}}
 import {{outboundEventsPackage}}.*;
 {{/if}}
 
@@ -32,14 +32,16 @@ public class {{service.name}}Impl implements {{service.name}} {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    private final {{service.name}}Mapper {{asInstanceName service.name}}Mapper = {{service.name}}Mapper.INSTANCE;
+
 {{#each entities as |entity|}}
-    private final {{entity.className}}Mapper {{entity.instanceName}}Mapper = {{entity.className}}Mapper.INSTANCE;
     {{~#unless (skipEntityRepository this)}}
     private final {{entity.className}}Repository {{entity.instanceName}}Repository;
     {{~/unless}}
 {{/each}}
 
-{{#if includeEventsProducerDependencies}}
+{{#if includeEmitEventsImplementation}}
+    private final EventsMapper eventsMapper = EventsMapper.INSTANCE;
     private final {{eventsProducerInterface service.name}} eventsProducer;
 {{/if}}
 
@@ -48,11 +50,13 @@ public class {{service.name}}Impl implements {{service.name}} {
      * Constructor.
      */
     public {{service.name}}Impl({{#joinWithTemplate service.entities delimiter=", "}}{{#unless (skipEntityRepository this)}}{{className}}Repository {{instanceName}}Repository{{/unless}}{{/joinWithTemplate}}
-                                {{#if includeEventsProducerDependencies}}, {{eventsProducerInterface service.name}} eventsProducer{{/if}}) {
+                                {{#if includeEmitEventsImplementation}}, {{eventsProducerInterface service.name}} eventsProducer{{/if}}) {
         {{~#joinWithTemplate service.entities ~}}
             {{#unless (skipEntityRepository this)}}this.{{instanceName}}Repository = {{instanceName}}Repository;{{/unless}}
         {{~/joinWithTemplate~}}
+        {{~#if includeEmitEventsImplementation}}
         this.eventsProducer = eventsProducer;
+        {{~/if}}
     }
 {{/unless~}}
 

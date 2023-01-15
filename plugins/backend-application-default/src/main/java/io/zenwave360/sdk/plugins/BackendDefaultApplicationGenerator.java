@@ -75,7 +75,7 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
     public boolean useLombok = false;
 
     @DocumentedOption(description = "Whether to add IEntityEventProducer interfaces as service dependencies. Depends on the naming convention of zenwave-asyncapi plugin to work.")
-    public boolean includeEventsProducerDependencies = true;
+    public boolean includeEmitEventsImplementation = false;
 
 
     @DocumentedOption(description = "If not empty, it will generate (and use) an `input` DTO for each entity used as command parameter")
@@ -96,6 +96,7 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
     protected Function<Map<String, Object>, Boolean> skipEntity = (model) -> is(model, "vo", "input");
     protected Function<Map<String, Object>, Boolean> skipEntityInput = (model) -> inputDTOSuffix == null || inputDTOSuffix.isEmpty();
 
+    protected Function<Map<String, Object>, Boolean> skipEvents = (model) -> !includeEmitEventsImplementation;
     protected Function<Map<String, Object>, Boolean> skipInput = (model) -> is(model, "inline");
     @Override
     protected ZDLProjectTemplates configureProjectTemplates() {
@@ -107,8 +108,6 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
                 "{{asPackageFolder outboundPackage}}/{{persistence}}/{{entity.className}}Repository.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/inbound/dtos/EntityInput.java",
                 "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}{{inputDTOSuffix entity}}.java", JAVA, skipEntityInput, false);
-        ts.addTemplate(ts.entityTemplates, "src/main/java","core/implementation/mappers/EntityMapper.java",
-                "{{asPackageFolder coreImplementationPackage}}/mappers/{{entity.className}}Mapper.java", JAVA, skipEntity, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/BaseRepositoryIntegrationTest.java",
                 "{{asPackageFolder infrastructurePackage}}/{{persistence}}/BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/EntityRepositoryIntegrationTest.java",
@@ -134,9 +133,15 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
                 "{{asPackageFolder inboundPackage}}/{{service.name}}.java", JAVA, null, false);
         ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/implementation/{{persistence}}/{{style}}/ServiceImpl.java",
                 "{{asPackageFolder coreImplementationPackage}}/{{service.name}}Impl.java", JAVA, null, true);
+        ts.addTemplate(ts.singleTemplates, "src/main/java", "core/implementation/mappers/BaseMapper.java",
+                "{{asPackageFolder coreImplementationPackage}}/mappers/BaseMapper.java", JAVA, null, true);
+        ts.addTemplate(ts.serviceTemplates, "src/main/java","core/implementation/mappers/ServiceMapper.java",
+                "{{asPackageFolder coreImplementationPackage}}/mappers/{{service.name}}Mapper.java", JAVA, null, true);
         ts.addTemplate(ts.serviceTemplates, "src/test/java", "core/implementation/{{persistence}}/{{style}}/ServiceTest.java",
                 "{{asPackageFolder coreImplementationPackage}}/{{service.name}}Test.java", JAVA, null, true);
 
+        ts.addTemplate(ts.allServicesTemplates, "src/main/java", "core/implementation/mappers/EventsMapper.java",
+                "{{asPackageFolder coreImplementationPackage}}/mappers/EventsMapper.java", JAVA, skipEvents, true);
         ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/RepositoriesInMemoryConfig.java",
                 "{{asPackageFolder configPackage}}/RepositoriesInMemoryConfig.java", JAVA, null, true);
         ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/ServicesInMemoryConfig.java",

@@ -13,6 +13,8 @@ import com.github.jknack.handlebars.Options;
 import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.utils.JSONPath;
 
+import static io.zenwave360.sdk.utils.NamingUtils.asJavaTypeName;
+
 public class BackendApplicationDefaultHelpers {
 
     private final BackendDefaultApplicationGenerator generator;
@@ -73,8 +75,56 @@ public class BackendApplicationDefaultHelpers {
         return ZDLJavaSignatureUtils.methodParametersSignature(generator.getIdJavaType(), method, zdl, generator.inputDTOSuffix);
     }
 
-    public List<String> methodEventsFlatList(Map<String, Object> method, Options options) {
-        return ZDLFindUtils.methodEventsFlatList(method);
+    public String methodParametersCallSignature(Map<String, Object> method, Options options) {
+        var zdl = (Map) options.get("zdl");
+        return ZDLJavaSignatureUtils.methodParametersCallSignature(generator.getIdJavaType(), method, zdl, generator.inputDTOSuffix);
+    }
+
+    public List<Map<String, Object>> methodEvents(Map<String, Object> method, Options options) {
+        var eventNames = ZDLFindUtils.methodEventsFlatList(method);
+        var zdl = (Map) options.get("zdl");
+        return (List) eventNames.stream().map(eventName -> JSONPath.get(zdl, "$.events." + eventName)).collect(Collectors.toList());
+    }
+
+    public List<Map<String, Object>> methodsWithEvents(Map<String, Object> zdl, Options options) {
+        return ZDLFindUtils.methodsWithEvents(zdl); // TODO review usages
+    }
+
+    public Collection<Map<String, Object>> listOfPairEventEntity(Map<String, Object> zdl, Options options) {
+        var result = new HashMap<String, Object>();
+        var methods = ZDLFindUtils.methodsWithEvents(zdl);
+        for (Map<String, Object> method : methods) {
+            var entity = methodEntity(method, options);
+            var methodEvents = methodEvents(method, options);
+            for (Map<String, Object> event : methodEvents) {
+                if (entity == null) {
+                    var key = JSONPath.get(event, "name") + "-method-" + ZDLJavaSignatureUtils.methodParametersCallSignature(generator.getIdJavaType(), method, zdl, generator.inputDTOSuffix);
+                    result.put(key, Map.of("event", event, "method", method));
+                } else {
+                    var key = JSONPath.get(event, "name") + "-" + entity.get("name");
+                    result.put(key, Map.of("event", event, "entity", entity));
+                    result.putAll(extraMappingsFromEventFields(event, entity, zdl));
+                }
+            }
+        }
+        return (Collection) result.values();
+    }
+
+    private Map<String, Map<String, Object>> extraMappingsFromEventFields(Map<String, Object> target, Map<String, Object> source, Map zdl) {
+        var targetFields = (List<Map>) JSONPath.get(target, "$.fields[*][?(@.isComplexType == true)]");
+        var result = new HashMap<String, Map<String, Object>>();
+        for (Map<String, Object> targetField : targetFields) {
+            var targetEntity = JSONPath.get(zdl, "$.allEntitiesAndEnums." + targetField.get("type"));
+            if (targetEntity != null && !JSONPath.get(targetEntity, "options.skip", false)) {
+                var key = targetField.get("type") + "-" + targetField.get("type");
+                result.put(key, Map.of("event",targetEntity, "entity", targetEntity));
+            }
+        }
+        return result;
+    }
+
+    public String operationNameForEvent(String eventName, Options options) {
+        return  "on" + asJavaTypeName(eventName);
     }
 
     public List<Map> methodPolicies(Map<String, Object> method, Options options) {
@@ -100,10 +150,10 @@ public class BackendApplicationDefaultHelpers {
 
     public Map<String, Object> methodEntity(Map<String, Object> method, Options options) {
         var returnType = (String) method.get("returnType");
-        var service = options.get("service");
+        var zdl = options.get("zdl");
+        var service = JSONPath.get(zdl, "$.services." + method.get("serviceName"));
         var aggregates = JSONPath.get(service, "aggregates", Collections.emptyList());
         if(aggregates.size() == 1 && StringUtils.equals(returnType, aggregates.get(0).toString())) {
-            var zdl = options.get("zdl");
             return JSONPath.get(zdl, "$.entities." + returnType);
         }
         return null;
@@ -159,8 +209,8 @@ public class BackendApplicationDefaultHelpers {
     }
 
     public Object findEntity(String entityName, Options options) {
-        var zdl = options.param(0, Collections.emptyMap());
-        return JSONPath.get(zdl, "entities." + entityName, Collections.emptyMap());
+        var zdl = options.get("zdl");
+        return JSONPath.get(zdl, "entities." + entityName);
     }
 
     public String inputDTOSuffix(Object entity, Options options) {

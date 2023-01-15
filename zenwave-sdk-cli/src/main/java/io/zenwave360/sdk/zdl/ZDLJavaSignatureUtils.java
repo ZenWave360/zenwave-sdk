@@ -5,10 +5,7 @@ import io.zenwave360.sdk.utils.JSONPath;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ZDLJavaSignatureUtils {
@@ -35,6 +32,12 @@ public class ZDLJavaSignatureUtils {
             params.add("Pageable pageable");
         }
         return StringUtils.join(params, ", ");
+    }
+
+    public static String methodParametersCallSignature(String idJavaType, Map method, Map zdl, String inputDTOSuffix) {
+        return Arrays.stream(methodParametersSignature(idJavaType, method, zdl, inputDTOSuffix).split(", "))
+                .map(p -> p.split(" ")[1])
+                .collect(Collectors.joining(", "));
     }
 
     private static List<String> methodInputSignature(Map method, Map zdl, String inputDTOSuffix) {

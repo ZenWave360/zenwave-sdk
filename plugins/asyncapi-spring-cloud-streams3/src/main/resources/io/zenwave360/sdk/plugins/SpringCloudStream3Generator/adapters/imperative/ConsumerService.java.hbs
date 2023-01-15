@@ -16,17 +16,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Component
-public class {{serviceName operation.x--operationIdCamelCase}}Adapter implements {{serviceInterfaceName operation.x--operationIdCamelCase}} {
+public class {{serviceName operation.x--operationIdCamelCase}} implements {{serviceInterfaceName operation.x--operationIdCamelCase}} {
 
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    private Logger log = LoggerFactory.getLogger(getClass());
 
-    private AdapterEventsMapper mapper;
+    private EventsMapper mapper = EventsMapper.INSTANCE;
     // TODO: private EntityService service;
-
-    @Autowired
-    public void setAdapterEventsMapper(AdapterEventsMapper mapper) {
-        this.mapper = mapper;
-    }
 
 {{#each operation.x--messages as |message|}}
     {{~#assign "methodName"}}{{operation.operationId}}{{methodSuffix message operation}}{{/assign}}
@@ -35,12 +30,12 @@ public class {{serviceName operation.x--operationIdCamelCase}}Adapter implements
      */
     {{~#if exposeMessage}}
     public void {{methodName}}(Message<{{message.x--javaType}}> msg) {
-        logger.debug("Received command request for {{methodName}}: {} with headers {}", msg.getPayload(), msg.getHeaders());
+        log.debug("Received command request for {{methodName}}: {} with headers {}", msg.getPayload(), msg.getHeaders());
         // TODO: service.{{operation.operationId}}(mapper.asEntity(msg.getPayload()));
     };
     {{~else}}
     public void {{methodName}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers) {
-        logger.debug("Received command request for {{methodName}}: {} with headers {}", payload, headers);
+        log.debug("Received command request for {{methodName}}: {} with headers {}", payload, headers);
         // TODO: service.{{operation.operationId}}(mapper.asEntity(payload));
     };
     {{~/if}}

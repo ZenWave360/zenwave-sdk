@@ -22,7 +22,7 @@ public class SpringCloudStreams3AdaptersGenerator extends SpringCloudStreams3Gen
     public String basePackage;
 
     @DocumentedOption(description = "Unique identifier of each AsyncAPI that you consume as a client or provider. It will become the last package token for generated adapters")
-    public String apiId = "provider";
+    public String apiId = "commands";
 
     @DocumentedOption(description = "The package to generate Async Inbound Adapters in")
     public String adaptersPackage = "{{basePackage}}.adapters.events.{{apiId}}";
@@ -36,14 +36,29 @@ public class SpringCloudStreams3AdaptersGenerator extends SpringCloudStreams3Gen
     @DocumentedOption(description = "Should use same value configured in BackendApplicationDefaultPlugin. Whether to use an input DTO for entities used as command parameter.")
     public String inputDTOSuffix = "";
 
+    @DocumentedOption(description = "BaseConsumerTest class name")
+    public String baseTestClassName = "BaseConsumerTest";
+
+    @DocumentedOption(description = "BaseConsumerTest package")
+    public String baseTestClassPackage = "{{basePackage}}.adapters.events";
+
+    @DocumentedOption(description = "Annotate tests as @Transactional")
+    public boolean transactional = true;
+
+    @DocumentedOption(description = "@Transactional annotation class name")
+    public String transactionalAnnotationClass = "org.springframework.transaction.annotation.Transactional";
+
 
     @DocumentedOption(description = "Programming Style")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
 
     private String prefix = templatesPath + "/adapters/";
 
-    private TemplateInput mapperTemplate = new TemplateInput(prefix + "{{style}}/Mapper.java", "src/main/java/{{asPackageFolder adaptersPackage}}/AdapterEventsMapper.java", JAVA);
-    private TemplateInput adapterTemplate = new TemplateInput(prefix + "{{style}}/Adapter.java", "src/main/java/{{asPackageFolder adaptersPackage}}/{{serviceName operation.x--operationIdCamelCase}}Adapter.java", JAVA);
+    private TemplateInput mapperTemplate = new TemplateInput(prefix + "{{style}}/EventsMapper.java", "src/main/java/{{asPackageFolder adaptersPackage}}/EventsMapper.java", JAVA);
+    private TemplateInput adapterTemplate = new TemplateInput(prefix + "{{style}}/ConsumerService.java", "src/main/java/{{asPackageFolder adaptersPackage}}/{{serviceName operation.x--operationIdCamelCase}}.java", JAVA);
+
+    private TemplateInput baseTestTemplate = new TemplateInput(prefix + "{{style}}/BaseConsumerTest.java", "src/test/java/{{asPackageFolder baseTestClassPackage}}/{{baseTestClassName}}.java", JAVA).withSkipOverwrite(true);
+    private TemplateInput testTemplate = new TemplateInput(prefix + "{{style}}/ConsumerTest.java", "src/test/java/{{asPackageFolder adaptersPackage}}/{{serviceName operation.x--operationIdCamelCase}}{{testSuffix}}.java", JAVA);
 
     @Override
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {
@@ -67,8 +82,10 @@ public class SpringCloudStreams3AdaptersGenerator extends SpringCloudStreams3Gen
         List<TemplateOutput> templateOutputList = new ArrayList<>();
 
         templateOutputList.addAll(generateMapperTemplates(contextModel, mapperTemplate, dtoEntityMap));
+        templateOutputList.addAll(generateMapperTemplates(contextModel, baseTestTemplate, dtoEntityMap));
         for (Map<String, Object> operation : consumerOperations) {
             templateOutputList.addAll(generateOperationTemplates(contextModel, adapterTemplate, operation));
+            templateOutputList.addAll(generateOperationTemplates(contextModel, testTemplate, operation));
         }
 
         return templateOutputList;

@@ -13,6 +13,10 @@ public class ZDLFindUtils {
         return ZDLFindUtils.findDependentEntities(model, serviceEntities);
     }
 
+    public static List<Map<String, Object>> methodsWithEvents(Map<String, Object> model) {
+        return JSONPath.get(model, "$.services[*].methods[*][?(@.withEvents.length() > 0)]", Collections.<Map<String, Object>>emptyList());
+    }
+
     public static List<String> findAllPaginatedEntities(Map<String, Object> model) {
         return JSONPath.get(model, "$.services[*].methods[*][?(@.options.paginated == true)].returnType", List.<String>of());
     }

@@ -107,7 +107,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         }
         addAllEventsAsMessages(messages, JSONPath.get(model, "$.events", Map.of()));
 
-        var methodsWithEvents = JSONPath.get(model, "$.services[*].methods[*][?(@.withEvents.length() > 0)]", Collections.<Map>emptyList());
+        var methodsWithEvents = ZDLFindUtils.methodsWithEvents(model);
         for (Map<String, Object> method : methodsWithEvents) {
             var withEvents = ZDLFindUtils.methodEventsFlatList(method);
             for (int i = 0; i < withEvents.size(); i++) {

@@ -13,9 +13,9 @@ import java.time.OffsetDateTime;
 import java.util.TimeZone;
 
 @Mapper
-public interface AdapterEventsMapper {
+public interface EventsMapper {
 
-    AdapterEventsMapper INSTANCE = Mappers.getMapper(AdapterEventsMapper.class);
+    EventsMapper INSTANCE = Mappers.getMapper(EventsMapper.class);
 
 {{~#each dtoEntityMap as |dtoEntity|}}
     {{~#assign "dtoClassName"}}{{asJavaTypeName dtoEntity.schemaName}}{{/assign}}

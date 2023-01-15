@@ -37,6 +37,15 @@ public class ZDLJavaSignatureUtilsTest {
     }
 
     @Test
+    void methodParametersCallSignature() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
+        var method = JSONPath.get(model, "$.services.AttachmentService.methods.downloadAttachmentFile", Map.of());
+        var inputDTOSuffix = "InputDTO";
+        var signature = ZDLJavaSignatureUtils.methodParametersCallSignature("String", method, model, inputDTOSuffix);
+        Assertions.assertEquals("businessUnit, orderId, documentManagerId", signature);
+    }
+
+    @Test
     void mapperInputSignature() throws IOException {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
         var inputDTOSuffix = "InputDTO";

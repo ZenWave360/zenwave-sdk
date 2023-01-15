@@ -1,4 +1,4 @@
-package {{basePackage}}.core.implementation.mappers;
+package {{coreImplementationPackage}}.mappers;
 
 import {{basePackage}}.core.domain.*;
 import {{basePackage}}.core.inbound.dtos.*;
@@ -11,10 +11,12 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 import org.springframework.data.domain.Page;
 
-@Mapper
-public interface {{entity.className}}Mapper {
+@Mapper(uses = { BaseMapper.class })
+public interface {{service.name}}Mapper {
 
-    {{entity.className}}Mapper INSTANCE = Mappers.getMapper({{entity.className}}Mapper.class);
+    {{service.name}}Mapper INSTANCE = Mappers.getMapper({{service.name}}Mapper.class);
+{{~#each service.aggregates as |entityName|}}
+    {{~assign "entity" (findEntity entityName)}}
 
   {{~#each (findAggregateInputs entity) as |input|}}
     {{~#if (not (eq entity.className input))}}
@@ -44,4 +46,6 @@ public interface {{entity.className}}Mapper {
         {{~/each}}
     }
     {{~/if}}
+
+{{~/each}}
 }
