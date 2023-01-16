@@ -59,8 +59,10 @@ public class ZDLFindUtils {
     }
 
     public static List<String> findMethodParameterAndReturnTypes(Map<String, Object> model) {
-        var entities = JSONPath.get(model, "$.services[*].methods[*]['parameter','returnType']");
-        return new ArrayList(new HashSet(JSONPath.get(entities, "$[*][*]")));
+        var entities = new ArrayList<String>();
+        entities.addAll(JSONPath.get(model, "$.services[*].methods[*]['parameter']"));
+        entities.addAll(JSONPath.get(model, "$.services[*].methods[*]['returnType']"));
+        return entities.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList());
     }
 
     public static String findServiceName(String entityName, Map<String, Object> model) {

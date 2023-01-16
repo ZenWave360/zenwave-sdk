@@ -47,8 +47,8 @@ public class ZDLJavaSignatureUtils {
         return StringUtils.join(inputSignature(inputType, null, zdl, inputDTOSuffix), ", ");
     }
 
-    public static String mapperInputCallSignature(String inputType, Map zdl, String inputDTOSuffix) {
-        return inputSignature(inputType, null, zdl, inputDTOSuffix).stream()
+    public static String mapperInputCallSignature(String inputType, Map zdl) {
+        return inputSignature(inputType, null, zdl, "notused").stream()
                 .map(p -> p.split(" ")[1])
                 .collect(Collectors.joining(", "));
     }

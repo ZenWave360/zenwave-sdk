@@ -140,7 +140,7 @@ public class BackendApplicationDefaultHelpers {
 
     public String mapperInputCallSignature(String inputType, Options options) {
         var zdl = (Map) options.get("zdl");
-        return ZDLJavaSignatureUtils.mapperInputCallSignature(inputType, zdl, generator.inputDTOSuffix);
+        return ZDLJavaSignatureUtils.mapperInputCallSignature(inputType, zdl);
     }
 
     public String inputFieldInitializer(String inputType, Options options) {

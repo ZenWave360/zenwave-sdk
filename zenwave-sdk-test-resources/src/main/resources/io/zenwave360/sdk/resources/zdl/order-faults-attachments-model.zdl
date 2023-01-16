@@ -41,14 +41,20 @@ service AttachmentService for (PurchaseOrder) {
   @put("/{businessUnit}/{orderId}")
   updateFile(id, PurchaseOrder) PurchaseOrder
 
-    @put("/{purchaseOrderId}")
+  @put("/{purchaseOrderId}")
   updatePurchaseOrder(id, PurchaseOrder) PurchaseOrder?
 
   @get("/{businessUnit}/{orderId}")
   listAttachmentFiles(OrderBusinessId) AttachmentFile[]
 
+  @get("/{businessUnit}/{orderId}/paginated") @paginated
+  listAttachmentFilesPaginated(OrderBusinessId) AttachmentFile[]
+
+
   @get("/{businessUnit}/{orderId}/{documentManagerId}")
   downloadAttachmentFile(AttachmentFileId) AttachmentFileOutput
+
+  startBackgroundAdminProcess()
 }
 
 @inline
