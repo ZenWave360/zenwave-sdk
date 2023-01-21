@@ -41,7 +41,8 @@ public class OpenAPIControllersPlugin extends Plugin {
 
         if (!getOptions().containsKey("zdlFile")) {
             removeFromChain(ZDLParser.class, ZDLProcessor.class);
-            addBeforeInChain(OpenAPIControllersGenerator.class, JDLDummyDataFromSchemasProcessor.class);
+            addBeforeInChain(OpenAPIControllersGenerator.class, DummyDataFromSchemasProcessor.class);
+            withOption("haltOnFailFormatting", false);
         }
         // because we have more than one model, we need to configure how they are passed around from parser to processor and generator
         // we use class name for passing the properties, in case one class is repeated in chain we'd use the index number in the chain

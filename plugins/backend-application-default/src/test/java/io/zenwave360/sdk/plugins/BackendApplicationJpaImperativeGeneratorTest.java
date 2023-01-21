@@ -33,26 +33,16 @@ public class BackendApplicationJpaImperativeGeneratorTest {
         logCaptor.close();
     }
 
-    private Map<String, Object> loadZDLModelFromResource(String resource) throws Exception {
-        Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
-        return new ZDLProcessor().process(model);
-    }
-
-
-
-
     @Test
-    @Disabled // TODO: implement this
-    public void test_generator_hexagonal_jpa_TODO() throws Exception {
-        String targetFolder = "target/zdl/test_generator_hexagonal_jpa_TODO";
+    public void test_generator_hexagonal_jpa() throws Exception {
+        String targetFolder = "target/zdl/test_generator_hexagonal_jpa_customer_address";
         Plugin plugin = new BackendApplicationDefaultPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address-relational.zdl")
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.jpa)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("projectName", "customer-address")
-                .withOption("multiModule", true)
                 .withOption("forceOverwrite", true)
                 .withOption("haltOnFailFormatting", false);
 

@@ -2,6 +2,9 @@
     {{~#if (isCrudMethod 'create' method=method entity=entity )}}
         var input = new {{methodParameterType method}}();
         // TODO fill input data
+        {{~#each entity.fields as |field|}}
+        // input.set{{capitalize field.name}}({{{populateField field}}});
+        {{~/each}}
         var {{entity.instanceName}} = {{serviceInstance}}.create{{entity.className}}(input);
         assertNotNull({{entity.instanceName}}.getId());
         assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}));
@@ -9,6 +12,9 @@
         var id = "1"; // TODO fill id
         var input = new {{methodParameterType method}}();
         // TODO fill input data
+        {{~#each entity.fields as |field|}}
+        // input.set{{capitalize field.name}}({{{populateField field}}});
+        {{~/each}}
         assertTrue({{entity.instanceName}}Repository.containsKey(id));
         var {{entity.instanceName}} = {{serviceInstance}}.update{{entity.className}}(id, input);
         assertTrue({{entity.instanceName}}.isPresent());

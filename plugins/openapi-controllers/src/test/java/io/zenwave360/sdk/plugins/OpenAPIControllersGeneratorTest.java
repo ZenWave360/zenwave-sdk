@@ -28,9 +28,28 @@ public class OpenAPIControllersGeneratorTest {
         logCaptor.close();
     }
 
+    @Test
+    public void test_generator_openapi_controllers_no_zdl() throws Exception {
+        Plugin plugin = new OpenAPIControllersPlugin()
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/oas-controllers-with-no-zdl.yml")
+                .withOption("basePackage", "io.zenwave360.example")
+                .withOption("openApiApiPackage", "io.zenwave360.example.web.api")
+                .withOption("openApiModelPackage", "io.zenwave360.example.web.api.model")
+                .withOption("openApiModelNameSuffix", "DTO")
+                // .withOption("operationIds", List.of("addPet", "updatePet"))
+                .withOption("style", ProgrammingStyle.imperative)
+                //                .withOption("haltOnFailFormatting", false)
+                .withTargetFolder("target/out/oas-controllers-with-no-zdl");
+
+        new MainGenerator().generate(plugin);
+
+        List<String> logs = logCaptor.getLogs();
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
+    }
 
     @Test
-    public void test_generator_jdl_openapi_controllers_zdl_customer_address() throws Exception {
+    public void test_generator_openapi_controllers_zdl_customer_address() throws Exception {
         Plugin plugin = new OpenAPIControllersPlugin()
                 .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/customer-address-openapi.yml")
                 .withOption("zdlFile", "classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
@@ -41,7 +60,7 @@ public class OpenAPIControllersGeneratorTest {
                 // .withOption("operationIds", List.of("addPet", "updatePet"))
                 .withOption("style", ProgrammingStyle.imperative)
 //                .withOption("haltOnFailFormatting", false)
-                .withTargetFolder("target/out");
+                .withTargetFolder("target/out/customer_address");
 
         new MainGenerator().generate(plugin);
 

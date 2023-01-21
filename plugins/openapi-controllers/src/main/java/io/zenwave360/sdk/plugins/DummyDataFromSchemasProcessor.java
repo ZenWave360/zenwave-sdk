@@ -1,10 +1,11 @@
-package io.zenwave360.sdk.processors;
+package io.zenwave360.sdk.plugins;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.zenwave360.sdk.processors.AbstractBaseProcessor;
 import org.apache.commons.lang3.ObjectUtils;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
@@ -12,22 +13,22 @@ import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
 import io.zenwave360.sdk.utils.NamingUtils;
 
-public class JDLDummyDataFromSchemasProcessor extends AbstractBaseProcessor {
+public class DummyDataFromSchemasProcessor extends AbstractBaseProcessor {
 
-    public String jdlProperty = "zdl";
+    public String zdlProperty = "zdl";
     public String apiProperty = "api";
 
-    @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
-    public String jdlBusinessEntityProperty = "x-business-entity";
+    @DocumentedOption(description = "Extension property referencing zdl entity in components schemas (default: x-business-entity)")
+    public String zdlBusinessEntityProperty = "x-business-entity";
 
-    @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas for paginated lists (default: x-business-entity-paginated)")
-    public String jdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
+    @DocumentedOption(description = "Extension property referencing zdl entity in components schemas for paginated lists (default: x-business-entity-paginated)")
+    public String zdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
 
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
         var apiModel = (Map) contextModel.get(apiProperty);
-        var zdlModel = (Map) contextModel.getOrDefault(jdlProperty, Maps.of("isDummy", true));
-        contextModel.put(jdlProperty, zdlModel);
+        var zdlModel = (Map) contextModel.getOrDefault(zdlProperty, Maps.of("isDummy", true));
+        contextModel.put(zdlProperty, zdlModel);
 
         // assign entity-service using tags from openapi or asyncapi
         Map<String, String> schemaTagMap = new HashMap<>();
@@ -46,8 +47,8 @@ public class JDLDummyDataFromSchemasProcessor extends AbstractBaseProcessor {
         for (Map.Entry<String, Map> schemaEntry : schemas.entrySet()) {
             var entity = new HashMap<String, Object>();
             var schemaName = schemaEntry.getKey();
-            var businessName = (String) schemaEntry.getValue().get(jdlBusinessEntityProperty);
-            var paginatedName = (String) schemaEntry.getValue().get(jdlBusinessEntityPaginatedProperty);
+            var businessName = (String) schemaEntry.getValue().get(zdlBusinessEntityProperty);
+            var paginatedName = (String) schemaEntry.getValue().get(zdlBusinessEntityPaginatedProperty);
             var entityName = ObjectUtils.firstNonNull(businessName, paginatedName, schemaName);
             entity.put("name", entityName);
             entity.put("type", "entities");

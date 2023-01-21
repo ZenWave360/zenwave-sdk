@@ -281,7 +281,7 @@ public class BackendApplicationDefaultHelpers {
         if (max != null) {
             annotations.add(String.format("@Max(%s)", max));
         }
-        if (minlength != null || maxlength != null) {
+        if (minlength != null && maxlength != null) {
             annotations.add(String.format("@Size(min = %s, max = %s)", minlength, maxlength));
         } else if (maxlength != null) {
             annotations.add(String.format("@Size(max = %s)", maxlength));

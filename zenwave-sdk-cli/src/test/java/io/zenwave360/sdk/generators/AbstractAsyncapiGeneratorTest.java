@@ -59,6 +59,19 @@ public class AbstractAsyncapiGeneratorTest {
     }
 
     @Test
+    public void test_filter_operations_for_provider_nobindings_v3() throws Exception {
+        Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v3/customer-order-asyncapi.yml");
+        AbstractAsyncapiGenerator asyncapiGenerator = newAbstractAsyncapiGenerator();
+        asyncapiGenerator.role = AsyncapiRoleType.provider;
+        Map<String, List<Map<String, Object>>> consumerOperations = asyncapiGenerator.getSubscribeOperationsGroupedByTag(model);
+        Map<String, List<Map<String, Object>>> producerOperations = asyncapiGenerator.getPublishOperationsGroupedByTag(model);
+        Assertions.assertEquals(2, consumerOperations.size());
+        Assertions.assertEquals("doCustomerRequest", consumerOperations.get("Customer").get(0).get("operationId"));
+        Assertions.assertEquals(2, producerOperations.size());
+        Assertions.assertEquals("onCustomerEvent", producerOperations.get("Customer").get(0).get("operationId"));
+    }
+
+    @Test
     public void test_filter_operations_for_provider_with_matching_bindings() throws Exception {
         Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-circular-refs.yml");
         AbstractAsyncapiGenerator asyncapiGenerator = newAbstractAsyncapiGenerator();

@@ -9,7 +9,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractZDLGenerator;
-import io.zenwave360.sdk.generators.JDLEntitiesToSchemasConverter;
+import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.zdl.ZDLFindUtils;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
@@ -41,7 +41,7 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
     @DocumentedOption(description = "Target file")
     public String targetFile = "openapi.yml";
     @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
-    public String jdlBusinessEntityProperty = "x-business-entity";
+    public String zdlBusinessEntityProperty = "x-business-entity";
 
     @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas for paginated lists")
     public String zdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
@@ -140,7 +140,7 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
         Map<String, Object> schemas = new LinkedHashMap<>();
         JSONPath.set(oasSchemas, "components.schemas", schemas);
 
-        JDLEntitiesToSchemasConverter converter = new JDLEntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
+        EntitiesToSchemasConverter converter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withZdlBusinessEntityProperty(zdlBusinessEntityProperty);
 
         List<Map<String, Object>> entities = (List) JSONPath.get(zdlModel, "$.allEntitiesAndEnums[*]");
         for (Map<String, Object> entity : entities) {

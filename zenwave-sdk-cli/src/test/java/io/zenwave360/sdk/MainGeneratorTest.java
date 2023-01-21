@@ -2,6 +2,7 @@ package io.zenwave360.sdk;
 
 import java.util.Map;
 
+import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -41,6 +42,20 @@ public class MainGeneratorTest {
                 .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-circular-refs.yml")
                 .withTargetFolder("target/zenwave630/out")
                 .withChain(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class)
+                .withOption("forceOverwrite", true);
+
+        new MainGenerator().generate(plugin);
+
+        logCaptor.getLogs();
+    }
+
+    @Test
+    public void testGeneratorWithStdout() throws Exception {
+        // File file = new File(getClass().getClassLoader().getResource("io/zenwave360/sdk/parsers/asyncapi-circular-refs.yml").toURI());
+        Plugin plugin = new Plugin()
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-circular-refs.yml")
+                .withTargetFolder("target/zenwave630/out")
+                .withChain(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpGenerator.class, TemplateStdoutWriter.class)
                 .withOption("forceOverwrite", true);
 
         new MainGenerator().generate(plugin);

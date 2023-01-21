@@ -13,7 +13,7 @@ import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.processors.JDLProcessor;
 import io.zenwave360.sdk.utils.JSONPath;
 
-public class JDLEntitiesToSchemasConverterTest {
+public class EntitiesToSchemasConverterTest {
 
     private Map<String, Object> loadZDLModelFromResource(String resource) throws Exception {
         Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
@@ -22,8 +22,8 @@ public class JDLEntitiesToSchemasConverterTest {
 
     @Test
     public void testConvertEntityToSchema() throws Exception {
-        JDLEntitiesToSchemasConverter converter = new JDLEntitiesToSchemasConverter().withIdType("string");
-        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl");
+        EntitiesToSchemasConverter converter = new EntitiesToSchemasConverter().withIdType("string");
+        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
         List<Map> entities = JSONPath.get(model, "entities[*]");
         List<Map> enums = JSONPath.get(model, "enums.enums[*]");
         List<Map> entitiesAndEnums = new ArrayList<>();
@@ -34,7 +34,7 @@ public class JDLEntitiesToSchemasConverterTest {
 
         for (Map entity : entitiesAndEnums) {
             Map<String, Object> result = converter.convertToSchema(entity, model);
-            Assertions.assertEquals(entity.get(converter.jdlBusinessEntityProperty), result.get("name"));
+            Assertions.assertEquals(entity.get(converter.zdlBusinessEntityProperty), result.get("name"));
             schemas.add(result);
         }
 
@@ -44,8 +44,8 @@ public class JDLEntitiesToSchemasConverterTest {
 
     @Test
     public void testConvertEntityToSchemaRelational() throws Exception {
-        JDLEntitiesToSchemasConverter converter = new JDLEntitiesToSchemasConverter().withIdType("string");
-        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/jdl/orders-model-relational.jdl");
+        EntitiesToSchemasConverter converter = new EntitiesToSchemasConverter().withIdType("number", "int64");
+        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address-relational.zdl");
         List<Map> entities = JSONPath.get(model, "entities[*]");
         List<Map> enums = JSONPath.get(model, "enums.enums[*]");
         List<Map> entitiesAndEnums = new ArrayList<>();
@@ -56,7 +56,7 @@ public class JDLEntitiesToSchemasConverterTest {
 
         for (Map entity : entitiesAndEnums) {
             Map<String, Object> result = converter.convertToSchema(entity, model);
-            Assertions.assertEquals(entity.get(converter.jdlBusinessEntityProperty), result.get("name"));
+            Assertions.assertEquals(entity.get(converter.zdlBusinessEntityProperty), result.get("name"));
             schemas.add(result);
         }
 

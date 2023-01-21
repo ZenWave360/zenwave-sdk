@@ -35,14 +35,15 @@ public class AbstractZDLProjectGeneratorTest {
                 templates.inputEnumTemplates.add(new TemplateInput("inputEnum {{enum.name}}", ""));
                 templates.outputTemplates.add(new TemplateInput("output {{entity.name}}", ""));
                 templates.serviceTemplates.add(new TemplateInput("service {{service.name}}", ""));
-//                templates.eventTemplates.add(new TemplateInput("{{event.name}}", ""));
-//                templates.allEntitiesTemplates.add(new TemplateInput("entities {{size entities}}", ""));
-//                templates.allEnumsTemplates.add(new TemplateInput("enums {{size enums}}", ""));
-//                templates.allEventsTemplates.add(new TemplateInput("events {{size events}}", ""));
-//                templates.allInputsTemplates.add(new TemplateInput("inputs {{size inputs}}", ""));
-//                templates.allOutputsTemplates.add(new TemplateInput("outputs {{size outputs}}", ""));
+                //                templates.eventTemplates.add(new TemplateInput("{{event.name}}", ""));
+                //                templates.allEntitiesTemplates.add(new TemplateInput("entities {{size entities}}", ""));
+                //                templates.allEnumsTemplates.add(new TemplateInput("enums {{size enums}}", ""));
+                //                templates.allEventsTemplates.add(new TemplateInput("events {{size events}}", ""));
+                //                templates.allInputsTemplates.add(new TemplateInput("inputs {{size inputs}}", ""));
+                //                templates.allOutputsTemplates.add(new TemplateInput("outputs {{size outputs}}", ""));
                 templates.allServicesTemplates.add(new TemplateInput("services {{size services}}", ""));
                 templates.singleTemplates.add(new TemplateInput("singleTemplate", ""));
+                templates.addTemplate(templates.singleTemplates, "src/main/java", "singleTemplate", "singleTemplate.java", null, null, false);
                 return templates;
             }
 
@@ -54,7 +55,7 @@ public class AbstractZDLProjectGeneratorTest {
 
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
         var outputList = abstractZDLProjectGenerator.generate(model);
-        Assertions.assertEquals(10, outputList.size());
+        Assertions.assertEquals(11, outputList.size());
     }
 
     static class NOPHandlebarsEngine extends HandlebarsEngine {

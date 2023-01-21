@@ -111,14 +111,14 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
                 String requestDto = JSONPath.get(operation, "$.x--request-dto");
                 String requestDtoName = requestDto != null ? openApiModelNamePrefix + requestDto + openApiModelNameSuffix : null;
-                String inputType = ZDLHttpUtils.getRequestBodyType(method, zdlModel);
+                String inputType = method != null? ZDLHttpUtils.getRequestBodyType(method, zdlModel) : "Entity";
                 String responseSchemaName = JSONPath.get(operation, "$.x--response.x--response-dto");
                 String responseEntityName = responseSchemaName != null ? openApiModelNamePrefix + responseSchemaName + openApiModelNameSuffix : null;
                 String responseDtoName = responseSchemaName != null ? openApiModelNamePrefix + responseSchemaName + openApiModelNameSuffix : null;
                 String outputType = JSONPath.get(method, "$.returnType");
-                boolean isResponseArray = JSONPath.get(method, "$.returnTypeIsArray", false);
-                boolean isResponsePaginated = JSONPath.get(method, "$.options.paginated", false);
-                if (JSONPath.get(method, "$.returnTypeIsArray", false)) {
+                boolean isResponseArray = method != null? JSONPath.get(method, "$.returnTypeIsArray", false) : false;
+                boolean isResponsePaginated = method != null? JSONPath.get(method, "$.options.paginated", false) : false;
+                if (isResponseArray) {
                     var innerArrayDTO = innerArrayDTO(JSONPath.get(operation, "$.x--response.x--response-schema"));
                     responseDtoName = innerArrayDTO != null ? openApiModelNamePrefix + innerArrayDTO + openApiModelNameSuffix : responseDtoName;
                 }

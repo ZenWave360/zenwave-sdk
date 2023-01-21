@@ -10,7 +10,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractZDLGenerator;
 import io.zenwave360.sdk.generators.JDLEntitiesToAvroConverter;
-import io.zenwave360.sdk.generators.JDLEntitiesToSchemasConverter;
+import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
@@ -131,7 +131,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
         for (Map<String, Object> schema : filterSchemasToInclude(model, methodsWithCommands)) {
             if (schemaFormat == SchemaFormat.schema) {
-                JDLEntitiesToSchemasConverter toSchemasConverter = new JDLEntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
+                EntitiesToSchemasConverter toSchemasConverter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withZdlBusinessEntityProperty(jdlBusinessEntityProperty);
                 toSchemasConverter.includeVersion = false;
                 String entityName = (String) schema.get("name");
                 Map<String, Object> asyncAPISchema = toSchemasConverter.convertToSchema(schema, model);

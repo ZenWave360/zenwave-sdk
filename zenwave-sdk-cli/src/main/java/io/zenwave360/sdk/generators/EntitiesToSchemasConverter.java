@@ -6,22 +6,22 @@ import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Lists;
 import io.zenwave360.sdk.utils.Maps;
 
-public class JDLEntitiesToSchemasConverter {
+public class EntitiesToSchemasConverter {
     private static final List blobTypes = List.of("Blob", "AnyBlob", "ImageBlob");
 
-    public String jdlBusinessEntityProperty = "x-business-entity";
+    public String zdlBusinessEntityProperty = "x-business-entity";
 
     public String idType = "string";
     public String idTypeFormat = null;
 
     public boolean includeVersion = true;
 
-    public JDLEntitiesToSchemasConverter withIdType(String idType) {
+    public EntitiesToSchemasConverter withIdType(String idType) {
         this.idType = idType;
         return this;
     }
 
-    public JDLEntitiesToSchemasConverter withIdType(String idType, String idTypeFormat) {
+    public EntitiesToSchemasConverter withIdType(String idType, String idTypeFormat) {
         this.idType = idType;
         this.idTypeFormat = idTypeFormat;
         return this;
@@ -36,8 +36,8 @@ public class JDLEntitiesToSchemasConverter {
         return idType;
     }
 
-    public JDLEntitiesToSchemasConverter withJdlBusinessEntityProperty(String jdlBusinessEntityProperty) {
-        this.jdlBusinessEntityProperty = jdlBusinessEntityProperty;
+    public EntitiesToSchemasConverter withZdlBusinessEntityProperty(String zdlBusinessEntityProperty) {
+        this.zdlBusinessEntityProperty = zdlBusinessEntityProperty;
         return this;
     }
 
@@ -49,7 +49,7 @@ public class JDLEntitiesToSchemasConverter {
     public Map<String, Object> convertEnumToSchema(Map<String, Object> enumValue, Map<String, Object> zdlModelv) {
         Map<String, Object> enumSchema = new LinkedHashMap<>();
         enumSchema.put("type", "string");
-        enumSchema.put(jdlBusinessEntityProperty, enumValue.get("name"));
+        enumSchema.put(zdlBusinessEntityProperty, enumValue.get("name"));
         if (enumValue.get("comment") != null) {
             enumSchema.put("description", enumValue.get("comment"));
         }
@@ -61,7 +61,7 @@ public class JDLEntitiesToSchemasConverter {
     public Map<String, Object> convertEntityToSchema(Map<String, Object> entity, Map<String, Object> zdlModel) {
         Map<String, Object> schema = new LinkedHashMap<>();
         schema.put("type", "object");
-        schema.put(jdlBusinessEntityProperty, entity.get("name"));
+        schema.put(zdlBusinessEntityProperty, entity.get("name"));
         if (entity.get("comment") != null) {
             schema.put("description", entity.get("comment"));
         }

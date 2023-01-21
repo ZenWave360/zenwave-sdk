@@ -16,7 +16,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractZDLGenerator;
 import io.zenwave360.sdk.generators.JDLEntitiesToAvroConverter;
-import io.zenwave360.sdk.generators.JDLEntitiesToSchemasConverter;
+import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
@@ -116,7 +116,7 @@ public class JDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         JSONPath.set(oasSchemas, "components.schemas", schemas);
 
         JDLEntitiesToAvroConverter toAvroConverter = new JDLEntitiesToAvroConverter().withIdType(idType).withNamespace(avroPackage);
-        JDLEntitiesToSchemasConverter toSchemasConverter = new JDLEntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
+        EntitiesToSchemasConverter toSchemasConverter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withZdlBusinessEntityProperty(jdlBusinessEntityProperty);
         toSchemasConverter.includeVersion = false;
 
         List<Map<String, Object>> entities = (List) JSONPath.get(zdlModel, "$.entities[*]");
