@@ -42,7 +42,6 @@ config {
             apiId "restaurants"
             role client
             specFile "modules/restaurants/src/main/resources/apis/asyncapi.yml"
-            zdlFile "models/orders.zdl"
             modelPackage "{{basePackage}}.client.{{apiId}}.events.dtos"
             consumerApiPackage "{{basePackage}}.client.{{apiId}}.events.consumer"
         }
@@ -50,7 +49,6 @@ config {
             apiId "delivery"
             role client
             specFile "modules/delivery/src/main/resources/apis/asyncapi.yml"
-            zdlFile "models/orders.zdl"
             modelPackage "{{basePackage}}.client.{{apiId}}.events.dtos"
             consumerApiPackage "{{basePackage}}.client.{{apiId}}.events.consumer"
         }

@@ -33,14 +33,6 @@ public class BackendApplicationMongoImperativeGeneratorTest {
         logCaptor.close();
     }
 
-    private Map<String, Object> loadZDLModelFromResource(String resource) throws Exception {
-        Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
-        return new ZDLProcessor().process(model);
-    }
-
-
-
-
     @Test
     public void test_generator_hexagonal_mongodb_customer_address() throws Exception {
         String targetFolder = "target/zdl/test_generator_hexagonal_mongodb_customer_address_multimodule";

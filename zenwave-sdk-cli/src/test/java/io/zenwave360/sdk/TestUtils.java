@@ -1,11 +1,11 @@
 package io.zenwave360.sdk;
 
+import java.net.URI;
+import java.util.Map;
+
 import io.zenwave360.sdk.parsers.DefaultYamlParser;
 import io.zenwave360.sdk.parsers.Model;
 import io.zenwave360.sdk.processors.OpenApiProcessor;
-
-import java.net.URI;
-import java.util.Map;
 
 public class TestUtils {
 

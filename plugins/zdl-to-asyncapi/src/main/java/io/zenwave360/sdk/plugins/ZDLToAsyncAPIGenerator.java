@@ -9,7 +9,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractZDLGenerator;
-import io.zenwave360.sdk.generators.JDLEntitiesToAvroConverter;
+import io.zenwave360.sdk.generators.EntitiesToAvroConverter;
 import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
@@ -138,7 +138,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
                 schemas.put(entityName, asyncAPISchema);
             }
             if (schemaFormat == SchemaFormat.avro) {
-                JDLEntitiesToAvroConverter toAvroConverter = new JDLEntitiesToAvroConverter().withIdType(idType).withNamespace(avroPackage);
+                EntitiesToAvroConverter toAvroConverter = new EntitiesToAvroConverter().withIdType(idType).withNamespace(avroPackage);
                 outputList.addAll(convertToAvro(toAvroConverter, schema, model));
             }
         }
@@ -332,7 +332,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         return targetFolder == null ? "avro" : targetFolder + "/avro";
     }
 
-    protected List<TemplateOutput> convertToAvro(JDLEntitiesToAvroConverter converter, Map<String, Object> entityOrEnum, Map<String, Object> zdlModel) {
+    protected List<TemplateOutput> convertToAvro(EntitiesToAvroConverter converter, Map<String, Object> entityOrEnum, Map<String, Object> zdlModel) {
         String name = (String) entityOrEnum.get("name");
         Map avro = converter.convertToAvro(entityOrEnum, zdlModel);
         String avroJson = writeAsString(jsonMapper, avro);

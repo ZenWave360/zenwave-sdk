@@ -7,17 +7,17 @@ import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Lists;
 import io.zenwave360.sdk.utils.Maps;
 
-public class JDLEntitiesToAvroConverter {
+public class EntitiesToAvroConverter {
 
     public String idType = "string";
     public String namespace = "com.example.please.update";
 
-    public JDLEntitiesToAvroConverter withIdType(String idType) {
+    public EntitiesToAvroConverter withIdType(String idType) {
         this.idType = idType;
         return this;
     }
 
-    public JDLEntitiesToAvroConverter withNamespace(String namespace) {
+    public EntitiesToAvroConverter withNamespace(String namespace) {
         this.namespace = namespace;
         return this;
     }

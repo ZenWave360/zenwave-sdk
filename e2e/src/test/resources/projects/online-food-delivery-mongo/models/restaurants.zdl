@@ -43,7 +43,6 @@ config {
             apiId "orders"
             role client
             specFile "modules/orders/src/main/resources/apis/asyncapi.yml"
-            zdlFile "models/restaurants.zdl"
             modelPackage "{{basePackage}}.client.{{apiId}}.events.dtos"
             consumerApiPackage "{{basePackage}}.client.{{apiId}}.events.consumer"
         }

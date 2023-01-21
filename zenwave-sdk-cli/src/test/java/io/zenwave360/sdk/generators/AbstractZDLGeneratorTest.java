@@ -26,9 +26,9 @@ public class AbstractZDLGeneratorTest {
 
     @Test
     public void test_todo() throws Exception {
-        Map<String, Object> model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/jdl/21-points.jh");
-        AbstractZDLGenerator jdlGenerator = newAbstractZDLGenerator();
-        List<TemplateOutput> generated = jdlGenerator.generate(model);
+        Map<String, Object> model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
+        AbstractZDLGenerator generator = newAbstractZDLGenerator();
+        List<TemplateOutput> generated = generator.generate(model);
     }
 
 }

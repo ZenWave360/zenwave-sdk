@@ -1,6 +1,5 @@
 package io.zenwave360.sdk.generators;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -8,9 +7,7 @@ import io.zenwave360.sdk.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import io.zenwave360.sdk.parsers.DefaultYamlParser;
 import io.zenwave360.sdk.parsers.Model;
-import io.zenwave360.sdk.processors.OpenApiProcessor;
 import io.zenwave360.sdk.templating.TemplateOutput;
 
 public class AbstractOpenAPIGeneratorTest {

@@ -4,7 +4,7 @@ entity Entity {
     zoneDateTime ZonedDateTime /** ZonedDateTime.now() */
     instant Instant /** Instant.now() */
     duration Duration /** Duration.ofSeconds(0) */
-    integer Integer /** 0 */
+    integer Integer min(0) max(100) /** 0 */
     long Long /** 0L */
     float Float /** 0.0F */
     double Double /** 0.0 */
@@ -12,4 +12,13 @@ entity Entity {
     boolean Boolean /** false */
     uuid UUID /** UUID.randomUUID() */
     blob Blob /** null */
+    someEnum SomeEnum /** SomeEnum.values()[0] */
+    string String minlength(0) maxlength(100) pattern(/.*/) /** "" */
 }
+
+enum SomeEnum {
+    A
+    B
+    C
+}
+

@@ -63,4 +63,26 @@ public class EntitiesToSchemasConverterTest {
         ObjectMapper mapper = new ObjectMapper();
         System.out.println(mapper.writeValueAsString(schemas));
     }
+
+    @Test
+    public void testConvertEntityToSchemaFullEquipped() throws Exception {
+        EntitiesToSchemasConverter converter = new EntitiesToSchemasConverter().withIdType("number", "int64");
+        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/zdl/populate-fields.zdl");
+        List<Map> entities = JSONPath.get(model, "entities[*]");
+        List<Map> enums = JSONPath.get(model, "enums.enums[*]");
+        List<Map> entitiesAndEnums = new ArrayList<>();
+        entitiesAndEnums.addAll(entities);
+        entitiesAndEnums.addAll(enums);
+
+        List<Map> schemas = new ArrayList<>();
+
+        for (Map entity : entitiesAndEnums) {
+            Map<String, Object> result = converter.convertToSchema(entity, model);
+            Assertions.assertEquals(entity.get(converter.zdlBusinessEntityProperty), result.get("name"));
+            schemas.add(result);
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(mapper.writeValueAsString(schemas));
+    }
 }
