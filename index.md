@@ -148,6 +148,7 @@ Whether you are:
       - [x] For MongoDB
       - [x] For JDBC
     - [x] Enterprise Envelop Pattern
+    - [x] Automatically fill headers at runtime from payload paths, tracing-id supplier...
   - [x] JDL to Specs
     - [x] JDL to OpenAPI
     - [x] JDL to AsyncAPI

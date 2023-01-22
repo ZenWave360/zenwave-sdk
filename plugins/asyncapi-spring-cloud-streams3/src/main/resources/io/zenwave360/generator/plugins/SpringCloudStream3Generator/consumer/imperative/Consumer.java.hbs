@@ -67,7 +67,7 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
                 return;
             }
             {{~/each}}
-            log.warn("Received message without any business handler: [payload: {}, message: {}]", payload.getClass().getName(), message);
+            log.error("Received message without any business handler: [payload: {}, message: {}]", payload.getClass().getName(), message);
         } catch (Exception e) {
             if(log.isDebugEnabled()) {
                 log.error("Error processing message: {}", message, e);

@@ -5,8 +5,10 @@
         }
         for (Map.Entry<String, String> runtimeHeader :runtimeHeaders.entrySet()) {
             String location = runtimeHeader.getValue().replace("$message.payload#/", "");
-            if(tracingIdSupplier != null && "$tracingIdSupplier".equals(location.trim())) {
-                headers.put(runtimeHeader.getKey(), tracingIdSupplier.get());
+            if("$tracingIdSupplier".equals(location.trim())) {
+                if(tracingIdSupplier != null) {
+                    headers.put(runtimeHeader.getKey(), tracingIdSupplier.get());
+                }
                 continue;
             }
             try {
