@@ -4,7 +4,7 @@
   <parent>
     <artifactId>zenwave-code-generator</artifactId>
     <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
-    <version>0.9.8-SNAPSHOT</version>
+    <version>0.9.8</version>
   </parent>
   <name>${project.groupId}:${project.artifactId}</name>
   <artifactId>zenwave-code-generator-test-resources</artifactId>
