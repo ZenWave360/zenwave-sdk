@@ -17,17 +17,17 @@
       "main": "io.zenwave360.generator.Main"
     },
     "snapshots": {
-      "script-ref": "io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli:0.9.8-SNAPSHOT",
+      "script-ref": "io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli:0.9.9-SNAPSHOT",
       "dependencies": [
         "org.slf4j:slf4j-simple:1.7.36",
-        "io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:0.9.8-SNAPSHOT",
-        "io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-jsonschema2pojo:0.9.8-SNAPSHOT",
-        "io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:0.9.8-SNAPSHOT",
-        "io.github.zenwave360.zenwave-code-generator.plugins:openapi-rest-assured:0.9.8-SNAPSHOT",
-        "io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:0.9.8-SNAPSHOT",
-        "io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.9.8-SNAPSHOT",
-        "io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi:0.9.8-SNAPSHOT",
-        "io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:0.9.8-SNAPSHOT"
+        "io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:0.9.9-SNAPSHOT",
+        "io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-jsonschema2pojo:0.9.9-SNAPSHOT",
+        "io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:0.9.9-SNAPSHOT",
+        "io.github.zenwave360.zenwave-code-generator.plugins:openapi-rest-assured:0.9.9-SNAPSHOT",
+        "io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:0.9.9-SNAPSHOT",
+        "io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.9.9-SNAPSHOT",
+        "io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi:0.9.9-SNAPSHOT",
+        "io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:0.9.9-SNAPSHOT"
       ],
       "repositories": [
         "mavencentral",
