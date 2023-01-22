@@ -13,8 +13,6 @@ import io.zenwave360.generator.templating.TemplateEngine;
 import io.zenwave360.generator.templating.TemplateInput;
 import io.zenwave360.generator.templating.TemplateOutput;
 import io.zenwave360.generator.utils.JSONPath;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +60,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     public String bindingSuffix = "-0";
 
     @DocumentedOption(description = "AsyncAPI extension property name for runtime auto-configuration of headers.")
-    public String autoHeadersProperty = "x-runtime-expression";
+    public String runtimeHeadersProperty = "x-runtime-expression";
 
     @DocumentedOption(description = "Spring bean id for the tracing id supplier for runtime header with expression: '$tracingIdSupplier'")
     public String tracingIdSupplierQualifier = "tracingIdSupplier";
@@ -115,13 +113,13 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         handlebarsEngine.getHandlebars().registerHelper("hasRuntimeHeaders", (context, options) -> {
             // operations[] or message
             var path = context instanceof List? "$[*].x--messages[*].headers.properties[*]" : "$.headers.properties[*]";
-            return !JSONPath.get(context, path + autoHeadersProperty, Collections.emptyList()).isEmpty();
+            return !JSONPath.get(context, path + runtimeHeadersProperty, Collections.emptyList()).isEmpty();
         });
         handlebarsEngine.getHandlebars().registerHelper("runtimeHeadersMap", (message, options) -> {
             List<String> runtimeHeaders = new ArrayList<>();
             Map<String, Map> headers = JSONPath.get(message, "$.headers.properties");
             for (String header : headers.keySet()) {
-                String location = JSONPath.get(headers.get(header), "$." + autoHeadersProperty);
+                String location = JSONPath.get(headers.get(header), "$." + runtimeHeadersProperty);
                 if(location != null) {
                     runtimeHeaders.add("\"" + header + "\"");
                     runtimeHeaders.add("\"" + location + "\"");

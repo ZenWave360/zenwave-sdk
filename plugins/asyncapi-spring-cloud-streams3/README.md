@@ -96,6 +96,43 @@ jbang zw -p io.zenwave360.generator.plugins.SpringCloudStreams3Plugin --help
 | `skipFormatting`                | Skip java sources output formatting                                                                                                                                                     | boolean                 | false                |                      |
 | `haltOnFailFormatting`          | Halt on formatting errors                                                                                                                                                               | boolean                 | true                 |                      |
 
+## Populating Headers at Runtime Automatically
+
+ZenWave Code Generator provides `x-runtime-expression` for automatic header population at runtime. Values for this extension property are:
+
+- `$message.payload#/<json pointer fragment>`: follows the same format as AsyncAPI [Correlation ID](https://www.asyncapi.com/docs/reference/specification/v2.5.0#correlationIdObject) object.
+- `$tracingIdSupplier`: will use the tracing id `java.function.Supplier` configured in your Spring context.
+
+```yaml
+    CustomerEventMessage:
+      name: CustomerEventMessage
+      // [...] other properties omitted for brevity
+      headers:
+        type: object
+        properties:
+          kafka_messageKey:
+            type: string
+            description: This one will be populated automatically at runtime
+            x-runtime-expression: $message.payload#/customer/id
+          tracingId:
+            type: string
+            description: This one will be populated automatically at runtime
+            x-runtime-expression: $tracingIdSupplier
+```
+
+```xml
+<configOption>
+    <tracingIdSupplierQualifier>myTracingIdSupplier</tracingIdSupplierQualifier><!-- default is "tracingIdSupplier" -->
+    <runtimeHeadersProperty>x-custom-runtime-expression</runtimeHeadersProperty><!-- you can also override this extension property name -->
+</configOption>
+```
+
+```java
+    @Bean("myTracingIdSupplier")
+    public Supplier tracingIdSupplier() {
+        return () -> "test-tracing-id";
+    }
+```
 
 ## Producer Event-Captors for Tests (Mocks)
 
