@@ -25,7 +25,7 @@ import io.zenwave360.sdk.writers.TemplateFileWriter;
  *     targetFolder=.
  * ```
  */
-@DocumentedPlugin(value = "Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.", shortCode = "openapi-controllers")
+@DocumentedPlugin(value = "Generates implementations based on ZDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.", shortCode = "openapi-controllers")
 public class OpenAPIControllersPlugin extends Plugin {
 
     @DocumentedOption(description = "ZDL file to parse", required = false)

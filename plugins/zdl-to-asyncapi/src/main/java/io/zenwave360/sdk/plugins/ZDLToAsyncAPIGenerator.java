@@ -40,8 +40,8 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
     @DocumentedOption(description = "Target file")
     public String targetFile = "asyncapi.yml";
-    @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
-    public String jdlBusinessEntityProperty = "x-business-entity";
+    @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas (default: x-business-entity)")
+    public String zdlBusinessEntityProperty = "x-business-entity";
 
     @DocumentedOption(description = "Schema format for messages' payload")
     public SchemaFormat schemaFormat = SchemaFormat.schema;
@@ -70,7 +70,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         });
     }
 
-    private final TemplateInput jdlToAsyncAPITemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZDLToAsyncAPIGenerator/ZDLToAsyncAPI{{asyncapiVersion}}.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
+    private final TemplateInput zdlToAsyncAPITemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZDLToAsyncAPIGenerator/ZDLToAsyncAPI{{asyncapiVersion}}.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
 
     protected Map<String, Object> getModel(Map<String, Object> contextModel) {
         return (Map) contextModel.get(sourceProperty);
@@ -131,7 +131,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
         for (Map<String, Object> schema : filterSchemasToInclude(model, methodsWithCommands)) {
             if (schemaFormat == SchemaFormat.schema) {
-                EntitiesToSchemasConverter toSchemasConverter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withZdlBusinessEntityProperty(jdlBusinessEntityProperty);
+                EntitiesToSchemasConverter toSchemasConverter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withZdlBusinessEntityProperty(zdlBusinessEntityProperty);
                 toSchemasConverter.includeVersion = false;
                 String entityName = (String) schema.get("name");
                 Map<String, Object> asyncAPISchema = toSchemasConverter.convertToSchema(schema, model);
@@ -150,7 +150,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
             asyncAPISchemasString = asyncAPISchemasString.substring(asyncAPISchemasString.indexOf("components:") + 12);
         }
 
-        outputList.add(generateTemplateOutput(contextModel, jdlToAsyncAPITemplate, model, asyncAPISchemasString));
+        outputList.add(generateTemplateOutput(contextModel, zdlToAsyncAPITemplate, model, asyncAPISchemasString));
         return outputList;
     }
 

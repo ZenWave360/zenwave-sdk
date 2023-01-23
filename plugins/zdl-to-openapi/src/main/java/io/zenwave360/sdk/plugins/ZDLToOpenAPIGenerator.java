@@ -40,10 +40,10 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
 
     @DocumentedOption(description = "Target file")
     public String targetFile = "openapi.yml";
-    @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
+    @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas (default: x-business-entity)")
     public String zdlBusinessEntityProperty = "x-business-entity";
 
-    @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas for paginated lists")
+    @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas for paginated lists")
     public String zdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
 
     @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. Examples: '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
@@ -74,7 +74,7 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
 
     private final TemplateInput zdlToOpenAPITemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZDLToOpenAPIGenerator/ZDLToOpenAPI.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
 
-    protected Map<String, Object> getJDLModel(Map<String, Object> contextModel) {
+    protected Map<String, Object> getZDLModel(Map<String, Object> contextModel) {
         return (Map) contextModel.get(sourceProperty);
     }
 
@@ -94,10 +94,10 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
         });
         handlebarsEngine.getHandlebars().registerHelper("serviceAggregates", (context, options) -> {
             Map service = options.hash("service", new HashMap<>());
-            Map jdl = options.hash("zdl", new HashMap<>());
+            Map zdl = options.hash("zdl", new HashMap<>());
             List<String> aggregateNames = JSONPath.get(service, "$.aggregates", List.of());
             String aggregatesRegex = aggregateNames.isEmpty() ? "" : " =~ /(" + StringUtils.join(aggregateNames, "|") + ")/";
-            return JSONPath.<List<Map<String, Object>>>get(jdl, "$.channels[*][*][?(@.operationId" + aggregatesRegex + ")]");
+            return JSONPath.<List<Map<String, Object>>>get(zdl, "$.channels[*][*][?(@.operationId" + aggregatesRegex + ")]");
         });
         handlebarsEngine.getHandlebars().registerHelper("httpResponseStatus", (context, options) -> {
             Map operation = (Map) context;
@@ -123,7 +123,7 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
 
     @Override
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {
-        Map<String, Object> zdlModel = getJDLModel(contextModel);
+        Map<String, Object> zdlModel = getZDLModel(contextModel);
         List<String> serviceNames = JSONPath.get(zdlModel, "$.options.options.service[*].value");
         ((Map) zdlModel).put("serviceNames", serviceNames);
 

@@ -28,22 +28,9 @@ public class SpringCloudStreams3AdaptersPlugin extends Plugin {
 
         if (!getOptions().containsKey("zdlFile")) {
             removeFromChain(ZDLParser.class, ZDLProcessor.class);
-//            addBeforeInChain(EnrichAsyncAPIWithJDLProcessor.class, DummyDataFromSchemasProcessor.class);
-//            withOption("DummyDataFromSchemasProcessor.apiProperty", "api");
-//            withOption("DummyDataFromSchemasProcessor.jdlProperty", "zdl");
         }
-        // because we have more than one model, we need to configure how they are passed around from parser to processor and generator
-        // we use class name for passing the properties, in case one class is repeated in chain we'd use the index number in the chain
         withOption("DefaultYamlParser.specFile", StringUtils.firstNonBlank(this.getSpecFile(), (String) getOptions().get("apiFile")));
-//        withOption("DefaultYamlParser.targetProperty", "api");
-//        withOption("AsyncApiProcessor.targetProperty", "api");
         withOption("ZDLParser.specFile", getOptions().get("zdlFile"));
-//        withOption("ZDLParser.targetProperty", "zdl");
-//        withOption("JDLProcessor.targetProperty", "zdl");
-//        withOption("EnrichAsyncAPIWithJDLProcessor.apiProperty", "api");
-//        withOption("EnrichAsyncAPIWithJDLProcessor.jdlProperty", "zdl");
-//        withOption("JDLOpenAPIControllersGenerator.openapiProperty", "api");
-//        withOption("JDLOpenAPIControllersGenerator.jdlProperty", "zdl");
         return (T) this;
     }
 }

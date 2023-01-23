@@ -13,9 +13,6 @@ public class ZDL2JDLProcessor extends AbstractBaseProcessor {
         this.targetProperty = "zdl";
     }
 
-    // Undocumented. Plugins using this should document the meaning of this option .
-    public String criteriaDTOSuffix = "Criteria";
-
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
         Map<String, Object> model = targetProperty != null ? (Map) contextModel.get(targetProperty) : (Map) contextModel;

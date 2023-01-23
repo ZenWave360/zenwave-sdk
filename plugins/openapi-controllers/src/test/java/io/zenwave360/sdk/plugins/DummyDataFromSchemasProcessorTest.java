@@ -20,7 +20,7 @@ public class DummyDataFromSchemasProcessorTest {
     }
 
     @Test
-    public void testProcessJDLWithOpenAPI() throws Exception {
+    public void testCreateDummyDataFromOpenAPISchemas() throws Exception {
         var openapiModel = loadOpenApi("classpath:io/zenwave360/sdk/resources/openapi/oas-controllers-with-no-zdl.yml");
         var model = new HashMap<String, Object>();
         model.putAll(openapiModel);

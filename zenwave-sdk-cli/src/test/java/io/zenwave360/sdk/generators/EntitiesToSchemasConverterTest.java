@@ -10,14 +10,14 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.zenwave360.sdk.parsers.ZDLParser;
-import io.zenwave360.sdk.processors.JDLProcessor;
+import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.utils.JSONPath;
 
 public class EntitiesToSchemasConverterTest {
 
     private Map<String, Object> loadZDLModelFromResource(String resource) throws Exception {
         Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
-        return (Map) new JDLProcessor().process(model).get("zdl");
+        return (Map) new ZDLProcessor().process(model).get("zdl");
     }
 
     @Test

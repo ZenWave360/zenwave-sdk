@@ -280,7 +280,6 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                 operationsByService.put(tagName, new ArrayList<>());
             }
             String responseDto = JSONPath.get(operation, "$.x--response.x--response-dto");
-            // operation.put("jdl-entity", dtoToEntityMap.get(responseDto));
             operationsByService.get(tagName).add(operation);
         }
         return operationsByService;

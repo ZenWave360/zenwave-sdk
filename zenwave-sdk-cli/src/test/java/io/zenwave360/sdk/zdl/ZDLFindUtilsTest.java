@@ -1,17 +1,15 @@
 package io.zenwave360.sdk.zdl;
 
-import io.zenwave360.sdk.parsers.ZDLParser;
-import io.zenwave360.sdk.processors.JDLProcessor;
-import io.zenwave360.sdk.processors.ZDLProcessor;
-import io.zenwave360.sdk.zdl.ZDLFindUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import io.zenwave360.sdk.parsers.ZDLParser;
+import io.zenwave360.sdk.processors.ZDLProcessor;
 
 public class ZDLFindUtilsTest {
 

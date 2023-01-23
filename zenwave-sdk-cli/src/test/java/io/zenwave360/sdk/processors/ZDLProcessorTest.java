@@ -17,10 +17,6 @@ public class ZDLProcessorTest {
         return new ZDLProcessor().process(model);
     }
 
-    private boolean containsEntity(List<Map> entities, String entityName) {
-        return entities.stream().filter(e -> entityName.contentEquals((String) e.get("name"))).findFirst().isPresent();
-    }
-
     @Test
     public void testProcessZDL_CopyAnnotation() throws Exception {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
