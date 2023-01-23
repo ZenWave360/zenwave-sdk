@@ -10,6 +10,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractZDLGenerator;
 import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
+import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.zdl.ZDLFindUtils;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
@@ -21,7 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import static java.util.Collections.emptyList;
 
-public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
+public class ZDLToOpenAPIGenerator implements Generator {
 
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
@@ -48,9 +49,6 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
 
     @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. Examples: '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
     public List<String> paginatedDtoItemsJsonPath = List.of("$.items", "$.properties.content.items");
-
-    @DocumentedOption(description = "Suffix for search criteria DTOs (default: Criteria)")
-    public String criteriaDTOSuffix = "Criteria";
 
     @DocumentedOption(description = "JsonSchema type for id fields and parameters.")
     public String idType = "string";

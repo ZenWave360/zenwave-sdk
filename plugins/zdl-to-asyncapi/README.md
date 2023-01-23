@@ -19,16 +19,17 @@ jbang zw -p io.zenwave360.sdk.plugins.ZDLToAsyncAPIPlugin \
 | **Option**                  | **Description**                                                                                       | **Type**            | **Default**             | **Values**   |
 |-----------------------------|-------------------------------------------------------------------------------------------------------|---------------------|-------------------------|--------------|
 | `specFile`                  | Spec file to parse                                                                                    | String              |                         |              |
-| `specFiles`                 | ZDL files to parse                                                                                    | String[]            | []                      |              |
-| `asyncapiVersion`           | Target AsyncAPI version.                                                                              | AsyncapiVersionType | v3                      | v2, v3       |
-| `schemaFormat`              | Schema format for messages' payload                                                                   | SchemaFormat        | schema                  | schema, avro |
-| `basePackage`               | Java Models package name                                                                              | String              | io.example.domain.model |              |
-| `avroPackage`               | Package name for generated Avro Schemas (.avsc)                                                       | String              | io.example.domain.model |              |
-| `idType`                    | JsonSchema type for id fields and parameters.                                                         | String              | string                  |              |
-| `idTypeFormat`              | JsonSchema type format for id fields and parameters.                                                  | String              |                         |              |
-| `jdlBusinessEntityProperty` | Extension property referencing original jdl entity in components schemas (default: x-business-entity) | String              | x-business-entity       |              |
 | `targetFolder`              | Target folder to generate code to. If left empty, it will print to stdout.                            | File                |                         |              |
 | `targetFile`                | Target file                                                                                           | String              | asyncapi.yml            |              |
+| `asyncapiVersion`           | Target AsyncAPI version.                                                                              | AsyncapiVersionType | v3                      | v2, v3       |
+| `schemaFormat`              | Schema format for messages' payload                                                                   | SchemaFormat        | schema                  | schema, avro |
+| `idType`                    | JsonSchema type for id fields and parameters.                                                         | String              | string                  |              |
+| `idTypeFormat`              | JsonSchema type format for id fields and parameters.                                                  | String              |                         |              |
+| `basePackage`               | Java Models package name                                                                              | String              | io.example.domain.model |              |
+| `avroPackage`               | Package name for generated Avro Schemas (.avsc)                                                       | String              | io.example.domain.model |              |
+| `zdlBusinessEntityProperty` | Extension property referencing original zdl entity in components schemas (default: x-business-entity) | String              | x-business-entity       |              |
+| `continueOnZdlError`        | Continue even when ZDL contains fatal errors                                                          | boolean             | true                    |              |
+
 
 
 ## Getting Help

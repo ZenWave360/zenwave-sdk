@@ -11,13 +11,13 @@
   * [Generating Consumer & Producer APIs](#generating-consumer--producer-apis)
     * [Getting Help](#getting-help)
     * [Options](#options)
-  * [Producer Event-Captors for Tests (Mocks)](#producer-event-captors-for-tests--mocks-)
-  * [Consumer Adapters API Tests](#consumer-adapters-api-tests)
-    * [Options for Adapter Tests](#options-for-adapter-tests)
-  * [Generating Consumer Adapters (Skeletons)](#generating-consumer-adapters--skeletons-)
+    * [Populating Headers at Runtime Automatically](#populating-headers-at-runtime-automatically)
+    * [Producer Event-Captors for Tests (Mocks)](#producer-event-captors-for-tests-mocks)
+  * [Generating Consumer Adapters (Skeletons)](#generating-consumer-adapters-skeletons)
+    * [Consumer Adapters API Tests](#consumer-adapters-api-tests)
     * [Options for Consumer Adapters](#options-for-consumer-adapters)
   * [Enterprise Integration Patterns](#enterprise-integration-patterns)
-  * [Maven Plugin Plugin (API-First)](#maven-plugin-plugin--api-first-)
+  * [Maven Plugin Configuration (API-First)](#maven-plugin-configuration-api-first)
     * [Provider Imperative style without Transactional Outbox](#provider-imperative-style-without-transactional-outbox)
     * [Provider Imperative style with Mongodb Transactional Outbox](#provider-imperative-style-with-mongodb-transactional-outbox)
     * [Provider Imperative style with JDBC Transactional Outbox](#provider-imperative-style-with-jdbc-transactional-outbox)
@@ -29,12 +29,14 @@
 
 ## Generating Consumer & Producer APIs
 
+> Jump to [Maven Plugin Section](#maven-plugin-configuration-api-first) for maven plugin configuration.
+
 With ZenWave's `spring-cloud-streams3` and `jsonschema2pojo` generator plugins you can generate:
 - Strongly typed **business interfaces**
 - **Payload DTOs** and 
 - **Header objects** from AsyncAPI definitions.
 
-It uses Spring Cloud Streams as default implementation so it can connect to many different brokers via provided binders.
+It uses Spring Cloud Streams as default implementation, so it can connect to many different brokers via provided binders.
 
 And because everything is hidden behind interfaces we can encapsulate many Enterprise Integration Patterns:
 
@@ -71,36 +73,39 @@ jbang zw -p io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin --help
 
 ### Options
 
-| **Option**                      | **Description**                                                                                                                                                                         | **Type**                | **Default**          | **Values**           |
-|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------|----------------------|----------------------|
-| `specFile`                      | API Specification File                                                                                                                                                                  | URI                     |                      |                      |
-| `targetFolder`                  | Target folder to generate code to. If left empty, it will print to stdout.                                                                                                              | File                    |                      |                      |
-| `role`                          | Project role: provider/client                                                                                                                                                           | AsyncapiRoleType        | provider             | provider, client     |
-| `style`                         | Programming style                                                                                                                                                                       | ProgrammingStyle        | imperative           | imperative, reactive |
-| `exposeMessage`                 | Whether to expose underlying spring Message to consumers or not.                                                                                                                        | boolean                 | false                |                      |
-| `apiPackage`                    | Java API package name for producerApiPackage and consumerApiPackage if not specified.                                                                                                   | String                  |                      |                      |
-| `modelPackage`                  | Java Models package name                                                                                                                                                                | String                  |                      |                      |
-| `producerApiPackage`            | Java API package name for outbound (producer) services. It can override apiPackage for producers.                                                                                       | String                  | {{apiPackage}}       |                      |
-| `consumerApiPackage`            | Java API package name for inbound (consumer) services. It can override apiPackage for consumer.                                                                                         | String                  | {{apiPackage}}       |                      |
-| `operationIds`                  | Operation ids to include in code generation. Generates code for ALL if left empty                                                                                                       | List                    | []                   |                      |
-| `bindingTypes`                  | Binding names to include in code generation. Generates code for ALL bindings if left empty                                                                                              | List                    |                      |                      |
-| `methodAndMessageSeparator`     | To avoid method erasure conflicts, when exposeMessage or reactive style this character will be used as separator to append message payload type to method names in consumer interfaces. | String                  | $                    |                      |
-| `skipProducerImplementation`    | Generate only the producer interface and skip the implementation.                                                                                                                       | boolean                 | false                |                      |
-| `transactionalOutbox`           | Transactional outbox type for message producers.                                                                                                                                        | TransactionalOutboxType | none                 | none, mongodb, jdbc  |
-| `useEnterpriseEnvelope`         | Include support for enterprise envelop wrapping/unwrapping.                                                                                                                             | boolean                 | false                |                      |
-| `runtimeHeadersProperty`        | AsyncAPI extension property name for runtime auto-configuration of headers.                                                                                                             | String                  | x-runtime-expression |                      |
-| `envelopeJavaTypeExtensionName` | AsyncAPI Message extension name for the envelop java type for wrapping/unwrapping.                                                                                                      | String                  | x-envelope-java-type |                      |
-| `consumerPrefix`                | SC Streams Binder class prefix                                                                                                                                                          | String                  |                      |                      |
-| `consumerSuffix`                | SC Streams Binder class suffix                                                                                                                                                          | String                  | Consumer             |                      |
-| `servicePrefix`                 | Business/Service interface prefix                                                                                                                                                       | String                  | I                    |                      |
-| `serviceSuffix`                 | Business/Service interface suffix                                                                                                                                                       | String                  | ConsumerService      |                      |
-| `bindingSuffix`                 | Spring-Boot binding suffix. It will be appended to the operation name kebab-cased. E.g. <operation-id>-in-0                                                                             | String                  | -0                   |                      |
-| `tracingIdSupplierQualifier`    | Spring bean id for the tracing id supplier for runtime header with expression: '$tracingIdSupplier'                                                                                     | String                  | tracingIdSupplier    |                      |
-| `skipFormatting`                | Skip java sources output formatting                                                                                                                                                     | boolean                 | false                |                      |
-| `haltOnFailFormatting`          | Halt on formatting errors                                                                                                                                                               | boolean                 | true                 |                      |
+| **Option**                      | **Description**                                                                                                                                                                         | **Type**                | **Default**          | **Values**                        |
+|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------|----------------------|-----------------------------------|
+| `specFile`                      | API Specification File                                                                                                                                                                  | URI                     |                      |                                   |
+| `targetFolder`                  | Target folder to generate code to. If left empty, it will print to stdout.                                                                                                              | File                    |                      |                                   |
+| `style`                         | Programming style                                                                                                                                                                       | ProgrammingStyle        | imperative           | imperative, reactive              |
+| `role`                          | Project role: provider/client                                                                                                                                                           | AsyncapiRoleType        | provider             | provider, client                  |
+| `exposeMessage`                 | Whether to expose underlying spring Message to consumers or not.                                                                                                                        | boolean                 | false                |                                   |
+| `apiPackage`                    | Java API package name for producerApiPackage and consumerApiPackage if not specified.                                                                                                   | String                  |                      |                                   |
+| `modelPackage`                  | Java Models package name                                                                                                                                                                | String                  |                      |                                   |
+| `producerApiPackage`            | Java API package name for outbound (producer) services. It can override apiPackage for producers.                                                                                       | String                  | {{apiPackage}}       |                                   |
+| `consumerApiPackage`            | Java API package name for inbound (consumer) services. It can override apiPackage for consumer.                                                                                         | String                  | {{apiPackage}}       |                                   |
+| `bindingTypes`                  | Binding names to include in code generation. Generates code for ALL bindings if left empty                                                                                              | List                    |                      |                                   |
+| `operationIds`                  | Operation ids to include in code generation. Generates code for ALL if left empty                                                                                                       | List                    | []                   |                                   |
+| `methodAndMessageSeparator`     | To avoid method erasure conflicts, when exposeMessage or reactive style this character will be used as separator to append message payload type to method names in consumer interfaces. | String                  | $                    |                                   |   
+| `skipProducerImplementation`    | Generate only the producer interface and skip the implementation.                                                                                                                       | boolean                 | false                |                                   |
+| `transactionalOutbox`           | Transactional outbox type for message producers.                                                                                                                                        | TransactionalOutboxType | none                 | none, mongodb, jdbc               |
+| `useEnterpriseEnvelope`         | Include support for enterprise envelop wrapping/unwrapping.                                                                                                                             | boolean                 | false                |                                   |
+| `runtimeHeadersProperty`        | AsyncAPI extension property name for runtime auto-configuration of headers.                                                                                                             | String                  | x-runtime-expression |                                   |
+| `tracingIdSupplierQualifier`    | Spring bean id for the tracing id supplier for runtime header with expression: '$tracingIdSupplier'                                                                                     | String                  | tracingIdSupplier    |                                   |
+| `envelopeJavaTypeExtensionName` | AsyncAPI Message extension name for the envelop java type for wrapping/unwrapping.                                                                                                      | String                  | x-envelope-java-type |                                   |
+| `includeKafkaCommonHeaders`     | Include Kafka common headers 'kafka_messageKey' as x-runtime-header                                                                                                                     | boolean                 | false                |                                   |
+| `consumerPrefix`                | SC Streams Binder class prefix                                                                                                                                                          | String                  |                      |                                   |
+| `consumerSuffix`                | SC Streams Binder class suffix                                                                                                                                                          | String                  | Consumer             |                                   |
+| `bindingPrefix`                 | SC Streams Binding Name Prefix (used in @Component name)                                                                                                                                | String                  |                      |                                   |
+| `servicePrefix`                 | Business/Service interface prefix                                                                                                                                                       | String                  | I                    |                                   |
+| `serviceSuffix`                 | Business/Service interface suffix                                                                                                                                                       | String                  | ConsumerService      |                                   |
+| `bindingSuffix`                 | Spring-Boot binding suffix. It will be appended to the operation name kebab-cased. E.g. <operation-id>-in-0                                                                             | String                  | -0                   |                                   |
+| `formatter`                     | Code formatter implementation                                                                                                                                                           | Formatters              | spring               | google, palantir, spring, eclipse |
+| `skipFormatting`                | Skip java sources output formatting                                                                                                                                                     | boolean                 | false                |                                   |
+| `haltOnFailFormatting`          | Halt on formatting errors                                                                                                                                                               | boolean                 | true                 |                                   |
 
 
-## Populating Headers at Runtime Automatically
+### Populating Headers at Runtime Automatically
 
 ZenWave SDK provides `x-runtime-expression` for automatic header population at runtime. Values for this extension property are:
 
@@ -138,7 +143,7 @@ ZenWave SDK provides `x-runtime-expression` for automatic header population at r
     }
 ```
 
-## Producer Event-Captors for Tests (Mocks)
+### Producer Event-Captors for Tests (Mocks)
 
 ```java
 // autogenerate in: target/generated-sources/zenwave/src/test/java/.../CustomerOrderEventsProducerCaptor.java
@@ -177,82 +182,11 @@ public class ProducerInMemoryContext {
 }
 ```
 
-## Consumer Adapters API Tests
-
+## Generating Consumer Adapters (Skeletons)
 
 ```shell
-jbang zw -p io.zenwave360.sdk.plugins.SpringCloudStreams3TestsPlugin \
-    specFile=src/main/resources/model/asyncapi.yml \
-    role=provider \
-    style=imperative \
-    basePackage=io.zenwave360.example \
-    consumerApiPackage=io.zenwave360.example.adapters.events \
-    modelPackage=io.zenwave360.example.core.domain.events \
-    targetFolder=.
+jbang zw -p io.zenwave360.sdk.plugins.SpringCloudStreams3AdaptersPlugin --help
 ```
-
-```java
-// generated and editable in: src/test/java/.../adapters/events/DoCustomerRequestConsumerServiceIT.java
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@org.springframework.transaction.annotation.Transactional
-public class DoCustomerRequestConsumerServiceIT extends BaseConsumerTest {
-
-  @Autowired public IDoCustomerRequestConsumerService consumerService;
-
-  /** Test for doCustomerRequest: */
-  @Test
-  public void doCustomerRequestTest() {
-    CustomerRequestPayload payload = new CustomerRequestPayload();
-    payload.setCustomerId(null);
-    payload.setRequestType(null);
-    payload.setCustomer(null);
-
-    CustomerRequestPayloadHeaders headers = new CustomerRequestPayloadHeaders();
-
-    // invoke the method under test
-    consumerService.doCustomerRequest(payload, headers);
-    // perform your assertions here
-  }
-}
-```
-
-### Options for Adapter Tests
-
-| **Option**                      | **Description**                                                                                                                                                                         | **Type**                | **Default**                                              | **Values**           |
-|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------|----------------------------------------------------------|----------------------|
-| `specFile`                      | API Specification File                                                                                                                                                                  | URI                     |                                                          |                      |
-| `targetFolder`                  | Target folder to generate code to. If left empty, it will print to stdout.                                                                                                              | File                    |                                                          |                      |
-| `role`                          | Project role: provider/client                                                                                                                                                           | AsyncapiRoleType        | provider                                                 | provider, client     |
-| `style`                         | Programming style                                                                                                                                                                       | ProgrammingStyle        | imperative                                               | imperative, reactive |
-| `exposeMessage`                 | Whether to expose underlying spring Message to consumers or not.                                                                                                                        | boolean                 | false                                                    |                      |
-| `apiPackage`                    | Java API package name for producerApiPackage and consumerApiPackage if not specified.                                                                                                   | String                  |                                                          |                      |
-| `modelPackage`                  | Java Models package name                                                                                                                                                                | String                  |                                                          |                      |
-| `testsPackage`                  | Package name for generated tests                                                                                                                                                        | String                  | {{consumerApiPackage}}                                   |                      |
-| `producerApiPackage`            | Java API package name for outbound (producer) services. It can override apiPackage for producers.                                                                                       | String                  | {{apiPackage}}                                           |                      |
-| `consumerApiPackage`            | Java API package name for inbound (consumer) services. It can override apiPackage for consumer.                                                                                         | String                  | {{apiPackage}}                                           |                      |
-| `bindingTypes`                  | Binding names to include in code generation. Generates code for ALL bindings if left empty                                                                                              | List                    |                                                          |                      |
-| `operationIds`                  | Operation ids to include in code generation. Generates code for ALL if left empty                                                                                                       | List                    | []                                                       |                      |
-| `testSuffix`                    | Class name suffix for generated test classes                                                                                                                                            | String                  | IT                                                       |                      |
-| `consumerPrefix`                | SC Streams Binder class prefix                                                                                                                                                          | String                  |                                                          |                      |
-| `consumerSuffix`                | SC Streams Binder class suffix                                                                                                                                                          | String                  | Consumer                                                 |                      |
-| `servicePrefix`                 | Business/Service interface prefix                                                                                                                                                       | String                  | I                                                        |                      |
-| `serviceSuffix`                 | Business/Service interface suffix                                                                                                                                                       | String                  | ConsumerService                                          |                      |
-| `bindingSuffix`                 | Spring-Boot binding suffix. It will be appended to the operation name kebab-cased. E.g. <operation-id>-in-0                                                                             | String                  | -0                                                       |                      |
-| `methodAndMessageSeparator`     | To avoid method erasure conflicts, when exposeMessage or reactive style this character will be used as separator to append message payload type to method names in consumer interfaces. | String                  | $                                                        |                      |
-| `transactional`                 | Annotate tests as @Transactional                                                                                                                                                        | boolean                 | true                                                     |                      |
-| `transactionalAnnotationClass`  | @Transactional annotation class name                                                                                                                                                    | String                  | org.springframework.transaction.annotation.Transactional |                      |
-| `skipProducerImplementation`    | Generate only the producer interface and skip the implementation.                                                                                                                       | boolean                 | false                                                    |                      |
-| `transactionalOutbox`           | Transactional outbox type for message producers.                                                                                                                                        | TransactionalOutboxType | none                                                     | none, mongodb, jdbc  |
-| `useEnterpriseEnvelope`         | Include support for enterprise envelop wrapping/unwrapping.                                                                                                                             | boolean                 | false                                                    |                      |
-| `envelopeJavaTypeExtensionName` | AsyncAPI Message extension name for the envelop java type for wrapping/unwrapping.                                                                                                      | String                  | x-envelope-java-type                                     |                      |
-| `tracingIdSupplierQualifier`    | Spring bean id for the tracing id supplier for runtime header with expression: '$tracingIdSupplier'                                                                                     | String                  | tracingIdSupplier                                        |                      |
-| `runtimeHeadersProperty`        | AsyncAPI extension property name for runtime auto-configuration of headers.                                                                                                             | String                  | x-runtime-expression                                     |                      |
-| `skipFormatting`                | Skip java sources output formatting                                                                                                                                                     | boolean                 | false                                                    |                      |
-| `haltOnFailFormatting`          | Halt on formatting errors                                                                                                                                                               | boolean                 | true                                                     |                      |
-
-
-
-## Generating Consumer Adapters (Skeletons)
 
 
 ```shell
@@ -286,38 +220,73 @@ public class DoCustomerRequestConsumerServiceAdapter implements IDoCustomerReque
 }
 ```
 
+### Consumer Adapters API Tests
+
+```java
+// generated and editable in: src/test/java/.../adapters/events/DoCustomerRequestConsumerServiceIT.java
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@org.springframework.transaction.annotation.Transactional
+public class DoCustomerRequestConsumerServiceIT extends BaseConsumerTest {
+
+  @Autowired public IDoCustomerRequestConsumerService consumerService;
+
+  /** Test for doCustomerRequest: */
+  @Test
+  public void doCustomerRequestTest() {
+    CustomerRequestPayload payload = new CustomerRequestPayload();
+    payload.setCustomerId(null);
+    payload.setRequestType(null);
+    payload.setCustomer(null);
+
+    CustomerRequestPayloadHeaders headers = new CustomerRequestPayloadHeaders();
+
+    // invoke the method under test
+    consumerService.doCustomerRequest(payload, headers);
+    // perform your assertions here
+  }
+}
+```
+
+
 ### Options for Consumer Adapters
 
-| **Option**                           | **Description**                                                                                                                                                                         | **Type**         | **Default**                               | **Values**           |
-|--------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|-------------------------------------------|----------------------|
-| `specFile`                           | API Specification File                                                                                                                                                                  | URI              |                                           |                      |
-| `targetFolder`                       | Target folder to generate code to. If left empty, it will print to stdout.                                                                                                              | File             |                                           |                      |
-| `specFiles`                          | JDL files to parse                                                                                                                                                                      | String[]         | [null]                                    |                      |
-| `apiId`                              | Unique identifier of each AsyncAPI that you consume as a client or provider. It will become the last package token for generated adapters                                               | String           | provider                                  |                      |
-| `style`                              | Programming style                                                                                                                                                                       | ProgrammingStyle | imperative                                | imperative, reactive |
-| `role`                               | Project role: provider/client                                                                                                                                                           | AsyncapiRoleType | provider                                  | provider, client     |
-| `operationIds`                       | Operation ids to include in code generation. Generates code for ALL if left empty                                                                                                       | List             | []                                        |                      |
-| `exposeMessage`                      | Whether to expose underlying spring Message to consumers or not.                                                                                                                        | boolean          | false                                     |                      |
-| `methodAndMessageSeparator`          | To avoid method erasure conflicts, when exposeMessage or reactive style this character will be used as separator to append message payload type to method names in consumer interfaces. | String           | $                                         |                      |
-| `basePackage`                        | Applications base package                                                                                                                                                               | String           |                                           |                      |
-| `adaptersPackage`                    | The package to generate Async Inbound Adapters in                                                                                                                                       | String           | {{basePackage}}.adapters.events.{{apiId}} |                      |
-| `apiPackage`                         | Java API package name for producerApiPackage and consumerApiPackage if not specified.                                                                                                   | String           |                                           |                      |
-| `producerApiPackage`                 | Java API package name for outbound (producer) services. It can override apiPackage for producers.                                                                                       | String           | {{apiPackage}}                            |                      |
-| `consumerApiPackage`                 | Java API package name for inbound (consumer) services. It can override apiPackage for consumer.                                                                                         | String           | {{apiPackage}}                            |                      |
-| `modelPackage`                       | Java Models package name                                                                                                                                                                | String           |                                           |                      |
-| `inboundDtosPackage`                 | Package where your inbound dtos are                                                                                                                                                     | String           | {{basePackage}}.core.inbound.dtos         |                      |
-| `servicesPackage`                    | Package where your domain services/usecases interfaces are                                                                                                                              | String           | {{basePackage}}.core.inbound              |                      |
-| `inputDTOSuffix`                     | Suffix for CRUD operations DTOs (default: Input)                                                                                                                                        | String           | Input                                     |                      |
-| `jdlBusinessEntityProperty`          | Extension property referencing original jdl entity in components schemas (default: x-business-entity)                                                                                   | String           | x-business-entity                         |                      |
-| `jdlBusinessEntityPaginatedProperty` | Extension property referencing original jdl entity in components schemas for paginated lists (default: x-business-entity-paginated)                                                     | String           | x-business-entity-paginated               |                      |
-| `consumerPrefix`                     | SC Streams Binder class prefix                                                                                                                                                          | String           |                                           |                      |
-| `consumerSuffix`                     | SC Streams Binder class suffix                                                                                                                                                          | String           | Consumer                                  |                      |
-| `servicePrefix`                      | Business/Service interface prefix                                                                                                                                                       | String           | I                                         |                      |
-| `serviceSuffix`                      | Business/Service interface suffix                                                                                                                                                       | String           | ConsumerService                           |                      |
-| `bindingSuffix`                      | Spring-Boot binding suffix. It will be appended to the operation name kebab-cased. E.g. <operation-id>-in-0                                                                             | String           | -0                                        |                      |
-| `bindingTypes`                       | Binding names to include in code generation. Generates code for ALL bindings if left empty                                                                                              | List             |                                           |                      |
-| `skipFormatting`                     | Skip java sources output formatting                                                                                                                                                     | boolean          | false                                     |                      |
-| `haltOnFailFormatting`               | Halt on formatting errors                                                                                                                                                               | boolean          | true                                      |                      |
+| **Option**                      | **Description**                                                                                                                                                                         | **Type**                | **Default**                                              | **Values**                        |
+|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------|----------------------------------------------------------|-----------------------------------|
+| `specFile`                      | API Specification File                                                                                                                                                                  | URI                     |                                                          |                                   |
+| `specFiles`                     | ZDL files to parse                                                                                                                                                                      | String[]                | []                                                       |                                   |
+| `targetFolder`                  | Target folder to generate code to. If left empty, it will print to stdout.                                                                                                              | File                    |                                                          |                                   |
+| `style`                         | Programming style                                                                                                                                                                       | ProgrammingStyle        | imperative                                               | imperative, reactive              |
+| `role`                          | Project role: provider/client                                                                                                                                                           | AsyncapiRoleType        | provider                                                 | provider, client                  |
+| `exposeMessage`                 | Whether to expose underlying spring Message to consumers or not.                                                                                                                        | boolean                 | false                                                    |                                   |
+| `apiId`                         | Unique identifier of each AsyncAPI that you consume as a client or provider. It will become the last package token for generated adapters                                               | String                  | commands                                                 |                                   |
+| `basePackage`                   | Applications base package                                                                                                                                                               | String                  |                                                          |                                   |
+| `adaptersPackage`               | The package to generate Async Inbound Adapters in                                                                                                                                       | String                  | {{basePackage}}.adapters.events.{{apiId}}                |                                   |
+| `inboundDtosPackage`            | Package where your inbound dtos are                                                                                                                                                     | String                  | {{basePackage}}.core.inbound.dtos                        |                                   |
+| `servicesPackage`               | Package where your domain services/usecases interfaces are                                                                                                                              | String                  | {{basePackage}}.core.inbound                             |                                   |
+| `apiPackage`                    | Java API package name for producerApiPackage and consumerApiPackage if not specified.                                                                                                   | String                  |                                                          |                                   |
+| `modelPackage`                  | Java Models package name                                                                                                                                                                | String                  |                                                          |                                   |
+| `producerApiPackage`            | Java API package name for outbound (producer) services. It can override apiPackage for producers.                                                                                       | String                  | {{apiPackage}}                                           |                                   |
+| `consumerApiPackage`            | Java API package name for inbound (consumer) services. It can override apiPackage for consumer.                                                                                         | String                  | {{apiPackage}}                                           |                                   |
+| `bindingTypes`                  | Binding names to include in code generation. Generates code for ALL bindings if left empty                                                                                              | List                    |                                                          |                                   |
+| `operationIds`                  | Operation ids to include in code generation. Generates code for ALL if left empty                                                                                                       | List                    | []                                                       |                                   |
+| `runtimeHeadersProperty`        | AsyncAPI extension property name for runtime auto-configuration of headers.                                                                                                             | String                  | x-runtime-expression                                     |                                   |
+| `continueOnZdlError`            | Continue even when ZDL contains fatal errors                                                                                                                                            | boolean                 | true                                                     |                                   |
+| `inputDTOSuffix`                | Should use same value configured in BackendApplicationDefaultPlugin. Whether to use an input DTO for entities used as command parameter.                                                | String                  |                                                          |                                   |
+| `baseTestClassName`             | BaseConsumerTest class name                                                                                                                                                             | String                  | BaseConsumerTest                                         |                                   |
+| `baseTestClassPackage`          | BaseConsumerTest package                                                                                                                                                                | String                  | {{basePackage}}.adapters.events                          |                                   |
+| `transactional`                 | Annotate tests as @Transactional                                                                                                                                                        | boolean                 | true                                                     |                                   |
+| `transactionalAnnotationClass`  | @Transactional annotation class name                                                                                                                                                    | String                  | org.springframework.transaction.annotation.Transactional |                                   |
+| `methodAndMessageSeparator`     | To avoid method erasure conflicts, when exposeMessage or reactive style this character will be used as separator to append message payload type to method names in consumer interfaces. | String                  | $                                                        |                                   |   
+| `consumerPrefix`                | SC Streams Binder class prefix                                                                                                                                                          | String                  |                                                          |                                   |
+| `consumerSuffix`                | SC Streams Binder class suffix                                                                                                                                                          | String                  | Consumer                                                 |                                   |
+| `bindingPrefix`                 | SC Streams Binding Name Prefix (used in @Component name)                                                                                                                                | String                  |                                                          |                                   |
+| `servicePrefix`                 | Business/Service interface prefix                                                                                                                                                       | String                  | I                                                        |                                   |
+| `serviceSuffix`                 | Business/Service interface suffix                                                                                                                                                       | String                  | ConsumerService                                          |                                   |
+| `bindingSuffix`                 | Spring-Boot binding suffix. It will be appended to the operation name kebab-cased. E.g. <operation-id>-in-0                                                                             | String                  | -0                                                       |                                   |
+| `formatter`                     | Code formatter implementation                                                                                                                                                           | Formatters              | spring                                                   | google, palantir, spring, eclipse |
+| `skipFormatting`                | Skip java sources output formatting                                                                                                                                                     | boolean                 | false                                                    |                                   |
+| `haltOnFailFormatting`          | Halt on formatting errors                                                                                                                                                               | boolean                 | true                                                     |                                   |
+
 
 
 ## Enterprise Integration Patterns
@@ -329,7 +298,7 @@ Because access to the underlying broker is encapsulated behind the generated int
 - [Enterprise Envelope](/Event-Driven-Architectures/Enterprise-Integration-Patterns/Enterprise-Envelop)
 - [Async Request/Response](/Event-Driven-Architectures/Enterprise-Integration-Patterns/Async-Request-Response) (coming soon)
 
-## Maven Plugin Plugin (API-First)
+## Maven Plugin Configuration (API-First)
 
 You can use ZenWave Maven Plugin to generate code as part of your build process:
 
