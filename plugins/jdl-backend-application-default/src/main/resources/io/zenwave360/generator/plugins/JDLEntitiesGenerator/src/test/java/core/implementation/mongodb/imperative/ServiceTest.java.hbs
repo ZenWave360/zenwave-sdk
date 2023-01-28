@@ -11,9 +11,11 @@ import {{basePackage}}.infrastructure.mongodb.inmemory.*;
 import {{basePackage}}.core.outbound.search.*;
 {{/if}}
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mapstruct.factory.Mappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +33,7 @@ import static org.mockito.Mockito.*;
 /**
  * Acceptance Test for {{service.name}}.
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class {{service.name}}Test  {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -55,6 +58,7 @@ public class {{service.name}}Test  {
     // {{entity.name}}
 
     @Test
+    @Order({{@index}}1)
     void testCRUD{{entity.className}}() {
         var input = new {{entity.className}}Input();
         // TODO fill input data
@@ -76,6 +80,7 @@ public class {{service.name}}Test  {
     }
 
     @Test
+    @Order({{@index}}2)
     void testCreate{{entity.className}}() {
         var input = new {{entity.className}}{{inputDTOSuffix}}();
         // TODO fill input data
@@ -85,6 +90,7 @@ public class {{service.name}}Test  {
     }
 
     @Test
+    @Order({{@index}}3)
     void testUpdate{{entity.className}}() {
         var id = "0"; // TODO fill id
         var input = new {{entity.className}}{{inputDTOSuffix}}();
@@ -96,6 +102,7 @@ public class {{service.name}}Test  {
     }
 
     @Test
+    @Order({{@index}}4)
     void testList{{entity.classNamePlural}}() {
         var results = {{serviceInstance}}.list{{entity.classNamePlural}}(PageRequest.of(0, 10));
         assertNotNull(results);
@@ -103,6 +110,7 @@ public class {{service.name}}Test  {
 
     {{#if entity.options.searchCriteria ~}}
     @Test
+    @Order({{@index}}5)
     void testSearch{{entity.classNamePlural}}() {
         var criteria = new {{criteriaClassName entity}}();
         // TODO fill criteria
@@ -112,6 +120,7 @@ public class {{service.name}}Test  {
     {{~/if}}
 
     @Test
+    @Order({{@index}}6)
     void testGet{{entity.className}}() {
         var id = "0"; // TODO fill id
         var {{entity.instanceName}} = {{serviceInstance}}.get{{entity.className}}(id);
@@ -119,6 +128,7 @@ public class {{service.name}}Test  {
     }
 
     @Test
+    @Order({{@index}}7)
     void testDelete{{entity.className}}() {
         var id = "0"; // TODO fill id
         assertTrue({{entity.instanceName}}Repository.containsKey(id));

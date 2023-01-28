@@ -45,7 +45,7 @@ public class SpringCloudStreams3AdaptersGeneratorTest {
         new MainGenerator().generate(plugin);
 
         List<String> logs = logCaptor.getLogs();
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/adapters/events/orders/EventEntityMapper.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/adapters/events/orders/AdapterEventsMapper.java"));
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/adapters/events/orders/OnProductCreatedConsumerServiceAdapter.java"));
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/adapters/events/orders/OnProductCreated2ConsumerServiceAdapter.java"));
     }
@@ -68,7 +68,7 @@ public class SpringCloudStreams3AdaptersGeneratorTest {
         new MainGenerator().generate(plugin);
 
         List<String> logs = logCaptor.getLogs();
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/orders/relational/adapters/events/provider/EventEntityMapper.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/orders/relational/adapters/events/provider/AdapterEventsMapper.java"));
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/orders/relational/adapters/events/provider/DoCustomerRequestConsumerServiceAdapter.java"));
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/orders/relational/adapters/events/provider/DoShippingDetailsRequestConsumerServiceAdapter.java"));
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/orders/relational/adapters/events/provider/DoPaymentDetailsRequestConsumerServiceAdapter.java"));

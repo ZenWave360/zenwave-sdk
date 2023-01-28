@@ -32,6 +32,10 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         schema, avro
     }
 
+    enum PayloadStyle {
+        entity, stateTransfer
+    }
+
     public String sourceProperty = "jdl";
 
     @DocumentedOption(description = "Entities to generate code for")
@@ -59,6 +63,15 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
 
     @DocumentedOption(description = "Schema format for messages' payload")
     public SchemaFormat schemaFormat = SchemaFormat.schema;
+
+    @DocumentedOption(description = "Payload Style for messages' payload")
+    public PayloadStyle payloadStyle = PayloadStyle.entity;
+
+    @DocumentedOption(description = "JsonSchema type for id fields and parameters.")
+    public String idType = "string";
+
+    @DocumentedOption(description = "JsonSchema type format for id fields and parameters.")
+    public String idTypeFormat = null;
 
     @DocumentedOption(description = "Package name for generated Avro Schemas (.avsc)")
     public String avroPackage = "io.example.domain.model";
@@ -97,8 +110,8 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         Map<String, Object> schemas = new LinkedHashMap<>();
         JSONPath.set(oasSchemas, "components.schemas", schemas);
 
-        JDLEntitiesToAvroConverter toAvroConverter = new JDLEntitiesToAvroConverter().withIdType("string").withNamespace(avroPackage);
-        JDLEntitiesToSchemasConverter toSchemasConverter = new JDLEntitiesToSchemasConverter().withIdType("string").withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
+        JDLEntitiesToAvroConverter toAvroConverter = new JDLEntitiesToAvroConverter().withIdType(idType).withNamespace(avroPackage);
+        JDLEntitiesToSchemasConverter toSchemasConverter = new JDLEntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
         toSchemasConverter.includeVersion = false;
 
         List<Map<String, Object>> entities = (List) JSONPath.get(jdlModel, "$.entities[*]");
@@ -171,7 +184,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
 
         avroList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name), avroJson, OutputFormatType.JSON.toString()));
 
-        if (!skipOperations(entityOrEnum) || entityOrEnum.get("fields") == null) {
+        if (payloadStyle == PayloadStyle.stateTransfer && (!skipOperations(entityOrEnum) || entityOrEnum.get("fields") == null)) {
             // creating 'fake' jdl entities for message payloads for created/updated/deleted as { id: <id>, payload: <entity> }
 
             Map<String, Object> fields = new HashMap<>();
@@ -238,13 +251,18 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
             return "Default";
         });
 
+        handlebarsEngine.getHandlebars().registerHelper("isStateTransferPayloadStyle", (context, options) -> {
+            return payloadStyle == PayloadStyle.stateTransfer;
+        });
+
         handlebarsEngine.getHandlebars().registerHelper("payloadRef", (context, options) -> {
             Map entity = (Map) context;
-            String messageType = options.param(0);
+            String messageType = payloadStyle == PayloadStyle.stateTransfer ? options.param(0) : "";
+            String payloadStyleSuffix = payloadStyle == PayloadStyle.stateTransfer ? "Payload" : "";
             if (schemaFormat == SchemaFormat.avro) {
-                return String.format("avro/%s%sPayload.avsc", entity.get("className"), messageType);
+                return String.format("avro/%s%s%s.avsc", entity.get("className"), messageType, payloadStyleSuffix);
             }
-            return String.format("#/components/schemas/%s%sPayload", entity.get("className"), messageType);
+            return String.format("#/components/schemas/%s%s%s", entity.get("className"), messageType, payloadStyleSuffix);
         });
     }
 }

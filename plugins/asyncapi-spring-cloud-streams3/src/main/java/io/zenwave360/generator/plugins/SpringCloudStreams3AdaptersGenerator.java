@@ -42,7 +42,7 @@ public class SpringCloudStreams3AdaptersGenerator extends SpringCloudStreams3Gen
 
     private String prefix = templatesPath + "/adapters/";
 
-    private TemplateInput mapperTemplate = new TemplateInput(prefix + "{{style}}/Mapper.java", "src/main/java/{{asPackageFolder adaptersPackage}}/EventEntityMapper.java", JAVA);
+    private TemplateInput mapperTemplate = new TemplateInput(prefix + "{{style}}/Mapper.java", "src/main/java/{{asPackageFolder adaptersPackage}}/AdapterEventsMapper.java", JAVA);
     private TemplateInput adapterTemplate = new TemplateInput(prefix + "{{style}}/Adapter.java", "src/main/java/{{asPackageFolder adaptersPackage}}/{{serviceName operation.x--operationIdCamelCase}}Adapter.java", JAVA);
 
     @Override

@@ -82,7 +82,7 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
                     var headers = new HashMap(message.getHeaders());
                     headers.put("x-exception-type", e.getClass().getName());
                     headers.put("x-exception-message", e.getMessage());
-                    headers.put("x-exception-stacktrace ", e.getStackTrace());
+                    headers.put("x-exception-stacktrace ", getStackTraceAsString(e));
                     headers.put("x-exception-payload-type", message.getPayload().getClass().getName());
                     streamBridge.send(resolvedDLQ, MessageBuilder.createMessage(message.getPayload(), new MessageHeaders(headers)));
                     return;

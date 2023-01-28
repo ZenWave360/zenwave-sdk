@@ -3,6 +3,9 @@
         if(runtimeHeaders == null ||runtimeHeaders.isEmpty()) {
             return;
         }
+        if(headers == null) {
+            headers = new java.util.HashMap<>();
+        }
         for (Map.Entry<String, String> runtimeHeader :runtimeHeaders.entrySet()) {
             String location = runtimeHeader.getValue().replace("$message.payload#/", "");
             if("$tracingIdSupplier".equals(location.trim())) {
@@ -15,7 +18,14 @@
                 var parts = java.util.Arrays.asList(location.split("/"));
                 var value = payload;
                 for (String part : parts) {
-                    value = new java.beans.PropertyDescriptor(part, value.getClass()).getReadMethod().invoke(value);
+                    if(value != null) {
+                        var pd = new java.beans.PropertyDescriptor(part, value.getClass());
+                        if(pd != null && pd.getReadMethod() != null) {
+                            value = pd.getReadMethod().invoke(value);
+                        } else {
+                            log.error("Unable to find property for: {} in class: {}", parts, payload.getClass());
+                        }
+                    }
                 }
                 headers.put(runtimeHeader.getKey(), value);
             } catch (java.beans.IntrospectionException | java.lang.reflect.InvocationTargetException | IllegalAccessException e) {

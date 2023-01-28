@@ -107,6 +107,7 @@ public class {{apiClassName}} implements I{{apiClassName}} {
     public boolean {{operation.operationId}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers) {
         log.debug("Sending message to stream {} via outbox", {{operation.operationId}}BindingName);
         {{~#if (hasRuntimeHeaders message)}}
+        headers = headers != null ? headers : new {{message.x--javaTypeSimpleName}}Headers();
         processRuntimeHeaders(payload, headers, headers._runtimeheaders);
         {{~/if}}
         Message message = MessageBuilder.createMessage(payload, new MessageHeaders(headers));

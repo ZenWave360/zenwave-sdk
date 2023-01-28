@@ -10,17 +10,21 @@ import {{consumerApiPackage}}.{{serviceInterfaceName operation.x--operationIdCam
 {{~/each}}
 {{~/if}}
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Component
 public class {{serviceName operation.x--operationIdCamelCase}}Adapter implements {{serviceInterfaceName operation.x--operationIdCamelCase}} {
 
-    private EventEntityMapper mapper;
+    private Logger logger = LoggerFactory.getLogger(getClass());
+
+    private AdapterEventsMapper mapper;
     // TODO: private EntityService service;
 
     @Autowired
-    public void setEventEntityMapper(EventEntityMapper mapper) {
+    public void setAdapterEventsMapper(AdapterEventsMapper mapper) {
         this.mapper = mapper;
     }
 
@@ -30,10 +34,12 @@ public class {{serviceName operation.x--operationIdCamelCase}}Adapter implements
      */
     {{~#if exposeMessage}}
     public void {{operation.operationId}}{{methodSuffix message operation}}(Message<{{message.x--javaType}}> msg) {
+        logger.debug("Received command request for doCustomerRequest: {} with headers {}", msg.getPayload(), msg.getHeaders());
         // TODO: service.{{operation.operationId}}(mapper.asEntity(msg.getPayload()));
     };
     {{~else}}
     public void {{operation.operationId}}{{methodSuffix message operation}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers) {
+        logger.debug("Received command request for doCustomerRequest: {} with headers {}", payload, headers);
         // TODO: service.{{operation.operationId}}(mapper.asEntity(payload));
     };
     {{~/if}}

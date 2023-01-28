@@ -48,6 +48,8 @@ components:
       title: Async Command/Request for a {{entity.className}}
       summary: Async Command/Request for a {{entity.className}}
       schemaFormat: {{{schemaFormatString}}}
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
         $ref: "{{payloadRef entity "Request" }}"
     {{~/if}}
@@ -58,23 +60,42 @@ components:
       title: Message for a {{entity.className}} Event
       summary: Message for a {{entity.className}} Event
       schemaFormat: {{{schemaFormatString}}}
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
         $ref: "{{payloadRef entity "Event"}}"
     {{~/if}}
   {{/unless}}
 {{~/each}}
 
+  messageTraits:
+    CommonHeaders:
+      headers:
+        type: object
+        properties:
+          kafka_messageKey:
+            type: string
+            description: This header value will be populated automatically at runtime
+            x-runtime-expression: $message.payload#/id
+          tracingId:
+            type: string
+            description: This header value will be populated automatically at runtime
+            x-runtime-expression: $tracingIdSupplier
+
 {{{schemasAsString}}}
 
-{{~#if schemasAsString}}
+{{~#if schemasAsString}}{{~#if (isStateTransferPayloadStyle)}}
 {{~#each jdlModel.entities as |entity|}}
   {{~#unless (skipOperations entity)}}
     {{~#if includeCommands}}
     {{entity.className}}RequestPayload:
       type: object
       properties:
-        {{entity.instanceName}}Id:
-          type: string
+        id:
+          type: {{idType}}
+          {{~#if idTypeFormat}}
+          format: {{idTypeFormat}}
+          {{~/if}}
         requestType:
           type: string
           enum:
@@ -88,8 +109,11 @@ components:
     {{entity.className}}EventPayload:
       type: object
       properties:
-        {{entity.instanceName}}Id:
-          type: string
+        id:
+          type: {{idType}}
+          {{~#if idTypeFormat}}
+          format: {{idTypeFormat}}
+          {{~/if}}
         eventType:
           type: string
           enum:
@@ -101,4 +125,4 @@ components:
     {{~/if}}
   {{/unless}}
 {{~/each}}
-{{~/if}}
+{{~/if}}{{~/if}}
