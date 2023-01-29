@@ -101,7 +101,7 @@ You can generate complete Event Driven Microservices using DDD and API-First
 5. Generate E2E, Integration tests and Consumer Contracts for the public APIs you just produced.
 
 
-![ZenWave Features MindMap](docs/ZenWave-MindMap2.svg)
+![ZenWave Features MindMap](docs/ZenWave-MindMap.svg)
 
 
 ## What can we generate for you today?
