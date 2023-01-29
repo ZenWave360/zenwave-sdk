@@ -61,10 +61,17 @@ entity ShippingDetails {
 @copy(ShippingDetails)
 entity OrderShippingDetails {}
 
+@copy(ShippingDetails)
+entity OrderShippingDetails2 {}
+
 //relationship OneToMany {
 //	Customer{shipmentDetails} to ShippingDetails{customer}
 //	Customer{paymentDetails} to PaymentDetails{customer}
 //}
+
+relationship OneToOne {
+	CustomerOrder{shipmentDetails} to OrderShippingDetails2{customerOrder}
+}
 
 relationship ManyToOne {
 	ShippingDetails{customer} to Customer{shipmentDetails}

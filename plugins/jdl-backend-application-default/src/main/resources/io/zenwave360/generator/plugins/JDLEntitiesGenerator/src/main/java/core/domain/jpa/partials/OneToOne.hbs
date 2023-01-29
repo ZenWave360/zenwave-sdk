@@ -1,1 +1,7 @@
-@OneToOne{{#if relationship.ownerSide }}(mappedBy = "{{relationship.otherEntityName}}"){{/if~}}
+{{#if relationship.ownerSide }}
+@OneToOne
+@JoinColumn(unique = true)
+{{~else~}}
+@OneToOne(mappedBy = "{{relationship.otherEntityFieldName}}")
+{{/if~}}
+
