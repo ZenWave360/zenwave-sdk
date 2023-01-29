@@ -116,8 +116,8 @@ Whether you are:
 
 ![06-ServiceImplementation-Hexagonal](docs/06-ServiceImplementation-Hexagonal.excalidraw.svg)
 
-- [ ] Standard Plugins
-  - [ ] JDL Backend Application (flexible hexagonal architecture)
+- [x] Standard Plugins
+  - [x] JDL Backend Application (flexible hexagonal architecture)
     - [x] Domain Entities,
     - [x] Inbound
       - [x] Service Ports, DTOs, Mappers

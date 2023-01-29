@@ -76,8 +76,8 @@ JBang will use you maven settings for repository resolution, but you can also sp
   - [x] Help command: detailed, json, markdown, list of available plugins
   - [x] Fork existing (custom or standard) plugin command
 - [x] ZenWave Code Generator Maven Plugin
-- [ ] Standard Plugins
-  - [ ] JDL Backend Application (flexible hexagonal architecture)
+- [x] Standard Plugins
+  - [x] JDL Backend Application (flexible hexagonal architecture)
     - [x] Domain Entities
     - [x] Inbound
       - [x] Service Ports, DTOs, Mappers
