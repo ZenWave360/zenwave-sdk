@@ -54,15 +54,15 @@ jbang alias add --name=zw \
     --repos=mavencentral,snapshots=https://s01.oss.sonatype.org/content/repositories/snapshots \
     --deps=\
 org.slf4j:slf4j-simple:1.7.36,\
-io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:0.9.13-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-jsonschema2pojo:0.9.13-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:0.9.13-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:openapi-rest-assured:0.9.13-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:0.9.13-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:0.9.13-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi:0.9.13-SNAPSHOT,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:0.9.13-SNAPSHOT \
-    io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli:0.9.13-SNAPSHOT
+io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:1.0.0.RC1,\
+io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-jsonschema2pojo:1.0.0.RC1,\
+io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:1.0.0.RC1,\
+io.github.zenwave360.zenwave-code-generator.plugins:openapi-rest-assured:1.0.0.RC1,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:1.0.0.RC1,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:1.0.0.RC1,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi:1.0.0.RC1,\
+io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:1.0.0.RC1 \
+    io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli:1.0.0.RC1
 ```
 
 You can include any **custom plugin** jars in the `--deps` option.
@@ -204,7 +204,7 @@ jbang zw -p io.zenwave360.generator.plugins.ForkPlugin -h
 | `targetFolder`          |                                                                                     | String   |                                                                                   |            |
 | `sourcePluginClassName` | Plugin Plugin class to fork                                                         | String   |                                                                                   |            |
 | `targetPluginClassName` | New Plugin Plugin class. It will be used for class name, package and maven groupId. | String   |                                                                                   |            |
-| `downloadURL`           | Download URL for the source code of original plugin in zip format                   | URL      | https://github.com/ZenWave360/zenwave-code-generator/archive/refs/tags/v0.9.12.zip |            |
+| `downloadURL`           | Download URL for the source code of original plugin in zip format                   | URL      | https://github.com/ZenWave360/zenwave-code-generator/archive/refs/tags/v1.0.0.RC1.zip |            |
 
 Example:
 
