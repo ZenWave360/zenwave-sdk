@@ -60,7 +60,7 @@ public class {{apiClassName}}Captor implements I{{apiClassName}} {
         log.debug("Capturing message to topic: {}", {{operation.operationId}}BindingName);
         {{~#if (hasRuntimeHeaders message)}}
         headers = headers != null ? headers : new {{message.x--javaTypeSimpleName}}Headers();
-        processRuntimeHeaders(payload, headers, headers._runtimeheaders);
+        processRuntimeHeaders(payload, headers, {{message.x--javaTypeSimpleName}}Headers._runtimeheaders);
         {{~/if}}
         Message message = MessageBuilder.createMessage({{#if (hasEnterpriseEnvelope operation)}}wrap(payload){{else}}payload{{/if}}, new MessageHeaders(headers));
         return appendCapturedMessage({{operation.operationId}}BindingName, message);

@@ -108,7 +108,7 @@ public class {{apiClassName}} implements I{{apiClassName}} {
         log.debug("Sending message to stream {} via outbox", {{operation.operationId}}BindingName);
         {{~#if (hasRuntimeHeaders message)}}
         headers = headers != null ? headers : new {{message.x--javaTypeSimpleName}}Headers();
-        processRuntimeHeaders(payload, headers, headers._runtimeheaders);
+        processRuntimeHeaders(payload, headers, {{message.x--javaTypeSimpleName}}Headers._runtimeheaders);
         {{~/if}}
         Message message = MessageBuilder.createMessage(payload, new MessageHeaders(headers));
         // return streamBridge.send({{operation.operationId}}BindingName, message, outputContentType);
