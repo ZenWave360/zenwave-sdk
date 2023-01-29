@@ -59,7 +59,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
 
     private String prefix = "io/zenwave360/generator/plugins/SpringWebTestClientGenerator/";
     private final TemplateInput partialTemplate = new TemplateInput(prefix + "partials/Operation.java", "{{asPackageFolder testsPackage}}/Operation.java");
-    private final TemplateInput testSetTemplate = new TemplateInput(prefix + "ControllersTestSet.java", "{{asPackageFolder testsPackage}}/ControllersTestSet.java").withMimeType(JAVA);
+//    private final TemplateInput testSetTemplate = new TemplateInput(prefix + "ControllersTestSet.java", "{{asPackageFolder testsPackage}}/ControllersTestSet.java").withMimeType(JAVA);
 
     private final TemplateInput baseTestClassTemplate = new TemplateInput(prefix + "BaseWebTestClientTest.java", "{{asPackageFolder baseTestClassPackage}}/{{baseTestClassName}}.java").withMimeType(JAVA).withSkipOverwrite(true);
 
@@ -112,7 +112,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
                 }
             }
 
-            templateOutputList.add(generateTestSet(contextModel, testSetTemplate, includedImports, includedTestNames));
+//            templateOutputList.add(generateTestSet(contextModel, testSetTemplate, includedImports, includedTestNames));
             templateOutputList.add(generateTemplateOutput(contextModel, baseTestClassTemplate, null, null));
         }
 

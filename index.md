@@ -31,7 +31,7 @@ ZenWave Code Generator is designed to be easily extensible and adaptable to your
 You can install the latest release using [jbang](https://www.jbang.dev) running the following command:
 
 ```shell
-jbang alias add --name=zw release@zenwave360/zenwave-code-generator --fresh
+jbang alias add --fresh --name=zw release@zenwave360/zenwave-code-generator
 ```
 
 Please refer to [**ZenWave Code Generator**](https://github.com/ZenWave360/zenwave-code-generator/) for more detailed installation options.

@@ -6,6 +6,8 @@ import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 
+import static com.tngtech.archunit.base.DescribedPredicate.alwaysTrue;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 import static com.tngtech.archunit.library.Architectures.onionArchitecture;
 
@@ -48,6 +50,8 @@ public class ArchitectureTest {
         .whereLayer("CoreOutbound").mayOnlyBeAccessedByLayers("CoreImplementation", "Infrastructure", "InfrastructureSearch")
         .whereLayer("Domain").mayOnlyAccessLayers("Domain")
         .whereLayer("SearchModel").mayOnlyAccessLayers("Domain")
+
+        .ignoreDependency(resideInAPackage("..config.."), alwaysTrue())
         ;
 
     /**
@@ -62,5 +66,8 @@ public class ArchitectureTest {
         .domainServices("..core.inbound..", "..core.outbound..")
         .applicationServices("..core.implementation..")
         .adapter("inbound", "..adapters.(*)..")
-        .adapter("outbound", "..infrastructure.(*)..");
+        .adapter("outbound", "..infrastructure.(*)..")
+
+        .ignoreDependency(resideInAPackage("..config.."), alwaysTrue())
+        ;
 }

@@ -91,8 +91,8 @@ public class SpringWebTestClientGeneratorTest {
 
     @ParameterizedTest(name = "[{index}] {displayName} {0}")
     @CsvSource({
-            "openapi-petstore.yml, addPet, 'PetApiIT,ControllersTestSet'",
-            "openapi-orders.yml, createCustomer, 'CustomerApiIT,ControllersTestSet'"
+            "openapi-petstore.yml, addPet, 'PetApiIT'",
+            "openapi-orders.yml, createCustomer, 'CustomerApiIT'"
     })
     public void test_output_by_one_service(String openapi, String operationId, String controllers) throws Exception {
         String targetFolder = "target/test_output_by_one_service_" + openapi.replaceAll("\\.", "_");
@@ -120,8 +120,8 @@ public class SpringWebTestClientGeneratorTest {
 
     @ParameterizedTest(name = "[{index}] {displayName} {0}")
     @CsvSource({
-            "openapi-petstore.yml, 'PetApiIT,ControllersTestSet'",
-            "openapi-orders.yml, 'CustomerApiIT,ControllersTestSet'"
+            "openapi-petstore.yml, 'PetApiIT'",
+            "openapi-orders.yml, 'CustomerApiIT'"
     })
     public void test_output_by_service(String openapi, String controllers) throws Exception {
         String targetFolder = "target/test_output_by_service_" + openapi.replaceAll("\\.", "_");
@@ -148,8 +148,8 @@ public class SpringWebTestClientGeneratorTest {
 
     @ParameterizedTest(name = "[{index}] {displayName} {0}")
     @CsvSource({
-            "openapi-petstore.yml, 'PetApi/AddPetIT,ControllersTestSet'",
-            "openapi-orders.yml, 'CustomerOrderApi/CreateCustomerOrderIT,ControllersTestSet'"
+            "openapi-petstore.yml, 'PetApi/AddPetIT'",
+            "openapi-orders.yml, 'CustomerOrderApi/CreateCustomerOrderIT'"
     })
     public void test_output_by_operation(String openapi, String controllers) throws Exception {
         String targetFolder = "target/test_output_by_operation_" + openapi.replaceAll("\\.", "_");
