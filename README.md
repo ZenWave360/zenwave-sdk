@@ -86,19 +86,18 @@ JBang will use you maven settings for repository resolution, but you can also sp
     - [x] Outbound: SpringData Repositories, ElasticSearch... (for REST or Async see other plugins)
     - [x] Adapters:
       - [x] Spring MVC
-      - [ ] Spring WebFlux
+      - [ ] ~~Spring WebFlux~~
     - [ ] Flavors
       - [x] MongoDB
         - [x] Imperative
-        - [ ] Reactive
+        - [ ] ~~Reactive~~
       - [x] JPA
         - [x] Imperative
-        - [ ] Reactive
-    - [ ] Unit/Integration Testing
-      - [ ] Solitary Unit Testing: minimal
-      - [ ] Sociable Vertical Testing: manual dependency setup with in memory infrastructure _test-doubles_
-      - [ ] Edge Integration Testing: partial spring-boot context for outbound adapters with testcontainers
-      - [ ] Vertical Integration Testing: full spring-boot context for inbound adapters with testcontainers
+        - [ ] ~~Reactive~~
+    - [x] Unit/Integration Testing
+      - [x] Edge Integration Testing: partial spring-boot context for outbound adapters (with testcontainers)
+      - [x] Sociable Vertical Testing: manual dependency setup with in memory infrastructure _test-doubles_
+      - [x] Vertical Integration Testing: full spring-boot context for inbound adapters (with testcontainers)
   - [x] JDL OpenAPI Controllers
   - [x] OpenAPI to Spring WebTestClient
   - [x] AsyncAPI Spring Cloud Streams3
