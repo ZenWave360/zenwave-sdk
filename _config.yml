@@ -8,7 +8,7 @@ search_enabled: true
 logo: "https://raw.githubusercontent.com/ZenWave360/.github/main/logos/code-generator/code-generator-logo-right-side-text.svg"
 aux_links:
   "See on GitHub":
-    - "//github.com/zenwave360/zenwave-code-generator"
+    - "//github.com/zenwave360/zenwave-sdk"
 ga_tracking: G-PWPE0ZF877
 ga_tracking_anonymize_ip: true # Use GDPR compliant Google Analytics settings (true by default)
 

@@ -1,8 +1,8 @@
 # AsyncAPI and JsonSchema2Pojo (with maven plugin)
 > 👉 ZenWave360 Helps You Create Software that's Easy to Understand
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360.zenwave-code-generator/zenwave-code-generator.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360.zenwave-code-generator/zenwave-code-generator)
-[![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-code-generator)](https://github.com/ZenWave360/zenwave-code-generator/blob/main/LICENSE)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360.zenwave-sdk/zenwave-sdk.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360.zenwave-sdk/zenwave-sdk)
+[![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-sdk)](https://github.com/ZenWave360/zenwave-sdk/blob/main/LICENSE)
 
 Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files using https://www.jsonschema2pojo.org/ library.
 
@@ -48,8 +48,8 @@ Use jsonschema2pojo prefix to pass any option to https://www.jsonschema2pojo.org
 
 ```xml
 <plugin>
-    <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
-    <artifactId>zenwave-code-generator-maven-plugin</artifactId>
+    <groupId>io.github.zenwave360.zenwave-sdk</groupId>
+    <artifactId>zenwave-sdk-maven-plugin</artifactId>
     <version>${zenwave.version}</version>
     <executions>
         <execution>
@@ -71,7 +71,7 @@ Use jsonschema2pojo prefix to pass any option to https://www.jsonschema2pojo.org
     </executions>
     <dependencies>
         <dependency>
-            <groupId>io.github.zenwave360.zenwave-code-generator.plugins</groupId>
+            <groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
             <artifactId>asyncapi-jsonschema2pojo</artifactId>
             <version>${zenwave.version}</version>
         </dependency>

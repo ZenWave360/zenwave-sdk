@@ -41,7 +41,7 @@ public class ForkPluginGenerator implements Generator {
     public String targetPluginClassName;
 
     @DocumentedOption(description = "Download URL for the source code of original plugin in zip format", required = false)
-    public URL downloadURL = new URL("https://github.com/ZenWave360/zenwave-code-generator/archive/refs/tags/v1.0.0.RC1.zip");
+    public URL downloadURL = new URL("https://github.com/ZenWave360/zenwave-sdk/archive/refs/tags/v1.0.0.RC1.zip");
 
     @DocumentedOption
     public String targetFolder;
@@ -264,14 +264,14 @@ public class ForkPluginGenerator implements Generator {
     }
 
     protected File download(URL downloadURL) throws IOException {
-        File zipFile = File.createTempFile("zenwave-code-generator-repo-", ".zip");
+        File zipFile = File.createTempFile("zenwave-sdk-repo-", ".zip");
         log.debug("Downloading {} to {}", downloadURL, zipFile.getAbsoluteFile());
         FileUtils.copyURLToFile(downloadURL, zipFile);
         return zipFile;
     }
 
     protected File uncompress(File zipFile) throws IOException {
-        File outputDir = File.createTempFile("zenwave-code-generator-repo-", "");
+        File outputDir = File.createTempFile("zenwave-sdk-repo-", "");
         outputDir.delete();
         outputDir.mkdir();
         log.debug("Uncompressing {} to {}", zipFile, outputDir);

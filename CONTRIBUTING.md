@@ -6,14 +6,14 @@ ZenWave Code Generator features two complementary contributing models:
 
 ## Plugins as a Bazaar
 
-One of the main promises of ZenWave Code Generator is to provide a plugin system that allows developers to easily extend and personalize the core functionality of the tool, create entirely new plugins or [fork existing ones](https://github.com/ZenWave360/zenwave-code-generator#forking-an-standard-or-custom-plugin).
+One of the main promises of ZenWave Code Generator is to provide a plugin system that allows developers to easily extend and personalize the core functionality of the tool, create entirely new plugins or [fork existing ones](https://github.com/ZenWave360/zenwave-sdk#forking-an-standard-or-custom-plugin).
 
 Plugins as packed as standard java jar files and installed on any local, corporate or public maven repo and can be added to jbang or maven classpath as a dependency.
 
 You don't need to ask permission, become a code developer, request write access to this repo or even create pull requests to create your own plugins:
 
 - Just find a plugin that you want to extend or fork
-- This [fork command](https://github.com/ZenWave360/zenwave-code-generator#forking-an-standard-or-custom-plugin) will download current source code from GitHub, find the plugin you want to fork and will create a new project with the forked source code, performing some basic replacements in java packages names and maven groupId/artifactId
+- This [fork command](https://github.com/ZenWave360/zenwave-sdk#forking-an-standard-or-custom-plugin) will download current source code from GitHub, find the plugin you want to fork and will create a new project with the forked source code, performing some basic replacements in java packages names and maven groupId/artifactId
 - Do your modifications and install your plugin to any maven repo. Both JBang and Maven will be able to find your plugin as a dependency using your maven settings. You don't even need to publish your changes.
 - If you think your changes are worth considering to be merged back to the original plugin. Open an issue following this process, and we will be happy to review your changes and start a discussion:
   - Create a GitHub repo with a base project and use your plugin to generate on top of it.
@@ -37,4 +37,4 @@ We love your input! We want to make contributing to this project as easy and tra
 Happy contributing :heart:
 
 ## License
-When you submit changes, your submissions are understood to be under the same [MIT](https://github.com/ZenWave360/zenwave-code-generator/blob/main/LICENSE) that covers the project. Feel free to contact the maintainers if that's a concern.
+When you submit changes, your submissions are understood to be under the same [MIT](https://github.com/ZenWave360/zenwave-sdk/blob/main/LICENSE) that covers the project. Feel free to contact the maintainers if that's a concern.

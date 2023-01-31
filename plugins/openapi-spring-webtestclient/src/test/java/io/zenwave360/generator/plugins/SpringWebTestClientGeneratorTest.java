@@ -24,7 +24,7 @@ import static io.zenwave360.generator.utils.NamingUtils.camelCase;
 
 public class SpringWebTestClientGeneratorTest {
 
-    private static final String OPENAPI_RESOURCES = "../../../../zenwave-code-generator-test-resources/src/main/resources/io/zenwave360/generator/resources/openapi/";
+    private static final String OPENAPI_RESOURCES = "../../../../zenwave-sdk-test-resources/src/main/resources/io/zenwave360/generator/resources/openapi/";
 
     private Map<String, Object> loadApiModelFromResource(String resource) throws Exception {
         Map<String, Object> model = new DefaultYamlParser().withSpecFile(URI.create(resource)).parse();

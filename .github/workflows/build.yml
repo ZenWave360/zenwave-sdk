@@ -54,7 +54,7 @@ jobs:
             ./plugins/jdl-to-asyncapi/target/site/jacoco/jacoco.csv
             ./plugins/openapi-spring-webtestclient/target/site/jacoco/jacoco.csv
             ./plugins/openapi-rest-assured/target/site/jacoco/jacoco.csv
-            ./zenwave-code-generator-cli/target/site/jacoco/jacoco.csv
+            ./zenwave-sdk-cli/target/site/jacoco/jacoco.csv
 
       - name: Log coverage percentage
         run: |
@@ -86,11 +86,11 @@ jobs:
       - name: Comment on PR with coverage percentages
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          REPORT=$(<badges/zenwave-code-generator-cli/coverage-summary.json)
+          REPORT=$(<badges/zenwave-sdk-cli/coverage-summary.json)
           COVERAGE=$(jq -r '.coverage' <<< "$REPORT")%
           BRANCHES=$(jq -r '.branches' <<< "$REPORT")%
           NEWLINE=$'\n'
-          BODY="## JaCoCo Test Coverage Summary Statistics (zenwave-code-generator-cli)${NEWLINE}* __Coverage:__ ${COVERAGE}${NEWLINE}* __Branches:__ ${BRANCHES}"
+          BODY="## JaCoCo Test Coverage Summary Statistics (zenwave-sdk-cli)${NEWLINE}* __Coverage:__ ${COVERAGE}${NEWLINE}* __Branches:__ ${BRANCHES}"
           gh pr comment ${{github.event.pull_request.number}} -b "${BODY}"
         continue-on-error: true
         env:

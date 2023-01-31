@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
+        <groupId>io.github.zenwave360.zenwave-sdk</groupId>
         <artifactId>plugins-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <name>${project.groupId}:${project.artifactId}</name>
-    <groupId>io.github.zenwave360.zenwave-code-generator.plugins</groupId>
+    <groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
     <artifactId>jdl-to-asyncapi</artifactId>
     <packaging>jar</packaging>
 

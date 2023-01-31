@@ -2,13 +2,13 @@
 
 > 👉 ZenWave360 Helps You Create Software that's Easy to Understand
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360.zenwave-code-generator/zenwave-code-generator.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360.zenwave-code-generator/zenwave-code-generator)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/ZenWave360/zenwave-code-generator?logo=GitHub)](https://github.com/ZenWave360/zenwave-code-generator/releases)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360.zenwave-sdk/zenwave-sdk.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360.zenwave-sdk/zenwave-sdk)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/ZenWave360/zenwave-sdk?logo=GitHub)](https://github.com/ZenWave360/zenwave-sdk/releases)
 ![General Availability](https://img.shields.io/badge/lifecycle-GA-green)
-[![build](https://github.com/ZenWave360/zenwave-code-generator/workflows/build/badge.svg)](https://github.com/ZenWave360/zenwave-code-generator/actions/workflows/build.yml)
-[![coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-code-generator/badges/jacoco.svg)](https://github.com/ZenWave360/zenwave-code-generator/actions/workflows/build.yml)
-[![branches coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-code-generator/badges/branches.svg)](https://github.com/ZenWave360/zenwave-code-generator/actions/workflows/build.yml)
-[![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-code-generator)](https://github.com/ZenWave360/zenwave-code-generator/blob/main/LICENSE)
+[![build](https://github.com/ZenWave360/zenwave-sdk/workflows/build/badge.svg)](https://github.com/ZenWave360/zenwave-sdk/actions/workflows/build.yml)
+[![coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/badges/jacoco.svg)](https://github.com/ZenWave360/zenwave-sdk/actions/workflows/build.yml)
+[![branches coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/badges/branches.svg)](https://github.com/ZenWave360/zenwave-sdk/actions/workflows/build.yml)
+[![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-sdk)](https://github.com/ZenWave360/zenwave-sdk/blob/main/LICENSE)
 
 ## Domain Driven Design (DDD) and API-First for Event Driven Microservices
 
@@ -26,15 +26,15 @@ Using JHipster Domain Language as **Ubiquitous Language** for **Data on the Insi
 - **API-First specs like AsyncAPI and OpenAPI:** to describe Inter Process Communications (IPC) between bounded contexts/microservices.
 - **ZenWave Code Generator:** to generate (_a lot of_) infrastructure, functional and testing code from your models and APIs.
 
-ZenWave Code Generator is designed to be easily extensible and adaptable to your project or your organization needs and likes. You can always [fork an existing, standard or custom plugin](https://github.com/ZenWave360/zenwave-code-generator/#forking-an-standard-or-custom-plugin).
+ZenWave Code Generator is designed to be easily extensible and adaptable to your project or your organization needs and likes. You can always [fork an existing, standard or custom plugin](https://github.com/ZenWave360/zenwave-sdk/#forking-an-standard-or-custom-plugin).
 
 You can install the latest release using [jbang](https://www.jbang.dev) running the following command:
 
 ```shell
-jbang alias add --fresh --name=zw release@zenwave360/zenwave-code-generator
+jbang alias add --fresh --name=zw release@zenwave360/zenwave-sdk
 ```
 
-Please refer to [**ZenWave Code Generator**](https://github.com/ZenWave360/zenwave-code-generator/) for more detailed installation options.
+Please refer to [**ZenWave Code Generator**](https://github.com/ZenWave360/zenwave-sdk/) for more detailed installation options.
 
 **Note:** Official plugins are designed to generate functional code and tests on top of existing projects. Creating a base project is out of scope, but you can always go to [start.spring.io](http://start.spring.io) or [start.jhipster.tech](https://start.jhipster.tech/), in case your company doesn't already have a project starter or archetype.
 
@@ -62,7 +62,7 @@ In this way all team members: **Domain Experts**, **Product Owners**, **Software
 ## Table of Contents
 
 <!-- TOC -->
-- [ZenWave Code Generator](#zenwave-code-generator)
+- [ZenWave Code Generator](#zenwave-sdk)
   - [Domain Driven Design (DDD) and API-First for Event Driven Microservices](#domain-driven-design-ddd-and-api-first-for-event-driven-microservices)
   - [Not (just) a Code Generator](#not-just-a-code-generator)
   - [Why Domain Driven Design?](#why-domain-driven-design)
@@ -355,8 +355,8 @@ jbang zw -p io.zenwave360.generator.plugins.JDLToAsyncAPIPlugin \
 
 ```xml
 <plugin>
-  <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
-  <artifactId>zenwave-code-generator-maven-plugin</artifactId>
+  <groupId>io.github.zenwave360.zenwave-sdk</groupId>
+  <artifactId>zenwave-sdk-maven-plugin</artifactId>
   <version>${zenwave.version}</version>
   <plugin>
     <skip>false</skip>
@@ -368,12 +368,12 @@ jbang zw -p io.zenwave360.generator.plugins.JDLToAsyncAPIPlugin \
   </executions>
   <dependencies>
     <dependency><!-- Plugins standard or custom go here -->
-      <groupId>io.github.zenwave360.zenwave-code-generator.plugins</groupId>
+      <groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
       <artifactId>asyncapi-spring-cloud-streams3</artifactId>
       <version>${zenwave.version}</version>
     </dependency>
     <dependency>
-      <groupId>io.github.zenwave360.zenwave-code-generator.plugins</groupId>
+      <groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
       <artifactId>asyncapi-jsonschema2pojo</artifactId>
       <version>${zenwave.version}</version>
     </dependency>

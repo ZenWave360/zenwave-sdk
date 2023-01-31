@@ -7,7 +7,7 @@ Inspecting your java classes requires access to your project classpath. Add this
 
 ```xml
 <dependency>
-    <groupId>io.github.zenwave360.zenwave-code-generator.plugins</groupId>
+    <groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
     <artifactId>java-to-jdl</artifactId>
     <version>${zenwave.version}</version>
 </dependency>

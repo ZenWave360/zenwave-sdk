@@ -1,8 +1,8 @@
 # AsyncAPI and Spring Cloud Stream 3
 > 👉 ZenWave360 Helps You Create Software that's Easy to Understand
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360.zenwave-code-generator/zenwave-code-generator.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360.zenwave-code-generator/zenwave-code-generator)
-[![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-code-generator)](https://github.com/ZenWave360/zenwave-code-generator/blob/main/LICENSE)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360.zenwave-sdk/zenwave-sdk.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360.zenwave-sdk/zenwave-sdk)
+[![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-sdk)](https://github.com/ZenWave360/zenwave-sdk/blob/main/LICENSE)
 
 ![AsyncAPI and Spring Cloud Streams 3](../../docs/ZenWave360-AsyncAPI-SpringCloudStreams.excalidraw.svg)
 
@@ -325,8 +325,8 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
 
 ```xml
 <plugin>
-    <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
-    <artifactId>zenwave-code-generator-maven-plugin</artifactId>
+    <groupId>io.github.zenwave360.zenwave-sdk</groupId>
+    <artifactId>zenwave-sdk-maven-plugin</artifactId>
     <version>${zenwave.version}</version>
     <plugin>
         <addCompileSourceRoot>true</addCompileSourceRoot><!-- default is true -->
@@ -353,12 +353,12 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
     <!-- add any generator plugin (custom or standard) as dependency here -->
     <dependencies>
         <dependency>
-            <groupId>io.github.zenwave360.zenwave-code-generator.plugins</groupId>
+            <groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
             <artifactId>asyncapi-spring-cloud-streams3</artifactId>
             <version>${zenwave.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.zenwave360.zenwave-code-generator.plugins</groupId>
+            <groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
             <artifactId>asyncapi-jsonschema2pojo</artifactId>
             <version>${zenwave.version}</version>
         </dependency>

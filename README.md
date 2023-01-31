@@ -7,13 +7,13 @@
 
 > 👉 ZenWave360 Helps You Create Software that's Easy to Understand
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360.zenwave-code-generator/zenwave-code-generator.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360.zenwave-code-generator/zenwave-code-generator)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/ZenWave360/zenwave-code-generator?logo=GitHub)](https://github.com/ZenWave360/zenwave-code-generator/releases)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360.zenwave-sdk/zenwave-sdk.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360.zenwave-sdk/zenwave-sdk)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/ZenWave360/zenwave-sdk?logo=GitHub)](https://github.com/ZenWave360/zenwave-sdk/releases)
 ![General Availability](https://img.shields.io/badge/lifecycle-GA-green)
-[![build](https://github.com/ZenWave360/zenwave-code-generator/workflows/build/badge.svg)](https://github.com/ZenWave360/zenwave-code-generator/actions/workflows/build.yml)
-[![coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-code-generator/badges/jacoco.svg)](https://github.com/ZenWave360/zenwave-code-generator/actions/workflows/build.yml)
-[![branches coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-code-generator/badges/branches.svg)](https://github.com/ZenWave360/zenwave-code-generator/actions/workflows/build.yml)
-[![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-code-generator)](https://github.com/ZenWave360/zenwave-code-generator/blob/main/LICENSE)
+[![build](https://github.com/ZenWave360/zenwave-sdk/workflows/build/badge.svg)](https://github.com/ZenWave360/zenwave-sdk/actions/workflows/build.yml)
+[![coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/badges/jacoco.svg)](https://github.com/ZenWave360/zenwave-sdk/actions/workflows/build.yml)
+[![branches coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/badges/branches.svg)](https://github.com/ZenWave360/zenwave-sdk/actions/workflows/build.yml)
+[![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-sdk)](https://github.com/ZenWave360/zenwave-sdk/blob/main/LICENSE)
 
 ZenWave Code Generator is a configurable and extensible code generator tool for **Domain Driven Design (DDD)** and **API-First** that can generate code from a mix of different models including:
 
@@ -23,27 +23,27 @@ ZenWave Code Generator is a configurable and extensible code generator tool for 
 
 **Table of Contents:**
 
-- [ZenWave Code Generator](#zenwave-code-generator)
+- [ZenWave Code Generator](#zenwave-sdk)
   - [Jbang Instalation](#jbang-instalation)
   - [Features / Roadmap](#features--roadmap)
   - [Building from source](#building-from-source)
   - [Usage](#usage)
   - [Available Plugins](#available-plugins)
   - [Forking an Standard or Custom Plugin](#forking-an-standard-or-custom-plugin)
-- [ZenWave Code Generator Documentation](#zenwave-code-generator-documentation)
+- [ZenWave Code Generator Documentation](#zenwave-sdk-documentation)
 
 ## Jbang Instalation
 
 The easiest way to install ZenWave Code Generator is as a [JBang alias](https://www.jbang.dev/documentation/guide/latest/alias_catalogs.html):
 
 ```shell
-jbang alias add --fresh --name=zw release@zenwave360/zenwave-code-generator
+jbang alias add --fresh --name=zw release@zenwave360/zenwave-sdk
 ```
 
 or if you prefer to use the latest **snapshot** versions:
 
 ```shell
-jbang alias add --fresh --name=zw zw-snapshots@zenwave360/zenwave-code-generator
+jbang alias add --fresh --name=zw zw-snapshots@zenwave360/zenwave-sdk
 ```
 
 If you plan to use **custom plugins** you will need to use the command in the following format:
@@ -54,15 +54,15 @@ jbang alias add --name=zw \
     --repos=mavencentral,snapshots=https://s01.oss.sonatype.org/content/repositories/snapshots \
     --deps=\
 org.slf4j:slf4j-simple:1.7.36,\
-io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-spring-cloud-streams3:1.0.0.RC1,\
-io.github.zenwave360.zenwave-code-generator.plugins:asyncapi-jsonschema2pojo:1.0.0.RC1,\
-io.github.zenwave360.zenwave-code-generator.plugins:openapi-spring-webtestclient:1.0.0.RC1,\
-io.github.zenwave360.zenwave-code-generator.plugins:openapi-rest-assured:1.0.0.RC1,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-backend-application-default:1.0.0.RC1,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-openapi:1.0.0.RC1,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-to-asyncapi:1.0.0.RC1,\
-io.github.zenwave360.zenwave-code-generator.plugins:jdl-openapi-controllers:1.0.0.RC1 \
-    io.github.zenwave360.zenwave-code-generator:zenwave-code-generator-cli:1.0.0.RC1
+io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3:1.0.0.RC1,\
+io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:1.0.0.RC1,\
+io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:1.0.0.RC1,\
+io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured:1.0.0.RC1,\
+io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default:1.0.0.RC1,\
+io.github.zenwave360.zenwave-sdk.plugins:jdl-to-openapi:1.0.0.RC1,\
+io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:1.0.0.RC1,\
+io.github.zenwave360.zenwave-sdk.plugins:jdl-openapi-controllers:1.0.0.RC1 \
+    io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli:1.0.0.RC1
 ```
 
 You can include any **custom plugin** jars in the `--deps` option.
@@ -129,8 +129,8 @@ JBang will use you maven settings for repository resolution, but you can also sp
 ## Building from source
 
 ```shell
-git clone https://github.com/ZenWave360/zenwave-code-generator.git
-cd zenwave-code-generator
+git clone https://github.com/ZenWave360/zenwave-sdk.git
+cd zenwave-sdk
 mvn clean install
 ```
 
@@ -204,7 +204,7 @@ jbang zw -p io.zenwave360.generator.plugins.ForkPlugin -h
 | `targetFolder`          |                                                                                     | String   |                                                                                   |            |
 | `sourcePluginClassName` | Plugin Plugin class to fork                                                         | String   |                                                                                   |            |
 | `targetPluginClassName` | New Plugin Plugin class. It will be used for class name, package and maven groupId. | String   |                                                                                   |            |
-| `downloadURL`           | Download URL for the source code of original plugin in zip format                   | URL      | https://github.com/ZenWave360/zenwave-code-generator/archive/refs/tags/v1.0.0.RC1.zip |            |
+| `downloadURL`           | Download URL for the source code of original plugin in zip format                   | URL      | https://github.com/ZenWave360/zenwave-sdk/archive/refs/tags/v1.0.0.RC1.zip |            |
 
 Example:
 
@@ -221,4 +221,4 @@ Now you can add this jar to the list of available plugins in [jbang install comm
 
 # ZenWave Code Generator Documentation
 
-Please refer to the [documentation](https://zenwave360.github.io/zenwave-code-generator/) website for more information.
+Please refer to the [documentation](https://zenwave360.github.io/zenwave-sdk/) website for more information.

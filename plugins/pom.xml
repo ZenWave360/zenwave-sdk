@@ -2,8 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
-        <artifactId>zenwave-code-generator</artifactId>
+        <groupId>io.github.zenwave360.zenwave-sdk</groupId>
+        <artifactId>zenwave-sdk</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <name>${project.groupId}:${project.artifactId}</name>
@@ -12,13 +12,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
-            <artifactId>zenwave-code-generator-cli</artifactId>
+            <groupId>io.github.zenwave360.zenwave-sdk</groupId>
+            <artifactId>zenwave-sdk-cli</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.zenwave360.zenwave-code-generator</groupId>
-            <artifactId>zenwave-code-generator-test-resources</artifactId>
+            <groupId>io.github.zenwave360.zenwave-sdk</groupId>
+            <artifactId>zenwave-sdk-test-resources</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
