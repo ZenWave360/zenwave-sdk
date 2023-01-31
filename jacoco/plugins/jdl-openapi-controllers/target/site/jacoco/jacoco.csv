@@ -1,3 +1,0 @@
-GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-io.github.zenwave360.zenwave-sdk.plugins:jdl-openapi-controllers,io.zenwave360.sdk.plugins,JDLOpenAPIControllersPlugin,5,98,1,3,1,10,1,3,0,2
-io.github.zenwave360.zenwave-sdk.plugins:jdl-openapi-controllers,io.zenwave360.sdk.plugins,JDLOpenAPIControllersGenerator,45,731,15,49,8,120,15,44,0,27
