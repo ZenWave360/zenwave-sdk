@@ -7,7 +7,7 @@ Generate OpenAPI definition from JDL entities:
 - CRUD operations for entities
 
 ```shell
-jbang zw -p io.zenwave360.sdkns.JDLToOpenAPIPlugin \
+jbang zw -p io.zenwave360.sdk.plugins.JDLToOpenAPIPlugin \
     specFile=src/main/resources/model/orders-model.jdl \
     idType=integer \
     idTypeFormat=int64 \
@@ -36,7 +36,7 @@ jbang zw -p io.zenwave360.sdkns.JDLToOpenAPIPlugin \
 ## Getting Help
 
 ```shell
-jbang zw -p io.zenwave360.sdkns.JDLToOpenAPIPlugin --help
+jbang zw -p io.zenwave360.sdk.plugins.JDLToOpenAPIPlugin --help
 ```
 
 # OpenAPI To JDL
@@ -58,5 +58,5 @@ Generates JDL model from OpenAPI schemas
 ## Getting Help
 
 ```shell
-jbang zw -p io.zenwave360.sdkns.OpenAPIToJDLPlugin --help
+jbang zw -p io.zenwave360.sdk.plugins.OpenAPIToJDLPlugin --help
 ```

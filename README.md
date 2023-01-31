@@ -149,15 +149,15 @@ $ jbang zw -h -f list
 INFO Reflections - Reflections took 428 ms to scan 44 urls, producing 2493 keys and 14406 values
 Available plugins:
 
-jsonschema2pojo                io.zenwave360.sdkns.AsyncApiJsonSchema2PojoPlugin: Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files
-jdl-backend-application-default io.zenwave360.sdkns.JDLBackendApplicationDefaultPlugin: Generates a full backend application using a flexible hexagonal architecture
-jdl-to-openapi                 io.zenwave360.sdkns.JDLToOpenAPIPlugin: Generates a full OpenAPI definitions for CRUD operations from JDL models
-jdl-openapi-controllers        io.zenwave360.sdkns.JDLOpenAPIControllersPlugin: Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.
-openapi-to-jdl                 io.zenwave360.sdkns.OpenAPIToJDLPlugin: Generates JDL model from OpenAPI schemas
-spring-cloud-streams3          io.zenwave360.sdkns.SpringCloudStreams3Plugin: Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI
-fork-plugin                    io.zenwave360.sdkns.ForkPlugin: Creates a new standalone maven module cloning an existing plugin
-spring-webtestclient           io.zenwave360.sdkns.SpringWebTestClientPlugin: Generates spring WebTestClient tests from OpenAPI defined endpoints.
-rest-assured                   io.zenwave360.sdkns.RestAssuredPlugin: Generates REST-assured tests from OpenAPI defined endpoints.
+jsonschema2pojo                io.zenwave360.sdk.plugins.AsyncApiJsonSchema2PojoPlugin: Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files
+jdl-backend-application-default io.zenwave360.sdk.plugins.JDLBackendApplicationDefaultPlugin: Generates a full backend application using a flexible hexagonal architecture
+jdl-to-openapi                 io.zenwave360.sdk.plugins.JDLToOpenAPIPlugin: Generates a full OpenAPI definitions for CRUD operations from JDL models
+jdl-openapi-controllers        io.zenwave360.sdk.plugins.JDLOpenAPIControllersPlugin: Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.
+openapi-to-jdl                 io.zenwave360.sdk.plugins.OpenAPIToJDLPlugin: Generates JDL model from OpenAPI schemas
+spring-cloud-streams3          io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin: Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI
+fork-plugin                    io.zenwave360.sdk.plugins.ForkPlugin: Creates a new standalone maven module cloning an existing plugin
+spring-webtestclient           io.zenwave360.sdk.plugins.SpringWebTestClientPlugin: Generates spring WebTestClient tests from OpenAPI defined endpoints.
+rest-assured                   io.zenwave360.sdk.plugins.RestAssuredPlugin: Generates REST-assured tests from OpenAPI defined endpoints.
 ```
 
 NOTE: it will list any available plugin, standard or custom, inside any of these root java packages "io", "com" or "org".
@@ -196,7 +196,7 @@ One promise of ZenWave SDK is to be easily extensible and adaptable to your proj
 You can always fork an existing plugin with the following command:
 
 ```shell
-jbang zw -p io.zenwave360.sdkns.ForkPlugin -h
+jbang zw -p io.zenwave360.sdk.plugins.ForkPlugin -h
 ```
 
 | **Option**              | **Description**                                                                     | **Type** | **Default**                                                                | **Values** |
@@ -209,9 +209,9 @@ jbang zw -p io.zenwave360.sdkns.ForkPlugin -h
 Example:
 
 ```shell
-jbang zw -p io.zenwave360.sdkns.ForkPlugin \
+jbang zw -p io.zenwave360.sdk.plugins.ForkPlugin \
             targetFolder=target/forked-plugin \
-            sourcePluginClassName=io.zenwave360.sdkns.JDLBackendApplicationDefaultPlugin \
+            sourcePluginClassName=io.zenwave360.sdk.plugins.JDLBackendApplicationDefaultPlugin \
             targetPluginClassName=com.myorganization.sdk.JDLBackendApplicationDefaultPluginForked
 cd target/forked-plugin
 mvn clean install

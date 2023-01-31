@@ -4,7 +4,7 @@
 Generates test for SpringMVC or Spring WebFlux using WebTestClient based on OpenAPI specification.
 
 ```shell
-jbang zw -p io.zenwave360.sdkns.SpringWebTestClientPlugin \
+jbang zw -p io.zenwave360.sdk.plugins.SpringWebTestClientPlugin \
     specFile=src/main/resources/model/openapi.yml \
     targetFolder=src/test/java \
     testsPackage=io.zenwave360.example.adapters.web.tests \
@@ -15,7 +15,7 @@ jbang zw -p io.zenwave360.sdkns.SpringWebTestClientPlugin \
 ```
 
 ```shell
-jbang zw -p io.zenwave360.sdkns.SpringWebTestClientPlugin \
+jbang zw -p io.zenwave360.sdk.plugins.SpringWebTestClientPlugin \
     specFile=src/main/resources/model/openapi.yml \
     targetFolder=src/test/java \
     testsPackage=io.zenwave360.example.adapters.web.tests \
@@ -54,5 +54,5 @@ jbang zw -p io.zenwave360.sdkns.SpringWebTestClientPlugin \
 ## Getting Help
 
 ```shell
-jbang zw -p io.zenwave360.sdkns.SpringWebTestClientPlugin --help
+jbang zw -p io.zenwave360.sdk.plugins.SpringWebTestClientPlugin --help
 ```

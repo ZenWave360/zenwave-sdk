@@ -66,7 +66,7 @@ Use the table to understand which section of AsyncAPI (publish or subscribe) to 
 ### Getting Help
 
 ```shell
-jbang zw -p io.zenwave360.sdkns.SpringCloudStreams3Plugin --help
+jbang zw -p io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin --help
 ```
 
 ### Options
@@ -177,7 +177,7 @@ public class ProducerInMemoryContext {
 
 
 ```shell
-jbang zw -p io.zenwave360.sdkns.SpringCloudStreams3TestsPlugin \
+jbang zw -p io.zenwave360.sdk.plugins.SpringCloudStreams3TestsPlugin \
     specFile=src/main/resources/model/asyncapi.yml \
     role=provider \
     style=imperative \
@@ -243,7 +243,7 @@ public class DoCustomerRequestConsumerServiceIT extends BaseConsumerTest {
 
 
 ```shell
-jbang zw -p io.zenwave360.sdkns.SpringCloudStreams3AdaptersPlugin \
+jbang zw -p io.zenwave360.sdk.plugins.SpringCloudStreams3AdaptersPlugin \
     specFile=src/main/resources/model/asyncapi.yml \
     jdlFile=src/main/resources/model/orders-model.jdl \
     role=provider \

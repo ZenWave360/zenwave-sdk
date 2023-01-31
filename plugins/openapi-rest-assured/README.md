@@ -4,7 +4,7 @@
 Generates REST-Assured tests based on OpenAPI specification.
 
 ```shell
-jbang zw -p io.zenwave360.sdkns.RestAssuredPlugin \
+jbang zw -p io.zenwave360.sdk.plugins.RestAssuredPlugin \
     specFile=src/main/resources/model/openapi.yml \
     targetFolder=src/test/java \
     testsPackage=io.zenwave360.example.adapters.web.tests.restassured \
@@ -38,5 +38,5 @@ jbang zw -p io.zenwave360.sdkns.RestAssuredPlugin \
 ## Getting Help
 
 ```shell
-jbang zw -p io.zenwave360.sdkns.RestAssuredPlugin --help
+jbang zw -p io.zenwave360.sdk.plugins.RestAssuredPlugin --help
 ```
