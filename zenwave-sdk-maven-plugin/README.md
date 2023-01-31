@@ -1,4 +1,4 @@
-# ZenWave Code Generator Maven Plugin
+# ZenWave SDK Maven Plugin
 > 👉 ZenWave360 Helps You Create Software that's Easy to Understand
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360.zenwave-sdk/zenwave-sdk.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360.zenwave-sdk/zenwave-sdk)

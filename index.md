@@ -1,4 +1,4 @@
-# ZenWave Code Generator
+# ZenWave SDK
 
 > 👉 ZenWave360 Helps You Create Software that's Easy to Understand
 
@@ -12,7 +12,7 @@
 
 ## Domain Driven Design (DDD) and API-First for Event Driven Microservices
 
-ZenWave Code Generator is a configurable and extensible code generator tool for **Domain Driven Design (DDD)** and **API-First** for **Event Driven Microservices** that can generate code from a mix of different models including:
+ZenWave SDK is a configurable and extensible code generator tool for **Domain Driven Design (DDD)** and **API-First** for **Event Driven Microservices** that can generate code from a mix of different models including:
 
 - [JHipster Domain Language (JDL)](https://www.jhipster.tech/jdl/intro)
 - [AsyncAPI](https://www.asyncapi.com/docs/getting-started/coming-from-openapi)
@@ -24,9 +24,9 @@ Using JHipster Domain Language as **Ubiquitous Language** for **Data on the Insi
 
 - **JHipster Domain Language (JDL) as Ubiquitous Language:** To describe your domain core domain model
 - **API-First specs like AsyncAPI and OpenAPI:** to describe Inter Process Communications (IPC) between bounded contexts/microservices.
-- **ZenWave Code Generator:** to generate (_a lot of_) infrastructure, functional and testing code from your models and APIs.
+- **ZenWave SDK:** to generate (_a lot of_) infrastructure, functional and testing code from your models and APIs.
 
-ZenWave Code Generator is designed to be easily extensible and adaptable to your project or your organization needs and likes. You can always [fork an existing, standard or custom plugin](https://github.com/ZenWave360/zenwave-sdk/#forking-an-standard-or-custom-plugin).
+ZenWave SDK is designed to be easily extensible and adaptable to your project or your organization needs and likes. You can always [fork an existing, standard or custom plugin](https://github.com/ZenWave360/zenwave-sdk/#forking-an-standard-or-custom-plugin).
 
 You can install the latest release using [jbang](https://www.jbang.dev) running the following command:
 
@@ -34,13 +34,13 @@ You can install the latest release using [jbang](https://www.jbang.dev) running 
 jbang alias add --fresh --name=zw release@zenwave360/zenwave-sdk
 ```
 
-Please refer to [**ZenWave Code Generator**](https://github.com/ZenWave360/zenwave-sdk/) for more detailed installation options.
+Please refer to [**ZenWave SDK**](https://github.com/ZenWave360/zenwave-sdk/) for more detailed installation options.
 
 **Note:** Official plugins are designed to generate functional code and tests on top of existing projects. Creating a base project is out of scope, but you can always go to [start.spring.io](http://start.spring.io) or [start.jhipster.tech](https://start.jhipster.tech/), in case your company doesn't already have a project starter or archetype.
 
 ## Not (just) a Code Generator
 
-ZenWave Code Generator is not a Code Generator but a **Modeling Tool** for Domain Driven Design and API-First in disguise of a _code generator_.
+ZenWave SDK is a **Modeling Tool** for Domain Driven Design and API-First in disguise of a _code generator_.
 
 Its purpose is to produce successful software projects by dramatically shortening the feedback loop between the expert domain knowledge and working software and its tests.
 
@@ -62,7 +62,7 @@ In this way all team members: **Domain Experts**, **Product Owners**, **Software
 ## Table of Contents
 
 <!-- TOC -->
-- [ZenWave Code Generator](#zenwave-sdk)
+- [ZenWave SDK](#zenwave-sdk)
   - [Domain Driven Design (DDD) and API-First for Event Driven Microservices](#domain-driven-design-ddd-and-api-first-for-event-driven-microservices)
   - [Not (just) a Code Generator](#not-just-a-code-generator)
   - [Why Domain Driven Design?](#why-domain-driven-design)
@@ -112,7 +112,7 @@ Whether you are:
 - [Refactoring a legacy monolith](#refactoring-a-legacy-monolith) or just
 - [Adding functionality on top of an existent microservices architecture](#adding-functionality-on-top-of-an-existent-microservices-archytecture)
 
-...ZenWave Code Generator can... **generate a lot of code for you!!**
+...ZenWave SDK can... **generate a lot of code for you!!**
 
 ![06-ServiceImplementation-Hexagonal](docs/06-ServiceImplementation-Hexagonal.excalidraw.svg)
 
@@ -351,7 +351,7 @@ jbang zw -p io.zenwave360.sdkns.JDLToAsyncAPIPlugin \
 ### Configure ZenWave Maven Plugin for AsyncAPI generation
 
 <details open markdown="1">
-  <summary>ZenWave Code Generator Maven Plugin (expand to see)</summary>
+  <summary>ZenWave SDK Maven Plugin (expand to see)</summary>
 
 ```xml
 <plugin>

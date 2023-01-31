@@ -1,12 +1,12 @@
-# Contributing to ZenWave Code Generator
-ZenWave Code Generator features two complementary contributing models:
+# Contributing to ZenWave SDK
+ZenWave SDK features two complementary contributing models:
 
 - Plugins as a Bazaar
 - Core as a Cathedral
 
 ## Plugins as a Bazaar
 
-One of the main promises of ZenWave Code Generator is to provide a plugin system that allows developers to easily extend and personalize the core functionality of the tool, create entirely new plugins or [fork existing ones](https://github.com/ZenWave360/zenwave-sdk#forking-an-standard-or-custom-plugin).
+One of the main promises of ZenWave SDK is to provide a plugin system that allows developers to easily extend and personalize the core functionality of the tool, create entirely new plugins or [fork existing ones](https://github.com/ZenWave360/zenwave-sdk#forking-an-standard-or-custom-plugin).
 
 Plugins as packed as standard java jar files and installed on any local, corporate or public maven repo and can be added to jbang or maven classpath as a dependency.
 
@@ -24,7 +24,7 @@ Keep in mind that standard original plugins are designed to be simple, middle of
 
 ## Core as a Cathedral
 
-Creating and maintaining the core of ZenWave Code Generator requires time and commitment. If you are inclined to become a core developer consider the following steps as a natural progression:
+Creating and maintaining the core of ZenWave SDK requires time and commitment. If you are inclined to become a core developer consider the following steps as a natural progression:
 
 - Become a zenwave user your self. Use the tool to generate code for your projects and learn how it works.
 - Report any issues you find. If you are not sure if it is a bug or a feature request, open an issue, and we will discuss it.

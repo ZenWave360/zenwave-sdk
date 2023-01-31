@@ -98,7 +98,7 @@ jbang zw -p io.zenwave360.sdkns.SpringCloudStreams3Plugin --help
 
 ## Populating Headers at Runtime Automatically
 
-ZenWave Code Generator provides `x-runtime-expression` for automatic header population at runtime. Values for this extension property are:
+ZenWave SDK provides `x-runtime-expression` for automatic header population at runtime. Values for this extension property are:
 
 - `$message.payload#/<json pointer fragment>`: follows the same format as AsyncAPI [Correlation ID](https://www.asyncapi.com/docs/reference/specification/v2.5.0#correlationIdObject) object.
 - `$tracingIdSupplier`: will use the tracing id `java.function.Supplier` configured in your Spring context.

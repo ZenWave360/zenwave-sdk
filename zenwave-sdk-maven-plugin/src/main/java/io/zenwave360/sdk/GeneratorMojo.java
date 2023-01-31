@@ -17,7 +17,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 /**
- * Goal which generates code with the configured ZenWave Code Generator plugin.
+ * Goal which generates code with the configured ZenWave SDK plugin.
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class GeneratorMojo extends AbstractMojo {

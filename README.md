@@ -1,4 +1,4 @@
-# ZenWave Code Generator
+# ZenWave SDK
 
 <p align="center"  markdown="1">
   <img src="docs/logos/code-generator-logo-dark.svg#gh-dark-mode-only" alt="ZW> Code Generator" />
@@ -15,7 +15,7 @@
 [![branches coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/badges/branches.svg)](https://github.com/ZenWave360/zenwave-sdk/actions/workflows/build.yml)
 [![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-sdk)](https://github.com/ZenWave360/zenwave-sdk/blob/main/LICENSE)
 
-ZenWave Code Generator is a configurable and extensible code generator tool for **Domain Driven Design (DDD)** and **API-First** that can generate code from a mix of different models including:
+ZenWave SDK is a configurable and extensible code generator tool for **Domain Driven Design (DDD)** and **API-First** that can generate code from a mix of different models including:
 
 - JHipster Domain Language (JDL)
 - AsyncAPI
@@ -23,18 +23,18 @@ ZenWave Code Generator is a configurable and extensible code generator tool for 
 
 **Table of Contents:**
 
-- [ZenWave Code Generator](#zenwave-sdk)
+- [ZenWave SDK](#zenwave-sdk)
   - [Jbang Instalation](#jbang-instalation)
   - [Features / Roadmap](#features--roadmap)
   - [Building from source](#building-from-source)
   - [Usage](#usage)
   - [Available Plugins](#available-plugins)
   - [Forking an Standard or Custom Plugin](#forking-an-standard-or-custom-plugin)
-- [ZenWave Code Generator Documentation](#zenwave-sdk-documentation)
+- [ZenWave SDK Documentation](#zenwave-sdk-documentation)
 
 ## Jbang Instalation
 
-The easiest way to install ZenWave Code Generator is as a [JBang alias](https://www.jbang.dev/documentation/guide/latest/alias_catalogs.html):
+The easiest way to install ZenWave SDK is as a [JBang alias](https://www.jbang.dev/documentation/guide/latest/alias_catalogs.html):
 
 ```shell
 jbang alias add --fresh --name=zw release@zenwave360/zenwave-sdk
@@ -71,11 +71,11 @@ JBang will use you maven settings for repository resolution, but you can also sp
 
 ## Features / Roadmap
 
-- [x] ZenWave Code Generator CLI
+- [x] ZenWave SDK CLI
   - [x] Default parsers, processors, plugins, templating, formatters, writers, etc... for AsyncAPI, OpenAPI and JDL.
   - [x] Help command: detailed, json, markdown, list of available plugins
   - [x] Fork existing (custom or standard) plugin command
-- [x] ZenWave Code Generator Maven Plugin
+- [x] ZenWave SDK Maven Plugin
 - [x] Standard Plugins
   - [x] JDL Backend Application (flexible hexagonal architecture)
     - [x] Domain Entities
@@ -191,7 +191,7 @@ Refer to individual plugin's documentation for more information:
 
 ## Forking an Standard or Custom Plugin
 
-One promise of ZenWave Code Generator is to be easily extensible and adaptable to your project or your organization needs and likes.
+One promise of ZenWave SDK is to be easily extensible and adaptable to your project or your organization needs and likes.
 
 You can always fork an existing plugin with the following command:
 
@@ -219,6 +219,6 @@ mvn clean install
 
 Now you can add this jar to the list of available plugins in [jbang install command](#jbang-instalation)
 
-# ZenWave Code Generator Documentation
+# ZenWave SDK Documentation
 
 Please refer to the [documentation](https://zenwave360.github.io/zenwave-sdk/) website for more information.

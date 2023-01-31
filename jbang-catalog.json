@@ -14,7 +14,7 @@
         "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:RELEASE",
         "io.github.zenwave360.zenwave-sdk.plugins:jdl-openapi-controllers:RELEASE"
       ],
-      "main": "io.zenwave360.generator.Main"
+      "main": "io.zenwave360.sdk.Main"
     },
     "snapshots": {
       "script-ref": "io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli:1.0.0.RC1",
@@ -33,7 +33,7 @@
         "mavencentral",
         "snapshots\u003dhttps://s01.oss.sonatype.org/content/repositories/snapshots"
       ],
-      "main": "io.zenwave360.generator.Main"
+      "main": "io.zenwave360.sdk.Main"
     }
   },
   "templates": {}
