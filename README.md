@@ -43,7 +43,7 @@ jbang alias add --fresh --name=zw release@zenwave360/zenwave-sdk
 or if you prefer to use the latest **snapshot** versions:
 
 ```shell
-jbang alias add --fresh --name=zw zw-snapshots@zenwave360/zenwave-sdk
+jbang alias add --fresh --name=zw snapshots@zenwave360/zenwave-sdk
 ```
 
 If you plan to use **custom plugins** you will need to use the command in the following format:
@@ -155,6 +155,8 @@ jdl-to-openapi                 io.zenwave360.sdk.plugins.JDLToOpenAPIPlugin: Gen
 jdl-openapi-controllers        io.zenwave360.sdk.plugins.JDLOpenAPIControllersPlugin: Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.
 openapi-to-jdl                 io.zenwave360.sdk.plugins.OpenAPIToJDLPlugin: Generates JDL model from OpenAPI schemas
 spring-cloud-streams3          io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin: Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI
+spring-cloud-streams3-tests    io.zenwave360.sdk.plugins.SpringCloudStreams3TestsPlugin: Generates tests for Spring Cloud Streams Consumers.
+spring-cloud-streams3-adapters io.zenwave360.sdk.plugins.SpringCloudStreams3AdaptersPlugin: Generates tests for Spring Cloud Streams Consumers.
 fork-plugin                    io.zenwave360.sdk.plugins.ForkPlugin: Creates a new standalone maven module cloning an existing plugin
 spring-webtestclient           io.zenwave360.sdk.plugins.SpringWebTestClientPlugin: Generates spring WebTestClient tests from OpenAPI defined endpoints.
 rest-assured                   io.zenwave360.sdk.plugins.RestAssuredPlugin: Generates REST-assured tests from OpenAPI defined endpoints.
