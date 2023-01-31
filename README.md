@@ -54,15 +54,15 @@ jbang alias add --name=zw \
     --repos=mavencentral,snapshots=https://s01.oss.sonatype.org/content/repositories/snapshots \
     --deps=\
 org.slf4j:slf4j-simple:1.7.36,\
-io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3:1.0.0.RC1,\
-io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:1.0.0.RC1,\
-io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:1.0.0.RC1,\
-io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured:1.0.0.RC1,\
-io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default:1.0.0.RC1,\
-io.github.zenwave360.zenwave-sdk.plugins:jdl-to-openapi:1.0.0.RC1,\
-io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:1.0.0.RC1,\
-io.github.zenwave360.zenwave-sdk.plugins:jdl-openapi-controllers:1.0.0.RC1 \
-    io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli:1.0.0.RC1
+io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3:1.0.0-SNAPSHOT,\
+io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:1.0.0-SNAPSHOT,\
+io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:1.0.0-SNAPSHOT,\
+io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured:1.0.0-SNAPSHOT,\
+io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default:1.0.0-SNAPSHOT,\
+io.github.zenwave360.zenwave-sdk.plugins:jdl-to-openapi:1.0.0-SNAPSHOT,\
+io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:1.0.0-SNAPSHOT,\
+io.github.zenwave360.zenwave-sdk.plugins:jdl-openapi-controllers:1.0.0-SNAPSHOT \
+    io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli:1.0.0-SNAPSHOT
 ```
 
 You can include any **custom plugin** jars in the `--deps` option.
@@ -199,12 +199,12 @@ You can always fork an existing plugin with the following command:
 jbang zw -p io.zenwave360.sdkns.ForkPlugin -h
 ```
 
-| **Option**              | **Description**                                                                     | **Type** | **Default**                                                                       | **Values** |
-|-------------------------|-------------------------------------------------------------------------------------|----------|-----------------------------------------------------------------------------------|------------|
-| `targetFolder`          |                                                                                     | String   |                                                                                   |            |
-| `sourcePluginClassName` | Plugin Plugin class to fork                                                         | String   |                                                                                   |            |
-| `targetPluginClassName` | New Plugin Plugin class. It will be used for class name, package and maven groupId. | String   |                                                                                   |            |
-| `downloadURL`           | Download URL for the source code of original plugin in zip format                   | URL      | https://github.com/ZenWave360/zenwave-sdk/archive/refs/tags/v1.0.0.RC1.zip |            |
+| **Option**              | **Description**                                                                     | **Type** | **Default**                                                                | **Values** |
+|-------------------------|-------------------------------------------------------------------------------------|----------|----------------------------------------------------------------------------|------------|
+| `targetFolder`          |                                                                                     | String   |                                                                            |            |
+| `sourcePluginClassName` | Plugin Plugin class to fork                                                         | String   |                                                                            |            |
+| `targetPluginClassName` | New Plugin Plugin class. It will be used for class name, package and maven groupId. | String   |                                                                            |            |
+| `downloadURL`           | Download URL for the source code of original plugin in zip format                   | URL      | https://github.com/ZenWave360/zenwave-sdk/archive/refs/tags/v1.0.0.RC2.zip |            |
 
 Example:
 
