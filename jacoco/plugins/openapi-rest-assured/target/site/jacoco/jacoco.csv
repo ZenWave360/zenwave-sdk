@@ -1,4 +1,4 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-io.github.zenwave360.zenwave-code-generator.plugins:openapi-rest-assured,io.zenwave360.generator.plugins,RestAssuredGenerator,5,446,0,20,2,69,1,25,1,15
-io.github.zenwave360.zenwave-code-generator.plugins:openapi-rest-assured,io.zenwave360.generator.plugins,RestAssuredPlugin,0,48,0,2,0,7,0,3,0,2
-io.github.zenwave360.zenwave-code-generator.plugins:openapi-rest-assured,io.zenwave360.generator.plugins,RestAssuredGenerator.GroupByType,0,21,0,0,0,2,0,1,0,1
+io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured,io.zenwave360.sdk.plugins,RestAssuredPlugin,0,48,0,2,0,7,0,3,0,2
+io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured,io.zenwave360.sdk.plugins,RestAssuredGenerator,5,446,0,20,2,69,1,25,1,15
+io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured,io.zenwave360.sdk.plugins,RestAssuredGenerator.GroupByType,0,21,0,0,0,2,0,1,0,1
