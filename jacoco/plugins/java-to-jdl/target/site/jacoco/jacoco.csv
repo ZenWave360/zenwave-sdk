@@ -1,0 +1,3 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+io.github.zenwave360.zenwave-sdk.plugins:java-to-jdl,io.zenwave360.sdk.plugins,JavaToJDLGenerator,203,581,57,73,57,136,45,32,2,10
+io.github.zenwave360.zenwave-sdk.plugins:java-to-jdl,io.zenwave360.sdk.plugins,JavaToJDLGenerator.PersistenceType,0,15,0,0,0,2,0,1,0,1
