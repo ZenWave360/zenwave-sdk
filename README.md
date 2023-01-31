@@ -50,7 +50,7 @@ If you plan to use **custom plugins** you will need to use the command in the fo
 
 ```shell
 jbang alias add --name=zw \
-    -m=io.zenwave360.generator.Main \
+    -m=io.zenwave360.sdk\
     --repos=mavencentral,snapshots=https://s01.oss.sonatype.org/content/repositories/snapshots \
     --deps=\
 org.slf4j:slf4j-simple:1.7.36,\
@@ -149,15 +149,15 @@ $ jbang zw -h -f list
 INFO Reflections - Reflections took 428 ms to scan 44 urls, producing 2493 keys and 14406 values
 Available plugins:
 
-jsonschema2pojo                io.zenwave360.generator.plugins.AsyncApiJsonSchema2PojoPlugin: Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files
-jdl-backend-application-default io.zenwave360.generator.plugins.JDLBackendApplicationDefaultPlugin: Generates a full backend application using a flexible hexagonal architecture
-jdl-to-openapi                 io.zenwave360.generator.plugins.JDLToOpenAPIPlugin: Generates a full OpenAPI definitions for CRUD operations from JDL models
-jdl-openapi-controllers        io.zenwave360.generator.plugins.JDLOpenAPIControllersPlugin: Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.
-openapi-to-jdl                 io.zenwave360.generator.plugins.OpenAPIToJDLPlugin: Generates JDL model from OpenAPI schemas
-spring-cloud-streams3          io.zenwave360.generator.plugins.SpringCloudStreams3Plugin: Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI
-fork-plugin                    io.zenwave360.generator.plugins.ForkPlugin: Creates a new standalone maven module cloning an existing plugin
-spring-webtestclient           io.zenwave360.generator.plugins.SpringWebTestClientPlugin: Generates spring WebTestClient tests from OpenAPI defined endpoints.
-rest-assured                   io.zenwave360.generator.plugins.RestAssuredPlugin: Generates REST-assured tests from OpenAPI defined endpoints.
+jsonschema2pojo                io.zenwave360.sdkns.AsyncApiJsonSchema2PojoPlugin: Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files
+jdl-backend-application-default io.zenwave360.sdkns.JDLBackendApplicationDefaultPlugin: Generates a full backend application using a flexible hexagonal architecture
+jdl-to-openapi                 io.zenwave360.sdkns.JDLToOpenAPIPlugin: Generates a full OpenAPI definitions for CRUD operations from JDL models
+jdl-openapi-controllers        io.zenwave360.sdkns.JDLOpenAPIControllersPlugin: Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.
+openapi-to-jdl                 io.zenwave360.sdkns.OpenAPIToJDLPlugin: Generates JDL model from OpenAPI schemas
+spring-cloud-streams3          io.zenwave360.sdkns.SpringCloudStreams3Plugin: Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI
+fork-plugin                    io.zenwave360.sdkns.ForkPlugin: Creates a new standalone maven module cloning an existing plugin
+spring-webtestclient           io.zenwave360.sdkns.SpringWebTestClientPlugin: Generates spring WebTestClient tests from OpenAPI defined endpoints.
+rest-assured                   io.zenwave360.sdkns.RestAssuredPlugin: Generates REST-assured tests from OpenAPI defined endpoints.
 ```
 
 NOTE: it will list any available plugin, standard or custom, inside any of these root java packages "io", "com" or "org".
@@ -196,7 +196,7 @@ One promise of ZenWave Code Generator is to be easily extensible and adaptable t
 You can always fork an existing plugin with the following command:
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.ForkPlugin -h
+jbang zw -p io.zenwave360.sdkns.ForkPlugin -h
 ```
 
 | **Option**              | **Description**                                                                     | **Type** | **Default**                                                                       | **Values** |
@@ -209,10 +209,10 @@ jbang zw -p io.zenwave360.generator.plugins.ForkPlugin -h
 Example:
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.ForkPlugin \
+jbang zw -p io.zenwave360.sdkns.ForkPlugin \
             targetFolder=target/forked-plugin \
-            sourcePluginClassName=io.zenwave360.generator.plugins.JDLBackendApplicationDefaultPlugin \
-            targetPluginClassName=com.myorganization.generator.JDLBackendApplicationDefaultPluginForked
+            sourcePluginClassName=io.zenwave360.sdkns.JDLBackendApplicationDefaultPlugin \
+            targetPluginClassName=com.myorganization.sdk.JDLBackendApplicationDefaultPluginForked
 cd target/forked-plugin
 mvn clean install
 ```

@@ -1,4 +1,4 @@
-package io.zenwave360.generator.plugins;
+package io.zenwave360.sdk.plugins;
 
 import java.net.URI;
 import java.util.List;
@@ -7,9 +7,9 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import io.zenwave360.generator.parsers.DefaultYamlParser;
-import io.zenwave360.generator.processors.OpenApiProcessor;
-import io.zenwave360.generator.templating.TemplateOutput;
+import io.zenwave360.sdk.parsers.DefaultYamlParser;
+import io.zenwave360.sdk.processors.OpenApiProcessor;
+import io.zenwave360.sdk.templating.TemplateOutput;
 
 public class PactConsumerGeneratorTest {
 
@@ -20,7 +20,7 @@ public class PactConsumerGeneratorTest {
 
     @Test
     public void test_output_partial_one_operation() throws Exception {
-        Map<String, Object> model = loadApiModelFromResource("classpath:io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
+        Map<String, Object> model = loadApiModelFromResource("classpath:io/zenwave360/sdk/resources/openapi/openapi-petstore.yml");
         PactConsumerGenerator generator = new PactConsumerGenerator();
         generator.groupBy = PactConsumerGenerator.GroupByType.partial;
         generator.basePackage = "io.example";
@@ -35,7 +35,7 @@ public class PactConsumerGeneratorTest {
 
     @Test
     public void test_output_by_operation() throws Exception {
-        Map<String, Object> model = loadApiModelFromResource("classpath:io/zenwave360/generator/resources/openapi/openapi-petstore.yml");
+        Map<String, Object> model = loadApiModelFromResource("classpath:io/zenwave360/sdk/resources/openapi/openapi-petstore.yml");
         PactConsumerGenerator generator = new PactConsumerGenerator();
         generator.groupBy = PactConsumerGenerator.GroupByType.operation;
         generator.basePackage = "io.example";

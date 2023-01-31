@@ -6,7 +6,7 @@ Generates implementations based on JDL models and OpenAPI definitions SpringMVC 
 After you have generated SpringMVC interfaces and DTOs with OpenAPI generator, you can use this command to generate implementations (skeletons) and mappers for those interfaces and dtos:
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.JDLOpenAPIControllersPlugin \
+jbang zw -p io.zenwave360.sdkns.JDLOpenAPIControllersPlugin \
     specFile=src/main/resources/model/openapi.yml \
     jdlFile=src/main/resources/model/orders-model.jdl \
     basePackage=io.zenwave360.example \
@@ -50,5 +50,5 @@ jbang zw -p io.zenwave360.generator.plugins.JDLOpenAPIControllersPlugin \
 ## Getting Help
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.JDLOpenAPIControllersPlugin --help
+jbang zw -p io.zenwave360.sdkns.JDLOpenAPIControllersPlugin --help
 ```

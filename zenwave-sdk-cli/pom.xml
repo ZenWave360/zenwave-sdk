@@ -86,7 +86,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>io.zenwave360.generator.Main</mainClass>
+              <mainClass>io.zenwave360.sdk.Main</mainClass>
             </manifest>
           </archive>
         </configuration>

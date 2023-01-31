@@ -18,7 +18,7 @@ And then just paste the following code snippets on any test class or main method
 
 ```java
 String jdl = new JavaToJDLGenerator()
-    .withPackageName("io.zenwave360.generator.jpa2jdl")
+    .withPackageName("io.zenwave360.sdk.jpa2jdl")
     .withPersistenceType(JavaToJDLGenerator.PersistenceType.JPA)
     .generate();
 System.out.println(jdl);
@@ -26,7 +26,7 @@ System.out.println(jdl);
 
 ```java
 String jdl = new JavaToJDLGenerator()
-    .withPackageName("io.zenwave360.generator.mongodb2jdl")
+    .withPackageName("io.zenwave360.sdk.mongodb2jdl")
     .withPersistenceType(JavaToJDLGenerator.PersistenceType.MONGODB)
     .generate();
 System.out.println(jdl);

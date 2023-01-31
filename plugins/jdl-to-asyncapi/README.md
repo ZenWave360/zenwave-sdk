@@ -24,7 +24,7 @@ entity Customer {
 Then run:
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.JDLToAsyncAPIPlugin \
+jbang zw -p io.zenwave360.sdkns.JDLToAsyncAPIPlugin \
     includeCommands=true \
     specFile=src/main/resources/model/orders-model.jdl \
     idType=integer \
@@ -63,5 +63,5 @@ jbang zw -p io.zenwave360.generator.plugins.JDLToAsyncAPIPlugin \
 ## Getting Help
 
 ```shell
-jbang zw -p io.zenwave360.generator.plugins.JDLToAsyncAPIPlugin --help
+jbang zw -p io.zenwave360.sdkns.JDLToAsyncAPIPlugin --help
 ```

@@ -1,4 +1,4 @@
-package io.zenwave360.generator.plugins;
+package io.zenwave360.sdk.plugins;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,13 +8,13 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import io.zenwave360.generator.doc.DocumentedOption;
-import io.zenwave360.generator.generators.AbstractOpenAPIGenerator;
-import io.zenwave360.generator.parsers.Model;
-import io.zenwave360.generator.templating.HandlebarsEngine;
-import io.zenwave360.generator.templating.TemplateEngine;
-import io.zenwave360.generator.templating.TemplateInput;
-import io.zenwave360.generator.templating.TemplateOutput;
+import io.zenwave360.sdk.doc.DocumentedOption;
+import io.zenwave360.sdk.generators.AbstractOpenAPIGenerator;
+import io.zenwave360.sdk.parsers.Model;
+import io.zenwave360.sdk.templating.HandlebarsEngine;
+import io.zenwave360.sdk.templating.TemplateEngine;
+import io.zenwave360.sdk.templating.TemplateInput;
+import io.zenwave360.sdk.templating.TemplateOutput;
 
 public class PactConsumerGenerator extends AbstractOpenAPIGenerator {
 
@@ -40,7 +40,7 @@ public class PactConsumerGenerator extends AbstractOpenAPIGenerator {
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
-    private String prefix = "io/zenwave360/generator/plugins/PactConsumerGenerator/";
+    private String prefix = "io/zenwave360/sdk/plugins/PactConsumerGenerator/";
     private final TemplateInput partialTemplate = new TemplateInput(prefix + "partials/Operation.java", "{{asPackageFolder testsPackage}}/{{asJavaTypeName operationId}}ConsumerContractTest.java");
     private final TemplateInput operationTestTemplate = new TemplateInput(prefix + "ConsumerContractTest.java", "{{asPackageFolder testsPackage}}/{{asJavaTypeName operationId}}ConsumerContractTest.java");
 

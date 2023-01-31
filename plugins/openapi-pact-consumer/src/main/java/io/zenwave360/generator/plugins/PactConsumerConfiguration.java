@@ -1,15 +1,15 @@
-package io.zenwave360.generator.plugins;
+package io.zenwave360.sdk.plugins;
 
-import io.zenwave360.generator.Configuration;
-import io.zenwave360.generator.doc.DocumentedPlugin;
-import io.zenwave360.generator.formatters.JavaFormatter;
-import io.zenwave360.generator.parsers.DefaultYamlParser;
-import io.zenwave360.generator.processors.OpenApiProcessor;
-import io.zenwave360.generator.writers.TemplateFileWriter;
-import io.zenwave360.generator.writers.TemplateStdoutWriter;
+import io.zenwave360.sdk.Configuration;
+import io.zenwave360.sdk.doc.DocumentedPlugin;
+import io.zenwave360.sdk.formatters.JavaFormatter;
+import io.zenwave360.sdk.parsers.DefaultYamlParser;
+import io.zenwave360.sdk.processors.OpenApiProcessor;
+import io.zenwave360.sdk.writers.TemplateFileWriter;
+import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 
 /**
- * jbang zw -p io.zenwave360.generator.plugins.PactConsumerConfiguration \
+ * jbang zw -p io.zenwave360.sdk.plugins.PactConsumerConfiguration \
  *     specFile=src/main/resources/model/openapi.yml \
  *     targetFolder=src/test/java \
  *     testsPackage=io.zenwave360.example.tests.contract \
