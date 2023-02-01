@@ -16,9 +16,9 @@ public interface {{serviceInterfaceName operation.x--operationIdCamelCase}} {
 
 {{#each operation.x--messages as |message|}}
     {{~#if exposeMessage}}
-    default void {{operation.operationId}}{{methodSuffix message operation}}(Flux<Message<{{message.x--javaType}}>> messageFlux) { };
+    void {{operation.operationId}}{{methodSuffix message operation}}(Flux<Message<{{message.x--javaType}}>> messageFlux);
     {{~else}}
-    default void {{operation.operationId}}{{methodSuffix message operation}}(Flux<{{message.x--javaType}}> messageFlux) { };
+    void {{operation.operationId}}{{methodSuffix message operation}}(Flux<{{message.x--javaType}}> messageFlux);
     {{~/if}}
 {{/each}}
 

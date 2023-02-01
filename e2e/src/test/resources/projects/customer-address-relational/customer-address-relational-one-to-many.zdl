@@ -1,0 +1,126 @@
+/**
+ * Simple Event-Driven CRUD for Customer/Addresses.
+ */
+config {
+    title "ZenWave Playground Customer-Address MariaDB"
+    basePackage "io.zenwave360.example"
+    persistence jpa
+    databaseType mariadb
+//    haltOnFailFormatting false
+
+    plugins {
+
+        ZDLToOpenAPIPlugin {
+            idType integer
+            idTypeFormat int64
+            targetFile "src/main/resources/apis/openapi.yml"
+        }
+
+        ZDLToAsyncAPIPlugin {
+            asyncapiVersion v3
+            idType integer
+            idTypeFormat int64
+            targetFile "src/main/resources/apis/asyncapi.yml"
+        }
+
+        BackendApplicationDefaultPlugin {
+            useLombok true
+            includeEmitEventsImplementation true
+            // --force // overwite all files
+        }
+
+        OpenAPIControllersPlugin {
+            formatter google // comments in one line are better for demos
+            specFile "src/main/resources/apis/openapi.yml"
+            zdlFile "customer-address-relational.zdl"
+
+            // thse should match the values of openapi-generator-maven-plugin
+            openApiApiPackage "{{basePackage}}.adapters.web"
+            openApiModelPackage "{{basePackage}}.adapters.web.model"
+            openApiModelNameSuffix DTO
+        }
+    }
+}
+
+
+// == Entities =============================
+/**
+* Customer javadoc comment
+*/
+@aggregate
+entity Customer {
+    username String required unique /** username javadoc comment */
+    email String required unique /** email javadoc comment */
+}
+
+entity Address {
+    street String required /** street javadoc comment */
+    city String /** city javadoc comment */
+    state String /** state javadoc comment */
+    zip String /** zip javadoc comment */
+    type AddressType required /** address type is an enum */
+}
+
+enum AddressType {  HOME(1) /** home description */,  WORK(1) /** work description */ }
+
+relationship OneToMany {
+    Customer{addresses} to Address{customer}
+}
+
+
+// == Services =============================
+
+@inline
+input AddressInput {
+    identifier String required /** Description identifier for this Address */
+    address Address
+}
+
+/**
+ Service javadoc comment
+ */
+@rest("/customers")
+service CustomerService for (Customer) {
+  /**
+   * Create customer javadoc comment
+   */
+  @post
+  createCustomer(Customer) Customer withEvents CustomerEvent
+
+  @put("/{customerId}")
+  updateCustomer(id, Customer) Customer? withEvents CustomerEvent
+
+  /** Updates a the customer address identified by address.identifier */
+  @put("/{customerId}/address/{identifier}")
+  updateCustomerAddress(id, AddressInput) Customer? withEvents CustomerEvent CustomerAddressUpdated
+
+  @delete("/{customerId}")
+  deleteCustomer(id) withEvents CustomerEvent
+
+  @get("/{customerId}")
+  getCustomer(id) Customer?
+
+  @get({params: {search: "string"}})
+  @paginated
+  listCustomers() Customer[]
+}
+
+// == Events =============================
+
+@skip // skip generating this domain enum, it will genereate by asyncapi code generator.
+enum EventType {  CREATED(1) /** created description */,  UPDATED(1) /** updated description */,  DELETED(1) /** deleted description */ }
+
+@asyncapi({channel: "CustomerEventsChannel", topic: "customer.events"})
+event CustomerEvent {
+  customerId String
+  eventType EventType
+  customer Customer
+}
+
+@asyncapi({channel: "CustomerAddressEventsChannel", topic: "customer.address-events"})
+event CustomerAddressUpdated {
+  customerId String
+  addressDescription String
+  originalAddress Address
+  newAddress Address
+}
