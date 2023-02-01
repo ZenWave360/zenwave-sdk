@@ -68,7 +68,7 @@
         <picocli.version>4.6.3</picocli.version>
         <reflections.version>0.10.2</reflections.version>
         <handlebars-java.version>4.3.0</handlebars-java.version>
-        <json-schema-ref-parser-jvm.version>0.8.2</json-schema-ref-parser-jvm.version>
+        <json-schema-ref-parser-jvm.version>0.8.4</json-schema-ref-parser-jvm.version>
         <zdl-jvm.version>0.9.5</zdl-jvm.version>
         <graphql-java.version>19.2</graphql-java.version>
         <google-java-format.version>1.7</google-java-format.version>
