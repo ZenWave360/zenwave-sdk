@@ -110,13 +110,14 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     }
 
     public void generate(Model apiModel, List<Map<String, Object>> messages) throws IOException, URISyntaxException {
+        var asyncapiVersion = JSONPath.get(apiModel, "$.asyncapi");
+        var defaultSchemaFormat = AsyncApiProcessor.SchemaFormatType.ASYNCAPI_YAML.getSchemaFormat((String) asyncapiVersion);
         for (final Map<String, Object> message : messages) {
-            var schemaPath = AsyncAPIUtils.isV3(apiModel) ? "$.payload.schema" : "$.payload";
-            Map<String, Object> payload = JSONPath.get(message, schemaPath);
+            Map<String, Object> payload = JSONPath.getFirst(message, "$.payload.schema", "$.payload");
             String name = (String)  ObjectUtils.firstNonNull(payload.get("x--schema-name"), message.get("name"));
             $Ref payloadRef = apiModel.getRefs().getOriginalRef(payload);
             var schemaFormatPath = AsyncAPIUtils.isV3(apiModel) ? "$.payload.schemaFormat" : "$.schemaFormat";
-            var schemaFormat = (String) firstNonNull(JSONPath.get(message, schemaFormatPath), JSONPath.get(apiModel, "$.schemaFormat"));
+            var schemaFormat = (String) firstNonNull(JSONPath.get(message, schemaFormatPath), defaultSchemaFormat);
             AsyncApiProcessor.SchemaFormatType schemaFormatType = AsyncApiProcessor.SchemaFormatType.getFormat(schemaFormat);
 
             final JsonSchema2PojoConfiguration config = JsonSchema2PojoConfiguration.of(jsonschema2pojo);
