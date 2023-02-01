@@ -61,7 +61,7 @@ io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,JDLPa
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,GraphQLParser,5,112,0,0,2,15,1,2,1,2
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,DefaultYamlParser,7,59,0,0,2,14,1,5,1,5
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.plugins,ForkPlugin,0,12,0,0,0,3,0,1,0,1
-io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.plugins,ForkPluginGenerator,929,29,62,0,181,6,50,1,19,1
+io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.plugins,ForkPluginGenerator,33,925,9,53,7,180,8,43,0,20
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,AbstractOpenAPIGenerator.OperationType,0,45,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,Generator,28,69,2,10,7,12,3,5,1,1
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,AbstractOpenAPIGenerator,21,138,4,18,4,22,6,13,2,6
