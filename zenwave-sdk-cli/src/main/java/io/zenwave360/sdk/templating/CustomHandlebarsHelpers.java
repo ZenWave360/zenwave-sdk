@@ -59,6 +59,11 @@ public class CustomHandlebarsHelpers {
         return StringUtils.startsWith(first, second);
     }
 
+    public static boolean endsWith(String first, Options options) throws IOException {
+        String second = options.param(0);
+        return StringUtils.endsWith(first, second);
+    }
+
     public static boolean not(Object value, Options options) throws IOException {
         if (value == null) {
             return true;

@@ -1,12 +1,19 @@
 package {{basePackage}}.infrastructure.jpa;
 
+import java.util.HashSet;
+
 import {{basePackage}}.core.domain.*;
 import {{basePackage}}.core.outbound.jpa.{{entity.className}}Repository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.persistence.EntityManager;
+
 public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositoryIntegrationTest {
+
+    @Autowired
+    EntityManager entityManager;
 
     @Autowired
     {{entity.className}}Repository {{entity.instanceName}}Repository;
@@ -37,13 +44,49 @@ public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositor
         {{entity.instanceName}}.set{{capitalize field.name}}(null);
         {{~/each}}
 
+{{#each entity.relationships as |relationship|}}
+{{~#if relationship.fieldName}}
+        // {{relationship.type}} {{relationship.fieldName}} owner: {{relationship.ownerSide}}
+    {{~#if relationship.ownerSide}}
+        {{~#if (addRelationshipById relationship)}}
+        var {{relationship.fieldName}}Id = 1L;
+        {{entity.instanceName}}.set{{capitalize relationship.fieldName}}Id({{relationship.fieldName}}Id); // using id to write relationship
+        {{~else}}
+        var {{relationship.fieldName}} = new {{relationship.otherEntityName}}(); // TODO: fill in this object
+            {{~#if (endsWith relationship.type 'ToOne')}}
+        {{entity.instanceName}}.set{{capitalize relationship.fieldName}}({{relationship.fieldName}});
+            {{~else}}
+        {{entity.instanceName}}.set{{capitalize relationship.fieldName}}(new HashSet<>());
+        {{entity.instanceName}}.get{{capitalize relationship.fieldName}}().add({{relationship.fieldName}});
+            {{~/if}}
+        {{~/if}}
+    {{~/if}}
+{{/if~}}
+{{/each}}
+
+        // Persist aggregate root
         var created = {{entity.instanceName}}Repository.save({{entity.instanceName}});
+        entityManager.refresh(created); // reloading to get relationships persisted by id
         Assertions.assertTrue(created.getId() != null);
         Assertions.assertTrue(created.getVersion() != null);
         {{~#if (or entity.options.auditing entity.options.extendsAuditing)}}
         Assertions.assertTrue(created.getCreatedBy() != null);
         Assertions.assertTrue(created.getCreatedDate() != null);
         {{~/if}}
+
+{{#each entity.relationships as |relationship|}}
+{{~#if relationship.fieldName}}
+    {{~#if relationship.ownerSide}}
+        {{~#if (endsWith relationship.type 'OneToOne')}}
+        Assertions.assertTrue({{entity.instanceName}}.get{{capitalize relationship.fieldName}}().getId() != null);
+        {{~else if (endsWith relationship.type 'ToOne')}}
+        Assertions.assertTrue({{entity.instanceName}}.get{{capitalize relationship.fieldName}}().getId() == {{relationship.fieldName}}Id);
+        {{~else}}
+        Assertions.assertTrue({{entity.instanceName}}.get{{capitalize relationship.fieldName}}().stream().allMatch(item -> item.getId() != null));
+        {{~/if}}
+    {{~/if}}
+{{~/if}}
+{{~/each}}
     }
 
     @Test

@@ -25,6 +25,9 @@ path: '{{path 'api' 'v1' 'users'}}'
 
 {{> (partial 'partial')}}
 
+Starts with: {{startsWith "Hello World" "Hello"}}
+Ends with: {{endsWith "Hello World" "World"}}
+
 Not with string: {{not 'true'}}
 Not with boolean: {{not booleanValue}}
 Not with null: {{not nullValue}}

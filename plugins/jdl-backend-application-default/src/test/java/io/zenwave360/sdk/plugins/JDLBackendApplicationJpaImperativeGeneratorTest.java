@@ -53,12 +53,6 @@ public class JDLBackendApplicationJpaImperativeGeneratorTest {
 
         new MainGenerator().generate(plugin);
 
-        List<String> logs = logCaptor.getLogs();
-        logCaptor.getLogEvents().forEach(log -> {
-            System.out.println(log.getLevel());
-            System.out.println(log.getLoggerName());
-            System.out.println(log.getMessage());
-        });
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
 

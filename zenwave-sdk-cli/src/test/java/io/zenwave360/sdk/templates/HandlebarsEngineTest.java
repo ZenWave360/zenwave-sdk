@@ -39,6 +39,8 @@ public class HandlebarsEngineTest {
         Assertions.assertTrue(templateOutput.getContent().contains("Inside else 2"));
         Assertions.assertTrue(templateOutput.getContent().contains("path: 'api/v1/users'"));
         Assertions.assertTrue(templateOutput.getContent().contains("This is from partial"));
+        Assertions.assertTrue(templateOutput.getContent().contains("Starts with: true"));
+        Assertions.assertTrue(templateOutput.getContent().contains("Ends with: true"));
         Assertions.assertTrue(templateOutput.getContent().contains("Not with string: false"));
         Assertions.assertTrue(templateOutput.getContent().contains("Not with boolean: false"));
         Assertions.assertTrue(templateOutput.getContent().contains("Not with null: true"));
