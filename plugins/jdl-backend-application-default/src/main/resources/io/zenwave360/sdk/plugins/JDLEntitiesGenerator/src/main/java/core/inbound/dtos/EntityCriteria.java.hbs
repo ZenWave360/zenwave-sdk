@@ -26,7 +26,7 @@ public class {{_criteriaClassName}} {{addExtends entity suffix=inputDTOSuffix}} 
 {{#each entity.fields as |field|}}
     {{#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix}}{{/if}}{{/assign}}
     {{~#if field.isArray}}
-        public {{_criteriaClassName}} add{{capitalize field.name}}({{field.type}}{{typeSuffix}} {{field.name}}) {
+        public {{_criteriaClassName}} add{{capitalize field.name}}({{javaType field}}{{typeSuffix}} {{field.name}}) {
         this.{{field.name}}.add({{field.name}});
         return this;
         }

@@ -57,7 +57,7 @@ public class {{entity.className}}{{inputDTOSuffix}} {{addExtends entity suffix=i
 {{#each entity.fields as |field|}}
     {{#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix}}{{/if}}{{/assign}}
     {{~#if field.isArray}}
-        public {{entity.className}}{{inputDTOSuffix}} add{{capitalize field.name}}({{field.type}}{{typeSuffix}} {{field.name}}) {
+        public {{entity.className}}{{inputDTOSuffix}} add{{capitalize field.name}}({{javaType field}}{{typeSuffix}} {{field.name}}) {
         this.{{field.name}}.add({{field.name}});
         return this;
         }

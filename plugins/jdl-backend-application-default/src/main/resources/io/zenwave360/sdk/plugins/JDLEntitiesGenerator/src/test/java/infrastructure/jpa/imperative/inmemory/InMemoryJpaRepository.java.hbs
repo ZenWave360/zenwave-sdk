@@ -31,13 +31,13 @@ public class InMemoryJpaRepository<T> implements JpaRepository<T, {{idJavaType}}
     private final Map<{{idJavaType}}, T> entities = new HashMap<>();
 
     // private final PrimaryKeyGenerator<{{idJavaType}}> primaryKeyGenerator = () -> UUID.randomUUID().toString();
-    private final PrimaryKeyGenerator<{{idJavaType}}> primaryKeyGenerator = new PrimaryKeyGenerator<{{idJavaType}}>() {
-        private long next = 0;
-        @Override
-        public {{idJavaType}} next() {
-          return next++;
-        }
-    };
+    private long nextId = 0;
+    private final PrimaryKeyGenerator<Long> primaryKeyGenerator = () -> nextId++;
+
+    public void clear() {
+        nextId = 0;
+        entities.clear();
+    }
 
     public Map<{{idJavaType}}, T> getEntities() {
         return entities;

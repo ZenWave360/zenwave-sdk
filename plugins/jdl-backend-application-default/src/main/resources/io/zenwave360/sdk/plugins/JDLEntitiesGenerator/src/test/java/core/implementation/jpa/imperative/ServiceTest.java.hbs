@@ -50,6 +50,7 @@ public class {{service.name}}Test  {
     @BeforeEach
     void setUp() {
         {{~#each entities as |entity|}}
+        {{entity.instanceName}}Repository.clear();
         {{entity.instanceName}}Repository.save(new {{entity.className}}());
         {{~/each}}
     }

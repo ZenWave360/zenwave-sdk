@@ -2,6 +2,7 @@ package io.zenwave360.sdk.generators;
 
 import java.util.*;
 
+import io.zenwave360.sdk.parsers.JDLParser;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Lists;
 import io.zenwave360.sdk.utils.Maps;
@@ -20,8 +21,6 @@ public class JDLEntitiesToAvroConverter {
         this.namespace = namespace;
         return this;
     }
-
-    private static final List blobTypes = List.of("Blob", "AnyBlob", "ImageBlob");
 
     public Map<String, Object> convertToAvro(Map<String, Object> entityOrEnum, Map<String, Object> jdlModel) {
         boolean isEnum = entityOrEnum.get("values") != null;
@@ -100,7 +99,7 @@ public class JDLEntitiesToAvroConverter {
             } else if ("UUID".equals(entityField.get("type"))) {
                 field.put("type", typeList("string", isRequired));
                 // field.put("pattern", "^[a-f\\d]{4}(?:[a-f\\d]{4}-){4}[a-f\\d]{12}$");
-            } else if (blobTypes.contains(entityField.get("type"))) {
+            } else if (JDLParser.blobTypes.contains(entityField.get("type"))) {
                 field.put("type", typeList("bytes", isRequired));
                 // field.put("format", "binary");
             } else {

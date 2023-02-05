@@ -1,15 +1,14 @@
 package io.zenwave360.sdk.parsers;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
 
 public class JDLParser implements Parser {
+
+    public static final List blobTypes = List.of("Blob", "AnyBlob", "ImageBlob");
 
     @DocumentedOption(description = "JDL files to parse")
     public String[] specFiles;

@@ -23,7 +23,7 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
 
 {{#each entity.fields as |field|}}
     {{~#if field.isArray}}
-    public {{entity.className}} add{{capitalize field.name}}({{field.type}} {{field.name}}) {
+    public {{entity.className}} add{{capitalize field.name}}({{javaType field}} {{field.name}}) {
         this.{{field.name}}.add({{field.name}});
         return this;
     }

@@ -53,7 +53,7 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
     @Column(name = "{{snakeCase field.name}}" {{#if field.validations.required}}, nullable = false{{/if}}{{#if field.validations.unique}}, unique = true{{/if}}{{#if field.validations.maxlength}}, length = {{field.validations.maxlength.value}}{{/if}})
   {{~/if~}}
     {{~#if field.isEnum}} @Enumerated(EnumType.STRING){{/if}}
-    private {{field.type}} {{field.name}};
+    private {{javaType field}} {{field.name}};
 {{/each}}
 
 {{#each entity.relationships as |relationship|}}
@@ -104,18 +104,18 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
 {{/unless~}}
 
 {{#each entity.fields as |field|}}
-    public {{entity.name}} with{{capitalize field.name}}({{field.type}} {{field.name}}) {
+    public {{entity.name}} with{{capitalize field.name}}({{javaType field}} {{field.name}}) {
     this.{{field.name}} = {{field.name}};
     return this;
     }
 {{/each}}
 
 {{#each entity.fields as |field|}}
-    public {{field.type}} get{{capitalize field.name}}() {
+    public {{javaType field}} get{{capitalize field.name}}() {
         return {{field.name}};
     }
 
-    public void set{{capitalize field.name}}({{field.type}} {{field.name}}) {
+    public void set{{capitalize field.name}}({{javaType field}} {{field.name}}) {
         this.{{field.name}} = {{field.name}};
     }
 {{/each}}

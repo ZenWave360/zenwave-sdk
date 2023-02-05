@@ -1,6 +1,8 @@
 package {{basePackage}}.infrastructure.jpa;
 
 import java.util.HashSet;
+import java.time.*;
+import java.math.BigDecimal;
 
 import {{basePackage}}.core.domain.*;
 import {{basePackage}}.core.outbound.jpa.{{entity.className}}Repository;
@@ -41,7 +43,7 @@ public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositor
     public void saveTest() {
         {{entity.className}} {{entity.instanceName}} = new {{entity.className}}();
         {{~#each entity.fields as |field|}}
-        {{entity.instanceName}}.set{{capitalize field.name}}(null);
+        {{entity.instanceName}}.set{{capitalize field.name}}({{{populateField field}}});
         {{~/each}}
 
 {{#each entity.relationships as |relationship|}}
@@ -52,7 +54,11 @@ public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositor
         var {{relationship.fieldName}}Id = 1L;
         {{entity.instanceName}}.set{{capitalize relationship.fieldName}}Id({{relationship.fieldName}}Id); // using id to write relationship
         {{~else}}
-        var {{relationship.fieldName}} = new {{relationship.otherEntityName}}(); // TODO: fill in this object
+        var {{relationship.fieldName}} = new {{relationship.otherEntityName}}();
+        {{~assign 'otherEntity' (findEntity relationship.otherEntityName jdl)}}
+        {{~#each otherEntity.fields as |field|}}
+        {{relationship.fieldName}}.set{{capitalize field.name}}({{{populateField field}}});
+        {{~/each}}
             {{~#if (endsWith relationship.type 'ToOne')}}
         {{entity.instanceName}}.set{{capitalize relationship.fieldName}}({{relationship.fieldName}});
             {{~else}}
@@ -66,6 +72,7 @@ public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositor
 
         // Persist aggregate root
         var created = {{entity.instanceName}}Repository.save({{entity.instanceName}});
+
         entityManager.refresh(created); // reloading to get relationships persisted by id
         Assertions.assertTrue(created.getId() != null);
         Assertions.assertTrue(created.getVersion() != null);
@@ -94,12 +101,12 @@ public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositor
         var id = 1L;
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).orElseThrow();
         {{~#each entity.fields as |field|}}
-        {{entity.instanceName}}.set{{capitalize field.name}}(null);
+        {{entity.instanceName}}.set{{capitalize field.name}}({{{populateField field}}});
         {{~/each}}
 
         {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}});
         {{~#each entity.fields as |field|}}
-        Assertions.assertEquals("", {{entity.instanceName}}.get{{capitalize field.name}}());
+        Assertions.assertEquals({{{populateField field}}}, {{entity.instanceName}}.get{{capitalize field.name}}());
         {{~/each}}
     }
 

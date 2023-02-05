@@ -16,14 +16,14 @@ public class {{entity.className}}{{searchDTOSuffix}} implements Serializable {
 
 {{#each entity.fields as |field|}}
     {{~#unless field.isEntity}}
-    {{~#assign "fieldType"}}{{#if field.isEnum}}String{{else}}{{field.type}}{{/if}}{{/assign~}}
+    {{~#assign "fieldType"}}{{#if field.isEnum}}String{{else}}{{javaType field}}{{/if}}{{/assign~}}
     private {{fieldType}} {{field.name}};
     {{~/unless}}
 {{/each}}
 
 {{#each entity.fields as |field|}}
     {{~#unless field.isEntity}}
-    {{#assign "fieldType"}}{{#if field.isEnum}}String{{else}}{{field.type}}{{/if}}{{/assign}}
+    {{#assign "fieldType"}}{{#if field.isEnum}}String{{else}}{{javaType field}}{{/if}}{{/assign}}
     public {{entity.className}}{{searchDTOSuffix}} with{{capitalize field.name}}({{fieldType}} {{field.name}}) {
         this.{{field.name}} = {{field.name}};
         return this;
@@ -44,7 +44,7 @@ public class {{entity.className}}{{searchDTOSuffix}} implements Serializable {
 
 {{#each entity.fields as |field|}}
     {{#unless field.isEntity}}
-    {{#assign "fieldType"}}{{#if field.isEnum}}String{{else}}{{field.type}}{{/if}}{{/assign}}
+    {{#assign "fieldType"}}{{#if field.isEnum}}String{{else}}{{javaType field}}{{/if}}{{/assign}}
     public {{fieldType}} get{{capitalize field.name}}() {
         return {{field.name}};
     }
