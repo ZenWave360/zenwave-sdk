@@ -41,7 +41,7 @@ public class ForkPluginGenerator implements Generator {
     public String targetPluginClassName;
 
     @DocumentedOption(description = "Download URL for the source code of original plugin in zip format", required = false)
-    public URL downloadURL = new URL("https://github.com/ZenWave360/zenwave-sdk/archive/refs/tags/v1.0.0.RC2.zip");
+    public URL downloadURL = new URL("https://github.com/ZenWave360/zenwave-sdk/archive/refs/tags/v1.0.0.RC3.zip");
 
     @DocumentedOption
     public String targetFolder;

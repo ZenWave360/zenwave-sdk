@@ -206,7 +206,7 @@ jbang zw -p io.zenwave360.sdk.plugins.ForkPlugin -h
 | `targetFolder`          |                                                                                     | String   |                                                                            |            |
 | `sourcePluginClassName` | Plugin Plugin class to fork                                                         | String   |                                                                            |            |
 | `targetPluginClassName` | New Plugin Plugin class. It will be used for class name, package and maven groupId. | String   |                                                                            |            |
-| `downloadURL`           | Download URL for the source code of original plugin in zip format                   | URL      | https://github.com/ZenWave360/zenwave-sdk/archive/refs/tags/v1.0.0.RC2.zip |            |
+| `downloadURL`           | Download URL for the source code of original plugin in zip format                   | URL      | https://github.com/ZenWave360/zenwave-sdk/archive/refs/tags/v1.0.0.RC3.zip |            |
 
 Example:
 
