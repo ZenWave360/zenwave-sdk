@@ -1,6 +1,8 @@
 package io.zenwave360.sdk.zdl;
 
+import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.utils.JSONPath;
+import io.zenwave360.sdk.utils.Maps;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.ArrayList;
@@ -22,6 +24,31 @@ public class ZDLHttpUtils {
         return httpOptions instanceof String? (String) httpOptions : JSONPath.get(httpOptions, "$.path", "");
     }
 
+    public static List<Map<String, Object>> getPathParamsAsObject(Map method, String idType, String idTypeFormat) {
+        var path = getPathFromMethod(method);
+        var httpOption = getHttpOption(method);
+        var params = JSONPath.get(httpOption, "$.httpOptions.params", Map.of());
+        return (List) getPathParams(path).stream().map(param -> {
+            var type = params.getOrDefault(param, "String");
+            var typeAndFormat = EntitiesToSchemasConverter.schemaTypeAndFormat((String) type);
+            if(!params.containsKey(param) && (param.startsWith("id") || param.endsWith("Id"))) {
+                typeAndFormat.put("type", idType);
+                typeAndFormat.put("format", idTypeFormat);
+            }
+            return Maps.of("name", param,"type", typeAndFormat.get("type"), "format", typeAndFormat.get("format"));
+        }).toList();
+    }
+
+    public static List<Map<String, Object>> getQueryParamsAsObject(Map method) {
+        var pathParams = getPathParamsFromMethod(method);
+        var httpOption = getHttpOption(method);
+        var params = JSONPath.get(httpOption, "$.httpOptions.params", Map.of());
+        return (List) params.entrySet().stream().filter(entry -> !pathParams.contains(entry.getKey())).map(entry -> {
+            var type = entry.getValue();
+            var typeAndFormat = EntitiesToSchemasConverter.schemaTypeAndFormat((String) type);
+            return Maps.of("name", entry.getKey(),"type", typeAndFormat.get("type"), "format", typeAndFormat.get("format"));
+        }).toList();
+    }
     public static List<String> getPathParamsFromMethod(Map method) {
         var path = getPathFromMethod(method);
         return getPathParams(path);

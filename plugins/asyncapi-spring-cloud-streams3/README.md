@@ -310,10 +310,10 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
     <groupId>io.github.zenwave360.zenwave-sdk</groupId>
     <artifactId>zenwave-sdk-maven-plugin</artifactId>
     <version>${zenwave.version}</version>
-    <plugin>
+    <configuration>
         <addCompileSourceRoot>true</addCompileSourceRoot><!-- default is true -->
         <addTestCompileSourceRoot>true</addTestCompileSourceRoot><!-- default is true -->
-    </plugin>
+    </configuration>
     <executions>
         <!-- Add executions for each generation here: -->
         <execution>
@@ -357,7 +357,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
     <goals>
         <goal>generate</goal>
     </goals>
-    <plugin>
+    <configuration>
         <generatorName>spring-cloud-streams3</generatorName>
         <inputSpec>classpath:model/asyncapi.yml</inputSpec>
         <configOptions>
@@ -366,7 +366,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
             <apiPackage>io.zenwave360.example.core.events.outbound.outbox.none</apiPackage>
             <modelPackage>io.zenwave360.example.core.events.model</modelPackage>
         </configOptions>
-    </plugin>
+    </configuration>
 </execution>
 ```
 
@@ -379,7 +379,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
     <goals>
         <goal>generate</goal>
     </goals>
-    <plugin>
+    <configuration>
         <generatorName>spring-cloud-streams3</generatorName>
         <inputSpec>classpath:model/asyncapi.yml</inputSpec>
         <configOptions>
@@ -389,7 +389,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
             <apiPackage>io.zenwave360.example.core.events.outbound.outbox.mongodb</apiPackage>
             <modelPackage>io.zenwave360.example.core.events.model</modelPackage>
         </configOptions>
-    </plugin>
+    </configuration>
 </execution>
 ```
 
@@ -402,7 +402,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
     <goals>
         <goal>generate</goal>
     </goals>
-    <plugin>
+    <configuration>
         <generatorName>spring-cloud-streams3</generatorName>
         <inputSpec>classpath:model/asyncapi.yml</inputSpec>
         <configOptions>
@@ -412,7 +412,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
             <apiPackage>io.zenwave360.example.core.events.outbound.outbox.jdbc</apiPackage>
             <modelPackage>io.zenwave360.example.core.events.model</modelPackage>
         </configOptions>
-    </plugin>
+    </configuration>
 </execution>
 ```
 
@@ -425,13 +425,13 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
     <goals>
         <goal>generate</goal>
     </goals>
-    <plugin>
+    <configuration>
         <generatorName>jsonschema2pojo</generatorName>
         <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
         <configOptions>
             <modelPackage>io.zenwave360.example.core.events.model</modelPackage>
         </configOptions>
-    </plugin>
+    </configuration>
 </execution>
 ```
 
@@ -444,7 +444,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
     <goals>
         <goal>generate</goal>
     </goals>
-    <plugin>
+    <configuration>
         <generatorName>spring-cloud-streams3</generatorName>
         <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi-avro.yml</inputSpec>
         <configOptions>
@@ -452,7 +452,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
             <style>imperative</style>
             <apiPackage>io.zenwave360.example.core.events.outbound.avro</apiPackage>
         </configOptions>
-    </plugin>
+    </configuration>
 </execution>
 
 ```
@@ -466,7 +466,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
     <goals>
         <goal>generate</goal>
     </goals>
-    <plugin>
+    <configuration>
         <generatorName>spring-cloud-streams3</generatorName>
         <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
         <configOptions>
@@ -475,7 +475,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
             <apiPackage>io.zenwave360.example.core.events.inbound.imperative</apiPackage>
             <modelPackage>io.zenwave360.example.core.events.model</modelPackage>
         </configOptions>
-    </plugin>
+    </configuration>
 </execution>
 ```
 
@@ -488,7 +488,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
     <goals>
         <goal>generate</goal>
     </goals>
-    <plugin>
+    <configuration>
         <generatorName>spring-cloud-streams3</generatorName>
         <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
         <configOptions>
@@ -497,6 +497,6 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
             <apiPackage>io.zenwave360.example.core.events.inbound.reactive</apiPackage>
             <modelPackage>io.zenwave360.example.core.events.model</modelPackage>
         </configOptions>
-    </plugin>
+    </configuration>
 </execution>
 ```

@@ -88,46 +88,10 @@ public class EntitiesToSchemasConverter {
             boolean isComplexType = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + field.get("type")) != null
                     || JSONPath.get(zdlModel, "$.events." + field.get("type")) != null;
 
-            if ("String".equals(field.get("type")) || "TextBlob".equals(field.get("type"))) {
-                property.put("type", "string");
-            } else if ("Enum".equals(field.get("type"))) {
-                property.put("type", "string");
-            } else if ("LocalDate".equals(field.get("type"))) {
-                property.put("type", "string");
-                property.put("format", "date");
-            } else if ("ZonedDateTime".equals(field.get("type"))) {
-                property.put("type", "string");
-                property.put("format", "date-time");
-            } else if ("Instant".equals(field.get("type"))) {
-                property.put("type", "string");
-                property.put("format", "date-time");
-            } else if ("Duration".equals(field.get("type"))) {
-                property.put("type", "string");
-                // property.put("format", "date-time");
-            } else if ("Integer".equals(field.get("type"))) {
-                property.put("type", "integer");
-                property.put("format", "int32");
-            } else if ("Long".equals(field.get("type"))) {
-                property.put("type", "integer");
-                property.put("format", "int64");
-            } else if ("Float".equals(field.get("type"))) {
-                property.put("type", "number");
-                property.put("format", "float");
-            } else if ("Double".equals(field.get("type")) || "BigDecimal".equals(field.get("type"))) {
-                property.put("type", "number");
-                property.put("format", "double");
-            } else if ("Boolean".equals(field.get("type"))) {
-                property.put("type", "boolean");
-            } else if ("UUID".equals(field.get("type"))) {
-                property.put("type", "string");
-                property.put("pattern", "^[a-f\\d]{4}(?:[a-f\\d]{4}-){4}[a-f\\d]{12}$");
-            } else if (blobTypes.contains(field.get("type"))) {
-                property.put("type", "string");
-                property.put("format", "binary");
-            } else if (isComplexType) {
+            if (isComplexType) {
                 property.put("$ref", "#/components/schemas/" + field.get("type"));
             } else {
-                property.put("type", "string");
+                property.putAll(schemaTypeAndFormat((String) field.get("type")));
             }
 
             String required = JSONPath.get(field, "$.validations.required.value");
@@ -192,6 +156,50 @@ public class EntitiesToSchemasConverter {
         }
 
         return schema;
+    }
+
+    public static Map<String, String> schemaTypeAndFormat(String entityType) {
+        var property = new LinkedHashMap<String, String>();
+        if ("String".equals(entityType) || "TextBlob".equals(entityType)) {
+            property.put("type", "string");
+        } else if ("Enum".equals(entityType)) {
+            property.put("type", "string");
+        } else if ("LocalDate".equals(entityType)) {
+            property.put("type", "string");
+            property.put("format", "date");
+        } else if ("ZonedDateTime".equals(entityType)) {
+            property.put("type", "string");
+            property.put("format", "date-time");
+        } else if ("Instant".equals(entityType)) {
+            property.put("type", "string");
+            property.put("format", "date-time");
+        } else if ("Duration".equals(entityType)) {
+            property.put("type", "string");
+            // property.put("format", "date-time");
+        } else if ("Integer".equals(entityType)) {
+            property.put("type", "integer");
+            property.put("format", "int32");
+        } else if ("Long".equals(entityType)) {
+            property.put("type", "integer");
+            property.put("format", "int64");
+        } else if ("Float".equals(entityType)) {
+            property.put("type", "number");
+            property.put("format", "float");
+        } else if ("Double".equals(entityType) || "BigDecimal".equals(entityType)) {
+            property.put("type", "number");
+            property.put("format", "double");
+        } else if ("Boolean".equals(entityType)) {
+            property.put("type", "boolean");
+        } else if ("UUID".equals(entityType)) {
+            property.put("type", "string");
+            property.put("pattern", "^[a-f\\d]{4}(?:[a-f\\d]{4}-){4}[a-f\\d]{12}$");
+        } else if (blobTypes.contains(entityType)) {
+            property.put("type", "string");
+            property.put("format", "binary");
+        } else {
+            property.put("type", "string");
+        }
+        return property;
     }
 
     private static boolean includeIdAndVersion(Map<String, Object> entity) {

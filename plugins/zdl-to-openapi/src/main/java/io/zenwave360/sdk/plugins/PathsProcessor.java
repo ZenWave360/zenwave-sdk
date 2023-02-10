@@ -39,17 +39,21 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
                         var methodVerb = httpOption.get("httpMethod");
                         var methodPath = ZDLHttpUtils.getPathFromMethod(method);
                         var path = basePath + methodPath;
-                        var params = httpOption.get("params");
+//                        var params = httpOption.get("params");
                         var pathParams = ZDLHttpUtils.getPathParams(path);
-                        var hasParams = params != null || pathParams.size() > 0 || paginated != null;
+                        var pathParamsMap = ZDLHttpUtils.getPathParamsAsObject(method, idType, idTypeFormat);
+                        var queryParamsMap = ZDLHttpUtils.getQueryParamsAsObject(method);
+                        var hasParams = !pathParams.isEmpty() || !queryParamsMap.isEmpty() || paginated != null;
                         paths.appendTo(path, (String) methodVerb, new FluentMap()
                                 .with("operationId", methodName)
                                 .with("httpMethod", methodVerb)
                                 .with("tags", new String[]{(String) ((Map)service).get("name")})
                                 .with("summary", method.get("javadoc"))
                                 .with("hasParams", hasParams)
-                                .with("params", params)
+//                                .with("params", params)
                                 .with("pathParams", pathParams)
+                                .with("pathParamsMap", pathParamsMap)
+                                .with("queryParamsMap", queryParamsMap)
                                 .with("requestBody", ZDLHttpUtils.getRequestBodyType(method, apiModel))
                                 .with("responseBody", method.get("returnType"))
                                 .with("isResponseBodyArray", method.get("returnTypeIsArray"))

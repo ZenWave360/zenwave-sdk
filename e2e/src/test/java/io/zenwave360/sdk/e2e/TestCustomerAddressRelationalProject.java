@@ -46,18 +46,18 @@ public class TestCustomerAddressRelationalProject {
                 .withTargetFolder(targetFolder);
         new MainGenerator().generate(plugin);
 
-        var replace = "        - name: \"identifier\"\n" +
-                "          in: path\n" +
-                "          required: true\n" +
-                "          schema:\n" +
-                "            type: integer\n" +
-                "            format: int64";
-        var replacement = "        - name: \"identifier\"\n" +
-                "          in: path\n" +
-                "          required: true\n" +
-                "          schema:\n" +
-                "            type: string";
-        TextUtils.replaceInFile(new File(targetFolder + "/src/main/resources/apis/openapi.yml"), replace, replacement);
+//        var replace = "        - name: \"identifier\"\n" +
+//                "          in: path\n" +
+//                "          required: true\n" +
+//                "          schema:\n" +
+//                "            type: integer\n" +
+//                "            format: int64";
+//        var replacement = "        - name: \"identifier\"\n" +
+//                "          in: path\n" +
+//                "          required: true\n" +
+//                "          schema:\n" +
+//                "            type: string";
+//        TextUtils.replaceInFile(new File(targetFolder + "/src/main/resources/apis/openapi.yml"), replace, replacement);
 
         plugin = new ZDLToAsyncAPIPlugin()
                 .withSpecFile(zdlFile)

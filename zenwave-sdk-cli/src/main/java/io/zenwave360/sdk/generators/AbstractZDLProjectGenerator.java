@@ -47,7 +47,7 @@ public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
                 continue;
             }
             var comment = enumValue.get("comment");
-            var isDtoInput = comment != null && comment.toString().contains("@input");
+            var isDtoInput = JSONPath.get(enumValue, "$.options.input", false);
             if (isDtoInput) {
                 for (TemplateInput template : templates.inputEnumTemplates) {
                     templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("enum", enumValue)));

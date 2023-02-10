@@ -92,7 +92,7 @@ service CustomerService for (Customer) {
   updateCustomer(id, Customer) Customer? withEvents CustomerEvent
 
   /** Updates a the customer address identified by address.identifier */
-  @put("/{customerId}/address/{identifier}")
+  @put({path: "/{customerId}/address/{identifier}", params: {identifier: String}})
   updateCustomerAddress(id, AddressInput) Customer? withEvents CustomerEvent CustomerAddressUpdated
 
   @delete("/{customerId}")

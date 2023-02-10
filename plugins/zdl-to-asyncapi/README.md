@@ -1,18 +1,38 @@
 # ZDL To AsyncAPI Generator
 > 👉 ZenWave360 Helps You Create Software that's Easy to Understand
 
-Generate OpenAPI definition from JDL entities:
-
-- Component Schemas for entities, plain and paginated lists
-- CRUD operations for entities
+Generate AsyncAPI definition from ZDL Services and Events:
 
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.ZDLToAsyncAPIPlugin \
     specFile=src/main/resources/model/orders-model.zdl \
     idType=integer \
     idTypeFormat=int64 \
-    targetFile=src/main/resources/model/openapi.yml
+    targetFile=src/main/resources/model/asyncapi.yml
 ```
+
+For instance the following ZDL model will generate:
+
+```zdl
+service OrdersService for (CustomerOrder) {
+    // only emited events will be included in the asyncapi definition
+    updateOrder(id, CustomerOrderInput) CustomerOrder withEvents OrderStatusUpdated
+}
+
+@asyncapi({channel: "OrderUpdatesChannel", topic: "orders.order_updates"})
+event OrderStatusUpdated {
+    id String
+    dateTime Instant required
+    status OrderStatus required
+    previousStatus OrderStatus
+}
+```
+- An `schema` named `OrderStatusUpdated` with a `payload` containing the `id`, `dateTime`, `status` and `previousStatus` fields.
+- A `message` named `OrderStatusUpdatedMessage` pointing to `OrderStatusUpdated` schema.
+- An a `Channel` named `OrderUpdatesChannel` containing a reference to the `OrderStatusUpdatedMessage` message.
+- It also will generate an `Operation` named `onOrderStatusUpdated` with and action `send`to the `OrderUpdatesChannel` channel.
+
+This is as a compact format as it can get!! Saving you a lot of typing and giving you very concise representation of your events.
 
 ## Options
 

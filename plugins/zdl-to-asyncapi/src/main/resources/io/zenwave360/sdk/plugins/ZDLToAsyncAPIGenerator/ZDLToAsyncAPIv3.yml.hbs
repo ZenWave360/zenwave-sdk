@@ -42,9 +42,13 @@ components:
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
+      {{~#if isDefaultSchemaFormat}}
+        $ref: "{{payloadRef message}}"
+      {{~else}}
         schemaFormat: {{{schemaFormatString}}}
         schema:
           $ref: "{{payloadRef message}}"
+      {{~/if}}
 {{~/each}}
 
   messageTraits:
