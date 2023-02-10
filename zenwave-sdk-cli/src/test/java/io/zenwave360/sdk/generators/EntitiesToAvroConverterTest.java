@@ -25,7 +25,7 @@ public class EntitiesToAvroConverterTest {
         EntitiesToAvroConverter converter = new EntitiesToAvroConverter().withIdType("string").withNamespace("io.example");
         Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
         List<Map> entities = JSONPath.get(model, "entities[*]");
-        List<Map> enums = JSONPath.get(model, "enums.enums[*]");
+        List<Map> enums = JSONPath.get(model, "enums[*]");
         List<Map> entitiesAndEnums = new ArrayList<>();
         entitiesAndEnums.addAll(entities);
         entitiesAndEnums.addAll(enums);
@@ -51,7 +51,7 @@ public class EntitiesToAvroConverterTest {
         EntitiesToAvroConverter converter = new EntitiesToAvroConverter().withIdType("integer").withNamespace("io.example");
         Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address-relational.zdl");
         List<Map> entities = JSONPath.get(model, "entities[*]");
-        List<Map> enums = JSONPath.get(model, "enums.enums[*]");
+        List<Map> enums = JSONPath.get(model, "enums[*]");
         List<Map> entitiesAndEnums = new ArrayList<>();
         entitiesAndEnums.addAll(entities);
         entitiesAndEnums.addAll(enums);
@@ -77,7 +77,7 @@ public class EntitiesToAvroConverterTest {
         EntitiesToAvroConverter converter = new EntitiesToAvroConverter().withIdType("integer").withNamespace("io.example");
         Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/zdl/populate-fields.zdl");
         List<Map> entities = JSONPath.get(model, "entities[*]");
-        List<Map> enums = JSONPath.get(model, "enums.enums[*]");
+        List<Map> enums = JSONPath.get(model, "enums[*]");
         List<Map> entitiesAndEnums = new ArrayList<>();
         entitiesAndEnums.addAll(entities);
         entitiesAndEnums.addAll(enums);

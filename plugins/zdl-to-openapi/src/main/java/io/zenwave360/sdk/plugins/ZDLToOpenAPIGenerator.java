@@ -139,7 +139,7 @@ public class ZDLToOpenAPIGenerator implements Generator {
             }
         }
 
-//        List<Map<String, Object>> enums = JSONPath.get(zdlModel, "$.enums.enums[*]", emptyList());
+//        List<Map<String, Object>> enums = JSONPath.get(zdlModel, "$.enums[*]", emptyList());
 //        for (Map<String, Object> enumValue : enums) {
 //            Map<String, Object> enumSchema = converter.convertToSchema(enumValue, zdlModel);
 //            schemas.put((String) enumValue.get("name"), enumSchema);

@@ -41,7 +41,7 @@ public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
             }
         }
 
-        Map<String, Map<String, Object>> enums = JSONPath.get(apiModel, "$.enums.enums");
+        Map<String, Map<String, Object>> enums = JSONPath.get(apiModel, "$.enums");
         for (Map<String, Object> enumValue : enums.values()) {
             if (!isGenerateEntity(enumValue)) {
                 continue;
