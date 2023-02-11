@@ -74,7 +74,6 @@ public class BackendApplicationDefaultHelpersTest {
                 "Customer=CustomerCreatedFailed",
                 "Customer=CustomerEvent",
                 "Customer=CustomerUpdated",
-                "CustomerInput=CustomerInput",
                 "deleteCustomer=CustomerDeleted"),
                 entityEvent);
 

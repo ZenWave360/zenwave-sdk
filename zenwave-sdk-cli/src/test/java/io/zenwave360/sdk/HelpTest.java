@@ -17,6 +17,11 @@ public class HelpTest {
     }
 
     @Test
+    public void testPluginsJsonHelp() {
+        Main.main("-h", "json");
+    }
+
+    @Test
     public void testPluginHelp() {
         Main.main("-h", "-p", NoOpPluginConfiguration.class.getName());
     }

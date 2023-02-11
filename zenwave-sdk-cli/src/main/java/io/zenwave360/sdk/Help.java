@@ -118,7 +118,7 @@ public class Help {
 
     public String help(Plugin plugin, Format format) {
         format = format == null ? Format.help : format;
-        var model = format == Format.list ? discoverAvailablePlugins() : buildHelpModel(plugin);
+        var model = plugin == null ? discoverAvailablePlugins() : buildHelpModel(plugin);
         model.put("version", getClass().getPackage().getImplementationVersion());
         if (format == Format.json) {
             try {
