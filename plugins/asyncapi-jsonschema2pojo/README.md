@@ -16,20 +16,15 @@ jbang zw -p io.zenwave360.sdk.plugins.AsyncApiJsonSchema2PojoPlugin \
 
 ## Options
 
-| **Option**        | **Description**                                                                                                | **Type**         | **Default**   | **Values**       |
-|-------------------|----------------------------------------------------------------------------------------------------------------|------------------|---------------|------------------|
-| `specFile`        | API Specification File                                                                                         | String           |               |                  |
-| `targetFolder`    | Target folder to generate code to.                                                                             | File             |               |                  |
-| `messageNames`    | Message names to include in code generation (combined with operationIds). Generates code for ALL if left empty | List             | []            |                  |
-| `jsonschema2pojo` | JsonSchema2Pojo settings to pass any option to https://www.jsonschema2pojo.org/ underlying library.            | Map              | {}            |                  |
-| `sourceFolder`    | Source folder inside folder to generate code to.                                                               | String           | src/main/java |                  |
-| `apiPackage`      | Java API package name                                                                                          | String           |               |                  |
-| `modelPackage`    | Java Models package name                                                                                       | String           |               |                  |
-| `bindingTypes`    | Binding names to include in code generation. Generates code for ALL bindings if left empty                     | List             |               |                  |
-| `role`            | Project role: provider/client                                                                                  | AsyncapiRoleType | provider      | provider, client |
-| `operationIds`    | Operation ids to include in code generation. Generates code for ALL if left empty                              | List             | []            |                  |
-
-
+| **Option**        | **Description**                                                                                                | **Type** | **Default** | **Values** |
+|-------------------|----------------------------------------------------------------------------------------------------------------|----------|-------------|------------|
+| `specFile`        | API Specification File                                                                                         | String   |             |            |
+| `targetFolder`    | Target folder to generate code to.                                                                             | File     |             |            |
+| `modelPackage`    | Java Models package name                                                                                       | String   |             |            |
+| `jsonschema2pojo` | JsonSchema2Pojo settings                                                                                       | Map      | {}          |            |
+| `messageNames`    | Message names to include in code generation (combined with operationIds). Generates code for ALL if left empty | List     | []          |            |
+| `bindingTypes`    | Binding names to include in code generation. Generates code for ALL bindings if left empty                     | List     |             |            |
+| `operationIds`    | Operation ids to include in code generation. Generates code for ALL if left empty                              | List     | []          |            |
 
 ## Getting Help
 

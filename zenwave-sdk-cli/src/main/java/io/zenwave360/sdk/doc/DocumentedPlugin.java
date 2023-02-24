@@ -20,4 +20,6 @@ public @interface DocumentedPlugin {
     String description() default "";
 
     String shortCode() default "";
+
+    String[] hiddenOptions() default {};
 }

@@ -6,5 +6,5 @@ Help for: {{configClassName}}
 
 Options:
 {{#each options as |option|}}
-    * {{~@key}}: {{{option.description}}}
-{{/each}}
+  * {{@key}}: {{{option.description}}} {{#if option.values}}({{join option.values ", " }}){{/if}} {{#if option.defaultValue}}[default: {{{option.defaultValue}}}]{{/if}}
+{{~/each}}

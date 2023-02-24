@@ -58,6 +58,7 @@ public class Help {
             }
         }
 
+        List<String> hiddenOptions = Arrays.asList(pluginDocumentation.hiddenOptions());
         // adds options from processors chain
         int chainIndex = 0;
         for (Class pluginClass : configuration.getChain()) {
@@ -71,12 +72,10 @@ public class Help {
             }
             for (Field field : FieldUtils.getAllFields(pluginClass)) {
                 DocumentedOption documentedOption = field.getAnnotation(DocumentedOption.class);
-                if (documentedOption != null) {
+                if (documentedOption != null && !hiddenOptions.contains(field.getName())) {
                     options.put(field.getName(), asModel(plugin, field, documentedOption));
-                } else {
-                    if (isPublic(field.getModifiers()) && !isStatic(field.getModifiers())) {
-                        undocumentedOptions.put(field.getName(), Map.of("name", field.getName(), "ownerClass", pluginClass.getName(), "type", field.getType()));
-                    }
+                } else if (isPublic(field.getModifiers()) && !isStatic(field.getModifiers())) {
+                    undocumentedOptions.put(field.getName(), Map.of("name", field.getName(), "ownerClass", pluginClass.getName(), "type", field.getType()));
                 }
             }
         }

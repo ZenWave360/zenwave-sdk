@@ -80,10 +80,10 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
             new Object[] {"src/main/java", "core/domain/search/EntityDocument.java", "core/domain/search/{{entity.className}}{{searchDTOSuffix}}.java", JAVA, skipElasticSearch},
             new Object[] {"src/main/java", "core/outbound/search/EntitySearchRepository.java", "core/outbound/search/{{entity.className}}SearchRepository.java", JAVA, skipElasticSearch},
 
-            new Object[] {"src/test/java", "infrastructure/{{persistence}}/{{style}}/BaseRepositoryIntegrationTest.java", "infrastructure/{{persistence}}/BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository},
-            new Object[] {"src/test/java", "infrastructure/{{persistence}}/{{style}}/EntityRepositoryIntegrationTest.java", "infrastructure/{{persistence}}/{{entity.className}}RepositoryIntegrationTest.java", JAVA, skipEntityRepository},
-            new Object[] {"src/test/java", "infrastructure/{{persistence}}/{{style}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", "infrastructure/{{persistence}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository},
-            new Object[] {"src/test/java", "infrastructure/{{persistence}}/{{style}}/inmemory/EntityRepositoryInMemory.java", "infrastructure/{{persistence}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA, skipEntityRepository}
+            new Object[] {"src/test/java", "infrastructure/{{persistence}}/{{style}}/BaseRepositoryIntegrationTest.java", "infrastructure/{{persistence}}/BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository, true},
+            new Object[] {"src/test/java", "infrastructure/{{persistence}}/{{style}}/EntityRepositoryIntegrationTest.java", "infrastructure/{{persistence}}/{{entity.className}}RepositoryIntegrationTest.java", JAVA, skipEntityRepository, true},
+            new Object[] {"src/test/java", "infrastructure/{{persistence}}/{{style}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", "infrastructure/{{persistence}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true},
+            new Object[] {"src/test/java", "infrastructure/{{persistence}}/{{style}}/inmemory/EntityRepositoryInMemory.java", "infrastructure/{{persistence}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA, skipEntityRepository, true}
     );
 
     protected List<Object[]> templatesByService = List.of(
@@ -104,11 +104,13 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
     }
 
     protected TemplateInput asTemplateInput(Object[] templateNames) {
+        boolean skipOverwrite = templateNames.length > 5 ? (boolean) templateNames[5] : false;
         Function<Map<String, Object>, Boolean> skip = templateNames.length > 4 ? (Function) templateNames[4] : null;
         return new TemplateInput()
                 .withTemplateLocation(templatesFolder + templateNames[0] + "/" + templateNames[1])
                 .withTargetFile(templateNames[0] + "/{{asPackageFolder basePackage}}/" + templateNames[2])
                 .withMimeType((OutputFormatType) templateNames[3])
+                .withSkipOverwrite(skipOverwrite)
                 .withSkip(skip);
     }
 

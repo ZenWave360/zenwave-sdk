@@ -24,6 +24,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.Optional;
+import java.time.*;
+import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -61,15 +63,21 @@ public class {{service.name}}Test  {
     @Test
     @Order({{@index}}1)
     void testCRUD{{entity.className}}() {
-        var input = new {{entity.className}}Input();
+        var input = new {{entity.className}}{{inputDTOSuffix}}();
         // TODO fill input data
+        {{~#each entity.fields as |field|}}
+        // input.set{{capitalize field.name}}({{{populateField field}}});
+        {{~/each}}
         var {{entity.instanceName}} = {{serviceInstance}}.create{{entity.className}}(input);
         assertNotNull({{entity.instanceName}}.getId());
         assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}));
 
         var id = {{entity.instanceName}}.getId();
-        var {{entity.instanceName}}Update = new {{entity.className}}Input();
+        var {{entity.instanceName}}Update = new {{entity.className}}{{inputDTOSuffix}}();
         // TODO fill update data
+        {{~#each entity.fields as |field|}}
+        // {{entity.instanceName}}Update.set{{capitalize field.name}}({{{populateField field}}});
+        {{~/each}}
         assertTrue({{entity.instanceName}}Repository.containsKey(id));
         var {{entity.instanceName}}Updated = {{serviceInstance}}.update{{entity.className}}(id, {{entity.instanceName}}Update);
         assertTrue({{entity.instanceName}}Updated.isPresent());
@@ -85,6 +93,9 @@ public class {{service.name}}Test  {
     void testCreate{{entity.className}}() {
         var input = new {{entity.className}}{{inputDTOSuffix}}();
         // TODO fill input data
+        {{~#each entity.fields as |field|}}
+        // input.set{{capitalize field.name}}({{{populateField field}}});
+        {{~/each}}
         var {{entity.instanceName}} = {{serviceInstance}}.create{{entity.className}}(input);
         assertNotNull({{entity.instanceName}}.getId());
         assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}));
@@ -96,6 +107,9 @@ public class {{service.name}}Test  {
         var id = 0L; // TODO fill id
         var input = new {{entity.className}}{{inputDTOSuffix}}();
         // TODO fill input data
+        {{~#each entity.fields as |field|}}
+        // input.set{{capitalize field.name}}({{{populateField field}}});
+        {{~/each}}
         assertTrue({{entity.instanceName}}Repository.containsKey(id));
         var {{entity.instanceName}} = {{serviceInstance}}.update{{entity.className}}(id, input);
         assertTrue({{entity.instanceName}}.isPresent());
