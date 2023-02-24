@@ -9,7 +9,7 @@ io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,As
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,OpenApiProcessor,2,386,8,34,0,77,8,23,0,10
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,EnrichSchemaWithJDLProcessor,0,242,0,12,0,50,0,12,0,6
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk,Help.Format,0,39,0,0,0,2,0,1,0,1
-io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk,Help,34,375,3,25,10,56,3,17,0,6
+io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk,Help,34,384,4,26,10,57,4,17,0,6
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk,Main,5,116,2,6,3,29,2,6,0,4
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk,Plugin,156,235,16,26,39,47,26,26,17,14
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk,MainGenerator,15,168,3,15,3,37,3,10,0,4
