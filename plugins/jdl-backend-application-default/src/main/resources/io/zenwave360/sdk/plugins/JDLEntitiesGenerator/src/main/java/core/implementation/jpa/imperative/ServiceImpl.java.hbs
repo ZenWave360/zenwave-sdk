@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Service Implementation for managing {{service.entityNames}}.
  */
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class {{service.name}}Impl implements {{service.name}} {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -51,6 +51,7 @@ public class {{service.name}}Impl implements {{service.name}} {
     // {{entity.name}}
 
     @Override
+    @Transactional(readOnly = false)
     public {{entity.className}} create{{entity.className}}({{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
         log.debug("Request to save {{entity.className}}: {}", {{entity.instanceName}}{{inputDTOSuffix}});
         var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), {{entity.instanceName}}Input);
@@ -60,6 +61,7 @@ public class {{service.name}}Impl implements {{service.name}} {
     }
 
     @Override
+    @Transactional(readOnly = false)
     public Optional<{{entity.className}}> update{{entity.className}}({{idJavaType}} id, {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
         log.debug("Request to update {{entity.className}}: {}", {{entity.instanceName}}{{inputDTOSuffix}});
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id);
@@ -91,6 +93,7 @@ public class {{service.name}}Impl implements {{service.name}} {
     }
 
     @Override
+    @Transactional(readOnly = false)
     public void delete{{entity.className}}({{idJavaType}} id) {
         log.debug("Request to delete {{entity.className}} : {}", id);
         {{entity.instanceName}}Repository.deleteById(id);
