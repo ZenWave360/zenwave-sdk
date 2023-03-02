@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.zenwave360.sdk.parsers.JDLParser;
 import io.zenwave360.sdk.utils.JSONPath;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +13,45 @@ import com.github.jknack.handlebars.Options;
 
 import io.zenwave360.sdk.utils.NamingUtils;
 
+import static org.apache.commons.lang3.StringUtils.capitalize;
+
 public class CustomHandlebarsHelpers {
+
+    public static String populateProperty(Map property, Options options) {
+        String type = (String) property.get("type");
+        String format = (String) property.get("format");
+        if ("date".equals(format)) {
+            return "new Date()";
+        }
+        if ("date-time".equals(format)) {
+            return "Instant.now()";
+        }
+        if ("integer".equals(type) && "int32".equals(format)) {
+            return "1";
+        }
+        if ("integer".equals(type) && "int64".equals(format)) {
+            return "1L";
+        }
+        if ("number".equals(type)) {
+            return "BigDecimal.valueOf(0)";
+        }
+        if ("boolean".equals(type)) {
+            return "true";
+        }
+        if ("array".equals(type)) {
+            var items = (Map<String, Object>) property.get("items");
+            var propertyName = (String) property.get("x--property-name");
+            return "null";
+        }
+        if (property.get("x--schema-name") != null) {
+            // root level #/component/schemas would be an entity or enum
+            String otherEntity = (String) property.get("x--schema-name");
+            String propertyName = (String) property.get("x--property-name");
+            return "new " + otherEntity + "()";
+        }
+        return "\"aaa\"";
+    }
+
 
     public static Object jsonPath(Object entity, Options options) throws IOException {
         String jsonPath = StringUtils.join(options.params, "");

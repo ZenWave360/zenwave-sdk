@@ -33,7 +33,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
     }
 
     enum PayloadStyle {
-        entity, stateTransfer
+        entity, event
     }
 
     public String sourceProperty = "jdl";
@@ -184,7 +184,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
 
         avroList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name), avroJson, OutputFormatType.JSON.toString()));
 
-        if (payloadStyle == PayloadStyle.stateTransfer && (!skipOperations(entityOrEnum) || entityOrEnum.get("fields") == null)) {
+        if (payloadStyle == PayloadStyle.event && (!skipOperations(entityOrEnum) || entityOrEnum.get("fields") == null)) {
             // creating 'fake' jdl entities for message payloads for created/updated/deleted as { id: <id>, payload: <entity> }
 
             Map<String, Object> fields = new HashMap<>();
@@ -252,13 +252,13 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         });
 
         handlebarsEngine.getHandlebars().registerHelper("isStateTransferPayloadStyle", (context, options) -> {
-            return payloadStyle == PayloadStyle.stateTransfer;
+            return payloadStyle == PayloadStyle.event;
         });
 
         handlebarsEngine.getHandlebars().registerHelper("payloadRef", (context, options) -> {
             Map entity = (Map) context;
-            String messageType = payloadStyle == PayloadStyle.stateTransfer ? options.param(0) : "";
-            String payloadStyleSuffix = payloadStyle == PayloadStyle.stateTransfer ? "Payload" : "";
+            String messageType = payloadStyle == PayloadStyle.event ? options.param(0) : "";
+            String payloadStyleSuffix = payloadStyle == PayloadStyle.event ? "Payload" : "";
             if (schemaFormat == SchemaFormat.avro) {
                 return String.format("avro/%s%s%s.avsc", entity.get("className"), messageType, payloadStyleSuffix);
             }

@@ -131,6 +131,9 @@
                             <supportingFilesToGenerate>
                                 ApiUtil.java
                             </supportingFilesToGenerate>
+                            <typeMappings>
+                                <typeMapping>Double=java.math.BigDecimal</typeMapping>
+                            </typeMappings>
                             <configOptions>
                                 <documentationProvider>none</documentationProvider>
                                 <openApiNullable>false</openApiNullable>

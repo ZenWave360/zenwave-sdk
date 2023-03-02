@@ -69,7 +69,7 @@ public class JDLToAsyncAPIGeneratorTest {
         Map<String, Object> model = loadJDLModelFromResource("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl");
         JDLToAsyncAPIGenerator generator = new JDLToAsyncAPIGenerator();
         generator.includeCommands = true;
-        generator.payloadStyle = JDLToAsyncAPIGenerator.PayloadStyle.stateTransfer;
+        generator.payloadStyle = JDLToAsyncAPIGenerator.PayloadStyle.event;
         generator.annotations = List.of("aggregate");
 
         List<TemplateOutput> outputTemplates = generator.generate(model);
@@ -94,7 +94,7 @@ public class JDLToAsyncAPIGeneratorTest {
         JDLToAsyncAPIGenerator generator = new JDLToAsyncAPIGenerator();
         generator.schemaFormat = JDLToAsyncAPIGenerator.SchemaFormat.avro;
         generator.includeCommands = true;
-        generator.payloadStyle = JDLToAsyncAPIGenerator.PayloadStyle.stateTransfer;
+        generator.payloadStyle = JDLToAsyncAPIGenerator.PayloadStyle.event;
 
         List<TemplateOutput> outputTemplates = generator.generate(model);
 

@@ -30,7 +30,7 @@ jbang zw -p io.zenwave360.sdk.plugins.JDLToAsyncAPIPlugin \
     idType=integer \
     idTypeFormat=int64 \
     annotations=aggregate \
-    payloadStyle=stateTransfer \
+    payloadStyle=event \
     targetFile=src/main/resources/model/asyncapi.yml
 ```
 
@@ -46,7 +46,7 @@ jbang zw -p io.zenwave360.sdk.plugins.JDLToAsyncAPIPlugin \
 | `targetFolder`              | Target folder for generated output                                                                    | String       |                         |                       |
 | `targetFile`                | Target file                                                                                           | String       | asyncapi.yml            |                       |
 | `schemaFormat`              | Schema format for messages' payload                                                                   | SchemaFormat | schema                  | schema, avro          |
-| `payloadStyle`              | Payload Style for messages' payload                                                                   | PayloadStyle | entity                  | entity, stateTransfer |
+| `payloadStyle`              | Payload Style for messages' payload                                                                   | PayloadStyle | entity                  | entity, event |
 | `idType`                    | JsonSchema type for id fields and parameters.                                                         | String       | string                  |                       |
 | `idTypeFormat`              | JsonSchema type format for id fields and parameters.                                                  | String       |                         |                       |
 | `entities`                  | Entities to generate code for                                                                         | List         | []                      |                       |
