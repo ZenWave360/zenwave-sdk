@@ -16,7 +16,7 @@ io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk,MainGenerator
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,TemplateInput,58,48,2,0,17,17,6,10,5,10
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,OutputFormatType,27,0,0,0,2,0,1,0,1,0
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,HandlebarsEngine,29,112,4,2,5,24,5,5,2,5
-io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,CustomHandlebarsHelpers,116,225,21,15,22,43,21,20,7,16
+io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,CustomHandlebarsHelpers,205,225,41,15,45,43,32,20,8,16
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,TemplateOutput,18,39,0,0,6,14,2,5,2,5
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.writers,TemplateStdoutWriter,40,8,0,0,9,2,4,1,4,1
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.writers,TemplateFileWriter,15,93,2,4,4,17,3,8,1,7
