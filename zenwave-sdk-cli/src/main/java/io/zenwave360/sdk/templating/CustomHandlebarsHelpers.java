@@ -1,6 +1,11 @@
 package io.zenwave360.sdk.templating;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,6 +22,9 @@ import static org.apache.commons.lang3.StringUtils.capitalize;
 
 public class CustomHandlebarsHelpers {
 
+    public static String date(Object props, Options options) {
+        return DateTimeFormatter.ISO_ZONED_DATE_TIME.format(OffsetDateTime.now());
+    }
     public static String populateProperty(Map property, Options options) {
         String type = (String) property.get("type");
         String format = (String) property.get("format");
