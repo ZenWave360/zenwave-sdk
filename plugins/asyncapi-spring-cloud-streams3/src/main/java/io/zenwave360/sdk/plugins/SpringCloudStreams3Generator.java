@@ -1,6 +1,7 @@
 package io.zenwave360.sdk.plugins;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
@@ -31,6 +32,9 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
     @DocumentedOption(description = "Transactional outbox type for message producers.")
     public TransactionalOutboxType transactionalOutbox = TransactionalOutboxType.none;
+
+    @DocumentedOption(description = "Generate only the producer interface and skip the implementation.")
+    public boolean skipProducerImplementation = false;
 
     @DocumentedOption(description = "Whether to expose underlying spring Message to consumers or not.")
     public boolean exposeMessage = false;
@@ -133,7 +137,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
     protected List<TemplateInput> producerTemplates = Arrays.asList(
             new TemplateInput(templatesPath + "/producer/IProducer.java", "src/main/java/{{asPackageFolder producerApiPackage}}/I{{apiClassName}}.java"),
-            new TemplateInput(templatesPath + "/producer/outbox/{{transactionalOutbox}}/Producer.java", "src/main/java/{{asPackageFolder producerApiPackage}}/{{apiClassName}}.java"),
+            new TemplateInput(templatesPath + "/producer/outbox/{{transactionalOutbox}}/Producer.java", "src/main/java/{{asPackageFolder producerApiPackage}}/{{apiClassName}}.java").withSkip((context) -> skipProducerImplementation),
             new TemplateInput(templatesPath + "/producer/mocks/ProducerCaptor.java", "src/test/java/{{asPackageFolder producerApiPackage}}/{{apiClassName}}Captor.java"));
 
     protected List<TemplateInput> producerByServicesTemplates = Arrays.asList(
