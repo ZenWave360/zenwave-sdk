@@ -4,7 +4,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 import {{basePackage}}.core.outbound.{{persistence}}.*;
+{{~#each services as |service|}}{{~#each service.entities as |entity|}}
+{{~#if options.search}}
 import {{basePackage}}.core.outbound.search.*;
+{{~/if}}{{~/each}}{{~/each}}
 import {{basePackage}}.infrastructure.{{persistence}}.inmemory.*;
 
 
