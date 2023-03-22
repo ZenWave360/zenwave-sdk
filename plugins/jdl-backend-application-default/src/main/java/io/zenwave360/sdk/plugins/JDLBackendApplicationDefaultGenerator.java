@@ -53,7 +53,6 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
 
     private String templatesFolder = "io/zenwave360/sdk/plugins/JDLEntitiesGenerator/";
 
-    Object[] enumTemplate = {"src/main/java", "core/domain/common/Enum.java", "core/domain/{{enum.name}}.java", JAVA};
 
     boolean useSemanticAnnotations = false;
 
@@ -66,21 +65,26 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
     Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo", "input", "isSuperClass");
     Function<Map<String, Object>, Boolean> skipEntity = (model) -> is(model, "vo", "input");
     Function<Map<String, Object>, Boolean> skipVO = (model) -> useSemanticAnnotations && !is(model, "vo");
+
+    Function<Map<String, Object>, Boolean> skipEntityInput = (model) -> is(model, "vo", "input") || inputDTOSuffix == null || inputDTOSuffix.isEmpty();
     Function<Map<String, Object>, Boolean> skipInput = (model) -> useSemanticAnnotations && !is(model, "input");
     Function<Map<String, Object>, Boolean> skipEntityResource = (model) -> is(model, "vo", "input") || !is(model, "service");
     Function<Map<String, Object>, Boolean> skipSearchCriteria = (model) -> is(model, "vo", "input") || !is(model, "searchCriteria");
     Function<Map<String, Object>, Boolean> skipElasticSearch = (model) -> is(model, "vo", "input") || !is(model, "search");
+
+    Object[] enumTemplate = {"src/main/java", "core/domain/common/Enum.java", "core/domain/{{enum.name}}.java", JAVA};
+    Object[] enumDtoTemplate = {"src/main/java", "core/inbound/dtos/Enum.java", "core/inbound/dtos/{{enum.name}}.java", JAVA};
     protected List<Object[]> templatesByEntity = List.of(
             new Object[] {"src/main/java", "core/domain/vo/Entity.java", "core/domain/{{entity.name}}.java", JAVA, skipVO},
             new Object[] {"src/main/java", "core/domain/{{persistence}}/Entity.java", "core/domain/{{entity.name}}.java", JAVA, skipEntity},
-            new Object[] {"src/main/java", "core/outbound/{{persistence}}/{{style}}/EntityRepository.java", "core/outbound/{{persistence}}/{{entity.className}}Repository.java", JAVA, skipEntityRepository},
+            new Object[] {"src/main/java", "core/outbound/{{persistence}}/{{style}}/EntityRepository.java", "core/outbound/{{persistence}}/{{entity.className}}Repository.java", JAVA, skipEntityRepository, true},
             new Object[] {"src/main/java", "core/inbound/dtos/EntityCriteria.java", "core/inbound/dtos/{{criteriaClassName entity }}.java", JAVA, skipSearchCriteria},
-            new Object[] {"src/main/java", "core/inbound/dtos/EntityInput.java", "core/inbound/dtos/{{entity.className}}{{inputDTOSuffix entity}}.java", JAVA, skipEntity},
+            new Object[] {"src/main/java", "core/inbound/dtos/EntityInput.java", "core/inbound/dtos/{{entity.className}}{{inputDTOSuffix entity}}.java", JAVA, skipEntityInput},
             new Object[] {"src/main/java", "core/inbound/dtos/EntityInput.java", "core/inbound/dtos/{{entity.className}}{{inputDTOSuffix entity}}.java", JAVA, skipInput},
-            new Object[] {"src/main/java", "core/implementation/mappers/EntityMapper.java", "core/implementation/mappers/{{entity.className}}Mapper.java", JAVA, skipEntity},
+            new Object[] {"src/main/java", "core/implementation/mappers/EntityMapper.java", "core/implementation/mappers/{{entity.className}}Mapper.java", JAVA, skipEntityInput, true},
 //            new Object[] {"src/main/java", "adapters/web/{{webFlavor}}/EntityResource.java", "adapters/web/{{entity.className}}Resource.java", JAVA, skipEntityResource},
             new Object[] {"src/main/java", "core/domain/search/EntityDocument.java", "core/domain/search/{{entity.className}}{{searchDTOSuffix}}.java", JAVA, skipElasticSearch},
-            new Object[] {"src/main/java", "core/outbound/search/EntitySearchRepository.java", "core/outbound/search/{{entity.className}}SearchRepository.java", JAVA, skipElasticSearch},
+            new Object[] {"src/main/java", "core/outbound/search/EntitySearchRepository.java", "core/outbound/search/{{entity.className}}SearchRepository.java", JAVA, skipElasticSearch, true},
 
             new Object[] {"src/test/java", "infrastructure/{{persistence}}/{{style}}/BaseRepositoryIntegrationTest.java", "infrastructure/{{persistence}}/BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository, true},
             new Object[] {"src/test/java", "infrastructure/{{persistence}}/{{style}}/EntityRepositoryIntegrationTest.java", "infrastructure/{{persistence}}/{{entity.className}}RepositoryIntegrationTest.java", JAVA, skipEntityRepository, true},
@@ -142,7 +146,9 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
             if (!isGenerateEntity(enumValue)) {
                 continue;
             }
-            templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(enumTemplate), Map.of("enum", enumValue)));
+            var comment = enumValue.get("comment");
+            var isDtoInput = comment != null && comment.toString().contains("@input");
+            templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(isDtoInput? enumDtoTemplate : enumTemplate), Map.of("enum", enumValue)));
         }
 
         Map<String, Map<String, Object>> services = JSONPath.get(apiModel, "$.options.options.service", Collections.emptyMap());

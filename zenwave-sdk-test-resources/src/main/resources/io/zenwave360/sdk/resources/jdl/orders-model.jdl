@@ -57,10 +57,14 @@
 		address String
 	}
 
-
+	/** @input */
+	enum InputType {
+		A, B, C
+	}
 	@input
 	entity CoreDomainInput {
 		key String
+		type InputType
 	}
 
 	service Customer with CustomerUseCases

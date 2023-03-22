@@ -28,7 +28,9 @@ public class {{service.name}}Impl implements {{service.name}} {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
 {{#each entities as |entity|}}
+    {{~#if (inputDTOSuffix entity)}}
     private final {{entity.className}}Mapper {{entity.instanceName}}Mapper = Mappers.getMapper({{entity.className}}Mapper.class);
+    {{~/if}}
     {{~#unless (skipEntityRepository this)}}
     private final {{entity.className}}Repository {{entity.instanceName}}Repository;
     {{~/unless}}
@@ -51,21 +53,25 @@ public class {{service.name}}Impl implements {{service.name}} {
     // {{entity.name}}
 
     @Override
-    public {{entity.className}} create{{entity.className}}({{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
-        log.debug("Request to save {{entity.className}}{{inputDTOSuffix}} : {}", {{entity.instanceName}}{{inputDTOSuffix}});
-        var {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}}Mapper.update(new {{entity.className}}(), {{entity.instanceName}}{{inputDTOSuffix}}));
+    public {{entity.className}} create{{entity.className}}({{entity.className}}{{inputDTOSuffix}} input) {
+        log.debug("Request to save {{entity.className}}{{inputDTOSuffix}} : {}", input);
+        {{~#if (inputDTOSuffix entity)}}
+        var {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}}Mapper.update(new {{entity.className}}(), input));
+        {{~else}}
+        var {{entity.instanceName}} = {{entity.instanceName}}Repository.save(input);
+        {{~/if}}
         return {{entity.instanceName}};
     }
 
     @Override
-    public Optional<{{entity.className}}> update{{entity.className}}({{idJavaType}} id, {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}}{{inputDTOSuffix}}) {
-        log.debug("Request to update {{entity.className}} : {}", {{entity.instanceName}}{{inputDTOSuffix}});
+    public Optional<{{entity.className}}> update{{entity.className}}({{idJavaType}} id, {{entity.className}}{{inputDTOSuffix}} input) {
+        log.debug("Request to update {{entity.className}} : {}", input);
 
         var {{entity.instanceName}} = {{entity.instanceName}}Repository
                 .findById(id)
-                .map(existing{{entity.className}} -> {
-                    return {{entity.instanceName}}Mapper.update(existing{{entity.className}}, {{entity.instanceName}}{{inputDTOSuffix}});
-                })
+                {{~#if (inputDTOSuffix entity)}}
+                .map(existing{{entity.className}} ->  {{entity.instanceName}}Mapper.update(existing{{entity.className}}, input))
+                {{~/if}}
                 .map({{entity.instanceName}}Repository::save);
         return {{entity.instanceName}};
     }
