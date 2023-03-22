@@ -63,18 +63,20 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
     }
 
     Function<Map<String, Object>, Boolean> skipEntityRepository = (model) -> useSemanticAnnotations && !is(model, "aggregate");
-    Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo", "isSuperClass");
-    Function<Map<String, Object>, Boolean> skipEntity = (model) -> is(model, "vo");
+    Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo", "input", "isSuperClass");
+    Function<Map<String, Object>, Boolean> skipEntity = (model) -> is(model, "vo", "input");
     Function<Map<String, Object>, Boolean> skipVO = (model) -> useSemanticAnnotations && !is(model, "vo");
-    Function<Map<String, Object>, Boolean> skipEntityResource = (model) -> is(model, "vo") || !is(model, "service");
-    Function<Map<String, Object>, Boolean> skipSearchCriteria = (model) -> is(model, "vo") || !is(model, "searchCriteria");
-    Function<Map<String, Object>, Boolean> skipElasticSearch = (model) -> is(model, "vo") || !is(model, "search");
+    Function<Map<String, Object>, Boolean> skipInput = (model) -> useSemanticAnnotations && !is(model, "input");
+    Function<Map<String, Object>, Boolean> skipEntityResource = (model) -> is(model, "vo", "input") || !is(model, "service");
+    Function<Map<String, Object>, Boolean> skipSearchCriteria = (model) -> is(model, "vo", "input") || !is(model, "searchCriteria");
+    Function<Map<String, Object>, Boolean> skipElasticSearch = (model) -> is(model, "vo", "input") || !is(model, "search");
     protected List<Object[]> templatesByEntity = List.of(
             new Object[] {"src/main/java", "core/domain/vo/Entity.java", "core/domain/{{entity.name}}.java", JAVA, skipVO},
             new Object[] {"src/main/java", "core/domain/{{persistence}}/Entity.java", "core/domain/{{entity.name}}.java", JAVA, skipEntity},
             new Object[] {"src/main/java", "core/outbound/{{persistence}}/{{style}}/EntityRepository.java", "core/outbound/{{persistence}}/{{entity.className}}Repository.java", JAVA, skipEntityRepository},
             new Object[] {"src/main/java", "core/inbound/dtos/EntityCriteria.java", "core/inbound/dtos/{{criteriaClassName entity }}.java", JAVA, skipSearchCriteria},
-            new Object[] {"src/main/java", "core/inbound/dtos/EntityInput.java", "core/inbound/dtos/{{entity.className}}{{inputDTOSuffix}}.java", JAVA, skipEntity},
+            new Object[] {"src/main/java", "core/inbound/dtos/EntityInput.java", "core/inbound/dtos/{{entity.className}}{{inputDTOSuffix entity}}.java", JAVA, skipEntity},
+            new Object[] {"src/main/java", "core/inbound/dtos/EntityInput.java", "core/inbound/dtos/{{entity.className}}{{inputDTOSuffix entity}}.java", JAVA, skipInput},
             new Object[] {"src/main/java", "core/implementation/mappers/EntityMapper.java", "core/implementation/mappers/{{entity.className}}Mapper.java", JAVA, skipEntity},
 //            new Object[] {"src/main/java", "adapters/web/{{webFlavor}}/EntityResource.java", "adapters/web/{{entity.className}}Resource.java", JAVA, skipEntityResource},
             new Object[] {"src/main/java", "core/domain/search/EntityDocument.java", "core/domain/search/{{entity.className}}{{searchDTOSuffix}}.java", JAVA, skipElasticSearch},

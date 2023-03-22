@@ -10,7 +10,7 @@ import javax.validation.constraints.*;
 /**
  *
  */
-public class {{entity.className}}{{inputDTOSuffix}} {{addExtends entity suffix=inputDTOSuffix}} implements Serializable {
+public class {{entity.className}}{{inputDTOSuffix entity}} {{addExtends entity suffix=(inputDTOSuffix entity)}} implements Serializable {
 
 {{#unless (skipEntityId entity)~}}
     private {{idJavaType}} id;
@@ -20,7 +20,7 @@ public class {{entity.className}}{{inputDTOSuffix}} {{addExtends entity suffix=i
 
 {{#each entity.fields as |field|}}
     {{{fieldValidationAnnotations field}}}
-    {{~#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix}}{{/if}}{{/assign}}
+    {{~#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix entity}}{{/if}}{{/assign}}
     private {{{fieldType field suffix=typeSuffix}}} {{field.name}};
 {{/each}}
 
@@ -30,7 +30,7 @@ public class {{entity.className}}{{inputDTOSuffix}} {{addExtends entity suffix=i
     {{#if (addRelationshipById relationship)}}
     private {{idJavaType}} {{relationship.fieldName}}Id;
     {{~else~}}
-    private {{{relationshipFieldType relationship suffix=inputDTOSuffix}}} {{relationship.fieldName}}{{#if relationship.isCollection}} = {{{relationshipFieldTypeInitialized relationship}}}{{/if}};
+    private {{{relationshipFieldType relationship suffix=(inputDTOSuffix entity)}}} {{relationship.fieldName}}{{#if relationship.isCollection}} = {{{relationshipFieldTypeInitialized relationship}}}{{/if}};
     {{~/if}}
 {{/if~}}
 {{/each}}
@@ -39,7 +39,7 @@ public class {{entity.className}}{{inputDTOSuffix}} {{addExtends entity suffix=i
     public {{idJavaType}} getId() {
         return id;
     }
-    public {{entity.className}}{{inputDTOSuffix}} withId({{idJavaType}} id) {
+    public {{entity.className}}{{inputDTOSuffix entity}} withId({{idJavaType}} id) {
         this.id = id;
         return this;
     }
@@ -55,21 +55,21 @@ public class {{entity.className}}{{inputDTOSuffix}} {{addExtends entity suffix=i
 {{/unless~}}
 
 {{#each entity.fields as |field|}}
-    {{#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix}}{{/if}}{{/assign}}
+    {{#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix entity}}{{/if}}{{/assign}}
     {{~#if field.isArray}}
-        public {{entity.className}}{{inputDTOSuffix}} add{{capitalize field.name}}({{javaType field}}{{typeSuffix}} {{field.name}}) {
+        public {{entity.className}}{{inputDTOSuffix entity}} add{{capitalize field.name}}({{javaType field}}{{typeSuffix}} {{field.name}}) {
         this.{{field.name}}.add({{field.name}});
         return this;
         }
     {{~/if}}
-    public {{entity.className}}{{inputDTOSuffix}} with{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
+    public {{entity.className}}{{inputDTOSuffix entity}} with{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
         this.{{field.name}} = {{field.name}};
         return this;
     }
 {{/each}}
 
 {{#each entity.fields as |field|}}
-    {{~#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix}}{{/if}}{{/assign}}
+    {{~#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix entity}}{{/if}}{{/assign}}
     public {{{fieldType field suffix=typeSuffix}}} get{{capitalize field.name}}() {
         return {{field.name}};
     }
@@ -89,11 +89,11 @@ public class {{entity.className}}{{inputDTOSuffix}} {{addExtends entity suffix=i
         this.{{relationship.fieldName}}Id = {{relationship.fieldName}}Id;
     }
     {{~else}}
-    public {{{relationshipFieldType relationship suffix=inputDTOSuffix}}} get{{capitalize relationship.fieldName}}() {
+    public {{{relationshipFieldType relationship suffix=(inputDTOSuffix entity)}}} get{{capitalize relationship.fieldName}}() {
         return {{relationship.fieldName}};
     }
 
-    public void set{{capitalize relationship.otherEntityName}}({{{relationshipFieldType relationship suffix=inputDTOSuffix}}} {{relationship.fieldName}}) {
+    public void set{{capitalize relationship.otherEntityName}}({{{relationshipFieldType relationship suffix=(inputDTOSuffix entity)}}} {{relationship.fieldName}}) {
         this.{{relationship.fieldName}} = {{relationship.fieldName}};
     }
     {{~/if}}

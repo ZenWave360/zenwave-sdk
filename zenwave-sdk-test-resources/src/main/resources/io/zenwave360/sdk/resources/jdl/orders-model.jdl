@@ -57,5 +57,11 @@
 		address String
 	}
 
+
+	@input
+	entity CoreDomainInput {
+		key String
+	}
+
 	service Customer with CustomerUseCases
 	service CustomerOrder with CustomerOrderUseCases

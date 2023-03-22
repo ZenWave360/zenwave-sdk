@@ -42,6 +42,11 @@ public class JDLBackendApplicationDefaultHelpers {
         return JSONPath.get(jdl, "entities." + entityName, Collections.emptyMap());
     }
 
+    public String inputDTOSuffix(Object entity, Options options) {
+        var isInput = JSONPath.get(entity, "options.input.value", false);
+        return isInput? "" : generator.inputDTOSuffix;
+    }
+
     public String populateField(Map field, Options options) {
         String value;
         if ("String".equals(field.get("type")) || "TextBlob".equals(field.get("type"))) {
@@ -132,6 +137,11 @@ public class JDLBackendApplicationDefaultHelpers {
         var pattern = JSONPath.get(field, "validations.pattern.value");
         var unique = JSONPath.get(field, "validations.unique.value");
         List<String> annotations = new ArrayList<>();
+        if (unique != null) {
+            if(generator.persistence == PersistenceType.mongodb) {
+                annotations.add("@Indexed(unique = true)");
+            }
+        }
         if (required != null) {
             annotations.add("@NotNull");
         }
