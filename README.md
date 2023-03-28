@@ -173,7 +173,7 @@ jbang zw --help -p <pluginConfigClass>
 You can add choose a help format from the following: help, detailed, markdown, or list:
 
 ```shell
-jbang zw --help --help-format markdown -p <pluginConfigClass>
+jbang zw --help markdown -p <pluginConfigClass>
 ```
 
 ## Available Plugins
