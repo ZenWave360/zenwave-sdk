@@ -1,5 +1,5 @@
 # JDL To AsyncAPI Generator
-> 👉 ZenWave360 Helps You Create Software that's Easy to Understand
+> 👉 ZenWave360 Helps You Create Software Easy to Understand
 
 Generate AsyncAPI definition from JHipster Domain Language (JDL) entities:
 
