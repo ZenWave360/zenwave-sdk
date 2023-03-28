@@ -7,6 +7,10 @@ asInstanceName {{asInstanceName "tratra-tratra"}}
 asJavaTypeName {{asJavaTypeName "tratra-tratra"}}
 kebabCase {{kebabCase "Some Camel Case with Spaces"}}
 asPackageFolder {{asPackageFolder "io.zenwave360.sdk.templating"}}
+
+ifTruthy true: {{ifTruthy "true" "true" "false"}}
+ifTruthy false: {{ifTruthy "false" "true" "false"}}
+
 {{#joinWithTemplate theList}}
    Prefix{{.}}Suffix
 {{/joinWithTemplate}}

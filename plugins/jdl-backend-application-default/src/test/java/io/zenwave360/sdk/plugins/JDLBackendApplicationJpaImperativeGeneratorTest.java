@@ -49,6 +49,30 @@ public class JDLBackendApplicationJpaImperativeGeneratorTest {
                 .withOption("persistence", PersistenceType.jpa)
                 .withOption("databaseType", DatabaseType.mariadb)
                 .withOption("style", ProgrammingStyle.imperative)
+                .withOption("forceOverwrite", true)
+                .withOption("haltOnFailFormatting", false);
+
+        new MainGenerator().generate(plugin);
+
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
+
+        int exitCode = MavenCompiler.compile("src/test/resources/jpa-elasticsearch-scs3-pom.xml", targetFolder);
+        Assertions.assertEquals(0, exitCode);
+    }
+
+    @Test
+    public void test_generator_hexagonal_jpa_imperative_no_dto() throws Exception {
+        String targetFolder = "target/test_generator_hexagonal_jpa_imperative";
+        Plugin plugin = new JDLBackendApplicationDefaultPlugin()
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/jdl/orders-model-relational.jdl")
+                .withTargetFolder(targetFolder)
+                .withOption("basePackage", "io.zenwave360.example")
+                .withOption("persistence", PersistenceType.jpa)
+                .withOption("databaseType", DatabaseType.mariadb)
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("inputDTOSuffix", "")
+                .withOption("forceOverwrite", true)
                 .withOption("haltOnFailFormatting", false);
 
         new MainGenerator().generate(plugin);

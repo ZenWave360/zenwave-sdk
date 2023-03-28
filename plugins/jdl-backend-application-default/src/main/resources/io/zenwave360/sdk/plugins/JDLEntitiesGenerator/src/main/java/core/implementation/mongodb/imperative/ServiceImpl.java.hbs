@@ -28,9 +28,7 @@ public class {{service.name}}Impl implements {{service.name}} {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
 {{#each entities as |entity|}}
-    {{~#if (inputDTOSuffix entity)}}
     private final {{entity.className}}Mapper {{entity.instanceName}}Mapper = Mappers.getMapper({{entity.className}}Mapper.class);
-    {{~/if}}
     {{~#unless (skipEntityRepository this)}}
     private final {{entity.className}}Repository {{entity.instanceName}}Repository;
     {{~/unless}}
@@ -55,11 +53,7 @@ public class {{service.name}}Impl implements {{service.name}} {
     @Override
     public {{entity.className}} create{{entity.className}}({{entity.className}}{{inputDTOSuffix}} input) {
         log.debug("Request to save {{entity.className}}{{inputDTOSuffix}} : {}", input);
-        {{~#if (inputDTOSuffix entity)}}
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}}Mapper.update(new {{entity.className}}(), input));
-        {{~else}}
-        var {{entity.instanceName}} = {{entity.instanceName}}Repository.save(input);
-        {{~/if}}
         return {{entity.instanceName}};
     }
 
@@ -69,9 +63,9 @@ public class {{service.name}}Impl implements {{service.name}} {
 
         var {{entity.instanceName}} = {{entity.instanceName}}Repository
                 .findById(id)
-                {{~#if (inputDTOSuffix entity)}}
-                .map(existing{{entity.className}} ->  {{entity.instanceName}}Mapper.update(existing{{entity.className}}, input))
-                {{~/if}}
+                .map(existing{{entity.className}} -> {
+                    return {{entity.instanceName}}Mapper.update(existing{{entity.className}}, input);
+                })
                 .map({{entity.instanceName}}Repository::save);
         return {{entity.instanceName}};
     }

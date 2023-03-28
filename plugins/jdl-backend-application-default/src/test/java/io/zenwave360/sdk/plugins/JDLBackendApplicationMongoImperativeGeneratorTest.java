@@ -62,7 +62,8 @@ public class JDLBackendApplicationMongoImperativeGeneratorTest {
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.mongodb)
-                .withOption("style", ProgrammingStyle.imperative);
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("forceOverwrite", true);
 
         new MainGenerator().generate(plugin);
 
@@ -75,6 +76,29 @@ public class JDLBackendApplicationMongoImperativeGeneratorTest {
     }
 
     @Test
+    public void test_generator_hexagonal_mongodb_imperative_no_dtos() throws Exception {
+        String targetFolder = "target/test_generator_hexagonal_mongodb_imperative";
+        Plugin plugin = new JDLBackendApplicationDefaultPlugin()
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl")
+                .withTargetFolder(targetFolder)
+                .withOption("basePackage", "io.zenwave360.example")
+                .withOption("persistence", PersistenceType.mongodb)
+                .withOption("inputDTOSuffix", "")
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("forceOverwrite", true);
+
+        new MainGenerator().generate(plugin);
+
+        List<String> logs = logCaptor.getLogs();
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
+
+        int exitCode = MavenCompiler.compile("src/test/resources/mongodb-elasticsearch-scs3-pom.xml", targetFolder);
+        Assertions.assertEquals(0, exitCode);
+    }
+
+
+    @Test
     // @Disabled
     public void test_generator_hexagonal_mongodb_imperative_registry() throws Exception {
         String targetFolder = "target/test_generator_hexagonal_mongodb_imperative_registry";
@@ -83,7 +107,8 @@ public class JDLBackendApplicationMongoImperativeGeneratorTest {
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.mongodb)
-                .withOption("style", ProgrammingStyle.imperative);
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("forceOverwrite", true);
 
         new MainGenerator().generate(plugin);
 
@@ -105,7 +130,8 @@ public class JDLBackendApplicationMongoImperativeGeneratorTest {
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.mongodb)
                 .withOption("style", ProgrammingStyle.imperative)
-                .withOption("entities", List.of("BaseEntity", "Customer"));
+                .withOption("entities", List.of("BaseEntity", "Customer"))
+                .withOption("forceOverwrite", true);
 
         new MainGenerator().generate(plugin);
 

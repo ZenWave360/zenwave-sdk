@@ -21,14 +21,15 @@ This generator supports the following JDL extensions:
 
 - if any entity is annotated with @aggregate then the following table applies:
 
-| **Annotation**                  | **Entity** | **@Persistence** | **Repository** | **Id** |
-|:--------------------------------|------------|:-----------------|:---------------|:-------|
-| **entity**                      | yes        | yes              |                | yes    |
-| **@aggregate**                  | yes        | yes              | yes            | yes    |
-| **@embedded**                   | yes        | yes              |                |        |
-| **@vo**                         | yes        |                  |                |        |
-| **@searchCriteria(entityName)** |            |                  |                |        |
-| **@skip**                       | no         |                  |                |        |
+| **Annotation**                  | **Entity** | **Inbound DTO**      | **@Persistence** | **Repository** | **Id**   |
+|:--------------------------------|------------|----------------------|:-----------------|:---------------|:---------|
+| **entity**                      | yes        |                      | yes              |                | yes      |
+| **@aggregate**                  | yes        |                      | yes              | yes            | yes      |
+| **@embedded**                   | yes        |                      | yes              |                | only jpa |
+| **@vo**                         | yes        |                      |                  |                |          |
+| **@input**                      | no         | yes                  |                  |                |          |
+| **@searchCriteria(entityName)** |            | yes (for entityName) |                  |                |          |
+| **@skip**                       | no         |                      |                  |                |          |
 
 - **@searchCriteria(entityName)** is used to specify the entity name for the search criteria, if empty will take the same fields as the actual entity.
 - **@skip** entities used as search criteria should be marked with @skip

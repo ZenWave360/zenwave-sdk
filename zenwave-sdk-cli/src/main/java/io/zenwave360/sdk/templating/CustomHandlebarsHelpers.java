@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.github.jknack.handlebars.Handlebars;
 import io.zenwave360.sdk.parsers.JDLParser;
 import io.zenwave360.sdk.utils.JSONPath;
 import org.apache.commons.io.FilenameUtils;
@@ -111,6 +112,14 @@ public class CustomHandlebarsHelpers {
         return StringUtils.endsWith(first, second);
     }
 
+    public static Object ifTruthy(final Object value, final Options options)
+            throws IOException {
+        if (isTruthy(value)) {
+            return options.param(0, "");
+        }
+        return options.param(1, "");
+    }
+
     public static boolean not(Object value, Options options) throws IOException {
         if (value == null) {
             return true;
@@ -128,6 +137,9 @@ public class CustomHandlebarsHelpers {
 
     private static boolean isTruthy(Object value) {
         if (value == null) {
+            return false;
+        }
+        if(value.toString().trim().equals("")) {
             return false;
         }
         if (value instanceof Boolean) {

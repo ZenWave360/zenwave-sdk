@@ -28,9 +28,7 @@ public class {{service.name}}Impl implements {{service.name}} {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
 {{#each entities as |entity|}}
-    {{~#if (inputDTOSuffix entity)}}
     private final {{entity.className}}Mapper {{entity.instanceName}}Mapper = Mappers.getMapper({{entity.className}}Mapper.class);
-    {{~/if}}
     {{~#unless (skipEntityRepository this)}}
     private final {{entity.className}}Repository {{entity.instanceName}}Repository;
     {{~/unless}}
@@ -53,25 +51,20 @@ public class {{service.name}}Impl implements {{service.name}} {
     // {{entity.name}}
 
     @Override
-    @Transactional(readOnly = false)
     public {{entity.className}} create{{entity.className}}({{entity.className}}{{inputDTOSuffix}} input) {
         log.debug("Request to save {{entity.className}}: {}", input);
-        var {{entity.instanceName}} = {{#if (inputDTOSuffix entity)}}{{entity.instanceName}}Mapper.update(new {{entity.className}}(), input);
-        {{entity.instanceName}} ={{/if}} {{entity.instanceName}}Repository.save({{entity.instanceName}});
+        var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), input);
+        {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}});
         // TODO: you may need to reload the entity here to fetch all the relationships
         return {{entity.instanceName}};
     }
 
     @Override
-    @Transactional(readOnly = false)
     public Optional<{{entity.className}}> update{{entity.className}}({{idJavaType}} id, {{entity.className}}{{inputDTOSuffix}} input) {
         log.debug("Request to update {{entity.className}}: {}", input);
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id);
-        {{~#if (inputDTOSuffix entity)}}
         {{entity.instanceName}} = {{entity.instanceName}}.map(existing{{entity.instanceName}} -> {{entity.instanceName}}Mapper.update(existing{{entity.instanceName}}, input));
-        {{~/if}}
-        // saving is unnecessary (jpa save anti-pattern): https://vladmihalcea.com/best-spring-data-jparepository/
-        // return {{entity.instanceName}}.map({{entity.instanceName}}Repository::save);
+        // saving is unnecessary: https://vladmihalcea.com/best-spring-data-jparepository/
         return {{entity.instanceName}};
     }
 
