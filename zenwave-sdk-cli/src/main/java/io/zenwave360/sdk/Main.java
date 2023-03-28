@@ -23,9 +23,6 @@ public class Main implements Callable<Integer> {
     @Option(names = {"-p", "--plugin"}, arity = "0..1", description = "Plugin Class or short-code")
     String pluginClass;
 
-    @Option(names = {"-c", "--chain"}, split = ",", description = "<undocumented> use --plugin instead", hidden = true)
-    Class[] chain;
-
     @Option(names = {"-f", "--force"}, description = "Force overwrite", defaultValue = "false")
     boolean forceOverwrite = false;
 
@@ -68,8 +65,7 @@ public class Main implements Callable<Integer> {
                 .withSpecFile((String) options.get("specFile"))
                 .withTargetFolder((String) options.get("targetFolder"))
                 .withForceOverwrite(forceOverwrite)
-                .withOptions(options)
-                .withChain(chain);
+                .withOptions(options);
         new MainGenerator().generate(plugin);
         return 0;
     }
@@ -79,8 +75,7 @@ public class Main implements Callable<Integer> {
             Plugin plugin = Plugin.of(this.pluginClass)
                     .withSpecFile((String) options.get("specFile"))
                     .withTargetFolder((String) options.get("targetFolder"))
-                    .withOptions(options)
-                    .withChain(chain);
+                    .withOptions(options);
             String help = new Help().help(plugin, helpFormat);
             System.out.println(help);
         } catch (Exception e) {
