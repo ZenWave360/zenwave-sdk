@@ -57,6 +57,7 @@ public class MainTest {
 
         Main.main(
                 "-c", StringUtils.join(processors, ","),
+                "--force",
                 "specFile=classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-circular-refs.yml",
                 "targetFolder=target/zenwave/out",
                 "inner.specFile=target/zenwave/out",

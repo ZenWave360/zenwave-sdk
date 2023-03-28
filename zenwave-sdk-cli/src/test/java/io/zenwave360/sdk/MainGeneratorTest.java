@@ -40,7 +40,8 @@ public class MainGeneratorTest {
         Plugin plugin = new Plugin()
                 .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-circular-refs.yml")
                 .withTargetFolder("target/zenwave630/out")
-                .withChain(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class);
+                .withChain(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class)
+                .withOption("forceOverwrite", true);
 
         new MainGenerator().generate(plugin);
 

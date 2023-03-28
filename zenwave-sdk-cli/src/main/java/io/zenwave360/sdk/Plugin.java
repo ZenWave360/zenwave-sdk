@@ -24,6 +24,8 @@ public class Plugin {
     public String targetFolder;
     private List<Class> chain;
 
+    private boolean forceOverwrite = false;
+
     private Map<String, Object> options = new HashMap<>();
 
     private ClassLoader projectClassLoader;
@@ -71,6 +73,11 @@ public class Plugin {
 
     public Plugin withProjectClassLoader(ClassLoader projectClassLoader) {
         this.projectClassLoader = projectClassLoader;
+        return this;
+    }
+
+    public Plugin withForceOverwrite(boolean forceOverwrite) {
+        this.forceOverwrite = forceOverwrite;
         return this;
     }
 

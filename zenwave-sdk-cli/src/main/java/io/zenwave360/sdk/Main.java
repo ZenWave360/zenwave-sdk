@@ -17,17 +17,17 @@ public class Main implements Callable<Integer> {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    @Option(names = {"-h", "--help"}, usageHelp = true, description = "display this help message")
-    boolean help;
-
-    @Option(names = {"-f", "--help-format"}, arity = "0..1", description = "Help output format", defaultValue = "help")
-    Help.Format helpFormat = Help.Format.help;
+    @Option(names = {"-h", "--help"}, arity = "0..1", description = "Help with output format", converter = HelpFormatConverter.class)
+    Help.Format helpFormat;
 
     @Option(names = {"-p", "--plugin"}, arity = "0..1", description = "Plugin Class or short-code")
-    String pluginConfigClass;
+    String pluginClass;
 
-    @Option(names = {"-c", "--chain"}, split = ",", description = "<undocumented> use --plugin instead")
+    @Option(names = {"-c", "--chain"}, split = ",", description = "<undocumented> use --plugin instead", hidden = true)
     Class[] chain;
+
+    @Option(names = {"-f", "--force"}, description = "Force overwrite", defaultValue = "false")
+    boolean forceOverwrite = false;
 
     @CommandLine.Parameters
     Map<String, Object> options = new HashMap<>();
@@ -37,14 +37,21 @@ public class Main implements Callable<Integer> {
         CommandLine cmd = new CommandLine(main);
         CommandLine.ParseResult parsed = cmd.parseArgs(args);
 
-        if (parsed.hasMatchedOption("h") && (parsed.hasMatchedOption("p") || parsed.hasMatchedOption("f"))) {
-            try {
-                main.help();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        boolean noOptions = !parsed.hasMatchedOption("h") && !parsed.hasMatchedOption("p");
+        boolean noPlugin = !parsed.hasMatchedOption("p");
+        boolean usage = parsed.hasMatchedOption("h") && !parsed.hasMatchedOption("p") && main.helpFormat == null;
+
+        if(usage || noOptions || noPlugin) {
+            cmd.usage(System.out);
+            main.helpFormat = Help.Format.list;
+            main.help();
             return;
         }
+        if (parsed.hasMatchedOption("h") && parsed.hasMatchedOption("p")) {
+            main.help();
+            return;
+        }
+
 
         int returnCode = cmd.execute(args);
         if (returnCode != 0) {
@@ -54,22 +61,40 @@ public class Main implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        Plugin plugin = Plugin.of(this.pluginConfigClass)
+        if(forceOverwrite) {
+            options.put("forceOverwrite", true);
+        }
+        Plugin plugin = Plugin.of(this.pluginClass)
                 .withSpecFile((String) options.get("specFile"))
                 .withTargetFolder((String) options.get("targetFolder"))
+                .withForceOverwrite(forceOverwrite)
                 .withOptions(options)
                 .withChain(chain);
         new MainGenerator().generate(plugin);
         return 0;
     }
 
-    public void help() throws Exception {
-        Plugin plugin = Plugin.of(this.pluginConfigClass)
-                .withSpecFile((String) options.get("specFile"))
-                .withTargetFolder((String) options.get("targetFolder"))
-                .withOptions(options)
-                .withChain(chain);
-        String help = new Help().help(plugin, helpFormat);
-        System.out.println(help);
+    public void help() {
+        try {
+            Plugin plugin = Plugin.of(this.pluginClass)
+                    .withSpecFile((String) options.get("specFile"))
+                    .withTargetFolder((String) options.get("targetFolder"))
+                    .withOptions(options)
+                    .withChain(chain);
+            String help = new Help().help(plugin, helpFormat);
+            System.out.println(help);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static class HelpFormatConverter implements CommandLine.ITypeConverter<Help.Format> {
+        @Override
+        public Help.Format convert(String value) throws Exception {
+            if(value == null || value.isEmpty()) {
+                return null;
+            }
+            return Help.Format.valueOf(value);
+        }
     }
 }

@@ -24,11 +24,12 @@ import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.utils.Maps;
+import picocli.CommandLine;
 
 public class Help {
 
     enum Format {
-        help, detailed, json, markdown, html, list
+        list, help, detailed, json, markdown, html;
     }
 
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -116,6 +117,7 @@ public class Help {
     }
 
     public String help(Plugin plugin, Format format) {
+        format = format == null ? Format.help : format;
         var model = format == Format.list ? discoverAvailablePlugins() : buildHelpModel(plugin);
         model.put("version", getClass().getPackage().getImplementationVersion());
         if (format == Format.json) {

@@ -21,6 +21,8 @@ public class TemplateFileWriter implements TemplateWriter {
     @DocumentedOption(description = "Target folder to generate code to. If left empty, it will print to stdout.")
     private File targetFolder;
 
+    private boolean forceOverwrite = false;
+
     public TemplateFileWriter withTargetFolder(File targetFolder) {
         this.targetFolder = targetFolder;
         return this;
@@ -30,11 +32,15 @@ public class TemplateFileWriter implements TemplateWriter {
         this.targetFolder = targetFolder;
     }
 
+    public void setForceOverwrite(boolean forceOverwrite) {
+        this.forceOverwrite = forceOverwrite;
+    }
+
     @Override
     public void write(List<TemplateOutput> templateOutputList) {
         templateOutputList.stream()
                 .peek(t -> log.info("Writing template with targetFile: {}", t.getTargetFile()))
-                .forEach(t -> writeToFile(getFile(t.getTargetFile()), t.getContent(), t.isSkipOverwrite()));
+                .forEach(t -> writeToFile(getFile(t.getTargetFile()), t.getContent(), !forceOverwrite && t.isSkipOverwrite()));
     }
 
     protected File getFile(String fileName) {
