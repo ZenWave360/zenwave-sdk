@@ -74,14 +74,14 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date")
-    protected Date createdDate;
+    protected LocalDateTime createdDate;
     @LastModifiedBy
     @Column(name = "last_modified_by")
     protected String lastModifiedBy;
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_modified_date")
-    protected Date lastModifiedDate;
+    protected LocalDateTime lastModifiedDate;
 {{~/if}}
 
 {{#unless (skipEntityId entity)~}}

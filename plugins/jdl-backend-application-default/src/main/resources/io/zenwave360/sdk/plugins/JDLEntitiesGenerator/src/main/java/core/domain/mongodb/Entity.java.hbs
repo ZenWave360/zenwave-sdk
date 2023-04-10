@@ -39,9 +39,9 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
 
 {{~#if entity.options.auditing}}
     @CreatedDate
-    private OffsetDateTime createdDate;
+    private LocalDateTime createdDate;
     @LastModifiedDate
-    private OffsetDateTime lastModifiedDate;
+    private LocalDateTime lastModifiedDate;
 {{/if~}}
 
 {{#unless (skipEntityId entity)~}}
@@ -87,19 +87,19 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
 {{/each}}
 
 {{~#if entity.options.auditing}}
-  public OffsetDateTime getCreatedDate() {
+  public LocalDateTime getCreatedDate() {
     return createdDate;
   }
 
-  public void setCreatedDate(OffsetDateTime createdDate) {
+  public void setCreatedDate(LocalDateTime createdDate) {
     this.createdDate = createdDate;
   }
 
-  public OffsetDateTime getLastModifiedDate() {
+  public LocalDateTime getLastModifiedDate() {
     return lastModifiedDate;
   }
 
-  public void setLastModifiedDate(OffsetDateTime lastModifiedDate) {
+  public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
     this.lastModifiedDate = lastModifiedDate;
   }
 {{/if}}
