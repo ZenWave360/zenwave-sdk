@@ -13,8 +13,11 @@ public class JDLBackendApplicationDefaultJpaHelpers {
     }
 
     public Boolean addRelationshipById(Object relationship, Options options) {
+        var jdl = options.get("jdl");
+        String otherEntityName = JSONPath.get(relationship, "otherEntityName");
+        boolean isOtherEntityAggregate = JSONPath.get(jdl, String.format("entities.%s.options.aggregate", otherEntityName), false);
         boolean isOwnerSide = JSONPath.get(relationship, "ownerSide", false);
         String relationType = JSONPath.get(relationship, "type");
-        return "ManyToOne".contentEquals(relationType) && isOwnerSide;
+        return "ManyToOne".contentEquals(relationType) && isOwnerSide && isOtherEntityAggregate;
     }
 }

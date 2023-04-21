@@ -35,7 +35,7 @@ public class CustomHandlebarsHelpers {
         if ("date-time".equals(format)) {
             return "Instant.now()";
         }
-        if ("integer".equals(type) && "int32".equals(format)) {
+        if ("integer".equals(type) && (StringUtils.isEmpty(format) || "int32".equals(format))) {
             return "1";
         }
         if ("integer".equals(type) && "int64".equals(format)) {

@@ -50,8 +50,8 @@ public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositor
 {{~#if relationship.fieldName}}
         // {{relationship.type}} {{relationship.fieldName}} owner: {{relationship.ownerSide}}
     {{~#if relationship.ownerSide}}
-        {{~#if (addRelationshipById relationship)}}
         var {{relationship.fieldName}}Id = 1L;
+        {{~#if (addRelationshipById relationship jdl=jdl entity=entity)}}
         {{entity.instanceName}}.set{{capitalize relationship.fieldName}}Id({{relationship.fieldName}}Id); // using id to write relationship
         {{~else}}
         var {{relationship.fieldName}} = new {{relationship.otherEntityName}}();

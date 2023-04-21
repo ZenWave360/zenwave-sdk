@@ -58,7 +58,7 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
 
 {{#each entity.relationships as |relationship|}}
 {{#if relationship.fieldName~}}
-    {{#if (addRelationshipById relationship)}}
+    {{#if (addRelationshipById relationship jdl=jdl entity=entity)}}
     @Column(name = "{{snakeCase relationship.fieldName}}_id")
     private {{idJavaType}} {{relationship.fieldName}}Id;
     {{~/if}}
@@ -72,15 +72,13 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
     @Column(name = "created_by")
     protected String createdBy;
     @CreatedDate
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_date")
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP")
     protected LocalDateTime createdDate;
     @LastModifiedBy
     @Column(name = "last_modified_by")
     protected String lastModifiedBy;
     @LastModifiedDate
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "last_modified_date")
+    @Column(name = "last_modified_date", columnDefinition = "TIMESTAMP")
     protected LocalDateTime lastModifiedDate;
 {{~/if}}
 
@@ -122,7 +120,7 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
 
 {{#each entity.relationships as |relationship|}}
 {{#if relationship.fieldName~}}
-    {{#if (addRelationshipById relationship)}}
+    {{#if (addRelationshipById relationship jdl=jdl entity=entity)}}
     public {{idJavaType}} get{{capitalize relationship.fieldName}}Id() {
         return {{relationship.fieldName}}Id;
     }

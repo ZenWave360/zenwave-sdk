@@ -102,6 +102,7 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
             new Object[] {"src/test/java", "config/InMemoryTestsManualContext.java", "config/InMemoryTestsManualContext.java", JAVA});
 
     protected List<Object[]> singleTemplates = List.of(
+            new Object[] {"src/main/java", "core/inbound/dtos/package-info.java", "core/inbound/dtos/package-info.java", JAVA},
             new Object[] {"src/main/java", "infrastructure/package-info.java", "infrastructure/package-info.java", JAVA},
             new Object[] {"src/test/java", "ArchitectureTest.java", "ArchitectureTest.java", JAVA});
 

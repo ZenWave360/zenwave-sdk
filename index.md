@@ -56,7 +56,9 @@ In this way all team members: **Domain Experts**, **Product Owners**, **Software
 
 **ZenWave360:** is about speeding up the feedback loop from idea -> model -> working software and tests.
 
-![Design to Code](docs/ZenWave360-Design-Code-Loop.excalidraw.svg)
+<div style="text-align: center;" markdown="1">
+  <img src="docs/ZenWave360-Design-Code-Loop.excalidraw.svg" alt="Design to Code" />
+</div>
 
 
 ## Table of Contents
@@ -173,7 +175,7 @@ You can navigate the [complete example](https://github.com/ZenWave360/zenwave-ex
 
 ### Describe your core business model using JDL:
 
-<details open markdown="1">
+<details markdown="1">
   <summary>orders-model.jdl (expand to see)</summary>
 
 ```jdl

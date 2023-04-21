@@ -77,7 +77,7 @@ public class JDLBackendApplicationMongoImperativeGeneratorTest {
 
     @Test
     public void test_generator_hexagonal_mongodb_imperative_no_dtos() throws Exception {
-        String targetFolder = "target/test_generator_hexagonal_mongodb_imperative";
+        String targetFolder = "target/test_generator_hexagonal_mongodb_imperative_no_dtos";
         Plugin plugin = new JDLBackendApplicationDefaultPlugin()
                 .withSpecFile("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl")
                 .withTargetFolder(targetFolder)
