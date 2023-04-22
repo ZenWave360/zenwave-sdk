@@ -43,7 +43,7 @@ public class JDLBackendApplicationJpaImperativeGeneratorTest {
     public void test_generator_hexagonal_jpa_imperative() throws Exception {
         String targetFolder = "target/test_generator_hexagonal_jpa_imperative";
         Plugin plugin = new JDLBackendApplicationDefaultPlugin()
-                .withSpecFile("C:\\Users\\ivan.garcia\\workspace\\ivangsa\\zenwave-examples\\spring-boot-jpa-skeleton\\src\\main\\resources\\model\\model.jdl")
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/jdl/orders-model-relational.jdl")
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.jpa)
