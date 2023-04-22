@@ -46,5 +46,9 @@ public class HandlebarsEngineTest {
         Assertions.assertTrue(templateOutput.getContent().contains("Not with string: false"));
         Assertions.assertTrue(templateOutput.getContent().contains("Not with boolean: false"));
         Assertions.assertTrue(templateOutput.getContent().contains("Not with null: true"));
+        Assertions.assertTrue(templateOutput.getContent().contains("and true: true"));
+        Assertions.assertTrue(templateOutput.getContent().contains("and false: false"));
+        Assertions.assertTrue(templateOutput.getContent().contains("or true: true"));
+        Assertions.assertTrue(templateOutput.getContent().contains("or false: false"));
     }
 }

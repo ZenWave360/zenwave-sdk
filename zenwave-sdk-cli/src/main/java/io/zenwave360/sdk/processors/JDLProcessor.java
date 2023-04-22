@@ -103,6 +103,7 @@ public class JDLProcessor extends AbstractBaseProcessor {
             if(relationship.get("injectedFieldInFrom") != null) {
                 var fillInjectedFieldInFrom = StringUtils.replace((String) relationship.get("injectedFieldInFrom"), ")","").split("\\(");
                 relationshipMap.put("fieldName", fillInjectedFieldInFrom[0]);
+                relationshipMap.put("required", relationship.getOrDefault("isInjectedFieldInFromRequired", false));
             }
             if(relationship.get("injectedFieldInTo") != null) {
                 var fillInjectedFieldInFrom = StringUtils.replace((String) relationship.get("injectedFieldInTo"), ")","").split("\\(");
@@ -115,6 +116,7 @@ public class JDLProcessor extends AbstractBaseProcessor {
             if(relationship.get("injectedFieldInTo") != null) {
                 var fillInjectedFieldInFrom = StringUtils.replace((String) relationship.get("injectedFieldInTo"), ")","").split("\\(");
                 relationshipMap.put("fieldName", fillInjectedFieldInFrom[0]);
+                relationshipMap.put("required", relationship.getOrDefault("isInjectedFieldInToRequired", false));
             }
             if(relationship.get("injectedFieldInFrom") != null) {
                 var fillInjectedFieldInFrom = StringUtils.replace((String) relationship.get("injectedFieldInFrom"), ")","").split("\\(");

@@ -11,6 +11,11 @@ asPackageFolder {{asPackageFolder "io.zenwave360.sdk.templating"}}
 ifTruthy true: {{ifTruthy "true" "true" "false"}}
 ifTruthy false: {{ifTruthy "false" "true" "false"}}
 
+and true: {{and "true" "true" "true"}}
+and false: {{and "true" "false" "true"}}
+or true: {{or "true" "true" "true"}}
+or false: {{or "false" "false" "false"}}
+
 {{#joinWithTemplate theList}}
    Prefix{{.}}Suffix
 {{/joinWithTemplate}}

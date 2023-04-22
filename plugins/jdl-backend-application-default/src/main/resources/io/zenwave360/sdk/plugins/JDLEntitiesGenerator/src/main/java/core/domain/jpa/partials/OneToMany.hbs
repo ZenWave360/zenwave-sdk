@@ -1,5 +1,5 @@
 {{#if relationship.ownerSide}}
-@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+@OneToMany{{#if entity.options.aggregate}}(cascade = CascadeType.ALL, orphanRemoval = true){{/if}}
 {{else}}
 @ManyToOne(fetch = FetchType.LAZY)
 @JoinColumn(name = "{{snakeCase relationship.fieldName}}_id", insertable = false, updatable = false)

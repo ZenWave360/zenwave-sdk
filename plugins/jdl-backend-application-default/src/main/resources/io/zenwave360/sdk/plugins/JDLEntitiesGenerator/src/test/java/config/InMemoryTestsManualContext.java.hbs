@@ -1,6 +1,8 @@
 package {{basePackage}}.config;
 
+{{#if services}}
 import {{basePackage}}.core.implementation.*;
+{{/if}}
 
 public class InMemoryTestsManualContext extends InMemoryTestsConfig {
 

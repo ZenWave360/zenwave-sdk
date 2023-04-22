@@ -59,10 +59,12 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
 {{#each entity.relationships as |relationship|}}
 {{#if relationship.fieldName~}}
     {{#if (addRelationshipById relationship jdl=jdl entity=entity)}}
+    {{#if relationship.required}}@NotNull{{/if}}
     @Column(name = "{{snakeCase relationship.fieldName}}_id")
     private {{idJavaType}} {{relationship.fieldName}}Id;
     {{~/if}}
     {{> (partial 'partials/' relationship.type)}}
+    {{#unless (addRelationshipById relationship jdl=jdl entity=entity)}}{{#if relationship.required}}@NotNull{{/if}}{{/unless}}
     private {{{relationshipFieldType relationship}}} {{relationship.fieldName}};
 {{/if~}}
 {{/each}}

@@ -1,7 +1,7 @@
 {{#if relationship.ownerSide }}
-@OneToOne
+@OneToOne{{#if entity.options.aggregate}}(cascade = CascadeType.ALL, orphanRemoval = true){{/if}}
 @JoinColumn(unique = true)
 {{~else~}}
-@OneToOne(mappedBy = "{{relationship.otherEntityFieldName}}")
+@OneToOne(mappedBy = "{{relationship.otherEntityFieldName}}"{{#if entity.options.aggregate}}, cascade = CascadeType.ALL, orphanRemoval = true{{/if}})
 {{/if~}}
 

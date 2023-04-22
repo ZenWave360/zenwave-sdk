@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.jknack.handlebars.Handlebars;
 import io.zenwave360.sdk.parsers.JDLParser;
@@ -131,8 +132,11 @@ public class CustomHandlebarsHelpers {
     }
 
     public static boolean or(Object first, Options options) throws IOException {
-        Object second = options.param(0);
-        return isTruthy(first) || isTruthy(second);
+        return isTruthy(first) || Stream.of(options.params).anyMatch(CustomHandlebarsHelpers::isTruthy);
+    }
+
+    public static boolean and(Object first, Options options) throws IOException {
+        return isTruthy(first) && Stream.of(options.params).allMatch(CustomHandlebarsHelpers::isTruthy);
     }
 
     private static boolean isTruthy(Object value) {
