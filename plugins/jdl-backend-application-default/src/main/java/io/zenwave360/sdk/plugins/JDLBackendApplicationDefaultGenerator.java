@@ -54,20 +54,18 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
     private String templatesFolder = "io/zenwave360/sdk/plugins/JDLEntitiesGenerator/";
 
 
-    boolean useSemanticAnnotations = false;
-
     boolean is(Map<String, Object> model, String... annotations) {
         String annotationsFilter = Arrays.stream(annotations).map(a -> "@." + a).collect(Collectors.joining(" || "));
         return !((List) JSONPath.get(model, "$.entity.options[?(" + annotationsFilter + ")]")).isEmpty();
     }
 
-    Function<Map<String, Object>, Boolean> skipEntityRepository = (model) -> useSemanticAnnotations && !is(model, "aggregate");
+    Function<Map<String, Object>, Boolean> skipEntityRepository = (model) -> !is(model, "aggregate");
     Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo", "input", "isSuperClass");
     Function<Map<String, Object>, Boolean> skipEntity = (model) -> is(model, "vo", "input");
-    Function<Map<String, Object>, Boolean> skipVO = (model) -> useSemanticAnnotations && !is(model, "vo");
+    Function<Map<String, Object>, Boolean> skipVO = (model) -> !is(model, "vo");
 
     Function<Map<String, Object>, Boolean> skipEntityInput = (model) -> is(model, "vo", "input") || inputDTOSuffix == null || inputDTOSuffix.isEmpty();
-    Function<Map<String, Object>, Boolean> skipInput = (model) -> useSemanticAnnotations && !is(model, "input");
+    Function<Map<String, Object>, Boolean> skipInput = (model) -> !is(model, "input");
     Function<Map<String, Object>, Boolean> skipEntityResource = (model) -> is(model, "vo", "input") || !is(model, "service");
     Function<Map<String, Object>, Boolean> skipSearchCriteria = (model) -> is(model, "vo", "input") || !is(model, "searchCriteria");
     Function<Map<String, Object>, Boolean> skipElasticSearch = (model) -> is(model, "vo", "input") || !is(model, "search");
@@ -129,8 +127,6 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {
         var templateOutputList = new ArrayList<TemplateOutput>();
         var apiModel = getJDLModel(contextModel);
-
-        useSemanticAnnotations = ((List) JSONPath.get(apiModel, "$.entities[*][?(@.options.aggregate)]")).size() > 0;
 
         Map<String, Map<String, Object>> entities = (Map) apiModel.get("entities");
         for (Map<String, Object> entity : entities.values()) {

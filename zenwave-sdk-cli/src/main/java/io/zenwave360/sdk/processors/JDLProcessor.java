@@ -97,6 +97,7 @@ public class JDLProcessor extends AbstractBaseProcessor {
         var from = relationship.get("from");
         var to = relationship.get("to");
         if (from.equals(entityName)) {
+            relationshipMap.put("entityName", from);
             relationshipMap.put("otherEntityName", to);
             relationshipMap.put("ownerSide", true);
             relationshipMap.put("isCollection", relationship.get("type").toString().endsWith("Many"));
@@ -110,6 +111,7 @@ public class JDLProcessor extends AbstractBaseProcessor {
                 relationshipMap.put("otherEntityFieldName", fillInjectedFieldInFrom[0]);
             }
         } else {
+            relationshipMap.put("entityName", to);
             relationshipMap.put("otherEntityName", from);
             relationshipMap.put("ownerSide", false);
             relationshipMap.put("isCollection", relationship.get("type").toString().startsWith("Many"));

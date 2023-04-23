@@ -61,7 +61,7 @@
         <reflections.version>0.10.2</reflections.version>
         <handlebars-java.version>4.3.0</handlebars-java.version>
         <json-schema-ref-parser-jvm.version>0.8.1</json-schema-ref-parser-jvm.version>
-        <jdl-jvm.version>0.5.3</jdl-jvm.version>
+        <jdl-jvm.version>0.5.4-SNAPSHOT</jdl-jvm.version>
         <graphql-java.version>19.2</graphql-java.version>
         <google-java-format.version>1.7</google-java-format.version>
         <junit.version>4.13.2</junit.version>

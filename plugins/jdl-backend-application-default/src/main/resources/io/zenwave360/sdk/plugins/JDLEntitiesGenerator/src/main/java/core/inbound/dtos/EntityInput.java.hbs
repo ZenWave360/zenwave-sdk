@@ -25,7 +25,6 @@ public class {{entity.className}}{{inputDTOSuffix entity}} {{addExtends entity s
 {{/each}}
 
 {{#each entity.relationships as |relationship|}}
-// {{{relationship}}}
 {{#if relationship.fieldName~}}
     {{#if (addRelationshipById relationship jdl=jdl entity=entity)}}
     private {{idJavaType}} {{relationship.fieldName}}Id;
@@ -93,7 +92,7 @@ public class {{entity.className}}{{inputDTOSuffix entity}} {{addExtends entity s
         return {{relationship.fieldName}};
     }
 
-    public void set{{capitalize relationship.otherEntityName}}({{{relationshipFieldType relationship suffix=(inputDTOSuffix entity)}}} {{relationship.fieldName}}) {
+    public void set{{capitalize relationship.fieldName}}({{{relationshipFieldType relationship suffix=(inputDTOSuffix entity)}}} {{relationship.fieldName}}) {
         this.{{relationship.fieldName}} = {{relationship.fieldName}};
     }
     {{~/if}}

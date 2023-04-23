@@ -4,11 +4,11 @@
         {{requestBodyVar}}.set{{asJavaTypeName @key}}({{{newPropertyObject property}}});
             {{~#if (eq property.type 'object')}}
                 {{~#each property.properties as |innerProperty|}}
-        {{requestBodyVar}}.get{{asJavaTypeName parentPropertyName}}().set{{asJavaTypeName @key}}({{{populateProperty innerProperty}}});
+        {{requestBodyVar}}.get{{asJavaTypeName parentPropertyName}}().set{{asJavaTypeName @key}}({{{populateProperty innerProperty openApiModelNameSuffix=openApiModelNameSuffix}}});
                 {{~/each}}
             {{~else if (eq property.type 'array')}}
                 {{~#each property.items.properties as |innerProperty|}}
-        {{requestBodyVar}}.get{{asJavaTypeName parentPropertyName}}().get(0).set{{asJavaTypeName @key}}({{{populateProperty innerProperty}}});
+        {{requestBodyVar}}.get{{asJavaTypeName parentPropertyName}}().get(0).set{{asJavaTypeName @key}}({{{populateProperty innerProperty openApiModelNameSuffix=openApiModelNameSuffix}}});
                 {{~/each}}
             {{~else}}
             {{~/if}}

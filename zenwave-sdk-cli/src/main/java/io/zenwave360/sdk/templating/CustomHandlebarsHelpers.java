@@ -57,7 +57,8 @@ public class CustomHandlebarsHelpers {
             // root level #/component/schemas would be an entity or enum
             String otherEntity = (String) property.get("x--schema-name");
             String propertyName = (String) property.get("x--property-name");
-            return "new " + otherEntity + "()";
+            String openApiModelNameSuffix = options.hash("openApiModelNameSuffix", "");
+            return "new " + otherEntity + openApiModelNameSuffix + "()";
         }
         return "\"aaa\"";
     }
