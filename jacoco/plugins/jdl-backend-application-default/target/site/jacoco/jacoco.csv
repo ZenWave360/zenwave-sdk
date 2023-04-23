@@ -1,5 +1,5 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultHelpers,119,477,25,43,21,88,23,25,0,14
-io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultGenerator,61,1304,16,66,4,108,16,49,3,21
-io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultJpaHelpers,0,56,1,5,0,9,1,4,0,2
+io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultGenerator,60,1282,12,62,4,106,12,49,3,21
+io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultJpaHelpers,0,82,1,9,0,11,1,6,0,2
 io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultPlugin,5,35,1,1,1,5,1,2,0,2

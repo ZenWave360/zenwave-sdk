@@ -1,5 +1,5 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,JDLProcessor,2,481,7,25,0,79,7,20,0,11
+io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,JDLProcessor,2,491,7,25,0,81,7,20,0,11
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,JDLDummyDataFromSchemasProcessor,0,295,0,4,0,51,0,9,0,7
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,EnrichOpenAPIWithJDLProcessor,0,170,0,12,0,36,0,13,0,7
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,AbstractBaseProcessor,8,61,1,7,0,15,1,7,0,4
@@ -17,7 +17,7 @@ io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk,MainGenerator
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,TemplateInput,58,48,2,0,17,17,6,10,5,10
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,OutputFormatType,27,0,0,0,2,0,1,0,1,0
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,HandlebarsEngine,29,112,4,2,5,24,5,5,2,5
-io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,CustomHandlebarsHelpers,182,288,38,28,41,53,31,29,6,21
+io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,CustomHandlebarsHelpers,189,288,38,28,42,53,31,29,6,21
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,TemplateOutput,18,39,0,0,6,14,2,5,2,5
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.writers,TemplateStdoutWriter,40,8,0,0,9,2,4,1,4,1
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.writers,TemplateFileWriter,15,107,2,8,4,20,3,11,1,8
@@ -69,8 +69,8 @@ io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured,io.zenwave360.sdk.
 io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured,io.zenwave360.sdk.plugins,RestAssuredPlugin,0,48,0,2,0,7,0,3,0,2
 io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured,io.zenwave360.sdk.plugins,RestAssuredGenerator.GroupByType,0,21,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultHelpers,119,477,25,43,21,88,23,25,0,14
-io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultGenerator,61,1304,16,66,4,108,16,49,3,21
-io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultJpaHelpers,0,56,1,5,0,9,1,4,0,2
+io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultGenerator,60,1282,12,62,4,106,12,49,3,21
+io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultJpaHelpers,0,82,1,9,0,11,1,6,0,2
 io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultPlugin,5,35,1,1,1,5,1,2,0,2
 io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi,io.zenwave360.sdk.plugins,JDLToAsyncAPIGenerator.SchemaFormat,0,15,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi,io.zenwave360.sdk.plugins,JDLToAsyncAPIGenerator.PayloadStyle,0,15,0,0,0,2,0,1,0,1
