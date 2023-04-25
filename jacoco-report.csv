@@ -68,9 +68,9 @@ io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwa
 io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured,io.zenwave360.sdk.plugins,RestAssuredGenerator,5,446,0,20,2,69,1,25,1,15
 io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured,io.zenwave360.sdk.plugins,RestAssuredPlugin,0,48,0,2,0,7,0,3,0,2
 io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured,io.zenwave360.sdk.plugins,RestAssuredGenerator.GroupByType,0,21,0,0,0,2,0,1,0,1
-io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultHelpers,119,477,25,43,21,88,23,25,0,14
+io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultHelpers,117,491,24,46,20,93,22,28,0,15
 io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultGenerator,60,1282,12,62,4,106,12,49,3,21
-io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultJpaHelpers,0,82,1,9,0,11,1,6,0,2
+io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultJpaHelpers,7,120,6,10,0,19,4,8,0,4
 io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default,io.zenwave360.sdk.plugins,JDLBackendApplicationDefaultPlugin,5,35,1,1,1,5,1,2,0,2
 io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi,io.zenwave360.sdk.plugins,JDLToAsyncAPIGenerator.SchemaFormat,0,15,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi,io.zenwave360.sdk.plugins,JDLToAsyncAPIGenerator.PayloadStyle,0,15,0,0,0,2,0,1,0,1
