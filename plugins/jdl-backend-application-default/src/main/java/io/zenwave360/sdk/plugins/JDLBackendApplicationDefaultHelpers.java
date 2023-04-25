@@ -33,6 +33,14 @@ public class JDLBackendApplicationDefaultHelpers {
         return String.format("%s%s%s", prefix, type, suffix);
     };
 
+    public String fieldTypeInitializer(Object context, Options options) {
+        Map field = (Map) context;
+        if (field.get("isArray") == Boolean.TRUE) {
+            return "= new ArrayList<>()";
+        }
+        return "";
+    };
+
     public String javaType(Map field, Options options) {
         return (String) field.get("type");
     }
@@ -98,15 +106,12 @@ public class JDLBackendApplicationDefaultHelpers {
         return String.format("%s%s%s", prefix, type, suffix);
     };
 
-    public String relationshipFieldTypeInitialized(Object context, Options options) {
+    public String relationshipFieldTypeInitializer(Object context, Options options) {
         Map field = (Map) context;
-//        String type = (String) field.get("otherEntityName");
-//        String prefix = (String) options.hash.getOrDefault("prefix", "");
-//        String suffix = (String) options.hash.getOrDefault("suffix", "");
         if (field.get("isCollection") == Boolean.TRUE) {
-            return "new HashSet<>()";
+            return "= new HashSet<>()";
         }
-        return null;
+        return "";
     };
 
     public String fieldPersistenceAnnotations(Object context, Options options) {

@@ -34,7 +34,7 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
 {{#each entity.fields as |field|}}
     {{fieldPersistenceAnnotations field}}
     {{{fieldValidationAnnotations field}}}
-    private {{{fieldType field}}} {{field.name}};
+    private {{{fieldType field}}} {{field.name}} {{{fieldTypeInitializer field}}};
 {{/each}}
 
 {{~#if entity.options.auditing}}

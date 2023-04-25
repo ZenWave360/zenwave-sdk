@@ -21,7 +21,7 @@ public class {{entity.className}}{{inputDTOSuffix entity}} {{addExtends entity s
 {{#each entity.fields as |field|}}
     {{{fieldValidationAnnotations field}}}
     {{~#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix entity}}{{/if}}{{/assign}}
-    private {{{fieldType field suffix=typeSuffix}}} {{field.name}};
+    private {{{fieldType field suffix=typeSuffix}}} {{field.name}} {{{fieldTypeInitializer field}}};
 {{/each}}
 
 {{#each entity.relationships as |relationship|}}
@@ -29,7 +29,7 @@ public class {{entity.className}}{{inputDTOSuffix entity}} {{addExtends entity s
     {{#if (addRelationshipById relationship jdl=jdl entity=entity)}}
     private {{idJavaType}} {{relationship.fieldName}}Id;
     {{~else~}}
-    private {{{relationshipFieldType relationship suffix=(inputDTOSuffix entity)}}} {{relationship.fieldName}}{{#if relationship.isCollection}} = {{{relationshipFieldTypeInitialized relationship}}}{{/if}};
+    private {{{relationshipFieldType relationship suffix=(inputDTOSuffix entity)}}} {{relationship.fieldName}} {{{relationshipFieldTypeInitializer relationship}}};
     {{~/if}}
 {{/if~}}
 {{/each}}

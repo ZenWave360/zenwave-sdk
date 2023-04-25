@@ -50,7 +50,9 @@ public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositor
 {{~#if relationship.fieldName}}
         // {{relationship.type}} {{relationship.fieldName}} owner: {{relationship.ownerSide}}
     {{~#if (or relationship.ownerSide (and (endsWith relationship.type 'OneToOne') (not relationship.ownerSide) entity.options.aggregate) )}}
+        {{~#if (and relationship.ownerSide (endsWith relationship.type 'ToOne'))}}
         var {{relationship.fieldName}}Id = 1L;
+        {{~/if}}
         {{~#if (addRelationshipById relationship jdl=jdl entity=entity)}}
         {{entity.instanceName}}.set{{capitalize relationship.fieldName}}Id({{relationship.fieldName}}Id); // using id to write relationship
         {{~else}}
