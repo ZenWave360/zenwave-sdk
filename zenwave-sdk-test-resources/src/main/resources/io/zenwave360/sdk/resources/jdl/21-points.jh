@@ -43,3 +43,5 @@ relationship ManyToOne {
 paginate BloodPressure, Weight with infinite-scroll
 paginate Points with pagination
 
+service BloodPressure, Weight, Points with serviceImpl
+

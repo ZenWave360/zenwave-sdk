@@ -59,10 +59,10 @@ entity ShippingDetails {
 
 @embedded
 @copy(ShippingDetails)
-entity OrderShippingDetails {}
+entity OrderShippingDetails { }
 
 @copy(ShippingDetails)
-entity OrderShippingDetails2 {}
+entity OrderShippingDetails2 { }
 
 //relationship OneToMany {
 //	Customer{shipmentDetails} to ShippingDetails{customer}

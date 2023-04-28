@@ -1,0 +1,107 @@
+/**
+* Global javadoc comment
+*/
+
+MAX_LENGTH=100
+
+/**
+* Customer javadoc comment
+*/
+  @aggregate
+  @service(CustomerService)
+entity Customer {
+  username String required unique
+  tags String[]
+  email String required unique
+}
+
+/**
+Enum javadoc comment
+*/
+enum OrderStatus {
+  NEW(1) /** new order */,  IN_PROGRESS(2) /** order in progress */,
+  /** order completed */
+  COMPLETED(3)
+  /**
+    * order cancelled
+    */
+  CANCELLED(4)
+}
+
+//relationship OneToMany {
+//	Customer{shipmentDetails} to ShippingDetails{customer}
+//	Customer{paymentDetails} to PaymentDetails{customer}
+//}
+
+relationship ManyToOne {
+  /** shipment details */
+  ShippingDetails{customer} to
+  /** customer */
+  Customer{shipmentDetails}
+
+  PaymentDetails{customer} to Customer{paymentDetails}
+
+  CustomerOrder{paymentDetails} to PaymentDetails
+  CustomerOrder{customer} to Customer
+}
+
+relationship ManyToMany {
+  CustomerOrder{orderedItems} to OrderedItem{customerOrders}
+}
+
+/**
+ * Customer input javadoc comment
+ */
+@copy(Customer)
+input CustomerInput {
+username String required unique
+tags String[]
+email String required unique pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/)
+address AddressInput {
+street String
+city String
+state String
+zip String
+}
+}
+
+service Customer, CustomerOrder with CustomerLegacyServer
+
+/**
+ Service javadoc comment
+ */
+@rest
+service CustomerService for (Customer) {
+/**
+ * Create customer javadoc comment
+ */
+@command(createCustomer)
+createCustomer(Customer) Customer withEvents onCustomerCreated
+@evento(onCustomerCreated)
+updateCustomer(Customer) Customer withEvents onCustomerUpdated /** update customer javadoc comment */
+deleteCustomer(id) withEvents onCustomerDeleted
+getCustomer(id) Customer
+
+listCustomers(pageable) Customer[]
+}
+
+@topic(tratra)
+event onCustomerCreated {
+customerId String
+customer Customer
+}
+
+@topic(tratra)
+event onCustomerUpdated {
+customerId String
+customer Customer {
+username String
+tags String[]
+email String
+}
+}
+
+@topic(tratra)
+event onCustomerDeleted {
+customerId String
+}

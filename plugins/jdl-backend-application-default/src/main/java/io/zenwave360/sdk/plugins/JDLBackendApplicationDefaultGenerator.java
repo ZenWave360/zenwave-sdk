@@ -194,7 +194,7 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
         }
         List<Map<String, Object>> entitiesByService = (List<Map<String, Object>>) entityNames.stream().map(e -> JSONPath.get(apiModel, "$.entities." + e)).collect(Collectors.toList());
         List excludedNames = ((List) service.get("excludedNames"));
-        if (excludedNames.size() > 0) {
+        if (excludedNames != null && excludedNames.size() > 0) {
             entitiesByService = entitiesByService.stream().filter(e -> !excludedNames.contains(e.get("name"))).collect(Collectors.toList());
         }
         service.put("entityNames", entityNames);

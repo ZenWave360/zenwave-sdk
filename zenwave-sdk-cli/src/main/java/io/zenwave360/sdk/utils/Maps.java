@@ -32,7 +32,7 @@ public interface Maps {
         if (source instanceof Map) {
             source = new HashMap<>((Map) source);
             ((HashMap<String, Object>) source).entrySet().forEach(e -> e.setValue(deepCopy(e.getValue())));
-        } else if (source instanceof List) {
+        } else if (source instanceof List && !((List<?>) source).isEmpty()) {
             source = ((List<?>) source).stream().map(e -> deepCopy(e));
         }
         return source;

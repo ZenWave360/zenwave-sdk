@@ -21,6 +21,8 @@ public class JDLProcessor extends AbstractBaseProcessor {
 
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
+        contextModel = new ZDL2JDLProcessor().process(contextModel);
+
         Map<String, Object> jdlModel = targetProperty != null ? (Map) contextModel.get(targetProperty) : (Map) contextModel;
         List<Map<String, Object>> entities = JSONPath.get(jdlModel, "$.entities[*]");
         for (Map<String, Object> entity : entities) {
