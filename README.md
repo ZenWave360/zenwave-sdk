@@ -46,6 +46,12 @@ or if you prefer to use the latest **snapshot** versions:
 jbang alias add --fresh --name=zw snapshots@zenwave360/zenwave-sdk
 ```
 
+or if you prefer to use the _next_ experimental/unstable **snapshot** versions:
+
+```shell
+jbang alias add --fresh --name=zw next@zenwave360/zenwave-sdk
+```
+
 If you plan to use **custom plugins** you will need to use the command in the following format:
 
 ```shell
