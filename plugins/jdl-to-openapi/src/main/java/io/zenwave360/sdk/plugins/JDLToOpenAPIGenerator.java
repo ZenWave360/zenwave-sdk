@@ -1,10 +1,6 @@
 package io.zenwave360.sdk.plugins;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,6 +17,8 @@ import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
+
+import static java.util.Collections.emptyList;
 
 public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
 
@@ -116,7 +114,7 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
             schemas.put(entityName + "Paginated", paginatedSchema);
         }
 
-        List<Map<String, Object>> enums = (List) JSONPath.get(jdlModel, "$.enums.enums[*]");
+        List<Map<String, Object>> enums = JSONPath.get(jdlModel, "$.enums.enums[*]", emptyList());
         for (Map<String, Object> enumValue : enums) {
             if (!isGenerateSchemaEntity(enumValue)) {
                 continue;
