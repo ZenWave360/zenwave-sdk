@@ -1,9 +1,6 @@
 package io.zenwave360.sdk.utils;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Mutable version of {@link java.util.Map} static methods and other utilities.
@@ -29,11 +26,11 @@ public interface Maps {
     }
 
     private static Object deepCopy(Object source) {
-        if (source instanceof Map) {
-            source = new HashMap<>((Map) source);
+        if(source instanceof Map) {
+            source = new LinkedHashMap<>((Map) source);
             ((HashMap<String, Object>) source).entrySet().forEach(e -> e.setValue(deepCopy(e.getValue())));
-        } else if (source instanceof List && !((List<?>) source).isEmpty()) {
-            source = ((List<?>) source).stream().map(e -> deepCopy(e));
+        } else if(source instanceof List) {
+            source = new ArrayList<>((List) source);
         }
         return source;
     }

@@ -20,7 +20,7 @@ public class ZDL2JDLProcessor extends AbstractBaseProcessor {
     public Map<String, Object> process(Map<String, Object> contextModel) {
         Map<String, Object> model = targetProperty != null ? (Map) contextModel.get(targetProperty) : (Map) contextModel;
 
-        var services = (Map<String, Map>) copy(JSONPath.get(model, "$.services"));
+        var services = (Map<String, Map>) Maps.copy(JSONPath.get(model, "$.services"));
         for (Map service : services.values()) {
             service.put("entityNames", service.get("aggregates"));
             service.put("value", service.get("name"));
@@ -55,16 +55,6 @@ public class ZDL2JDLProcessor extends AbstractBaseProcessor {
         }
 
         return contextModel;
-    }
-
-    private static Object copy(Object source) {
-        if(source instanceof Map) {
-            source = new LinkedHashMap<>((Map) source);
-            ((HashMap<String, Object>) source).entrySet().forEach(e -> e.setValue(copy(e.getValue())));
-        } else if(source instanceof List) {
-            source = new ArrayList<>((List) source);
-        }
-        return source;
     }
 
 }

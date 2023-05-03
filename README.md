@@ -218,10 +218,10 @@ Example:
 
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.ForkPlugin \
-            targetFolder=target/forked-plugin \
-            sourcePluginClassName=io.zenwave360.sdk.plugins.JDLBackendApplicationDefaultPlugin \
-            targetPluginClassName=com.myorganization.sdk.JDLBackendApplicationDefaultPluginForked
-cd target/forked-plugin
+            targetFolder=plugins/zdl-to-asyncapi \
+            sourcePluginClassName=io.zenwave360.sdk.plugins.JDLToOpenAPIPlugin \
+            targetPluginClassName=io.zenwave360.sdk.plugins.ZDLToAsyncAPIPlugin
+cd plugins/zdl-to-asyncapi
 mvn clean install
 ```
 

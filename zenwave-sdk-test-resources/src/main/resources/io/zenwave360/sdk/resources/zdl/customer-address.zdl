@@ -1,0 +1,90 @@
+/**
+* Global javadoc comment
+*/
+
+MAX_LENGTH=100
+
+/**
+* Customer javadoc comment
+*/
+  @aggregate
+entity Customer {
+  username String required unique
+  email String required unique
+  tags String[]
+}
+
+enum AddressType {  HOME,  WORK }
+
+entity Address {
+  street String
+  city String
+  state String
+  zip String
+  type AddressType
+}
+
+relationship OneToMany {
+  Customer{addresses} to Address{customer}
+}
+
+
+/**
+ * Customer input javadoc comment
+ */
+input CustomerInput {
+  username String required unique
+  tags String[]
+  email String required unique pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/)
+  address AddressInput[] {
+    street String
+    city String
+    state String
+    zip String
+  }
+}
+
+/**
+ Service javadoc comment
+ */
+@rest
+service CustomerService for (Customer) {
+  /**
+   * Create customer javadoc comment
+   */
+  @asyncapi(createCustomerChannel) @topic(inputchannel)
+  createCustomer(Customer) Customer withEvents CustomerEvent CustomerCreated CustomerCreatedFailed
+
+
+  updateCustomer(Customer) Customer withEvents CustomerEvent CustomerUpdated /** update customer javadoc comment */
+
+  deleteCustomer(id) withEvents CustomerDeleted
+
+  getCustomer(id) Customer
+
+  @pageable
+  listCustomers() Customer[]
+}
+
+@topic(compacted)
+@entity(Customer)
+event CustomerEvent(customerEventChannel) {
+
+}
+
+@topic(tratra)
+event CustomerCreated(customerEventsChannel) {
+  customerId String
+  customer Customer
+}
+
+@topic(tratra)
+event CustomerUpdated(customerEventsChannel) {
+  customerId String
+  customer Customer
+}
+
+@topic(tratra)
+event CustomerDeleted(customerEventsChannel) {
+  customerId String
+}
