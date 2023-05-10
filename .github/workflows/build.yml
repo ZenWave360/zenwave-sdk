@@ -33,7 +33,7 @@ jobs:
           SIGN_KEY: ${{ secrets.SIGN_KEY }}
           SIGN_KEY_PASS: ${{ secrets.SIGN_KEY_PASS }}
 
-      - name: Build
+      - name: Build Next
         if: github.ref == 'refs/heads/next'
         run: mvn -B verify
 
