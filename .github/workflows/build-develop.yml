@@ -1,10 +1,10 @@
-name: build
+name: Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ develop, next ]
   pull_request:
-    branches: [ main ]
+    branches: [ develop, next ]
   workflow_dispatch:
 
 jobs:
@@ -14,12 +14,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Checkout badges branch to a badges directory nested inside first checkout
-        uses: actions/checkout@v2
-        with:
-          ref: badges
-          path: badges
 
       - name: Set up the Java JDK
         uses: actions/setup-java@v2
@@ -31,12 +25,17 @@ jobs:
           server-password: MAVEN_PASSWORD
 
       - name: Build and Publish SNAPSHOT to the Maven Central Repository
-        run: mvn --batch-mode verify deploy -DupdateReleaseInfo=true
+        if: github.ref == 'refs/heads/develop'
+        run: mvn -B verify deploy
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
           SIGN_KEY: ${{ secrets.SIGN_KEY }}
           SIGN_KEY_PASS: ${{ secrets.SIGN_KEY_PASS }}
+
+      - name: Build
+        if: github.ref == 'refs/heads/next'
+        run: mvn -B verify
 
       - name: Generate JaCoCo Badge
         id: jacoco
@@ -60,28 +59,6 @@ jobs:
         run: |
           echo "coverage = ${{ steps.jacoco.outputs.coverage }}"
           echo "branch coverage = ${{ steps.jacoco.outputs.branches }}"
-
-      - name: Packs Jacoco Reports
-        run: |
-          rm -rf badges/jacoco
-          mkdir -p badges/jacoco
-          echo "GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED" > badges/jacoco-report.csv
-          find -name 'jacoco.csv' -exec sed '1d' {} \; >> badges/jacoco-report.csv
-          tar -c `find -name jacoco.csv` `find -name jacoco.exec` `find -name jacoco.xml` | tar -C badges/jacoco -x
-
-
-      - name: Commit and push the coverage badges and summary file
-        if: ${{ github.event_name != 'pull_request' }}
-        run: |
-          echo $(ls -l)
-          cd badges
-          if [[ `git status --porcelain` ]]; then
-            git config --global user.name 'github-agit pctions'
-            git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add *.svg *.json jacoco-report.csv jacoco/*
-            git commit -m "coverage = ${{ steps.jacoco.outputs.coverage }} branches = ${{ steps.jacoco.outputs.branches }}" *.svg *.json jacoco-report.csv jacoco/*
-            git push
-          fi
 
       - name: Comment on PR with coverage percentages
         if: ${{ github.event_name == 'pull_request' }}

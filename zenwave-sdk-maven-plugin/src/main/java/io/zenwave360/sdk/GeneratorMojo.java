@@ -109,7 +109,7 @@ public class GeneratorMojo extends AbstractMojo {
 
             String specFile = inputSpec.startsWith("classpath:") ? inputSpec : new File(inputSpec).getAbsolutePath();
             Plugin plugin = Plugin.of(this.generatorName)
-                    .withSpecFile(specFile)
+                    .withSpecFile(escapeSpaces(specFile))
                     .withTargetFolder(targetFolder.getAbsolutePath())
                     .withProjectClassLoader(projectClassLoader)
                     .withOptions(options);
@@ -123,6 +123,10 @@ public class GeneratorMojo extends AbstractMojo {
             getLog().error(e);
             throw new MojoExecutionException("Code generation failed. See above for the full exception.");
         }
+    }
+      
+    protected String escapeSpaces(String uri) {
+        return uri.replace(" ", "\\ ");
     }
 
     protected Map<String, String> buildConfigOptions(String configOptions) {
