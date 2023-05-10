@@ -2,15 +2,11 @@ name: Prepare Maven Release
 on:
   workflow_dispatch:
     inputs:
-      branch:
-        description: "The branch to checkout when cutting the release."
-        required: true
-        default: "main"
       releaseVersion:
-        description: "Default version to use when preparing a release."
+        description: "Version to use for the release."
         required: true
       developmentVersion:
-        description: "Default version to use for new local working copy."
+        description: "Version to use for the next development iteration."
         required: true
 
 jobs:
@@ -19,8 +15,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.inputs.branch }}
       - name: Set up Java for publishing to Maven Central Repository
         uses: actions/setup-java@v2
         with:
