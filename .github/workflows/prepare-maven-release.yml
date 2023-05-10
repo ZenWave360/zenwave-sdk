@@ -1,13 +1,12 @@
-name: Prepare Maven Release
+name: Create Maven Release
 on:
   workflow_dispatch:
     inputs:
       releaseVersion:
-        description: "Version to use for the release."
+        description: "Release Version:"
         required: true
       developmentVersion:
-        description: "Version to use for the next development iteration."
-        required: true
+        description: "Next Development Version:"
 
 jobs:
   release:
