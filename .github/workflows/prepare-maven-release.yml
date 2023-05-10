@@ -34,3 +34,8 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Push Release
+        run: |
+          git push
+          git push --tags
