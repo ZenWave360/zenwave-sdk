@@ -1,13 +1,12 @@
-name: Prepare Maven Release
+name: Create Maven Release
 on:
   workflow_dispatch:
     inputs:
       releaseVersion:
-        description: "Version to use for the release."
+        description: "Release Version:"
         required: true
       developmentVersion:
-        description: "Version to use for the next development iteration."
-        required: true
+        description: "Next Development Version:"
 
 jobs:
   release:
@@ -26,11 +25,16 @@ jobs:
 
       - name: Configure Git User
         run: |
-          git config user.email "actions@github.com"
-          git config user.name "GitHub Actions"
+          git config user.email ${{ github.actor }}@users.noreply.github.com
+          git config user.name ${{ github.actor }}
 
       - name: Prepare Release
         run: mvn -B release:prepare -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Push Release
+        run: |
+          git push
+          git push --tags

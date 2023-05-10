@@ -4,7 +4,7 @@ on:
   push:
     branches: [ develop, next ]
   pull_request:
-    branches: [ develop, next ]
+    branches: [ '**' ]
   workflow_dispatch:
 
 jobs:
@@ -24,18 +24,13 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
 
-      - name: Build and Publish SNAPSHOT to the Maven Central Repository
-        if: github.ref == 'refs/heads/develop'
+      - name: Build and Publish SNAPSHOT to the Maven Central
         run: mvn -B verify deploy
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
           SIGN_KEY: ${{ secrets.SIGN_KEY }}
           SIGN_KEY_PASS: ${{ secrets.SIGN_KEY_PASS }}
-
-      - name: Build
-        if: github.ref == 'refs/heads/next'
-        run: mvn -B verify
 
       - name: Generate JaCoCo Badge
         id: jacoco
