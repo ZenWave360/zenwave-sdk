@@ -2,6 +2,7 @@ package io.zenwave360.sdk.generators;
 
 import java.util.*;
 
+import io.zenwave360.sdk.utils.AsyncAPIUtils;
 import io.zenwave360.sdk.utils.JSONPath;
 import org.apache.commons.lang3.ObjectUtils;
 
@@ -66,7 +67,8 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
 
     public Map<String, List<Map<String, Object>>> getOperationsGroupedByTag(Model apiModel, AsyncapiOperationType operationType) {
         Map<String, List<Map<String, Object>>> operationsByTag = new HashMap<>();
-        List<Map<String, Object>> operations = JSONPath.get(apiModel, "$.channels[*].*");
+        boolean isV3 = AsyncAPIUtils.isV3(apiModel);
+        List<Map<String, Object>> operations = isV3? JSONPath.get(apiModel, "$.operations[*]") : JSONPath.get(apiModel, "$.channels[*].*");
         for (Map<String, Object> operation : operations) {
             if (matchesFilters(operation, operationType)) {
                 String tag = (String) ObjectUtils.firstNonNull(operation.get("x--normalizedTagName"), "DefaultService");
@@ -80,8 +82,9 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
     }
 
     public boolean matchesFilters(Map<String, Object> operation, AsyncapiOperationType operationType) {
-        var operationOperationType = AsyncapiOperationType.valueOf(operation.get("x--operationType").toString());
-        return operationOperationType == operationType && matchesBindingTypes(operation, bindingTypes) && !isSkipOperation(operation);
+        var action = ObjectUtils.firstNonNull(operation.get("action"), operation.get("x--operationType"));
+        var operationOperationType = AsyncapiOperationType.valueOf((String) action);
+        return operationOperationType.isEquivalent(operationType) && matchesBindingTypes(operation, bindingTypes) && !isSkipOperation(operation);
     }
 
     /**

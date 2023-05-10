@@ -6,6 +6,7 @@ import com.jayway.jsonpath.JsonPath;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.parsers.Model;
+import io.zenwave360.sdk.utils.AsyncAPIUtils;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
 
@@ -69,6 +70,8 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
         Model apiModel = targetProperty != null ? (Model) contextModel.get(targetProperty) : (Model) contextModel;
+        boolean isV2 = AsyncAPIUtils.isV2(apiModel);
+        boolean isV3 = AsyncAPIUtils.isV3(apiModel);
 
         apiModel.getRefs().getOriginalRefsList().forEach(pair -> {
             if (pair.getValue() instanceof Map) {
@@ -96,23 +99,45 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
             }
         }
 
+
         Map<String, Object> channels = JSONPath.get(apiModel, "$.channels", Collections.emptyMap());
-        for (Map.Entry<String, Object> channel : channels.entrySet()) {
-            Map<String, Map<String, Object>> value = (Map) channel.getValue();
-            if (value != null) {
-                addChannelNameToOperation(value.get("publish"), channel.getKey());
-                addChannelNameToOperation(value.get("subscribe"), channel.getKey());
-                addOperationType(value.get("publish"), "publish");
-                addOperationType(value.get("subscribe"), "subscribe");
-                addNormalizedTagName(value.get("publish"));
-                addNormalizedTagName(value.get("subscribe"));
-                addOperationIdVariants(value.get("publish"));
-                addOperationIdVariants(value.get("subscribe"));
-                collectMessages(value.get("publish"));
-                collectMessages(value.get("subscribe"));
-                setHasRuntimeHeaders(value.get("publish"));
-                setHasRuntimeHeaders(value.get("subscribe"));
+        for (Map.Entry<String, Object> channelEntry : channels.entrySet()) {
+            Map<String, Map<String, Object>> channel = (Map) channelEntry.getValue();
+            if (isV2) {
+                if (channel != null) {
+                    addChannelNameToOperation(channel.get("publish"), channelEntry.getKey());
+                    addChannelNameToOperation(channel.get("subscribe"), channelEntry.getKey());
+                    addOperationType(channel.get("publish"), "publish");
+                    addOperationType(channel.get("subscribe"), "subscribe");
+                    addNormalizedTagName(channel.get("publish"));
+                    addNormalizedTagName(channel.get("subscribe"));
+                    addOperationIdVariants(channel.get("publish"));
+                    addOperationIdVariants(channel.get("subscribe"));
+                    collectMessages(channel.get("publish"));
+                    collectMessages(channel.get("subscribe"));
+                    setHasRuntimeHeaders(channel.get("publish"));
+                    setHasRuntimeHeaders(channel.get("subscribe"));
+                }
             }
+            if (isV3) {
+                // collect channel messages
+                var messages = JSONPath.get(channel, "$.messages[*]", Collections.emptyList());
+                ((Map) channel).put("x--messages", messages);
+            }
+        }
+
+        if(isV3) {
+            var operations = JSONPath.get(apiModel, "$.operations", Collections.<String, Map>emptyMap());
+            for (Map.Entry<String, Map> operationEntry : operations.entrySet()) {
+                operationEntry.getValue().put("operationId", operationEntry.getKey());
+                addOperationIdVariants(operationEntry.getValue());
+                operationEntry.getValue().put("x--messages", JSONPath.get(operationEntry.getValue(), "$.channel.x--messages"));
+            }
+        }
+
+        List<Map<String, Object>> messages = JSONPath.get(apiModel, "$.channels..x--messages[*]");
+        for (Map<String, Object> message : messages) {
+            calculateMessageParamType(message);
         }
 
         Map<String, Map> componentsMessages = JSONPath.get(apiModel, "$.components.messages", Collections.emptyMap());
@@ -125,11 +150,6 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
         Map<String, Map> schemas = JSONPath.get(apiModel, "$.components.schemas", Collections.emptyMap());
         for (Map.Entry<String, Map> entry : schemas.entrySet()) {
             entry.getValue().put("x--schema-name", entry.getKey());
-        }
-
-        List<Map<String, Object>> messages = JSONPath.get(apiModel, "$.channels..x--messages[*]");
-        for (Map<String, Object> message : messages) {
-            calculateMessageParamType(message);
         }
 
         return contextModel;

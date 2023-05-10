@@ -21,7 +21,7 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
     @Test
     public void test_generator_for_asyncapi_schemas() throws Exception {
         Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-events.yml")
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-events.yml")
                 .withTargetFolder("target/zenwave630")
                 .withOption("modelPackage", "io.example.integration.test.with_schemas.model");
 
@@ -32,9 +32,9 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
 
     @Test
     public void test_generator_for_json_schemas() throws Exception {
-        var url = getClass().getClassLoader().getResource("/io/zenwave360/sdk/resources/asyncapi/json-schemas/asyncapi.yml");
+        var url = getClass().getClassLoader().getResource("/io/zenwave360/sdk/resources/asyncapi/v2/v2/json-schemas/asyncapi.yml");
         Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/json-schemas/asyncapi.yml")
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/json-schemas/asyncapi.yml")
                 .withTargetFolder("target/zenwave630");
 
         new MainGenerator().generate(plugin);
