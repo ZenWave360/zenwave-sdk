@@ -1,0 +1,53 @@
+name: build
+
+on:
+  push:
+    branches: [ next ]
+  pull_request:
+    branches: [ next ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: next
+
+      - name: Set up the Java JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+          server-id: ossrh
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+
+      - name: Build and Publish SNAPSHOT to the Maven Central Repository
+        run: mvn -B verify
+
+      - name: Generate JaCoCo Badge
+        id: jacoco
+        uses: cicirello/jacoco-badge-generator@v2
+        with:
+          badges-directory: badges
+          generate-branches-badge: true
+          generate-summary: true
+          jacoco-csv-file: >
+            ./plugins/asyncapi-spring-cloud-streams3/target/site/jacoco/jacoco.csv
+            ./plugins/java-to-jdl/target/site/jacoco/jacoco.csv
+            ./plugins/jdl-backend-application-default/target/site/jacoco/jacoco.csv
+            ./plugins/jdl-openapi-controllers/target/site/jacoco/jacoco.csv
+            ./plugins/jdl-to-openapi/target/site/jacoco/jacoco.csv
+            ./plugins/jdl-to-asyncapi/target/site/jacoco/jacoco.csv
+            ./plugins/openapi-spring-webtestclient/target/site/jacoco/jacoco.csv
+            ./plugins/openapi-rest-assured/target/site/jacoco/jacoco.csv
+            ./zenwave-sdk-cli/target/site/jacoco/jacoco.csv
+
+      - name: Log coverage percentage
+        run: |
+          echo "coverage = ${{ steps.jacoco.outputs.coverage }}"
+          echo "branch coverage = ${{ steps.jacoco.outputs.branches }}"

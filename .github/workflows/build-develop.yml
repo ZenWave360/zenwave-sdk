@@ -2,9 +2,9 @@ name: build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ develop ]
   workflow_dispatch:
 
 jobs:
@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          ref: develop
 
       - name: Checkout badges branch to a badges directory nested inside first checkout
         uses: actions/checkout@v2
@@ -31,7 +33,7 @@ jobs:
           server-password: MAVEN_PASSWORD
 
       - name: Build and Publish SNAPSHOT to the Maven Central Repository
-        run: mvn --batch-mode verify deploy -DupdateReleaseInfo=true
+        run: mvn -B verify deploy -DupdateReleaseInfo=true
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
