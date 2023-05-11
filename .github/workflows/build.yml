@@ -25,7 +25,7 @@ jobs:
           server-password: MAVEN_PASSWORD
 
       - name: Build and Publish SNAPSHOT to the Maven Central
-        run: mvn -B verify deploy
+        run: mvn -B verify deploy -DdeployAtEnd=true
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
