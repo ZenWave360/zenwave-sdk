@@ -110,7 +110,7 @@
                     <mavenExecutorId>forked-path</mavenExecutorId>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
-                    <!--          <arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>-->
+<!--                    <arguments>-DskipTests</arguments>-->
                 </configuration>
                 <dependencies>
                     <dependency>
