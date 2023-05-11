@@ -3,8 +3,8 @@ name: Build
 on:
   push:
     branches: [ develop, next ]
-  pull_request:
-    branches: [ '**' ]
+#  pull_request:
+#    branches: [ '**' ]
   workflow_dispatch:
 
 jobs:
@@ -25,7 +25,7 @@ jobs:
           server-password: MAVEN_PASSWORD
 
       - name: Build and Publish SNAPSHOT to the Maven Central
-        if: ${{ github.event_name != 'pull_request' }}
+        if: ${{ github.event_name == 'push' }}
         run: mvn -B verify deploy -DdeployAtEnd=true
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
@@ -33,9 +33,9 @@ jobs:
           SIGN_KEY: ${{ secrets.SIGN_KEY }}
           SIGN_KEY_PASS: ${{ secrets.SIGN_KEY_PASS }}
 
-      - name: Build and Verify
-        if: ${{ github.event_name == 'pull_request' }}
-        run: mvn -B verify
+#      - name: Build and Verify
+#        if: ${{ github.event_name == 'pull_request' }}
+#        run: mvn -B verify
 
       - name: Generate JaCoCo Badge
         id: jacoco
