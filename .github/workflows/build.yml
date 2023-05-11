@@ -25,12 +25,17 @@ jobs:
           server-password: MAVEN_PASSWORD
 
       - name: Build and Publish SNAPSHOT to the Maven Central
+        if: ${{ github.event_name != 'pull_request' }}
         run: mvn -B verify deploy -DdeployAtEnd=true
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
           SIGN_KEY: ${{ secrets.SIGN_KEY }}
           SIGN_KEY_PASS: ${{ secrets.SIGN_KEY_PASS }}
+
+      - name: Build and Verify
+        if: ${{ github.event_name == 'pull_request' }}
+        run: mvn -B verify
 
       - name: Generate JaCoCo Badge
         id: jacoco
