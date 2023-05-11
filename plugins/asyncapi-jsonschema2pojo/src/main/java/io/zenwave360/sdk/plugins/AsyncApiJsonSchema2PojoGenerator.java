@@ -17,13 +17,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jsonschema2pojo.FileCodeWriterWithEncoding;
-import org.jsonschema2pojo.Jackson2Annotator;
-import org.jsonschema2pojo.Jsonschema2Pojo;
-import org.jsonschema2pojo.SchemaGenerator;
-import org.jsonschema2pojo.SchemaMapper;
-import org.jsonschema2pojo.SchemaStore;
-import org.jsonschema2pojo.SourceType;
+import org.jsonschema2pojo.*;
+import org.jsonschema2pojo.exception.ClassAlreadyExistsException;
 import org.jsonschema2pojo.rules.RuleFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,13 +143,15 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             SourceType sourceType = url.getFile().endsWith(".yml") || url.getFile().endsWith(".yaml") ? YAMLSCHEMA : JSONSCHEMA;
             config.setSourceType(sourceType);
         }
-        Jsonschema2Pojo.generate(config, null);
+        Jsonschema2Pojo.generate(config, ruleLogger);
     }
 
     public void generateFromNativeFormat(JsonSchema2PojoConfiguration config, Map<String, Object> payload, String packageName, String className) throws IOException {
         var json = this.convertToJson(payload, packageName);
 
-        SchemaMapper mapper = new SchemaMapper(new RuleFactory(config, new Jackson2Annotator(config), new SchemaStore()), new SchemaGenerator());
+        var ruleFactory = new RuleFactory(config, new Jackson2Annotator(config), new SchemaStore());
+        ruleFactory.setLogger(ruleLogger);
+        SchemaMapper mapper = new SchemaMapper(ruleFactory, new SchemaGenerator());
         var sourcesWriter = new FileCodeWriterWithEncoding(targetSourceFolder, config.getOutputEncoding());
         var resourcesWriter = new FileCodeWriterWithEncoding(targetSourceFolder, config.getOutputEncoding());
         var codeModel = new JCodeModel();
@@ -174,4 +171,59 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
         return this.jsonMapper.writeValueAsString(jsonObject);
     }
 
+    private RuleLogger ruleLogger = new AbstractRuleLogger() {
+        @Override
+        protected void doDebug(String msg) {
+            log.debug(msg);
+        }
+
+        @Override
+        protected void doError(String msg, Throwable e) {
+            if (e instanceof ClassAlreadyExistsException) {
+                log.debug("Class already exists: {}", ((ClassAlreadyExistsException)e).getExistingClass());
+            } else {
+                log.debug(msg, e);
+            }
+        }
+
+        @Override
+        protected void doInfo(String msg) {
+            log.debug(msg);
+        }
+
+        @Override
+        protected void doTrace(String msg) {
+            log.trace(msg);
+        }
+
+        @Override
+        protected void doWarn(String msg, Throwable e) {
+
+        }
+
+        @Override
+        public boolean isDebugEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isErrorEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isInfoEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isTraceEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isWarnEnabled() {
+            return false;
+        }
+    };
 }

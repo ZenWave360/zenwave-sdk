@@ -19,6 +19,19 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
     }
 
     @Test
+    public void test_generator_for_asyncapi_repeated_enum() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withSpecFile("classpath:asyncapi.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.integration.test.with_schemas.model");
+
+        new MainGenerator().generate(plugin);
+
+        Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/integration/test/with_schemas/model/Email.java").exists());
+        Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/integration/test/with_schemas/model/UserSignedUp.java").exists());
+    }
+
+    @Test
     public void test_generator_for_asyncapi_schemas() throws Exception {
         Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
                 .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-events.yml")
