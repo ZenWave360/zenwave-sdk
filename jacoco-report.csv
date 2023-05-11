@@ -66,9 +66,10 @@ io.github.zenwave360.zenwave-sdk.plugins:jdl-to-openapi,io.zenwave360.sdk.plugin
 io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient,io.zenwave360.sdk.plugins,SpringWebTestClientGenerator.GroupByType,0,27,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient,io.zenwave360.sdk.plugins,SpringWebTestClientGenerator,50,470,0,24,10,71,2,26,2,14
 io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient,io.zenwave360.sdk.plugins,SpringWebTestClientPlugin,14,57,1,5,3,9,1,4,0,2
+io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo,io.zenwave360.sdk.plugins,AsyncApiJsonSchema2PojoGenerator.new AbstractRuleLogger() {...},46,8,2,0,15,2,10,2,9,2
 io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo,io.zenwave360.sdk.plugins,AsyncApiJsonSchema2PojoPlugin,4,20,0,0,1,3,1,1,1,1
 io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo,io.zenwave360.sdk.plugins,JsonSchema2PojoConfiguration,377,521,11,27,141,142,88,64,78,55
-io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo,io.zenwave360.sdk.plugins,AsyncApiJsonSchema2PojoGenerator,41,307,8,8,7,60,7,10,1,8
+io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo,io.zenwave360.sdk.plugins,AsyncApiJsonSchema2PojoGenerator,41,320,8,8,7,63,7,10,1,8
 io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured,io.zenwave360.sdk.plugins,RestAssuredPlugin,0,48,0,2,0,7,0,3,0,2
 io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured,io.zenwave360.sdk.plugins,RestAssuredGenerator,5,446,0,20,2,69,1,25,1,15
 io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured,io.zenwave360.sdk.plugins,RestAssuredGenerator.GroupByType,0,21,0,0,0,2,0,1,0,1
