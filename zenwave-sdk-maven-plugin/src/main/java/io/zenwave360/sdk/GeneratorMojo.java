@@ -1,6 +1,7 @@
 package io.zenwave360.sdk;
 
 import java.io.File;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
@@ -107,9 +108,9 @@ public class GeneratorMojo extends AbstractMojo {
                 projectClassLoader = new URLClassLoader(classpathFiles.toArray(new URL[0]), this.getClass().getClassLoader());
             }
 
-            String specFile = inputSpec.startsWith("classpath:") ? inputSpec : new File(inputSpec).getAbsolutePath();
+            String specFile = inputSpec.startsWith("classpath:") ? inputSpec : new File(inputSpec).toURI().toString();
             Plugin plugin = Plugin.of(this.generatorName)
-                    .withSpecFile(escapeSpaces(specFile))
+                    .withSpecFile(specFile)
                     .withTargetFolder(targetFolder.getAbsolutePath())
                     .withProjectClassLoader(projectClassLoader)
                     .withOptions(options);
@@ -123,10 +124,6 @@ public class GeneratorMojo extends AbstractMojo {
             getLog().error(e);
             throw new MojoExecutionException("Code generation failed. See above for the full exception.");
         }
-    }
-      
-    protected String escapeSpaces(String uri) {
-        return uri.replace(" ", "\\ ");
     }
 
     protected Map<String, String> buildConfigOptions(String configOptions) {
