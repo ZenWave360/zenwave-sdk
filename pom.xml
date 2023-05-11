@@ -109,7 +109,7 @@
                     <mavenExecutorId>forked-path</mavenExecutorId>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
-                    <arguments>-DskipTests</arguments>
+<!--                    <arguments>-DskipTests</arguments>-->
                 </configuration>
                 <dependencies>
                     <dependency>
