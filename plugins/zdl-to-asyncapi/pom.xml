@@ -8,12 +8,12 @@
     </parent>
     <name>${project.groupId}:${project.artifactId}</name>
     <groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
-    <artifactId>zdlto-async-apiplugin</artifactId>
+    <artifactId>zdl-to-asyncapi</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
-            <groupId>io.github.zenwave360</groupId>
+            <groupId>io.github.zenwave360.zenwave-sdk</groupId>
             <artifactId>zdl-jvm</artifactId>
             <version>${zdl-jvm.version}</version>
         </dependency>
