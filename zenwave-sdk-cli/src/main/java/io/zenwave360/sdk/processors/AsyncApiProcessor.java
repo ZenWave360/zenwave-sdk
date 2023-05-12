@@ -99,6 +99,10 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
             }
         }
 
+        Map<String, Map> schemas = JSONPath.get(apiModel, "$.components.schemas", Collections.emptyMap());
+        for (Map.Entry<String, Map> entry : schemas.entrySet()) {
+            entry.getValue().put("x--schema-name", entry.getKey());
+        }
 
         Map<String, Object> channels = JSONPath.get(apiModel, "$.channels", Collections.emptyMap());
         for (Map.Entry<String, Object> channelEntry : channels.entrySet()) {
@@ -145,11 +149,6 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
             if (!message.getValue().containsKey("name")) {
                 message.getValue().put("name", message.getKey());
             }
-        }
-
-        Map<String, Map> schemas = JSONPath.get(apiModel, "$.components.schemas", Collections.emptyMap());
-        for (Map.Entry<String, Map> entry : schemas.entrySet()) {
-            entry.getValue().put("x--schema-name", entry.getKey());
         }
 
         return contextModel;
