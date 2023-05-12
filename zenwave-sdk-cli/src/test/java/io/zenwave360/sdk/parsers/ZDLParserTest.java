@@ -19,7 +19,7 @@ public class ZDLParserTest {
     @Test
     public void testParseZDL() throws URISyntaxException, IOException {
         String targetProperty = "model";
-        ZDLParser parser = new ZDLParser().withSpecFile("classpath:io/zenwave360/sdk/resources/zdl/all-features.zdl").withTargetProperty(targetProperty);
+        ZDLParser parser = new ZDLParser().withSpecFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl").withTargetProperty(targetProperty);
         long startTime = System.currentTimeMillis();
         Map<String, Object> model = (Map) parser.parse().get(targetProperty);
         System.out.println("ZDLParser load time: " + (System.currentTimeMillis() - startTime));
