@@ -17,6 +17,7 @@ import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractJDLGenerator;
 import io.zenwave360.sdk.generators.JDLEntitiesToAvroConverter;
 import io.zenwave360.sdk.generators.JDLEntitiesToSchemasConverter;
+import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateInput;
@@ -37,6 +38,9 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
     }
 
     public String sourceProperty = "jdl";
+
+    @DocumentedOption(description = "Target AsyncAPI version.")
+    public AsyncapiVersionType asyncapiVersion = AsyncapiVersionType.v2;
 
     @DocumentedOption(description = "Entities to generate code for")
     public List<String> entities = new ArrayList<>();
@@ -76,7 +80,8 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "Package name for generated Avro Schemas (.avsc)")
     public String avroPackage = "io.example.domain.model";
 
-    public String defaultSchemaFormat = "application/vnd.aai.asyncapi;version=2.4.0";
+    public String defaultSchemaFormatV2 = "application/vnd.aai.asyncapi;version=2.6.0";
+    public String defaultSchemaFormatV3 = "application/vnd.aai.asyncapi;version=3.0.0";
     public String avroSchemaFormat = "application/vnd.apache.avro+json;version=1.9.0";
 
     public JDLToAsyncAPIGenerator withSourceProperty(String sourceProperty) {
@@ -86,7 +91,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
-    private final TemplateInput jdlToAsyncAPITemplate = new TemplateInput("io/zenwave360/sdk/plugins/AsyncAPIToJDLGenerator/JDLToAsyncAPI.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
+    private final TemplateInput jdlToAsyncAPITemplate = new TemplateInput("io/zenwave360/sdk/plugins/AsyncAPIToJDLGenerator/JDLToAsyncAPI{{asyncapiVersion}}.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
 
     protected Map<String, Object> getJDLModel(Map<String, Object> contextModel) {
         return (Map) contextModel.get(sourceProperty);
@@ -219,7 +224,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         model.putAll(this.asConfigurationMap());
         model.put("context", contextModel);
         model.put("jdlModel", jdlModel);
-        model.put("schemaFormatString", schemaFormat == SchemaFormat.schema ? defaultSchemaFormat : avroSchemaFormat);
+        model.put("schemaFormatString", schemaFormat == SchemaFormat.schema ? (asyncapiVersion == AsyncapiVersionType.v3? defaultSchemaFormatV3 : defaultSchemaFormatV2) : avroSchemaFormat);
         model.put("schemasAsString", schemasAsString);
         return handlebarsEngine.processTemplate(model, template).get(0);
     }

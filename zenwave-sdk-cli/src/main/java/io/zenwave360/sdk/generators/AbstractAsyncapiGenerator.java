@@ -2,6 +2,7 @@ package io.zenwave360.sdk.generators;
 
 import java.util.*;
 
+import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
 import io.zenwave360.sdk.utils.JSONPath;
 import org.apache.commons.lang3.ObjectUtils;
 
@@ -65,6 +66,17 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
     }
 
     public Map<String, List<Map<String, Object>>> getOperationsGroupedByTag(Model apiModel, AsyncapiOperationType operationType) {
+        boolean isV2 = AsyncapiVersionType.isV2(apiModel);
+        boolean isV3 = AsyncapiVersionType.isV3(apiModel);
+        if(isV2) {
+            return getOperationsGroupedByTagV2(apiModel, operationType);
+        } else if(isV3) {
+            return getOperationsGroupedByTagV3(apiModel, operationType);
+        }
+        return null;
+    }
+
+    public Map<String, List<Map<String, Object>>> getOperationsGroupedByTagV2(Model apiModel, AsyncapiOperationType operationType) {
         Map<String, List<Map<String, Object>>> operationsByTag = new HashMap<>();
         List<Map<String, Object>> operations = JSONPath.get(apiModel, "$.channels[*].*");
         for (Map<String, Object> operation : operations) {
@@ -79,9 +91,31 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
         return operationsByTag;
     }
 
+    public Map<String, List<Map<String, Object>>> getOperationsGroupedByTagV3(Model apiModel, AsyncapiOperationType operationType) {
+        Map<String, List<Map<String, Object>>> operationsByTag = new HashMap<>();
+        List<Map<String, Object>> operations = JSONPath.get(apiModel, "$.operations[*]");
+        for (Map<String, Object> operation : operations) {
+            if (matchesFilters(operation, operationType)) {
+                String tag = (String) ObjectUtils.firstNonNull(operation.get("x--normalizedTagName"), "DefaultService");
+                if (!operationsByTag.containsKey(tag)) {
+                    operationsByTag.put(tag, new ArrayList<>());
+                }
+                operationsByTag.get(tag).add(operation);
+            }
+        }
+        return operationsByTag;
+    }
+
     public boolean matchesFilters(Map<String, Object> operation, AsyncapiOperationType operationType) {
-        var operationOperationType = AsyncapiOperationType.valueOf(operation.get("x--operationType").toString());
-        return operationOperationType == operationType && matchesBindingTypes(operation, bindingTypes) && !isSkipOperation(operation);
+        var operationOperationType = getOperationType(operation);
+        return operationType.isEquivalent(operationOperationType) && matchesBindingTypes(operation, bindingTypes) && !isSkipOperation(operation);
+    }
+
+    private AsyncapiOperationType getOperationType(Map<String, Object> operation) {
+        var v2OperationType = operation.get("x--operationType");
+        var v3Action = operation.get("action");
+        var operationType = ObjectUtils.firstNonNull(v2OperationType, v3Action);
+        return operationType != null? AsyncapiOperationType.valueOf(operationType.toString()) : null;
     }
 
     /**
@@ -132,7 +166,7 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
      * @return
      */
     public boolean isProducer(AsyncapiRoleType roleType, AsyncapiOperationType operationType) {
-        if ((AsyncapiRoleType.provider == roleType && AsyncapiOperationType.publish == operationType) || (AsyncapiRoleType.client == roleType && AsyncapiOperationType.subscribe == operationType)) {
+        if ((AsyncapiRoleType.provider == roleType && AsyncapiOperationType.publish.isEquivalent(operationType)) || (AsyncapiRoleType.client == roleType && AsyncapiOperationType.subscribe.isEquivalent(operationType))) {
             return true;
         }
         return false;

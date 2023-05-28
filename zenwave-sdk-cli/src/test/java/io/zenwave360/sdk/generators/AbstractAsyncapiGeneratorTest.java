@@ -48,7 +48,7 @@ public class AbstractAsyncapiGeneratorTest {
 
     @Test
     public void test_filter_operations_for_provider_nobindings() throws Exception {
-        Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-circular-refs.yml");
+        Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-circular-refs.yml");
         AbstractAsyncapiGenerator asyncapiGenerator = newAbstractAsyncapiGenerator();
         asyncapiGenerator.role = AsyncapiRoleType.provider;
         Map<String, List<Map<String, Object>>> consumerOperations = asyncapiGenerator.getSubscribeOperationsGroupedByTag(model);
@@ -60,7 +60,7 @@ public class AbstractAsyncapiGeneratorTest {
 
     @Test
     public void test_filter_operations_for_provider_with_matching_bindings() throws Exception {
-        Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-circular-refs.yml");
+        Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-circular-refs.yml");
         AbstractAsyncapiGenerator asyncapiGenerator = newAbstractAsyncapiGenerator();
         asyncapiGenerator.role = AsyncapiRoleType.provider;
         asyncapiGenerator.bindingTypes = Arrays.asList("kafka");
@@ -72,7 +72,7 @@ public class AbstractAsyncapiGeneratorTest {
 
     @Test
     public void test_filter_operations_for_provider_with_no_matching_bindings() throws Exception {
-        Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-circular-refs.yml");
+        Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-circular-refs.yml");
         AbstractAsyncapiGenerator asyncapiGenerator = newAbstractAsyncapiGenerator();
         asyncapiGenerator.role = AsyncapiRoleType.provider;
         asyncapiGenerator.bindingTypes = Arrays.asList("nomatchingbinding");
