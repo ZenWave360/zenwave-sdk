@@ -38,7 +38,7 @@ public class MainGeneratorTest {
     public void testGenerator() throws Exception {
         // File file = new File(getClass().getClassLoader().getResource("io/zenwave360/sdk/parsers/asyncapi-circular-refs.yml").toURI());
         Plugin plugin = new Plugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-circular-refs.yml")
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-circular-refs.yml")
                 .withTargetFolder("target/zenwave630/out")
                 .withChain(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class)
                 .withOption("forceOverwrite", true);
@@ -53,7 +53,7 @@ public class MainGeneratorTest {
         // File file = new File(getClass().getClassLoader().getResource("io/zenwave360/sdk/parsers/asyncapi-circular-refs.yml").toURI());
         Plugin plugin = new Plugin()
                 .withTargetFolder("target/zenwave630/out")
-                .withOption("0.specFile", "classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-circular-refs.yml")
+                .withOption("0.specFile", "classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-circular-refs.yml")
                 .withOption("1.specFile", "classpath:io/zenwave360/sdk/resources/openapi/openapi-petstore.yml")
                 .withOption("2.specFile", "classpath:io/zenwave360/sdk/resources/jdl/21-points.jh")
                 .withOption("0.targetProperty", "asyncapi")

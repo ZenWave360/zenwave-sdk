@@ -36,8 +36,8 @@ public class SpringCloudStreams3GeneratorTest {
     @Test
     public void test_generator_provider_for_events() throws Exception {
         Plugin plugin = new SpringCloudStreams3Plugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-events.yml")
-                .withTargetFolder("target/zenwave630/out")
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-events.yml")
+                .withTargetFolder("target/zenwave630/out/v2")
                 .withOption("apiPackage", "io.example.integration.test.api.provider_for_events")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
                 .withOption("role", AsyncapiRoleType.provider)
@@ -53,8 +53,8 @@ public class SpringCloudStreams3GeneratorTest {
     @Test
     public void test_generator_provider_for_events_with_envelope() throws Exception {
         Plugin plugin = new SpringCloudStreams3Plugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-events.yml")
-                .withTargetFolder("target/zenwave630/out")
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-events.yml")
+                .withTargetFolder("target/zenwave630/out/v2")
                 .withOption("apiPackage", "io.example.integration.test.api.client_for_events_with_envelope")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
                 .withOption("useEnterpriseEnvelope", true)
@@ -72,8 +72,8 @@ public class SpringCloudStreams3GeneratorTest {
     @Test
     public void test_generator_provider_for_commands_imperative() throws Exception {
         Plugin plugin = new SpringCloudStreams3Plugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-commands.yml")
-                .withTargetFolder("target/zenwave630/out")
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-commands.yml")
+                .withTargetFolder("target/zenwave630/out/v2")
                 .withOption("apiPackage", "io.example.integration.test.api.provider_for_commands_imperative")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
                 .withOption("role", AsyncapiRoleType.provider);
@@ -88,8 +88,8 @@ public class SpringCloudStreams3GeneratorTest {
     @Test
     public void test_generator_provider_for_commands_imperative_expose_message() throws Exception {
         Plugin plugin = new SpringCloudStreams3Plugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-commands.yml")
-                .withTargetFolder("target/zenwave630/out")
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-commands.yml")
+                .withTargetFolder("target/zenwave630/out/v2")
                 .withOption("apiPackage", "io.example.integration.test.api.provider_for_commands_imperative_expose_message")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
                 .withOption("role", AsyncapiRoleType.provider)
@@ -105,8 +105,8 @@ public class SpringCloudStreams3GeneratorTest {
     @Test
     public void test_generator_provider_for_commands_reactive() throws Exception {
         Plugin plugin = new SpringCloudStreams3Plugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-commands.yml")
-                .withTargetFolder("target/zenwave630/out")
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-commands.yml")
+                .withTargetFolder("target/zenwave630/out/v2")
                 .withOption("apiPackage", "io.example.integration.test.api.provider_for_commands_reactive")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
                 .withOption("role", AsyncapiRoleType.provider)
@@ -122,8 +122,8 @@ public class SpringCloudStreams3GeneratorTest {
     @Test
     public void test_generator_provider_for_commands_reactive_expose_message() throws Exception {
         Plugin plugin = new SpringCloudStreams3Plugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-commands.yml")
-                .withTargetFolder("target/zenwave630/out")
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-commands.yml")
+                .withTargetFolder("target/zenwave630/out/v2")
                 .withOption("apiPackage", "io.example.integration.test.api.provider_for_commands_reactive_expose_message")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
                 .withOption("role", AsyncapiRoleType.provider)
@@ -140,8 +140,8 @@ public class SpringCloudStreams3GeneratorTest {
     @Test
     public void test_generator_client_for_commands() throws Exception {
         Plugin plugin = new SpringCloudStreams3Plugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-commands.yml")
-                .withTargetFolder("target/zenwave630/out")
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-commands.yml")
+                .withTargetFolder("target/zenwave630/out/v2")
                 .withOption("apiPackage", "io.example.integration.test.api.client_for_commands")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
                 .withOption("role", AsyncapiRoleType.client);
@@ -156,8 +156,8 @@ public class SpringCloudStreams3GeneratorTest {
     @Test
     public void test_generator_client_for_events_imperative() throws Exception {
         Plugin plugin = new SpringCloudStreams3Plugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-events.yml")
-                .withTargetFolder("target/zenwave630/out")
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-events.yml")
+                .withTargetFolder("target/zenwave630/out/v2")
                 .withOption("apiPackage", "io.example.integration.test.api.client_for_events_imperative")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
                 .withOption("role", AsyncapiRoleType.client)
@@ -173,8 +173,8 @@ public class SpringCloudStreams3GeneratorTest {
     @Test
     public void test_generator_client_for_events_imperative_expose_message() throws Exception {
         Plugin plugin = new SpringCloudStreams3Plugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-events.yml")
-                .withTargetFolder("target/zenwave630/out")
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-events.yml")
+                .withTargetFolder("target/zenwave630/out/v2")
                 .withOption("apiPackage", "io.example.integration.test.api.client_for_events_imperative_expose_message")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
                 .withOption("role", AsyncapiRoleType.client)
@@ -191,8 +191,8 @@ public class SpringCloudStreams3GeneratorTest {
     @Test
     public void test_generator_client_for_events_reactive() throws Exception {
         Plugin plugin = new SpringCloudStreams3Plugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-commands.yml")
-                .withTargetFolder("target/zenwave630/out")
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-commands.yml")
+                .withTargetFolder("target/zenwave630/out/v2")
                 .withOption("apiPackage", "io.example.integration.test.api.client_for_events_reactive")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
                 .withOption("role", AsyncapiRoleType.client)
@@ -208,8 +208,8 @@ public class SpringCloudStreams3GeneratorTest {
     @Test
     public void test_generator_client_for_events_reactive_expose_message() throws Exception {
         Plugin plugin = new SpringCloudStreams3Plugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/asyncapi-commands.yml")
-                .withTargetFolder("target/zenwave630/out")
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-commands.yml")
+                .withTargetFolder("target/zenwave630/out/v2")
                 .withOption("apiPackage", "io.example.integration.test.api.client_for_events_reactive_expose_message")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
                 .withOption("role", AsyncapiRoleType.client)
