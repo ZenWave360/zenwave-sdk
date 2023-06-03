@@ -24,7 +24,7 @@ public class JDLProcessorTest {
     @Test
     public void testProcessJDL_WithSemanticAnnotations() throws Exception {
         var model = loadJDL("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl");
-        List entitiesWithCriteria = JSONPath.get(model, "$..[?(@.options.searchCriteriaObject)]");
+        List entitiesWithCriteria = JSONPath.get(model, "$.jdl.entities[*][?(@.options.searchCriteriaObject)]");
         Assertions.assertFalse(entitiesWithCriteria.isEmpty());
         Assertions.assertEquals(2, entitiesWithCriteria.size());
         Assertions.assertTrue(containsEntity(entitiesWithCriteria, "Customer"));
@@ -34,7 +34,7 @@ public class JDLProcessorTest {
     @Test
     public void testProcessJDL_Relational() throws Exception {
         var model = loadJDL("classpath:io/zenwave360/sdk/resources/jdl/orders-model-relational.jdl");
-        List entitiesWithCriteria = JSONPath.get(model, "$..[?(@.options.searchCriteriaObject)]");
+        List entitiesWithCriteria = JSONPath.get(model, "$.jdl.entities[*][?(@.options.searchCriteriaObject)]");
         Assertions.assertFalse(entitiesWithCriteria.isEmpty());
         Assertions.assertEquals(2, entitiesWithCriteria.size());
         Assertions.assertTrue(containsEntity(entitiesWithCriteria, "Customer"));

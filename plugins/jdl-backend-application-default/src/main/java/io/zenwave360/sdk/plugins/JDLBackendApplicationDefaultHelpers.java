@@ -22,6 +22,36 @@ public class JDLBackendApplicationDefaultHelpers {
         this.generator = generator;
     }
 
+    public boolean isCrudMethod(String crudMethodPrefix, Options options) {
+        var entity = (Map<String, Object>) options.hash("entity");
+        var entityName = (String) entity.get("name");
+        var entityNamePlural = (String) entity.get("classNamePlural");
+        var method = (Map<String, Object>) options.hash("method");
+        var methodName = (String) method.get("name");
+        var isArray = (Boolean) method.getOrDefault("returnTypeIsArray", false);
+        var entityMethodSuffix = isArray ? entityNamePlural : entityName;
+        return methodName.equals(crudMethodPrefix + entityMethodSuffix);
+    }
+
+    public String returnType(Map<String, Object> method, Options options) {
+        var methodName = (String) method.get("name");
+        var returnType = method.get("returnType");
+        var returnTypeIsArray = (Boolean) method.getOrDefault("returnTypeIsArray", false);
+        if (returnType == null) {
+            return "void";
+        }
+        if(methodName.startsWith("create")) {
+            return (String) returnType;
+        }
+        if(returnTypeIsArray) {
+            if(JSONPath.get(method, "options.pageable", false)) {
+                return String.format("Page<%s>", returnType);
+            }
+            return String.format("List<%s>", returnType);
+        }
+        return String.format("Optional<%s>", returnType);
+    }
+
     public String fieldType(Object context, Options options) {
         Map field = (Map) context;
         String type = javaType(field, options);

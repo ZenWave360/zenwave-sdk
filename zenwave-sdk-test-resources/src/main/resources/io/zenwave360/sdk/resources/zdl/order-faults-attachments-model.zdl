@@ -1,0 +1,63 @@
+
+@aggregate
+@auditing
+entity Order {
+  businessId OrderBusinessId {
+    businessUnit String required
+    orderId String required
+    orderFaultType OrderFaultType
+  } required unique
+
+  supplierId String /** supplier id */
+  supplierName String
+  orderDate LocalDate
+  section String
+  status OrderStatus
+
+  attachments AttachmentFile[]  {
+    documentManagerId String
+    filename String
+    mimetype String
+    url String
+    orderLineIds String[]
+  }
+}
+
+enum OrderStatus {  OPEN,  CLOSED }
+
+enum OrderFaultType { TIME, QUALITY }
+
+//========================================
+
+/**
+* Service for Order Attachments.
+*/
+@rest("/order-attachments")
+service AttachmentService for (Order) {
+
+  @post("/{businessUnit}/{orderId}")
+  uploadFile(AttachmentInput) Order
+
+  @get("/{businessUnit}/{orderId}")
+  listAttachmentFiles(OrderBusinessId) AttachmentFile[]
+
+  @get("/{businessUnit}/{orderId}/{documentManagerId}")
+  downloadAttachmentFile(AttachmentFileId) AttachmentFileOutput
+}
+
+@copy(Order)
+input AttachmentInput {
+}
+
+input AttachmentFileId {
+  businessUnit String required
+  documentManagerId String required
+  orderId String
+}
+
+output AttachmentFileOutput {
+    documentManagerId String
+    filename String
+    mimetype String
+    contents Blob
+}

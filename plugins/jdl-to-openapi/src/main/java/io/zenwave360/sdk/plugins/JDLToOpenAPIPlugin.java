@@ -12,7 +12,7 @@ public class JDLToOpenAPIPlugin extends Plugin {
 
     public JDLToOpenAPIPlugin() {
         super();
-        withChain(JDLParser.class, JDLProcessor.class, JDLToOpenAPIGenerator.class, TemplateFileWriter.class);
+        withChain(JDLParser.class, JDLProcessor.class, PathsProcessor.class, JDLToOpenAPIGenerator.class, TemplateFileWriter.class);
     }
 
     @Override

@@ -11,56 +11,9 @@ import org.springframework.data.domain.Pageable;
  */
 public interface {{service.name}} {
 
-{{#each entities as |entity|}}
-    // {{entity.name}}
-
-    /**
-     * Creates a {{entity.instanceName}}.
-     *
-     * @param {{entity.instanceName}} the entity to save.
-     * @return the persisted entity.
-     */
-    {{entity.className}} create{{entity.className}}({{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}});
-
-    /**
-     * Updates a {{entity.instanceName}}.
-     *
-     * @param {{entity.instanceName}} the entity to update.
-     * @return the persisted entity.
-     */
-    Optional<{{entity.className}}> update{{entity.className}}({{idJavaType}} id, {{entity.className}}{{inputDTOSuffix}} {{entity.instanceName}});
-
-    /**
-     * Get all the {{entity.classNamePlural}}.
-     *
-     * @param criteria the criteria with pagination information.
-     * @return the list of entities.
-     */
-    Page<{{entity.className}}> list{{entity.classNamePlural}}(Pageable pageable);
-
-    {{~#if entity.options.searchCriteria}}
-    /**
-     * Get all the {{entity.classNamePlural}} matching the search criteria.
-     *
-     * @param criteria the criteria with pagination information.
-     * @return the list of entities.
-     */
-    Page<{{entity.className}}> search{{entity.classNamePlural}}({{criteriaClassName entity}} criteria, Pageable pageable);
-    {{~/if}}
-
-    /**
-     * Get the "id" {{entity.instanceName}}.
-     *
-     * @param id the id of the entity.
-     * @return the entity.
-     */
-    Optional<{{entity.className}}> get{{entity.className}}({{idJavaType}} id);
-
-    /**
-     * Delete the "id" {{entity.instanceName}}.
-     *
-     * @param id the id of the entity.
-     */
-    void delete{{entity.className}}({{idJavaType}} id);
+{{#each service.methods as |method|}}
+    {{~> (partial '../implementation/partials/serviceMethodJavadoc')}};
+    {{~> (partial '../implementation/partials/serviceMethodSignature')}};
 {{/each}}
+
 }

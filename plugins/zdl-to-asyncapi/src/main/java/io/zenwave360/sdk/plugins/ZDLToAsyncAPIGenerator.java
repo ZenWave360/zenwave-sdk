@@ -2,6 +2,7 @@ package io.zenwave360.sdk.plugins;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -88,7 +89,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         var methodsWithCommands = JSONPath.get(model, "$.services[*].methods[*][?(@.options.asyncapi)]", Collections.<Map>emptyList());
         for (Map method : methodsWithCommands) {
             var commandName = "do" + asJavaTypeName((String) method.get("name"));
-            var channelName = JSONPath.get(method, "$.options.asyncapi", commandName + "Channel");
+            var channelName = JSONPath.get(method, "$.options.asyncapi.operationId", commandName + "Channel");
             var topic = JSONPath.get(method, "$.options.topic");
             var channel = (Map) channels.getOrDefault(channelName, Maps.of("address", "add topic here"));
             if(topic != null) {
@@ -124,7 +125,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
         var methodsWithEvents = JSONPath.get(model, "$.services[*].methods[*][?(@.withEvents.length() > 0)]", Collections.<Map>emptyList());
         for (Map<String, Object> method : methodsWithEvents) {
-            var withEvents = (List) method.get("withEvents");
+            var withEvents = allEvents((List) method.getOrDefault("withEvents", List.of())); // flatten list
             for (int i = 0; i < withEvents.size(); i++) {
                 String withEvent = (String) withEvents.get(i);
                 var operationId = "on" + asJavaTypeName((String) method.get("name"));
@@ -162,6 +163,18 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
         outputList.add(generateTemplateOutput(contextModel, jdlToAsyncAPITemplate, model, asyncAPISchemasString));
         return outputList;
+    }
+
+    protected List<String> allEvents(List events) {
+        List<String> allEvents = new ArrayList<>();
+        for (Object event : events) {
+            if(event instanceof String) {
+                allEvents.add((String) event);
+            } else if(event instanceof List) {
+                allEvents.addAll((Collection<? extends String>) event);
+            }
+        }
+        return allEvents;
     }
 
     protected List<Map<String, Object>> filterSchemasToInclude(Map<String, Object> model) {

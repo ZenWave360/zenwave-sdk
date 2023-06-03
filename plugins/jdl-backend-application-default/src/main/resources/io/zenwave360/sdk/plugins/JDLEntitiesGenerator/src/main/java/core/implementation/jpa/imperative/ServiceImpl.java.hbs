@@ -47,53 +47,11 @@ public class {{service.name}}Impl implements {{service.name}} {
         {{~/joinWithTemplate~}}
     }
 
-{{#each entities as |entity|}}
-    // {{entity.name}}
-
-    @Override
-    public {{entity.className}} create{{entity.className}}({{entity.className}}{{inputDTOSuffix}} input) {
-        log.debug("Request to save {{entity.className}}: {}", input);
-        var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), input);
-        {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}});
-        // TODO: you may need to reload the entity here to fetch all the relationships
-        return {{entity.instanceName}};
-    }
-
-    @Override
-    public Optional<{{entity.className}}> update{{entity.className}}({{idJavaType}} id, {{entity.className}}{{inputDTOSuffix}} input) {
-        log.debug("Request to update {{entity.className}}: {}", input);
-        var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id);
-        {{entity.instanceName}} = {{entity.instanceName}}.map(existing{{entity.instanceName}} -> {{entity.instanceName}}Mapper.update(existing{{entity.instanceName}}, input));
-        // saving is unnecessary: https://vladmihalcea.com/best-spring-data-jparepository/
-        return {{entity.instanceName}};
-    }
-
-    @Override
-    public Page<{{entity.className}}> list{{entity.classNamePlural}}(Pageable pageable) {
-        log.debug("Request list of {{entity.classNamePlural}}: {}", pageable);
-        return {{entity.instanceName}}Repository.findAll(pageable);
-    }
-
-    {{~#if entity.options.searchCriteria}}
-    @Override
-    public Page<{{entity.className}}> search{{entity.classNamePlural}}({{criteriaClassName entity}} criteria, Pageable pageable) {
-        log.debug("Request to search {{entity.classNamePlural}}: {} - {}", criteria, pageable);
-        // TODO implement this search by criteria
-        return {{entity.instanceName}}Repository.findAll(pageable);
-    }
-    {{~/if}}
-
-    @Override
-    public Optional<{{entity.className}}> get{{entity.className}}({{idJavaType}} id) {
-        log.debug("Request to get {{entity.className}} : {}", id);
-        return {{entity.instanceName}}Repository.findById(id);
-    }
-
-    @Override
-    @Transactional(readOnly = false)
-    public void delete{{entity.className}}({{idJavaType}} id) {
-        log.debug("Request to delete {{entity.className}} : {}", id);
-        {{entity.instanceName}}Repository.deleteById(id);
+{{#each service.methods as |method|}}
+    {{~> (partial '../../partials/jpaMethodAnnotations')~}}
+    {{~> (partial '../../partials/serviceMethodSignature')}} {
+        {{~> (partial '../../partials/jpaMethodBody')~}}
     }
 {{/each}}
+
 }

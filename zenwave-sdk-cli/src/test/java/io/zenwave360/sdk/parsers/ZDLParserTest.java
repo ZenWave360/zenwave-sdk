@@ -25,7 +25,7 @@ public class ZDLParserTest {
         System.out.println("ZDLParser load time: " + (System.currentTimeMillis() - startTime));
         Assertions.assertNotNull(model);
         Assertions.assertEquals("String", JSONPath.get(model, "$.entities.Customer.fields.username.type"));
-        Assertions.assertEquals("Customer", JSONPath.get(model, "$.services.CustomerService.methods.createCustomer.parameter"));
+        Assertions.assertEquals("CustomerInput", JSONPath.get(model, "$.services.CustomerService.methods.createCustomer.parameter"));
     }
 
     @Test

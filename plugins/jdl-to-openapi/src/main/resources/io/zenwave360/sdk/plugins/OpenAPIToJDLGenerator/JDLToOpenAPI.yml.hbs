@@ -2,122 +2,74 @@ openapi: 3.0.1
 info:
   title: Zenwave 360 Generated API
   version: 0.0.1
+  description: "Zenwave 360 Generated API"
+  contact:
+    email: email@domain.com
 servers:
-  - url: http://localhost:8080/api/
+  - url: http://localhost:8080/api
 tags:
   - name: "Default"
 {{~#each jdlModel.serviceNames as |serviceName|}}
   - name: "{{asTagName serviceName}}"
 {{~/each}}
 
-paths:
-{{~#each jdlModel.entities as |entity|}}
-  {{~#unless (skipOperations entity)}}
-{{~#if entity.options.searchCriteria}}
-  /{{entity.kebabCasePlural}}/search:
-    post:
-      summary: Search {{entity.classNamePlural}}
-      operationId: search{{entity.classNamePlural}}
-      tags: [{{asTagName entity.options.service}}]
-      parameters:
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/sort'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/{{entity.options.searchCriteria}}"
-      responses:
-        "200":
-          description: {{entity.classNamePlural}}
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/{{entity.className}}Paginated"
-{{~/if}}
-  /{{entity.kebabCasePlural}}:
-    get:
-      summary: Find {{entity.classNamePlural}}
-      operationId: list{{entity.classNamePlural}}
-      tags: [{{asTagName entity.options.service}}]
-      parameters:
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/sort'
-      responses:
-        "200":
-          description: {{entity.classNamePlural}}
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/{{entity.className}}Paginated"
-    post:
-      summary: Create {{entity.className}}
-      operationId: create{{entity.className}}
-      tags: [{{asTagName entity.options.service}}]
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/{{entity.className}}"
-      responses:
-        "201":
-          description: {{entity.className}}
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/{{entity.className}}"
 
-  /{{entity.kebabCasePlural}}/{id}:
-    parameters:
-    - name: id
-      in: path
-      description: {{entity.className}} id
-      required: true
-      schema:
-        type: {{idType}}
-        {{~#if idTypeFormat}}
-        format: {{idTypeFormat}}
+paths:
+{{~#each jdlModel.services as |service|}}
+  {{~#if service.isLegacy}}
+    {{~> (partial 'legacy')~}}
+  {{~else}}
+  {{~#each service.paths as |path|}}
+  {{{@key}}}:
+    {{~#each path as |operation|}}
+    {{{@key}}}:
+      operationId: {{operation.operationId}}
+      description: "{{defaultIfEmpty operation.summary operation.operationId}}"
+      tags: [{{#joinWithTemplate operation.tags delimiter=", " as |tag|}}{{asTagName tag}}{{/joinWithTemplate}}]
+      {{~#if operation.hasParams}}
+      parameters:
+        {{~#each operation.pathParams as |pathParam|}}
+        - name: "{{pathParam}}"
+          in: path
+          required: true
+          schema:
+            type: string
+        {{~/each}}
+        {{~#each path.params as |param|}}
+        - name: "{{param}}"
+          in: query
+          schema:
+            type: string
+        {{~/each}}
+        {{~#if operation.pageable}}
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/sort"
         {{~/if}}
-    get:
-      summary: Get {{entity.className}} by id
-      operationId: get{{entity.className}}
-      tags: [{{asTagName entity.options.service}}]
-      responses:
-        "200":
-          description: {{entity.className}}
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/{{entity.className}}"
-    put:
-      summary: Update {{entity.className}}
-      operationId: update{{entity.className}}
-      tags: [{{asTagName entity.options.service}}]
+      {{~/if}}
+      {{~#if operation.requestBody}}
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/{{entity.className}}"
+              $ref: "#/components/schemas/{{operation.requestBody}}"
+      {{~/if}}
+      {{~#if operation.responseBody}}
       responses:
-        "200":
-          description: {{entity.className}}
+        "{{httpResponseStatus operation}}":
+          description: "OK"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/{{entity.className}}"
-    delete:
-      summary: Delete {{entity.className}}
-      operationId: delete{{entity.className}}
-      tags: [{{asTagName entity.options.service}}]
-      responses:
-        "204":
-          description: {{entity.className}} deleted
-  {{/unless}}
-{{/each~}}
+                $ref: "#/components/schemas/{{operation.responseBody}}{{responseBodyCollectionSuffix operation}}"
+      {{~/if}}
+    {{~/each}}
+  {{~/each}}
+  {{~/if}}
+{{~/each}}
 
 {{{schemasAsString}}}
+{{~#if paginatedEntities}}
     Page:
       type: object
       required:
@@ -168,6 +120,7 @@ paths:
         type: array
         items:
           type: string
+{{~/if}}
 
   securitySchemes:
     basicAuth:     # <-- arbitrary name for the security scheme

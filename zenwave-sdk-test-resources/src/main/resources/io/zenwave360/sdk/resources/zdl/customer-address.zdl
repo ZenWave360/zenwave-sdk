@@ -47,21 +47,25 @@ input CustomerInput {
 /**
  Service javadoc comment
  */
-@rest
+@rest("/customers")
 service CustomerService for (Customer) {
   /**
    * Create customer javadoc comment
    */
-  @asyncapi(createCustomerChannel) @topic(inputchannel)
-  createCustomer(Customer) Customer withEvents CustomerEvent CustomerCreated CustomerCreatedFailed
+  @post("/customers")
+  @asyncapi({ api: "apiname", operationId: "createCustomer"})
+  createCustomer(CustomerInput) Customer withEvents CustomerEvent [CustomerCreated|CustomerCreatedFailed]
 
+  @put("/customers/{customerId}")
+  updateCustomer(CustomerInput) Customer withEvents CustomerEvent CustomerUpdated /** update customer javadoc comment */
 
-  updateCustomer(Customer) Customer withEvents CustomerEvent CustomerUpdated /** update customer javadoc comment */
-
+  @delete("/customers/{customerId}")
   deleteCustomer(id) withEvents CustomerDeleted
 
+  @get("/customers/{customerId}")
   getCustomer(id) Customer
 
+  @get({path: "/customers", params: {search: "string"}})
   @pageable
   listCustomers() Customer[]
 }

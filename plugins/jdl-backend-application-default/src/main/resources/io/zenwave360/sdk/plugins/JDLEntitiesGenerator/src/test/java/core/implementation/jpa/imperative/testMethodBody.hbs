@@ -1,29 +1,41 @@
 {{~#each entities as |entity|}}
     {{~#if (isCrudMethod 'create' method=method entity=entity )}}
-        log.debug("Request to save {{entity.className}}: {}", input);
-        var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), input);
-        {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}});
-        // TODO: you may need to reload the entity here to fetch all the relationships
-        return {{entity.instanceName}};
+        var input = new {{entity.className}}{{inputDTOSuffix}}();
+        // TODO fill input data
+        {{~#each entity.fields as |field|}}
+        // input.set{{capitalize field.name}}({{{populateField field}}});
+        {{~/each}}
+        var {{entity.instanceName}} = {{serviceInstance}}.create{{entity.className}}(input);
+        assertNotNull({{entity.instanceName}}.getId());
+        assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}));
     {{~else if (isCrudMethod 'update' method=method entity=entity )}}
-        log.debug("Request to update {{entity.className}}: {}", input);
-        var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id);
-        {{entity.instanceName}} = {{entity.instanceName}}.map(existing{{entity.instanceName}} -> {{entity.instanceName}}Mapper.update(existing{{entity.instanceName}}, input));
-        // saving is unnecessary: https://vladmihalcea.com/best-spring-data-jparepository/
-        return {{entity.instanceName}};
+        var id = 1L; // TODO fill id
+        var input = new {{entity.className}}{{inputDTOSuffix}}();
+        // TODO fill input data
+        {{~#each entity.fields as |field|}}
+        // input.set{{capitalize field.name}}({{{populateField field}}});
+        {{~/each}}
+        assertTrue({{entity.instanceName}}Repository.containsKey(id));
+        var {{entity.instanceName}} = {{serviceInstance}}.update{{entity.className}}(id, input);
+        assertTrue({{entity.instanceName}}.isPresent());
+        assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}.get()));
     {{~else if (isCrudMethod 'list' method=method entity=entity )}}
-        log.debug("Request list of {{entity.classNamePlural}}: {}", pageable);
-        return {{entity.instanceName}}Repository.findAll(pageable);
+        var results = {{serviceInstance}}.list{{entity.classNamePlural}}(PageRequest.of(0, 10));
+        assertNotNull(results);
     {{~else if (isCrudMethod 'search' method=method entity=entity )}}
-        log.debug("Request to search {{entity.classNamePlural}}: {} - {}", criteria, pageable);
-        // TODO implement this search by criteria
-        return {{entity.instanceName}}Repository.findAll(pageable);
+        var criteria = new {{criteriaClassName entity}}();
+        // TODO fill criteria
+        var results = {{serviceInstance}}.search{{entity.classNamePlural}}(criteria, PageRequest.of(0, 10));
+        assertNotNull(results);
     {{~else if (isCrudMethod 'get' method=method entity=entity )}}
-        log.debug("Request to get {{entity.className}} : {}", id);
-        return {{entity.instanceName}}Repository.findById(id);
+        var id = 1L; // TODO fill id
+        var {{entity.instanceName}} = {{serviceInstance}}.get{{entity.className}}(id);
+        assertTrue({{entity.instanceName}}.isPresent());
     {{~else if (isCrudMethod 'delete' method=method entity=entity )}}
-        log.debug("Request to delete {{entity.className}} : {}", id);
-        {{entity.instanceName}}Repository.deleteById(id);
+        var id = 1L; // TODO fill id
+        assertTrue({{entity.instanceName}}Repository.containsKey(id));
+        {{serviceInstance}}.delete{{entity.className}}(id);
+        assertFalse({{entity.instanceName}}Repository.containsKey(id));
     {{~else~}}
     // not legacy
     {{~/if}}

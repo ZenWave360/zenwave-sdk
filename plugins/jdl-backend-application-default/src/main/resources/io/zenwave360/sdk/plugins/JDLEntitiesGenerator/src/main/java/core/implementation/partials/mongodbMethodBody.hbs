@@ -1,0 +1,33 @@
+{{~#each entities as |entity|}}
+    {{~#if (isCrudMethod 'create' method=method entity=entity )}}
+        log.debug("Request to save {{entity.className}}: {}", input);
+        var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), input);
+        {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}});
+        return {{entity.instanceName}};
+    {{~else if (isCrudMethod 'update' method=method entity=entity )}}
+        log.debug("Request to update {{entity.className}} : {}", input);
+
+        var {{entity.instanceName}} = {{entity.instanceName}}Repository
+                .findById(id)
+                .map(existing{{entity.className}} -> {
+                    return {{entity.instanceName}}Mapper.update(existing{{entity.className}}, input);
+                })
+                .map({{entity.instanceName}}Repository::save);
+        return {{entity.instanceName}};
+    {{~else if (isCrudMethod 'list' method=method entity=entity )}}
+        log.debug("Request list of {{entity.classNamePlural}}: {}", pageable);
+        return {{entity.instanceName}}Repository.findAll(pageable);
+    {{~else if (isCrudMethod 'search' method=method entity=entity )}}
+        log.debug("Request to search {{entity.classNamePlural}}: {} - {}", criteria, pageable);
+        // TODO implement this search by criteria
+        return {{entity.instanceName}}Repository.findAll(pageable);
+    {{~else if (isCrudMethod 'get' method=method entity=entity )}}
+        log.debug("Request to get {{entity.className}} : {}", id);
+        return {{entity.instanceName}}Repository.findById(id);
+    {{~else if (isCrudMethod 'delete' method=method entity=entity )}}
+        log.debug("Request to delete {{entity.className}} : {}", id);
+        {{entity.instanceName}}Repository.deleteById(id);
+    {{~else~}}
+    // not legacy
+    {{~/if}}
+{{~/each}}

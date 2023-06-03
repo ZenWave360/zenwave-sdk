@@ -10,6 +10,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractJDLGenerator;
 import io.zenwave360.sdk.generators.JDLEntitiesToSchemasConverter;
+import io.zenwave360.sdk.processors.ZDLUtils;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateEngine;
@@ -17,6 +18,7 @@ import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
+import org.apache.commons.lang3.StringUtils;
 
 import static java.util.Collections.emptyList;
 
@@ -54,6 +56,13 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
     @DocumentedOption(description = "JsonSchema type format for id fields and parameters.")
     public String idTypeFormat = null;
 
+    protected Map<String, Integer> httpStatusCodes = Map.of(
+        "get", 200,
+        "post", 201,
+        "put", 200,
+        "delete", 204
+    );
+
     public JDLToOpenAPIGenerator withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;
         return this;
@@ -81,6 +90,33 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
             boolean isSkip = skipForAnnotations.isEmpty() || !((List) JSONPath.get(entity, "$.options[?(" + skipAnnotationsFilter + ")]")).isEmpty();
             return !isGenerate || isSkip;
         });
+        handlebarsEngine.getHandlebars().registerHelper("serviceAggregates", (context, options) -> {
+            Map service = options.hash("service", new HashMap<>());
+            Map jdl = options.hash("jdl", new HashMap<>());
+            List<String> aggregateNames = JSONPath.get(service, "$.aggregates", List.of());
+            String aggregatesRegex = aggregateNames.isEmpty() ? "" : " =~ /(" + StringUtils.join(aggregateNames, "|") + ")/";
+            return JSONPath.<List<Map<String, Object>>>get(jdl, "$.channels[*][*][?(@.operationId" + aggregatesRegex + ")]");
+        });
+        handlebarsEngine.getHandlebars().registerHelper("httpResponseStatus", (context, options) -> {
+            Map operation = (Map) context;
+            var defaultStatus = httpStatusCodes.get(operation.get("httpMethod"));
+            return JSONPath.get(operation, "$.httpOptions.status", defaultStatus);
+        });
+        handlebarsEngine.getHandlebars().registerHelper("responseBodyCollectionSuffix", (context, options) -> {
+            Map operation = (Map) context;
+            var isArray = JSONPath.get(operation, "$.isResponseBodyArray", false);
+            var pageable = JSONPath.get(operation, "$.pageable", false);
+            if(isArray) {
+                return pageable ? "Paginated" : "List";
+            }
+            return "";
+        });
+        handlebarsEngine.getHandlebars().registerHelper("asTagName", (context, options) -> {
+            if (context instanceof String) {
+                return ((String) context).replaceAll("(Service|UseCases)", "");
+            }
+            return "Default";
+        });
     }
 
     @Override
@@ -89,13 +125,22 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
         List<String> serviceNames = JSONPath.get(jdlModel, "$.options.options.service[*].value");
         ((Map) jdlModel).put("serviceNames", serviceNames);
 
+        if(this.entities == null) {
+            this.entities = ZDLUtils.findAllServiceFacingEntities(jdlModel);
+        }
+
+        var paginatedEntities = ZDLUtils.findAllPaginatedEntities(jdlModel);
+        var listedEntities = ZDLUtils.findAllEntitiesReturnedAsList(jdlModel);
+        jdlModel.put("paginatedEntities", paginatedEntities);
+        jdlModel.put("listedEntities", listedEntities);
+
         Map<String, Object> oasSchemas = new HashMap<>();
         Map<String, Object> schemas = new LinkedHashMap<>();
         JSONPath.set(oasSchemas, "components.schemas", schemas);
 
         JDLEntitiesToSchemasConverter converter = new JDLEntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
 
-        List<Map<String, Object>> entities = (List) JSONPath.get(jdlModel, "$.entities[*]");
+        List<Map<String, Object>> entities = (List) JSONPath.get(jdlModel, "$.allEntitiesAndEnums[*]");
         for (Map<String, Object> entity : entities) {
             if (!isGenerateSchemaEntity(entity)) {
                 continue;
@@ -104,14 +149,21 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
             Map<String, Object> openAPISchema = converter.convertToSchema(entity, jdlModel);
             schemas.put(entityName, openAPISchema);
 
-            Map<String, Object> paginatedSchema = new HashMap<>();
-            paginatedSchema.put("allOf", List.of(
-                    Map.of("$ref", "#/components/schemas/Page"),
-                    Map.of(jdlBusinessEntityPaginatedProperty, entityName),
-                    Map.of("properties",
-                            Map.of("content",
-                                    Maps.of("type", "array", "items", Map.of("$ref", "#/components/schemas/" + entityName))))));
-            schemas.put(entityName + "Paginated", paginatedSchema);
+            if(listedEntities.contains(entityName)) {
+                Map<String, Object> listSchema = Maps.of("type", "array", "items", Map.of("$ref", "#/components/schemas/" + entityName));
+                schemas.put(entityName + "List", listSchema);
+            }
+
+            if(paginatedEntities.contains(entityName)) {
+                Map<String, Object> paginatedSchema = new HashMap<>();
+                paginatedSchema.put("allOf", List.of(
+                        Map.of("$ref", "#/components/schemas/Page"),
+                        Map.of(jdlBusinessEntityPaginatedProperty, entityName),
+                        Map.of("properties",
+                                Map.of("content",
+                                        Maps.of("type", "array", "items", Map.of("$ref", "#/components/schemas/" + entityName))))));
+                schemas.put(entityName + "Paginated", paginatedSchema);
+            }
         }
 
         List<Map<String, Object>> enums = JSONPath.get(jdlModel, "$.enums.enums[*]", emptyList());
@@ -141,16 +193,6 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
         model.put("context", contextModel);
         model.put("jdlModel", jdlModel);
         model.put("schemasAsString", schemasAsString);
-        return getTemplateEngine().processTemplate(model, template).get(0);
-    }
-
-    protected TemplateEngine getTemplateEngine() {
-        handlebarsEngine.getHandlebars().registerHelper("asTagName", (context, options) -> {
-            if (context instanceof String) {
-                return ((String) context).replaceAll("(Service|UseCases)", "");
-            }
-            return "Default";
-        });
-        return handlebarsEngine;
+        return handlebarsEngine.processTemplate(model, template).get(0);
     }
 }

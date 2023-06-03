@@ -20,7 +20,9 @@ public class JDLToOpenAPIGeneratorTest {
 
     private Map<String, Object> loadJDLModelFromResource(String resource) throws Exception {
         Map<String, Object> model = new JDLParser().withSpecFile(resource).parse();
-        return new JDLProcessor().process(model);
+        model = new JDLProcessor().process(model);
+        model = new PathsProcessor().process(model);
+        return model;
     }
 
     @Test
