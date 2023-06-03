@@ -105,9 +105,9 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
         handlebarsEngine.getHandlebars().registerHelper("responseBodyCollectionSuffix", (context, options) -> {
             Map operation = (Map) context;
             var isArray = JSONPath.get(operation, "$.isResponseBodyArray", false);
-            var pageable = JSONPath.get(operation, "$.pageable", false);
+            var paginated = JSONPath.get(operation, "$.paginated", false);
             if(isArray) {
-                return pageable ? "Paginated" : "List";
+                return paginated ? "Paginated" : "List";
             }
             return "";
         });

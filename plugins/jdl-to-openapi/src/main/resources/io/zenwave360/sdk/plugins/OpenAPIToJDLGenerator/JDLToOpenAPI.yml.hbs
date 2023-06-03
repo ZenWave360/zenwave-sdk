@@ -41,7 +41,7 @@ paths:
           schema:
             type: string
         {{~/each}}
-        {{~#if operation.pageable}}
+        {{~#if operation.paginated}}
         - $ref: "#/components/parameters/page"
         - $ref: "#/components/parameters/limit"
         - $ref: "#/components/parameters/sort"

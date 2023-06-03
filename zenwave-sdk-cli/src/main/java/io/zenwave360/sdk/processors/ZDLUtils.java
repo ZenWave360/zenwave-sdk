@@ -16,11 +16,11 @@ public class ZDLUtils {
     }
 
     public static List<String> findAllPaginatedEntities(Map<String, Object> model) {
-        return JSONPath.get(model, "$.services[*].methods[*][?(@.options.pageable == true)].returnType", List.<String>of());
+        return JSONPath.get(model, "$.services[*].methods[*][?(@.options.paginated == true)].returnType", List.<String>of());
     }
 
     public static List<String> findAllEntitiesReturnedAsList(Map<String, Object> model) {
-        return JSONPath.get(model, "$.services[*].methods[*][?(@.returnTypeIsArray == true && @.options.pageable != true)].returnType", List.<String>of());
+        return JSONPath.get(model, "$.services[*].methods[*][?(@.returnTypeIsArray == true && @.options.paginated != true)].returnType", List.<String>of());
     }
 
     public static List<String> findDependentEntities(Map<String, Object> model, String entityName) {

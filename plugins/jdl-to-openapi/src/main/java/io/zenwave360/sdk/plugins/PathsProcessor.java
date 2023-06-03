@@ -32,7 +32,7 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
                 var methods = JSONPath.get(service, "$.methods", Map.<String, Map>of());
                 var paths = new FluentMap();
                 methods.forEach((methodName, method) -> {
-                    var pageable = JSONPath.get(method, "$.options.pageable");
+                    var paginated = JSONPath.get(method, "$.options.paginated");
                     var httpOption = getHttpOption((Map) method);
                     if(httpOption != null) {
                         var methodVerb = httpOption.get("httpMethod");
@@ -41,7 +41,7 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
                         var path = (String) basePath + methodPath;
                         var params = httpOption.get("params");
                         var pathParams = getPathParams(path);
-                        var hasParams = params != null || pathParams.size() > 0 || pageable != null;
+                        var hasParams = params != null || pathParams.size() > 0 || paginated != null;
                         paths.appendTo(path, (String) methodVerb, new FluentMap()
                                 .with("operationId", methodName)
                                 .with("httpMethod", methodVerb)
@@ -53,7 +53,7 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
                                 .with("requestBody", method.get("parameter"))
                                 .with("responseBody", method.get("returnType"))
                                 .with("isResponseBodyArray", method.get("returnTypeIsArray"))
-                                .with("pageable", pageable)
+                                .with("paginated", paginated)
                                 .with("httpOptions", httpOptions)
                                 .with("serviceMethod", method)
                         );

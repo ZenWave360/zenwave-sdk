@@ -44,7 +44,7 @@ public class JDLBackendApplicationDefaultHelpers {
             return (String) returnType;
         }
         if(returnTypeIsArray) {
-            if(JSONPath.get(method, "options.pageable", false)) {
+            if(JSONPath.get(method, "options.paginated", false)) {
                 return String.format("Page<%s>", returnType);
             }
             return String.format("List<%s>", returnType);
