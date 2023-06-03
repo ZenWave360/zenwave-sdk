@@ -1,0 +1,17 @@
+{{~#each entities as |entity|}}
+    {{~#if (isCrudMethod 'create' method=method entity=entity )}}
+    @Transactional(readOnly = false)
+    {{~/if}}
+    {{~#if (isCrudMethod 'update' method=method entity=entity )}}
+    @Transactional(readOnly = false)
+    {{~/if}}
+    {{~#if (isCrudMethod 'list' method=method entity=entity )}}
+    {{~/if}}
+    {{~#if (isCrudMethod 'search' method=method entity=entity )}}
+    {{~/if}}
+    {{~#if (isCrudMethod 'get' method=method entity=entity )}}
+    {{~/if}}
+    {{~#if (isCrudMethod 'delete' method=method entity=entity )}}
+    @Transactional(readOnly = false)
+    {{~/if}}
+{{~/each}}

@@ -5,8 +5,8 @@ import java.util.*;
 import com.jayway.jsonpath.JsonPath;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
+import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
 import io.zenwave360.sdk.parsers.Model;
-import io.zenwave360.sdk.utils.AsyncAPIUtils;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
 
@@ -70,8 +70,8 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
         Model apiModel = targetProperty != null ? (Model) contextModel.get(targetProperty) : (Model) contextModel;
-        boolean isV2 = AsyncAPIUtils.isV2(apiModel);
-        boolean isV3 = AsyncAPIUtils.isV3(apiModel);
+        boolean isV2 = AsyncapiVersionType.isV2(apiModel);
+        boolean isV3 = AsyncapiVersionType.isV3(apiModel);
 
         apiModel.getRefs().getOriginalRefsList().forEach(pair -> {
             if (pair.getValue() instanceof Map) {
@@ -135,6 +135,7 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
             for (Map.Entry<String, Map> operationEntry : operations.entrySet()) {
                 operationEntry.getValue().put("operationId", operationEntry.getKey());
                 addOperationIdVariants(operationEntry.getValue());
+                addNormalizedTagName(operationEntry.getValue());
                 operationEntry.getValue().put("x--messages", JSONPath.get(operationEntry.getValue(), "$.channel.x--messages"));
             }
         }

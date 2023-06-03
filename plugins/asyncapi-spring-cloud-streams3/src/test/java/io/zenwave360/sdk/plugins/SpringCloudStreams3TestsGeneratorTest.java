@@ -33,7 +33,7 @@ public class SpringCloudStreams3TestsGeneratorTest {
     public void test_generate_imperative_tests() throws Exception {
         Plugin plugin = new SpringCloudStreams3TestsPlugin()
                 .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-events.yml")
-                .withTargetFolder("target/zenwave630/out")
+                .withTargetFolder("target/zenwave630/out/v2")
                 .withOption("apiPackage", "io.example.integration.test.consumer_tests_imperative")
                 .withOption("modelPackage", "io.example.integration.test.api.model")
                 .withOption("role", AsyncapiRoleType.client)
