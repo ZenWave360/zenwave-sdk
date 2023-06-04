@@ -47,7 +47,7 @@ paths:
         - $ref: "#/components/parameters/sort"
         {{~/if}}
       {{~/if}}
-      {{~#if operation.requestBody}}
+      {{~#if (and operation.requestBody (or (eq operation.httpMethod 'post') (eq operation.httpMethod 'put') (eq operation.httpMethod 'patch') ))}}
       requestBody:
         content:
           application/json:
