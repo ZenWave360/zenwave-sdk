@@ -36,7 +36,7 @@ public class ZDL2JDLProcessor extends AbstractBaseProcessor {
         }
         model.put("options", Maps.of("options", Maps.of("service", services)));
 
-        boolean withElasticsearch = JSONPath.get(model, "$.entities[*].options.search") != null;
+        boolean withElasticsearch = !JSONPath.get(model, "$.entities[*].options.search", List.of()).isEmpty();
         if (withElasticsearch) {
             JSONPath.set(model, "$.options.options.search", true);
         }

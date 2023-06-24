@@ -19,7 +19,7 @@ public class ZDLUtilsTest {
     void testFindAllServiceFacingEntities() throws IOException {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
         var entities = ZDLUtils.findAllServiceFacingEntities((Map) model.get("jdl"));
-        Assertions.assertEquals(List.of("Order", "OrderBusinessId", "OrderStatus", "AttachmentFile", "OrderBusinessId", "OrderFaultType", "AttachmentFileId", "AttachmentFileOutput", "AttachmentFile", "AttachmentInput"), entities);
+        Assertions.assertEquals(List.of("OrderBusinessId", "OrderFaultType", "AttachmentFileId", "AttachmentFileOutput", "AttachmentFile", "PurchaseOrder", "OrderBusinessId", "OrderStatus", "AttachmentFile", "AttachmentInput"), entities);
     }
 
     @Test
@@ -40,7 +40,7 @@ public class ZDLUtilsTest {
     void testFindMethodParameterAndReturnTypes() throws IOException {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
         var entities = ZDLUtils.findMethodParameterAndReturnTypes((Map) model.get("jdl"));
-        Assertions.assertEquals(List.of("Order", "OrderBusinessId", "AttachmentFileId", "AttachmentFileOutput", "AttachmentFile", "AttachmentInput"), entities);
+        Assertions.assertEquals(List.of("OrderBusinessId", "AttachmentFileId", "AttachmentFileOutput", "AttachmentFile", "PurchaseOrder", "AttachmentInput"), entities);
     }
 
     @Test
@@ -53,8 +53,8 @@ public class ZDLUtilsTest {
     @Test
     public void testFindDependentEntitiesMongodbZdl() throws Exception {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
-        var entities = ZDLUtils.findDependentEntities((Map) model.get("jdl"), "Order");
-        Assertions.assertEquals(List.of("Order", "OrderBusinessId", "OrderStatus", "AttachmentFile"), entities);
+        var entities = ZDLUtils.findDependentEntities((Map) model.get("jdl"), "PurchaseOrder");
+        Assertions.assertEquals(List.of("PurchaseOrder", "OrderBusinessId", "OrderStatus", "AttachmentFile"), entities);
     }
 
     @Test

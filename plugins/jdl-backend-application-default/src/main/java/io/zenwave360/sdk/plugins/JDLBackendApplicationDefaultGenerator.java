@@ -90,6 +90,9 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
             new Object[] {"src/test/java", "infrastructure/{{persistence}}/{{style}}/inmemory/EntityRepositoryInMemory.java", "infrastructure/{{persistence}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA, skipEntityRepository, true}
     );
 
+    protected List<Object[]> templatesByInputOutput = (List) List.of(((Object)
+            new Object[] {"src/main/java", "core/inbound/dtos/InputOrOutput.java", "core/inbound/dtos/{{entity.className}}.java", JAVA}));
+
     protected List<Object[]> templatesByService = List.of(
             new Object[] {"src/main/java", "core/inbound/Service.java", "core/inbound/{{service.name}}.java", JAVA},
             new Object[] {"src/main/java", "core/implementation/{{persistence}}/{{style}}/ServiceImpl.java", "core/implementation/{{service.name}}Impl.java", JAVA},
@@ -146,6 +149,13 @@ public class JDLBackendApplicationDefaultGenerator extends AbstractJDLGenerator 
             var comment = enumValue.get("comment");
             var isDtoInput = comment != null && comment.toString().contains("@input");
             templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(isDtoInput? enumDtoTemplate : enumTemplate), Map.of("enum", enumValue)));
+        }
+
+        List<Map<String, Object>> inputsOutputs = JSONPath.get(apiModel, "$.['inputs','outputs'][*]", Collections.emptyList());
+        for (Map<String, Object> inputOutput : inputsOutputs) {
+            for (Object[] templateValues : templatesByInputOutput) {
+                templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(templateValues), Map.of("entity", inputOutput)));
+            }
         }
 
         Map<String, Map<String, Object>> services = JSONPath.get(apiModel, "$.options.options.service", Collections.emptyMap());

@@ -13,6 +13,7 @@ import com.github.jknack.handlebars.Options;
 import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.parsers.JDLParser;
 import io.zenwave360.sdk.utils.JSONPath;
+import org.checkerframework.checker.nullness.Opt;
 
 public class JDLBackendApplicationDefaultHelpers {
 
@@ -28,9 +29,16 @@ public class JDLBackendApplicationDefaultHelpers {
         var entityNamePlural = (String) entity.get("classNamePlural");
         var method = (Map<String, Object>) options.hash("method");
         var methodName = (String) method.get("name");
-        var isArray = (Boolean) method.getOrDefault("returnTypeIsArray", false);
+        var isArray = "true".equals(String.valueOf(method.get("returnTypeIsArray")));
         var entityMethodSuffix = isArray ? entityNamePlural : entityName;
         return methodName.equals(crudMethodPrefix + entityMethodSuffix);
+    }
+
+    public String methodParameterType(Map<String, Object> method, Options options) {
+        var parameterName = (String) method.get("parameter");
+        var zdl = options.hash("zdl");
+        var isEntity = JSONPath.get(zdl, "$.entities." + parameterName) != null;
+        return String.format("%s%s", parameterName, isEntity? generator.inputDTOSuffix : "");
     }
 
     public String returnType(Map<String, Object> method, Options options) {
@@ -58,6 +66,9 @@ public class JDLBackendApplicationDefaultHelpers {
         String prefix = (String) options.hash.getOrDefault("prefix", "");
         String suffix = (String) options.hash.getOrDefault("suffix", "");
         if (field.get("isArray") == Boolean.TRUE) {
+            if("byte".equalsIgnoreCase(type)) {
+                return "byte[]";
+            }
             return String.format("List<%s%s%s>", prefix, type, suffix);
         }
         return String.format("%s%s%s", prefix, type, suffix);
@@ -66,6 +77,9 @@ public class JDLBackendApplicationDefaultHelpers {
     public String fieldTypeInitializer(Object context, Options options) {
         Map field = (Map) context;
         if (field.get("isArray") == Boolean.TRUE) {
+            if("byte".equalsIgnoreCase(String.valueOf(field.get("type")))) {
+                return "";
+            }
             return "= new ArrayList<>()";
         }
         return "";
@@ -173,7 +187,7 @@ public class JDLBackendApplicationDefaultHelpers {
         var unique = JSONPath.get(field, "validations.unique.value");
         List<String> annotations = new ArrayList<>();
         if (unique != null) {
-            if(generator.persistence == PersistenceType.mongodb) {
+            if(generator.persistence == PersistenceType.mongodb && options.fn.filename().contains("/core/domain/mongodb/")) {
                 annotations.add("@Indexed(unique = true)");
             }
         }
@@ -194,11 +208,15 @@ public class JDLBackendApplicationDefaultHelpers {
             annotations.add(String.format("@Size(min = %s)", minlength));
         }
         if (pattern != null) {
-            annotations.add(String.format("@Pattern(regexp = \"%s\")", pattern));
+            annotations.add(String.format("@Pattern(regexp = \"%s\")", validationPatternJava((String) pattern, null)));
         }
 
         return annotations.stream().collect(Collectors.joining(" "));
     };
+
+    public String validationPatternJava(String pattern, Options options) {
+        return pattern.replace("\\", "").replace("\\", "\\\\");
+    }
 
     public String criteriaClassName(Object context, Options options) {
         Map entity = (Map) context;

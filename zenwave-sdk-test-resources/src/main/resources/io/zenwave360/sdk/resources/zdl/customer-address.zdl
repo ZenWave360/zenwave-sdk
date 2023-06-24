@@ -57,7 +57,7 @@ service CustomerService for (Customer) {
   createCustomer(CustomerInput) Customer withEvents CustomerEvent [CustomerCreated|CustomerCreatedFailed]
 
   @put("/customers/{customerId}")
-  updateCustomer(CustomerInput) Customer withEvents CustomerEvent CustomerUpdated /** update customer javadoc comment */
+  updateCustomer(id, CustomerInput) Customer withEvents CustomerEvent CustomerUpdated /** update customer javadoc comment */
 
   @delete("/customers/{customerId}")
   deleteCustomer(id) withEvents CustomerDeleted

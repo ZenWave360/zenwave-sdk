@@ -29,5 +29,8 @@
         {{entity.instanceName}}Repository.deleteById(id);
     {{~else~}}
     // not legacy
+    {{~#if method.returnType}}
+    return null; // TODO
+    {{~/if}}
     {{~/if}}
 {{~/each}}

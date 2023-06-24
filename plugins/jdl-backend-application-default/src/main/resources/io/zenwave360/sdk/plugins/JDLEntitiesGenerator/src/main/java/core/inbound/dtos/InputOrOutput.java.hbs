@@ -1,0 +1,45 @@
+package {{basePackage}}.core.inbound.dtos;
+
+import {{basePackage}}.core.domain.*;
+import java.io.Serializable;
+import java.math.*;
+import java.time.*;
+import java.util.*;
+import javax.validation.constraints.*;
+
+/**
+ * {{defaultIfEmpty entity.description entity.name}}.
+ */
+public class {{entity.className}} implements Serializable {
+
+{{#each entity.fields as |field|}}
+    {{{fieldValidationAnnotations field}}}
+    {{~#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix entity}}{{/if}}{{/assign}}
+    private {{{fieldType field suffix=typeSuffix}}} {{field.name}} {{{fieldTypeInitializer field}}};
+{{/each}}
+
+{{#each entity.fields as |field|}}
+    {{#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix entity}}{{/if}}{{/assign}}
+    {{~#if (and field.isArray (not (eq field.type "byte")))}}
+        public {{entity.className}} add{{capitalize field.name}}({{javaType field}}{{typeSuffix}} {{field.name}}) {
+        this.{{field.name}}.add({{field.name}});
+        return this;
+        }
+    {{~/if}}
+    public {{entity.className}} with{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
+        this.{{field.name}} = {{field.name}};
+        return this;
+    }
+{{/each}}
+
+{{#each entity.fields as |field|}}
+    {{~#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix entity}}{{/if}}{{/assign}}
+    public {{{fieldType field suffix=typeSuffix}}} get{{capitalize field.name}}() {
+        return {{field.name}};
+    }
+
+    public void set{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
+        this.{{field.name}} = {{field.name}};
+    }
+{{/each}}
+}

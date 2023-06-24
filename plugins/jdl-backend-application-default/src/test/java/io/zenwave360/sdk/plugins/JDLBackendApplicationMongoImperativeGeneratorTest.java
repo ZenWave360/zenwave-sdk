@@ -56,7 +56,7 @@ public class JDLBackendApplicationMongoImperativeGeneratorTest {
 
     @Test
     public void test_generator_hexagonal_mongodb_imperative() throws Exception {
-        String targetFolder = "target/test_generator_hexagonal_mongodb_imperative";
+        String targetFolder = "target/jdl/test_generator_hexagonal_mongodb_imperative";
         Plugin plugin = new JDLBackendApplicationDefaultPlugin()
                 .withSpecFile("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl")
                 .withTargetFolder(targetFolder)
@@ -77,7 +77,7 @@ public class JDLBackendApplicationMongoImperativeGeneratorTest {
 
     @Test
     public void test_generator_hexagonal_mongodb_imperative_no_dtos() throws Exception {
-        String targetFolder = "target/test_generator_hexagonal_mongodb_imperative_no_dtos";
+        String targetFolder = "target/jdl/test_generator_hexagonal_mongodb_imperative_no_dtos";
         Plugin plugin = new JDLBackendApplicationDefaultPlugin()
                 .withSpecFile("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl")
                 .withTargetFolder(targetFolder)
@@ -101,7 +101,7 @@ public class JDLBackendApplicationMongoImperativeGeneratorTest {
     @Test
     // @Disabled
     public void test_generator_hexagonal_mongodb_imperative_registry() throws Exception {
-        String targetFolder = "target/test_generator_hexagonal_mongodb_imperative_registry";
+        String targetFolder = "target/jdl/test_generator_hexagonal_mongodb_imperative_registry";
         Plugin plugin = new JDLBackendApplicationDefaultPlugin()
                 .withSpecFile("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl")
                 .withTargetFolder(targetFolder)
@@ -123,7 +123,7 @@ public class JDLBackendApplicationMongoImperativeGeneratorTest {
     @Test
     // @Disabled
     public void test_generator_hexagonal_mongodb_imperative_registry_only_some_entities() throws Exception {
-        String targetFolder = "target/test_generator_hexagonal_mongodb_imperative_registry_only_some_entities";
+        String targetFolder = "target/jdl/test_generator_hexagonal_mongodb_imperative_registry_only_some_entities";
         Plugin plugin = new JDLBackendApplicationDefaultPlugin()
                 .withSpecFile("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl")
                 .withTargetFolder(targetFolder)
