@@ -56,7 +56,7 @@ If you plan to use **custom plugins** you will need to use the command in the fo
 
 ```shell
 jbang alias add --name=zw \
-    -m=io.zenwave360.sdk\
+    -m=io.zenwave360.sdk.Main \
     --repos=mavencentral,snapshots=https://s01.oss.sonatype.org/content/repositories/snapshots \
     --deps=\
 org.slf4j:slf4j-simple:1.7.36,\

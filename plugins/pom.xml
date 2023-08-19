@@ -58,6 +58,7 @@
         <module>jdl-to-openapi</module>
         <module>jdl-to-asyncapi</module>
         <module>zdl-to-asyncapi</module>
+        <module>zdl-to-markdown</module>
         <module>asyncapi-spring-cloud-streams3</module>
         <module>asyncapi-jsonschema2pojo</module>
         <module>jdl-backend-application-default</module>
