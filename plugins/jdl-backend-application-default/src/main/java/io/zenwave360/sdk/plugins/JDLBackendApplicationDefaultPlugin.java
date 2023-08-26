@@ -5,6 +5,7 @@ import io.zenwave360.sdk.doc.DocumentedPlugin;
 import io.zenwave360.sdk.formatters.JavaFormatter;
 import io.zenwave360.sdk.parsers.JDLParser;
 import io.zenwave360.sdk.processors.JDLProcessor;
+import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 
@@ -16,7 +17,7 @@ public class JDLBackendApplicationDefaultPlugin extends Plugin {
 
     public JDLBackendApplicationDefaultPlugin() {
         super();
-        withChain(JDLParser.class, JDLProcessor.class, JDLBackendApplicationDefaultGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
+        withChain(JDLParser.class, ZDLProcessor.class, JDLBackendApplicationDefaultGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
     }
 
     @Override

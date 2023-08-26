@@ -92,7 +92,7 @@ public class {{service.name}}Test  {
 {{#each service.methods as |method|}}
     @Test
     @Order({{@index}})
-    void test{{method.name}}() {
+    void {{method.name}}Test() {
         {{~> (partial 'testMethodBody')~}}
     }
 {{/each}}

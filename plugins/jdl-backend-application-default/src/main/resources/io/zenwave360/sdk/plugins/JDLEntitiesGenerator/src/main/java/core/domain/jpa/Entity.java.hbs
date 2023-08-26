@@ -5,7 +5,7 @@ import java.math.*;
 import java.time.*;
 import java.util.*;
 import javax.persistence.*;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 {{~#if entity.options.auditing}}
@@ -42,6 +42,11 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
 {{/unless~}}
 
 {{#each entity.fields as |field|}}
+  {{~#if field.javadoc}}
+    /**
+    * {{{field.javadoc}}}
+    */
+  {{~/if}}
   {{{fieldValidationAnnotations field}}}
   {{~#if field.isEntity}}
     @Embedded

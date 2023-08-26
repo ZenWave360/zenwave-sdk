@@ -14,7 +14,7 @@ public class ZDLProcessorTest {
 
     private Map<String, Object> loadZDL(String resource) throws IOException {
         Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
-        return new JDLProcessor().process(model);
+        return new ZDLProcessor().process(model);
     }
 
     private boolean containsEntity(List<Map> entities, String entityName) {
@@ -22,23 +22,12 @@ public class ZDLProcessorTest {
     }
 
     @Test
-    public void testProcessZDL_WithSemanticAnnotations() throws Exception {
-        var model = loadZDL("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl");
-        List entitiesWithCriteria = JSONPath.get(model, "$.jdl.entities[*][?(@.options.searchCriteriaObject)]");
-        Assertions.assertFalse(entitiesWithCriteria.isEmpty());
-        Assertions.assertEquals(2, entitiesWithCriteria.size());
-        Assertions.assertTrue(containsEntity(entitiesWithCriteria, "Customer"));
-        Assertions.assertTrue(containsEntity(entitiesWithCriteria, "CustomerOrder"));
-    }
-
-    @Test
-    public void testProcessZDL_Relational() throws Exception {
-        var model = loadZDL("classpath:io/zenwave360/sdk/resources/jdl/orders-model-relational.jdl");
-        List entitiesWithCriteria = JSONPath.get(model, "$.jdl.entities[*][?(@.options.searchCriteriaObject)]");
-        Assertions.assertFalse(entitiesWithCriteria.isEmpty());
-        Assertions.assertEquals(2, entitiesWithCriteria.size());
-        Assertions.assertTrue(containsEntity(entitiesWithCriteria, "Customer"));
-        Assertions.assertTrue(containsEntity(entitiesWithCriteria, "CustomerOrder"));
+    public void testProcessZDL_CopyAnnotation() throws Exception {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
+        var attachmentInput = JSONPath.get(model, "$.jdl.inputs.AttachmentInput", Map.of());
+        var fields = JSONPath.get(attachmentInput, "$.fields", Map.of());
+        Assertions.assertNotNull(fields);
+        Assertions.assertEquals(7, fields.size());
     }
 
 }
