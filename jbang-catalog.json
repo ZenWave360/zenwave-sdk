@@ -46,6 +46,7 @@
         "io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default:2.0.0-SNAPSHOT",
         "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-openapi:2.0.0-SNAPSHOT",
         "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:2.0.0-SNAPSHOT",
+        "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-markdown:2.0.0-SNAPSHOT",
         "io.github.zenwave360.zenwave-sdk.plugins:jdl-openapi-controllers:2.0.0-SNAPSHOT"
       ],
       "repositories": [
