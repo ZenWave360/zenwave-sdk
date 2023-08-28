@@ -40,7 +40,7 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
         this.streamBridge = streamBridge;
     }
 
-    @Value("#{${spring.cloud.stream.bindings.on-customer-event-in-0.dead-letter-queue-error-map:{:}}}")
+    @Value("#{${spring.cloud.stream.bindings.{{operation.x--operationIdKebabCase}}-in-0.dead-letter-queue-error-map:{:}}}")
     public void setErrorQueueMap(Map<Class<? extends Exception>, String> errorQueueMap) {
         this.errorQueueMap = errorQueueMap;
     }
