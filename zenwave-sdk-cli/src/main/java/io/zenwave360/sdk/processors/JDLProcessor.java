@@ -90,7 +90,7 @@ public class JDLProcessor extends AbstractBaseProcessor {
 
     protected void fillEntityRelationships(Map entity, Map jdlModel) {
         String entityName = (String) entity.get("name");
-        List<Map> relationships = JSONPath.get(jdlModel, "$.relationships[*][*][*][?(@.from == '" + entityName + "' || @.to == '" + entityName + "')]");
+        List<Map> relationships = JSONPath.get(jdlModel, "$.relationships[*][*][?(@.from == '" + entityName + "' || @.to == '" + entityName + "')]");
         entity.put("relationships", relationships.stream().map(r -> buildRelationship(entityName, r)).collect(Collectors.toList()));
     }
 

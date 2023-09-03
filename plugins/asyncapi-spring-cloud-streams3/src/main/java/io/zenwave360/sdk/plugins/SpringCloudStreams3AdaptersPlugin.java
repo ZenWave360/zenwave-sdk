@@ -25,9 +25,7 @@ public class SpringCloudStreams3AdaptersPlugin extends Plugin {
 
     @Override
     public <T extends Plugin> T processOptions() {
-        if (!getOptions().containsKey("targetFolder")) {
-            replaceInChain(TemplateFileWriter.class, TemplateStdoutWriter.class);
-        }
+
         if (!getOptions().containsKey("jdlFile")) {
             removeFromChain(JDLParser.class, JDLProcessor.class);
 //            addBeforeInChain(EnrichAsyncAPIWithJDLProcessor.class, JDLDummyDataFromSchemasProcessor.class);

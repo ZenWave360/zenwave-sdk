@@ -9,13 +9,31 @@ import java.util.Map;
 public class ZDLProcessor extends JDLProcessor {
 
     public Map<String, Object> process(Map<String, Object> contextModel) {
-        contextModel = super.process(contextModel);
-        Map<String, Object> jdlModel = targetProperty != null ? (Map) contextModel.get(targetProperty) : (Map) contextModel;
+        Map<String, Object> zdlModel = targetProperty != null ? (Map) contextModel.get(targetProperty) : (Map) contextModel;
+        processServiceName(zdlModel);
 
-        var entitiesToPopulate = (List<Map>) JSONPath.get(jdlModel, "$.allEntitiesAndEnums[*][?(@.options.copy)]");
+        contextModel = super.process(contextModel);
+
+        processCopyAnnotation(zdlModel);
+
+        return contextModel;
+    }
+
+    public void processServiceName(Map<String, Object> zdlModel) {
+        var services = JSONPath.get(zdlModel, "$.services", Map.of());
+        for (Map.Entry<Object, Object> service : services.entrySet()) {
+            var aggregates = JSONPath.get(service.getValue(), "$.aggregates", List.of());
+            for (Object aggregate : aggregates) {
+                JSONPath.set(zdlModel, "$.entities." + aggregate + ".options.service", service.getKey());
+            }
+        }
+    }
+
+    public void processCopyAnnotation(Map<String, Object> zdlModel) {
+        var entitiesToPopulate = (List<Map>) JSONPath.get(zdlModel, "$.allEntitiesAndEnums[*][?(@.options.copy)]");
         for (var entity : entitiesToPopulate) {
             var toCopyName = JSONPath.get(entity, "$.options.copy");
-            var entityToCopy = JSONPath.get(jdlModel, "$.allEntitiesAndEnums." + toCopyName);
+            var entityToCopy = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + toCopyName);
             var fieldsToCopy = JSONPath.get(entityToCopy, "$.fields", Map.of());
             var entityFields = JSONPath.get(entity, "$.fields", Map.of());
 
@@ -26,7 +44,5 @@ public class ZDLProcessor extends JDLProcessor {
             entityFields.clear();
             entityFields.putAll(copiedFields);
         }
-
-        return contextModel;
     }
 }

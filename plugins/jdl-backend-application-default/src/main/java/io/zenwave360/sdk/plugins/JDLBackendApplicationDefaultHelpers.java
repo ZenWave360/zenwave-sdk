@@ -30,8 +30,13 @@ public class JDLBackendApplicationDefaultHelpers {
         var method = (Map<String, Object>) options.hash("method");
         var methodName = (String) method.get("name");
         var isArray = "true".equals(String.valueOf(method.get("returnTypeIsArray")));
+        var isOptional = "true".equals(String.valueOf(method.get("returnTypeIsOptional")));
         var entityMethodSuffix = isArray ? entityNamePlural : entityName;
-        return methodName.equals(crudMethodPrefix + entityMethodSuffix);
+        var isCrudMethod = methodName.equals(crudMethodPrefix + entityMethodSuffix);
+        if(isCrudMethod) {
+            method.put("isCrudMethod", isCrudMethod);
+        }
+        return isCrudMethod;
     }
 
     public String methodParameterType(Map<String, Object> method, Options options) {
@@ -41,6 +46,23 @@ public class JDLBackendApplicationDefaultHelpers {
         return String.format("%s%s", parameterName, isEntity? generator.inputDTOSuffix : "");
     }
 
+    public Map<String, Object> methodEntity(Map<String, Object> method, Options options) {
+        var returnType = (String) method.get("returnType");
+        var service = options.hash("service");
+        var aggregates = JSONPath.get(service, "aggregates", Collections.emptyList());
+        if(aggregates.size() == 1 && StringUtils.equals(returnType, aggregates.get(0).toString())) {
+            var zdl = options.hash("zdl");
+            return JSONPath.get(zdl, "$.entities." + returnType);
+        }
+        return null;
+    }
+
+    public Map<String, Object> methodReturnEntity(Map<String, Object> method, Options options) {
+        var returnType = (String) method.get("returnType");
+        var zdl = options.hash("zdl");
+        return JSONPath.get(zdl, "$.entities." + returnType);
+    }
+
     public String returnType(Map<String, Object> method, Options options) {
         var methodName = (String) method.get("name");
         var returnType = method.get("returnType");
@@ -48,16 +70,20 @@ public class JDLBackendApplicationDefaultHelpers {
         if (returnType == null) {
             return "void";
         }
-        if(methodName.startsWith("create")) {
-            return (String) returnType;
-        }
+//        if(methodName.startsWith("create")) {
+//            return (String) returnType;
+//        }
         if(returnTypeIsArray) {
             if(JSONPath.get(method, "options.paginated", false)) {
                 return String.format("Page<%s>", returnType);
             }
             return String.format("List<%s>", returnType);
         }
-        return String.format("Optional<%s>", returnType);
+        var isOptional = "true".equals(String.valueOf(method.get("returnTypeIsOptional")));
+        if(isOptional) {
+            return String.format("Optional<%s>", returnType);
+        }
+        return (String) returnType;
     }
 
     public String fieldType(Object context, Options options) {

@@ -8,10 +8,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface {{entity.className}}Mapper {
 
     {{entity.className}} asEntity({{entity.className}}{{inputDTOSuffix}} input);
+
+    List<{{entity.className}}> asEntity(List<{{entity.className}}{{inputDTOSuffix}}> inputList);
 
     {{#unless (skipEntityId entity)~}}@Mapping(target = "id", ignore = true){{/unless~}}
     {{entity.className}} update(@MappingTarget {{entity.className}} entity, {{entity.className}}{{inputDTOSuffix}} input);

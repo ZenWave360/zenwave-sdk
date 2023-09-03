@@ -6,7 +6,6 @@
         return {{entity.instanceName}};
     {{~else if (isCrudMethod 'update' method=method entity=entity )}}
         log.debug("Request to update {{entity.className}} : {}", input);
-
         var {{entity.instanceName}} = {{entity.instanceName}}Repository
                 .findById(id)
                 .map(existing{{entity.className}} -> {
@@ -27,10 +26,42 @@
     {{~else if (isCrudMethod 'delete' method=method entity=entity )}}
         log.debug("Request to delete {{entity.className}} : {}", id);
         {{entity.instanceName}}Repository.deleteById(id);
-    {{~else~}}
-    // not legacy
-    {{~#if method.returnType}}
-    return null; // TODO
-    {{~/if}}
+    {{~else}}
     {{~/if}}
 {{~/each}}
+{{~#unless method.isCrudMethod}} {{!-- comes from helper isCrudMethod --}}
+  {{~assign "entity" (methodEntity method service=service zdl=jdl)}}
+  {{~assign "returnEntity" (methodReturnEntity method service=service zdl=jdl)}}
+  {{~#if entity}}
+      {{~#if method.paramId }}
+        log.debug("Request {{method.name}}: {}", id);
+        var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).orElseThrow();
+        {{~#if method.parameter}}
+        {{entity.instanceName}} = {{entity.instanceName}}Mapper.update({{entity.instanceName}}, input);
+        {{~/if}}
+      {{~else if method.parameter }}
+        log.debug("Request {{method.name}}: {}", input);
+        {{~#if (eq entity.name returnEntity.name)}}
+        var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), input);
+        {{~/if}}
+      {{~else}}
+        log.debug("Request {{method.name}}");
+        // var {{entity.instanceName}} = new {{entity.className}}();
+      {{~/if}}
+      // TODO: implement this method
+      {{~#if method.returnType}}
+        {{~#if (eq entity.name returnEntity.name)}}
+        return {{entity.instanceName}}Repository.save({{entity.instanceName}});
+        {{~else}}
+        return {{entity.instanceName}};
+        {{~else}}
+        return null;
+        {{~/if}}
+      {{~/if}}
+  {{~else~}}
+        // TODO: implement this method
+      {{~#if method.returnType}}
+        return null;
+      {{~/if}}
+  {{~/if}}
+{{~/unless}}

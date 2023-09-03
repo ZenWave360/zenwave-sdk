@@ -1,0 +1,157 @@
+# Glossary
+
+{{{zdlModel.javadoc}}}
+
+## <a name="entities"></a> Entities
+{{~#each zdlModel.entities as |entity|}}
+
+### <a name="entity_{{entity.name}}"></a> {{entity.name}}
+
+{{{entity.javadoc}}}
+
+| Field | Type | Description | Validations |
+| ----- | ---- | ----------- | ----------- |
+    {{~#each entity.fields as |field|}}
+| {{field.name}} | {{{field.type}}} | {{{field.javadoc}}} | {{~#each field.validations}}{{this.name}} {{/each}} |
+    {{~/each}}
+
+```plantuml
+@startuml
+{{> (partial 'entityClass.plantuml') stereotype='aggregate' }}
+
+{{~#each (entityAssociations entity) as |association|}}
+    {{../entity.name}} -down{{association.linkType}} {{association.entity.name}}
+    {{> (partial 'entityClass.plantuml') entity=association.entity }}
+{{~/each}}
+@enduml
+```
+
+{{/each~}}
+
+{{~#each zdlModel.enums.enums as |enum|}}
+### <a name="entity_{{enum.name}}"></a> {{enum.name}} (enum)
+
+{{{enum.javadoc}}}
+
+| Name | Value | Description |
+| ----- | ---- | ----------- |
+    {{~#each enum.values as |value|}}
+| {{value.name}} | {{{value.value}}} | {{{value.javadoc}}} |
+    {{~/each}}
+
+{{/each~}}
+
+
+## <a name="services"></a> Services
+{{~#each zdlModel.services as |service|}}
+
+### <a name="service_{{service.name}}"></a> {{service.name}}
+
+```plantuml
+@startuml
+
+
+{{#each service.aggregates as |aggregates|}}
+{{~assign "entity" (lookup zdlModel.entities this)}}
+{{service.name}} -up-> {{entity.name}}
+{{> (partial 'entityClass.plantuml') stereotype='aggregate' }}
+{{/each}}
+
+class {{service.name}}  << service >> {
+{{~#each service.methods as |method|}}
+    {{method.name}}({{methodParamsSignature method}}): {{methodReturnType method}} withEvents {{methodEvents method}}
+{{~/each}}
+}
+
+{{assign "inputs" (serviceInputs service)}}
+{{#if inputs}}
+{{service.name}} -left-> inputs
+namespace inputs #DDDDDD {
+{{~#each inputs as |entity|}}
+    {{> (partial 'entityClass.plantuml') stereotype=entity.type }}
+{{~/each}}
+}
+{{/if}}
+
+{{assign "outputs" (serviceOutputs service)}}
+{{#if outputs}}
+{{service.name}} -right-> outputs
+namespace outputs #DDDDDD {
+{{~#each outputs as |entity|}}
+    {{> (partial 'entityClass.plantuml') stereotype=entity.type }}
+{{~/each}}
+}
+{{/if}}
+
+{{assign "events" (serviceEvents service)}}
+{{#if events}}
+{{service.name}} -down-> events
+namespace events #DDDDDD {
+{{~#each events as |event|}}
+class {{event.name}} << event >> {
+
+}
+{{~/each}}
+}
+{{/if}}
+@enduml
+
+```
+
+{{{service.javadoc}}}
+
+| Method | Description | Events |
+| ------ | ----------- | ------ |
+    {{~#each service.methods as |method|}}
+| {{method.name}} |  | {{~#each method.withEvents}} {{/each}} |
+    {{~/each}}
+
+{{/each~}}
+
+
+## <a name="events"></a> Domain Events
+{{~#each zdlModel.events as |event|}}
+
+### <a name="event_{{event.name}}"></a> {{event.name}}
+
+{{{event.javadoc}}}
+
+| Field | Type | Description | Validations |
+| ----- | ---- | ----------- | ----------- |
+    {{~#each event.fields as |field|}}
+| {{field.name}} | {{{field.type}}} | {{{field.javadoc}}} | {{~#each field.validations}}{{this.name}} {{/each}} |
+    {{~/each}}
+
+{{/each~}}
+
+
+## <a name="inputs"></a> Service Command Inputs
+{{~#each zdlModel.inputs as |input|}}
+
+### <a name="input_{{input.name}}"></a> {{input.name}}
+
+{{{input.javadoc}}}
+
+| Field | Type | Description | Validations |
+| ----- | ---- | ----------- | ----------- |
+    {{~#each input.fields as |field|}}
+| {{field.name}} | {{{field.type}}} | {{{field.javadoc}}} | {{~#each field.validations}}{{this.name}} {{/each}} |
+    {{~/each}}
+
+{{/each~}}
+
+
+## <a name="outputs"></a> Service Command Outputs
+{{~#each zdlModel.outputs as |output|}}
+
+### <a name="output_{{output.name}}"></a> {{output.name}}
+
+{{{output.javadoc}}}
+
+| Field | Type | Description | Validations |
+| ----- | ---- | ----------- | ----------- |
+    {{~#each output.fields as |field|}}
+| {{field.name}} | {{{field.type}}} | {{{field.javadoc}}} | {{~#each field.validations}}{{this.name}} {{/each}} |
+    {{~/each}}
+
+{{/each~}}

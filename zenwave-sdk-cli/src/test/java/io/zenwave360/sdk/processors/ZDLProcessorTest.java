@@ -23,11 +23,11 @@ public class ZDLProcessorTest {
 
     @Test
     public void testProcessZDL_CopyAnnotation() throws Exception {
-        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
-        var attachmentInput = JSONPath.get(model, "$.jdl.inputs.AttachmentInput", Map.of());
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
+        var attachmentInput = JSONPath.get(model, "$.jdl.inputs.AddressInputCopy", Map.of());
         var fields = JSONPath.get(attachmentInput, "$.fields", Map.of());
         Assertions.assertNotNull(fields);
-        Assertions.assertEquals(7, fields.size());
+        Assertions.assertEquals(5, fields.size());
     }
 
 }

@@ -7,12 +7,14 @@ import java.util.stream.Collectors;
 import io.github.zenwave360.zdl.ZdlParser;
 import io.zenwave360.sdk.doc.DocumentedOption;
 
+@Deprecated
 public class JDLParser implements Parser {
 
     public static final List blobTypes = List.of("Blob", "AnyBlob", "ImageBlob");
 
     @DocumentedOption(description = "JDL files to parse")
     public String[] specFiles;
+    private String content;
     public String targetProperty = "jdl";
 
     public Map<String, String> options = new HashMap<>();
@@ -26,6 +28,11 @@ public class JDLParser implements Parser {
 
     public JDLParser withSpecFile(String... specFile) {
         this.specFiles = specFile;
+        return this;
+    }
+
+    public JDLParser withContent(String content) {
+        this.content = content;
         return this;
     }
 
@@ -51,7 +58,10 @@ public class JDLParser implements Parser {
 //        Map model = new LinkedHashMap<>();
 //        model.put(targetProperty, jdlModel);
 //        return model;
-        String zdlString = Arrays.stream(specFiles).map(this::loadSpecFile).collect(Collectors.joining());
+        String zdlString = content;
+        if(zdlString == null) {
+            zdlString = Arrays.stream(specFiles).map(this::loadSpecFile).collect(Collectors.joining());
+        }
         Map<String, Object> zdlModel = ZdlParser.parseModel(zdlString);
         Map<String, Object> model = new LinkedHashMap<>();
         model.put(targetProperty, zdlModel);

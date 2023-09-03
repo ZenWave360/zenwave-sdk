@@ -220,7 +220,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
     }
 
     protected void addInclude(Map<String, Object> entity, Map<String, Object> entitiesMap, Set<String> includeNames) {
-        var fieldTypes = new HashSet<String>(JSONPath.get(entity, "$.fields[*].type"));
+        var fieldTypes = new HashSet<String>(JSONPath.get(entity, "$.fields[*].type", List.of()));
         for (String fieldType : fieldTypes) {
             if (entitiesMap.containsKey(fieldType) && !includeNames.contains(fieldType)) {
                 includeNames.add(fieldType);

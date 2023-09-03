@@ -18,9 +18,7 @@ public class SpringCloudStreams3Plugin extends Plugin {
 
     @Override
     public <T extends Plugin> T processOptions() {
-        if (!getOptions().containsKey("targetFolder")) {
-            replaceInChain(TemplateFileWriter.class, TemplateStdoutWriter.class);
-        }
+
         return super.processOptions();
     }
 }

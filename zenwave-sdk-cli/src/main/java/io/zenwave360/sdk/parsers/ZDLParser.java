@@ -13,6 +13,7 @@ public class ZDLParser implements Parser {
 
     @DocumentedOption(description = "ZDL files to parse")
     public String[] specFiles;
+    private String content;
     public String targetProperty = "jdl";
 
     public Map<String, String> options = new HashMap<>();
@@ -26,6 +27,11 @@ public class ZDLParser implements Parser {
 
     public ZDLParser withSpecFile(String... specFile) {
         this.specFiles = specFile;
+        return this;
+    }
+
+    public ZDLParser withContent(String content) {
+        this.content = content;
         return this;
     }
 
@@ -46,7 +52,10 @@ public class ZDLParser implements Parser {
 
     @Override
     public Map<String, Object> parse() throws IOException {
-        String zdlString = Arrays.stream(specFiles).map(this::loadSpecFile).collect(Collectors.joining());
+        String zdlString = content;
+        if(zdlString == null) {
+            zdlString = Arrays.stream(specFiles).map(this::loadSpecFile).collect(Collectors.joining());
+        }
         Map<String, Object> zdlModel = ZdlParser.parseModel(zdlString);
         Map<String, Object> model = new LinkedHashMap<>();
         model.put(targetProperty, zdlModel);

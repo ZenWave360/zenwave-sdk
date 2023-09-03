@@ -36,17 +36,19 @@ enum OrderFaultType { TIME, QUALITY }
 service AttachmentService for (PurchaseOrder) {
 
   @post("/{businessUnit}/{orderId}")
-  uploadFile(AttachmentInput) PurchaseOrder
+  uploadFile(PurchaseOrder) PurchaseOrder
+
+  @put("/{businessUnit}/{orderId}")
+  updateFile(id, PurchaseOrder) PurchaseOrder
+
+    @put("/{purchaseOrderId}")
+    updatePurchaseOrder(id, PurchaseOrder) PurchaseOrder?
 
   @get("/{businessUnit}/{orderId}")
   listAttachmentFiles(OrderBusinessId) AttachmentFile[]
 
   @get("/{businessUnit}/{orderId}/{documentManagerId}")
   downloadAttachmentFile(AttachmentFileId) AttachmentFileOutput
-}
-
-@copy(PurchaseOrder)
-input AttachmentInput {
 }
 
 input AttachmentFileId {

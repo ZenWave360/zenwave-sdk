@@ -1,0 +1,17 @@
+class {{entity.name}} {{#if stereotype}}<< {{stereotype}} >>{{/if}} {
+{{~#if entity.javadoc}}
+{{{entity.javadoc}}}
+--
+{{~/if}}
+{{~#each entity.fields as |field|}}
+{{{field.type}}} {{field.name}}
+{{~/each}}
+{{~#if entity.relationships}}
+--
+{{~#each entity.relationships as |relationship|}}
+  {{~#if relationship.fieldName}}
+@{{{relationshipType relationship}}} {{relationship.fieldName}}
+  {{~/if}}
+{{~/each}}
+{{~/if}}
+}

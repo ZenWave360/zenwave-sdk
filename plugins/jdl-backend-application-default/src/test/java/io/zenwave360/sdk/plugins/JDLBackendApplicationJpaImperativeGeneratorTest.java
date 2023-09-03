@@ -34,11 +34,6 @@ public class JDLBackendApplicationJpaImperativeGeneratorTest {
         logCaptor.close();
     }
 
-    private Map<String, Object> loadJDLModelFromResource(String resource) throws Exception {
-        Map<String, Object> model = new JDLParser().withSpecFile(resource).parse();
-        return new JDLProcessor().process(model);
-    }
-
     @Test
     public void test_generator_hexagonal_jpa_imperative() throws Exception {
         String targetFolder = "target/jdl/test_generator_hexagonal_jpa_imperative";

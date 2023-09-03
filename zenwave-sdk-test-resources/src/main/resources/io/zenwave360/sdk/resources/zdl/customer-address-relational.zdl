@@ -12,19 +12,25 @@ entity Customer {
   username String required unique /** username javadoc comment */
   email String required unique /** email javadoc comment */
   tags String[] /** tags javadoc comment */
-  /**
-   * address is a nested entity
-   */
-  address Address[] {
-    street String /** street javadoc comment */
-    city String /** city javadoc comment */
-    state String /** state javadoc comment */
-    zip String /** zip javadoc comment */
-    type AddressType /** address type is an enum */
-  }
 }
 
 enum AddressType {  HOME(1) /** home description */,  WORK(1) /** work description */ }
+
+entity Address {
+  street String /** street javadoc comment */
+  city String /** city javadoc comment */
+  state String /** state javadoc comment */
+  zip String /** zip javadoc comment */
+  type AddressType /** address type is an enum */
+}
+
+relationship OneToMany {
+  /** Customer to addresses relationship */
+  Customer{addresses} to
+  /** Address to customer relationship */
+  Address{customer}
+}
+
 
 /**
  * Customer input javadoc comment
