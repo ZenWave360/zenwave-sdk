@@ -55,7 +55,7 @@ service CustomerService for (Customer) {
    * Create customer javadoc comment
    */
   @post("/customers")
-  @asyncapi({ api: "apiname", operationId: "createCustomer"})
+  @asyncapi({ api: "apiname", operationId: "createCustomer", channel: "customerCommandsChannel", topic: "customer-input-topic" })
   createCustomer(CustomerInput) Customer withEvents CustomerEvent [CustomerCreated|CustomerCreatedFailed]
 
   @put("/customers/{customerId}")
@@ -72,25 +72,25 @@ service CustomerService for (Customer) {
   listCustomers() Customer[]
 }
 
-@topic(compacted)
-@entity(Customer)
-event CustomerEvent(customerEventChannel) {
-
+@copy(Customer)
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerEvent {
+  customerId String
 }
 
-@topic(tratra)
-event CustomerCreated(customerEventsChannel) {
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerCreated {
   customerId String
   customer Customer
 }
 
-@topic(tratra)
-event CustomerUpdated(customerEventsChannel) {
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerUpdated {
   customerId String
   customer Customer
 }
 
-@topic(tratra)
-event CustomerDeleted(customerEventsChannel) {
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerDeleted {
   customerId String
 }

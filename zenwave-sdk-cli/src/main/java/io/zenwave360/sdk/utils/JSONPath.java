@@ -21,6 +21,18 @@ public class JSONPath {
         }
     }
 
+    public static <T> T getFirst(Object object, String... jsonPaths) {
+        if(jsonPaths != null) {
+            for (String jsonPath : jsonPaths) {
+                var value = get(object, jsonPath);
+                if(value != null) {
+                    return (T) value;
+                }
+            }
+        }
+        return null;
+    }
+
     public static <T> T get(Object object, String jsonPath, T defaultIfNull) {
         try {
             return ObjectUtils.firstNonNull(JsonPath.using(config).parse(object).read(jsonPath), defaultIfNull);
