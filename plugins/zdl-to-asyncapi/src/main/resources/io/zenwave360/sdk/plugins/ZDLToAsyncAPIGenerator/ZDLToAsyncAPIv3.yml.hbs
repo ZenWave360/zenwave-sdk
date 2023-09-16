@@ -33,29 +33,17 @@ operations:
 
 components:
   messages:
-{{~#each zdlModel.commands as |command|}}
-    {{command.name}}Message:
-      messageId: {{command.name}}Message
-      name: {{command.name}}Message
-      title: {{command.javadoc}}
-      summary: {{command.javadoc}}
+{{~#each zdlModel.messages as |message|}}
+    {{message.name}}Message:
+      messageId: {{message.name}}Message
+      name: {{message.name}}Message
+      title: {{message.javadoc}}
+      summary: {{message.javadoc}}
       schemaFormat: {{{schemaFormatString}}}
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "{{payloadRef command}}"
-{{~/each}}
-{{~#each zdlModel.events as |event|}}
-    {{event.name}}Message:
-      messageId: {{event.name}}Message
-      name: {{event.name}}Message
-      title: {{event.javadoc}}
-      summary: {{event.javadoc}}
-      schemaFormat: {{{schemaFormatString}}}
-      traits:
-        - $ref: '#/components/messageTraits/CommonHeaders'
-      payload:
-        $ref: "{{payloadRef event}}"
+        $ref: "{{payloadRef message}}"
 {{~/each}}
 
   messageTraits:

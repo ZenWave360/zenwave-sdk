@@ -54,22 +54,22 @@ paths:
             schema:
               $ref: "#/components/schemas/{{operation.requestBody}}"
       {{~/if}}
-      {{~#if operation.responseBody}}
       responses:
         "{{httpResponseStatus operation}}":
           description: "OK"
+        {{~#if operation.responseBody}}
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/{{operation.responseBody}}{{responseBodyCollectionSuffix operation}}"
-      {{~/if}}
+        {{~/if}}
     {{~/each}}
   {{~/each}}
   {{~/if}}
 {{~/each}}
 
 {{{schemasAsString}}}
-{{~#if paginatedEntities}}
+{{~#if jdlModel.paginatedEntities}}
     Page:
       type: object
       required:
