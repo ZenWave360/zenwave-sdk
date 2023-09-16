@@ -1,8 +1,11 @@
 package io.zenwave360.sdk.plugins;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import io.zenwave360.sdk.parsers.DefaultYamlParser;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +30,6 @@ public class ZDLToAsyncAPIGeneratorTest {
     public void test_zdl_to_asyncapi() throws Exception {
         Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
         ZDLToAsyncAPIGenerator generator = new ZDLToAsyncAPIGenerator();
-        generator.includeCommands = true;
         generator.idType = "integer";
         generator.idTypeFormat = "int64";
 
@@ -36,14 +38,12 @@ public class ZDLToAsyncAPIGeneratorTest {
 
         System.out.println(outputTemplates.get(0).getContent());
 
+        var tmpFile = new File("target/customer-address.yml");
+        FileUtils.writeStringToFile(tmpFile, outputTemplates.get(0).getContent(), "UTF-8");
+        var api = new DefaultYamlParser().withSpecFile(tmpFile.toURI()).parse();
+
         Map<String, Object> oasSchema = mapper.readValue(outputTemplates.get(0).getContent(), Map.class);
-//        Assertions.assertEquals(3, ((List) JSONPath.get(oasSchema, "$.channels.customer-orders.publish.message.oneOf")).size());
-
-//        Assertions.assertTrue(((List) JSONPath.get(oasSchema, "$.components.schemas.AddressType.enum")).contains("HOME"));
         Assertions.assertTrue(((List) JSONPath.get(oasSchema, "$.components.schemas.Customer.required")).contains("username"));
-//        Assertions.assertEquals("3", JSONPath.get(oasSchema, "$.components.schemas.Customer.properties.firstName.minLength").toString());
-
-//        Assertions.assertEquals("#/components/schemas/CustomerOrder", JSONPath.get(oasSchema, "$.components.messages.CustomerOrderEventMessage.payload.$ref"));
     }
 
 }

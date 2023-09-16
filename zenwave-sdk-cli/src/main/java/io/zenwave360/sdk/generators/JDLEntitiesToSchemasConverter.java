@@ -85,6 +85,7 @@ public class JDLEntitiesToSchemasConverter {
         }
         for (Map<String, Object> field : fields) {
             Map<String, Object> property = new LinkedHashMap<>();
+            boolean isComplexType = JSONPath.get(jdlModel, "$.allEntitiesAndEnums." + field.get("type")) != null;
 
             if ("String".equals(field.get("type")) || "TextBlob".equals(field.get("type"))) {
                 property.put("type", "string");
@@ -122,8 +123,10 @@ public class JDLEntitiesToSchemasConverter {
             } else if (blobTypes.contains(field.get("type"))) {
                 property.put("type", "string");
                 property.put("format", "binary");
-            } else {
+            } else if (isComplexType) {
                 property.put("$ref", "#/components/schemas/" + field.get("type"));
+            } else {
+                property.put("type", "string");
             }
 
             String required = JSONPath.get(field, "$.validations.required.value");
@@ -142,7 +145,7 @@ public class JDLEntitiesToSchemasConverter {
             if (pattern != null) {
                 property.put("pattern", pattern);
             }
-            if (field.get("comment") != null) {
+            if (field.get("comment") != null && !isComplexType) {
                 property.put("description", field.get("comment"));
             }
 
