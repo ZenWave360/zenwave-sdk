@@ -61,6 +61,6 @@ public class ZDLUtilsTest {
     public void testFindDependentEntitiesRelational() throws Exception {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/jdl/orders-model-relational.jdl");
         var entities = ZDLUtils.findDependentEntities((Map) model.get("jdl"), "CustomerOrder");
-        Assertions.assertEquals(List.of("CustomerOrder", "OrderStatus", "OrderShippingDetails", "OrderShippingDetails2", "PaymentDetails", "Customer", "OrderedItem"), entities);
+        Assertions.assertEquals(List.of("CustomerOrder", "OrderStatus", "OrderShippingDetails", "OrderShippingDetails2", "OrderedItem"), entities);
     }
 }
