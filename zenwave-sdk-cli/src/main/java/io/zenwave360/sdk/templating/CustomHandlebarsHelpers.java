@@ -99,9 +99,9 @@ public class CustomHandlebarsHelpers {
         return StringUtils.join(tokens, "/").replaceAll("/+", "/");
     }
 
-    public static boolean eq(String first, Options options) throws IOException {
-        String second = options.param(0);
-        return StringUtils.equals(first, second);
+    public static boolean eq(Object first, Options options) throws IOException {
+        Object second = options.param(0);
+        return StringUtils.equals(String.valueOf(first), String.valueOf(second));
     }
 
     public static boolean startsWith(String first, Options options) throws IOException {
@@ -154,7 +154,7 @@ public class CustomHandlebarsHelpers {
     }
 
     public static Object size(List list, Options options) throws IOException {
-        return list.size();
+        return list != null? list.size() : 0;
     }
 
     public static Object uncapFirst(String text, Options options) throws IOException {

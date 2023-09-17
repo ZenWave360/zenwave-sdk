@@ -12,60 +12,40 @@ tags:
 {{~/each}}
 
 channels:
-{{~#each jdlModel.entities as |entity|}}
-  {{~#unless (skipOperations entity)}}
-  {{~#if includeCommands}}
-  {{entity.kebabCase}}.requests:
-    subscribe:
-      summary: {{entity.className}} Async Requests
-      operationId: do{{entity.className}}Request
+{{~#each zdlModel.channels as |channel|}}
+  {{@key}}:
+    x-address: {{channel.x-address}}
+  {{~#each channel.operations as |operation|}}
+    {{@key}}:
+      summary: {{operation.javadoc}}
+      operationId: {{operation.operationId}}
       tags:
-        - name: {{asTagName entity.options.service}}
-      message:
-        $ref: "#/components/messages/{{entity.className}}RequestMessage"
-   {{~/if}}
-  {{~#if includeEvents}}
-  {{entity.kebabCase}}.events:
-    publish:
-      summary: {{entity.className}} Domain Events
-      operationId: on{{entity.className}}Event
-      tags:
-        - name: {{asTagName entity.options.service}}
-      message:
-        $ref: "#/components/messages/{{entity.className}}EventMessage"
-   {{~/if}}
-  {{/unless}}
+        - name: {{asTagName operation.service}}
+      messages:
+      {{~#if (eq (size operation.messages) 1)}}
+        $ref: "{{firstItem operation.messages}}"
+      {{~else}}
+        oneOf:
+        {{~#each operation.messages as |message|}}
+        - $ref: "{{message}}"
+        {{~/each}}
+      {{~/if}}
+  {{~/each}}
 {{~/each}}
 
 components:
   messages:
-{{~#each jdlModel.entities as |entity|}}
-  {{~#unless (skipOperations entity)}}
-    {{~#if includeCommands}}
-    {{entity.className}}RequestMessage:
-      messageId: {{entity.className}}RequestMessage
-      name: {{entity.className}}RequestMessage
-      title: Async Command/Request for a {{entity.className}}
-      summary: Async Command/Request for a {{entity.className}}
+{{~#each zdlModel.messages as |message|}}
+    {{message.name}}Message:
+      messageId: {{message.name}}Message
+      name: {{message.name}}Message
+      title: {{message.javadoc}}
+      summary: {{message.javadoc}}
       schemaFormat: {{{schemaFormatString}}}
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "{{payloadRef entity "Request" }}"
-    {{~/if}}
-    {{~#if includeEvents}}
-    {{entity.className}}EventMessage:
-      name: {{entity.className}}EventMessage
-      messageId: {{entity.className}}EventMessage
-      title: Message for a {{entity.className}} Event
-      summary: Message for a {{entity.className}} Event
-      schemaFormat: {{{schemaFormatString}}}
-      traits:
-        - $ref: '#/components/messageTraits/CommonHeaders'
-      payload:
-        $ref: "{{payloadRef entity "Event"}}"
-    {{~/if}}
-  {{/unless}}
+        $ref: "{{payloadRef message}}"
 {{~/each}}
 
   messageTraits:
@@ -83,46 +63,3 @@ components:
             x-runtime-expression: $tracingIdSupplier
 
 {{{schemasAsString}}}
-
-{{~#if schemasAsString}}{{~#if (isStateTransferPayloadStyle)}}
-{{~#each jdlModel.entities as |entity|}}
-  {{~#unless (skipOperations entity)}}
-    {{~#if includeCommands}}
-    {{entity.className}}RequestPayload:
-      type: object
-      properties:
-        id:
-          type: {{idType}}
-          {{~#if idTypeFormat}}
-          format: {{idTypeFormat}}
-          {{~/if}}
-        requestType:
-          type: string
-          enum:
-          - "create"
-          - "update"
-          - "delete"
-        {{entity.instanceName}}:
-          $ref: "#/components/schemas/{{entity.className}}"
-    {{~/if}}
-    {{~#if includeEvents}}
-    {{entity.className}}EventPayload:
-      type: object
-      properties:
-        id:
-          type: {{idType}}
-          {{~#if idTypeFormat}}
-          format: {{idTypeFormat}}
-          {{~/if}}
-        eventType:
-          type: string
-          enum:
-          - "created"
-          - "updated"
-          - "deleted"
-        {{entity.instanceName}}:
-          $ref: "#/components/schemas/{{entity.className}}"
-    {{~/if}}
-  {{/unless}}
-{{~/each}}
-{{~/if}}{{~/if}}

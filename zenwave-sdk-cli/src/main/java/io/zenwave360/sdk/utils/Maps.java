@@ -7,6 +7,12 @@ import java.util.*;
  */
 public interface Maps {
 
+    static <K, V> V getOrCreateDefault(Map<K, V> map, K key, V defaultValue) {
+        var value = map.getOrDefault(key, defaultValue);
+        map.put(key, value);
+        return value;
+    }
+
     static <K, V> Map<K, V> of(K key, V value, Object... keyValues) {
         Map<K, V> map = new LinkedHashMap<>();
         map.put(key, value);
