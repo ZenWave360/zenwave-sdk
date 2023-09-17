@@ -9,12 +9,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsonschema2pojo.*;
@@ -76,43 +73,45 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {
         Model apiModel = getApiModel(contextModel);
 
-        String operationIdsRegex = operationIds.isEmpty() ? "" : " =~ /(" + StringUtils.join(operationIds, "|") + ")/";
-        List<Map<String, Object>> operations = JSONPath.get(apiModel, "$.channels[*][*][?(@.operationId" + operationIdsRegex + ")]");
-
-        String messageNamesRegex = messageNames.isEmpty() ? "" : " =~ /(" + StringUtils.join(messageNames, "|") + ")/";
-        List<Map<String, Object>> messages = JSONPath.get(operations, "$[*].x--messages[*][?(@.name" + operationIdsRegex + ")]", Collections.emptyList());
-        List<Map<String, Object>> oneOfMessages = JSONPath.get(operations, "$[*].x--messages[*].oneOf[?(@.name" + operationIdsRegex + ")]", Collections.emptyList());
-
         List<Map<String, Object>> allMessages = new ArrayList<>();
-        allMessages.addAll(messages);
-        allMessages.addAll(oneOfMessages);
+        var asyncapiVersion = (String) JSONPath.get(apiModel, "$.asyncapi");
+        if (asyncapiVersion.startsWith("2.")) {
+            String operationIdsRegex = operationIds.isEmpty() ? "" : " =~ /(" + StringUtils.join(operationIds, "|") + ")/";
+            List<Map<String, Object>> operations = JSONPath.get(apiModel, "$.channels[*][*][?(@.operationId" + operationIdsRegex + ")]");
+
+            List<Map<String, Object>> messages = JSONPath.get(operations, "$[*].x--messages[*][?(@.name" + operationIdsRegex + ")]", Collections.emptyList());
+            List<Map<String, Object>> oneOfMessages = JSONPath.get(operations, "$[*].x--messages[*].oneOf[?(@.name" + operationIdsRegex + ")]", Collections.emptyList());
+            allMessages.addAll(messages);
+            allMessages.addAll(oneOfMessages);
+        }
+        if (asyncapiVersion.startsWith("3.")) {
+            if (!messageNames.isEmpty()) {
+                String messageNamesRegex = messageNames.isEmpty() ? "" : " =~ /(" + StringUtils.join(messageNames, "|") + ")/";
+                Set<Map<String, Object>> messages = new HashSet<>(JSONPath.get(apiModel, "$.components.messages[*][?(@.name" + messageNamesRegex + ")]"));
+                allMessages.addAll(messages);
+            } else {
+                String operationIdsRegex = operationIds.isEmpty() ? "" : " =~ /(" + StringUtils.join(operationIds, "|") + ")/";
+                Set<Map<String, Object>> messages = new HashSet<>(JSONPath.get(apiModel, "$.operations." + operationIdsRegex + ".channel.messages[*]"));
+                allMessages.addAll(messages);
+            }
+        }
 
         targetSourceFolder = new File(targetFolder, sourceFolder);
 
         try {
             targetSourceFolder.mkdirs();
-            generate(apiModel, messages);
+            generate(apiModel, allMessages);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-        // for (final File file : this.getExtraFiles(this.settings, this.api.getFile().getParentFile())) {
-        // config.setSource(Arrays.asList(file.toURI().toURL()).iterator());
-        // if (file.getName().endsWith(".yml") || file.getName().endsWith(".yaml")) {
-        // config.setSourceType(SourceType.YAMLSCHEMA);
-        // } else {
-        // config.setSourceType(SourceType.JSONSCHEMA);
-        // }
-        // Jsonschema2Pojo.generate(config, null);
-        // }
 
         return Collections.emptyList();
     }
 
     public void generate(Model apiModel, List<Map<String, Object>> messages) throws IOException, URISyntaxException {
         for (final Map<String, Object> message : messages) {
-            final String name = (String) message.get("name");
             Map<String, Object> payload = (Map) message.get("payload");
+            String name = (String)  ObjectUtils.firstNonNull(payload.get("x--schema-name"), message.get("name"));
             $Ref payloadRef = apiModel.getRefs().getOriginalRef(payload);
             String schemaFormat = (String) message.get("schemaFormat"); // TODO get also global schemaFormat
             AsyncApiProcessor.SchemaFormatType schemaFormatType = AsyncApiProcessor.SchemaFormatType.getFormat(schemaFormat);

@@ -1,9 +1,6 @@
 package io.zenwave360.sdk.plugins;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -39,9 +36,25 @@ public class JDLBackendApplicationDefaultHelpers {
         return isCrudMethod;
     }
 
+    public Collection<String> findAggregateInputs(Map aggregate, Options options) {
+        var zdl = options.get("jdl");
+        var inputDTOSuffix = (String) options.get("inputDTOSuffix");
+        Set<String> inputs = new HashSet<String>();
+        inputs.addAll(JSONPath.get(zdl, "$.services[*][?('Customer' in @.aggregates)].methods[*].parameter"));
+        inputs.addAll(JSONPath.get(zdl, "$.services[*][?('Customer' in @.aggregates)].methods[*].returnType"));
+        inputs.add(aggregate.get("name") + inputDTOSuffix);
+        inputs = inputs.stream().filter(Objects::nonNull).collect(Collectors.toSet());
+
+        var entities = JSONPath.get(zdl, "$.entities", Collections.emptyMap());
+
+        inputs = inputs.stream().map(input -> entities.get(input) != null? input + inputDTOSuffix : input).collect(Collectors.toSet());
+
+        return inputs;
+    }
+
     public String methodParameterType(Map<String, Object> method, Options options) {
         var parameterName = (String) method.get("parameter");
-        var zdl = options.hash("zdl");
+        var zdl = options.get("jdl");
         var isEntity = JSONPath.get(zdl, "$.entities." + parameterName) != null;
         return String.format("%s%s", parameterName, isEntity? generator.inputDTOSuffix : "");
     }

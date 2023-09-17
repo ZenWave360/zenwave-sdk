@@ -2,6 +2,7 @@ package io.zenwave360.sdk.plugins;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import io.zenwave360.sdk.Plugin;
 import org.apache.commons.io.FileUtils;
@@ -16,6 +17,31 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
     @BeforeEach
     public void setup() throws IOException {
         FileUtils.deleteDirectory(new File("target/zenwave630/out"));
+    }
+
+    @Test
+    public void test_generator_for_asyncapi_v3() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withSpecFile("classpath:asyncapi-v3.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.v3.domain.events");
+
+        new MainGenerator().generate(plugin);
+
+        Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/v3/domain/events/CustomerInput.java").exists());
+    }
+
+    @Test
+    public void test_generator_for_asyncapi_v3_filter_messages() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withSpecFile("classpath:asyncapi-v3.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("messageNames", List.of("CustomerInputMessage"))
+                .withOption("modelPackage", "io.example.v3.domain.byMessage");
+
+        new MainGenerator().generate(plugin);
+
+        Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/v3/domain/byMessage/CustomerInput.java").exists());
     }
 
     @Test

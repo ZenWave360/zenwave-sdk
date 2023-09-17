@@ -218,6 +218,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         model.put("asyncapi", getApiModel(contextModel));
         model.put("serviceName", serviceName);
         model.put("operation", operation);
+        model.put("messages", new HashSet(JSONPath.get(operation, "$.x--messages[*]")));
         model.put("apiClassName", getApiClassName(serviceName, operationRoleType));
         return getTemplateEngine().processTemplates(model, templates);
     }
@@ -229,6 +230,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         model.put("asyncapi", getApiModel(contextModel));
         model.put("serviceName", serviceName);
         model.put("operations", operations);
+        model.put("messages", new HashSet(JSONPath.get(operations, "$[*].x--messages[*]")));
         model.put("apiClassName", getApiClassName(serviceName, operationRoleType));
         return getTemplateEngine().processTemplates(model, templates);
     }

@@ -30,6 +30,19 @@ public class SpringCloudStreams3GeneratorV3Test {
     }
 
     @Test
+    public void test_generator_asyncapi_v3() throws Exception {
+        Plugin plugin = new SpringCloudStreams3Plugin()
+                .withSpecFile("classpath:asyncapi-v3.yml")
+                .withTargetFolder("target/zenwave630/out/v3")
+                .withOption("apiPackage", "io.example.v3")
+                .withOption("modelPackage", "io.example.v3")
+                .withOption("role", AsyncapiRoleType.provider)
+                .withOption("style", ProgrammingStyle.imperative);
+
+        new MainGenerator().generate(plugin);
+    }
+
+    @Test
     public void test_generator_provider_for_events() throws Exception {
         Plugin plugin = new SpringCloudStreams3Plugin()
                 .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v3/customer-order-asyncapi.yml")

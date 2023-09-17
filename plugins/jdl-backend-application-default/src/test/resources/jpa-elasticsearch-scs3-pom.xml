@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.0</version>
+        <version>3.1.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>tests</groupId>
@@ -15,18 +15,19 @@
 
     <properties>
         <!--        <skipTests>true</skipTests>-->
-        <java.version>11</java.version>
-        <spring-boot.version>2.7.0</spring-boot.version>
+        <java.version>17</java.version>
+        <spring-boot.version>${project.parent.version}</spring-boot.version>
         <archunit-junit5.version>1.0.1</archunit-junit5.version>
         <mapstruct.version>1.5.1.Final</mapstruct.version>
         <spring-cloud.version>2021.0.3</spring-cloud.version>
         <avro.version>1.11.1</avro.version>
         <testcontainers.version>1.17.2</testcontainers.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
-        <jakarta.validation-api.version>3.0.2</jakarta.validation-api.version>
+        <jakarta-annotation.version>2.1.1</jakarta-annotation.version>
+        <validation-api.version>3.0.2</validation-api.version>
 
         <!-- Plugin versions -->
-        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -96,7 +97,7 @@
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
-            <version>${jakarta.validation-api.version}</version>
+            <version>${validation-api.version}</version>
         </dependency>
 
         <dependency>

@@ -1,13 +1,13 @@
 {{~#each entities as |entity|}}
     {{~#if (isCrudMethod 'create' method=method entity=entity )}}
-        var input = new {{entity.className}}{{inputDTOSuffix}}();
+        var input = new {{methodParameterType method}}();
         // TODO fill input data
         var {{entity.instanceName}} = {{serviceInstance}}.create{{entity.className}}(input);
         assertNotNull({{entity.instanceName}}.getId());
         assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}));
     {{~else if (isCrudMethod 'update' method=method entity=entity )}}
         var id = "1"; // TODO fill id
-        var input = new {{entity.className}}{{inputDTOSuffix}}();
+        var input = new {{methodParameterType method}}();
         // TODO fill input data
         assertTrue({{entity.instanceName}}Repository.containsKey(id));
         var {{entity.instanceName}} = {{serviceInstance}}.update{{entity.className}}(id, input);

@@ -11,12 +11,10 @@ import reactor.core.publisher.Mono;
 import {{modelPackage}}.*;
 {{/if}}
 
-@javax.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
+@jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
 public interface {{serviceInterfaceName operation.x--operationIdCamelCase}} {
 
 {{#each operation.x--messages as |message|}}
-    {{~> (partial '../../common/Headers') isProducer=false}}
-
     {{~#if exposeMessage}}
     default void {{operation.operationId}}{{methodSuffix message operation}}(Flux<Message<{{message.x--javaType}}>> messageFlux) { };
     {{~else}}
@@ -24,4 +22,7 @@ public interface {{serviceInterfaceName operation.x--operationIdCamelCase}} {
     {{~/if}}
 {{/each}}
 
+{{#each messages as |message|}}
+    {{~> (partial '../../common/Headers') isProducer=false}}
+{{/each}}
 }

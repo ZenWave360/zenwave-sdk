@@ -93,6 +93,8 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
     private String customTimePattern = null;
     private String customDateTimePattern = null;
     private String refFragmentPathDelimiters = "#/.";
+
+    private boolean isUseJakartaValidation = false;
     private SourceSortOrder sourceSortOrder = SourceSortOrder.OS;
 
     public static JsonSchema2PojoConfiguration of(Map<String, String> settings) {
@@ -291,7 +293,7 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
 
     @Override
     public boolean isUseJakartaValidation() {
-        return false;
+        return isUseJakartaValidation;
     }
 
     public void setFormatTypeMapping(Map<String, String> formatTypeMapping) {
@@ -662,5 +664,7 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
     public void setSourceSortOrder(SourceSortOrder sourceSortOrder) {
         this.sourceSortOrder = sourceSortOrder;
     }
+
+
 
 }

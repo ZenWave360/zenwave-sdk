@@ -7,12 +7,11 @@ import {{modelPackage}}.*;
 /**
  * {{asyncapi.description}}
  */
-@javax.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
+@jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
 public interface I{{apiClassName}} {
 
 {{#each operations as |operation|}}
     {{#each operation.x--messages as |message|}}
-    {{~> (partial '../common/Headers') isProducer=true}}
     /**
      * {{{operation.summary}}}
      */
@@ -21,5 +20,9 @@ public interface I{{apiClassName}} {
         return {{operation.operationId}}(payload, null);
     };
     {{/each}}
+{{/each}}
+
+{{#each messages as |message|}}
+    {{~> (partial '../common/Headers') isProducer=true}}
 {{/each}}
 }

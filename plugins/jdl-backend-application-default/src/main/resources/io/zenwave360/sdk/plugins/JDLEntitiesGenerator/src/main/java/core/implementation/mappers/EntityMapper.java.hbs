@@ -13,12 +13,14 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface {{entity.className}}Mapper {
 
-    {{entity.className}} asEntity({{entity.className}}{{inputDTOSuffix}} input);
+  {{~#each (findAggregateInputs entity) as |input|}}
+    {{entity.className}} asEntityFrom{{input}}List({{input}} input);
 
-    List<{{entity.className}}> asEntity(List<{{entity.className}}{{inputDTOSuffix}}> inputList);
+    List<{{entity.className}}> asEntityFrom{{input}}List(List<{{input}}> inputList);
 
     {{#unless (skipEntityId entity)~}}@Mapping(target = "id", ignore = true){{/unless~}}
-    {{entity.className}} update(@MappingTarget {{entity.className}} entity, {{entity.className}}{{inputDTOSuffix}} input);
+    {{entity.className}} update(@MappingTarget {{entity.className}} entity, {{input}} input);
+  {{~/each}}
 
     {{~assign 'relationships' (findOwnedOneToManyRelationships entity)}}
     {{~#if relationships}}

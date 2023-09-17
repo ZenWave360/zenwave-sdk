@@ -11,12 +11,10 @@ import {{modelPackage}}.*;
 /**
 * {{asyncapi.description}}
 */
-@javax.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
+@jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
 public interface {{serviceInterfaceName operation.x--operationIdCamelCase}} {
 
 {{#each operation.x--messages as |message|}}
-    {{~> (partial '../../common/Headers') isProducer=false}}
-
     /**
      * {{{operation.summary}}}
      */
@@ -27,4 +25,7 @@ public interface {{serviceInterfaceName operation.x--operationIdCamelCase}} {
     {{~/if}}
 {{/each~}}
 
+{{#each messages as |message|}}
+    {{~> (partial '../../common/Headers') isProducer=false}}
+{{/each}}
 }

@@ -70,15 +70,15 @@ entity OrderShippingDetails2 { }
 //}
 
 relationship OneToOne {
-	CustomerOrder{shipmentDetails} to OrderShippingDetails2{customerOrder}
+	CustomerOrder{shipmentDetails2} to OrderShippingDetails2{customerOrder}
 }
 
 relationship ManyToOne {
 	ShippingDetails{customer} to Customer{shipmentDetails}
 	PaymentDetails{customer} to Customer{paymentDetails}
 
-	CustomerOrder{paymentDetails(creditCardNumber)} to PaymentDetails
-	CustomerOrder{customer(username)} to Customer
+//	CustomerOrder{paymentDetails(creditCardNumber)} to PaymentDetails
+//	CustomerOrder{customer(username)} to Customer
 }
 
 relationship ManyToMany {
