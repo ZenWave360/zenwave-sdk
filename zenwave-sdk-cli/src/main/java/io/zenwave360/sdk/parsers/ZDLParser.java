@@ -22,7 +22,11 @@ public class ZDLParser implements Parser {
 
     @DocumentedOption(description = "ZDL file to parse")
     public void setSpecFile(String specFile) {
-        this.specFiles = new String[] {specFile};
+        if(specFile == null) {
+            this.specFiles = new String[] {};
+        } else {
+            this.specFiles = new String[] {specFile};
+        }
     }
 
     public ZDLParser withSpecFile(String... specFile) {

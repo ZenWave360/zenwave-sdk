@@ -50,6 +50,7 @@ public class JDLDummyDataFromSchemasProcessor extends AbstractBaseProcessor {
             var paginatedName = (String) schemaEntry.getValue().get(jdlBusinessEntityPaginatedProperty);
             var entityName = ObjectUtils.firstNonNull(businessName, paginatedName, schemaName);
             entity.put("name", entityName);
+            entity.put("type", "entities");
             entity.put("description", schemaEntry.getValue().get("description"));
             entity.put("className", className(entityName));
             entity.put("instanceName", instanceName(entityName));
@@ -58,15 +59,15 @@ public class JDLDummyDataFromSchemasProcessor extends AbstractBaseProcessor {
 
             var tagName = schemaTagMap.get(entityName);
             var serviceName = className(tagName + "Service");
-            var options = Maps.of("service", serviceName);
-            entity.put("options", options);
-
             addEntityToServices(services, serviceName, entityName);
 
             entities.put(entityName, entity);
         }
 
-        jdlModel.put("options", Maps.of("options", Maps.of("service", services)));
+        jdlModel.put("services", services);
+        jdlModel.put("allEntitiesAndEnums", entities);
+
+//        jdlModel.put("options", Maps.of("options", Maps.of("service", services)));
 
         return contextModel;
     }
@@ -75,9 +76,8 @@ public class JDLDummyDataFromSchemasProcessor extends AbstractBaseProcessor {
         Map service = services.getOrDefault(serviceName, new HashMap());
         services.put(serviceName, service);
         service.put("name", serviceName);
-        service.put("value", serviceName);
-        service.put("entityNames", service.getOrDefault("entityNames", new ArrayList<>()));
-        ((List) service.get("entityNames")).add(entityName);
+        service.put("aggregates", service.getOrDefault("entityNames", new ArrayList<>()));
+        ((List) service.get("aggregates")).add(entityName);
     }
 
     protected String className(String name) {

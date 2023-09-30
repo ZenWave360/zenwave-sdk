@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.zenwave360.sdk.options.ProgrammingStyle;
+import io.zenwave360.sdk.processors.ZDLUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -108,17 +109,16 @@ public class JDLOpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                                     "entity", getEntityForOpenApiSchema(openApiModel, dtoName),
                                     "paginatedEntity", getPaginatedEntityForOpenApiSchema(openApiModel, dtoName))));
 
-            Collection<Map<String, Object>> entities = new HashSet<>(JSONPath.get(operationByServiceEntry.getValue(), "$..x--entity[?(@.className)]")); // filters null
+            Collection<String> entityNames = new HashSet<>(JSONPath.get(operationByServiceEntry.getValue(), "$..x--entity[?(@.className)].name"));
 
-            Collection entitiesServices = entities.stream().map(entity -> JSONPath.get(entity, "options.service"))
-                    .distinct().filter(s -> s != null).collect(Collectors.toList());
+            Collection<String> entitiesServices = entityNames.stream().map(entity -> ZDLUtils.serviceName(entity, jdlModel)).filter(Objects::nonNull).collect(Collectors.toSet());
 
             Map serviceModel = Map.of(
                     "service", Map.of(
                             "name", operationByServiceEntry.getKey(),
                             "operations", operationByServiceEntry.getValue()),
                     "dtoWithEntityMap", dtoWithEntityMap,
-                    "entities", entities,
+//                    "entities", entities,
                     "entitiesServices", entitiesServices);
 
             for (Object[] template : templates) {

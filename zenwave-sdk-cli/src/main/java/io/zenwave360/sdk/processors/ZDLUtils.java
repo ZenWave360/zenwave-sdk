@@ -56,4 +56,24 @@ public class ZDLUtils {
         var entities = JSONPath.get(model, "$.services[*].methods[*]['parameter','returnType']");
         return new ArrayList(new HashSet(JSONPath.get(entities, "$[*][*]")));
     }
+
+    public static String serviceName(String entityName, Map<String, Object> model) {
+        var entity = (Map) JSONPath.get(model, "$.allEntitiesAndEnums." + entityName, Map.of());
+        var allServices = JSONPath.get(model, "$.services[*]", List.<Map>of());
+        if ("entities".equals(entity.get("type"))) {
+            return allServices.stream()
+                    .filter(service -> JSONPath.get(service, "$.aggregates", List.of()).contains(entityName))
+                    .map(service -> (String) service.get("name")).findFirst().orElse(null);
+        }
+        if ("inputs".equals(entity.get("type"))) {
+            return allServices.stream()
+                    .filter(service -> JSONPath.get(service, "$.methods[*].parameter", List.of()).contains(entityName))
+                    .map(service -> (String) service.get("name")).findFirst().orElse(null);
+        }
+        if ("outputs".equals(entity.get("type"))) {
+            return allServices.stream().filter(service -> JSONPath.get(service, "$.methods[*].returnType", List.of()).contains(entityName))
+                    .map(service -> (String) service.get("name")).findFirst().orElse(null);
+        }
+        return null;
+    }
 }

@@ -28,6 +28,9 @@ public class JDLToOpenAPIGenerator extends AbstractJDLGenerator {
 
     public String sourceProperty = "jdl";
 
+    @DocumentedOption(description = "API Title")
+    public String title;
+
     @DocumentedOption(description = "Entities to generate code for")
     public List<String> entities = new ArrayList<>();
 

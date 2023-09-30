@@ -49,6 +49,26 @@ public class JDLOpenAPIControllersGeneratorTest {
     }
 
     @Test
+    public void test_generator_jdl_openapi_controllers_zdl_customer_address() throws Exception {
+        Plugin plugin = new JDLOpenAPIControllersPlugin()
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/customer-address-openapi.yml")
+                .withOption("jdlFile", "classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
+                .withOption("basePackage", "io.zenwave360.example")
+                .withOption("openApiApiPackage", "io.zenwave360.example.web.api")
+                .withOption("openApiModelPackage", "io.zenwave360.example.web.api.model")
+                .withOption("openApiModelNameSuffix", "DTO")
+                // .withOption("operationIds", List.of("addPet", "updatePet"))
+                .withOption("style", ProgrammingStyle.imperative)
+                .withTargetFolder("target/out");
+
+        new MainGenerator().generate(plugin);
+
+        List<String> logs = logCaptor.getLogs();
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
+    }
+
+    @Test
     @Disabled
     public void test_generator_jdl_openapi_controllers_registry() throws Exception {
         Plugin plugin = new JDLOpenAPIControllersPlugin()

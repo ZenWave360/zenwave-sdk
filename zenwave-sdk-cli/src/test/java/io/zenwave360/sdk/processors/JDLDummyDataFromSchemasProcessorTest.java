@@ -29,7 +29,7 @@ public class JDLDummyDataFromSchemasProcessorTest {
         Map jdlModel = (Map) processed.get(processor.jdlProperty);
         Assertions.assertNotNull(JSONPath.get(jdlModel, "$.entities"));
         Assertions.assertNotNull(JSONPath.get(jdlModel, "$.entities.Pet"));
-        Assertions.assertEquals("PetService", JSONPath.get(jdlModel, "$.entities.Pet.options.service"));
+        Assertions.assertEquals("PetService", ZDLUtils.serviceName("Pet", jdlModel));
     }
 
 }

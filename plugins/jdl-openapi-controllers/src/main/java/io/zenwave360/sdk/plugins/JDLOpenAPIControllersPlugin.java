@@ -1,5 +1,7 @@
 package io.zenwave360.sdk.plugins;
 
+import io.zenwave360.sdk.parsers.ZDLParser;
+import io.zenwave360.sdk.processors.*;
 import org.apache.commons.lang3.StringUtils;
 
 import io.zenwave360.sdk.Plugin;
@@ -8,10 +10,6 @@ import io.zenwave360.sdk.doc.DocumentedPlugin;
 import io.zenwave360.sdk.formatters.JavaFormatter;
 import io.zenwave360.sdk.parsers.DefaultYamlParser;
 import io.zenwave360.sdk.parsers.JDLParser;
-import io.zenwave360.sdk.processors.EnrichOpenAPIWithJDLProcessor;
-import io.zenwave360.sdk.processors.JDLDummyDataFromSchemasProcessor;
-import io.zenwave360.sdk.processors.JDLProcessor;
-import io.zenwave360.sdk.processors.OpenApiProcessor;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 
@@ -37,7 +35,7 @@ public class JDLOpenAPIControllersPlugin extends Plugin {
 
     public JDLOpenAPIControllersPlugin() {
         super();
-        withChain(DefaultYamlParser.class, OpenApiProcessor.class, JDLParser.class, JDLProcessor.class, EnrichOpenAPIWithJDLProcessor.class, JDLOpenAPIControllersGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
+        withChain(DefaultYamlParser.class, OpenApiProcessor.class, ZDLParser.class, ZDLProcessor.class, EnrichOpenAPIWithJDLProcessor.class, JDLOpenAPIControllersGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
     }
 
     @Override
@@ -50,7 +48,7 @@ public class JDLOpenAPIControllersPlugin extends Plugin {
         // because we have more than one model, we need to configure how they are passed around from parser to processor and generator
         // we use class name for passing the properties, in case one class is repeated in chain we'd use the index number in the chain
         withOption("DefaultYamlParser.specFile", StringUtils.firstNonBlank(this.getSpecFile(), (String) getOptions().get("openapiFile")));
-        withOption("JDLParser.specFile", getOptions().get("jdlFile"));
+        withOption("ZDLParser.specFile", getOptions().get("jdlFile"));
         return (T) this;
     }
 }

@@ -40,8 +40,8 @@ public class JDLBackendApplicationDefaultHelpers {
         var zdl = options.get("jdl");
         var inputDTOSuffix = (String) options.get("inputDTOSuffix");
         Set<String> inputs = new HashSet<String>();
-        inputs.addAll(JSONPath.get(zdl, "$.services[*][?('Customer' in @.aggregates)].methods[*].parameter"));
-        inputs.addAll(JSONPath.get(zdl, "$.services[*][?('Customer' in @.aggregates)].methods[*].returnType"));
+        inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregate.get("name") + "' in @.aggregates)].methods[*].parameter"));
+        inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregate.get("name") + "' in @.aggregates)].methods[*].returnType"));
         inputs.add(aggregate.get("name") + inputDTOSuffix);
         inputs = inputs.stream().filter(Objects::nonNull).collect(Collectors.toSet());
 

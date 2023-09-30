@@ -64,7 +64,7 @@ public class EnrichSchemaWithJDLProcessor extends AbstractBaseProcessor {
             String schemaName = (String) schema.get("x--schema-name");
             String entityName = dtoToEntityNameMap.getOrDefault(schemaName, (String) schema.get(jdlBusinessEntityProperty));
             entityName = StringUtils.defaultString(entityName, StringUtils.capitalize(schemaName));
-            Map<String, Object> entity = JSONPath.get(jdlModel, "$.entities." + entityName);
+            Map<String, Object> entity = JSONPath.get(jdlModel, "$.allEntitiesAndEnums." + entityName);
             if (entity != null) {
                 var dtos = JSONPath.get(entity, "$.options.dtos", new ArrayList<Map>());
                 var copiedSchema = new HashMap<>(schema);
@@ -81,7 +81,7 @@ public class EnrichSchemaWithJDLProcessor extends AbstractBaseProcessor {
             String schemaName = (String) schema.get("x--schema-name");
             String entityName = dtoToEntityNameMap.getOrDefault(schemaName, (String) schema.get(jdlBusinessEntityProperty));
             entityName = StringUtils.defaultString(entityName, StringUtils.capitalize(schemaName));
-            Map<String, Object> entity = JSONPath.get(jdlModel, "$.entities." + entityName);
+            Map<String, Object> entity = JSONPath.get(jdlModel, "$.allEntitiesAndEnums." + entityName);
             if (entity != null) {
                 dtoToEntityMap.put(schemaName, entity);
             }
