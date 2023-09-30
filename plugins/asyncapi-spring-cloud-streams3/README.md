@@ -246,7 +246,7 @@ public class DoCustomerRequestConsumerServiceIT extends BaseConsumerTest {
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.SpringCloudStreams3AdaptersPlugin \
     specFile=src/main/resources/model/asyncapi.yml \
-    jdlFile=src/main/resources/model/orders-model.jdl \
+    zdlFile=src/main/resources/model/orders-model.jdl \
     role=provider \
     style=imperative \
     basePackage=io.zenwave360.example \

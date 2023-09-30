@@ -7,12 +7,12 @@ defaultContentType: application/json
 
 tags:
   - name: "Default"
-{{~#each jdlModel.serviceNames as |serviceName|}}
+{{~#each zdlModel.serviceNames as |serviceName|}}
   - name: "{{asTagName serviceName}}"
 {{~/each}}
 
 channels:
-{{~#each jdlModel.entities as |entity|}}
+{{~#each zdlModel.entities as |entity|}}
   {{~#unless (skipOperations entity)}}
   {{~#if includeCommands}}
   {{entity.kebabCase}}.requests:
@@ -31,13 +31,13 @@ channels:
 {{~/each}}
 
 operations:
-{{~#each jdlModel.operations as |operation|}}
+{{~#each zdlModel.operations as |operation|}}
   {{@key}}:
     action: {{operation.action}}
     channel:
       $ref: '#/channels/{{operation.channel}}'
 {{~/each}}
-{{~#each jdlModel.entities as |entity|}}
+{{~#each zdlModel.entities as |entity|}}
   {{~#unless (skipOperations entity)}}
   {{~#if includeCommands}}
   do{{entity.className}}Request:
@@ -60,7 +60,7 @@ operations:
 
 components:
   messages:
-{{~#each jdlModel.entities as |entity|}}
+{{~#each zdlModel.entities as |entity|}}
   {{~#unless (skipOperations entity)}}
     {{~#if includeCommands}}
     {{entity.className}}RequestMessage:

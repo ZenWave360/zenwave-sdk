@@ -1,26 +1,19 @@
 package io.zenwave360.sdk.templating;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.jknack.handlebars.Handlebars;
-import io.zenwave360.sdk.parsers.JDLParser;
-import io.zenwave360.sdk.utils.JSONPath;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.jknack.handlebars.Options;
 
+import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.NamingUtils;
-
-import static org.apache.commons.lang3.StringUtils.capitalize;
 
 public class CustomHandlebarsHelpers {
 

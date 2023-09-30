@@ -188,7 +188,7 @@ We will use **OpenAPI**, **AsyncAPI** and other specs to define the communicatio
 
 ### Access data owned by other bounded contexts: Direct Access, Event Sourcing and CQRS
 
-- **Direct Access:** [Generates a full OpenAPI definitions for CRUD operations from JDL models](https://zenwave360.github.io/zenwave-sdk/plugins/jdl-to-openapi/)
+- **Direct Access:** [Generates a full OpenAPI definitions for CRUD operations from JDL models](https://zenwave360.github.io/zenwave-sdk/plugins/zdl-to-openapi/)
 - **Event Sourcing:** _TODO_
   - from entities.jdl (aggregates)
   - generate AsyncAPI definition and SpringData event listeners with SpringCloudStreams client that writes event to a topic

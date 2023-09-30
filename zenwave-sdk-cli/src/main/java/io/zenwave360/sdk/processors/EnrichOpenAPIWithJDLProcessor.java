@@ -15,14 +15,14 @@ public class EnrichOpenAPIWithJDLProcessor extends EnrichSchemaWithJDLProcessor 
     public List<String> paginatedDtoItemsJsonPath = List.of("$.properties.items", "$.properties.content.items");
 
     @Override
-    protected void enrichSchemaWithJdl(Map<String, Object> schemaModel, Map<String, Object> jdlModel) {
-        super.enrichSchemaWithJdl(schemaModel, jdlModel);
+    protected void enrichSchemaWithJdl(Map<String, Object> schemaModel, Map<String, Object> zdlModel) {
+        super.enrichSchemaWithJdl(schemaModel, zdlModel);
 
-        enrichPaginatedSchemasWithEntity(schemaModel, jdlModel);
+        enrichPaginatedSchemasWithEntity(schemaModel, zdlModel);
         enrichOpenapiRequestAndResponseWithEntity(schemaModel);
     }
 
-    protected void enrichPaginatedSchemasWithEntity(Map<String, Object> openApiModel, Map<String, Object> jdlModel) {
+    protected void enrichPaginatedSchemasWithEntity(Map<String, Object> openApiModel, Map<String, Object> zdlModel) {
         List<Map<String, Object>> schemas = JSONPath.get(openApiModel, "$.components.schemas[*]");
         for (Map<String, Object> schema : schemas) {
             var paginatedDtoSchema = getPaginatedDtoSchema(schema);

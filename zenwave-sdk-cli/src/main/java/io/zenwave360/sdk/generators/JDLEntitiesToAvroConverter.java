@@ -2,7 +2,7 @@ package io.zenwave360.sdk.generators;
 
 import java.util.*;
 
-import io.zenwave360.sdk.parsers.JDLParser;
+import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Lists;
 import io.zenwave360.sdk.utils.Maps;
@@ -22,9 +22,9 @@ public class JDLEntitiesToAvroConverter {
         return this;
     }
 
-    public Map<String, Object> convertToAvro(Map<String, Object> entityOrEnum, Map<String, Object> jdlModel) {
+    public Map<String, Object> convertToAvro(Map<String, Object> entityOrEnum, Map<String, Object> zdlModel) {
         boolean isEnum = entityOrEnum.get("values") != null;
-        return isEnum ? convertEnumToAvro(entityOrEnum) : convertEntityToAvro(entityOrEnum, jdlModel);
+        return isEnum ? convertEnumToAvro(entityOrEnum) : convertEntityToAvro(entityOrEnum, zdlModel);
     }
 
     public Map<String, Object> convertEnumToAvro(Map<String, Object> enumValue) {
@@ -40,7 +40,7 @@ public class JDLEntitiesToAvroConverter {
         return schema;
     }
 
-    public Map<String, Object> convertEntityToAvro(Map<String, Object> entity, Map<String, Object> jdlModel) {
+    public Map<String, Object> convertEntityToAvro(Map<String, Object> entity, Map<String, Object> zdlModel) {
         Map<String, Object> schema = new LinkedHashMap<>();
         schema.put("type", "record");
         schema.put("name", entity.get("name"));
@@ -58,7 +58,7 @@ public class JDLEntitiesToAvroConverter {
         List<Map<String, Object>> entityFields = (List) JSONPath.get(entity, "$.fields[*]");
         String superClassName = JSONPath.get(entity, "$.options.extends");
         if (superClassName != null) {
-            List superClassFields = (List) JSONPath.get(jdlModel, "$.entities['" + superClassName + "'].fields[*]");
+            List superClassFields = (List) JSONPath.get(zdlModel, "$.entities['" + superClassName + "'].fields[*]");
             fields = Lists.concat(superClassFields, fields);
         }
         for (Map<String, Object> entityField : entityFields) {
@@ -99,7 +99,7 @@ public class JDLEntitiesToAvroConverter {
             } else if ("UUID".equals(entityField.get("type"))) {
                 field.put("type", typeList("string", isRequired));
                 // field.put("pattern", "^[a-f\\d]{4}(?:[a-f\\d]{4}-){4}[a-f\\d]{12}$");
-            } else if (JDLParser.blobTypes.contains(entityField.get("type"))) {
+            } else if (ZDLParser.blobTypes.contains(entityField.get("type"))) {
                 field.put("type", typeList("bytes", isRequired));
                 // field.put("format", "binary");
             } else {
@@ -131,7 +131,7 @@ public class JDLEntitiesToAvroConverter {
 
         List<Map<String, Object>> relationships = JSONPath.get(entity, "$.relationships[*]", Collections.emptyList());
         if (superClassName != null) {
-            List superClassRelationships = (List) JSONPath.get(jdlModel, "$.entities['" + superClassName + "'].relationships[*]");
+            List superClassRelationships = (List) JSONPath.get(zdlModel, "$.entities['" + superClassName + "'].relationships[*]");
             relationships = Lists.concat(superClassRelationships, relationships);
         }
         for (Map<String, Object> relationship : relationships) {

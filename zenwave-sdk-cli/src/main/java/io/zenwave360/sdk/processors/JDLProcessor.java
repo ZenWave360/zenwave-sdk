@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 public class JDLProcessor extends AbstractBaseProcessor {
 
     public JDLProcessor() {
-        this.targetProperty = "jdl";
+        this.targetProperty = "zdl";
     }
 
     // Undocumented. Plugins using this should document the meaning of this option .
@@ -23,36 +23,36 @@ public class JDLProcessor extends AbstractBaseProcessor {
     public Map<String, Object> process(Map<String, Object> contextModel) {
         contextModel = new ZDL2JDLProcessor().process(contextModel);
 
-        Map<String, Object> jdlModel = targetProperty != null ? (Map) contextModel.get(targetProperty) : (Map) contextModel;
-        List<Map<String, Object>> entities = JSONPath.get(jdlModel, "$.entities[*]");
+        Map<String, Object> zdlModel = targetProperty != null ? (Map) contextModel.get(targetProperty) : (Map) contextModel;
+        List<Map<String, Object>> entities = JSONPath.get(zdlModel, "$.entities[*]");
         for (Map<String, Object> entity : entities) {
             if(JSONPath.get(entity, "options.searchCriteria") != null) {
-                fillCriteriaObject(entity, jdlModel);
+                fillCriteriaObject(entity, zdlModel);
             }
             if(JSONPath.get(entity, "options.extends") != null) {
-                fillExtendsEntities(entity, jdlModel);
+                fillExtendsEntities(entity, zdlModel);
             }
             if(JSONPath.get(entity, "options.copy") != null) {
-                fillCopyEntities(entity, jdlModel);
+                fillCopyEntities(entity, zdlModel);
             }
-            fillEntityRelationships(entity, jdlModel);
+            fillEntityRelationships(entity, zdlModel);
         }
         return contextModel;
     }
 
-    protected void fillExtendsEntities(Map<String, Object> entity, Map<String, Object> jdlModel) {
+    protected void fillExtendsEntities(Map<String, Object> entity, Map<String, Object> zdlModel) {
         String superClassName = JSONPath.get(entity, "options.extends");
-        JSONPath.set(jdlModel, "$.entities['" + superClassName + "'].options.isSuperClass", true);
-        boolean isExtendsAuditing = JSONPath.get(jdlModel, "$.entities['" + superClassName + "'].options.auditing") != null;
+        JSONPath.set(zdlModel, "$.entities['" + superClassName + "'].options.isSuperClass", true);
+        boolean isExtendsAuditing = JSONPath.get(zdlModel, "$.entities['" + superClassName + "'].options.auditing") != null;
         if(isExtendsAuditing) {
             JSONPath.set(entity, "options.extendsAuditing", true);
         }
     }
 
-    protected void fillCopyEntities(Map<String, Object> entity, Map<String, Object> jdlModel) {
+    protected void fillCopyEntities(Map<String, Object> entity, Map<String, Object> zdlModel) {
         String entityName = JSONPath.get(entity, "name");
         String superClassName = JSONPath.get(entity, "options.copy");
-        Map<String, Object> superClass = JSONPath.get(jdlModel, "$.entities['" + superClassName + "']");
+        Map<String, Object> superClass = JSONPath.get(zdlModel, "$.entities['" + superClassName + "']");
         if(superClass != null) {
             Map<String, Map> fields = JSONPath.get(entity, "$.fields");
             Map<String, Map> superClassFields = JSONPath.get(superClass, "$.fields");
@@ -63,13 +63,13 @@ public class JDLProcessor extends AbstractBaseProcessor {
             }
         }
     }
-    protected void fillCriteriaObject(Map<String, Object> entity, Map<String, Object> jdlModel) {
+    protected void fillCriteriaObject(Map<String, Object> entity, Map<String, Object> zdlModel) {
         Object searchCriteria = JSONPath.get(entity, "$.options.searchCriteria");
         if (searchCriteria == Boolean.TRUE) {
             // we are searching for all fields in entity, we create a jdl criteria object with all fields
             searchCriteria = entity.get("name");
 
-            Map searchCriteriaObject = Maps.copy(JSONPath.get(jdlModel, "$.entities." + searchCriteria));
+            Map searchCriteriaObject = Maps.copy(JSONPath.get(zdlModel, "$.entities." + searchCriteria));
             searchCriteriaObject.put("options", Maps.of("skip", true, "isCriteria", true));
 
             List.of("name", "instanceName", "className", "classNamePlural", "instanceNamePlural", "tableName")
@@ -80,17 +80,17 @@ public class JDLProcessor extends AbstractBaseProcessor {
 
             searchCriteria = searchCriteria + criteriaDTOSuffix;
             JSONPath.set(entity, "$.options.searchCriteria", searchCriteria);
-            JSONPath.set(jdlModel, "$.entities." + searchCriteria, searchCriteriaObject);
+            JSONPath.set(zdlModel, "$.entities." + searchCriteria, searchCriteriaObject);
         }
 
-        JSONPath.get(jdlModel, "$.entities." + searchCriteria + ".options", Collections.emptyMap()).put("isCriteria", true);
-        Map searchCriteriaObject = Maps.copy(JSONPath.get(jdlModel, "$.entities." + searchCriteria));
+        JSONPath.get(zdlModel, "$.entities." + searchCriteria + ".options", Collections.emptyMap()).put("isCriteria", true);
+        Map searchCriteriaObject = Maps.copy(JSONPath.get(zdlModel, "$.entities." + searchCriteria));
         JSONPath.set(entity, "options.searchCriteriaObject", searchCriteriaObject);
     }
 
-    protected void fillEntityRelationships(Map entity, Map jdlModel) {
+    protected void fillEntityRelationships(Map entity, Map zdlModel) {
         String entityName = (String) entity.get("name");
-        List<Map> relationships = JSONPath.get(jdlModel, "$.relationships[*][*][?(@.from == '" + entityName + "' || @.to == '" + entityName + "')]");
+        List<Map> relationships = JSONPath.get(zdlModel, "$.relationships[*][*][?(@.from == '" + entityName + "' || @.to == '" + entityName + "')]");
         entity.put("relationships", relationships.stream().map(r -> buildRelationship(entityName, r)).collect(Collectors.toList()));
     }
 

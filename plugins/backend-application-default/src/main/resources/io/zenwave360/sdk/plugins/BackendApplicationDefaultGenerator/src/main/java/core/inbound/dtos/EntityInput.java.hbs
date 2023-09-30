@@ -1,0 +1,101 @@
+package {{basePackage}}.core.inbound.dtos;
+
+import {{basePackage}}.core.domain.*;
+import java.io.Serializable;
+import java.math.*;
+import java.time.*;
+import java.util.*;
+import jakarta.validation.constraints.*;
+
+/**
+ *
+ */
+public class {{entity.className}}{{inputDTOSuffix entity}} {{addExtends entity suffix=(inputDTOSuffix entity)}} implements Serializable {
+
+{{#unless (skipEntityId entity)~}}
+    private {{idJavaType}} id;
+
+    private Integer version;
+{{/unless~}}
+
+{{#each entity.fields as |field|}}
+    {{{fieldValidationAnnotations field}}}
+    {{~#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix entity}}{{/if}}{{/assign}}
+    private {{{fieldType field suffix=typeSuffix}}} {{field.name}} {{{fieldTypeInitializer field}}};
+{{/each}}
+
+{{#each entity.relationships as |relationship|}}
+{{#if relationship.fieldName~}}
+    {{#if (addRelationshipById relationship entity=entity)}}
+    private {{idJavaType}} {{relationship.fieldName}}Id;
+    {{~else~}}
+    private {{{relationshipFieldType relationship suffix=(inputDTOSuffix entity)}}} {{relationship.fieldName}} {{{relationshipFieldTypeInitializer relationship}}};
+    {{~/if}}
+{{/if~}}
+{{/each}}
+
+{{#unless (skipEntityId entity)~}}
+    public {{idJavaType}} getId() {
+        return id;
+    }
+    public {{entity.className}}{{inputDTOSuffix entity}} withId({{idJavaType}} id) {
+        this.id = id;
+        return this;
+    }
+    public void setId({{idJavaType}} id) {
+        this.id = id;
+    }
+    public Integer getVersion() {
+        return version;
+    }
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+{{/unless~}}
+
+{{#each entity.fields as |field|}}
+    {{#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix entity}}{{/if}}{{/assign}}
+    {{~#if field.isArray}}
+        public {{entity.className}}{{inputDTOSuffix entity}} add{{capitalize field.name}}({{javaType field}}{{typeSuffix}} {{field.name}}) {
+        this.{{field.name}}.add({{field.name}});
+        return this;
+        }
+    {{~/if}}
+    public {{entity.className}}{{inputDTOSuffix entity}} with{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
+        this.{{field.name}} = {{field.name}};
+        return this;
+    }
+{{/each}}
+
+{{#each entity.fields as |field|}}
+    {{~#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix entity}}{{/if}}{{/assign}}
+    public {{{fieldType field suffix=typeSuffix}}} get{{capitalize field.name}}() {
+        return {{field.name}};
+    }
+
+    public void set{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
+        this.{{field.name}} = {{field.name}};
+    }
+{{/each}}
+
+{{#each entity.relationships as |relationship|}}
+{{#if relationship.fieldName~}}
+    {{#if (addRelationshipById relationship entity=entity)}}
+    public {{idJavaType}} get{{capitalize relationship.fieldName}}Id() {
+        return {{relationship.fieldName}}Id;
+    }
+    public void set{{capitalize relationship.fieldName}}Id({{idJavaType}} {{relationship.fieldName}}Id) {
+        this.{{relationship.fieldName}}Id = {{relationship.fieldName}}Id;
+    }
+    {{~else}}
+    public {{{relationshipFieldType relationship suffix=(inputDTOSuffix entity)}}} get{{capitalize relationship.fieldName}}() {
+        return {{relationship.fieldName}};
+    }
+
+    public void set{{capitalize relationship.fieldName}}({{{relationshipFieldType relationship suffix=(inputDTOSuffix entity)}}} {{relationship.fieldName}}) {
+        this.{{relationship.fieldName}} = {{relationship.fieldName}};
+    }
+    {{~/if}}
+{{/if~}}
+{{/each}}
+}

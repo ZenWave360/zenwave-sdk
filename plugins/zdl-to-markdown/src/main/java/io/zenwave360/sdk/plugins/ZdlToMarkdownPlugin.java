@@ -2,7 +2,7 @@ package io.zenwave360.sdk.plugins;
 
 import io.zenwave360.sdk.Plugin;
 import io.zenwave360.sdk.doc.DocumentedPlugin;
-import io.zenwave360.sdk.parsers.JDLParser;
+import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.processors.JDLProcessor;
 import io.zenwave360.sdk.processors.ZDLProcessor;

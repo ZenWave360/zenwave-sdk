@@ -9,10 +9,10 @@
         "io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:RELEASE",
         "io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:RELEASE",
         "io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured:RELEASE",
-        "io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default:RELEASE",
-        "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-openapi:RELEASE",
+        "io.github.zenwave360.zenwave-sdk.plugins:backend-application-default:RELEASE",
+        "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi:RELEASE",
         "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:RELEASE",
-        "io.github.zenwave360.zenwave-sdk.plugins:jdl-openapi-controllers:RELEASE"
+        "io.github.zenwave360.zenwave-sdk.plugins:openapi-controllers:RELEASE"
       ],
       "main": "io.zenwave360.sdk.Main"
     },
@@ -24,10 +24,10 @@
         "io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:1.1.0-SNAPSHOT",
         "io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:1.1.0-SNAPSHOT",
         "io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured:1.1.0-SNAPSHOT",
-        "io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default:1.1.0-SNAPSHOT",
-        "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-openapi:1.1.0-SNAPSHOT",
+        "io.github.zenwave360.zenwave-sdk.plugins:backend-application-default:1.1.0-SNAPSHOT",
+        "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi:1.1.0-SNAPSHOT",
         "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:1.1.0-SNAPSHOT",
-        "io.github.zenwave360.zenwave-sdk.plugins:jdl-openapi-controllers:1.1.0-SNAPSHOT"
+        "io.github.zenwave360.zenwave-sdk.plugins:openapi-controllers:1.1.0-SNAPSHOT"
       ],
       "repositories": [
         "mavencentral",
@@ -43,11 +43,11 @@
         "io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:2.0.0-SNAPSHOT",
         "io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:2.0.0-SNAPSHOT",
         "io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured:2.0.0-SNAPSHOT",
-        "io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default:2.0.0-SNAPSHOT",
-        "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-openapi:2.0.0-SNAPSHOT",
+        "io.github.zenwave360.zenwave-sdk.plugins:backend-application-default:2.0.0-SNAPSHOT",
+        "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi:2.0.0-SNAPSHOT",
         "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:2.0.0-SNAPSHOT",
         "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-markdown:2.0.0-SNAPSHOT",
-        "io.github.zenwave360.zenwave-sdk.plugins:jdl-openapi-controllers:2.0.0-SNAPSHOT"
+        "io.github.zenwave360.zenwave-sdk.plugins:openapi-controllers:2.0.0-SNAPSHOT"
       ],
       "repositories": [
         "mavencentral",

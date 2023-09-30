@@ -41,12 +41,6 @@
       <version>${zdl-jvm.version}</version>
     </dependency>
     <dependency>
-      <groupId>io.github.zenwave360.jhipster</groupId>
-      <artifactId>jdl-jvm</artifactId>
-      <version>${jdl-jvm.version}</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>com.graphql-java</groupId>
       <artifactId>graphql-java</artifactId>
       <version>${graphql-java.version}</version>

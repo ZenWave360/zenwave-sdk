@@ -14,7 +14,7 @@ public class ZDLParser implements Parser {
     @DocumentedOption(description = "ZDL files to parse")
     public String[] specFiles;
     private String content;
-    public String targetProperty = "jdl";
+    public String targetProperty = "zdl";
 
     public Map<String, String> options = new HashMap<>();
 

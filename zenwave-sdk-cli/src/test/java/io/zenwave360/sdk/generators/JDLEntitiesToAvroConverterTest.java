@@ -9,21 +9,21 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.zenwave360.sdk.parsers.JDLParser;
+import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.processors.JDLProcessor;
 import io.zenwave360.sdk.utils.JSONPath;
 
 public class JDLEntitiesToAvroConverterTest {
 
-    private Map<String, Object> loadJDLModelFromResource(String resource) throws Exception {
-        Map<String, Object> model = new JDLParser().withSpecFile(resource).parse();
-        return (Map) new JDLProcessor().process(model).get("jdl");
+    private Map<String, Object> loadZDLModelFromResource(String resource) throws Exception {
+        Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
+        return (Map) new JDLProcessor().process(model).get("zdl");
     }
 
     @Test
     public void testConvertEntityToSchema() throws Exception {
         JDLEntitiesToAvroConverter converter = new JDLEntitiesToAvroConverter().withIdType("string").withNamespace("io.example");
-        Map<String, Object> model = loadJDLModelFromResource("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl");
+        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl");
         List<Map> entities = JSONPath.get(model, "entities[*]");
         List<Map> enums = JSONPath.get(model, "enums.enums[*]");
         List<Map> entitiesAndEnums = new ArrayList<>();
@@ -49,7 +49,7 @@ public class JDLEntitiesToAvroConverterTest {
     @Test
     public void testConvertEntityToSchemaRelational() throws Exception {
         JDLEntitiesToAvroConverter converter = new JDLEntitiesToAvroConverter().withIdType("string").withNamespace("io.example");
-        Map<String, Object> model = loadJDLModelFromResource("classpath:io/zenwave360/sdk/resources/jdl/orders-model-relational.jdl");
+        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/jdl/orders-model-relational.jdl");
         List<Map> entities = JSONPath.get(model, "entities[*]");
         List<Map> enums = JSONPath.get(model, "enums.enums[*]");
         List<Map> entitiesAndEnums = new ArrayList<>();

@@ -12,7 +12,7 @@ import io.zenwave360.sdk.utils.JSONPath;
  */
 public class EnrichSchemaWithJDLProcessor extends AbstractBaseProcessor {
 
-    public String jdlProperty = "jdl";
+    public String jdlProperty = "zdl";
     public String apiProperty = "api";
 
     @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
@@ -30,7 +30,7 @@ public class EnrichSchemaWithJDLProcessor extends AbstractBaseProcessor {
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
         var schemaModel = (Map) contextModel.get(apiProperty);
-        var jdlModel = (Map) contextModel.getOrDefault(jdlProperty, Collections.emptyMap());
+        var zdlModel = (Map) contextModel.getOrDefault(jdlProperty, Collections.emptyMap());
 
         // This loop it's also in OpenAPIProcessor
         Map<String, Map> schemas = JSONPath.get(schemaModel, "$.components.schemas", Collections.emptyMap());
@@ -38,18 +38,18 @@ public class EnrichSchemaWithJDLProcessor extends AbstractBaseProcessor {
             entry.getValue().put("x--schema-name", entry.getKey());
         }
 
-        buildDtoToEntityMap(schemaModel, jdlModel);
-        enrichSchemaWithJdl(schemaModel, jdlModel);
+        buildDtoToEntityMap(schemaModel, zdlModel);
+        enrichSchemaWithJdl(schemaModel, zdlModel);
 
         return contextModel;
     }
 
-    protected void enrichSchemaWithJdl(Map<String, Object> schemaModel, Map<String, Object> jdlModel) {
-        enrichSchemasWithEntity(schemaModel, jdlModel);
-        enrichJdlEntitiesWithDtoNames(schemaModel, jdlModel);
+    protected void enrichSchemaWithJdl(Map<String, Object> schemaModel, Map<String, Object> zdlModel) {
+        enrichSchemasWithEntity(schemaModel, zdlModel);
+        enrichJdlEntitiesWithDtoNames(schemaModel, zdlModel);
     }
 
-    protected void enrichSchemasWithEntity(Map<String, Object> openApiModel, Map<String, Object> jdlModel) {
+    protected void enrichSchemasWithEntity(Map<String, Object> openApiModel, Map<String, Object> zdlModel) {
         List<Map<String, Object>> schemas = JSONPath.get(openApiModel, "$.components.schemas[*]");
         for (Map<String, Object> schema : schemas) {
             String dtoName = (String) schema.get("x--schema-name");
@@ -58,13 +58,13 @@ public class EnrichSchemaWithJDLProcessor extends AbstractBaseProcessor {
         }
     }
 
-    protected void enrichJdlEntitiesWithDtoNames(Map<String, Object> openApiModel, Map<String, Object> jdlModel) {
+    protected void enrichJdlEntitiesWithDtoNames(Map<String, Object> openApiModel, Map<String, Object> zdlModel) {
         List<Map<String, Object>> schemas = JSONPath.get(openApiModel, "$.components.schemas[*]");
         for (Map<String, Object> schema : schemas) {
             String schemaName = (String) schema.get("x--schema-name");
             String entityName = dtoToEntityNameMap.getOrDefault(schemaName, (String) schema.get(jdlBusinessEntityProperty));
             entityName = StringUtils.defaultString(entityName, StringUtils.capitalize(schemaName));
-            Map<String, Object> entity = JSONPath.get(jdlModel, "$.allEntitiesAndEnums." + entityName);
+            Map<String, Object> entity = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + entityName);
             if (entity != null) {
                 var dtos = JSONPath.get(entity, "$.options.dtos", new ArrayList<Map>());
                 var copiedSchema = new HashMap<>(schema);
@@ -75,13 +75,13 @@ public class EnrichSchemaWithJDLProcessor extends AbstractBaseProcessor {
         }
     }
 
-    protected void buildDtoToEntityMap(Map<String, Object> openApiModel, Map<String, Object> jdlModel) {
+    protected void buildDtoToEntityMap(Map<String, Object> openApiModel, Map<String, Object> zdlModel) {
         List<Map<String, Object>> schemas = JSONPath.get(openApiModel, "$.components.schemas[*]");
         for (Map<String, Object> schema : schemas) {
             String schemaName = (String) schema.get("x--schema-name");
             String entityName = dtoToEntityNameMap.getOrDefault(schemaName, (String) schema.get(jdlBusinessEntityProperty));
             entityName = StringUtils.defaultString(entityName, StringUtils.capitalize(schemaName));
-            Map<String, Object> entity = JSONPath.get(jdlModel, "$.allEntitiesAndEnums." + entityName);
+            Map<String, Object> entity = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + entityName);
             if (entity != null) {
                 dtoToEntityMap.put(schemaName, entity);
             }

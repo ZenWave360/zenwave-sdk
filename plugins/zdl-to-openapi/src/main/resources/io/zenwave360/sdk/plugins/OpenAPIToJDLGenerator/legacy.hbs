@@ -1,0 +1,105 @@
+{{~#each zdlModel.entities as |entity|}}
+  {{~#unless (skipOperations entity)}}
+{{~#if entity.options.searchCriteria}}
+  /{{entity.kebabCasePlural}}/search:
+    post:
+      summary: Search {{entity.classNamePlural}}
+      operationId: search{{entity.classNamePlural}}
+      tags: [{{asTagName entity.options.service}}]
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/{{entity.options.searchCriteria}}"
+      responses:
+        "200":
+          description: {{entity.classNamePlural}}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/{{entity.className}}Paginated"
+{{~/if}}
+  /{{entity.kebabCasePlural}}:
+    get:
+      summary: Find {{entity.classNamePlural}}
+      operationId: list{{entity.classNamePlural}}
+      tags: [{{asTagName entity.options.service}}]
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+      responses:
+        "200":
+          description: {{entity.classNamePlural}}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/{{entity.className}}Paginated"
+    post:
+      summary: Create {{entity.className}}
+      operationId: create{{entity.className}}
+      tags: [{{asTagName entity.options.service}}]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/{{entity.className}}"
+      responses:
+        "201":
+          description: {{entity.className}}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/{{entity.className}}"
+
+  /{{entity.kebabCasePlural}}/{id}:
+    parameters:
+    - name: id
+      in: path
+      description: {{entity.className}} id
+      required: true
+      schema:
+        type: {{idType}}
+        {{~#if idTypeFormat}}
+        format: {{idTypeFormat}}
+        {{~/if}}
+    get:
+      summary: Get {{entity.className}} by id
+      operationId: get{{entity.className}}
+      tags: [{{asTagName entity.options.service}}]
+      responses:
+        "200":
+          description: {{entity.className}}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/{{entity.className}}"
+    put:
+      summary: Update {{entity.className}}
+      operationId: update{{entity.className}}
+      tags: [{{asTagName entity.options.service}}]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/{{entity.className}}"
+      responses:
+        "200":
+          description: {{entity.className}}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/{{entity.className}}"
+    delete:
+      summary: Delete {{entity.className}}
+      operationId: delete{{entity.className}}
+      tags: [{{asTagName entity.options.service}}]
+      responses:
+        "204":
+          description: {{entity.className}} deleted
+  {{/unless}}
+{{/each~}}

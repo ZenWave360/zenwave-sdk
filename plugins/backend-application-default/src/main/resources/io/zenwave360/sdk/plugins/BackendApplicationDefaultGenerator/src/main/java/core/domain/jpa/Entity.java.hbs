@@ -1,0 +1,181 @@
+package {{basePackage}}.core.domain;
+
+import java.io.Serializable;
+import java.math.*;
+import java.time.*;
+import java.util.*;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+{{~#if entity.options.auditing}}
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+{{~/if}}
+
+/**
+* {{entity.comment}}
+*/
+{{#if entity.options.embedded}}
+@Embeddable
+{{else if entity.options.isSuperClass}}
+@MappedSuperclass
+{{else}}
+@Entity
+@Table(name = "{{snakeCase entity.tableName}}")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+{{~/if}}
+{{~#if entity.options.auditing}}@EntityListeners(AuditingEntityListener.class){{~/if}}
+public class {{entity.className}} {{addExtends entity}} implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+{{#unless (skipEntityId entity)~}}
+    {{~> (partial 'partials/id' databaseType)}}
+    private {{idJavaType}} id;
+
+    @Version
+    private Integer version;
+{{/unless~}}
+
+{{#each entity.fields as |field|}}
+  {{~#if field.javadoc}}
+    /**
+    * {{{field.javadoc}}}
+    */
+  {{~/if}}
+  {{{fieldValidationAnnotations field}}}
+  {{~#if field.isEntity}}
+    @Embedded
+    {{~ assign 'embeddedFields' (jsonPath zdl 'entities.' field.type '.fields[*]') ~}}
+    {{~#joinWithTemplate embeddedFields as |it|}}
+    @AttributeOverride( name = "{{it.name}}", column = @Column(name = "{{snakeCase field.name}}_{{name}}"))
+    {{~/joinWithTemplate~}}
+  {{~else~}}
+    @Column(name = "{{snakeCase field.name}}" {{#if field.validations.required}}, nullable = false{{/if}}{{#if field.validations.unique}}, unique = true{{/if}}{{#if field.validations.maxlength}}, length = {{field.validations.maxlength.value}}{{/if}})
+  {{~/if~}}
+    {{~#if field.isEnum}} @Enumerated(EnumType.STRING){{/if}}
+    private {{fieldType field}} {{field.name}} {{fieldTypeInitializer field}};
+{{/each}}
+
+{{#each entity.relationships as |relationship|}}
+{{#if relationship.fieldName~}}
+    {{#if (addRelationshipById relationship entity=entity)}}
+    {{#if relationship.required}}@NotNull{{/if}}
+    @Column(name = "{{snakeCase relationship.fieldName}}_id")
+    private {{idJavaType}} {{relationship.fieldName}}Id;
+    {{~/if}}
+    {{> (partial 'partials/' relationship.type)}}
+    {{#unless (addRelationshipById relationship entity=entity)}}{{#if relationship.required}}@NotNull{{/if}}{{/unless}}
+    private {{{relationshipFieldType relationship}}} {{relationship.fieldName}} {{{relationshipFieldTypeInitializer relationship}}};
+{{/if~}}
+{{/each}}
+
+{{~#if entity.options.auditing}}
+    @CreatedBy
+    @Column(name = "created_by")
+    protected String createdBy;
+    @CreatedDate
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP")
+    protected LocalDateTime createdDate;
+    @LastModifiedBy
+    @Column(name = "last_modified_by")
+    protected String lastModifiedBy;
+    @LastModifiedDate
+    @Column(name = "last_modified_date", columnDefinition = "TIMESTAMP")
+    protected LocalDateTime lastModifiedDate;
+{{~/if}}
+
+{{#unless (skipEntityId entity)~}}
+    public {{idJavaType}} getId() {
+        return id;
+    }
+    public {{entity.className}} withId({{idJavaType}} id) {
+        this.id = id;
+        return this;
+    }
+    public void setId({{idJavaType}} id) {
+        this.id = id;
+    }
+    public Integer getVersion() {
+        return version;
+    }
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+{{/unless~}}
+
+{{#each entity.fields as |field|}}
+    public {{entity.name}} with{{capitalize field.name}}({{javaType field}} {{field.name}}) {
+    this.{{field.name}} = {{field.name}};
+    return this;
+    }
+{{/each}}
+
+{{#each entity.fields as |field|}}
+    public {{javaType field}} get{{capitalize field.name}}() {
+        return {{field.name}};
+    }
+
+    public void set{{capitalize field.name}}({{javaType field}} {{field.name}}) {
+        this.{{field.name}} = {{field.name}};
+    }
+{{/each}}
+
+{{#each entity.relationships as |relationship|}}
+{{#if relationship.fieldName~}}
+    {{#if (addRelationshipById relationship entity=entity)}}
+    public {{idJavaType}} get{{capitalize relationship.fieldName}}Id() {
+        return {{relationship.fieldName}}Id;
+    }
+    public void set{{capitalize relationship.fieldName}}Id({{idJavaType}} {{relationship.fieldName}}Id) {
+        this.{{relationship.fieldName}}Id = {{relationship.fieldName}}Id;
+    }
+    {{~/if}}
+    public {{{relationshipFieldType relationship}}} get{{capitalize relationship.fieldName}}() {
+        return {{relationship.fieldName}};
+    }
+    public void set{{capitalize relationship.fieldName}}({{{relationshipFieldType relationship}}} {{relationship.fieldName}}) {
+        this.{{relationship.fieldName}} = {{relationship.fieldName}};
+    }
+{{/if~}}
+{{/each}}
+
+{{~#if entity.options.auditing}}
+  public String getCreatedBy() {
+    return createdBy;
+  }
+
+  public void setCreatedBy(String createdBy) {
+    this.createdBy = createdBy;
+  }
+
+  public LocalDateTime getCreatedDate() {
+    return createdDate;
+  }
+
+  public void setCreatedDate(LocalDateTime createdDate) {
+    this.createdDate = createdDate;
+  }
+
+  public String getLastModifiedBy() {
+    return lastModifiedBy;
+  }
+
+  public void setLastModifiedBy(String lastModifiedBy) {
+    this.lastModifiedBy = lastModifiedBy;
+  }
+
+  public LocalDateTime getLastModifiedDate() {
+    return lastModifiedDate;
+  }
+
+  public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
+    this.lastModifiedDate = lastModifiedDate;
+  }
+{{/if}}
+
+}

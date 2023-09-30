@@ -41,12 +41,12 @@ public class JDLEntitiesToSchemasConverter {
         return this;
     }
 
-    public Map<String, Object> convertToSchema(Map<String, Object> entityOrEnum, Map<String, Object> jdlModel) {
+    public Map<String, Object> convertToSchema(Map<String, Object> entityOrEnum, Map<String, Object> zdlModel) {
         boolean isEnum = entityOrEnum.get("values") != null;
-        return isEnum ? convertEnumToSchema(entityOrEnum, jdlModel) : convertEntityToSchema(entityOrEnum, jdlModel);
+        return isEnum ? convertEnumToSchema(entityOrEnum, zdlModel) : convertEntityToSchema(entityOrEnum, zdlModel);
     }
 
-    public Map<String, Object> convertEnumToSchema(Map<String, Object> enumValue, Map<String, Object> jdlModelv) {
+    public Map<String, Object> convertEnumToSchema(Map<String, Object> enumValue, Map<String, Object> zdlModelv) {
         Map<String, Object> enumSchema = new LinkedHashMap<>();
         enumSchema.put("type", "string");
         enumSchema.put(jdlBusinessEntityProperty, enumValue.get("name"));
@@ -58,7 +58,7 @@ public class JDLEntitiesToSchemasConverter {
         return enumSchema;
     }
 
-    public Map<String, Object> convertEntityToSchema(Map<String, Object> entity, Map<String, Object> jdlModel) {
+    public Map<String, Object> convertEntityToSchema(Map<String, Object> entity, Map<String, Object> zdlModel) {
         Map<String, Object> schema = new LinkedHashMap<>();
         schema.put("type", "object");
         schema.put(jdlBusinessEntityProperty, entity.get("name"));
@@ -80,12 +80,12 @@ public class JDLEntitiesToSchemasConverter {
         List<Map<String, Object>> fields = (List) JSONPath.get(entity, "$.fields[*]");
         String superClassName = JSONPath.get(entity, "$.options.extends");
         if (superClassName != null) {
-            List superClassFields = (List) JSONPath.get(jdlModel, "$.entities['" + superClassName + "'].fields[*]");
+            List superClassFields = (List) JSONPath.get(zdlModel, "$.entities['" + superClassName + "'].fields[*]");
             fields = Lists.concat(superClassFields, fields);
         }
         for (Map<String, Object> field : fields) {
             Map<String, Object> property = new LinkedHashMap<>();
-            boolean isComplexType = JSONPath.get(jdlModel, "$.allEntitiesAndEnums." + field.get("type")) != null;
+            boolean isComplexType = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + field.get("type")) != null;
 
             if ("String".equals(field.get("type")) || "TextBlob".equals(field.get("type"))) {
                 property.put("type", "string");
@@ -158,7 +158,7 @@ public class JDLEntitiesToSchemasConverter {
 
         List<Map<String, Object>> relationships = JSONPath.get(entity, "$.relationships[*]", Collections.emptyList());
         if (superClassName != null) {
-            List superClassRelationships = (List) JSONPath.get(jdlModel, "$.entities['" + superClassName + "'].relationships[*]");
+            List superClassRelationships = (List) JSONPath.get(zdlModel, "$.entities['" + superClassName + "'].relationships[*]");
             relationships = Lists.concat(superClassRelationships, relationships);
         }
         for (Map<String, Object> relationship : relationships) {

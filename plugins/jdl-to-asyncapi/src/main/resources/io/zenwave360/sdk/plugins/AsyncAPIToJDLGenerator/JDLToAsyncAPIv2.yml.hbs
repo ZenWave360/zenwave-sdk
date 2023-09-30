@@ -7,12 +7,12 @@ defaultContentType: application/json
 
 tags:
   - name: "Default"
-{{~#each jdlModel.serviceNames as |serviceName|}}
+{{~#each zdlModel.serviceNames as |serviceName|}}
   - name: "{{asTagName serviceName}}"
 {{~/each}}
 
 channels:
-{{~#each jdlModel.entities as |entity|}}
+{{~#each zdlModel.entities as |entity|}}
   {{~#unless (skipOperations entity)}}
   {{~#if includeCommands}}
   {{entity.kebabCase}}.requests:
@@ -39,7 +39,7 @@ channels:
 
 components:
   messages:
-{{~#each jdlModel.entities as |entity|}}
+{{~#each zdlModel.entities as |entity|}}
   {{~#unless (skipOperations entity)}}
     {{~#if includeCommands}}
     {{entity.className}}RequestMessage:
@@ -85,7 +85,7 @@ components:
 {{{schemasAsString}}}
 
 {{~#if schemasAsString}}{{~#if (isStateTransferPayloadStyle)}}
-{{~#each jdlModel.entities as |entity|}}
+{{~#each zdlModel.entities as |entity|}}
   {{~#unless (skipOperations entity)}}
     {{~#if includeCommands}}
     {{entity.className}}RequestPayload:

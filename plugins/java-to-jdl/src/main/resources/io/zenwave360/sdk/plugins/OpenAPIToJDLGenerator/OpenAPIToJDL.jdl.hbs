@@ -1,5 +1,5 @@
 
-{{#each jdlModel.entities as |entity|}}
+{{#each zdlModel.entities as |entity|}}
     {{~#if entity.description~}}
 /**
  * {{entity.description}}
@@ -13,7 +13,7 @@ entity {{entity.name}} {
 
 {{/each}}
 
-{{#each jdlModel.enums as |enum|}}
+{{#each zdlModel.enums as |enum|}}
     {{~#if enum.description~}}
 /**
 * {{enum.description}}
@@ -27,16 +27,16 @@ enum {{enum.name}} {
 
 {{/each}}
 
-{{#if jdlModel.relationships.oneToMany}}
+{{#if zdlModel.relationships.oneToMany}}
 relationship OneToMany {
-    {{~#each jdlModel.relationships.oneToMany as |relationship|}}
+    {{~#each zdlModel.relationships.oneToMany as |relationship|}}
     {{relationship.0}}{ {{~relationship.1~}} } {{relationship.2}}
     {{~/each}}
 }
 {{/if}}
-{{#if jdlModel.relationships.manyToOne}}
+{{#if zdlModel.relationships.manyToOne}}
 relationship ManyToOne {
-    {{~#each jdlModel.relationships.manyToOne as |relationship|}}
+    {{~#each zdlModel.relationships.manyToOne as |relationship|}}
     {{relationship.0}}{ {{~relationship.1~}} } {{relationship.2}}
     {{~/each}}
 }

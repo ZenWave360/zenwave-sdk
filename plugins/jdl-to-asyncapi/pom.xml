@@ -10,12 +10,4 @@
     <groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
     <artifactId>jdl-to-asyncapi</artifactId>
     <packaging>jar</packaging>
-
-    <dependencies>
-        <dependency>
-            <groupId>io.github.zenwave360.jhipster</groupId>
-            <artifactId>jdl-jvm</artifactId>
-            <version>${jdl-jvm.version}</version>
-        </dependency>
-    </dependencies>
 </project>

@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
-import io.zenwave360.sdk.generators.AbstractJDLGenerator;
+import io.zenwave360.sdk.generators.AbstractZDLGenerator;
 import io.zenwave360.sdk.generators.JDLEntitiesToAvroConverter;
 import io.zenwave360.sdk.generators.JDLEntitiesToSchemasConverter;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
@@ -24,7 +24,7 @@ import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 
-public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
+public class JDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
     ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
     ObjectMapper jsonMapper = new ObjectMapper();
@@ -37,7 +37,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         entity, event
     }
 
-    public String sourceProperty = "jdl";
+    public String sourceProperty = "zdl";
 
     @DocumentedOption(description = "Target AsyncAPI version.")
     public AsyncapiVersionType asyncapiVersion = AsyncapiVersionType.v2;
@@ -107,9 +107,9 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
     @Override
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {
         List<TemplateOutput> outputList = new ArrayList<>();
-        Map<String, Object> jdlModel = getJDLModel(contextModel);
-        List<String> serviceNames = JSONPath.get(jdlModel, "$.options.options.service[*].value");
-        ((Map) jdlModel).put("serviceNames", serviceNames);
+        Map<String, Object> zdlModel = getJDLModel(contextModel);
+        List<String> serviceNames = JSONPath.get(zdlModel, "$.options.options.service[*].value");
+        ((Map) zdlModel).put("serviceNames", serviceNames);
 
         Map<String, Object> oasSchemas = new HashMap<>();
         Map<String, Object> schemas = new LinkedHashMap<>();
@@ -119,8 +119,8 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         JDLEntitiesToSchemasConverter toSchemasConverter = new JDLEntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
         toSchemasConverter.includeVersion = false;
 
-        List<Map<String, Object>> entities = (List) JSONPath.get(jdlModel, "$.entities[*]");
-        List<Map<String, Object>> enums = (List) JSONPath.get(jdlModel, "$.enums.enums[*]");
+        List<Map<String, Object>> entities = (List) JSONPath.get(zdlModel, "$.entities[*]");
+        List<Map<String, Object>> enums = (List) JSONPath.get(zdlModel, "$.enums.enums[*]");
         List<Map> entitiesAndEnums = new ArrayList<>();
         entitiesAndEnums.addAll(entities);
         entitiesAndEnums.addAll(enums);
@@ -131,12 +131,12 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
             }
             if (schemaFormat == SchemaFormat.schema) {
                 String entityName = (String) entity.get("name");
-                Map<String, Object> asyncAPISchema = toSchemasConverter.convertToSchema(entity, jdlModel);
+                Map<String, Object> asyncAPISchema = toSchemasConverter.convertToSchema(entity, zdlModel);
                 schemas.put(entityName, asyncAPISchema);
             }
             if (schemaFormat == SchemaFormat.avro) {
                 outputList.addAll(createAvroRequestAndEventTypeEnums(toAvroConverter));
-                outputList.addAll(convertToAvro(toAvroConverter, entity, jdlModel));
+                outputList.addAll(convertToAvro(toAvroConverter, entity, zdlModel));
             }
         }
 
@@ -147,7 +147,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
             asyncAPISchemasString = asyncAPISchemasString.substring(asyncAPISchemasString.indexOf("components:") + 12);
         }
 
-        outputList.add(generateTemplateOutput(contextModel, jdlToAsyncAPITemplate, jdlModel, asyncAPISchemasString));
+        outputList.add(generateTemplateOutput(contextModel, jdlToAsyncAPITemplate, zdlModel, asyncAPISchemasString));
         return outputList;
     }
 
@@ -180,9 +180,9 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         return targetFolder == null ? "avro" : targetFolder + "/avro";
     }
 
-    protected List<TemplateOutput> convertToAvro(JDLEntitiesToAvroConverter converter, Map<String, Object> entityOrEnum, Map<String, Object> jdlModel) {
+    protected List<TemplateOutput> convertToAvro(JDLEntitiesToAvroConverter converter, Map<String, Object> entityOrEnum, Map<String, Object> zdlModel) {
         String name = (String) entityOrEnum.get("name");
-        Map avro = converter.convertToAvro(entityOrEnum, jdlModel);
+        Map avro = converter.convertToAvro(entityOrEnum, zdlModel);
         String avroJson = writeAsString(jsonMapper, avro);
         String targetFolder = getTargetAvroFolder();
         List<TemplateOutput> avroList = new ArrayList<>();
@@ -201,7 +201,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
                 Map<String, Object> requestPayload = new HashMap<>();
                 requestPayload.put("name", name + "RequestPayload");
                 requestPayload.put("fields", fields);
-                avroJson = writeAsString(jsonMapper, converter.convertToAvro(requestPayload, jdlModel));
+                avroJson = writeAsString(jsonMapper, converter.convertToAvro(requestPayload, zdlModel));
                 avroList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name + "RequestPayload"), avroJson, OutputFormatType.JSON.toString()));
             }
 
@@ -211,7 +211,7 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
                 Map<String, Object> eventPayload = new HashMap<>();
                 eventPayload.put("name", name + "EventPayload");
                 eventPayload.put("fields", fields);
-                avroJson = writeAsString(jsonMapper, converter.convertToAvro(eventPayload, jdlModel));
+                avroJson = writeAsString(jsonMapper, converter.convertToAvro(eventPayload, zdlModel));
                 avroList.add(new TemplateOutput(String.format("%s/%s.avsc", targetFolder, name + "EventPayload"), avroJson, OutputFormatType.JSON.toString()));
             }
         }
@@ -219,11 +219,11 @@ public class JDLToAsyncAPIGenerator extends AbstractJDLGenerator {
         return avroList;
     }
 
-    public TemplateOutput generateTemplateOutput(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> jdlModel, String schemasAsString) {
+    public TemplateOutput generateTemplateOutput(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> zdlModel, String schemasAsString) {
         Map<String, Object> model = new HashMap<>();
         model.putAll(this.asConfigurationMap());
         model.put("context", contextModel);
-        model.put("jdlModel", jdlModel);
+        model.put("zdlModel", zdlModel);
         model.put("schemaFormatString", schemaFormat == SchemaFormat.schema ? (asyncapiVersion == AsyncapiVersionType.v3? defaultSchemaFormatV3 : defaultSchemaFormatV2) : avroSchemaFormat);
         model.put("schemasAsString", schemasAsString);
         return handlebarsEngine.processTemplate(model, template).get(0);

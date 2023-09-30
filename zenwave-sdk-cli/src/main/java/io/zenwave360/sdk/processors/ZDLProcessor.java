@@ -10,6 +10,10 @@ public class ZDLProcessor extends JDLProcessor {
 
     public Map<String, Object> process(Map<String, Object> contextModel) {
         Map<String, Object> zdlModel = targetProperty != null ? (Map) contextModel.get(targetProperty) : (Map) contextModel;
+        if(zdlModel == null) {
+            return contextModel;
+        }
+
         processServiceName(zdlModel);
 
         contextModel = super.process(contextModel);

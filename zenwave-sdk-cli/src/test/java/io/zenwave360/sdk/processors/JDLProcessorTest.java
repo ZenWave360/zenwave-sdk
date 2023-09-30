@@ -7,13 +7,13 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import io.zenwave360.sdk.parsers.JDLParser;
+import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.utils.JSONPath;
 
 public class JDLProcessorTest {
 
-    private Map<String, Object> loadJDL(String resource) throws IOException {
-        Map<String, Object> model = new JDLParser().withSpecFile(resource).parse();
+    private Map<String, Object> loadZDL(String resource) throws IOException {
+        Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
         return new JDLProcessor().process(model);
     }
 
@@ -23,8 +23,8 @@ public class JDLProcessorTest {
 
     @Test
     public void testProcessJDL_WithSemanticAnnotations() throws Exception {
-        var model = loadJDL("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl");
-        List entitiesWithCriteria = JSONPath.get(model, "$.jdl.entities[*][?(@.options.searchCriteriaObject)]");
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl");
+        List entitiesWithCriteria = JSONPath.get(model, "$.zdl.entities[*][?(@.options.searchCriteriaObject)]");
         Assertions.assertFalse(entitiesWithCriteria.isEmpty());
         Assertions.assertEquals(2, entitiesWithCriteria.size());
         Assertions.assertTrue(containsEntity(entitiesWithCriteria, "Customer"));
@@ -33,8 +33,8 @@ public class JDLProcessorTest {
 
     @Test
     public void testProcessJDL_Relational() throws Exception {
-        var model = loadJDL("classpath:io/zenwave360/sdk/resources/jdl/orders-model-relational.jdl");
-        List entitiesWithCriteria = JSONPath.get(model, "$.jdl.entities[*][?(@.options.searchCriteriaObject)]");
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/jdl/orders-model-relational.jdl");
+        List entitiesWithCriteria = JSONPath.get(model, "$.zdl.entities[*][?(@.options.searchCriteriaObject)]");
         Assertions.assertFalse(entitiesWithCriteria.isEmpty());
         Assertions.assertEquals(2, entitiesWithCriteria.size());
         Assertions.assertTrue(containsEntity(entitiesWithCriteria, "Customer"));

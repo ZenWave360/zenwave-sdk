@@ -26,10 +26,10 @@ public class JDLDummyDataFromSchemasProcessorTest {
         var processor = new JDLDummyDataFromSchemasProcessor();
         var processed = processor.process(model);
         Assertions.assertNotNull(processed.get(processor.jdlProperty));
-        Map jdlModel = (Map) processed.get(processor.jdlProperty);
-        Assertions.assertNotNull(JSONPath.get(jdlModel, "$.entities"));
-        Assertions.assertNotNull(JSONPath.get(jdlModel, "$.entities.Pet"));
-        Assertions.assertEquals("PetService", ZDLUtils.serviceName("Pet", jdlModel));
+        Map zdlModel = (Map) processed.get(processor.jdlProperty);
+        Assertions.assertNotNull(JSONPath.get(zdlModel, "$.entities"));
+        Assertions.assertNotNull(JSONPath.get(zdlModel, "$.entities.Pet"));
+        Assertions.assertEquals("PetService", ZDLUtils.serviceName("Pet", zdlModel));
     }
 
 }

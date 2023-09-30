@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import io.zenwave360.sdk.parsers.JDLParser;
+import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.processors.JDLProcessor;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
@@ -19,14 +19,14 @@ public class JDLToAsyncAPIGeneratorV3Test {
 
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
-    private Map<String, Object> loadJDLModelFromResource(String resource) throws Exception {
-        Map<String, Object> model = new JDLParser().withSpecFile(resource).parse();
+    private Map<String, Object> loadZDLModelFromResource(String resource) throws Exception {
+        Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
         return new JDLProcessor().process(model);
     }
 
     @Test
     public void test_jdl_to_asyncapi() throws Exception {
-        Map<String, Object> model = loadJDLModelFromResource("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl");
+        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl");
         JDLToAsyncAPIGenerator generator = new JDLToAsyncAPIGenerator();
         generator.includeCommands = true;
         generator.annotations = List.of("aggregate");

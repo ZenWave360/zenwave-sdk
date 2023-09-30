@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import io.zenwave360.sdk.parsers.DefaultYamlParser;
-import io.zenwave360.sdk.parsers.JDLParser;
+import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.plugins.NoOpGenerator;
 import io.zenwave360.sdk.processors.AsyncApiProcessor;
 import io.zenwave360.sdk.processors.OpenApiProcessor;
@@ -58,10 +58,10 @@ public class MainGeneratorTest {
                 .withOption("2.specFile", "classpath:io/zenwave360/sdk/resources/jdl/21-points.jh")
                 .withOption("0.targetProperty", "asyncapi")
                 .withOption("1.targetProperty", "openapi")
-                .withOption("2.targetProperty", "jdl")
+                .withOption("2.targetProperty", "zdl")
                 .withOption("3.targetProperty", "asyncapi")
                 .withOption("4.targetProperty", "openapi")
-                .withChain(DefaultYamlParser.class, DefaultYamlParser.class, JDLParser.class, AsyncApiProcessor.class, OpenApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class);
+                .withChain(DefaultYamlParser.class, DefaultYamlParser.class, ZDLParser.class, AsyncApiProcessor.class, OpenApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class);
 
         new MainGenerator().generate(plugin);
 

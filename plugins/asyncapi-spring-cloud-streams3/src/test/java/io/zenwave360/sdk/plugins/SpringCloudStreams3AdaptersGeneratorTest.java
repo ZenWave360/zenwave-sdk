@@ -57,7 +57,7 @@ public class SpringCloudStreams3AdaptersGeneratorTest {
                 .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-orders-relational.yml")
                 .withTargetFolder("target/zenwave630/out/v2")
                 .withOption("apiId", "provider")
-                .withOption("jdlFile", "classpath:io/zenwave360/sdk/resources/jdl/orders-model-relational.jdl")
+                .withOption("zdlFile", "classpath:io/zenwave360/sdk/resources/jdl/orders-model-relational.jdl")
                 .withOption("basePackage", "io.example.orders.relational")
                 .withOption("consumerApiPackage", "io.example.orders.provider.api")
                 .withOption("modelPackage", "io.example.orders.relational.core.domain.model.events")

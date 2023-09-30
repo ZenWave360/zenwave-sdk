@@ -1,6 +1,6 @@
 package io.zenwave360.sdk.plugins;
 
-import io.zenwave360.sdk.parsers.JDLParser;
+import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.processors.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,30 +20,30 @@ public class SpringCloudStreams3AdaptersPlugin extends Plugin {
     public SpringCloudStreams3AdaptersPlugin() {
         super();
 //        withChain(DefaultYamlParser.class, AsyncApiProcessor.class, SpringCloudStreams3AdaptersGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
-        withChain(DefaultYamlParser.class, AsyncApiProcessor.class, JDLParser.class, JDLProcessor.class, EnrichAsyncAPIWithJDLProcessor.class, SpringCloudStreams3AdaptersGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
+        withChain(DefaultYamlParser.class, AsyncApiProcessor.class, ZDLParser.class, JDLProcessor.class, EnrichAsyncAPIWithJDLProcessor.class, SpringCloudStreams3AdaptersGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
     }
 
     @Override
     public <T extends Plugin> T processOptions() {
 
-        if (!getOptions().containsKey("jdlFile")) {
-            removeFromChain(JDLParser.class, JDLProcessor.class);
+        if (!getOptions().containsKey("zdlFile")) {
+            removeFromChain(ZDLParser.class, JDLProcessor.class);
 //            addBeforeInChain(EnrichAsyncAPIWithJDLProcessor.class, JDLDummyDataFromSchemasProcessor.class);
 //            withOption("JDLDummyDataFromSchemasProcessor.apiProperty", "api");
-//            withOption("JDLDummyDataFromSchemasProcessor.jdlProperty", "jdl");
+//            withOption("JDLDummyDataFromSchemasProcessor.jdlProperty", "zdl");
         }
         // because we have more than one model, we need to configure how they are passed around from parser to processor and generator
         // we use class name for passing the properties, in case one class is repeated in chain we'd use the index number in the chain
         withOption("DefaultYamlParser.specFile", StringUtils.firstNonBlank(this.getSpecFile(), (String) getOptions().get("apiFile")));
 //        withOption("DefaultYamlParser.targetProperty", "api");
 //        withOption("AsyncApiProcessor.targetProperty", "api");
-        withOption("JDLParser.specFile", getOptions().get("jdlFile"));
-//        withOption("JDLParser.targetProperty", "jdl");
-//        withOption("JDLProcessor.targetProperty", "jdl");
+        withOption("ZDLParser.specFile", getOptions().get("zdlFile"));
+//        withOption("ZDLParser.targetProperty", "zdl");
+//        withOption("JDLProcessor.targetProperty", "zdl");
 //        withOption("EnrichAsyncAPIWithJDLProcessor.apiProperty", "api");
-//        withOption("EnrichAsyncAPIWithJDLProcessor.jdlProperty", "jdl");
+//        withOption("EnrichAsyncAPIWithJDLProcessor.jdlProperty", "zdl");
 //        withOption("JDLOpenAPIControllersGenerator.openapiProperty", "api");
-//        withOption("JDLOpenAPIControllersGenerator.jdlProperty", "jdl");
+//        withOption("JDLOpenAPIControllersGenerator.jdlProperty", "zdl");
         return (T) this;
     }
 }

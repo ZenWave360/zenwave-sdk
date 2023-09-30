@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public class ZDL2JDLProcessor extends AbstractBaseProcessor {
 
     public ZDL2JDLProcessor() {
-        this.targetProperty = "jdl";
+        this.targetProperty = "zdl";
     }
 
     // Undocumented. Plugins using this should document the meaning of this option .

@@ -12,7 +12,7 @@ public class ForkPluginGeneratorTest {
     public void testFork_JDLApplicationDefault() throws MalformedURLException {
         ForkPluginGenerator plugin = new ForkPluginGenerator();
         plugin.downloadURL = new URL("https://github.com/ZenWave360/zenwave-sdk/archive/refs/heads/main.zip");
-        plugin.sourcePluginClassName = "io.zenwave360.sdk.plugins.JDLBackendApplicationDefaultPlugin";
+        plugin.sourcePluginClassName = "io.zenwave360.sdk.plugins.JDLBackendApplicationDefaultPlugin"; // FIXME: replace this plugin name when promoted to main
         plugin.targetPluginClassName = "io.zenwave360.sdk.plugins.forked.JDLBackendApplicationDefaultPluginForked";
         plugin.targetFolder = "target/forked" + System.currentTimeMillis();
         plugin.generate(null);

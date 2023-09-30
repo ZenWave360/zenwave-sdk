@@ -14,7 +14,7 @@ import io.zenwave360.sdk.utils.NamingUtils;
 
 public class JDLDummyDataFromSchemasProcessor extends AbstractBaseProcessor {
 
-    public String jdlProperty = "jdl";
+    public String jdlProperty = "zdl";
     public String apiProperty = "api";
 
     @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
@@ -26,8 +26,8 @@ public class JDLDummyDataFromSchemasProcessor extends AbstractBaseProcessor {
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
         var apiModel = (Map) contextModel.get(apiProperty);
-        var jdlModel = (Map) contextModel.getOrDefault(jdlProperty, Maps.of("isDummy", true));
-        contextModel.put(jdlProperty, jdlModel);
+        var zdlModel = (Map) contextModel.getOrDefault(jdlProperty, Maps.of("isDummy", true));
+        contextModel.put(jdlProperty, zdlModel);
 
         // assign entity-service using tags from openapi or asyncapi
         Map<String, String> schemaTagMap = new HashMap<>();
@@ -41,7 +41,7 @@ public class JDLDummyDataFromSchemasProcessor extends AbstractBaseProcessor {
         Map<String, Map> services = new HashMap<>();
 
         Map<String, Map<String, Object>> entities = new HashMap();
-        jdlModel.put("entities", entities);
+        zdlModel.put("entities", entities);
         Map<String, Map> schemas = JSONPath.get(apiModel, "$.components.schemas");
         for (Map.Entry<String, Map> schemaEntry : schemas.entrySet()) {
             var entity = new HashMap<String, Object>();
@@ -64,10 +64,10 @@ public class JDLDummyDataFromSchemasProcessor extends AbstractBaseProcessor {
             entities.put(entityName, entity);
         }
 
-        jdlModel.put("services", services);
-        jdlModel.put("allEntitiesAndEnums", entities);
+        zdlModel.put("services", services);
+        zdlModel.put("allEntitiesAndEnums", entities);
 
-//        jdlModel.put("options", Maps.of("options", Maps.of("service", services)));
+//        zdlModel.put("options", Maps.of("options", Maps.of("service", services)));
 
         return contextModel;
     }

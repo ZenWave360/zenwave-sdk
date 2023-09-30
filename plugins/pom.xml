@@ -55,14 +55,14 @@
 
     <modules>
         <module>java-to-jdl</module>
-        <module>jdl-to-openapi</module>
+        <module>zdl-to-openapi</module>
         <module>jdl-to-asyncapi</module>
         <module>zdl-to-asyncapi</module>
         <module>zdl-to-markdown</module>
         <module>asyncapi-spring-cloud-streams3</module>
         <module>asyncapi-jsonschema2pojo</module>
-        <module>jdl-backend-application-default</module>
-        <module>jdl-openapi-controllers</module>
+        <module>backend-application-default</module>
+        <module>openapi-controllers</module>
         <module>openapi-spring-webtestclient</module>
         <module>openapi-rest-assured</module>
 <!--        <module>openapi-pact-consumer</module>-->

@@ -31,7 +31,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         schema, avro
     }
 
-    public String sourceProperty = "jdl";
+    public String sourceProperty = "zdl";
 
     @DocumentedOption(description = "Target AsyncAPI version.")
     public AsyncapiVersionType asyncapiVersion = AsyncapiVersionType.v3;
@@ -295,9 +295,9 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         return targetFolder == null ? "avro" : targetFolder + "/avro";
     }
 
-    protected List<TemplateOutput> convertToAvro(JDLEntitiesToAvroConverter converter, Map<String, Object> entityOrEnum, Map<String, Object> jdlModel) {
+    protected List<TemplateOutput> convertToAvro(JDLEntitiesToAvroConverter converter, Map<String, Object> entityOrEnum, Map<String, Object> zdlModel) {
         String name = (String) entityOrEnum.get("name");
-        Map avro = converter.convertToAvro(entityOrEnum, jdlModel);
+        Map avro = converter.convertToAvro(entityOrEnum, zdlModel);
         String avroJson = writeAsString(jsonMapper, avro);
         String targetFolder = getTargetAvroFolder();
         List<TemplateOutput> avroList = new ArrayList<>();
