@@ -78,8 +78,12 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
 
     public Map<String, List<Map<String, Object>>> getOperationsGroupedByTagV2(Model apiModel, AsyncapiOperationType operationType) {
         Map<String, List<Map<String, Object>>> operationsByTag = new HashMap<>();
-        List<Map<String, Object>> operations = JSONPath.get(apiModel, "$.channels[*].*");
-        for (Map<String, Object> operation : operations) {
+        List operations = JSONPath.get(apiModel, "$.channels[*].*");
+        for (Object operationObject : operations) {
+            if(operationObject != null && JSONPath.get(operationObject, "$.operationId") == null) {
+                continue;
+            }
+            Map<String, Object> operation = (Map) operationObject;
             if (matchesFilters(operation, operationType)) {
                 String tag = (String) ObjectUtils.firstNonNull(operation.get("x--normalizedTagName"), "DefaultService");
                 if (!operationsByTag.containsKey(tag)) {

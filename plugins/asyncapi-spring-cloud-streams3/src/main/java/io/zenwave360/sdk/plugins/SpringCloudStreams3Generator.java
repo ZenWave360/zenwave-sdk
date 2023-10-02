@@ -8,12 +8,14 @@ import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractAsyncapiGenerator;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiOperationType;
 import io.zenwave360.sdk.options.ProgrammingStyle;
+import io.zenwave360.sdk.options.asyncapi.AsyncapiRoleType;
 import io.zenwave360.sdk.parsers.Model;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.TemplateEngine;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -189,7 +191,9 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
             }
         }
 
-        templateOutputList.addAll(generateTemplateOutput(contextModel, producerByServicesTemplates, producerServicesMap));
+        if (!producerServicesMap.isEmpty()) {
+            templateOutputList.addAll(generateTemplateOutput(contextModel, producerByServicesTemplates, producerServicesMap));
+        }
 
         return templateOutputList;
     }
