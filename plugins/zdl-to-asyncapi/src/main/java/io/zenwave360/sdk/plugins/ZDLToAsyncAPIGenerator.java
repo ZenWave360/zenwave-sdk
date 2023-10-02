@@ -18,9 +18,12 @@ import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
 import static io.zenwave360.sdk.utils.NamingUtils.asJavaTypeName;
+import static org.apache.commons.lang.StringUtils.trimToNull;
+import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
@@ -99,7 +102,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
                 buildCommandChannelV2(method, channels, model, messages);
             }
         }
-        messages.putAll(JSONPath.get(model, "$.events", Map.of()));
+        addAllEventsAsMessages(messages, JSONPath.get(model, "$.events", Map.of()));
 
         var methodsWithEvents = JSONPath.get(model, "$.services[*].methods[*][?(@.withEvents.length() > 0)]", Collections.<Map>emptyList());
         for (Map<String, Object> method : methodsWithEvents) {
@@ -108,7 +111,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
                 String withEvent = (String) withEvents.get(i);
                 var event = JSONPath.get(model, "$.events['" + withEvent + "']", Map.<String, Object>of());
                 if (AsyncapiVersionType.v2.equals(asyncapiVersion)) {
-                    buildEventChannelV2(event, channels);
+                    buildEventChannelV2(method, event, channels);
                 }
                 if (AsyncapiVersionType.v3.equals(asyncapiVersion)) {
                     buildEventChannel(event, channels);
@@ -148,6 +151,17 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         return outputList;
     }
 
+    private static void addAllEventsAsMessages(LinkedHashMap<Object, Object> allMessages, Map<String, Map> events) {
+        for (Map.Entry<String, Map> event : events.entrySet()) {
+            if(JSONPath.get(event.getValue(), "$.options.embedded") != null) {
+                continue;
+            }
+            var message = new LinkedHashMap<>(event.getValue());
+            message.put("summary", firstNonNull(event.getValue().get("javadoc"), event.getKey()));
+            allMessages.put(event.getKey(), message);
+        }
+    }
+
     private void buildEventOperation(Map<String, Object> method, List<String> withEvents, String withEvent, Map<String, Object> model, Map<String, Object> operations) {
         var operationId = "on" + asJavaTypeName((String) method.get("name"));
         var operationIdSuffix = (withEvents.size() > 0? withEvent : "");
@@ -171,7 +185,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
     private void buildMethodCommand(Map method, Map<String, Object> channels, Map<String, Object> operations, Map<String, Object> model, LinkedHashMap<Object, Object> messages) {
         var operationId = JSONPath.get(method, "$.options.asyncapi.operationId", (String) null);
-        var commandName = ObjectUtils.firstNonNull(operationId, "do" + asJavaTypeName((String) method.get("name")));
+        var commandName = firstNonNull(operationId, "do" + asJavaTypeName((String) method.get("name")));
         var channelName = JSONPath.get(method, "$.options.asyncapi.channel", commandName + "Channel");
         var topic = JSONPath.getFirst(method, "$.options.topic", "$.options.asyncapi.topic");
 
@@ -182,7 +196,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
         var hasId = method.get("paramId") != null;
         var commandType = (String) method.get("parameter");
-        var inputEntity = ObjectUtils.firstNonNull(JSONPath.get(model, "$.inputs['" + commandType + "']"), JSONPath.get(model, "$.entities['" + commandType + "']"));
+        var inputEntity = firstNonNull(JSONPath.get(model, "$.inputs['" + commandType + "']"), JSONPath.get(model, "$.entities['" + commandType + "']"));
         messages.put(commandType, inputEntity);
 
         var messageName = asJavaTypeName(commandType) + "Message";
@@ -193,13 +207,12 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
     }
 
     private void buildCommandChannelV2(Map method, Map<String, Object> channels, Map<String, Object> model, LinkedHashMap<Object, Object> messages) {
-        var operationId = JSONPath.get(method, "$.options.asyncapi.operationId", (String) null);
-        var commandName = ObjectUtils.firstNonNull(operationId, "do" + asJavaTypeName((String) method.get("name")));
-        var channelName = JSONPath.get(method, "$.options.asyncapi.channel", commandName + "Channel");
+        var operationId = JSONPath.get(method, "$.options.asyncapi.operationId", "do" + asJavaTypeName((String) method.get("name")));
+        var channelName = JSONPath.get(method, "$.options.asyncapi.channel", operationId + "Channel");
         var topic = JSONPath.getFirst(method, "$.options.topic", "$.options.asyncapi.topic");
 
         var commandType = (String) method.get("parameter");
-        var javadoc = method.get("javadoc");
+        var javadoc = firstNonNull(trimToNull((String) method.get("javadoc")), method.get("name"));
         var messageName = asJavaTypeName(commandType) + "Message";
 
         var operation = Maps.of(
@@ -212,19 +225,21 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
             channel.put("x-address", topic);
         }
 
-        var inputEntity = ObjectUtils.firstNonNull(JSONPath.get(model, "$.inputs['" + commandType + "']"), JSONPath.get(model, "$.entities['" + commandType + "']"));
-        messages.put(commandType, inputEntity);
+        var inputEntity = (Map) firstNonNull(JSONPath.get(model, "$.inputs['" + commandType + "']"), JSONPath.get(model, "$.entities['" + commandType + "']"));
+        var message = new LinkedHashMap<>(inputEntity);
+        message.put("summary", firstNonNull(inputEntity.get("javadoc"), inputEntity.get("name")));
+        messages.put(commandType, message);
     }
 
-    private void buildEventChannelV2(Map event, Map<String, Object> channels) {
-        var operationId = JSONPath.get(event, "$.options.asyncapi.operationId", (String) null);
+    private void buildEventChannelV2(Map method, Map event, Map<String, Object> channels) {;
+        var operationId = JSONPath.get(event, "$.options.asyncapi.operationId", "on" + asJavaTypeName((String) method.get("name")));
         var channelName = JSONPath.get(event, "$.options.asyncapi.channel", event.get("name") + "Channel");
         var topic = JSONPath.getFirst(event, "$.options.topic", "$.options.asyncapi.topic");
         var messageName = event.get("name") + "Message";
 
         var operation = Maps.of(
                 "operationId", operationId,
-                "summary", event.get("javadoc"),
+                "summary", firstNonNull(event.get("javadoc"), event.get("name")),
                 "service", event.get("service"), // TODO: fill service name
                 "messages", new ArrayList<>());
         operation = JSONPath.get(channels, "$." + channelName + ".operations.publish", operation);
@@ -249,12 +264,16 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
     }
 
     protected List<Map<String, Object>> filterSchemasToInclude(Map<String, Object> model) {
-        List<Map<String, Object>> schemasToInclude = new ArrayList<>();
-        schemasToInclude.addAll(JSONPath.get(model, "$.commands[*]", List.of()));
-        schemasToInclude.addAll(JSONPath.get(model, "$.events[*]", List.of()));
-
         Map<String, Object> allEntitiesAndEnums = (Map) model.get("allEntitiesAndEnums");
 
+        List<Map<String, Object>> schemasToInclude = new ArrayList<>();
+        schemasToInclude.addAll(JSONPath.get(model, "$.events[*]", List.of()));
+        JSONPath.get(model, "$.services[*].methods[?(@.options.asyncapi != null)][*].parameter", List.of()).forEach(parameter -> {
+            var entity = JSONPath.get(allEntitiesAndEnums, "$.['" + parameter + "']", null);
+            if(entity != null) {
+                schemasToInclude.add((Map) entity);
+            }
+        });
 
         Set<String> includeNames = new HashSet<>();
         for (Map<String, Object> schema : schemasToInclude) {

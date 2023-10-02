@@ -87,6 +87,9 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
         var delete = JSONPath.get(method, "$.options.delete");
         var httpOptions = ObjectUtils.firstNonNull(get, put, post, delete);
         var httpMethod = get != null? "get" : put != null? "put" : post != null? "post" : delete != null? "delete" : null;
+        if (httpMethod == null) {
+            return null;
+        }
         var optionsMap = new LinkedHashMap();
         if(httpOptions instanceof String) {
             optionsMap.put("path", httpOptions);

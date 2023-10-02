@@ -17,11 +17,11 @@ channels:
     x-address: {{channel.x-address}}
   {{~#each channel.operations as |operation|}}
     {{@key}}:
-      summary: {{operation.javadoc}}
+      summary: {{operation.summary}}
       operationId: {{operation.operationId}}
       tags:
         - name: {{asTagName operation.service}}
-      messages:
+      message:
       {{~#if (eq (size operation.messages) 1)}}
         $ref: "{{firstItem operation.messages}}"
       {{~else}}
@@ -39,8 +39,8 @@ components:
     {{message.name}}Message:
       messageId: {{message.name}}Message
       name: {{message.name}}Message
-      title: {{message.javadoc}}
-      summary: {{message.javadoc}}
+      title: {{message.summary}}
+      summary: {{message.summary}}
       schemaFormat: {{{schemaFormatString}}}
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
