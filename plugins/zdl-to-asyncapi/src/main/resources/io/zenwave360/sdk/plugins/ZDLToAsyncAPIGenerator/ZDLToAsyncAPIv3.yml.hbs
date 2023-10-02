@@ -14,7 +14,7 @@ tags:
 channels:
 {{~#each zdlModel.channels as |channel|}}
   {{@key}}:
-    address: {{channel.address}}
+    address: "{{channel.address}}"
     messages:
     {{~#each channel.messages as |message|}}
       {{@key}}:

@@ -14,7 +14,7 @@ tags:
 channels:
 {{~#each zdlModel.channels as |channel|}}
   {{@key}}:
-    x-address: {{channel.x-address}}
+    x-address: "{{channel.x-address}}"
   {{~#each channel.operations as |operation|}}
     {{@key}}:
       summary: {{operation.summary}}
