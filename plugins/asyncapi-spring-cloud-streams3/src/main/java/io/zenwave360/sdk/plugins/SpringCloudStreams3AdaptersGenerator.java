@@ -33,8 +33,8 @@ public class SpringCloudStreams3AdaptersGenerator extends SpringCloudStreams3Gen
     @DocumentedOption(description = "Package where your domain services/usecases interfaces are")
     public String servicesPackage = "{{basePackage}}.core.inbound";
 
-    @DocumentedOption(description = "Suffix for CRUD operations DTOs (default: Input)")
-    public String inputDTOSuffix = "Input";
+    @DocumentedOption(description = "Should use same value configured in BackendApplicationDefaultPlugin. Whether to use an input DTO for entities used as command parameter.")
+    public String inputDTOSuffix = "";
 
 
     @DocumentedOption(description = "Programming Style")

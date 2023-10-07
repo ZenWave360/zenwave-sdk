@@ -26,6 +26,8 @@ operations:
 {{~#each zdlModel.operations as |operation|}}
   {{@key}}:
     action: {{operation.action}}
+    tags:
+      - name: {{asTagName operation.serviceName}}
     channel:
       $ref: '#/channels/{{operation.channel}}'
 {{~/each}}

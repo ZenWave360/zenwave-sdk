@@ -31,8 +31,8 @@ public class BackendApplicationDefaultGenerator extends AbstractZDLGenerator {
     @DocumentedOption(description = "Programming Style")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
 
-    @DocumentedOption(description = "Suffix for CRUD operations DTOs (default: Input)")
-    public String inputDTOSuffix = "Input";
+    @DocumentedOption(description = "If not empty, it will generate (and use) an `input` DTO for each entity used as command parameter")
+    public String inputDTOSuffix = "";
 
     @DocumentedOption(description = "Suffix for search criteria DTOs (default: Criteria)")
     public String criteriaDTOSuffix = "Criteria";

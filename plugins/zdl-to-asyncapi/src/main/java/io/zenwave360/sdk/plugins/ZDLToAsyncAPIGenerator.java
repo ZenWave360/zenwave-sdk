@@ -166,7 +166,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         var operationId = "on" + asJavaTypeName((String) method.get("name"));
         var operationIdSuffix = (withEvents.size() > 0? withEvent : "");
         var channelName = JSONPath.get(model, "$.events." + withEvent + ".options.asyncapi.channel", withEvent + "Channel");
-        operations.put(operationId + operationIdSuffix, Map.of("action", "send", "channel", channelName));
+        operations.put(operationId + operationIdSuffix, Map.of("action", "send","serviceName", method.get("serviceName"), "channel", channelName));
     }
 
     private void buildEventChannel(Map<String, Object> event, Map<String, Object> channels) {
@@ -203,7 +203,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         var channelMessages = Maps.of(messageName, Map.of("$ref", "#/components/messages/" + messageName));
         channel.put("messages", channelMessages);
         channels.put(channelName, channel);
-        operations.put(commandName, Maps.of("action", "receive", "channel", channelName));
+        operations.put(commandName, Maps.of("action", "receive", "serviceName", method.get("serviceName"), "channel", channelName));
     }
 
     private void buildCommandChannelV2(Map method, Map<String, Object> channels, Map<String, Object> model, LinkedHashMap<Object, Object> messages) {
@@ -218,7 +218,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         var operation = Maps.of(
                 "operationId", operationId,
                 "summary", javadoc,
-                "service", method.get("service"), // TODO: fill service name
+                "serviceName", method.get("serviceName"),
                 "messages", List.of("#/components/messages/" + messageName));
         var channel = (Map) Maps.getOrCreateDefault(channels, channelName, Maps.of("operations", Maps.of("publish", operation)));
         if(topic != null) {
@@ -240,7 +240,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         var operation = Maps.of(
                 "operationId", operationId,
                 "summary", firstNonNull(event.get("javadoc"), event.get("name")),
-                "service", event.get("service"), // TODO: fill service name
+                "serviceName", method.get("serviceName"),
                 "messages", new ArrayList<>());
         operation = JSONPath.get(channels, "$." + channelName + ".operations.publish", operation);
         var messages = (List) JSONPath.get(operation, "$.messages");

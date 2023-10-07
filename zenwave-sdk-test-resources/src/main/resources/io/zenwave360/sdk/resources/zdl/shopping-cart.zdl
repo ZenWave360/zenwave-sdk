@@ -15,12 +15,6 @@ relationship OneToMany {
     Customer{addresses} to Address{customer}
 }
 
-
-input CustomerInput {
-    username String required minlength(3) maxlength(20)
-    email String required pattern(/^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/)
-}
-
 /**
  * The Customer Service
  */
@@ -32,7 +26,12 @@ service CustomerService for (Customer) {
     updateCustomer(id, CustomerInput) Customer withEvents CustomerUpdated
 }
 
-event CustomerCreated (onCustomerCreated) {
+input CustomerInput {
+    username String required minlength(3) maxlength(20)
+    email String required pattern(/^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/)
+}
+
+event CustomerCreated {
     id Integer
     username String
 }

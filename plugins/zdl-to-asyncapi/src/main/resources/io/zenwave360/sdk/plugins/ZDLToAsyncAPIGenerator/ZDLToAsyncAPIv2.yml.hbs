@@ -20,7 +20,7 @@ channels:
       summary: {{operation.summary}}
       operationId: {{operation.operationId}}
       tags:
-        - name: {{asTagName operation.service}}
+        - name: {{asTagName operation.serviceName}}
       message:
       {{~#if (eq (size operation.messages) 1)}}
         $ref: "{{firstItem operation.messages}}"

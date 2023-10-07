@@ -97,7 +97,7 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
             }
             return inputs.stream().map(input -> {
                 var entity = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + input);
-                if(entity != null && !"entity".equals(JSONPath.get(entity, "type"))) {
+                if(entity != null && !"entities".equals(JSONPath.get(entity, "type"))) {
                     return entity;
                 }
                 return null;
@@ -113,7 +113,7 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
             }
             return outputs.stream().map(input -> {
                 var entity = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + input);
-                if(entity != null && !"entity".equals(JSONPath.get(entity, "type"))) {
+                if(entity != null && !"entities".equals(JSONPath.get(entity, "type"))) {
                     return entity;
                 }
                 return null;

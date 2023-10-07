@@ -78,12 +78,12 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
         {{~#if responseEntity}}
             {{~#assign "responseEntityClassName"}}{{responseEntity.className}}{{entityDTOSuffix}}{{/assign}}
             {{~#assign "responseEntityInstance"}}{{responseEntity.instanceName}}{{entityDTOSuffix}}{{/assign}}
-            {{~#assign "entityServiceName"}}{{asInstanceName (defaultIfEmpty responseEntity.options.service "defaultService")}}{{/assign}}
+            {{~#assign "entityServiceName"}}{{asInstanceName (defaultIfEmpty (entityService responseEntity.name) "service")}}{{/assign}}
         {{/if}}
         {{~#if responseEntityPaginated}}
             {{~#assign "responseEntityClassName"}}Page<{{responseEntityPaginated.className}}>{{/assign}}
             {{~#assign "responseEntityInstance"}}{{responseEntityPaginated.instanceNamePlural}}{{entityDTOSuffix}}{{/assign}}
-            {{~#assign "entityServiceName"}}{{asInstanceName (defaultIfEmpty responseEntityPaginated.options.service "defaultService")}}{{/assign}}
+            {{~#assign "entityServiceName"}}{{asInstanceName (defaultIfEmpty (entityService responseEntityPaginated.name) "service")}}{{/assign}}
         {{/if}}
     {{/if}}
     @Override
@@ -94,15 +94,15 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
     /* responseBodySchema: {{{responseBodySchema}}} */
     /* responseEntity: {{{responseEntity}}} */  --}}
     {{~#if requestBodySchema~}}
-        {{requestEntityClassName}} {{requestEntityInstance}} = mapper.as{{requestEntityClassName}}(reqBody);
+        {{requestEntityClassName}} input = mapper.as{{requestEntityClassName}}(reqBody);
     {{/if~}}
     {{~#if responseEntity~}}
         {{~#if (eq operation.x--response.x--statusCode "201") ~}}
-            {{{responseEntityClassName}}} {{responseEntityInstance}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}({{requestEntityInstance}});
+            {{{responseEntityClassName}}} {{responseEntityInstance}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}(input);
             {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{responseEntityInstance}});
             return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
         {{~else~}}
-            Optional<{{{responseEntityClassName}}}> {{responseEntityInstance}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}({{requestEntityInstance}});
+            Optional<{{{responseEntityClassName}}}> {{responseEntityInstance}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}(input);
             if ({{responseEntityInstance}}.isPresent()) {
                 {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{responseEntityInstance}}.get());
                 return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);

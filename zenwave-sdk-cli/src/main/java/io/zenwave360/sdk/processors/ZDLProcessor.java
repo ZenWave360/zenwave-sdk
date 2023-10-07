@@ -1,12 +1,16 @@
 package io.zenwave360.sdk.processors;
 
 import io.zenwave360.sdk.utils.JSONPath;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 public class ZDLProcessor extends JDLProcessor {
+
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     public Map<String, Object> process(Map<String, Object> contextModel) {
         Map<String, Object> zdlModel = targetProperty != null ? (Map) contextModel.get(targetProperty) : (Map) contextModel;
@@ -34,10 +38,19 @@ public class ZDLProcessor extends JDLProcessor {
     }
 
     public void processCopyAnnotation(Map<String, Object> zdlModel) {
-        var entitiesToPopulate = (List<Map>) JSONPath.get(zdlModel, "$.allEntitiesAndEnums[*][?(@.options.copy)]");
+        var allEntities = new HashMap<>();
+        allEntities.putAll(JSONPath.get(zdlModel, "$.allEntitiesAndEnums"));
+        allEntities.putAll(JSONPath.get(zdlModel, "$.events"));
+        var entitiesToPopulate = new ArrayList<Map>();
+        entitiesToPopulate.addAll(JSONPath.get(zdlModel, "$.allEntitiesAndEnums[*][?(@.options.copy)]"));
+        entitiesToPopulate.addAll(JSONPath.get(zdlModel, "$.events[*][?(@.options.copy)]"));
         for (var entity : entitiesToPopulate) {
             var toCopyName = JSONPath.get(entity, "$.options.copy");
-            var entityToCopy = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + toCopyName);
+            var entityToCopy = JSONPath.get(allEntities, "$." + toCopyName);
+            if(entityToCopy == null) {
+                log.error("Error Processing @copy({}) in {} {}", toCopyName, JSONPath.get(entity, "$.type"), JSONPath.get(entity, "$.name"));
+                continue;
+            }
             var fieldsToCopy = JSONPath.get(entityToCopy, "$.fields", Map.of());
             var entityFields = JSONPath.get(entity, "$.fields", Map.of());
 

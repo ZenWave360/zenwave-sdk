@@ -28,6 +28,9 @@ public class ZDLProcessorTest {
         var fields = JSONPath.get(attachmentInput, "$.fields", Map.of());
         Assertions.assertNotNull(fields);
         Assertions.assertEquals(5, fields.size());
+        var customerEventFields = JSONPath.get(model, "$.zdl.events.CustomerEvent.fields", Map.of());
+        Assertions.assertNotNull(customerEventFields);
+        Assertions.assertTrue(customerEventFields.size() > 1);
     }
 
 }

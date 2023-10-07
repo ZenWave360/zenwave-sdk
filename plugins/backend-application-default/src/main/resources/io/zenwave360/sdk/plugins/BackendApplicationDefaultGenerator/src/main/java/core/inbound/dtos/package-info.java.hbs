@@ -1,4 +1,7 @@
-/**
- * Inbound DTOs.
- */
+/** Inbound DTOs. */
+@keep
 package {{basePackage}}.core.inbound.dtos;
+@interface keep {
+    // keeps this package even when it's empty,
+    // allowing wildcard import "{{basePackage}}.core.inbound.dtos.*;"
+}

@@ -38,12 +38,8 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     @DocumentedOption(description = "Package where your domain services/usecases interfaces are")
     public String servicesPackage = "{{basePackage}}.core.inbound";
 
-    @DocumentedOption(description = "Suffix for CRUD operations DTOs (default: Input)")
-    public String inputDTOSuffix = "Input";
-
-    @DocumentedOption(description = "Suffix for (output) entities DTOs (default: empty to use the entity itself)")
-    public String entityDTOSuffix = "";
-
+    @DocumentedOption(description = "Should use same value configured in BackendApplicationDefaultPlugin. Whether to use an input DTO for entities used as command parameter.")
+    public String inputDTOSuffix = "";
     @DocumentedOption(description = "Suffix for search criteria DTOs (default: Criteria)")
     public String criteriaDTOSuffix = "Criteria";
 
@@ -173,6 +169,10 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
         handlebarsEngine.getHandlebars().registerHelper("asDtoName", (context, options) -> {
             return StringUtils.isNotBlank((String) context) ? openApiModelNamePrefix + context + openApiModelNameSuffix : null;
+        });
+
+        handlebarsEngine.getHandlebars().registerHelper("entityService", (entityName, options) -> {
+            return ZDLUtils.serviceName((String) entityName, options.get("zdl"));
         });
 
         handlebarsEngine.getHandlebars().registerHelper("statusCode", (context, options) -> {
