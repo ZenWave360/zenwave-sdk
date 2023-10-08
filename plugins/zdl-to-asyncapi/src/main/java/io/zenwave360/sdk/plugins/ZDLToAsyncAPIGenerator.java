@@ -151,7 +151,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         return outputList;
     }
 
-    private static void addAllEventsAsMessages(LinkedHashMap<Object, Object> allMessages, Map<String, Map> events) {
+    private void addAllEventsAsMessages(LinkedHashMap<Object, Object> allMessages, Map<String, Map> events) {
         for (Map.Entry<String, Map> event : events.entrySet()) {
             if(JSONPath.get(event.getValue(), "$.options.embedded") != null) {
                 continue;
@@ -265,6 +265,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
     protected List<Map<String, Object>> filterSchemasToInclude(Map<String, Object> model) {
         Map<String, Object> allEntitiesAndEnums = (Map) model.get("allEntitiesAndEnums");
+        Map<String, Object> relationships = (Map) model.get("relationships");
 
         List<Map<String, Object>> schemasToInclude = new ArrayList<>();
         schemasToInclude.addAll(JSONPath.get(model, "$.events[*]", List.of()));
@@ -280,6 +281,13 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
             addReferencedTypeToIncludeNames(schema, allEntitiesAndEnums, includeNames);
         }
 
+        for (String includeName : new ArrayList<>(includeNames)) {
+            Map<String, Object> entity = (Map) allEntitiesAndEnums.get(includeName);
+            if (entity != null) {
+                addRelationshipTypeToIncludeNames(entity, allEntitiesAndEnums, relationships, includeNames);
+            }
+        }
+
         List<Map<String, Object>> schemasToIncludeList = new ArrayList<>(schemasToInclude);
         for (String includeName : includeNames) {
             Map<String, Object> entity = (Map) allEntitiesAndEnums.get(includeName);
@@ -289,6 +297,17 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         }
 
         return schemasToIncludeList;
+    }
+
+    private void addRelationshipTypeToIncludeNames(Map<String, Object> entity, Map<String, Object> entitiesMap, Map<String, Object> relationships, Set<String> includeNames) {
+        var entityName = entity.get("name");
+        var relatedTypes = new HashSet<String>(JSONPath.get(relationships, "$..[?(@.from == '" + entityName + "')].to", List.of()));
+        for (String fieldType : relatedTypes) {
+            if (entitiesMap.containsKey(fieldType) && !includeNames.contains(fieldType)) {
+                includeNames.add(fieldType);
+                addReferencedTypeToIncludeNames((Map) entitiesMap.get(fieldType), entitiesMap, includeNames);
+            }
+        }
     }
 
     protected void addReferencedTypeToIncludeNames(Map<String, Object> entity, Map<String, Object> entitiesMap, Set<String> includeNames) {

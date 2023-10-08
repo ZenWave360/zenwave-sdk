@@ -27,7 +27,9 @@ public interface {{entity.className}}Mapper {
     @AfterMapping
     default void manageRelationships(@MappingTarget {{entity.className}} entity) {
         {{~#each relationships as |relationship|}}
-        entity.get{{capitalize relationship.fieldName}}().forEach({{relationship.fieldName}} -> {{relationship.fieldName}}.set{{capitalize relationship.otherEntityFieldName}}(entity));
+        if(entity.get{{capitalize relationship.fieldName}}() != null) {
+          entity.get{{capitalize relationship.fieldName}}().forEach({{relationship.fieldName}} -> {{relationship.fieldName}}.set{{capitalize relationship.otherEntityFieldName}}(entity));
+        }
         {{~/each}}
     }
     {{~/if}}

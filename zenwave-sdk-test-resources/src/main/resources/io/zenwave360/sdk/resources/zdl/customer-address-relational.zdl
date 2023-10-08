@@ -91,6 +91,12 @@ event CustomerCreated {
 }
 
 @asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerCreatedFailed {
+  customerId String
+  customer Customer
+}
+
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
 event CustomerUpdated {
   customerId String
   customer Customer

@@ -68,4 +68,24 @@ public class ZDLToAsyncAPIGeneratorTest {
         Map<String, Object> oasSchema = mapper.readValue(outputTemplates.get(0).getContent(), Map.class);
         Assertions.assertTrue(((List) JSONPath.get(oasSchema, "$.components.schemas.Customer.required")).contains("username"));
     }
+
+    @Test
+    public void test_zdl_to_asyncapi_relational_v3() throws Exception {
+        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address-relational.zdl");
+        ZDLToAsyncAPIGenerator generator = new ZDLToAsyncAPIGenerator();
+        generator.idType = "integer";
+        generator.idTypeFormat = "int64";
+
+        List<TemplateOutput> outputTemplates = generator.generate(model);
+        Assertions.assertEquals(1, outputTemplates.size());
+
+        System.out.println(outputTemplates.get(0).getContent());
+
+        var tmpFile = new File("target/customer-address.yml");
+        FileUtils.writeStringToFile(tmpFile, outputTemplates.get(0).getContent(), "UTF-8");
+        var api = new DefaultYamlParser().withSpecFile(tmpFile.toURI()).parse();
+
+        Map<String, Object> oasSchema = mapper.readValue(outputTemplates.get(0).getContent(), Map.class);
+        Assertions.assertTrue(((List) JSONPath.get(oasSchema, "$.components.schemas.Customer.required")).contains("username"));
+    }
 }

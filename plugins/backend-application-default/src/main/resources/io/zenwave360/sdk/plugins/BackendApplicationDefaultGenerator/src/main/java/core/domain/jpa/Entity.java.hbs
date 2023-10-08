@@ -58,7 +58,7 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
     @Column(name = "{{snakeCase field.name}}" {{#if field.validations.required}}, nullable = false{{/if}}{{#if field.validations.unique}}, unique = true{{/if}}{{#if field.validations.maxlength}}, length = {{field.validations.maxlength.value}}{{/if}})
   {{~/if~}}
     {{~#if field.isEnum}} @Enumerated(EnumType.STRING){{/if}}
-    private {{fieldType field}} {{field.name}} {{fieldTypeInitializer field}};
+    private {{{fieldType field}}} {{field.name}} {{{fieldTypeInitializer field}}};
 {{/each}}
 
 {{#each entity.relationships as |relationship|}}
@@ -109,18 +109,18 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
 {{/unless~}}
 
 {{#each entity.fields as |field|}}
-    public {{entity.name}} with{{capitalize field.name}}({{javaType field}} {{field.name}}) {
+    public {{entity.name}} with{{capitalize field.name}}({{{fieldType field}}} {{field.name}}) {
     this.{{field.name}} = {{field.name}};
     return this;
     }
 {{/each}}
 
 {{#each entity.fields as |field|}}
-    public {{javaType field}} get{{capitalize field.name}}() {
+    public {{{fieldType field}}} get{{capitalize field.name}}() {
         return {{field.name}};
     }
 
-    public void set{{capitalize field.name}}({{javaType field}} {{field.name}}) {
+    public void set{{capitalize field.name}}({{{fieldType field}}} {{field.name}}) {
         this.{{field.name}} = {{field.name}};
     }
 {{/each}}
@@ -178,4 +178,23 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
   }
 {{/if}}
 
+{{#unless (skipEntityId entity)~}}
+  /* https://vladmihalcea.com/the-best-way-to-implement-equals-hashcode-and-tostring-with-jpa-and-hibernate/ */
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof {{entity.className}})){
+      return false;
+    }
+    {{entity.className}} other = ({{entity.className}}) o;
+    return id != null && id.equals(other.getId());
+  }
+
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
+  }
+{{~/unless}}
 }

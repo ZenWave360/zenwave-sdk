@@ -44,7 +44,7 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
     public String jdlBusinessEntityProperty = "x-business-entity";
 
     @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas for paginated lists")
-    public String jdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
+    public String zdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
 
     @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. Examples: '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
     public List<String> paginatedDtoItemsJsonPath = List.of("$.items", "$.properties.content.items");
@@ -72,7 +72,7 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
-    private final TemplateInput jdlToOpenAPITemplate = new TemplateInput("io/zenwave360/sdk/plugins/OpenAPIToJDLGenerator/JDLToOpenAPI.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
+    private final TemplateInput zdlToOpenAPITemplate = new TemplateInput("io/zenwave360/sdk/plugins/OpenAPIToJDLGenerator/ZDLToOpenAPI.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
 
     protected Map<String, Object> getJDLModel(Map<String, Object> contextModel) {
         return (Map) contextModel.get(sourceProperty);
@@ -160,7 +160,7 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
                 Map<String, Object> paginatedSchema = new HashMap<>();
                 paginatedSchema.put("allOf", List.of(
                         Map.of("$ref", "#/components/schemas/Page"),
-                        Map.of(jdlBusinessEntityPaginatedProperty, entityName),
+                        Map.of(zdlBusinessEntityPaginatedProperty, entityName),
                         Map.of("properties",
                                 Map.of("content",
                                         Maps.of("type", "array", "items", Map.of("$ref", "#/components/schemas/" + entityName))))));
@@ -186,7 +186,7 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
         // remove first line
         openAPISchemasString = openAPISchemasString.substring(openAPISchemasString.indexOf("\n") + 1);
 
-        return List.of(generateTemplateOutput(contextModel, jdlToOpenAPITemplate, zdlModel, openAPISchemasString));
+        return List.of(generateTemplateOutput(contextModel, zdlToOpenAPITemplate, zdlModel, openAPISchemasString));
     }
 
     public TemplateOutput generateTemplateOutput(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> zdlModel, String schemasAsString) {
