@@ -9,25 +9,29 @@
         "io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:RELEASE",
         "io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:RELEASE",
         "io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured:RELEASE",
-        "io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default:RELEASE",
-        "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-openapi:RELEASE",
+        "io.github.zenwave360.zenwave-sdk.plugins:backend-application-default:RELEASE",
+        "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi:RELEASE",
+        "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-asyncapi:RELEASE",
         "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:RELEASE",
-        "io.github.zenwave360.zenwave-sdk.plugins:jdl-openapi-controllers:RELEASE"
+        "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-markdown:RELEASE",
+        "io.github.zenwave360.zenwave-sdk.plugins:openapi-controllers:RELEASE"
       ],
       "main": "io.zenwave360.sdk.Main"
     },
     "snapshots": {
-      "script-ref": "io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli:1.1.0-SNAPSHOT",
+      "script-ref": "io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli:1.4.0-SNAPSHOT",
       "dependencies": [
         "org.slf4j:slf4j-simple:1.7.36",
-        "io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3:1.1.0-SNAPSHOT",
-        "io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:1.1.0-SNAPSHOT",
-        "io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:1.1.0-SNAPSHOT",
-        "io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured:1.1.0-SNAPSHOT",
-        "io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default:1.1.0-SNAPSHOT",
-        "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-openapi:1.1.0-SNAPSHOT",
-        "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:1.1.0-SNAPSHOT",
-        "io.github.zenwave360.zenwave-sdk.plugins:jdl-openapi-controllers:1.1.0-SNAPSHOT"
+        "io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3:1.4.0-SNAPSHOTS",
+        "io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:1.4.0-SNAPSHOTS",
+        "io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:1.4.0-SNAPSHOTS",
+        "io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured:1.4.0-SNAPSHOTS",
+        "io.github.zenwave360.zenwave-sdk.plugins:backend-application-default:1.4.0-SNAPSHOTS",
+        "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi:1.4.0-SNAPSHOTS",
+        "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-asyncapi:1.4.0-SNAPSHOTS",
+        "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:1.4.0-SNAPSHOTS",
+        "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-markdown:1.4.0-SNAPSHOTS",
+        "io.github.zenwave360.zenwave-sdk.plugins:openapi-controllers:1.4.0-SNAPSHOTS"
       ],
       "repositories": [
         "mavencentral",
@@ -53,6 +57,21 @@
       "repositories": [
         "mavencentral",
         "snapshots\u003dhttps://s01.oss.sonatype.org/content/repositories/snapshots"
+      ],
+      "main": "io.zenwave360.sdk.Main"
+    },
+    "1.0.x": {
+      "script-ref": "io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli:1.0.7",
+      "dependencies": [
+        "org.slf4j:slf4j-simple:1.7.36",
+        "io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3:1.0.7",
+        "io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:1.0.7",
+        "io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:1.0.7",
+        "io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured:1.0.7",
+        "io.github.zenwave360.zenwave-sdk.plugins:jdl-backend-application-default:1.0.7",
+        "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-openapi:1.0.7",
+        "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:1.0.7",
+        "io.github.zenwave360.zenwave-sdk.plugins:jdl-openapi-controllers:1.0.7"
       ],
       "main": "io.zenwave360.sdk.Main"
     }
