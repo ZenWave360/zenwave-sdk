@@ -60,15 +60,17 @@ jbang alias add --name=zw \
     --repos=mavencentral,snapshots=https://s01.oss.sonatype.org/content/repositories/snapshots \
     --deps=\
 org.slf4j:slf4j-simple:1.7.36,\
-io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3:1.1.0-SNAPSHOT,\
-io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:1.1.0-SNAPSHOT,\
-io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:1.1.0-SNAPSHOT,\
-io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured:1.1.0-SNAPSHOT,\
-io.github.zenwave360.zenwave-sdk.plugins:backend-application-default:1.1.0-SNAPSHOT,\
-io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi:1.1.0-SNAPSHOT,\
-io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:1.1.0-SNAPSHOT,\
-io.github.zenwave360.zenwave-sdk.plugins:openapi-controllers:1.1.0-SNAPSHOT \
-    io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli:1.1.0-SNAPSHOT
+io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3:1.3.0,\
+io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:1.3.0,\
+io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:1.3.0,\
+io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured:1.3.0,\
+io.github.zenwave360.zenwave-sdk.plugins:backend-application-default:1.3.0,\
+io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi:1.3.0,\
+io.github.zenwave360.zenwave-sdk.plugins:zdl-to-asyncapi:1.3.0,\
+io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:1.3.0,\
+io.github.zenwave360.zenwave-sdk.plugins:zdl-to-markdown:1.3.0,\
+io.github.zenwave360.zenwave-sdk.plugins:openapi-controllers:1.3.0
+    io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli:1.3.0
 ```
 
 You can include any **custom plugin** jars in the `--deps` option.
@@ -155,17 +157,20 @@ $ jbang zw -h -f list
 INFO Reflections - Reflections took 428 ms to scan 44 urls, producing 2493 keys and 14406 values
 Available plugins:
 
-jsonschema2pojo                io.zenwave360.sdk.plugins.AsyncApiJsonSchema2PojoPlugin: Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files
-backend-application-default io.zenwave360.sdk.plugins.BackendApplicationDefaultPlugin: Generates a full backend application using a flexible hexagonal architecture
-zdl-to-openapi                 io.zenwave360.sdk.plugins.ZDLToOpenAPIPlugin: Generates a full OpenAPI definitions for CRUD operations from JDL models
-openapi-controllers        io.zenwave360.sdk.plugins.OpenAPIControllersPlugin: Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.
-openapi-to-jdl                 io.zenwave360.sdk.plugins.OpenAPIToJDLPlugin: Generates JDL model from OpenAPI schemas
-spring-cloud-streams3          io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin: Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI
-spring-cloud-streams3-tests    io.zenwave360.sdk.plugins.SpringCloudStreams3TestsPlugin: Generates tests for Spring Cloud Streams Consumers.
-spring-cloud-streams3-adapters io.zenwave360.sdk.plugins.SpringCloudStreams3AdaptersPlugin: Generates tests for Spring Cloud Streams Consumers.
-fork-plugin                    io.zenwave360.sdk.plugins.ForkPlugin: Creates a new standalone maven module cloning an existing plugin
-spring-webtestclient           io.zenwave360.sdk.plugins.SpringWebTestClientPlugin: Generates spring WebTestClient tests from OpenAPI defined endpoints.
-rest-assured                   io.zenwave360.sdk.plugins.RestAssuredPlugin: Generates REST-assured tests from OpenAPI defined endpoints.
+backend-application-default    io.zenwave360.sdk.plugins.BackendApplicationDefaultPlugin: Generates a full backend application using a flexible hexagonal architecture (1.3.0)
+spring-cloud-streams3-adapters io.zenwave360.sdk.plugins.SpringCloudStreams3AdaptersPlugin: Generates tests for Spring Cloud Streams Consumers. (1.3.0)
+jdl-to-asyncapi                io.zenwave360.sdk.plugins.JDLToAsyncAPIPlugin: Generates a full AsyncAPI definitions for CRUD operations from JDL models (1.3.0)
+spring-webtestclient           io.zenwave360.sdk.plugins.SpringWebTestClientPlugin: Generates test for SpringMVC or Spring WebFlux using WebTestClient based on OpenAPI specification. (1.3.0)
+fork-plugin                    io.zenwave360.sdk.plugins.ForkPlugin: Creates a new standalone maven module cloning an existing plugin (1.3.0)
+jsonschema2pojo                io.zenwave360.sdk.plugins.AsyncApiJsonSchema2PojoPlugin: Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files (1.3.0)
+spring-cloud-streams3-tests    io.zenwave360.sdk.plugins.SpringCloudStreams3TestsPlugin: Generates tests for Spring Cloud Streams Consumers. (1.3.0)
+openapi-controllers            io.zenwave360.sdk.plugins.OpenAPIControllersPlugin: Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces. (1.3.0)
+openapi-to-jdl                 io.zenwave360.sdk.plugins.OpenAPIToJDLPlugin: Generates JDL model from OpenAPI schemas (1.3.0)
+spring-cloud-streams3          io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin: Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI (1.3.0)
+rest-assured                   io.zenwave360.sdk.plugins.RestAssuredPlugin: Generates REST-Assured tests based on OpenAPI specification. (1.3.0)
+zdl-to-openapi                 io.zenwave360.sdk.plugins.ZDLToOpenAPIPlugin: Generates a full OpenAPI definitions for CRUD operations from JDL models (1.3.0)
+zdl-to-markdown                io.zenwave360.sdk.plugins.ZdlToMarkdownPlugin: Generates Markdown glossary from Zdl Models (1.3.0)
+zdl-to-asyncapi                io.zenwave360.sdk.plugins.ZDLToAsyncAPIPlugin: Generates a full OpenAPI definitions for CRUD operations from JDL models (1.3.0)
 ```
 
 NOTE: it will list any available plugin, standard or custom, inside any of these root java packages "io", "com" or "org".
@@ -187,15 +192,17 @@ jbang zw --help markdown -p <pluginConfigClass>
 Refer to individual plugin's documentation for more information:
 
 | **Plugin**                                                                               | **Description**                    | **Model Types**            |
-|------------------------------------------------------------------------------------------|------------------------------------| -------------------------- |
+|------------------------------------------------------------------------------------------|------------------------------------|----------------------------|
+| [Backend Application Default](./plugins/backend-application-default/README.md)           | Backend Application Default        | ZDL                        |
 | [AsyncAPI JSON Schema to POJO](./plugins/asyncapi-jsonschema2pojo/README.md)             | AsyncAPI JSON Schema to POJO       | AsyncAPI, JsonSchema       |
 | [AsyncAPI to Spring Cloud Streams 3](./plugins/asyncapi-spring-cloud-streams3/README.md) | AsyncAPI to Spring Cloud Streams 3 | AsyncAPI, AVRO, JsonSchema |
-| [JDL Backend Application Default](./plugins/backend-application-default/README.md)   | JDL Backend Application Default    | JDL                        |
-| [Java 2 JDL Reverse Engineering](./plugins/java-to-jdl/README.md)                        | Java 2 JDL Reverse Engineering     | Java, JDL                  |
-| [JDL OpenAPI Controllers](./plugins/openapi-controllers/README.md)                   | JDL OpenAPI Controllers            | OpenAPI, JDL               |
-| [JDL to OpenAPI](./plugins/zdl-to-openapi/README.md)                                     | JDL to OpenAPI and OpenAPI to JDL  | JDL, OpenAPI               |
+| [OpenAPI Controllers](./plugins/openapi-controllers/README.md)                           | JDL OpenAPI Controllers            | OpenAPI, ZDL               |
 | [OpenAPI to Spring WebTestClient](./plugins/openapi-spring-webtestclient/README.md)      | OpenAPI to Spring WebTestClient    | OpenAPI                    |
+| [ZDL to OpenAPI](./plugins/zdl-to-openapi/README.md)                                     | ZDL to OpenAPI and OpenAPI to ZDL  | ZDL, OpenAPI               |
+| [ZDL to AsyncAPI](./plugins/zdl-to-asyncapi/README.md)                                   | ZDL to AsyncAPI                    | ZDL, AsyncAPI              |
+| [ZDL to Markdown](./plugins/zdl-to-markdown/README.md)                                   | ZDL to Markdown                    | ZDL                        |
 | [REST-Assured](./plugins/openapi-rest-assured/README.md)                                 | OpenAPI to REST-Assured            | OpenAPI                    |
+| [Java 2 JDL Reverse Engineering](./plugins/java-to-jdl/README.md)                        | Java 2 JDL Reverse Engineering     | Java, JDL                  |
 
 ## Forking an Standard or Custom Plugin
 

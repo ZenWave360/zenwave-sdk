@@ -49,5 +49,5 @@ jbang zw -p io.zenwave360.sdk.plugins.OpenAPIControllersPlugin    specFile=src/m
 ## Getting Help
 
 ```shell
-jbang zw -p io.zenwave360.sdk.plugins.OpenAPIControllersPluginhelp
+jbang zw -p io.zenwave360.sdk.plugins.OpenAPIControllersPlugin --help
 ```

@@ -11,12 +11,13 @@ jbang zw -p io.zenwave360.sdk.plugins.ZdlToMarkdownPlugin \
 
 ## Options
 
-| **Option**     | **Description**                                                            | **Type** | **Default**             | **Values** |
-|----------------|----------------------------------------------------------------------------|----------|-------------------------|------------|
-| `specFile`     | Spec file to parse                                                         | String   |                         |            |
-| `targetFolder` | Target folder to generate code to. If left empty, it will print to stdout. | File     |                         |            |
-| `specFiles`    | JDL files to parse                                                         | String[] | [null]                  |            |
-| `targetFile`   | Target file                                                                | String   | zdl-model-glossary.md   |            |
+| **Option**     | **Description**                    | **Type** | **Default**           | **Values** |
+|----------------|------------------------------------|----------|-----------------------|------------|
+| `specFile`     | Spec file to parse                 | String   |                       |            |
+| `specFiles`    | ZDL files to parse                 | String[] | []                    |            |
+| `targetFile`   | Target file                        | String   | zdl-model-glossary.md |            |
+| `targetFolder` | Target folder for generated output | String   |                       |            |
+
 
 ## Getting Help
 

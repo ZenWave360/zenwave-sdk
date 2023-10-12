@@ -16,22 +16,20 @@ jbang zw -p io.zenwave360.sdk.plugins.ZDLToAsyncAPIPlugin \
 
 ## Options
 
-| **Option**                           | **Description**                                                                                                                                                                 | **Type** | **Default**                           | **Values** |
-|--------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|---------------------------------------|------------|
-| `specFile`                           | Spec file to parse                                                                                                                                                              | String   |                                       |            |
-| `specFiles`                          | JDL files to parse                                                                                                                                                              | String[] | []                                    |            |
-| `targetFolder`                       | Target folder to generate code to. If left empty, it will print to stdout.                                                                                                      | File     |                                       |            |
-| `targetFile`                         | Target file                                                                                                                                                                     | String   | openapi.yml                           |            |
-| `basePackage`                        | Java Models package name                                                                                                                                                        | String   | io.example.domain.model               |            |
-| `entities`                           | Entities to generate code for                                                                                                                                                   | List     | []                                    |            |
-| `annotationsToGenerate`              | Skip generating operations for entities annotated with these                                                                                                                    | List     | [aggregate]                           |            |
-| `skipForAnnotations`                 | Skip generating operations for entities annotated with these                                                                                                                    | List     | [vo, embedded, skip]                  |            |
-| `jdlBusinessEntityProperty`          | Extension property referencing original jdl entity in components schemas (default: x-business-entity)                                                                           | String   | x-business-entity                     |            |
-| `jdlBusinessEntityPaginatedProperty` | Extension property referencing original jdl entity in components schemas for paginated lists                                                                                    | String   | x-business-entity-paginated           |            |
-| `paginatedDtoItemsJsonPath`          | JSONPath list to search for response DTO schemas for list or paginated results. Examples: '$.items' for lists or '$.properties.<content property>.items' for paginated results. | List     | [$.items, $.properties.content.items] |            |
-| `criteriaDTOSuffix`                  | Suffix for search criteria DTOs (default: Criteria)                                                                                                                             | String   | Criteria                              |            |
-| `idType`                             | JsonSchema type for id fields and parameters.                                                                                                                                   | String   | string                                |            |
-| `idTypeFormat`                       | JsonSchema type format for id fields and parameters.                                                                                                                            | String   |                                       |            |
+| **Option**                  | **Description**                                                                                       | **Type**            | **Default**             | **Values**   |
+|-----------------------------|-------------------------------------------------------------------------------------------------------|---------------------|-------------------------|--------------|
+| `specFile`                  | Spec file to parse                                                                                    | String              |                         |              |
+| `specFiles`                 | ZDL files to parse                                                                                    | String[]            | []                      |              |
+| `asyncapiVersion`           | Target AsyncAPI version.                                                                              | AsyncapiVersionType | v3                      | v2, v3       |
+| `schemaFormat`              | Schema format for messages' payload                                                                   | SchemaFormat        | schema                  | schema, avro |
+| `basePackage`               | Java Models package name                                                                              | String              | io.example.domain.model |              |
+| `avroPackage`               | Package name for generated Avro Schemas (.avsc)                                                       | String              | io.example.domain.model |              |
+| `idType`                    | JsonSchema type for id fields and parameters.                                                         | String              | string                  |              |
+| `idTypeFormat`              | JsonSchema type format for id fields and parameters.                                                  | String              |                         |              |
+| `jdlBusinessEntityProperty` | Extension property referencing original jdl entity in components schemas (default: x-business-entity) | String              | x-business-entity       |              |
+| `targetFolder`              | Target folder to generate code to. If left empty, it will print to stdout.                            | File                |                         |              |
+| `targetFile`                | Target file                                                                                           | String              | asyncapi.yml            |              |
+
 
 ## Getting Help
 
