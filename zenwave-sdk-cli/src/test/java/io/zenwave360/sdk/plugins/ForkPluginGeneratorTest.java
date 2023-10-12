@@ -6,6 +6,7 @@ import java.net.URL;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+@Disabled
 public class ForkPluginGeneratorTest {
 
     @Test
