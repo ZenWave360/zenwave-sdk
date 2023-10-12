@@ -1,0 +1,6 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi,io.zenwave360.sdk.plugins,OpenAPIToJDLPlugin,41,0,4,0,6,0,4,0,2,0
+io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi,io.zenwave360.sdk.plugins,ZDLToOpenAPIGenerator,62,514,12,26,13,97,12,20,2,11
+io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi,io.zenwave360.sdk.plugins,ZDLToOpenAPIPlugin,45,0,4,0,6,0,4,0,2,0
+io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi,io.zenwave360.sdk.plugins,OpenAPIToJDLGenerator,10,502,4,42,5,93,5,25,1,6
+io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi,io.zenwave360.sdk.plugins,PathsProcessor,10,297,8,26,1,61,8,16,0,7
