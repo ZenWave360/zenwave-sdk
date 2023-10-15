@@ -31,7 +31,10 @@ public class ZDLParserTest {
     @Test
     public void testParseZDLWithProblems() throws URISyntaxException, IOException {
         String targetProperty = "model";
-        ZDLParser parser = new ZDLParser().withSpecFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address-problems.zdl").withTargetProperty(targetProperty);
+        ZDLParser parser = new ZDLParser()
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address-problems.zdl")
+                .withTargetProperty(targetProperty);
+        parser.continueOnZdlError = false;
 
         try {
             Map<String, Object> model = (Map) parser.parse().get(targetProperty);

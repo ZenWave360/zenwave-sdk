@@ -15,9 +15,9 @@ public interface I{{apiClassName}} {
     /**
      * {{{operation.summary}}}
      */
-    boolean {{operation.operationId}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers);
-    default boolean {{operation.operationId}}({{message.x--javaType}} payload) {
-        return {{operation.operationId}}(payload, null);
+    boolean {{operation.operationId}}{{methodSuffix message operation producer=true}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers);
+    default boolean {{operation.operationId}}{{methodSuffix message operation producer=true}}({{message.x--javaType}} payload) {
+        return {{operation.operationId}}{{methodSuffix message operation producer=true}}(payload, null);
     };
     {{/each}}
 {{/each}}

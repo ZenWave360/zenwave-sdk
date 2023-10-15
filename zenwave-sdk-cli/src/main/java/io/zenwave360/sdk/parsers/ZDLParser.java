@@ -18,7 +18,7 @@ public class ZDLParser implements Parser {
     public String targetProperty = "zdl";
 
     @DocumentedOption(description = "Continue even when ZDL contains fatal errors")
-    public boolean continueOnZdlError = false;
+    public boolean continueOnZdlError = true;
 
     public Map<String, String> options = new HashMap<>();
 

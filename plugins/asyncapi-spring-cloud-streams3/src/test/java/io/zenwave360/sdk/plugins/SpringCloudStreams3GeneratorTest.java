@@ -33,6 +33,20 @@ public class SpringCloudStreams3GeneratorTest {
         logCaptor.close();
     }
 
+
+    @Test
+    public void test_generator_asyncapi_v2() throws Exception {
+        Plugin plugin = new SpringCloudStreams3Plugin()
+                .withSpecFile("classpath:asyncapi-v2.yml")
+                .withTargetFolder("target/zenwave630/out/v2")
+                .withOption("apiPackage", "io.example.v2")
+                .withOption("modelPackage", "io.example.v2")
+                .withOption("role", AsyncapiRoleType.provider)
+                .withOption("style", ProgrammingStyle.imperative);
+
+        new MainGenerator().generate(plugin);
+    }
+
     @Test
     public void test_generator_provider_for_events() throws Exception {
         Plugin plugin = new SpringCloudStreams3Plugin()

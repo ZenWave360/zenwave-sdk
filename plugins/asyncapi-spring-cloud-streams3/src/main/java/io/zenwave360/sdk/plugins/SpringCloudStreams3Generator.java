@@ -107,7 +107,8 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         });
         handlebarsEngine.getHandlebars().registerHelper("methodSuffix", (context, options) -> {
             boolean doExposeMessage = "true".equals(String.valueOf(options.hash.get("exposeMessage")));
-            if (doExposeMessage || exposeMessage || style == ProgrammingStyle.reactive) {
+            boolean isProducer = "true".equals(String.valueOf(options.hash.get("producer")));;
+            if (isProducer || doExposeMessage || exposeMessage || style == ProgrammingStyle.reactive) {
                 int messagesCount = JSONPath.get(options.param(0), "$.x--messages.length()", 0);
                 if (messagesCount > 1) {
                     String messageJavaType = JSONPath.get(context, "$.x--javaTypeSimpleName");
