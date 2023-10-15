@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import io.github.zenwave360.zdl.ZdlParser;
 import io.zenwave360.sdk.doc.DocumentedOption;
+import io.zenwave360.sdk.utils.JSONPath;
 
 public class ZDLParser implements Parser {
 
@@ -15,6 +16,9 @@ public class ZDLParser implements Parser {
     public String[] specFiles;
     private String content;
     public String targetProperty = "zdl";
+
+    @DocumentedOption(description = "Continue even when ZDL contains fatal errors")
+    public boolean continueOnZdlError = false;
 
     public Map<String, String> options = new HashMap<>();
 
@@ -61,6 +65,18 @@ public class ZDLParser implements Parser {
             zdlString = Arrays.stream(specFiles).map(this::loadSpecFile).collect(Collectors.joining());
         }
         Map<String, Object> zdlModel = ZdlParser.parseModel(zdlString);
+        var problems = JSONPath.get(zdlModel, "$.problems", List.of());
+        if(!problems.isEmpty()) {
+            for (Object problem : problems) {
+                var message = JSONPath.get(problem, "message");
+                var location = JSONPath.get(problem, "location", new int[5]);
+                var path = JSONPath.get(problem, "path");
+                System.err.printf("ZDL ERROR [%s]: %s [line: %s, char: %s]%n", path, message, location[2], location[3]+1);
+            }
+            if(!continueOnZdlError) {
+                throw new ParseProblemsException(problems);
+            }
+        }
         Map<String, Object> model = new LinkedHashMap<>();
         model.put(targetProperty, zdlModel);
         return model;

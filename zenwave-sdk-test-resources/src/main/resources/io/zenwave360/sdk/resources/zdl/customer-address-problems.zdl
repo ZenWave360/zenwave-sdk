@@ -1,0 +1,107 @@
+/**
+* Global javadoc comment
+*/
+
+MAX_LENGTH=100
+
+/**
+* Customer javadoc comment
+*/
+  @aggregate
+entity Customer {
+  username string required unique /** username javadoc comment */
+  email String required unique /** email javadoc comment */
+  tags String[] /** tags javadoc comment */
+}
+
+enum AddressType {  HOME(1) /** home description */,  WORK(1) /** work description */ }
+
+entity Address {
+  street String /** street javadoc comment */
+  city String /** city javadoc comment */
+  state String /** state javadoc comment */
+  zip String /** zip javadoc comment */
+  type AddressTypeBad /** address type is an enum */
+}
+
+relationship OneToMany {
+  /** Customer to addresses relationship */
+  CustomerBad{addressesBad} to
+  /** Address to customer relationship */
+  Address{customer}
+}
+
+
+/**
+ * Customer input javadoc comment
+ */
+input CustomerInput {
+  username String required unique
+  tags String[]
+  email String required unique pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/)
+  /** address is a nested entity */
+  address AddressInput[] {
+    street String /** street javadoc comment */
+    city String /** city javadoc comment */
+    state String /** state javadoc comment */
+    zip String /** zip javadoc comment */
+  }
+}
+
+@copy(Address)
+input AddressInputCopy {
+}
+
+output CustomerOutput {
+
+}
+
+/**
+ Service javadoc comment
+ */
+@rest("/customers")
+service CustomerService for (CustomerBad) {
+  /**
+   * Create customer javadoc comment
+   */
+  @post("/customers")
+  @asyncapi({ api: "apiname", operationId: "createCustomer", channel: "customerCommandsChannel", topic: "customer-input-topic" })
+  createCustomer(CustomerInputBad) CustomerBad withEvents CustomerEventBad [CustomerCreatedBad|CustomerCreatedFailed]
+
+  @put("/customers/{customerId}")
+  updateCustomer(id, CustomerOutput) CustomerInput? withEvents CustomerEvent CustomerUpdated /** update customer javadoc comment */
+
+  @delete("/customers/{customerId}")
+  deleteCustomer(id) withEvents CustomerDeleted
+
+  @get("/customers/{customerId}")
+  getCustomer(id) Customer?
+
+  @get({path: "/customers", params: {search: "string"}})
+  @paginated
+  listCustomers() CustomerBad[]
+}
+
+@copy(Customer)
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerEvent {
+    id Long
+}
+
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerCreated {
+  customerId String
+  customer Customer
+}
+
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerUpdated {
+  customerId String
+  customer Customer
+}
+
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerDeleted {
+  customerId String
+}
+
