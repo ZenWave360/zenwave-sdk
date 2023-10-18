@@ -5,4 +5,4 @@ io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwa
 io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.sdk.plugins,SpringCloudStreams3TestsPlugin,5,39,1,1,1,6,1,2,0,2
 io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.sdk.plugins,SpringCloudStreams3Plugin,0,31,0,0,0,4,0,2,0,2
 io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.sdk.plugins,SpringCloudStreams3AdaptersPlugin,0,93,0,2,0,9,0,3,0,2
-io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.sdk.plugins,SpringCloudStreams3Generator,39,804,4,46,5,118,5,42,2,20
+io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.sdk.plugins,SpringCloudStreams3Generator,39,814,4,48,5,119,5,43,2,20

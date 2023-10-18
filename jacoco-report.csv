@@ -28,13 +28,15 @@ io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.options.async
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.options.asyncapi,AsyncapiOperationType,0,53,3,9,0,6,3,5,0,2
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.options.asyncapi,AsyncapiRoleType,0,15,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.formatters,JavaFormatter,138,0,14,0,25,0,13,0,6,0
-io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,ZDLParser,18,73,2,2,5,20,4,7,2,7
+io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,Parser.ParseException,4,0,0,0,2,0,1,0,1,0
+io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,ZDLParser,18,148,2,8,5,31,4,10,2,7
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,Parser,19,18,1,1,5,2,1,1,0,1
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,Model,0,22,0,0,0,7,0,4,0,4
+io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,Parser.ParseProblemsException,0,6,0,0,0,3,0,1,0,1
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,GraphQLParser,5,112,0,0,2,15,1,2,1,2
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,DefaultYamlParser,7,59,0,0,2,14,1,5,1,5
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.plugins,ForkPlugin,0,12,0,0,0,3,0,1,0,1
-io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.plugins,ForkPluginGenerator,929,29,62,0,181,6,50,1,19,1
+io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.plugins,ForkPluginGenerator,33,925,10,52,7,180,9,42,0,20
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,AbstractOpenAPIGenerator.OperationType,0,45,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,Generator,28,69,2,10,7,12,3,5,1,1
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,AbstractZDLGenerator,0,6,0,0,0,2,0,1,0,1
@@ -61,7 +63,7 @@ io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwa
 io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.sdk.plugins,SpringCloudStreams3TestsPlugin,5,39,1,1,1,6,1,2,0,2
 io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.sdk.plugins,SpringCloudStreams3Plugin,0,31,0,0,0,4,0,2,0,2
 io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.sdk.plugins,SpringCloudStreams3AdaptersPlugin,0,93,0,2,0,9,0,3,0,2
-io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.sdk.plugins,SpringCloudStreams3Generator,39,804,4,46,5,118,5,42,2,20
+io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.sdk.plugins,SpringCloudStreams3Generator,39,814,4,48,5,119,5,43,2,20
 io.github.zenwave360.zenwave-sdk.plugins:java-to-jdl,io.zenwave360.sdk.plugins,JavaToJDLGenerator,203,581,57,73,57,136,45,32,2,10
 io.github.zenwave360.zenwave-sdk.plugins:java-to-jdl,io.zenwave360.sdk.plugins,JavaToJDLGenerator.PersistenceType,0,15,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-sdk.plugins:openapi-controllers,io.zenwave360.sdk.plugins,OpenAPIControllersPlugin,0,93,0,2,0,9,0,3,0,2
