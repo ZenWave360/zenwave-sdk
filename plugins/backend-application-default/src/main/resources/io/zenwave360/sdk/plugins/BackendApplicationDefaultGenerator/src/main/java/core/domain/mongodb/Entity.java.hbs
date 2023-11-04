@@ -20,6 +20,9 @@ import org.springframework.data.annotation.LastModifiedDate;
 /**
 * {{entity.comment}}
 */
+{{~#if useLombok}}
+@lombok.Getter @lombok.Setter
+{{~/if}}
 {{#unless (skipEntityId entity)~}}@Document(collection = "{{entity.tableName}}"){{/unless~}}
 public class {{entity.className}} {{addExtends entity}} implements Serializable {
 
@@ -49,25 +52,6 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
     private LocalDateTime lastModifiedDate;
 {{/if~}}
 
-{{#unless (skipEntityId entity)~}}
-    public {{idJavaType}} getId() {
-        return id;
-    }
-    public {{entity.className}} withId({{idJavaType}} id) {
-        this.id = id;
-        return this;
-    }
-    public void setId({{idJavaType}} id) {
-        this.id = id;
-    }
-    public Integer getVersion() {
-        return version;
-    }
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
-{{/unless~}}
-
 {{#each entity.fields as |field|}}
     {{~#if field.isArray}}
     public {{entity.className}} add{{capitalize field.name}}({{javaType field}} {{field.name}}) {
@@ -75,19 +59,34 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
         return this;
     }
     {{~/if}}
-    public {{entity.className}} with{{capitalize field.name}}({{{fieldType field}}} {{field.name}}) {
-        this.{{field.name}} = {{field.name}};
+{{/each}}
+
+{{#unless useLombok~}}
+{{#unless (skipEntityId entity)~}}
+    public {{idJavaType}} getId() {
+        return id;
+    }
+    public {{entity.className}} setId({{idJavaType}} id) {
+        this.id = id;
         return this;
     }
-{{/each}}
+    public Integer getVersion() {
+        return version;
+    }
+    public {{entity.className}} setVersion(Integer version) {
+        this.version = version;
+        return this;
+    }
+{{/unless~}}
 
 {{#each entity.fields as |field|}}
     public {{{fieldType field}}} get{{capitalize field.name}}() {
         return {{field.name}};
     }
 
-    public void set{{capitalize field.name}}({{{fieldType field}}} {{field.name}}) {
+    public {{entity.className}} set{{capitalize field.name}}({{{fieldType field}}} {{field.name}}) {
         this.{{field.name}} = {{field.name}};
+        return this;
     }
 {{/each}}
 
@@ -96,18 +95,21 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
     return createdDate;
   }
 
-  public void setCreatedDate(LocalDateTime createdDate) {
+  public {{entity.className}} setCreatedDate(LocalDateTime createdDate) {
     this.createdDate = createdDate;
+    return this;
   }
 
   public LocalDateTime getLastModifiedDate() {
     return lastModifiedDate;
   }
 
-  public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
+  public {{entity.className}} setLastModifiedDate(LocalDateTime lastModifiedDate) {
     this.lastModifiedDate = lastModifiedDate;
+    return this;
   }
 {{/if}}
+{{/unless}}
 
 {{#unless (skipEntityId entity)~}}
   /* https://vladmihalcea.com/the-best-way-to-implement-equals-hashcode-and-tostring-with-jpa-and-hibernate/ */

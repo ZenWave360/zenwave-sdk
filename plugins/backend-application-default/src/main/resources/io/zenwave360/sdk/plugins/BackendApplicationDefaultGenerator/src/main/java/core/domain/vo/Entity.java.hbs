@@ -9,6 +9,9 @@ import jakarta.validation.constraints.*;
 /**
 * {{entity.comment}}
 */
+{{~#if useLombok}}
+@lombok.Getter @lombok.Setter
+{{~/if}}
 public class {{entity.className}} {{addExtends entity}} implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -28,19 +31,18 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
         return this;
     }
     {{~/if}}
-    public {{entity.className}} with{{capitalize field.name}}({{{fieldType field}}} {{field.name}}) {
-        this.{{field.name}} = {{field.name}};
-        return this;
-    }
 {{/each}}
 
+{{~#unless useLombok}}
 {{#each entity.fields as |field|}}
     public {{{fieldType field}}} get{{capitalize field.name}}() {
         return {{field.name}};
     }
 
-    public void set{{capitalize field.name}}({{{fieldType field}}} {{field.name}}) {
+    public {{entity.className}} set{{capitalize field.name}}({{{fieldType field}}} {{field.name}}) {
         this.{{field.name}} = {{field.name}};
+        return this;
     }
 {{/each}}
+{{~/unless}}
 }

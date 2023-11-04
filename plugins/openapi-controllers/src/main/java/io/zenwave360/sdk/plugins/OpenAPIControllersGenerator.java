@@ -56,7 +56,8 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     List<Object[]> templates = List.of(
             new Object[] {"src/main/java", "web/mappers/BaseMapper.java", "mappers/BaseMapper.java", JAVA},
             new Object[] {"src/main/java", "web/mappers/ServiceDTOsMapper.java", "mappers/{{service.name}}DTOsMapper.java", JAVA},
-            new Object[] {"src/main/java", "web/{{webFlavor}}/ServiceApiController.java", "{{service.name}}ApiController.java", JAVA});
+            new Object[] {"src/main/java", "web/{{webFlavor}}/ServiceApiController.java", "{{service.name}}ApiController.java", JAVA},
+            new Object[] {"src/test/java", "web/{{webFlavor}}/ServiceApiControllerTest.java", "{{service.name}}ApiControllerTest.java", JAVA});
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;
@@ -209,6 +210,44 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
             }
             return options.fn(context);
         });
+
+        handlebarsEngine.getHandlebars().registerHelper("asMethodParametersInitializer", (context, options) -> {
+            if (context instanceof Map) {
+                Map operation = (Map) context;
+                List<Map<String, Object>> params = (List) operation.getOrDefault("parameters", Collections.emptyList());
+                List methodParams = params.stream()
+                        .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
+                        .map(param -> {
+                            String javaType = getJavaTypeOrOptional(param);
+                            String name = JSONPath.get(param, "$.name");
+                            return javaType + " " + name + " = null;";
+                        }).collect(Collectors.toList());
+                if (operation.containsKey("x--request-dto")) {
+                    methodParams.add(String.format("%s%s%s %s = null;", openApiModelNamePrefix, operation.get("x--request-dto"), openApiModelNameSuffix, "reqBody"));
+                }
+                return StringUtils.join(methodParams, "\n");
+            }
+            return options.fn(context);
+        });
+
+        handlebarsEngine.getHandlebars().registerHelper("asMethodParameterValues", (context, options) -> {
+            if (context instanceof Map) {
+                Map operation = (Map) context;
+                List<Map<String, Object>> params = (List) operation.getOrDefault("parameters", Collections.emptyList());
+                List methodParams = params.stream()
+                        .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
+                        .map(param -> {
+                            String name = JSONPath.get(param, "$.name");
+                            return name;
+                        }).collect(Collectors.toList());
+                if (operation.containsKey("x--request-dto")) {
+                    methodParams.add("reqBody");
+                }
+                return StringUtils.join(methodParams, ", ");
+            }
+            return options.fn(context);
+        });
+
     }
 
     protected int compareParamsByRequire(Map<String, Object> param1, Map<String, Object> param2) {

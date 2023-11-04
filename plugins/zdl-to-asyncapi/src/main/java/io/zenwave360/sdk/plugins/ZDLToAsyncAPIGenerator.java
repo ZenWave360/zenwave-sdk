@@ -93,7 +93,11 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         // input commands
         var messages = new LinkedHashMap<>();
         model.put("messages", messages);
-        var methodsWithCommands = JSONPath.get(model, "$.services[*].methods[*][?(@.options.asyncapi)]", Collections.<Map>emptyList());
+        var methodsWithCommands = JSONPath.get(model, "$.services[*].methods[*][?(@.options.asyncapi)]", Collections.<Map>emptyList()).stream().filter(method -> {
+            var api = JSONPath.get(method, "$.options.asyncapi.api", (String) null);
+            var role = JSONPath.get(model, "$.apis." + api + ".role");
+            return role == null || "provider".equals(role);
+        }).toList();
         for (Map<String, Object> method : methodsWithCommands) {
             if (AsyncapiVersionType.v3.equals(asyncapiVersion)) {
                 buildMethodCommand(method, channels, operations, model, messages);

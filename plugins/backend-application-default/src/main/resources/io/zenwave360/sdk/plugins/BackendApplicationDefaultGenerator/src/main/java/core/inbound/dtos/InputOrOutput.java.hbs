@@ -10,6 +10,9 @@ import jakarta.validation.constraints.*;
 /**
  * {{defaultIfEmpty entity.description entity.name}}.
  */
+{{~#if useLombok}}
+@lombok.Getter @lombok.Setter
+{{~/if}}
 public class {{entity.className}} implements Serializable {
 
 {{#each entity.fields as |field|}}
@@ -26,20 +29,19 @@ public class {{entity.className}} implements Serializable {
         return this;
         }
     {{~/if}}
-    public {{entity.className}} with{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
-        this.{{field.name}} = {{field.name}};
-        return this;
-    }
 {{/each}}
 
+{{~#unless useLombok}}
 {{#each entity.fields as |field|}}
     {{~#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix entity}}{{/if}}{{/assign}}
     public {{{fieldType field suffix=typeSuffix}}} get{{capitalize field.name}}() {
         return {{field.name}};
     }
 
-    public void set{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
+    public {{entity.className}} set{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
         this.{{field.name}} = {{field.name}};
+        return this;
     }
 {{/each}}
+{{~/unless}}
 }

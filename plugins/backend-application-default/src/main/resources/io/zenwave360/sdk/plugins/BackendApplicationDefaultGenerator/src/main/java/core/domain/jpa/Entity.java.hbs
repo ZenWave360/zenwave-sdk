@@ -19,6 +19,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 /**
 * {{entity.comment}}
 */
+{{~#if useLombok}}
+@lombok.Getter @lombok.Setter
+{{~/if}}
 {{#if entity.options.embedded}}
 @Embeddable
 {{else if entity.options.isSuperClass}}
@@ -89,39 +92,32 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
     protected LocalDateTime lastModifiedDate;
 {{~/if}}
 
+{{#unless useLombok~}}
 {{#unless (skipEntityId entity)~}}
     public {{idJavaType}} getId() {
         return id;
     }
-    public {{entity.className}} withId({{idJavaType}} id) {
+    public {{entity.className}} setId({{idJavaType}} id) {
         this.id = id;
         return this;
-    }
-    public void setId({{idJavaType}} id) {
-        this.id = id;
     }
     public Integer getVersion() {
         return version;
     }
-    public void setVersion(Integer version) {
+    public {{entity.className}} setVersion(Integer version) {
         this.version = version;
+        return this;
     }
 {{/unless~}}
-
-{{#each entity.fields as |field|}}
-    public {{entity.name}} with{{capitalize field.name}}({{{fieldType field}}} {{field.name}}) {
-    this.{{field.name}} = {{field.name}};
-    return this;
-    }
-{{/each}}
 
 {{#each entity.fields as |field|}}
     public {{{fieldType field}}} get{{capitalize field.name}}() {
         return {{field.name}};
     }
 
-    public void set{{capitalize field.name}}({{{fieldType field}}} {{field.name}}) {
+    public {{entity.className}} set{{capitalize field.name}}({{{fieldType field}}} {{field.name}}) {
         this.{{field.name}} = {{field.name}};
+        return this;
     }
 {{/each}}
 
@@ -131,15 +127,17 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
     public {{idJavaType}} get{{capitalize relationship.fieldName}}Id() {
         return {{relationship.fieldName}}Id;
     }
-    public void set{{capitalize relationship.fieldName}}Id({{idJavaType}} {{relationship.fieldName}}Id) {
+    public {{entity.className}} set{{capitalize relationship.fieldName}}Id({{idJavaType}} {{relationship.fieldName}}Id) {
         this.{{relationship.fieldName}}Id = {{relationship.fieldName}}Id;
+        return this;
     }
     {{~/if}}
     public {{{relationshipFieldType relationship}}} get{{capitalize relationship.fieldName}}() {
         return {{relationship.fieldName}};
     }
-    public void set{{capitalize relationship.fieldName}}({{{relationshipFieldType relationship}}} {{relationship.fieldName}}) {
+    public {{entity.className}} set{{capitalize relationship.fieldName}}({{{relationshipFieldType relationship}}} {{relationship.fieldName}}) {
         this.{{relationship.fieldName}} = {{relationship.fieldName}};
+        return this;
     }
 {{/if~}}
 {{/each}}
@@ -149,34 +147,39 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
     return createdBy;
   }
 
-  public void setCreatedBy(String createdBy) {
+  public {{entity.className}} setCreatedBy(String createdBy) {
     this.createdBy = createdBy;
+    return this;
   }
 
   public LocalDateTime getCreatedDate() {
     return createdDate;
   }
 
-  public void setCreatedDate(LocalDateTime createdDate) {
+  public {{entity.className}} setCreatedDate(LocalDateTime createdDate) {
     this.createdDate = createdDate;
+    return this;
   }
 
   public String getLastModifiedBy() {
     return lastModifiedBy;
   }
 
-  public void setLastModifiedBy(String lastModifiedBy) {
+  public {{entity.className}} setLastModifiedBy(String lastModifiedBy) {
     this.lastModifiedBy = lastModifiedBy;
+    return this;
   }
 
   public LocalDateTime getLastModifiedDate() {
     return lastModifiedDate;
   }
 
-  public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
+  public {{entity.className}} setLastModifiedDate(LocalDateTime lastModifiedDate) {
     this.lastModifiedDate = lastModifiedDate;
+    return this;
   }
 {{/if}}
+{{/unless~}}
 
 {{#unless (skipEntityId entity)~}}
   /* https://vladmihalcea.com/the-best-way-to-implement-equals-hashcode-and-tostring-with-jpa-and-hibernate/ */

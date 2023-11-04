@@ -7,11 +7,14 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper
 public interface {{entity.className}}Mapper {
+
+    {{entity.className}}Mapper INSTANCE = Mappers.getMapper({{entity.className}}Mapper.class);
 
   {{~#each (findAggregateInputs entity) as |input|}}
     {{entity.className}} asEntityFrom{{input}}List({{input}} input);

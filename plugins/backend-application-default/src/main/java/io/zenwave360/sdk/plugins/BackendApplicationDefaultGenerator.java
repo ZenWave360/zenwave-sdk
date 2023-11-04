@@ -31,6 +31,9 @@ public class BackendApplicationDefaultGenerator extends AbstractZDLGenerator {
     @DocumentedOption(description = "Programming Style")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
 
+    @DocumentedOption(description = "Use @Getter and @Setter annotations from Lombok")
+    public boolean useLombok = false;
+
     @DocumentedOption(description = "If not empty, it will generate (and use) an `input` DTO for each entity used as command parameter")
     public String inputDTOSuffix = "";
 
@@ -95,8 +98,8 @@ public class BackendApplicationDefaultGenerator extends AbstractZDLGenerator {
 
     protected List<Object[]> templatesByService = List.of(
             new Object[] {"src/main/java", "core/inbound/Service.java", "core/inbound/{{service.name}}.java", JAVA},
-            new Object[] {"src/main/java", "core/implementation/{{persistence}}/{{style}}/ServiceImpl.java", "core/implementation/{{service.name}}Impl.java", JAVA},
-            new Object[] {"src/test/java", "core/implementation/{{persistence}}/{{style}}/ServiceTest.java", "core/implementation/{{service.name}}Test.java", JAVA});
+            new Object[] {"src/main/java", "core/implementation/{{persistence}}/{{style}}/ServiceImpl.java", "core/implementation/{{service.name}}Impl.java", JAVA, null, true},
+            new Object[] {"src/test/java", "core/implementation/{{persistence}}/{{style}}/ServiceTest.java", "core/implementation/{{service.name}}Test.java", JAVA, null, true});
 
     protected List<Object[]> templatesForAllServices = List.of(
             new Object[] {"src/test/java", "config/InMemoryTestsConfig.java", "config/InMemoryTestsConfig.java", JAVA},
@@ -113,7 +116,7 @@ public class BackendApplicationDefaultGenerator extends AbstractZDLGenerator {
 
     protected TemplateInput asTemplateInput(Object[] templateNames) {
         boolean skipOverwrite = templateNames.length > 5 ? (boolean) templateNames[5] : false;
-        Function<Map<String, Object>, Boolean> skip = templateNames.length > 4 ? (Function) templateNames[4] : null;
+        Function<Map<String, Object>, Boolean> skip = (templateNames.length > 4 && templateNames[4] instanceof Function) ? (Function) templateNames[4] : null;
         return new TemplateInput()
                 .withTemplateLocation(templatesFolder + templateNames[0] + "/" + templateNames[1])
                 .withTargetFile(templateNames[0] + "/{{asPackageFolder basePackage}}/" + templateNames[2])

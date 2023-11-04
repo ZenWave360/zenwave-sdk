@@ -4,6 +4,15 @@
 
 MAX_LENGTH=100
 
+apis {
+    asyncapi(provider) CustomerAddressAPI {
+        uri ""
+    }
+    asyncapi(client) ThirdPartyAPI {
+        uri ""
+    }
+}
+
 /**
 * Customer javadoc comment
 */
@@ -55,10 +64,11 @@ service CustomerService for (Customer) {
    * Create customer javadoc comment
    */
   @post("/customers")
-  @asyncapi({ api: "apiname", operationId: "doCreateCustomer", channel: "customerCommandsChannel", topic: "customer-input-topic" })
+  @asyncapi({operationId: "doCreateCustomer", channel: "customerCommandsChannel", topic: "customer-input-topic" })
   createCustomer(CustomerInput) Customer withEvents CustomerEvent [CustomerCreated|CustomerCreatedFailed]
 
   @put("/customers/{customerId}")
+  @asyncapi({ api: ThirdPartyAPI, operationId: "doUpdateCustomer"})
   updateCustomer(id, CustomerInput) Customer? withEvents CustomerEvent CustomerUpdated /** update customer javadoc comment */
 
   @delete("/customers/{customerId}")

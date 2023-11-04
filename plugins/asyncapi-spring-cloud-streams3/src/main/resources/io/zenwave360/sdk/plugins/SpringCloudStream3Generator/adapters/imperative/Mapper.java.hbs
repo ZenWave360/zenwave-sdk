@@ -7,12 +7,15 @@ import {{modelPackage}}.*;
 import {{inboundDtosPackage}}.*;
 {{~/if}}
 import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.TimeZone;
 
-@Mapper(componentModel = "spring")
+@Mapper
 public interface AdapterEventsMapper {
+
+    AdapterEventsMapper INSTANCE = Mappers.getMapper(AdapterEventsMapper.class);
 
 {{~#each dtoEntityMap as |dtoEntity|}}
     {{~#assign "dtoClassName"}}{{asJavaTypeName dtoEntity.schemaName}}{{/assign}}

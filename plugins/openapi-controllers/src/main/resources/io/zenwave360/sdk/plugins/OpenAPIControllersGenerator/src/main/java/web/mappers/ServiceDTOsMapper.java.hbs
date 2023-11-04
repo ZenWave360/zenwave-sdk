@@ -5,11 +5,14 @@ import {{inboundDtosPackage}}.*;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.factory.Mappers;
 import java.util.List;
 import org.springframework.data.domain.Page;
 
-@Mapper(componentModel = "spring", uses = BaseMapper.class)
+@Mapper(uses = BaseMapper.class)
 public interface {{service.name}}DTOsMapper {
+
+    {{service.name}}DTOsMapper INSTANCE = Mappers.getMapper({{service.name}}DTOsMapper.class);
 
 {{#each dtoWithEntityMap as |dto|}}
     {{~#assign "dtoName"}}{{openApiModelNamePrefix}}{{dto.name}}{{openApiModelNameSuffix}}{{/assign}}

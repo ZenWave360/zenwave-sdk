@@ -85,7 +85,8 @@ public class JDLEntitiesToSchemasConverter {
         }
         for (Map<String, Object> field : fields) {
             Map<String, Object> property = new LinkedHashMap<>();
-            boolean isComplexType = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + field.get("type")) != null;
+            boolean isComplexType = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + field.get("type")) != null
+                    || JSONPath.get(zdlModel, "$.events." + field.get("type")) != null;
 
             if ("String".equals(field.get("type")) || "TextBlob".equals(field.get("type"))) {
                 property.put("type", "string");

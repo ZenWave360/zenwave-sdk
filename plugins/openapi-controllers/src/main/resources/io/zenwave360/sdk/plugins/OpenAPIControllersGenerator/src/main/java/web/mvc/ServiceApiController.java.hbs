@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.mapstruct.factory.Mappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,15 +39,18 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
     @Autowired
     private NativeWebRequest request;
 
+{{~#if jdl.isDummy}}/*{{/if}}
+{{#each entitiesServices as |coreServiceName|}}
+    private {{coreServiceName}} {{asInstanceName coreServiceName}};
     @Autowired
-    private {{service.name}}DTOsMapper mapper;
-
-{{#if jdl.isDummy}}/*{{/if}}
-{{#each entitiesServices as |service|}}
-    @Autowired
-    private {{service}} {{asInstanceName service}};
+    public {{service.name}}ApiController set{{coreServiceName}}({{coreServiceName}} {{asInstanceName coreServiceName}}) {
+        this.{{asInstanceName coreServiceName}} = {{asInstanceName coreServiceName}};
+        return this;
+    }
 {{/each}}
-{{#if jdl.isDummy}}*/{{/if}}
+{{#if jdl.isDummy}}*/{{/if~}}
+
+    private {{service.name}}DTOsMapper mapper = {{service.name}}DTOsMapper.INSTANCE;
 
     @Override
     public Optional<NativeWebRequest> getRequest() {
