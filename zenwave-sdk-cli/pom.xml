@@ -51,6 +51,22 @@
       <artifactId>google-java-format</artifactId>
       <version>${google-java-format.version}</version>
     </dependency>
+    <dependency>
+      <groupId>io.spring.javaformat</groupId>
+      <artifactId>spring-javaformat-formatter</artifactId>
+      <version>${spring-javaformat.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>io.spring.javaformat</groupId>
+          <artifactId>spring-javaformat-formatter-eclipse-jdt-jdk8</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>io.spring.javaformat</groupId>
+      <artifactId>spring-javaformat-formatter-eclipse-runtime</artifactId>
+      <version>${spring-javaformat.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>com.github.javafaker</groupId>
