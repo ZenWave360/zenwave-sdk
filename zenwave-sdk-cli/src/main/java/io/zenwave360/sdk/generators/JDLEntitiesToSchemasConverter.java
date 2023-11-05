@@ -70,7 +70,7 @@ public class JDLEntitiesToSchemasConverter {
         Map<String, Object> properties = new LinkedHashMap<>();
         schema.put("properties", properties);
 
-        if (!JSONPath.get(entity, "options.embedded", false)) {
+        if (includeIdAndVersion(entity)) {
             properties.put("id", idTypeMap());
             if (includeVersion) {
                 properties.put("version", Maps.of("type", "integer"));
@@ -192,6 +192,10 @@ public class JDLEntitiesToSchemasConverter {
         }
 
         return schema;
+    }
+
+    private static boolean includeIdAndVersion(Map<String, Object> entity) {
+        return "entities".equals(entity.get("type")) && !JSONPath.get(entity, "options.embedded", false);
     }
 
     public boolean isAddRelationshipById(Object relationship) {
