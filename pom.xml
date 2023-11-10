@@ -72,6 +72,7 @@
         <zdl-jvm.version>1.0.0-SNAPSHOT</zdl-jvm.version>
         <graphql-java.version>19.2</graphql-java.version>
         <google-java-format.version>1.7</google-java-format.version>
+        <palantir-java-format.version>2.38.0</palantir-java-format.version>
         <spring-javaformat.version>0.0.39</spring-javaformat.version>
         <junit.version>4.13.2</junit.version>
         <spring-boot-dependencies.version>2.6.7</spring-boot-dependencies.version>

@@ -37,11 +37,12 @@ public class BackendApplicationDefaultHelpers {
 
     public Collection<String> findAggregateInputs(Map aggregate, Options options) {
         var zdl = options.get("zdl");
+        var aggregateName = (String) aggregate.get("name");
         var inputDTOSuffix = (String) options.get("inputDTOSuffix");
         Set<String> inputs = new HashSet<String>();
-        inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregate.get("name") + "' in @.aggregates)].methods[*].parameter"));
-        inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregate.get("name") + "' in @.aggregates)].methods[*].returnType"));
-        inputs.add(aggregate.get("name") + inputDTOSuffix);
+        inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregateName + "' in @.aggregates)].methods[*].parameter"));
+        // inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregateName + "' in @.aggregates)].methods[*].returnType"));
+        // inputs.add(aggregateName + inputDTOSuffix);
         inputs = inputs.stream().filter(Objects::nonNull).collect(Collectors.toSet());
 
         var entities = JSONPath.get(zdl, "$.entities", Collections.emptyMap());
@@ -49,6 +50,15 @@ public class BackendApplicationDefaultHelpers {
         inputs = inputs.stream().map(input -> entities.get(input) != null? input + inputDTOSuffix : input).collect(Collectors.toSet());
 
         return inputs;
+    }
+
+    public Collection<String> findAggregateOutputs(Map aggregate, Options options) {
+        var zdl = options.get("zdl");
+        var aggregateName = (String) aggregate.get("name");
+        Set<String> outputs = new HashSet<String>();
+        outputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregateName + "' in @.aggregates)].methods[*].returnType"));
+        outputs = outputs.stream().filter(input -> input != null && !aggregateName.equals(input)).collect(Collectors.toSet());
+        return outputs;
     }
 
     public String methodParameterType(Map<String, Object> method, Options options) {

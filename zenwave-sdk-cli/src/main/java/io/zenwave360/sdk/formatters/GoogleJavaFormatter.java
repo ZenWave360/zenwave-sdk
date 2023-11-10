@@ -23,6 +23,11 @@ public class GoogleJavaFormatter implements Formatter {
     @DocumentedOption(description = "Halt on formatting errors")
     public boolean haltOnFailFormatting = true;
 
+    public GoogleJavaFormatter(boolean skipFormatting, boolean haltOnFailFormatting) {
+        this.skipFormatting = skipFormatting;
+        this.haltOnFailFormatting = haltOnFailFormatting;
+    }
+
     public List<TemplateOutput> format(List<TemplateOutput> templateOutputList) {
         return templateOutputList.stream().map(t -> format(t)).collect(Collectors.toList());
     }
