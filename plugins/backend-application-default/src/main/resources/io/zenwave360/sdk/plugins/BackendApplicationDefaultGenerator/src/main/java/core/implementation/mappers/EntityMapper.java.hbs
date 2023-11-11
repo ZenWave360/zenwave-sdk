@@ -4,12 +4,12 @@ import {{basePackage}}.core.domain.*;
 import {{basePackage}}.core.inbound.dtos.*;
 
 import org.mapstruct.AfterMapping;
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 @Mapper
 public interface {{entity.className}}Mapper {
@@ -28,6 +28,9 @@ public interface {{entity.className}}Mapper {
   {{~#each (findAggregateOutputs entity) as |output|}}
     {{output}} as{{output}}({{entity.className}} entity);
     List<{{output}}> as{{output}}List(List<{{entity.className}}> entity);
+    default Page<{{output}}> as{{output}}Page(Page<{{entity.className}}> page) {
+      return page.map(this::as{{output}});
+    }
   {{~/each}}
 
     {{~assign 'relationships' (findOwnedOneToManyRelationships entity)}}

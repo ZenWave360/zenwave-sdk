@@ -70,7 +70,7 @@ public class BackendApplicationDefaultHelpers {
 
     public Map<String, Object> methodEntity(Map<String, Object> method, Options options) {
         var returnType = (String) method.get("returnType");
-        var service = options.hash("service");
+        var service = options.get("service");
         var aggregates = JSONPath.get(service, "aggregates", Collections.emptyList());
         if(aggregates.size() == 1 && StringUtils.equals(returnType, aggregates.get(0).toString())) {
             var zdl = options.get("zdl");
@@ -83,6 +83,31 @@ public class BackendApplicationDefaultHelpers {
         var returnType = (String) method.get("returnType");
         var zdl = options.get("zdl");
         return JSONPath.get(zdl, "$.entities." + returnType);
+    }
+
+    public String wrapWithMapper(Map<String, Object> entity, Options options) {
+        var method = (Map) options.get("method");
+        var returnType = methodReturnEntity(method, options);
+        if(returnType == null) {
+            return "";
+        }
+        var instanceName = (String) entity.get("instanceName");
+        if (Objects.equals(entity.get("name"), returnType.get("name"))) {
+            if(JSONPath.get(method, "options.paginated", false)) {
+                return "page";
+            }
+            return instanceName;
+        } else {
+            var returnTypeIsArray = (Boolean) method.getOrDefault("returnTypeIsArray", false);
+            if(returnTypeIsArray) {
+                if(JSONPath.get(method, "options.paginated", false)) {
+                    return String.format("%sMapper.as%sPage(%s)", instanceName, returnType.get("className"), "page");
+                }
+                return String.format("%sMapper.as%sList(%s)", instanceName, returnType.get("className"), instanceName);
+            } else {
+                return String.format("%sMapper.as%s(%s)", instanceName, returnType.get("className"), instanceName);
+            }
+        }
     }
 
     public String returnType(Map<String, Object> method, Options options) {
