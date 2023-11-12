@@ -10,7 +10,7 @@ import io.zenwave360.sdk.Plugin;
 import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.options.ProgrammingStyle;
 import io.zenwave360.sdk.parsers.ZDLParser;
-import io.zenwave360.sdk.processors.JDLProcessor;
+import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.testutils.MavenCompiler;
 import nl.altindag.log.LogCaptor;
 
@@ -35,7 +35,7 @@ public class BackendApplicationMongoImperativeGeneratorTest {
 
     private Map<String, Object> loadZDLModelFromResource(String resource) throws Exception {
         Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
-        return new JDLProcessor().process(model);
+        return new ZDLProcessor().process(model);
     }
 
 

@@ -3,6 +3,7 @@ package io.zenwave360.sdk.plugins;
 import java.util.List;
 import java.util.Map;
 
+import io.zenwave360.sdk.processors.ZDLProcessor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.zenwave360.sdk.parsers.ZDLParser;
-import io.zenwave360.sdk.processors.JDLProcessor;
 import io.zenwave360.sdk.templating.TemplateOutput;
 
 public class ZDLToOpenAPIGeneratorTest {
@@ -19,7 +19,7 @@ public class ZDLToOpenAPIGeneratorTest {
 
     private Map<String, Object> loadZDLModelFromResource(String resource) throws Exception {
         Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
-        model = new JDLProcessor().process(model);
+        model = new ZDLProcessor().process(model);
         model = new PathsProcessor().process(model);
         return model;
     }

@@ -82,7 +82,7 @@ public class BackendApplicationDefaultHelpers {
     public Map<String, Object> methodReturnEntity(Map<String, Object> method, Options options) {
         var returnType = (String) method.get("returnType");
         var zdl = options.get("zdl");
-        return JSONPath.get(zdl, "$.entities." + returnType);
+        return JSONPath.get(zdl, "$.allEntitiesAndEnums." + returnType);
     }
 
     public String wrapWithMapper(Map<String, Object> entity, Options options) {
