@@ -13,9 +13,9 @@ import io.zenwave360.sdk.utils.JSONPath;
 
 public class BackendApplicationDefaultJpaHelpers {
 
-    private final BackendApplicationDefaultGenerator generator;
+    private final BackendDefaultApplicationGenerator generator;
 
-    BackendApplicationDefaultJpaHelpers(BackendApplicationDefaultGenerator generator) {
+    BackendApplicationDefaultJpaHelpers(BackendDefaultApplicationGenerator generator) {
         this.generator = generator;
     }
 

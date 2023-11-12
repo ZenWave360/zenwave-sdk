@@ -41,20 +41,6 @@ public class LegacyBackendApplicationMongoImperativeGeneratorTest {
     }
 
     @Test
-    public void test_entities() throws Exception {
-        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl");
-        BackendApplicationDefaultGenerator generator = new BackendApplicationDefaultGenerator();
-
-        List<TemplateOutput> outputTemplates = generator.generate(model);
-
-        for (TemplateOutput outputTemplate : outputTemplates) {
-            System.out.println(" ----------- " + outputTemplate.getTargetFile());
-            System.out.println(outputTemplate.getContent());
-        }
-        outputTemplates = new JavaFormatter().format(outputTemplates);
-    }
-
-    @Test
     public void test_generator_hexagonal_mongodb_imperative() throws Exception {
         String targetFolder = "target/jdl/test_generator_hexagonal_mongodb_imperative";
         Plugin plugin = new BackendApplicationDefaultPlugin()

@@ -17,6 +17,10 @@ public class NamingUtils {
         return StringUtils.uncapitalize(camelCase(name));
     }
 
+    public static String asPackageFolder(String text) {
+        return text != null ? text.replaceAll("\\.", "/") : null;
+    }
+
     public static String camelCase(String name) {
         if (name == null) {
             return null;

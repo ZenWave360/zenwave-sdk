@@ -17,6 +17,8 @@ public interface Generator {
 
     List<TemplateOutput> generate(Map<String, Object> contextModel);
 
+    default void onPropertiesSet() { }
+
     default Map<String, Object> asConfigurationMap() {
         return Generator.asConfigurationMap(this);
     }

@@ -15,7 +15,7 @@ import io.zenwave360.sdk.options.WebFlavorType;
 import io.zenwave360.sdk.templating.*;
 import io.zenwave360.sdk.utils.JSONPath;
 
-public class BackendApplicationDefaultGenerator extends AbstractZDLGenerator {
+public class BackendApplicationDefaultGeneratorBack extends AbstractZDLGenerator {
 
     public String sourceProperty = "zdl";
 
@@ -43,15 +43,15 @@ public class BackendApplicationDefaultGenerator extends AbstractZDLGenerator {
     @DocumentedOption(description = "Suffix for elasticsearch document entities (default: Document)")
     public String searchDTOSuffix = "Document";
 
-    public BackendApplicationDefaultGenerator withSourceProperty(String sourceProperty) {
+    public BackendApplicationDefaultGeneratorBack withSourceProperty(String sourceProperty) {
         this.sourceProperty = sourceProperty;
         return this;
     }
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
     {
-        handlebarsEngine.getHandlebars().registerHelpers(new BackendApplicationDefaultHelpers(this));
-        handlebarsEngine.getHandlebars().registerHelpers(new BackendApplicationDefaultJpaHelpers(this));
+//        handlebarsEngine.getHandlebars().registerHelpers(new BackendApplicationDefaultHelpers(this));
+//        handlebarsEngine.getHandlebars().registerHelpers(new BackendApplicationDefaultJpaHelpers(this));
     }
 
     private String templatesFolder = "io/zenwave360/sdk/plugins/BackendApplicationDefaultGenerator/";
@@ -76,7 +76,7 @@ public class BackendApplicationDefaultGenerator extends AbstractZDLGenerator {
     Object[] enumTemplate = {"src/main/java", "core/domain/common/Enum.java", "core/domain/{{enum.name}}.java", JAVA};
     Object[] enumDtoTemplate = {"src/main/java", "core/inbound/dtos/Enum.java", "core/inbound/dtos/{{enum.name}}.java", JAVA};
     protected List<Object[]> templatesByEntity = List.of(
-            new Object[] {"src/main/java", "core/domain/vo/Entity.java", "core/domain/{{entity.name}}.java", JAVA, skipVO},
+            new Object[] {"src/main/java", "core/domain/{{persistence}}/Entity.java", "core/domain/{{entity.name}}.java", JAVA, skipVO},
             new Object[] {"src/main/java", "core/domain/{{persistence}}/Entity.java", "core/domain/{{entity.name}}.java", JAVA, skipEntity},
             new Object[] {"src/main/java", "core/outbound/{{persistence}}/{{style}}/EntityRepository.java", "core/outbound/{{persistence}}/{{entity.className}}Repository.java", JAVA, skipEntityRepository, true},
             new Object[] {"src/main/java", "core/inbound/dtos/EntityCriteria.java", "core/inbound/dtos/{{criteriaClassName entity }}.java", JAVA, skipSearchCriteria},

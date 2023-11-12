@@ -177,7 +177,7 @@ public class CustomHandlebarsHelpers {
     }
 
     public static String asPackageFolder(String text, Options options) throws IOException {
-        return text != null ? text.replaceAll("\\.", "/") : null;
+        return NamingUtils.asPackageFolder(text);
     }
 
     public static String camelCase(String text, Options options) throws IOException {
