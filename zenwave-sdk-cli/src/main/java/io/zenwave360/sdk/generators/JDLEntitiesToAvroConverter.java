@@ -51,7 +51,7 @@ public class JDLEntitiesToAvroConverter {
         List<Map<String, Object>> fields = new ArrayList<>();
         schema.put("fields", fields);
 
-        if (!JSONPath.get(entity, "options.embedded", false)) {
+        if (includeIdAndVersion(entity)) {
             fields.add(Maps.of("name", "id", "type", idType));
         }
 
@@ -158,6 +158,9 @@ public class JDLEntitiesToAvroConverter {
         return isRequired ? type : Arrays.asList("null", type);
     }
 
+    private static boolean includeIdAndVersion(Map<String, Object> entity) {
+        return "entities".equals(entity.get("type")) && !JSONPath.get(entity, "options.embedded", false);
+    }
     private static Object asNumber(String number) {
         try {
             return Integer.parseInt(number);

@@ -37,11 +37,12 @@ public class BackendApplicationDefaultHelpers {
 
     public Collection<String> findAggregateInputs(Map aggregate, Options options) {
         var zdl = options.get("zdl");
+        var aggregateName = (String) aggregate.get("name");
         var inputDTOSuffix = (String) options.get("inputDTOSuffix");
         Set<String> inputs = new HashSet<String>();
-        inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregate.get("name") + "' in @.aggregates)].methods[*].parameter"));
-        inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregate.get("name") + "' in @.aggregates)].methods[*].returnType"));
-        inputs.add(aggregate.get("name") + inputDTOSuffix);
+        inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregateName + "' in @.aggregates)].methods[*].parameter"));
+        // inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregateName + "' in @.aggregates)].methods[*].returnType"));
+        // inputs.add(aggregateName + inputDTOSuffix);
         inputs = inputs.stream().filter(Objects::nonNull).collect(Collectors.toSet());
 
         var entities = JSONPath.get(zdl, "$.entities", Collections.emptyMap());
@@ -49,6 +50,15 @@ public class BackendApplicationDefaultHelpers {
         inputs = inputs.stream().map(input -> entities.get(input) != null? input + inputDTOSuffix : input).collect(Collectors.toSet());
 
         return inputs;
+    }
+
+    public Collection<String> findAggregateOutputs(Map aggregate, Options options) {
+        var zdl = options.get("zdl");
+        var aggregateName = (String) aggregate.get("name");
+        Set<String> outputs = new HashSet<String>();
+        outputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregateName + "' in @.aggregates)].methods[*].returnType"));
+        outputs = outputs.stream().filter(input -> input != null && !aggregateName.equals(input)).collect(Collectors.toSet());
+        return outputs;
     }
 
     public String methodParameterType(Map<String, Object> method, Options options) {
@@ -60,7 +70,7 @@ public class BackendApplicationDefaultHelpers {
 
     public Map<String, Object> methodEntity(Map<String, Object> method, Options options) {
         var returnType = (String) method.get("returnType");
-        var service = options.hash("service");
+        var service = options.get("service");
         var aggregates = JSONPath.get(service, "aggregates", Collections.emptyList());
         if(aggregates.size() == 1 && StringUtils.equals(returnType, aggregates.get(0).toString())) {
             var zdl = options.get("zdl");
@@ -72,7 +82,32 @@ public class BackendApplicationDefaultHelpers {
     public Map<String, Object> methodReturnEntity(Map<String, Object> method, Options options) {
         var returnType = (String) method.get("returnType");
         var zdl = options.get("zdl");
-        return JSONPath.get(zdl, "$.entities." + returnType);
+        return JSONPath.get(zdl, "$.allEntitiesAndEnums." + returnType);
+    }
+
+    public String wrapWithMapper(Map<String, Object> entity, Options options) {
+        var method = (Map) options.get("method");
+        var returnType = methodReturnEntity(method, options);
+        if(returnType == null) {
+            return "";
+        }
+        var instanceName = (String) entity.get("instanceName");
+        if (Objects.equals(entity.get("name"), returnType.get("name"))) {
+            if(JSONPath.get(method, "options.paginated", false)) {
+                return "page";
+            }
+            return instanceName;
+        } else {
+            var returnTypeIsArray = (Boolean) method.getOrDefault("returnTypeIsArray", false);
+            if(returnTypeIsArray) {
+                if(JSONPath.get(method, "options.paginated", false)) {
+                    return String.format("%sMapper.as%sPage(%s)", instanceName, returnType.get("className"), "page");
+                }
+                return String.format("%sMapper.as%sList(%s)", instanceName, returnType.get("className"), instanceName);
+            } else {
+                return String.format("%sMapper.as%s(%s)", instanceName, returnType.get("className"), instanceName);
+            }
+        }
     }
 
     public String returnType(Map<String, Object> method, Options options) {

@@ -1,0 +1,39 @@
+package {{controllersPackage}};
+
+import {{openApiApiPackage}}.*;
+import {{openApiModelPackage}}.*;
+import {{basePackage}}.config.InMemoryTestsManualContext;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Test controller for {{service.name}}ApiController.
+ */
+public class {{service.name}}ApiControllerTest {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
+    {{service.name}}ApiController controller = new {{service.name}}ApiController()
+{{~#if jdl.isDummy}}/*{{/if}}
+{{#each entitiesServices as |coreServiceName|}}
+        .set{{coreServiceName}}(InMemoryTestsManualContext.INSTANCE.{{asInstanceName coreServiceName}}())
+{{/each}}
+{{#if jdl.isDummy}}*/{{/if~}}
+    ;
+
+{{#each service.operations as |operation|}}
+    @Test
+    public void {{operation.operationId}}Test() {
+        {{{asMethodParametersInitializer operation}}}
+        var response = controller.{{operation.operationId}}({{{asMethodParameterValues operation}}});
+        Assertions.assertEquals({{operation.x--response.x--statusCode}}, response.getStatusCode().value());
+    }
+{{/each}}
+
+}

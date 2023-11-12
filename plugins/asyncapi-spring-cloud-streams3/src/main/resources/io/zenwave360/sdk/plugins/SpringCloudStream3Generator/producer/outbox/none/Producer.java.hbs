@@ -51,7 +51,7 @@ public class {{apiClassName}} implements I{{apiClassName}} {
     /**
      * {{{operation.summary}}}
      */
-    public boolean {{operation.operationId}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers) {
+    public boolean {{operation.operationId}}{{methodSuffix message operation producer=true}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers) {
         log.debug("Sending message to topic: {}", {{operation.operationId}}BindingName);
         {{~#if (hasRuntimeHeaders message)}}
         headers = headers != null ? headers : new {{message.x--javaTypeSimpleName}}Headers();

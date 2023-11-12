@@ -10,36 +10,35 @@ import jakarta.validation.constraints.*;
 /**
  * {{defaultIfEmpty entity.description entity.name}}.
  */
-public class {{entity.className}} implements Serializable {
+{{~#if useLombok}}
+@lombok.Getter @lombok.Setter
+{{~/if}}
+public class {{entity.className}} {{addExtends entity}} implements Serializable {
 
 {{#each entity.fields as |field|}}
     {{{fieldValidationAnnotations field}}}
-    {{~#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix entity}}{{/if}}{{/assign}}
-    private {{{fieldType field suffix=typeSuffix}}} {{field.name}} {{{fieldTypeInitializer field}}};
+    private {{{fieldType field}}} {{field.name}} {{{fieldTypeInitializer field}}};
 {{/each}}
 
 {{#each entity.fields as |field|}}
-    {{#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix entity}}{{/if}}{{/assign}}
     {{~#if (and field.isArray (not (eq field.type "byte")))}}
-        public {{entity.className}} add{{capitalize field.name}}({{javaType field}}{{typeSuffix}} {{field.name}}) {
+        public {{entity.className}} add{{capitalize field.name}}({{javaType field}} {{field.name}}) {
         this.{{field.name}}.add({{field.name}});
         return this;
         }
     {{~/if}}
-    public {{entity.className}} with{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
+{{/each}}
+
+{{~#unless useLombok}}
+{{#each entity.fields as |field|}}
+    public {{{fieldType field}}} get{{capitalize field.name}}() {
+        return {{field.name}};
+    }
+
+    public {{entity.className}} set{{capitalize field.name}}({{{fieldType field}}} {{field.name}}) {
         this.{{field.name}} = {{field.name}};
         return this;
     }
 {{/each}}
-
-{{#each entity.fields as |field|}}
-    {{~#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix entity}}{{/if}}{{/assign}}
-    public {{{fieldType field suffix=typeSuffix}}} get{{capitalize field.name}}() {
-        return {{field.name}};
-    }
-
-    public void set{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
-        this.{{field.name}} = {{field.name}};
-    }
-{{/each}}
+{{~/unless}}
 }

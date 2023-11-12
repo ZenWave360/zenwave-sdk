@@ -18,8 +18,6 @@ import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.ObjectUtils;
 
 import static io.zenwave360.sdk.utils.NamingUtils.asJavaTypeName;
 import static org.apache.commons.lang.StringUtils.trimToNull;
@@ -93,7 +91,11 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         // input commands
         var messages = new LinkedHashMap<>();
         model.put("messages", messages);
-        var methodsWithCommands = JSONPath.get(model, "$.services[*].methods[*][?(@.options.asyncapi)]", Collections.<Map>emptyList());
+        var methodsWithCommands = JSONPath.get(model, "$.services[*].methods[*][?(@.options.asyncapi)]", Collections.<Map>emptyList()).stream().filter(method -> {
+            var api = JSONPath.get(method, "$.options.asyncapi.api", (String) null);
+            var role = JSONPath.get(model, "$.apis." + api + ".role");
+            return role == null || "provider".equals(role);
+        }).toList();
         for (Map<String, Object> method : methodsWithCommands) {
             if (AsyncapiVersionType.v3.equals(asyncapiVersion)) {
                 buildMethodCommand(method, channels, operations, model, messages);
@@ -126,7 +128,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         Map<String, Object> schemas = new LinkedHashMap<>();
         JSONPath.set(oasSchemas, "components.schemas", schemas);
 
-        for (Map<String, Object> schema : filterSchemasToInclude(model)) {
+        for (Map<String, Object> schema : filterSchemasToInclude(model, methodsWithCommands)) {
             if (schemaFormat == SchemaFormat.schema) {
                 JDLEntitiesToSchemasConverter toSchemasConverter = new JDLEntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
                 toSchemasConverter.includeVersion = false;
@@ -263,13 +265,13 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         return allEvents;
     }
 
-    protected List<Map<String, Object>> filterSchemasToInclude(Map<String, Object> model) {
+    protected List<Map<String, Object>> filterSchemasToInclude(Map<String, Object> model, List<Map> methodsWithCommands) {
         Map<String, Object> allEntitiesAndEnums = (Map) model.get("allEntitiesAndEnums");
         Map<String, Object> relationships = (Map) model.get("relationships");
 
         List<Map<String, Object>> schemasToInclude = new ArrayList<>();
         schemasToInclude.addAll(JSONPath.get(model, "$.events[*]", List.of()));
-        JSONPath.get(model, "$.services[*].methods[?(@.options.asyncapi != null)][*].parameter", List.of()).forEach(parameter -> {
+        JSONPath.get(methodsWithCommands, "$.[*].parameter", List.of()).forEach(parameter -> {
             var entity = JSONPath.get(allEntitiesAndEnums, "$.['" + parameter + "']", null);
             if(entity != null) {
                 schemasToInclude.add((Map) entity);

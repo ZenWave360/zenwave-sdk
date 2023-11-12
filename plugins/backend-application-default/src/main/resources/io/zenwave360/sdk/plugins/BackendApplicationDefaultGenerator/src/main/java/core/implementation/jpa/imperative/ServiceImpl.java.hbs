@@ -29,7 +29,7 @@ public class {{service.name}}Impl implements {{service.name}} {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
 {{#each entities as |entity|}}
-    private final {{entity.className}}Mapper {{entity.instanceName}}Mapper = Mappers.getMapper({{entity.className}}Mapper.class);
+    private final {{entity.className}}Mapper {{entity.instanceName}}Mapper = {{entity.className}}Mapper.INSTANCE;
     {{~#unless (skipEntityRepository this)}}
     private final {{entity.className}}Repository {{entity.instanceName}}Repository;
     {{~/unless}}

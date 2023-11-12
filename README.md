@@ -32,7 +32,7 @@ ZenWave SDK is a configurable and extensible toolkit for **Domain Driven Design 
   - [Forking an Standard or Custom Plugin](#forking-an-standard-or-custom-plugin)
 - [ZenWave SDK Documentation](#zenwave-sdk-documentation)
 
-## Jbang Instalation
+## JBang Instalation
 
 The easiest way to install ZenWave SDK is as a [JBang alias](https://www.jbang.dev/documentation/guide/latest/alias_catalogs.html):
 

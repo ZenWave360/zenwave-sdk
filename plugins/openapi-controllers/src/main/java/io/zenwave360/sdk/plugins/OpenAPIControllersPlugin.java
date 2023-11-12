@@ -40,7 +40,7 @@ public class OpenAPIControllersPlugin extends Plugin {
     public <T extends Plugin> T processOptions() {
 
         if (!getOptions().containsKey("zdlFile")) {
-            removeFromChain(ZDLParser.class, JDLProcessor.class);
+            removeFromChain(ZDLParser.class, ZDLProcessor.class);
             addBeforeInChain(EnrichOpenAPIWithJDLProcessor.class, JDLDummyDataFromSchemasProcessor.class);
         }
         // because we have more than one model, we need to configure how they are passed around from parser to processor and generator

@@ -10,6 +10,9 @@ import jakarta.validation.constraints.*;
 /**
  *
  */
+ {{~#if useLombok}}
+ @lombok.Getter @lombok.Setter
+ {{~/if}}
 public class {{entity.className}}{{inputDTOSuffix entity}} {{addExtends entity suffix=(inputDTOSuffix entity)}} implements Serializable {
 
 {{#unless (skipEntityId entity)~}}
@@ -34,25 +37,6 @@ public class {{entity.className}}{{inputDTOSuffix entity}} {{addExtends entity s
 {{/if~}}
 {{/each}}
 
-{{#unless (skipEntityId entity)~}}
-    public {{idJavaType}} getId() {
-        return id;
-    }
-    public {{entity.className}}{{inputDTOSuffix entity}} withId({{idJavaType}} id) {
-        this.id = id;
-        return this;
-    }
-    public void setId({{idJavaType}} id) {
-        this.id = id;
-    }
-    public Integer getVersion() {
-        return version;
-    }
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
-{{/unless~}}
-
 {{#each entity.fields as |field|}}
     {{#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix entity}}{{/if}}{{/assign}}
     {{~#if field.isArray}}
@@ -61,11 +45,25 @@ public class {{entity.className}}{{inputDTOSuffix entity}} {{addExtends entity s
         return this;
         }
     {{~/if}}
-    public {{entity.className}}{{inputDTOSuffix entity}} with{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
-        this.{{field.name}} = {{field.name}};
+{{/each}}
+
+{{#unless useLombok}}
+{{#unless (skipEntityId entity)~}}
+    public {{idJavaType}} getId() {
+        return id;
+    }
+    public {{entity.className}}{{inputDTOSuffix entity}} setId({{idJavaType}} id) {
+        this.id = id;
         return this;
     }
-{{/each}}
+    public Integer getVersion() {
+        return version;
+    }
+    public {{entity.className}}{{inputDTOSuffix entity}} setVersion(Integer version) {
+        this.version = version;
+        return this;
+    }
+{{/unless~}}
 
 {{#each entity.fields as |field|}}
     {{~#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix entity}}{{/if}}{{/assign}}
@@ -73,8 +71,9 @@ public class {{entity.className}}{{inputDTOSuffix entity}} {{addExtends entity s
         return {{field.name}};
     }
 
-    public void set{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
+    public {{entity.className}}{{inputDTOSuffix entity}} set{{capitalize field.name}}({{{fieldType field suffix=typeSuffix}}} {{field.name}}) {
         this.{{field.name}} = {{field.name}};
+        return this;
     }
 {{/each}}
 
@@ -84,18 +83,22 @@ public class {{entity.className}}{{inputDTOSuffix entity}} {{addExtends entity s
     public {{idJavaType}} get{{capitalize relationship.fieldName}}Id() {
         return {{relationship.fieldName}}Id;
     }
-    public void set{{capitalize relationship.fieldName}}Id({{idJavaType}} {{relationship.fieldName}}Id) {
+    public {{entity.className}}{{inputDTOSuffix entity}} set{{capitalize relationship.fieldName}}Id({{idJavaType}} {{relationship.fieldName}}Id) {
         this.{{relationship.fieldName}}Id = {{relationship.fieldName}}Id;
+        return this;
     }
     {{~else}}
     public {{{relationshipFieldType relationship suffix=(inputDTOSuffix entity)}}} get{{capitalize relationship.fieldName}}() {
         return {{relationship.fieldName}};
     }
 
-    public void set{{capitalize relationship.fieldName}}({{{relationshipFieldType relationship suffix=(inputDTOSuffix entity)}}} {{relationship.fieldName}}) {
+    public {{entity.className}}{{inputDTOSuffix entity}} set{{capitalize relationship.fieldName}}({{{relationshipFieldType relationship suffix=(inputDTOSuffix entity)}}} {{relationship.fieldName}}) {
         this.{{relationship.fieldName}} = {{relationship.fieldName}};
+        return this;
     }
     {{~/if}}
 {{/if~}}
 {{/each}}
+
+{{~/unless}}
 }

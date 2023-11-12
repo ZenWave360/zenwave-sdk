@@ -4,7 +4,7 @@
   <parent>
     <artifactId>zenwave-sdk</artifactId>
     <groupId>io.github.zenwave360.zenwave-sdk</groupId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>1.4.0-SNAPSHOT</version>
   </parent>
   <artifactId>zenwave-sdk-cli</artifactId>
   <name>${project.groupId}:${project.artifactId}</name>
@@ -50,6 +50,28 @@
       <groupId>com.google.googlejavaformat</groupId>
       <artifactId>google-java-format</artifactId>
       <version>${google-java-format.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.spring.javaformat</groupId>
+      <artifactId>spring-javaformat-formatter</artifactId>
+      <version>${spring-javaformat.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>io.spring.javaformat</groupId>
+          <artifactId>spring-javaformat-formatter-eclipse-jdt-jdk8</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>io.spring.javaformat</groupId>
+      <artifactId>spring-javaformat-formatter-eclipse-runtime</artifactId>
+      <version>${spring-javaformat.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.palantir.javaformat</groupId>
+      <artifactId>palantir-java-format</artifactId>
+      <version>${palantir-java-format.version}</version>
+      <optional>true</optional>
     </dependency>
 
     <dependency>

@@ -1,5 +1,7 @@
 package io.zenwave360.sdk;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -73,6 +75,12 @@ public class MainGenerator {
         }
         if (chainIndexOptions != null) {
             mapper.updateValue(processor, chainIndexOptions);
+        }
+
+        try {
+            processor.getClass().getMethod("onPropertiesSet").invoke(processor);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            // ignore
         }
     }
 }

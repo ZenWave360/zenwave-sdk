@@ -38,23 +38,24 @@ public class TemplateFileWriter implements TemplateWriter {
 
     @Override
     public void write(List<TemplateOutput> templateOutputList) {
-        templateOutputList.stream()
-                .peek(t -> log.info("Writing template with targetFile: {}", t.getTargetFile()))
-                .forEach(t -> writeToFile(getFile(t.getTargetFile()), t.getContent(), !forceOverwrite && t.isSkipOverwrite()));
+        templateOutputList
+                .forEach(t -> writeToFile(t.getTargetFile(), t.getContent(), !forceOverwrite && t.isSkipOverwrite()));
     }
 
     protected File getFile(String fileName) {
         return targetFolder != null ? new File(targetFolder, fileName) : new File(fileName);
     }
 
-    protected void writeToFile(File file, String contents, boolean skipOverwrite) {
-        log.trace("Writing template output to file: {}", file);
+    protected void writeToFile(String fileName, String contents, boolean skipOverwrite) {
+        log.trace("Writing template output to file: {}", fileName);
+        File file = getFile(fileName);
         try {
             file.getParentFile().mkdirs();
             if(skipOverwrite && Files.exists(Paths.get(file.toURI()))) {
-                log.warn("Skipping overwriting file: {}", file);
+                log.warn("Skipping overwriting file: {}", fileName);
                 return;
             }
+            log.info("Writing template with targetFile: {}", fileName);
             Files.writeString(Paths.get(file.toURI()),
                     contents,
                     StandardCharsets.UTF_8,

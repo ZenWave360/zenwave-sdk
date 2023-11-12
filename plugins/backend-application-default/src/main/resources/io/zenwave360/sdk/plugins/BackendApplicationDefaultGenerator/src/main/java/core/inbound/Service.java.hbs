@@ -13,7 +13,7 @@ import org.springframework.data.domain.Pageable;
 public interface {{service.name}} {
 
 {{#each service.methods as |method|}}
-    {{~> (partial '../implementation/partials/serviceMethodJavadoc')}};
+    {{~> (partial '../implementation/partials/serviceMethodJavadoc')}}
     {{~> (partial '../implementation/partials/serviceMethodSignature')}};
 {{/each}}
 

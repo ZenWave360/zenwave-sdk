@@ -1,22 +1,15 @@
 package io.zenwave360.sdk.plugins;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
 
-import io.zenwave360.sdk.parsers.Parser;
-import io.zenwave360.sdk.parsers.ZDLParser;
-import io.zenwave360.sdk.processors.ZDLProcessor;
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+import io.zenwave360.sdk.parsers.Parser;
 import io.zenwave360.sdk.parsers.ZDLParser;
-import io.zenwave360.sdk.processors.JDLProcessor;
-import io.zenwave360.sdk.templating.TemplateOutput;
 
 public class ZdlToMarkdownGeneratorTest {
 

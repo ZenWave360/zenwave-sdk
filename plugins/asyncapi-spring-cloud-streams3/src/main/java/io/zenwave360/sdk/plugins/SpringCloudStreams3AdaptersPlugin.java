@@ -20,14 +20,14 @@ public class SpringCloudStreams3AdaptersPlugin extends Plugin {
     public SpringCloudStreams3AdaptersPlugin() {
         super();
 //        withChain(DefaultYamlParser.class, AsyncApiProcessor.class, SpringCloudStreams3AdaptersGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
-        withChain(DefaultYamlParser.class, AsyncApiProcessor.class, ZDLParser.class, JDLProcessor.class, EnrichAsyncAPIWithJDLProcessor.class, SpringCloudStreams3AdaptersGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
+        withChain(DefaultYamlParser.class, AsyncApiProcessor.class, ZDLParser.class, ZDLProcessor.class, EnrichAsyncAPIWithJDLProcessor.class, SpringCloudStreams3AdaptersGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
     }
 
     @Override
     public <T extends Plugin> T processOptions() {
 
         if (!getOptions().containsKey("zdlFile")) {
-            removeFromChain(ZDLParser.class, JDLProcessor.class);
+            removeFromChain(ZDLParser.class, ZDLProcessor.class);
 //            addBeforeInChain(EnrichAsyncAPIWithJDLProcessor.class, JDLDummyDataFromSchemasProcessor.class);
 //            withOption("JDLDummyDataFromSchemasProcessor.apiProperty", "api");
 //            withOption("JDLDummyDataFromSchemasProcessor.jdlProperty", "zdl");
