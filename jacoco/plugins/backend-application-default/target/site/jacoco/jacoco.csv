@@ -1,5 +1,5 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 io.github.zenwave360.zenwave-sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultPlugin,0,28,0,0,0,3,0,1,0,1
 io.github.zenwave360.zenwave-sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultJpaHelpers,7,120,6,10,0,19,4,8,0,4
-io.github.zenwave360.zenwave-sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultHelpers,97,842,22,76,17,150,21,51,0,23
-io.github.zenwave360.zenwave-sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultGenerator,64,1342,15,65,4,113,14,50,3,21
+io.github.zenwave360.zenwave-sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultHelpers,174,906,28,84,24,163,25,57,0,26
+io.github.zenwave360.zenwave-sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultGenerator,64,1368,15,67,4,116,14,51,3,21
