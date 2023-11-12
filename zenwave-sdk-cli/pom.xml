@@ -4,7 +4,7 @@
   <parent>
     <artifactId>zenwave-sdk</artifactId>
     <groupId>io.github.zenwave360.zenwave-sdk</groupId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>1.3.2</version>
   </parent>
   <artifactId>zenwave-sdk-cli</artifactId>
   <name>${project.groupId}:${project.artifactId}</name>
