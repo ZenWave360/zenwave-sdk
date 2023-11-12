@@ -20,18 +20,6 @@
     },
     "snapshots": {
       "script-ref": "io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli:1.4.0-SNAPSHOT",
-      "arguments": [
-        "--java-options\u003d--add-exports",
-        "jdk.compiler/com.sun.tools.javac.api\u003dALL-UNNAMED",
-        "--add-exports",
-        "jdk.compiler/com.sun.tools.javac.file\u003dALL-UNNAMED",
-        "--add-exports",
-        "jdk.compiler/com.sun.tools.javac.parser\u003dALL-UNNAMED",
-        "--add-exports",
-        "jdk.compiler/com.sun.tools.javac.tree\u003dALL-UNNAMED",
-        "--add-exports",
-        "jdk.compiler/com.sun.tools.javac.util\u003dALL-UNNAMED"
-      ],
       "dependencies": [
         "org.slf4j:slf4j-simple:1.7.36",
         "io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3:1.4.0-SNAPSHOT",
