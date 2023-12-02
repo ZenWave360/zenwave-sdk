@@ -7,7 +7,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.zenwave360.sdk.options.ProgrammingStyle;
-import io.zenwave360.sdk.processors.ZDLUtils;
+import io.zenwave360.sdk.zdl.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.ZDLJavaSignatureUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -24,7 +25,7 @@ import io.zenwave360.sdk.utils.Maps;
 public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
     public String apiProperty = "api";
-    public String jdlProperty = "zdl";
+    public String zdlProperty = "zdl";
 
     @DocumentedOption(description = "The package to generate REST Controllers")
     public String controllersPackage = "{{basePackage}}.adapters.web";
@@ -72,8 +73,8 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                 .withSkip(skip);
     }
 
-    protected Map<String, Object> getJDLModel(Map<String, Object> contextModel) {
-        return (Map) contextModel.get(jdlProperty);
+    protected Map<String, Object> getZDLModel(Map<String, Object> contextModel) {
+        return (Map) contextModel.get(zdlProperty);
     }
 
     protected Map<String, Object> getOpenAPIModel(Map<String, Object> contextModel) {
@@ -84,7 +85,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {
         var templateOutputList = new ArrayList<TemplateOutput>();
         var openApiModel = getOpenAPIModel(contextModel);
-        var zdlModel = getJDLModel(contextModel);
+        var zdlModel = getZDLModel(contextModel);
 
         String operationIdsRegex = operationIds.isEmpty() ? "" : " =~ /(" + StringUtils.join(operationIds, "|") + ")/";
         List<Map<String, Object>> operations = JSONPath.get(openApiModel, "$.paths[*][*][?(@.operationId" + operationIdsRegex + ")]");
@@ -108,7 +109,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
             Collection<String> entityNames = new HashSet<>(JSONPath.get(operationByServiceEntry.getValue(), "$..x--entity[?(@.className)].name"));
 
-            Collection<String> entitiesServices = entityNames.stream().map(entity -> ZDLUtils.serviceName(entity, zdlModel)).filter(Objects::nonNull).collect(Collectors.toSet());
+            Collection<String> entitiesServices = entityNames.stream().map(entity -> ZDLFindUtils.findServiceName(entity, zdlModel)).filter(Objects::nonNull).collect(Collectors.toSet());
 
             Map serviceModel = Map.of(
                     "service", Map.of(
@@ -157,13 +158,58 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         model.putAll(this.asConfigurationMap());
         model.put("context", contextModel);
         model.put("openapi", getOpenAPIModel(contextModel));
-        model.put("zdl", getJDLModel(contextModel));
+        model.put("zdl", getZDLModel(contextModel));
         model.put("webFlavor", style == ProgrammingStyle.imperative ? "mvc" : "webflux");
         model.putAll(extModel);
         return getTemplateEngine().processTemplates(model, List.of(template));
     }
 
     {
+        handlebarsEngine.getHandlebars().registerHelper("methodReturnType", (method, options) -> {
+            if (method == null) { // legacy
+                var operation = (Map) options.get("operation");
+                var responseEntity = JSONPath.get(operation, "x--response.x--response-entity.className");
+                var responseEntityPaginated = JSONPath.get(operation, "x--response.x--response-entity-paginated.className");
+                return responseEntity;
+            }
+            return ZDLJavaSignatureUtils.methodReturnType((Map) method);
+        });
+        handlebarsEngine.getHandlebars().registerHelper("serviceMethodCall", (serviceMethod, options) -> {
+            if (serviceMethod == null) { // legacy
+                var operation = (Map) options.get("operation");
+                var operationId = JSONPath.get(operation, "operationId");
+                return String.format("%s(%s)", operationId, "input");
+            }
+            var methodName = JSONPath.get(serviceMethod, "name");
+            var params = new ArrayList<String>();
+            if(JSONPath.get(serviceMethod, "paramId") != null) {
+                params.add("id"); // TODO
+            }
+            if(JSONPath.get(serviceMethod, "parameter") != null) {
+                params.add("input");
+            }
+            return String.format("%s(%s)", methodName, StringUtils.join(params, ", "));
+        });
+        handlebarsEngine.getHandlebars().registerHelper("findServiceMethod", (operation, options) -> {
+            var zdl = options.get("zdl");
+            return ZDLFindUtils.findServiceMethod(JSONPath.get(operation, "operationId"), (Map) zdl);
+        });
+        handlebarsEngine.getHandlebars().registerHelper("hasPaginatedResponse", (operation, options) -> {
+            return JSONPath.get(operation, "x--response.x--response-entity-paginated") != null;
+        });
+        handlebarsEngine.getHandlebars().registerHelper("hasResponseEntity", (operation, options) -> {
+            return JSONPath.get(operation, "x--response.x--response-dto") != null;
+        });
+        handlebarsEngine.getHandlebars().registerHelper("requestEntity", (operation, options) -> {
+            return JSONPath.get(operation, "x--request-entity");
+        });
+        handlebarsEngine.getHandlebars().registerHelper("responseEntity", (operation, options) -> {
+            return JSONPath.get(operation, "x--response.x--response-entity");
+        });
+        handlebarsEngine.getHandlebars().registerHelper("responseEntityPaginated", (operation, options) -> {
+            return JSONPath.get(operation, "x--response.x--response-entity-paginated");
+        });
+
         handlebarsEngine.getHandlebars().registerHelper("orVoid", (context, options) -> {
             return StringUtils.isNotBlank((String) context) ? context : "Void";
         });
@@ -173,7 +219,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         });
 
         handlebarsEngine.getHandlebars().registerHelper("entityService", (entityName, options) -> {
-            return ZDLUtils.serviceName((String) entityName, options.get("zdl"));
+            return ZDLFindUtils.findServiceName((String) entityName, options.get("zdl"));
         });
 
         handlebarsEngine.getHandlebars().registerHelper("statusCode", (context, options) -> {

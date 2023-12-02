@@ -17,7 +17,7 @@ import io.zenwave360.sdk.writers.TemplateFileWriter;
  * ```shell
  * jbang zw -p io.zenwave360.sdk.plugins.OpenAPIControllersPlugin \
  *     specFile=src/main/resources/model/openapi.yml \
- *     zdlFile=src/main/resources/model/orders-model.jdl \
+ *     zdlFile=src/main/resources/model/orders-model.zdl \
  *     basePackage=io.zenwave360.example \
  *     openApiApiPackage=io.zenwave360.example.adapters.web \
  *     openApiModelPackage=io.zenwave360.example.adapters.web.model \
@@ -28,7 +28,7 @@ import io.zenwave360.sdk.writers.TemplateFileWriter;
 @DocumentedPlugin(value = "Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.", shortCode = "openapi-controllers")
 public class OpenAPIControllersPlugin extends Plugin {
 
-    @DocumentedOption(description = "JDL file to parse", required = false)
+    @DocumentedOption(description = "ZDL file to parse", required = false)
     public String zdlFile;
 
     public OpenAPIControllersPlugin() {

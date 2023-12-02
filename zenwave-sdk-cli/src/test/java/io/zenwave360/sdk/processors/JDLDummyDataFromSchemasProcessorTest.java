@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.zenwave360.sdk.zdl.ZDLFindUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +30,7 @@ public class JDLDummyDataFromSchemasProcessorTest {
         Map zdlModel = (Map) processed.get(processor.jdlProperty);
         Assertions.assertNotNull(JSONPath.get(zdlModel, "$.entities"));
         Assertions.assertNotNull(JSONPath.get(zdlModel, "$.entities.Pet"));
-        Assertions.assertEquals("PetService", ZDLUtils.serviceName("Pet", zdlModel));
+        Assertions.assertEquals("PetService", ZDLFindUtils.findServiceName("Pet", zdlModel));
     }
 
 }

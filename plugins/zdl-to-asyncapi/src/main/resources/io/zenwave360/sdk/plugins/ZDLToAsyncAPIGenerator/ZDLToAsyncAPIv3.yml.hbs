@@ -2,14 +2,13 @@ asyncapi: 3.0.0
 info:
   title: "{{{zdlModel.config.title}}}"
   version: 0.0.1
+  tags:
+    - name: "Default"
+  {{~#each zdlModel.serviceNames as |serviceName|}}
+    - name: "{{asTagName serviceName}}"
+  {{~/each}}
 
 defaultContentType: application/json
-
-tags:
-  - name: "Default"
-{{~#each zdlModel.serviceNames as |serviceName|}}
-  - name: "{{asTagName serviceName}}"
-{{~/each}}
 
 channels:
 {{~#each zdlModel.channels as |channel|}}

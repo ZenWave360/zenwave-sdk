@@ -1,4 +1,4 @@
-package io.zenwave360.sdk.processors;
+package io.zenwave360.sdk.zdl;
 
 import io.zenwave360.sdk.utils.JSONPath;
 
@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ZDLUtils {
+public class ZDLFindUtils {
 
     public static List<String> findAllServiceFacingEntities(Map<String, Object> model) {
-        var serviceEntities = ZDLUtils.findMethodParameterAndReturnTypes(model);
-        return ZDLUtils.findDependentEntities(model, serviceEntities);
+        var serviceEntities = ZDLFindUtils.findMethodParameterAndReturnTypes(model);
+        return ZDLFindUtils.findDependentEntities(model, serviceEntities);
     }
 
     public static List<String> findAllPaginatedEntities(Map<String, Object> model) {
@@ -57,7 +57,7 @@ public class ZDLUtils {
         return new ArrayList(new HashSet(JSONPath.get(entities, "$[*][*]")));
     }
 
-    public static String serviceName(String entityName, Map<String, Object> model) {
+    public static String findServiceName(String entityName, Map<String, Object> model) {
         var entity = (Map) JSONPath.get(model, "$.allEntitiesAndEnums." + entityName, Map.of());
         var allServices = JSONPath.get(model, "$.services[*]", List.<Map>of());
         if ("entities".equals(entity.get("type"))) {
@@ -75,5 +75,12 @@ public class ZDLUtils {
                     .map(service -> (String) service.get("name")).findFirst().orElse(null);
         }
         return null;
+    }
+
+    public static Map<String, Object> findServiceMethod(String operationId, Map<String, Object> model) {
+        var methods = JSONPath.get(model, "$.services[*].methods[*]", List.<Map>of());
+        return methods.stream()
+                .filter(method -> operationId.equals(JSONPath.get(method, "$.name")) || operationId.equals(JSONPath.get(method, "$.options[*].operationId"))
+                ).findFirst().orElse(null);
     }
 }

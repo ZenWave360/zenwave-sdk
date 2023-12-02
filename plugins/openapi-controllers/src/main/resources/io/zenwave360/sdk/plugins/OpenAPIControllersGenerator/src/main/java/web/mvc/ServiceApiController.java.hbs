@@ -28,7 +28,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 
 
 /**
- * REST controller for {{serviceName}}.
+ * REST controller for {{serviceName}}Api.
  */
 @RestController
 @RequestMapping("/api")
@@ -58,66 +58,37 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
     }
 
 {{#each service.operations as |operation|}}
+    {{~assign "requestBodySchema" operation.x--request-schema }}
+    {{~assign "responseBodySchema" operation.x--response.x--response-schema }}
     {{~#assign "requestDTOClassName"}}{{asDtoName operation.x--request-dto }}{{/assign}}
     {{~#assign "responseDTOClassName"}}{{asDtoName operation.x--response.x--response-dto }}{{/assign}}
+    {{~assign "serviceMethod" (findServiceMethod operation)}}
+    {{~assign "methodReturnType" (methodReturnType serviceMethod)}}
+    {{~assign "methodReturnTypeInstance" (asInstanceName methodReturnType)}}
 
-    {{~#if operation.x--request-dto}}
-        {{~assign "requestBodySchema" operation.x--request-schema }}
-        {{~assign "requestEntity"     operation.x--request-entity}}
-        {{~#if requestEntity}}
-            {{~#assign "requestEntityClassName"}}{{requestEntity.className}}{{inputDTOSuffix}}{{/assign}}
-            {{~#assign "requestEntityInstance"}}{{requestEntity.instanceName}}{{inputDTOSuffix}}{{/assign}}
-            {{~#assign "requestEntityCriteriaClassName"}}{{requestEntity.options.searchCriteria}}{{/assign}}
-            {{~#if requestEntity.options.isCriteria}}
-                {{~#assign "requestEntityClassName"}}{{requestEntity.className}}{{/assign}}
-                {{~#assign "requestEntityInstance"}}{{requestEntity.instanceName}}{{/assign}}
-            {{~/if}}
-        {{/if}}
-    {{/if}}
-    {{~#if operation.x--response.x--response-dto}}
-        {{~assign "responseBodySchema"      operation.x--response.x--response-schema }}
-        {{~assign "responseEntity"          operation.x--response.x--response-entity }}
-        {{~assign "responseEntityPaginated" operation.x--response.x--response-entity-paginated }}
-
-        {{~#if responseEntity}}
-            {{~#assign "responseEntityClassName"}}{{responseEntity.className}}{{entityDTOSuffix}}{{/assign}}
-            {{~#assign "responseEntityInstance"}}{{responseEntity.instanceName}}{{entityDTOSuffix}}{{/assign}}
-            {{~#assign "entityServiceName"}}{{asInstanceName (defaultIfEmpty (entityService responseEntity.name) "service")}}{{/assign}}
-        {{/if}}
-        {{~#if responseEntityPaginated}}
-            {{~#assign "responseEntityClassName"}}Page<{{responseEntityPaginated.className}}>{{/assign}}
-            {{~#assign "responseEntityInstance"}}{{responseEntityPaginated.instanceNamePlural}}{{entityDTOSuffix}}{{/assign}}
-            {{~#assign "entityServiceName"}}{{asInstanceName (defaultIfEmpty (entityService responseEntityPaginated.name) "service")}}{{/assign}}
-        {{/if}}
-    {{/if}}
     @Override
     public ResponseEntity<{{orVoid responseDTOClassName}}> {{operation.operationId}}({{{asMethodParameters operation}}}) {
-    {{!--
-    /* requestBodySchema: {{{requestBodySchema}}} */
-    /* requestEntity: {{{requestEntity}}} */
-    /* responseBodySchema: {{{responseBodySchema}}} */
-    /* responseEntity: {{{responseEntity}}} */  --}}
     {{~#if requestBodySchema~}}
-        {{requestEntityClassName}} input = mapper.as{{requestEntityClassName}}(reqBody);
+        {{serviceMethod.parameter}} input = mapper.as{{serviceMethod.parameter}}(reqBody);
     {{/if~}}
-    {{~#if responseEntity~}}
+    {{~#if (hasPaginatedResponse operation) ~}}
+        {{{methodReturnType}}} {{methodReturnTypeInstance}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}({{requestEntityInstance}}, pageOf(page, limit, sort));
+        {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{methodReturnTypeInstance}});
+        return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
+    {{~else if (hasResponseEntity operation) ~}}
         {{~#if (eq operation.x--response.x--statusCode "201") ~}}
-            {{{responseEntityClassName}}} {{responseEntityInstance}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}(input);
-            {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{responseEntityInstance}});
+            {{{methodReturnType}}} {{methodReturnTypeInstance}} = null; // TODO: {{entityServiceName}}.{{serviceMethodCall serviceMethod}};
+            {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{methodReturnTypeInstance}});
             return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
         {{~else~}}
-            Optional<{{{responseEntityClassName}}}> {{responseEntityInstance}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}(input);
-            if ({{responseEntityInstance}}.isPresent()) {
-                {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{responseEntityInstance}}.get());
+            Optional<{{{methodReturnType}}}> {{methodReturnTypeInstance}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}(input);
+            if ({{methodReturnTypeInstance}}.isPresent()) {
+                {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{methodReturnTypeInstance}}.get());
                 return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
             } else {
                 return ResponseEntity.notFound().build();
             }
         {{~/if~}}
-    {{else if responseEntityPaginated~}}
-        {{{responseEntityClassName}}} {{responseEntityInstance}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}({{requestEntityInstance}}, pageOf(page, limit, sort));
-        {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{responseEntityInstance}});
-        return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
     {{else}}
         return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).build();
     {{/if~}}

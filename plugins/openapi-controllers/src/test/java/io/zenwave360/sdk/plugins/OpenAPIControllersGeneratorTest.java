@@ -39,6 +39,7 @@ public class OpenAPIControllersGeneratorTest {
                 .withOption("openApiModelNameSuffix", "DTO")
                 // .withOption("operationIds", List.of("addPet", "updatePet"))
                 .withOption("style", ProgrammingStyle.imperative)
+//                .withOption("haltOnFailFormatting", false)
                 .withTargetFolder("target/out");
 
         new MainGenerator().generate(plugin);
@@ -59,6 +60,7 @@ public class OpenAPIControllersGeneratorTest {
                 .withOption("openApiModelNameSuffix", "DTO")
                 // .withOption("operationIds", List.of("addPet", "updatePet"))
                 .withOption("style", ProgrammingStyle.imperative)
+//                .withOption("haltOnFailFormatting", false)
                 .withTargetFolder("target/out");
 
         new MainGenerator().generate(plugin);

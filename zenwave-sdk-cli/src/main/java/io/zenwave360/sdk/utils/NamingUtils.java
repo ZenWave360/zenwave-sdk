@@ -14,7 +14,10 @@ public class NamingUtils {
     }
 
     public static String asInstanceName(String name) {
-        return StringUtils.uncapitalize(camelCase(name));
+        if(name == null) {
+            return null;
+        }
+        return StringUtils.uncapitalize(camelCase(name)).replaceAll("<", "").replaceAll(">", "");
     }
 
     public static String asPackageFolder(String text) {
