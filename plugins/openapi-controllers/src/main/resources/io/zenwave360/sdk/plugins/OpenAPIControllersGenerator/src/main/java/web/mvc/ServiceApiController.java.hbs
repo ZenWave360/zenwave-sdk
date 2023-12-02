@@ -72,16 +72,17 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
         {{serviceMethod.parameter}} input = mapper.as{{serviceMethod.parameter}}(reqBody);
     {{/if~}}
     {{~#if (hasPaginatedResponse operation) ~}}
-        {{{methodReturnType}}} {{methodReturnTypeInstance}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}({{requestEntityInstance}}, pageOf(page, limit, sort));
+    // paginated
+        {{{methodReturnType}}} {{methodReturnTypeInstance}} = null; // TODO: {{serviceMethod.serviceName}}.{{operation.operationId}}({{requestEntityInstance}}, pageOf(page, limit, sort));
         {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{methodReturnTypeInstance}});
         return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
     {{~else if (hasResponseEntity operation) ~}}
         {{~#if (eq operation.x--response.x--statusCode "201") ~}}
-            {{{methodReturnType}}} {{methodReturnTypeInstance}} = null; // TODO: {{entityServiceName}}.{{serviceMethodCall serviceMethod}};
+            {{{methodReturnType}}} {{methodReturnTypeInstance}} = null; // TODO: {{serviceMethod.serviceName}}.{{serviceMethodCall serviceMethod}};
             {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{methodReturnTypeInstance}});
             return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
         {{~else~}}
-            Optional<{{{methodReturnType}}}> {{methodReturnTypeInstance}} = null; // TODO: {{entityServiceName}}.{{operation.operationId}}(input);
+            Optional<{{{methodReturnType}}}> {{methodReturnTypeInstance}} = null; // TODO: {{serviceMethod.serviceName}}.{{operation.operationId}}(input);
             if ({{methodReturnTypeInstance}}.isPresent()) {
                 {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{methodReturnTypeInstance}}.get());
                 return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);

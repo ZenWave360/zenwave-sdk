@@ -19,6 +19,10 @@ public class ZDLFindUtils {
         return JSONPath.get(model, "$.services[*].methods[*][?(@.options.paginated == true)].returnType", List.<String>of());
     }
 
+    public static boolean isMethodPaginated(Map<String, Object> method) {
+        return JSONPath.get(method, "$.options.paginated", false);
+    }
+
     public static List<String> findAllEntitiesReturnedAsList(Map<String, Object> model) {
         return JSONPath.get(model, "$.services[*].methods[*][?(@.returnTypeIsArray == true && @.options.paginated != true)].returnType", List.<String>of());
     }

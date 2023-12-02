@@ -50,6 +50,9 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     @DocumentedOption(description = "Programming Style")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
 
+    @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. User '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
+    public List<String> paginatedDtoItemsJsonPath = List.of("$.properties.items", "$.properties.content.items");
+
     protected HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
     protected String templatesFolder = "io/zenwave360/sdk/plugins/OpenAPIControllersGenerator/";
@@ -96,27 +99,47 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
             dtoNames.addAll(JSONPath.get(operationByServiceEntry.getValue(), "$..x--request-dto"));
             dtoNames.addAll(JSONPath.get(operationByServiceEntry.getValue(), "$..x--response.x--response-dto"));
 
-            Map dtoWithEntityMap = (Map) dtoNames.stream()
-                    .filter(dtoName -> dtoName != null)
-                    // .filter(dtoName -> getEntityForOpenApiSchema(openApiModel, dtoName) != Boolean.FALSE || getPaginatedEntityForOpenApiSchema(openApiModel, dtoName) != Boolean.FALSE)
-                    .collect(Collectors.toMap(
-                            dtoName -> dtoName,
-                            dtoName -> Maps.of(
-                                    "name", dtoName,
-                                    "schema", getOpenApiSchema(openApiModel, dtoName),
-                                    "entity", getEntityForOpenApiSchema(openApiModel, dtoName),
-                                    "paginatedEntity", getPaginatedEntityForOpenApiSchema(openApiModel, dtoName))));
+            Collection<String> entitiesServices = operationByServiceEntry.getValue().stream()
+                    .map(operation -> ZDLFindUtils.findServiceMethod((String) operation.get("operationId"), zdlModel)).filter(Objects::nonNull)
+                    .map(method -> (String) method.get("serviceName"))
+                    .collect(Collectors.toSet());
 
-            Collection<String> entityNames = new HashSet<>(JSONPath.get(operationByServiceEntry.getValue(), "$..x--entity[?(@.className)].name"));
-
-            Collection<String> entitiesServices = entityNames.stream().map(entity -> ZDLFindUtils.findServiceName(entity, zdlModel)).filter(Objects::nonNull).collect(Collectors.toSet());
+            Map<String, Map<String, String>> requestDtosWithEntities = new HashMap<>();
+            Map<String, Map<String, String>> responseDtosWithEntities = new HashMap<>();
+            Map<String, Map<String, String>> responsePaginatedDtosWithEntities = new HashMap<>();
+            for (Map operation : operationByServiceEntry.getValue()) {
+                String requestDto = JSONPath.get(operation, "$.x--request-dto");
+                String responseDto = JSONPath.get(operation, "$.x--response.x--response-dto");
+                Map responseSchema = JSONPath.get(operation, "$.x--response.x--response-schema");
+                var method = ZDLFindUtils.findServiceMethod((String) operation.get("operationId"), zdlModel);
+                if (method == null) {
+                    continue;
+                }
+                String inputType = JSONPath.get(method, "$.parameter");
+                String outputType = JSONPath.get(method, "$.returnType");
+                Map inputEntity = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + inputType);
+                Map outputEntity = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + outputType);
+                if(inputEntity != null) {
+                    Maps.getOrCreateDefault(requestDtosWithEntities, requestDto, new HashMap<>()).put(inputType, (String) inputEntity.get("className"));
+                }
+                if (outputEntity != null) {
+                    if (JSONPath.get(method, "$.returnTypeIsArray", false)) {
+                        String paginatedDto = findPaginatedDto(responseSchema);
+                        Maps.getOrCreateDefault(responseDtosWithEntities, responseDto, new HashMap<>()).put(outputType, String.format("Page<%s>", outputEntity.get("className")));
+                        Maps.getOrCreateDefault(responsePaginatedDtosWithEntities, responseDto, new HashMap<>()).put(outputType, (String) outputEntity.get("className"));
+                    } else {
+                        Maps.getOrCreateDefault(responseDtosWithEntities, responseDto, new HashMap<>()).put(outputType, (String) outputEntity.get("className"));
+                    }
+                }
+            }
 
             Map serviceModel = Map.of(
                     "service", Map.of(
                             "name", operationByServiceEntry.getKey(),
                             "operations", operationByServiceEntry.getValue()),
-                    "dtoWithEntityMap", dtoWithEntityMap,
-//                    "entities", entities,
+                    "requestDtosWithEntities", requestDtosWithEntities,
+                    "responseDtosWithEntities", responseDtosWithEntities,
+                    "responsePaginatedDtosWithEntities", responsePaginatedDtosWithEntities,
                     "entitiesServices", entitiesServices);
 
             for (Object[] template : templates) {
@@ -127,16 +150,14 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         return templateOutputList;
     }
 
-    protected Map getEntityForOpenApiSchema(Map openApiModel, String schemaName) {
-        return JSONPath.get(openApiModel, "$.components.schemas." + schemaName + ".x--entity");
-    }
-
-    protected Map getPaginatedEntityForOpenApiSchema(Map openApiModel, String schemaName) {
-        return JSONPath.get(openApiModel, "$.components.schemas." + schemaName + ".x--entity-paginated");
-    }
-
-    protected Map getOpenApiSchema(Map openApiModel, String schemaName) {
-        return JSONPath.get(openApiModel, "$.components.schemas." + schemaName);
+    String findPaginatedDto(Map<String, Object> responseSchema) {
+        for (String jsonPath : paginatedDtoItemsJsonPath) {
+            String paginatedDto = JSONPath.get(responseSchema, jsonPath + ".x--schema-name");
+            if (paginatedDto != null) {
+                return paginatedDto;
+            }
+        }
+        return null;
     }
 
     protected Map<String, List<Map<String, Object>>> groupOperationsByService(List<Map<String, Object>> operations) {
