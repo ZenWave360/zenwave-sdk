@@ -124,9 +124,9 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                 }
                 if (outputEntity != null) {
                     if (JSONPath.get(method, "$.returnTypeIsArray", false)) {
-                        String paginatedDto = findPaginatedDto(responseSchema);
+                        String paginatedDto = ObjectUtils.firstNonNull(findPaginatedDto(responseSchema), responseDto);
                         Maps.getOrCreateDefault(responseDtosWithEntities, responseDto, new HashMap<>()).put(outputType, String.format("Page<%s>", outputEntity.get("className")));
-                        Maps.getOrCreateDefault(responsePaginatedDtosWithEntities, responseDto, new HashMap<>()).put(outputType, (String) outputEntity.get("className"));
+                        Maps.getOrCreateDefault(responsePaginatedDtosWithEntities, paginatedDto, new HashMap<>()).put(outputType, (String) outputEntity.get("className"));
                     } else {
                         Maps.getOrCreateDefault(responseDtosWithEntities, responseDto, new HashMap<>()).put(outputType, (String) outputEntity.get("className"));
                     }

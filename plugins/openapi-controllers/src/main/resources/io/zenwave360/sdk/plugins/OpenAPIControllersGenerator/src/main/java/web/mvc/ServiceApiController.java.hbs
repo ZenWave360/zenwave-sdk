@@ -72,29 +72,27 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
         {{serviceMethod.parameter}} input = mapper.as{{serviceMethod.parameter}}(reqBody);
     {{/if~}}
     {{~#if (hasPaginatedResponse operation) ~}}
-    // paginated
-        {{{methodReturnType}}} {{methodReturnTypeInstance}} = null; // TODO: {{serviceMethod.serviceName}}.{{operation.operationId}}({{requestEntityInstance}}, pageOf(page, limit, sort));
+        {{{methodReturnType}}} {{methodReturnTypeInstance}} = null; // TODO: {{asInstanceName serviceMethod.serviceName}}.{{operation.operationId}}({{requestEntityInstance}}, pageOf(page, limit, sort));
         {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{methodReturnTypeInstance}});
         return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
     {{~else if (hasResponseEntity operation) ~}}
-        {{~#if (eq operation.x--response.x--statusCode "201") ~}}
-            {{{methodReturnType}}} {{methodReturnTypeInstance}} = null; // TODO: {{serviceMethod.serviceName}}.{{serviceMethodCall serviceMethod}};
-            {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{methodReturnTypeInstance}});
+        {{{methodReturnType}}} {{methodReturnTypeInstance}} = null; // TODO: {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall serviceMethod}};
+        {{~#if serviceMethod.returnTypeIsOptional }}
+        if ({{methodReturnTypeInstance}}.isPresent()) {
+            {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{methodReturnTypeInstance}}.get());
             return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
-        {{~else~}}
-            Optional<{{{methodReturnType}}}> {{methodReturnTypeInstance}} = null; // TODO: {{serviceMethod.serviceName}}.{{operation.operationId}}(input);
-            if ({{methodReturnTypeInstance}}.isPresent()) {
-                {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{methodReturnTypeInstance}}.get());
-                return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        {{~/if~}}
-    {{else}}
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+        {{~else}}
+        {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{methodReturnTypeInstance}});
+        return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
+        {{~/if}}
+    {{~else}}
         return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).build();
-    {{/if~}}
+    {{~/if}}
     }
-{{/each}}
+{{~/each}}
 
   protected Pageable pageOf(Optional<Integer> page, Optional<Integer> limit, Optional<List<String>> sort) {
     return PageRequest.of(page.orElse(0), limit.orElse(10));
