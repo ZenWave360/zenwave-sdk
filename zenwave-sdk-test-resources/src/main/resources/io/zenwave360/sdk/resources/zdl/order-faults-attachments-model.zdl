@@ -42,7 +42,7 @@ service AttachmentService for (PurchaseOrder) {
   updateFile(id, PurchaseOrder) PurchaseOrder
 
     @put("/{purchaseOrderId}")
-    updatePurchaseOrder(id, PurchaseOrder) PurchaseOrder?
+  updatePurchaseOrder(id, PurchaseOrder) PurchaseOrder?
 
   @get("/{businessUnit}/{orderId}")
   listAttachmentFiles(OrderBusinessId) AttachmentFile[]
@@ -51,10 +51,11 @@ service AttachmentService for (PurchaseOrder) {
   downloadAttachmentFile(AttachmentFileId) AttachmentFileOutput
 }
 
+@inline
 input AttachmentFileId {
   businessUnit String required
+  orderId String required
   documentManagerId String required
-  orderId String
 }
 
 output AttachmentFileOutput {

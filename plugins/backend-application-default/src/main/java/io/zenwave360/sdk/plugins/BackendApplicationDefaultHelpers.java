@@ -66,6 +66,26 @@ public class BackendApplicationDefaultHelpers {
         return ZDLJavaSignatureUtils.methodParameterType(method, zdl, generator.inputDTOSuffix);
     }
 
+    public String methodParametersSignature(Map<String, Object> method, Options options) {
+        var zdl = (Map) options.get("zdl");
+        return ZDLJavaSignatureUtils.methodParametersSignature(generator.getIdJavaType(), method, zdl, generator.inputDTOSuffix);
+    }
+
+    public String mapperInputSignature(String inputType, Options options) {
+        var zdl = (Map) options.get("zdl");
+        return ZDLJavaSignatureUtils.mapperInputSignature(inputType, zdl, generator.inputDTOSuffix);
+    }
+
+    public String mapperInputCallSignature(String inputType, Options options) {
+        var zdl = (Map) options.get("zdl");
+        return ZDLJavaSignatureUtils.mapperInputCallSignature(inputType, zdl, generator.inputDTOSuffix);
+    }
+
+    public String inputFieldInitializer(String inputType, Options options) {
+        var zdl = (Map) options.get("zdl");
+        return ZDLJavaSignatureUtils.inputFieldInitializer(inputType, zdl, generator.inputDTOSuffix);
+    }
+
     public Map<String, Object> methodEntity(Map<String, Object> method, Options options) {
         var returnType = (String) method.get("returnType");
         var service = options.get("service");

@@ -18,11 +18,11 @@ public interface {{entity.className}}Mapper {
 
   {{~#each (findAggregateInputs entity) as |input|}}
     {{~#if (not (eq entity.className input))}}
-    {{entity.className}} asEntity({{input}} input);
+    {{entity.className}} asEntity({{mapperInputSignature input}});
     {{~/if}}
 
     {{#unless (skipEntityId entity)~}}@Mapping(target = "id", ignore = true){{/unless~}}
-    {{entity.className}} update(@MappingTarget {{entity.className}} entity, {{input}} input);
+    {{entity.className}} update(@MappingTarget {{entity.className}} entity, {{mapperInputSignature input}});
   {{~/each}}
 
   {{~#each (findAggregateOutputs entity) as |output|}}

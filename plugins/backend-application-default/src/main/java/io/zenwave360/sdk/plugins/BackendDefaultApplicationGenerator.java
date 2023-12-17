@@ -87,13 +87,15 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
 
     protected boolean is(Map<String, Object> model, String... annotations) {
         String annotationsFilter = Arrays.stream(annotations).map(a -> "@." + a).collect(Collectors.joining(" || "));
-        return !((List) JSONPath.get(model, "$.entity.options[?(" + annotationsFilter + ")]")).isEmpty();
+        return !(JSONPath.get(model, "$.entity.options[?(" + annotationsFilter + ")]", List.of())).isEmpty();
     }
 
     protected Function<Map<String, Object>, Boolean> skipEntityRepository = (model) -> !is(model, "aggregate");
     protected Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo", "input", "isSuperClass");
     protected Function<Map<String, Object>, Boolean> skipEntity = (model) -> is(model, "vo", "input");
     protected Function<Map<String, Object>, Boolean> skipEntityInput = (model) -> inputDTOSuffix == null || inputDTOSuffix.isEmpty();
+
+    protected Function<Map<String, Object>, Boolean> skipInput = (model) -> is(model, "inline");
     protected Function<Map<String, Object>, Boolean> skipSearchCriteria = (model) -> is(model, "vo", "input") || !is(model, "searchCriteria");
     protected Function<Map<String, Object>, Boolean> skipElasticSearch = (model) -> is(model, "vo", "input") || !is(model, "search");
 
@@ -129,7 +131,7 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
         ts.addTemplate(ts.enumTemplates, "src/main/java", "core/domain/common/Enum.java",
                 "{{asPackageFolder entitiesPackage}}/{{enum.name}}.java", JAVA, null, false);
         ts.addTemplate(ts.inputEnumTemplates, "src/main/java", "core/inbound/dtos/Enum.java",
-                "{{asPackageFolder inboundDtosPackage}}/{{enum.name}}.java", JAVA, null, false);
+                "{{asPackageFolder inboundDtosPackage}}/{{enum.name}}.java", JAVA, skipInput, false);
 
         ts.addTemplate(ts.inputTemplates, "src/main/java", "core/inbound/dtos/InputOrOutput.java",
                 "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}.java", JAVA, null, false);
@@ -166,9 +168,13 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
     @Override
     public Map<String, Object> asConfigurationMap() {
         var config = super.asConfigurationMap();
-        config.put("idJavaType", this.persistence == PersistenceType.jpa ? "Long" : "String");
+        config.put("idJavaType", getIdJavaType());
 //        config.put("webFlavor", style == ProgrammingStyle.imperative ? WebFlavorType.mvc : WebFlavorType.webflux);
         return config;
+    }
+
+    public String getIdJavaType() {
+        return this.persistence == PersistenceType.jpa ? "Long" : "String";
     }
 
 }

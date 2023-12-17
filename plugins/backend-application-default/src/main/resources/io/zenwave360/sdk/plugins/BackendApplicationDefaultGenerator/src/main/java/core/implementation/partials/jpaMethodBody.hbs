@@ -1,14 +1,14 @@
 {{~#each entities as |entity|}}
     {{~#if (isCrudMethod 'create' method=method entity=entity )}}
         log.debug("Request to save {{entity.className}}: {}", input);
-        var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), input);
+        var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), {{{mapperInputCallSignature method.parameter}}});
         {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}});
         // TODO: you may need to reload the entity here to fetch all the relationships
         return {{wrapWithMapper entity}};
     {{~else if (isCrudMethod 'update' method=method entity=entity )}}
         log.debug("Request to update {{entity.className}}: {}", input);
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id);
-        {{entity.instanceName}} = {{entity.instanceName}}.map(existing{{entity.instanceName}} -> {{entity.instanceName}}Mapper.update(existing{{entity.instanceName}}, input));
+        {{entity.instanceName}} = {{entity.instanceName}}.map(existing{{entity.instanceName}} -> {{entity.instanceName}}Mapper.update(existing{{entity.instanceName}}, {{{mapperInputCallSignature method.parameter}}}));
         // saving is unnecessary: https://vladmihalcea.com/best-spring-data-jparepository/
         return {{wrapWithMapper entity}};
     {{~else if (isCrudMethod 'list' method=method entity=entity )}}
@@ -38,12 +38,12 @@
         log.debug("Request {{method.name}}: {}", id);
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).orElseThrow();
         {{~#if method.parameter}}
-        {{entity.instanceName}} = {{entity.instanceName}}Mapper.update({{entity.instanceName}}, input);
+        {{entity.instanceName}} = {{entity.instanceName}}Mapper.update({{entity.instanceName}}, {{{mapperInputCallSignature method.parameter}}});
         {{~/if}}
       {{~else if method.parameter }}
         log.debug("Request {{method.name}}: {}", input);
         {{~#if (eq entity.name returnEntity.name)}}
-        var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), input);
+        var {{entity.instanceName}} = {{entity.instanceName}}Mapper.update(new {{entity.className}}(), {{{mapperInputCallSignature method.parameter}}});
         {{~/if}}
       {{~else}}
         log.debug("Request {{method.name}}");

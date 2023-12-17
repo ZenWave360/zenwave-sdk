@@ -2,9 +2,14 @@ package io.zenwave360.sdk.zdl;
 
 import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.utils.JSONPath;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ZDLJavaSignatureUtils {
 
@@ -16,6 +21,75 @@ public class ZDLJavaSignatureUtils {
         var parameterName = (String) method.get("parameter");
         var isEntity = JSONPath.get(zdl, "$.entities." + parameterName) != null;
         return String.format("%s%s", parameterName, isEntity? inputDTOSuffix : "");
+    }
+
+    public static String methodParametersSignature(String idJavaType, Map method, Map zdl, String inputDTOSuffix) {
+        var params = new ArrayList<String>();
+        if(JSONPath.get(method, "paramId") != null) {
+            params.add(idJavaType + " id");
+        }
+        if(JSONPath.get(method, "parameter") != null) {
+            params.addAll(methodInputSignature(method, zdl, inputDTOSuffix));
+        }
+        if(JSONPath.get(method, "options.paginated") != null) {
+            params.add("Pageable pageable");
+        }
+        return StringUtils.join(params, ", ");
+    }
+
+    private static List<String> methodInputSignature(Map method, Map zdl, String inputDTOSuffix) {
+        return inputSignature((String) method.get("parameter"), method, zdl, inputDTOSuffix);
+    }
+
+    public static String mapperInputSignature(String inputType, Map zdl, String inputDTOSuffix) {
+        return StringUtils.join(inputSignature(inputType, null, zdl, inputDTOSuffix), ", ");
+    }
+
+    public static String mapperInputCallSignature(String inputType, Map zdl, String inputDTOSuffix) {
+        return inputSignature(inputType, null, zdl, inputDTOSuffix).stream()
+                .map(p -> p.split(" ")[1])
+                .collect(Collectors.joining(", "));
+    }
+
+    public static String inputFieldInitializer(String inputType, Map zdl, String inputDTOSuffix) {
+        return inputSignature(inputType, null, zdl, inputDTOSuffix).stream()
+                .map(p -> p + " = null;\n")
+                .collect(Collectors.joining());
+    }
+
+    private static List<String> inputSignature(String inputType, Map method, Map zdl, String inputDTOSuffix) {
+        var params = new ArrayList<String>();
+        if(inputType != null) {
+            var isInline = JSONPath.get(zdl, "$.inputs." + inputType + ".options.inline", false);
+            var fields = (Map<String, Map>) JSONPath.get(zdl, "$.inputs." + inputType + ".fields");
+            if (isInline && fields != null && !fields.isEmpty()) {
+                for (var field : fields.entrySet()) {
+                    params.add(String.format("%s %s", field.getValue().get("type"), field.getKey()));
+                }
+            } else {
+                var methodParameterType = method != null? methodParameterType(method, zdl, inputDTOSuffix) : inputType;
+                params.add(methodParameterType + " input");
+            }
+        }
+        return params;
+    }
+
+    public static List<String> methodInputCall(Map method, Map zdl, String inputDTOSuffix) {
+        var params = new ArrayList<String>();
+        if(JSONPath.get(method, "parameter") != null) {
+            var parameterType = (String) method.get("parameter");
+            var isInline = JSONPath.get(zdl, "$.inputs." + parameterType + ".options.inline", false);
+            var fields = (Map<String, Map>) JSONPath.get(zdl, "$.inputs." + parameterType + ".fields");
+            if (isInline && fields != null && !fields.isEmpty()) {
+                for (var field : fields.entrySet()) {
+                    params.add(field.getKey());
+                }
+            } else {
+                var methodParameterType = methodParameterType(method, zdl, inputDTOSuffix);
+                params.add(methodParameterType + " input");
+            }
+        }
+        return params;
     }
 
     public static String methodReturnType(Map method) {

@@ -42,7 +42,7 @@ public class BackendMultiModuleApplicationGenerator extends BackendDefaultApplic
                 "{{asPackageFolder inboundDtosPackage}}/{{enum.name}}.java", JAVA, null, false);
 
         ts.addTemplate(ts.inputTemplates, "src/main/java", "core/inbound/dtos/InputOrOutput.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}.java", JAVA, null, false);
+                "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}.java", JAVA, skipInput, false);
         ts.addTemplate(ts.outputTemplates, "src/main/java", "core/inbound/dtos/InputOrOutput.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}.java", JAVA, null, false);
 

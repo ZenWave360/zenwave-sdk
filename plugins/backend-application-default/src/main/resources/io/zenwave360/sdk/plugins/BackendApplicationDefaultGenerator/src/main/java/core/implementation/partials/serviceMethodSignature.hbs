@@ -1,2 +1,2 @@
 
-    public {{{returnType method}}} {{method.name}}({{#if method.paramId}}{{idJavaType}} id{{/if}} {{#if method.parameter}}{{#if method.paramId}}, {{/if}} {{methodParameterType method}} input{{/if}} {{#if method.options.paginated}}{{#if method.parameter}}, {{/if}} Pageable pageable{{/if}})
+    public {{{returnType method}}} {{method.name}}({{methodParametersSignature method}})
