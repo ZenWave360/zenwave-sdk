@@ -2,9 +2,9 @@ package {{controllersPackage}}.mappers;
 
 import {{entitiesPackage}}.*;
 import {{inboundDtosPackage}}.*;
+import {{openApiModelPackage}}.*;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -14,35 +14,31 @@ public interface {{service.name}}DTOsMapper {
 
     {{service.name}}DTOsMapper INSTANCE = Mappers.getMapper({{service.name}}DTOsMapper.class);
 
-{{#each dtoWithEntityMap as |dto|}}
-    {{~#assign "dtoName"}}{{openApiModelNamePrefix}}{{dto.name}}{{openApiModelNameSuffix}}{{/assign}}
-    {{~#assign "dtoClassName"}}{{openApiModelPackage}}.{{dtoName}}{{/assign}}
-    {{~assign "entity" dto.entity}}
-    {{~assign "paginatedEntity" dto.paginatedEntity}}
-{{~#if entity}}
-    {{~#assign "entityClassName"}}{{entity.className}}{{entityDTOSuffix}}{{/assign}}
-    {{~#assign "entityInstance"}}{{entity.instanceName}}{{entityDTOSuffix}}{{/assign}}
-    {{~#assign "entityInputClassName"}}{{entity.className}}{{inputDTOSuffix}}{{/assign}}
-    {{~#assign "entityCriteriaClassName"}}{{criteriaClassName entity}}{{/assign}}
+    // request mappings
+{{~#each requestDtosWithEntities as |entities|}}
+    {{~assign "dto" @key }}
+    {{~#each entities as |entity|}}
+    {{entity}} as{{entity}}({{dto}}{{openApiModelNameSuffix}} dto);
+    {{~/each}}
+{{~/each}}
 
-    {{dtoClassName}} as{{dtoName}}({{entity.className}} {{entity.instanceName}});
-    {{entityClassName}} as{{entityClassName}}({{dtoClassName}} dto);
-    {{~#if inputDTOSuffix}}
-        {{~#unless entity.options.isCriteria}}
-        {{entityInputClassName}} as{{entityInputClassName}}({{dtoClassName}} dto);
-        {{/unless}}
-    {{/if}}
-    {{~#if entity.options.searchCriteria}}
-        {{entityCriteriaClassName}} as{{entityCriteriaClassName}}({{dtoClassName}} dto);
-    {{/if}}
-    {{entityClassName}} update(@MappingTarget {{entityClassName}} {{entity.instanceName}}, {{dtoClassName}} dto);
-    List<{{dtoClassName}}> as{{dtoName}}List(List<{{entity.className}}> {{entity.instanceNamePlural}});
-    List<{{entityClassName}}> as{{entityClassName}}List(List<{{dtoClassName}}> dtos);
-{{~/if}}
-{{~#if paginatedEntity}}
-    {{~#assign "paginatedEntityClassName"}}{{paginatedEntity.className}}{{/assign}}
-    {{dtoClassName}} as{{dtoName}}(Page<{{paginatedEntityClassName}}> page);
-{{/if~}}
-{{/each}}
+    // response mappings
+{{~#each responseDtosWithEntities as |entities|}}
+    {{~assign "dto" @key }}
+    {{~#each entities as |entity|}}
+    {{dto}}{{openApiModelNameSuffix}} as{{dto}}{{openApiModelNameSuffix}}({{{entity}}} entity);
+    {{~/each}}
+{{~/each}}
+
+    // response paginated mappings
+{{~#each responsePaginatedDtosWithEntities as |entities|}}
+    {{~assign "dto" @key }}
+    {{~#each entities as |entity|}}
+    List<{{dto}}{{openApiModelNameSuffix}}> as{{dto}}{{openApiModelNameSuffix}}List(List<{{entity}}> entityList);
+    default Page<{{dto}}{{openApiModelNameSuffix}}> as{{dto}}{{openApiModelNameSuffix}}Page(Page<{{entity}}> page) {
+      return page.map(this::as{{dto}}{{openApiModelNameSuffix}});
+    }
+    {{~/each}}
+{{~/each}}
 
 }

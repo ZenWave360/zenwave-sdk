@@ -10,6 +10,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 @Document(indexName = "{{entity.kebabCase}}")
 public class {{entity.className}}{{searchDTOSuffix}} implements Serializable {
 
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private {{idJavaType}} id;

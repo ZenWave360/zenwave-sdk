@@ -10,7 +10,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractZDLGenerator;
 import io.zenwave360.sdk.generators.JDLEntitiesToSchemasConverter;
-import io.zenwave360.sdk.processors.ZDLUtils;
+import io.zenwave360.sdk.zdl.ZDLFindUtils;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateInput;
@@ -128,11 +128,11 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
         ((Map) zdlModel).put("serviceNames", serviceNames);
 
         if(this.entities == null) {
-            this.entities = ZDLUtils.findAllServiceFacingEntities(zdlModel);
+            this.entities = ZDLFindUtils.findAllServiceFacingEntities(zdlModel);
         }
 
-        var paginatedEntities = ZDLUtils.findAllPaginatedEntities(zdlModel);
-        var listedEntities = ZDLUtils.findAllEntitiesReturnedAsList(zdlModel);
+        var paginatedEntities = ZDLFindUtils.findAllPaginatedEntities(zdlModel);
+        var listedEntities = ZDLFindUtils.findAllEntitiesReturnedAsList(zdlModel);
         zdlModel.put("paginatedEntities", paginatedEntities);
         zdlModel.put("listedEntities", listedEntities);
 
