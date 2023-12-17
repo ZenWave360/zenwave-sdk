@@ -1,0 +1,15 @@
+
+entity Entity {
+    localDate LocalDate /** LocalDate.now() */
+    zoneDateTime ZonedDateTime /** ZonedDateTime.now() */
+    instant Instant /** Instant.now() */
+    duration Duration /** Duration.ofSeconds(0) */
+    integer Integer /** 0 */
+    long Long /** 0L */
+    float Float /** 0.0F */
+    double Double /** 0.0 */
+    bigDecimal BigDecimal /** BigDecimal.valueOf(0) */
+    boolean Boolean /** false */
+    uuid UUID /** UUID.randomUUID() */
+    blob Blob /** null */
+}

@@ -1,6 +1,7 @@
 package io.zenwave360.sdk.zdl;
 
 import io.zenwave360.sdk.utils.JSONPath;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -65,20 +66,22 @@ public class ZDLFindUtils {
         var entity = (Map) JSONPath.get(model, "$.allEntitiesAndEnums." + entityName, Map.of());
         var allServices = JSONPath.get(model, "$.services[*]", List.<Map>of());
         if ("entities".equals(entity.get("type"))) {
-            return allServices.stream()
-                    .filter(service -> JSONPath.get(service, "$.aggregates", List.of()).contains(entityName))
-                    .map(service -> (String) service.get("name")).findFirst().orElse(null);
+            var aggregateService = _findServiceName(allServices, entityName, "$.aggregates");
+            var parameterService = _findServiceName(allServices, entityName, "$.methods[*].parameter");
+            return ObjectUtils.firstNonNull(aggregateService, parameterService);
         }
         if ("inputs".equals(entity.get("type"))) {
-            return allServices.stream()
-                    .filter(service -> JSONPath.get(service, "$.methods[*].parameter", List.of()).contains(entityName))
-                    .map(service -> (String) service.get("name")).findFirst().orElse(null);
+            return _findServiceName(allServices, entityName, "$.methods[*].parameter");
         }
         if ("outputs".equals(entity.get("type"))) {
-            return allServices.stream().filter(service -> JSONPath.get(service, "$.methods[*].returnType", List.of()).contains(entityName))
-                    .map(service -> (String) service.get("name")).findFirst().orElse(null);
+            return _findServiceName(allServices, entityName, "$.methods[*].returnType");
         }
         return null;
+    }
+
+    private static String _findServiceName(List<Map> services, String entityName, String jsonPath) {
+        return services.stream().filter(service -> JSONPath.get(service, jsonPath, List.of()).contains(entityName))
+                .map(service -> (String) service.get("name")).findFirst().orElse(null);
     }
 
     public static Map<String, Object> findServiceMethod(String operationId, Map<String, Object> model) {
