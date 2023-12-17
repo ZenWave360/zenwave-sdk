@@ -66,4 +66,24 @@ public class ZDLFindUtilsTest {
         var entities = ZDLFindUtils.findDependentEntities((Map) model.get("zdl"), "CustomerOrder");
         Assertions.assertEquals(List.of("CustomerOrder", "OrderStatus", "OrderShippingDetails", "OrderShippingDetails2", "OrderedItem"), entities);
     }
+
+    @Test
+    public void testFindServiceName() throws Exception {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
+        var serviceName = ZDLFindUtils.findServiceName("PurchaseOrder", (Map) model.get("zdl"));
+        Assertions.assertEquals("AttachmentService", serviceName);
+
+        serviceName = ZDLFindUtils.findServiceName("OrderBusinessId", (Map) model.get("zdl"));
+        Assertions.assertEquals("AttachmentService", serviceName);
+
+        serviceName = ZDLFindUtils.findServiceName("AttachmentFileId", (Map) model.get("zdl"));
+        Assertions.assertEquals("AttachmentService", serviceName);
+    }
+
+    @Test
+    public void testFindServiceMethod() throws Exception {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
+        var method = ZDLFindUtils.findServiceMethod("uploadFile", (Map) model.get("zdl"));
+        Assertions.assertEquals("AttachmentService", method.get("serviceName"));
+    }
 }

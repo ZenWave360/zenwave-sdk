@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 public class ZDLJavaSignatureUtilsTest {
@@ -35,6 +36,23 @@ public class ZDLJavaSignatureUtilsTest {
     }
 
     @Test
+    void methodReturnTypeArray() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
+        var method = JSONPath.get(model, "$.services.AttachmentService.methods.listAttachmentFiles", Map.of());
+        var returnType = ZDLJavaSignatureUtils.methodReturnType(method);
+        Assertions.assertEquals("List<AttachmentFile>", returnType);
+    }
+
+    @Test
+    void methodReturnTypeOptional() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
+        var method = JSONPath.get(model, "$.services.AttachmentService.methods.updatePurchaseOrder", Map.of());
+        var returnType = ZDLJavaSignatureUtils.methodReturnType(method);
+        Assertions.assertEquals("Optional<PurchaseOrder>", returnType);
+    }
+
+
+    @Test
     void fieldType() throws IOException {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
         var field = JSONPath.get(model, "$.entities.PurchaseOrder.fields.attachments", Map.of());
@@ -58,6 +76,16 @@ public class ZDLJavaSignatureUtilsTest {
         var field = JSONPath.get(model, "$.entities.OrderBusinessId.fields.orderId", Map.of());
         var fieldTypeInitializer = ZDLJavaSignatureUtils.populateField(field);
         Assertions.assertEquals("\"\"", fieldTypeInitializer);
+    }
+
+    @Test
+    void populateField_all_types() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/zdl/populate-fields.zdl");
+        var fields = JSONPath.get(model, "$.entities.Entity.fields[*]", List.<Map>of());
+        for (var field : fields) {
+            var fieldTypeInitializer = ZDLJavaSignatureUtils.populateField(field);
+            Assertions.assertEquals(((String)field.get("javadoc")).trim(), fieldTypeInitializer);
+        }
     }
 
     @Test
