@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import io.zenwave360.sdk.options.ProgrammingStyle;
 import io.zenwave360.sdk.zdl.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.ZDLHttpUtils;
 import io.zenwave360.sdk.zdl.ZDLJavaSignatureUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -204,10 +205,14 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
             var methodName = JSONPath.get(serviceMethod, "name");
             var params = new ArrayList<String>();
             if(JSONPath.get(serviceMethod, "paramId") != null) {
-                params.add("id"); // TODO
+                var paramId = ZDLHttpUtils.getFirstPathParamsFromMethod((Map) serviceMethod);
+                params.add(ObjectUtils.firstNonNull(paramId, "id"));
             }
             if(JSONPath.get(serviceMethod, "parameter") != null) {
                 params.add("input");
+            }
+            if(JSONPath.get(serviceMethod, "options.paginated") != null) {
+                params.add("pageOf(page, limit, sort)");
             }
             return String.format("%s(%s)", methodName, StringUtils.join(params, ", "));
         });

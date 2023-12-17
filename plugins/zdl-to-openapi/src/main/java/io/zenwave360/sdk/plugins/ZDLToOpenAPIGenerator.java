@@ -72,7 +72,7 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
-    private final TemplateInput zdlToOpenAPITemplate = new TemplateInput("io/zenwave360/sdk/plugins/OpenAPIToJDLGenerator/ZDLToOpenAPI.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
+    private final TemplateInput zdlToOpenAPITemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZDLToOpenAPIGenerator/ZDLToOpenAPI.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
 
     protected Map<String, Object> getJDLModel(Map<String, Object> contextModel) {
         return (Map) contextModel.get(sourceProperty);

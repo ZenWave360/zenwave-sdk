@@ -72,7 +72,7 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
         {{serviceMethod.parameter}} input = mapper.as{{serviceMethod.parameter}}(reqBody);
     {{/if~}}
     {{~#if (hasPaginatedResponse operation) ~}}
-        {{{methodReturnType}}} {{methodReturnTypeInstance}} = null; // TODO: {{asInstanceName serviceMethod.serviceName}}.{{operation.operationId}}({{requestEntityInstance}}, pageOf(page, limit, sort));
+        {{{methodReturnType}}} {{methodReturnTypeInstance}} = null; // TODO: {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall serviceMethod}};
         {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{methodReturnTypeInstance}});
         return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
     {{~else if (hasResponseEntity operation) ~}}
@@ -89,6 +89,7 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
         return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
         {{~/if}}
     {{~else}}
+        // TODO: {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall serviceMethod}};
         return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).build();
     {{~/if}}
     }
