@@ -33,7 +33,13 @@
 {{~#unless method.isCrudMethod}} {{!-- comes from helper isCrudMethod --}}
   {{~assign "entity" (methodEntity method)}}
   {{~assign "returnEntity" (methodReturnEntity method)}}
-  {{~#if entity}}
+  {{~#if (and entity method.paramId method.returnType method.returnTypeIsOptional)}}
+        log.debug("Request {{method.name}}: {}", id);
+        var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).map(existing{{entity.className}} -> {
+            return {{entity.instanceName}}Mapper.update(existing{{entity.className}}, {{{mapperInputCallSignature method.parameter}}});
+        }).map({{entity.instanceName}}Repository::save);
+        return {{entity.instanceName}};
+  {{~else if entity}}
       {{~#if method.paramId }}
         log.debug("Request {{method.name}}: {}", id);
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).orElseThrow();
