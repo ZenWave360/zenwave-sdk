@@ -76,8 +76,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
         Model apiModel = getApiModel(contextModel);
 
         List<Map<String, Object>> allMessages = new ArrayList<>();
-        var asyncapiVersion = (String) JSONPath.get(apiModel, "$.asyncapi");
-        if (asyncapiVersion.startsWith("2.")) {
+        if (AsyncAPIUtils.isV2(apiModel)) {
             String operationIdsRegex = operationIds.isEmpty() ? "" : " =~ /(" + StringUtils.join(operationIds, "|") + ")/";
             List<Map<String, Object>> operations = JSONPath.get(apiModel, "$.channels[*][*][?(@.operationId" + operationIdsRegex + ")]");
 
@@ -86,7 +85,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             allMessages.addAll(messages);
             allMessages.addAll(oneOfMessages);
         }
-        if (asyncapiVersion.startsWith("3.")) {
+        if (AsyncAPIUtils.isV3(apiModel)) {
             if (!messageNames.isEmpty()) {
                 String messageNamesRegex = messageNames.isEmpty() ? "" : " =~ /(" + StringUtils.join(messageNames, "|") + ")/";
                 Set<Map<String, Object>> messages = new HashSet<>(JSONPath.get(apiModel, "$.components.messages[*][?(@.name" + messageNamesRegex + ")]"));

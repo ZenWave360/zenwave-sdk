@@ -108,6 +108,13 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
         for (Map.Entry<String, Map> entry : schemas.entrySet()) {
             entry.getValue().put("x--schema-name", entry.getKey());
         }
+        List<Map> resolvedSchemas = JSONPath.get(apiModel, "$..[?(@.x--original-$ref =~ /#\\/components\\/schemas\\/.*/)]");
+        for (Map resolvedSchema : resolvedSchemas) {
+            if(!resolvedSchema.containsKey("x--schema-name")) {
+                String originalRef = JSONPath.get(resolvedSchema, "$.x--original-$ref");
+                resolvedSchema.put("x--schema-name", originalRef.replace("#/components/schemas/", ""));
+            }
+        }
 
         Map<String, Object> channels = JSONPath.get(apiModel, "$.channels", Collections.emptyMap());
         for (Map.Entry<String, Object> channelEntry : channels.entrySet()) {
