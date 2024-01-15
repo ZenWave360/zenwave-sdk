@@ -47,10 +47,10 @@ public class BackendMultiModuleApplicationGenerator extends BackendDefaultApplic
         ts.addTemplate(ts.serviceTemplates, "src/test/java", "core/implementation/{{persistence}}/{{style}}/ServiceTest.java", "{{mavenModulesPrefix}}-impl",
                 "{{asPackageFolder coreImplementationPackage}}/{{service.name}}Test.java", JAVA, null, true);
 
-        ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/InMemoryTestsConfig.java", "{{mavenModulesPrefix}}-impl",
-                "{{asPackageFolder configPackage}}/InMemoryTestsConfig.java", JAVA, null, false);
-        ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/InMemoryTestsManualContext.java", "{{mavenModulesPrefix}}-impl",
-                "{{asPackageFolder configPackage}}/InMemoryTestsManualContext.java", JAVA, null, false);
+        ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/RepositoriesInMemoryConfig.java", "{{mavenModulesPrefix}}-impl",
+                "{{asPackageFolder configPackage}}/RepositoriesInMemoryConfig.java", JAVA, null, true);
+        ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/ServicesInMemoryConfig.java", "{{mavenModulesPrefix}}-impl",
+                "{{asPackageFolder configPackage}}/ServicesInMemoryConfig.java", JAVA, null, true);
 
         ts.addTemplate(ts.singleTemplates, "src/main/java", "core/inbound/dtos/package-info.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder inboundDtosPackage}}/package-info.java", JAVA, null, true);

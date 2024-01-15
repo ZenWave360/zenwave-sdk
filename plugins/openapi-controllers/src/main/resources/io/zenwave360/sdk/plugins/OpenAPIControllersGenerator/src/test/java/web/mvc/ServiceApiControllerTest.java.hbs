@@ -2,7 +2,7 @@ package {{controllersPackage}};
 
 import {{openApiApiPackage}}.*;
 import {{openApiModelPackage}}.*;
-import {{basePackage}}.config.InMemoryTestsManualContext;
+import {{basePackage}}.config.ServicesInMemoryConfig;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -19,10 +19,12 @@ public class {{service.name}}ApiControllerTest {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    ServicesInMemoryConfig context = new ServicesInMemoryConfig();
+
     {{service.name}}ApiController controller = new {{service.name}}ApiController()
 {{~#if jdl.isDummy}}/*{{/if}}
 {{#each entitiesServices as |coreServiceName|}}
-        .set{{coreServiceName}}(InMemoryTestsManualContext.INSTANCE.{{asInstanceName coreServiceName}}())
+        .set{{coreServiceName}}(context.{{asInstanceName coreServiceName}}())
 {{/each}}
 {{#if jdl.isDummy}}*/{{/if~}}
     ;

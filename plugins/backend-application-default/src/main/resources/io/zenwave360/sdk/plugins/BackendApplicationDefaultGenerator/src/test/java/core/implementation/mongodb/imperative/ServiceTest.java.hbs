@@ -35,7 +35,7 @@ public class {{service.name}}Test  {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    InMemoryTestsManualContext context = InMemoryTestsManualContext.INSTANCE;
+    ServicesInMemoryConfig context = new ServicesInMemoryConfig();
     {{~#assign "serviceInstance"}}{{asInstanceName service.name}}{{/assign}}
     {{service.name}}Impl {{serviceInstance}} = context.{{serviceInstance}}();
 {{#each entities as |entity|}}

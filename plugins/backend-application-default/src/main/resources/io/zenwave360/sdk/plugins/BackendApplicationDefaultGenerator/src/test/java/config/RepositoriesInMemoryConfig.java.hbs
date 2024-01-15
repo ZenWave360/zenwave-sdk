@@ -8,11 +8,11 @@ import {{basePackage}}.infrastructure.{{persistence}}.inmemory.*;
 
 
 //@Configuration
-public class InMemoryTestsConfig {
+public class RepositoriesInMemoryConfig {
 
 {{~#each services as |service|}}
   {{~#each service.entities as |entity|}}
-    private final {{entity.className}}Repository {{entity.instanceName}}Repository = new {{entity.className}}RepositoryInMemory();
+    protected final {{entity.className}}Repository {{entity.instanceName}}Repository = new {{entity.className}}RepositoryInMemory();
     @Bean @Primary
     public <T extends {{entity.className}}Repository> T {{entity.instanceName}}Repository() {
         return (T) {{entity.instanceName}}Repository;

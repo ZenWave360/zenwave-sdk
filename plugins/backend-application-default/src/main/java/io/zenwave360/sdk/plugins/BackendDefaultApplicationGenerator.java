@@ -74,6 +74,10 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
     @DocumentedOption(description = "Use @Getter and @Setter annotations from Lombok")
     public boolean useLombok = false;
 
+    @DocumentedOption(description = "Whether to add IEntityEventProducer interfaces as service dependencies. Depends on the naming convention of zenwave-asyncapi plugin to work.")
+    public boolean includeEventsProducerDependencies = true;
+
+
     @DocumentedOption(description = "If not empty, it will generate (and use) an `input` DTO for each entity used as command parameter")
     public String inputDTOSuffix = "";
 
@@ -133,10 +137,10 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
         ts.addTemplate(ts.serviceTemplates, "src/test/java", "core/implementation/{{persistence}}/{{style}}/ServiceTest.java",
                 "{{asPackageFolder coreImplementationPackage}}/{{service.name}}Test.java", JAVA, null, true);
 
-        ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/InMemoryTestsConfig.java",
-                "{{asPackageFolder configPackage}}/InMemoryTestsConfig.java", JAVA, null, false);
-        ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/InMemoryTestsManualContext.java",
-                "{{asPackageFolder configPackage}}/InMemoryTestsManualContext.java", JAVA, null, false);
+        ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/RepositoriesInMemoryConfig.java",
+                "{{asPackageFolder configPackage}}/RepositoriesInMemoryConfig.java", JAVA, null, true);
+        ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/ServicesInMemoryConfig.java",
+                "{{asPackageFolder configPackage}}/ServicesInMemoryConfig.java", JAVA, null, true);
 
         ts.addTemplate(ts.singleTemplates, "src/main/java", "core/inbound/dtos/package-info.java",
                 "{{asPackageFolder inboundDtosPackage}}/package-info.java", JAVA, null, true);

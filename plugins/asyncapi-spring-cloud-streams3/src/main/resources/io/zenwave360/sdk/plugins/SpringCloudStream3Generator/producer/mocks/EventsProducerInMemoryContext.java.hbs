@@ -1,9 +1,7 @@
 package {{producerApiPackage}};
 
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
-public class ProducerInMemoryContext {
-
-    public static final ProducerInMemoryContext INSTANCE = new ProducerInMemoryContext();
+public class EventsProducerInMemoryContext {
 
 {{#each services as |service|}}
     private {{service.apiClassName}}Captor {{asInstanceName service.apiClassName}}Captor = new {{service.apiClassName}}Captor();

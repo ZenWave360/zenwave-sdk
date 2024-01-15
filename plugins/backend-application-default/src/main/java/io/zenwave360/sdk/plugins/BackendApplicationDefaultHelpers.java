@@ -3,6 +3,7 @@ package io.zenwave360.sdk.plugins;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.zenwave360.sdk.utils.NamingUtils;
 import io.zenwave360.sdk.zdl.ZDLFindUtils;
 import io.zenwave360.sdk.zdl.ZDLJavaSignatureUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -260,4 +261,11 @@ public class BackendApplicationDefaultHelpers {
         return "";
     };
 
+    public Object eventsProducerInterface(String serviceName, Options options) {
+        return String.format("I%sEventsProducer", serviceName.replaceAll("(Service|UseCases)", ""));
+    }
+
+    public Object eventsProducerInstance(String serviceName, Options options) {
+        return NamingUtils.asInstanceName(serviceName.replaceAll("(Service|UseCases)", "") + "EventsProducer");
+    }
 }

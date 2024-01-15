@@ -42,11 +42,6 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
     @DocumentedOption(description = "Should use same value configured in BackendApplicationDefaultPlugin. Whether to use an input DTO for entities used as command parameter.")
     public String inputDTOSuffix = "";
-    @DocumentedOption(description = "Suffix for search criteria DTOs (default: Criteria)")
-    public String criteriaDTOSuffix = "Criteria";
-
-    @DocumentedOption(description = "Suffix for elasticsearch document entities (default: Document)")
-    public String searchDTOSuffix = "Document";
 
     @DocumentedOption(description = "Programming Style")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
@@ -250,18 +245,6 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
         handlebarsEngine.getHandlebars().registerHelper("statusCode", (context, options) -> {
             return "default".equals(context) ? "200" : context;
-        });
-
-        handlebarsEngine.getHandlebars().registerHelper("criteriaClassName", (context, options) -> {
-            Map entity = (Map) context;
-            Object criteria = JSONPath.get(entity, "$.options.searchCriteria");
-            if (criteria instanceof String) {
-                return criteria;
-            }
-            if (criteria == Boolean.TRUE) {
-                return String.format("%s%s", entity.get("className"), criteriaDTOSuffix);
-            }
-            return "Pageable";
         });
 
         handlebarsEngine.getHandlebars().registerHelper("asMethodParameters", (context, options) -> {

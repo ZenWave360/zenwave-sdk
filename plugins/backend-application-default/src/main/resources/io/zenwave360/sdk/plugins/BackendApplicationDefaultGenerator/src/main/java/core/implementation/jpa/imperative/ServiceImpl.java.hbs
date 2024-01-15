@@ -1,10 +1,14 @@
 package {{basePackage}}.core.implementation;
 
-import {{basePackage}}.core.domain.*;
-import {{basePackage}}.core.inbound.*;
-import {{basePackage}}.core.inbound.dtos.*;
-import {{basePackage}}.core.implementation.mappers.*;
-import {{basePackage}}.core.outbound.jpa.*;
+import {{entitiesPackage}}.*;
+import {{inboundPackage}}.*;
+import {{inboundDtosPackage}}.*;
+import {{coreImplementationPackage}}.mappers.*;
+import {{outboundPackage}}.mongodb.*;
+{{#if includeEventsProducerDependencies}}
+import {{outboundEventsPackage}}.*;
+{{/if}}
+
 
 import java.util.List;
 import java.util.Optional;
@@ -35,14 +39,20 @@ public class {{service.name}}Impl implements {{service.name}} {
     {{~/unless}}
 {{/each}}
 
+{{#if includeEventsProducerDependencies}}
+    private final {{eventsProducerInterface service.name}} eventsProducer;
+{{/if}}
+
 {{#unless useLombok~}}
     /**
      * Constructor.
      */
-    public {{service.name}}Impl({{#joinWithTemplate service.entities delimiter=", "}}{{#unless (skipEntityRepository this)}}{{className}}Repository {{instanceName}}Repository{{/unless}}{{/joinWithTemplate}}) {
+    public {{service.name}}Impl({{#joinWithTemplate service.entities delimiter=", "}}{{#unless (skipEntityRepository this)}}{{className}}Repository {{instanceName}}Repository{{/unless}}{{/joinWithTemplate}}
+                                {{#if includeEventsProducerDependencies}}, {{eventsProducerInterface service.name}} eventsProducer{{/if}}) {
         {{~#joinWithTemplate service.entities ~}}
             {{#unless (skipEntityRepository this)}}this.{{instanceName}}Repository = {{instanceName}}Repository;{{/unless}}
         {{~/joinWithTemplate~}}
+        this.eventsProducer = eventsProducer;
     }
 {{/unless~}}
 
