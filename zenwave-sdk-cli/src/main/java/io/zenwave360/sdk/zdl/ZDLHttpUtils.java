@@ -46,6 +46,24 @@ public class ZDLHttpUtils {
         return pathParams;
     }
 
+    public static String getRequestBodyType(Map<String, Object> method, Map apiModel) {
+        var methodParameterType = (String) method.get("parameter");
+        var parameterEntity = JSONPath.get(apiModel, "$.allEntitiesAndEnums." + methodParameterType);
+        if(parameterEntity == null) {
+            return null;
+        }
+        var isInline = JSONPath.get(parameterEntity, "$.options.inline", false);
+        if (isInline) {
+            var fields = JSONPath.get(parameterEntity, "$.fields", Map.<String, Map>of());
+            for (Map field : fields.values()) {
+                if (JSONPath.get(field, "$.isComplexType", false)) {
+                    return JSONPath.get(field, "$.type");
+                }
+            }
+        }
+        return methodParameterType;
+    }
+
     public static Map<String, Object> getHttpOption(Map method) {
         var get = JSONPath.get(method, "$.options.get");
         var put = JSONPath.get(method, "$.options.put");

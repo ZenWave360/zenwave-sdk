@@ -107,6 +107,7 @@
         <module>zenwave-sdk-cli</module>
         <module>plugins</module>
         <module>zenwave-sdk-maven-plugin</module>
+        <module>e2e</module>
     </modules>
 
     <build>

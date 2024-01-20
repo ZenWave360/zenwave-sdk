@@ -38,7 +38,14 @@
 {{~#unless method.isCrudMethod}} {{!-- comes from helper isCrudMethod --}}
   {{~assign "entity" (methodEntity method)}}
   {{~assign "returnEntity" (methodReturnEntity method)}}
-  {{~#if (and entity method.paramId method.returnType method.returnTypeIsOptional)}}
+  {{~#if (and entity method.returnType method.returnTypeIsArray)}}
+        {{~#if method.parameter}}
+        log.debug("Request {{method.name}}: {}", input);
+        {{~else}}
+        log.debug("Request {{method.name}}");
+        {{~/if}}
+        return {{entity.instanceName}}Repository.findAll({{#if method.options.paginated}}pageable{{/if}});
+  {{~else if (and entity method.paramId method.returnType method.returnTypeIsOptional)}}
         log.debug("Request {{method.name}}: {}", id);
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).map(existing{{entity.className}} -> {
             return {{asInstanceName service.name}}Mapper.update(existing{{entity.className}}, {{{mapperInputCallSignature method.parameter}}});

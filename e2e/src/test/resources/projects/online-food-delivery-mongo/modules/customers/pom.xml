@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.zenwave360.example.modulith</groupId>
+        <artifactId>zenwave-modulith-playground</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+    <artifactId>customers-module</artifactId>
+
+    <properties>
+        <basePackage>io.zenwave360.example.customers</basePackage><!-- used by openapi and asyncapi plugins in parent -->
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.github.zenwave360.zenwave-sdk</groupId>
+                <artifactId>zenwave-sdk-maven-plugin</artifactId>
+
+                <executions>
+                    <!-- Generates AsyncAPI PROVIDER (own API) -->
+                    <!-- (Config is inherited from parent) -->
+                    <execution>
+                        <id>generate-asyncapi-provider-dtos</id>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/apis/asyncapi.yml</inputSpec>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-asyncapi-provider-implementation</id>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/apis/asyncapi.yml</inputSpec>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

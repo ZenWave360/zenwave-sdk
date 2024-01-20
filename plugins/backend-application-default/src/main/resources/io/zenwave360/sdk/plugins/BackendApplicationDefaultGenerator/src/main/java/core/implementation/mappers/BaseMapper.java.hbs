@@ -2,7 +2,13 @@ package {{coreImplementationPackage}}.mappers;
 
 import org.mapstruct.Mapper;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+
 @Mapper
 public interface BaseMapper {
 
+    default OffsetDateTime asOffsetDateTime(Instant value) {
+        return value == null ? null : OffsetDateTime.ofInstant(value, OffsetDateTime.now().getOffset());
+    }
 }

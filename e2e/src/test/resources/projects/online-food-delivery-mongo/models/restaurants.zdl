@@ -1,0 +1,184 @@
+
+/**
+ * ZenWave Online Food Delivery - Restaurants Module.
+ */
+config {
+    title "ZenWave Online Food Delivery - Restaurants Module"
+    basePackage "io.zenwave360.example.restaurants"
+    targetFolder "modules/restaurants"
+    persistence mongodb
+
+    // these are code generation plugins for ZenWave IntelliJ Plugin, for models you can skip to 'entities' section
+    plugins {
+
+        ZDLToOpenAPIPlugin {
+            idType string
+            targetFile "{{targetFolder}}/src/main/resources/apis/openapi.yml"
+        }
+
+        ZDLToAsyncAPIPlugin {
+            asyncapiVersion v3
+            idType string
+            targetFile "{{targetFolder}}/src/main/resources/apis/asyncapi.yml"
+        }
+
+        BackendApplicationDefaultPlugin {
+            useLombok true
+            // --force // overwite all files
+        }
+
+        OpenAPIControllersPlugin {
+            formatter google // comments in one line are better for demos
+            // TODO fix this: specFile "{{targetFolder}}/src/main/resources/apis/openapi.yml"
+            specFile "modules/restaurants/src/main/resources/apis/openapi.yml"
+            zdlFile "models/restaurants.zdl"
+
+            // these should match the values of openapi-generator-maven-plugin
+            openApiApiPackage "{{basePackage}}.adapters.web"
+            openApiModelPackage "{{basePackage}}.adapters.web.model"
+            openApiModelNameSuffix DTO
+        }
+
+        SpringCloudStreams3AdaptersPlugin {
+            apiId "orders"
+            role client
+            specFile "modules/orders/src/main/resources/apis/asyncapi.yml"
+            zdlFile "models/restaurants.zdl"
+            modelPackage "{{basePackage}}.client.{{apiId}}.events.dtos"
+            consumerApiPackage "{{basePackage}}.client.{{apiId}}.events.consumer"
+        }
+    }
+}
+
+apis {
+    asyncapi(client) OrdersAsyncAPI {
+        uri "orders/src/main/resources/apis/asyncapi.yml"
+    }
+}
+
+
+// == Entities =============================
+
+@aggregate
+entity Restaurant {
+    name String required unique minlength(2) maxlength(250)
+    phone String required
+    address Address {
+        street String required
+        city String required
+        state String required
+        zip String required
+    }
+}
+
+@aggregate
+entity MenuItem {
+    restaurantId String required
+    name String required minlength(2) maxlength(250)
+    description String
+    price BigDecimal required min(0)
+}
+
+@aggregate
+entity KitchenOrder {
+    orderId String required
+    restaurantId String required
+    date LocalDateTime required
+    items MenuItem[] required
+    status KitchenOrderStatus required
+    customer CustomerDetails {
+        name String required
+        phone String required
+        address CustomerAddress {
+            street String required
+            city String required
+            state String required
+            zip String required
+        }
+    }
+}
+
+enum KitchenOrderStatus {
+    ACCEPTED, REJECTED, IN_PROGRESS, READY, DELIVERED, CANCELLED
+}
+
+
+// == RestaurantBackOfficeService =============================
+
+@inline
+input RestaurantIdInput {
+    restaurantId String required
+}
+
+@rest("/restaurants")
+service RestaurantBackOfficeService for (Restaurant, MenuItem) {
+
+  @post
+  createRestaurant(Restaurant) Restaurant
+
+  @get("/{restaurantId}")
+  getRestaurant(id) Restaurant?
+
+  @get @paginated
+  listRestaurants() Restaurant[]
+
+  @post("/{restaurantId}/menuItems")
+  createMenuItem(MenuItem) MenuItem
+
+  @put("/{restaurantId}/menuItems/{name}")
+  updateMenuItem(id, MenuItem) MenuItem?
+
+  @get("/{restaurantId}/menuItems")
+  listMenuItems(RestaurantIdInput) MenuItem[]
+}
+
+// == RestaurantOrdersService =============================
+
+input KitchenOrderInput {
+    orderId String required
+    restaurantId String required
+    date LocalDateTime required
+    items MenuItemInput[] required
+    customer CustomerDetails required
+}
+
+input OrderStatusUpdated {
+    orderId String
+    dateTime Instant
+    status String
+    previousStatus String
+}
+
+input KitchenOrderStatusInput {
+    status KitchenOrderStatus required
+    operatorName String required
+}
+
+input KitchenOrdersFilter {
+    restaurantId String
+    status KitchenOrderStatus
+}
+
+@rest("/restaurants-orders")
+service RestaurantOrdersService for (KitchenOrder) {
+
+    @asyncapi({api: OrdersAsyncAPI, channel: "OrdersChannel"})
+    createKitchenOrder(KitchenOrderInput) KitchenOrder withEvents KitchenOrderStatusUpdated
+
+    @asyncapi({api: OrdersAsyncAPI, channel: "OrderUpdatesChannel"})
+    onOrderStatusUpdated(OrderStatusUpdated) withEvents KitchenOrderStatusUpdated
+
+    @put("/{orderId}/status")
+    updateKitchenOrderStatus(id, KitchenOrderStatusInput) KitchenOrder withEvents KitchenOrderStatusUpdated
+
+    @post @paginated
+    searchKitchenOrders(KitchenOrdersFilter) KitchenOrder[]
+}
+
+@asyncapi({channel: "KitchenOrdersStatusChannel", topic: "restaurants.kitchen_order_status"})
+event KitchenOrderStatusUpdated {
+    customerOrderId String required
+    kitchenOrderId String required
+    status KitchenOrderStatus required
+    message String
+}

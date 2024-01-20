@@ -54,7 +54,7 @@ public class AbstractZDLProjectGeneratorTest {
 
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
         var outputList = abstractZDLProjectGenerator.generate(model);
-        Assertions.assertEquals(9, outputList.size());
+        Assertions.assertEquals(10, outputList.size());
     }
 
     static class NOPHandlebarsEngine extends HandlebarsEngine {

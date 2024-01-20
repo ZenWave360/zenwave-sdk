@@ -15,16 +15,34 @@ public class ZDLHttpUtilsTest {
 
     private Map<String, Object> loadZDL(String resource) throws IOException {
         Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
-        return new ZDLProcessor().process(model);
+        return (Map<String, Object>) new ZDLProcessor().process(model).get("zdl");
     }
 
     @Test
     void testFindPathParams() throws IOException {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
-        var method = (Map) JSONPath.get(model, "$.zdl.services.CustomerService.methods.updateCustomer");
+        var method = (Map) JSONPath.get(model, "$.services.CustomerService.methods.updateCustomer");
 
         var pathParam = ZDLHttpUtils.getFirstPathParamsFromMethod(method);
         Assertions.assertEquals("customerId", pathParam);
+    }
+
+    @Test
+    void getRequestBodyType() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
+        var method = (Map) JSONPath.get(model, "$.services.CustomerService.methods.updateCustomer");
+
+        var pathParam = ZDLHttpUtils.getRequestBodyType(method, model);
+        Assertions.assertEquals("CustomerInput", pathParam);
+    }
+
+    @Test
+    void getRequestBodyTypeInline() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
+        var method = (Map) JSONPath.get(model, "$.services.CustomerService.methods.addCustomerAddress");
+
+        var pathParam = ZDLHttpUtils.getRequestBodyType(method, model);
+        Assertions.assertEquals("Address", pathParam);
     }
 
 }

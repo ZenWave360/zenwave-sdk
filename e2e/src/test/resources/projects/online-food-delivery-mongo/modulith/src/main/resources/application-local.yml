@@ -1,0 +1,9 @@
+logging:
+  level:
+    ROOT: ERROR
+    io.zenwave360.example: DEBUG
+    org.springframework.transaction: INFO
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    org.springframework.data.mongodb.MongoTransactionManager: DEBUG
+
+MONGODB_URI: mongodb://localhost:27017/online-food-delivery

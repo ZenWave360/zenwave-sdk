@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.zenwave360.sdk.options.ProgrammingStyle;
+import io.zenwave360.sdk.utils.NamingUtils;
 import io.zenwave360.sdk.zdl.ZDLFindUtils;
 import io.zenwave360.sdk.zdl.ZDLHttpUtils;
 import io.zenwave360.sdk.zdl.ZDLJavaSignatureUtils;
@@ -111,7 +112,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                 if (method == null) {
                     continue;
                 }
-                String inputType = JSONPath.get(method, "$.parameter");
+                String inputType = ZDLHttpUtils.getRequestBodyType(method, zdlModel);
                 String outputType = JSONPath.get(method, "$.returnType");
                 Map inputEntity = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + inputType);
                 Map outputEntity = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + outputType);
@@ -156,6 +157,14 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         return null;
     }
 
+    String responseDTOClassName(Map<String, Object> operation) {
+        String responseDto = JSONPath.get(operation, "$.x--response.x--response-dto");
+        if (responseDto != null) {
+            return openApiModelNamePrefix + responseDto + openApiModelNameSuffix;
+        }
+        return null;
+    }
+
     protected Map<String, List<Map<String, Object>>> groupOperationsByService(List<Map<String, Object>> operations) {
         Map<String, List<Map<String, Object>>> operationsByService = new HashMap<>();
         for (Map<String, Object> operation : operations) {
@@ -182,6 +191,35 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     }
 
     {
+        handlebarsEngine.getHandlebars().registerHelper("responseDTOClassName", (operation, options) -> {
+            return responseDTOClassName((Map) operation);
+        });
+        handlebarsEngine.getHandlebars().registerHelper("asMethodParameters", (context, options) -> {
+            if (context instanceof Map) {
+                Map operation = (Map) context;
+                List<Map<String, Object>> params = (List) operation.getOrDefault("parameters", Collections.emptyList());
+                List methodParams = params.stream()
+                        .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
+                        .map(param -> {
+                            String javaType = getJavaTypeOrOptional(param);
+                            String name = JSONPath.get(param, "$.name");
+                            return javaType + " " + name;
+                        }).collect(Collectors.toList());
+                if (operation.containsKey("x--request-dto")) {
+                    var dto = (String) operation.get("x--request-dto");
+                    methodParams.add(String.format("%s%s%s %s", openApiModelNamePrefix, dto, openApiModelNameSuffix, "reqBody"));
+                }
+                return StringUtils.join(methodParams, ", ");
+            }
+            return options.fn(context);
+        });
+        handlebarsEngine.getHandlebars().registerHelper("serviceMethodParameter", (method, options) -> {
+            if(method == null) { return "Entity"; }
+            return ZDLHttpUtils.getRequestBodyType((Map) method, (Map) options.get("zdl"));
+        });
+        handlebarsEngine.getHandlebars().registerHelper("mappedInputVariable", (serviceMethod, options) -> {
+            return "input";
+        });
         handlebarsEngine.getHandlebars().registerHelper("methodReturnType", (method, options) -> {
             if (method == null) { // legacy
                 var operation = (Map) options.get("operation");
@@ -191,6 +229,25 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
             }
             return ZDLJavaSignatureUtils.methodReturnType((Map) method);
         });
+        handlebarsEngine.getHandlebars().registerHelper("reqBodyVariableName", (serviceMethod, options) -> {
+            if (serviceMethod == null) { return "reqBody"; }
+            var zdl = (Map) options.get("zdl");
+            var parameterType = JSONPath.get(serviceMethod, "parameter");
+            var isInline = JSONPath.get(zdl, "$.inputs." + parameterType + ".options.inline", false);
+            if(isInline) {
+                var paramSignature = ZDLJavaSignatureUtils.inputSignature((String) parameterType, (Map) serviceMethod, zdl, inputDTOSuffix);
+                var  methodParametersCallSignature = paramSignature.get(paramSignature.size() - 1).split(" ")[1];
+                var params = methodParametersCallSignature.split(", ");
+                var reqBody = "";
+                for (int i = 0; i < params.length; i++) {
+                    if(!"id".equals(params[i]) && !"pageable".equals(params[i])) {
+                        reqBody = params[i];
+                    }
+                }
+                return methodParametersCallSignature.replaceFirst(reqBody, "reqBody");
+            }
+            return "reqBody";
+        });
         handlebarsEngine.getHandlebars().registerHelper("serviceMethodCall", (serviceMethod, options) -> {
             if (serviceMethod == null) { // legacy
                 var operation = (Map) options.get("operation");
@@ -198,12 +255,28 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                 return String.format("%s(%s)", operationId, "input");
             }
             var zdl = (Map) options.get("zdl");
+            var operation = (Map) options.get("operation");
             var methodName = JSONPath.get(serviceMethod, "name");
             var methodParametersCallSignature = ZDLJavaSignatureUtils.methodParametersCallSignature((Map) serviceMethod, zdl, inputDTOSuffix);
             var paramId = ObjectUtils.firstNonNull(ZDLHttpUtils.getFirstPathParamsFromMethod((Map) serviceMethod), "id");
 
+            if(operation.get("x--request-schema") != null) {
+                // find the last parameter name, that is not the pagination: that is the reqBody variable name
+                var params = methodParametersCallSignature.split(", ");
+                var reqBody = "";
+                for (int i = 0; i < params.length; i++) {
+                    if(!"id".equals(params[i]) && !"pageable".equals(params[i])) {
+                        reqBody = params[i];
+                    }
+                }
+                methodParametersCallSignature = methodParametersCallSignature.replaceFirst(reqBody, "input");
+            }
+
+            methodParametersCallSignature = methodParametersCallSignature.replaceFirst("^id$", paramId);
             methodParametersCallSignature = methodParametersCallSignature.replaceFirst("^id, ", paramId + ", ");
             methodParametersCallSignature = methodParametersCallSignature.replaceAll("pageable", "pageOf(page, limit, sort)");
+
+
 
             return String.format("%s(%s)", methodName, methodParametersCallSignature);
         });
@@ -242,26 +315,6 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         handlebarsEngine.getHandlebars().registerHelper("statusCode", (context, options) -> {
             return "default".equals(context) ? "200" : context;
         });
-
-        handlebarsEngine.getHandlebars().registerHelper("asMethodParameters", (context, options) -> {
-            if (context instanceof Map) {
-                Map operation = (Map) context;
-                List<Map<String, Object>> params = (List) operation.getOrDefault("parameters", Collections.emptyList());
-                List methodParams = params.stream()
-                        .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
-                        .map(param -> {
-                            String javaType = getJavaTypeOrOptional(param);
-                            String name = JSONPath.get(param, "$.name");
-                            return javaType + " " + name;
-                        }).collect(Collectors.toList());
-                if (operation.containsKey("x--request-dto")) {
-                    methodParams.add(String.format("%s%s%s %s", openApiModelNamePrefix, operation.get("x--request-dto"), openApiModelNameSuffix, "reqBody"));
-                }
-                return StringUtils.join(methodParams, ", ");
-            }
-            return options.fn(context);
-        });
-
         handlebarsEngine.getHandlebars().registerHelper("asMethodParametersInitializer", (context, options) -> {
             if (context instanceof Map) {
                 Map operation = (Map) context;

@@ -59,7 +59,7 @@ public class ZDLJavaSignatureUtils {
                 .collect(Collectors.joining());
     }
 
-    private static List<String> inputSignature(String inputType, Map method, Map zdl, String inputDTOSuffix) {
+    public static List<String> inputSignature(String inputType, Map method, Map zdl, String inputDTOSuffix) {
         var params = new ArrayList<String>();
         if(inputType != null) {
             var isInline = JSONPath.get(zdl, "$.inputs." + inputType + ".options.inline", false);

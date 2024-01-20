@@ -10,10 +10,11 @@ import java.util.Properties;
 
 public class MavenCompiler {
 
-    public static int compile(String pom, String baseDir, String... properties) throws MavenInvocationException, IOException {
-        System.out.println("Maven Invoker - compile:" + pom + " - " + baseDir);
-        FileUtils.copyFile(new File(pom), new File(baseDir, "pom.xml"));
+    public static int compile(File baseDir, String... properties) throws MavenInvocationException, IOException {
+        return compile("pom.xml", baseDir, properties);
+    }
 
+    public static int compile(String pom, File baseDir, String... properties) throws MavenInvocationException, IOException {
         InvocationRequest request = new DefaultInvocationRequest();
         if(properties != null) {
             Properties props = new Properties();
@@ -22,11 +23,17 @@ public class MavenCompiler {
             }
             request.setProperties(props);
         }
-        request.setBaseDirectory(new File(baseDir));
+        request.setBaseDirectory(baseDir);
         request.setGoals(Collections.singletonList("test-compile"));
 
         Invoker invoker = new DefaultInvoker();
         var results = invoker.execute(request);
         return results.getExitCode();
+    }
+
+    public static int copyPomAndCompile(String pom, String baseDir, String... properties) throws MavenInvocationException, IOException {
+        System.out.println("Maven Invoker - compile:" + pom + " - " + baseDir);
+        FileUtils.copyFile(new File(pom), new File(baseDir, "pom.xml"));
+        return compile(new File(baseDir), properties);
     }
 }

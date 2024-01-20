@@ -43,7 +43,7 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
                                 .with("hasParams", hasParams)
                                 .with("params", params)
                                 .with("pathParams", pathParams)
-                                .with("requestBody", getRequestBody(method, apiModel))
+                                .with("requestBody", ZDLHttpUtils.getRequestBodyType(method, apiModel))
                                 .with("responseBody", method.get("returnType"))
                                 .with("isResponseBodyArray", method.get("returnTypeIsArray"))
                                 .with("paginated", paginated)
@@ -57,25 +57,5 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
         });
 
         return contextModel;
-    }
-
-    private String getRequestBody(Map method, Map apiModel) {
-        var parameterType = (String) method.get("parameter");
-        var parameterEntity = JSONPath.get(apiModel, "$.allEntitiesAndEnums." + parameterType);
-        if(parameterEntity == null) {
-            return null;
-        }
-        var isInline = JSONPath.get(parameterEntity, "$.options.inline", false);
-        if (isInline) {
-            var fields = JSONPath.get(parameterEntity, "$.fields", Map.<String, Map>of());
-            for (Map field : fields.values()) {
-                var fieldTypeName = JSONPath.get(field, "$.type");
-                var isEntity = JSONPath.get(apiModel, "$.allEntitiesAndEnums." + fieldTypeName) != null;
-                if(isEntity) {
-                    return JSONPath.get(field, "$.type");
-                }
-            }
-        }
-        return parameterType;
     }
 }

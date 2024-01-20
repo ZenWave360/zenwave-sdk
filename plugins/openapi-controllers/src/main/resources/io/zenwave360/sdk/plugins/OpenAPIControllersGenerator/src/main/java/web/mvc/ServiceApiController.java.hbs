@@ -61,7 +61,7 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
     {{~assign "requestBodySchema" operation.x--request-schema }}
     {{~assign "responseBodySchema" operation.x--response.x--response-schema }}
     {{~#assign "requestDTOClassName"}}{{asDtoName operation.x--request-dto }}{{/assign}}
-    {{~#assign "responseDTOClassName"}}{{asDtoName operation.x--response.x--response-dto }}{{/assign}}
+    {{~#assign "responseDTOClassName"}}{{responseDTOClassName operation}}{{/assign}}
     {{~assign "serviceMethod" (findServiceMethod operation)}}
     {{~assign "methodReturnType" (methodReturnType serviceMethod)}}
     {{~assign "methodReturnTypeInstance" (asInstanceName methodReturnType)}}
@@ -70,7 +70,7 @@ public class {{service.name}}ApiController implements {{service.name}}Api {
     @Override
     public ResponseEntity<{{orVoid responseDTOClassName}}> {{operation.operationId}}({{{asMethodParameters operation}}}) {
     {{~#if requestBodySchema~}}
-        {{serviceMethod.parameter}} input = mapper.as{{serviceMethod.parameter}}(reqBody);
+        {{serviceMethodParameter serviceMethod}} {{mappedInputVariable serviceMethod}} = mapper.as{{serviceMethodParameter serviceMethod}}({{reqBodyVariableName serviceMethod}});
     {{/if~}}
     {{~#if (hasPaginatedResponse operation) ~}}
         {{{methodReturnType}}} {{methodReturnTypeInstance}} = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall serviceMethod}};
