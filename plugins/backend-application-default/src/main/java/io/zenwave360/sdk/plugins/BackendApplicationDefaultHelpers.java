@@ -80,6 +80,13 @@ public class BackendApplicationDefaultHelpers {
         return ZDLJavaSignatureUtils.methodParametersCallSignature(method, zdl, generator.inputDTOSuffix);
     }
 
+    public boolean includeEmitEventsImplementation(Map service, Options options) {
+        if(service == null) {
+            return generator.includeEmitEventsImplementation;
+        }
+        return generator.includeEmitEventsImplementation && !JSONPath.get(service, "methods[*].withEvents[*]", List.of()).isEmpty();
+    }
+
     public List<Map<String, Object>> methodEvents(Map<String, Object> method, Options options) {
         var eventNames = ZDLFindUtils.methodEventsFlatList(method);
         var zdl = (Map) options.get("zdl");
@@ -171,14 +178,14 @@ public class BackendApplicationDefaultHelpers {
         if(returnType == null) {
             return "";
         }
-        var instanceName = (String) entity.get("instanceName");
+        var returnTypeIsArray = (Boolean) method.getOrDefault("returnTypeIsArray", false);
+        var instanceName = returnTypeIsArray? entity.get("instanceNamePlural") : entity.get("instanceName");
         if (Objects.equals(entity.get("name"), returnType.get("name"))) {
             if(JSONPath.get(method, "options.paginated", false)) {
                 return "page";
             }
-            return instanceName;
+            return (String) instanceName;
         } else {
-            var returnTypeIsArray = (Boolean) method.getOrDefault("returnTypeIsArray", false);
             if(returnTypeIsArray) {
                 if(JSONPath.get(method, "options.paginated", false)) {
                     return String.format("%sMapper.as%sPage(%s)", instanceName, returnType.get("className"), "page");

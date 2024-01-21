@@ -138,7 +138,7 @@ input KitchenOrderInput {
     orderId String required
     restaurantId String required
     date LocalDateTime required
-    items MenuItemInput[] required
+    items MenuItem[] required
     customer CustomerDetails required
 }
 

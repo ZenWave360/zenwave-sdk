@@ -100,7 +100,7 @@ entity CustomerOrder {
         zip String
       }
     }
-    orderItems OrderItem[] {
+    orderItems OrderItemInput[] {
        menuItemId String required
        name String required
        description String

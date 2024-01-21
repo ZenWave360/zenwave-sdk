@@ -10,35 +10,29 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 
 @Mapper(uses = BaseMapper.class)
-public interface {{service.name}}DTOsMapper {
+public interface {{serviceName}}DTOsMapper {
 
-    {{service.name}}DTOsMapper INSTANCE = Mappers.getMapper({{service.name}}DTOsMapper.class);
+    {{serviceName}}DTOsMapper INSTANCE = Mappers.getMapper({{serviceName}}DTOsMapper.class);
 
     // request mappings
-{{~#each requestDtosWithEntities as |entities|}}
-    {{~assign "dto" @key }}
-    {{~#each entities as |entity|}}
-    {{entity}} as{{entity}}({{dto}}{{openApiModelNameSuffix}} dto);
-    {{~/each}}
+{{~#each mapperRequestDtoEntity as |entry|}}
+    {{inputType}} as{{inputType}}({{requestDto}} dto);
 {{~/each}}
 
     // response mappings
-{{~#each responseDtosWithEntities as |entities|}}
-    {{~assign "dto" @key }}
-    {{~#each entities as |entity|}}
-    {{dto}}{{openApiModelNameSuffix}} as{{dto}}{{openApiModelNameSuffix}}({{{entity}}} entity);
-    {{~/each}}
+{{~#each mapperResponseDtoEntity as |entry|}}
+    {{#if isResponsePaginated}}
+    List<{{responseDto}}> as{{responseDto}}List(List<{{outputType}}> entityList);
+    {{responseEntityName}} as{{responseEntityName}}(Page<{{outputType}}> page);
+    default Page<{{responseDto}}> as{{responseDto}}Page(Page<{{outputType}}> page) {
+      return page.map(this::as{{responseDto}});
+    }
+    {{~else if isResponseArray}}
+    List<{{responseDto}}> as{{responseDto}}List(List<{{outputType}}> entityList);
+    {{~else}}
+    {{responseDto}} as{{responseDto}}({{outputType}} entity);
+    {{/if}}
 {{~/each}}
 
-    // response paginated mappings
-{{~#each responsePaginatedDtosWithEntities as |entities|}}
-    {{~assign "dto" @key }}
-    {{~#each entities as |entity|}}
-    List<{{dto}}{{openApiModelNameSuffix}}> as{{dto}}{{openApiModelNameSuffix}}List(List<{{entity}}> entityList);
-    default Page<{{dto}}{{openApiModelNameSuffix}}> as{{dto}}{{openApiModelNameSuffix}}Page(Page<{{entity}}> page) {
-      return page.map(this::as{{dto}}{{openApiModelNameSuffix}});
-    }
-    {{~/each}}
-{{~/each}}
 
 }

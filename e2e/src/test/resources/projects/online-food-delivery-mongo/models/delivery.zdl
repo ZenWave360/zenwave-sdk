@@ -94,7 +94,7 @@ entity Delivery {
     status DeliveryOrderStatus required
 }
 
-enum DeliveryStatus {
+enum DeliveryOrderStatus {
     ACCEPTED, REJECTED, IN_PROGRESS, READY, DELIVERED, CANCELLED
 }
 
@@ -115,7 +115,7 @@ input OrderStatusUpdated {
 }
 
 input DeliveryStatusInput {
-    status DeliveryStatus required
+    status DeliveryOrderStatus required
     operatorName String required
 }
 
@@ -139,6 +139,6 @@ service DeliveryService for (Delivery) {
 event DeliveryStatusUpdated {
     customerOrderId String required
     deliveryId String required
-    status DeliveryStatus required
+    status DeliveryOrderStatus required
     message String
 }

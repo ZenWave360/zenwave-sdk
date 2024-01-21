@@ -32,66 +32,61 @@ import org.springframework.web.context.request.NativeWebRequest;
  */
 @RestController
 @RequestMapping("/api")
-public class {{service.name}}ApiController implements {{service.name}}Api {
+public class {{serviceName}}ApiController implements {{serviceName}}Api {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private NativeWebRequest request;
 
-{{~#if jdl.isDummy}}/*{{/if}}
 {{#each entitiesServices as |coreServiceName|}}
     private {{coreServiceName}} {{asInstanceName coreServiceName}};
     @Autowired
-    public {{service.name}}ApiController set{{coreServiceName}}({{coreServiceName}} {{asInstanceName coreServiceName}}) {
+    public {{serviceName}}ApiController set{{coreServiceName}}({{coreServiceName}} {{asInstanceName coreServiceName}}) {
         this.{{asInstanceName coreServiceName}} = {{asInstanceName coreServiceName}};
         return this;
     }
 {{/each}}
-{{#if jdl.isDummy}}*/{{/if~}}
 
-    private {{service.name}}DTOsMapper mapper = {{service.name}}DTOsMapper.INSTANCE;
+    private {{serviceName}}DTOsMapper mapper = {{serviceName}}DTOsMapper.INSTANCE;
 
     @Override
     public Optional<NativeWebRequest> getRequest() {
         return Optional.ofNullable(request);
     }
 
-{{#each service.operations as |operation|}}
-    {{~assign "requestBodySchema" operation.x--request-schema }}
-    {{~assign "responseBodySchema" operation.x--response.x--response-schema }}
-    {{~#assign "requestDTOClassName"}}{{asDtoName operation.x--request-dto }}{{/assign}}
-    {{~#assign "responseDTOClassName"}}{{responseDTOClassName operation}}{{/assign}}
-    {{~assign "serviceMethod" (findServiceMethod operation)}}
-    {{~assign "methodReturnType" (methodReturnType serviceMethod)}}
-    {{~assign "methodReturnTypeInstance" (asInstanceName methodReturnType)}}
+{{#each serviceOperations}}
     {{~#assign "TODO"}}{{#unless serviceMethod}}null; // TODO: service{{/unless}}{{/assign}}
 
     @Override
-    public ResponseEntity<{{orVoid responseDTOClassName}}> {{operation.operationId}}({{{asMethodParameters operation}}}) {
+    public ResponseEntity<{{{responseEntityExpression}}}> {{operationId}}({{{methodParameters}}}) {
     {{~#if requestBodySchema~}}
-        {{serviceMethodParameter serviceMethod}} {{mappedInputVariable serviceMethod}} = mapper.as{{serviceMethodParameter serviceMethod}}({{reqBodyVariableName serviceMethod}});
+        var {{mappedInputVariable}} = mapper.as{{serviceMethodParameter}}({{reqBodyVariableName}});
     {{/if~}}
-    {{~#if (hasPaginatedResponse operation) ~}}
-        {{{methodReturnType}}} {{methodReturnTypeInstance}} = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall serviceMethod}};
-        {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{methodReturnTypeInstance}});
-        return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
-    {{~else if (hasResponseEntity operation) ~}}
-        {{{methodReturnType}}} {{methodReturnTypeInstance}} = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall serviceMethod}};
-        {{~#if serviceMethod.returnTypeIsOptional }}
+    {{~#if isResponsePaginated ~}}
+        var {{{asInstanceName methodReturnType}}}Page = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}};
+        var responseDTO = mapper.as{{responseEntityName}}({{{asInstanceName methodReturnType}}}Page);
+        return ResponseEntity.status({{statusCode}}).body(responseDTO);
+    {{~else isResponseArray ~}}
+        var {{methodReturnTypeInstance}} = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}};
+        var responseDTO = mapper.as{{responseDtoName}}List({{methodReturnTypeInstance}});
+        return ResponseEntity.status({{statusCode}}).body(responseDTO);
+    {{~else if responseSchemaName ~}}
+        var {{methodReturnTypeInstance}} = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}};
+        {{~#if returnTypeIsOptional }}
         if ({{methodReturnTypeInstance}}.isPresent()) {
-            {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{methodReturnTypeInstance}}.get());
-            return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
+            {{responseDtoName}} responseDTO = mapper.as{{responseDtoName}}({{methodReturnTypeInstance}}.get());
+            return ResponseEntity.status({{statusCode}}).body(responseDTO);
         } else {
             return ResponseEntity.notFound().build();
         }
         {{~else}}
-        {{responseDTOClassName}} responseDTO = mapper.as{{responseDTOClassName}}({{methodReturnTypeInstance}});
-        return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).body(responseDTO);
+        {{responseDtoName}} responseDTO = mapper.as{{responseDtoName}}({{methodReturnTypeInstance}});
+        return ResponseEntity.status({{statusCode}}).body(responseDTO);
         {{~/if}}
     {{~else}}
-        // TODO: {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall serviceMethod}};
-        return ResponseEntity.status({{statusCode operation.x--response.x--statusCode}}).build();
+        // TODO: {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}};
+        return ResponseEntity.status({{statusCode}}).build();
     {{~/if}}
     }
 {{~/each}}

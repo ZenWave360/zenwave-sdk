@@ -38,21 +38,22 @@ public class TestOnlineFoodDeliveryProject {
 
 //        @Test
     public void test() throws Exception {
-        var module = "orders";
+        var module = "restaurants";
         var modulePackage = basePackage + "." + module;
         var moduleFolder = targetFolder + "modules/" + module;
         var zdlFile = targetFolder + "models/" + module + ".zdl";
 
         Plugin plugin = new BackendApplicationDefaultPlugin()
-                .withSpecFile(zdlFile)
-                .withTargetFolder(moduleFolder)
-                .withOption("basePackage", modulePackage)
-                .withOption("persistence", PersistenceType.mongodb)
-                .withOption("style", ProgrammingStyle.imperative)
-                .withOption("useLombok", true)
-                .withOption("includeEmitEventsImplementation", true)
-                .withOption("forceOverwrite", true)
-                .withOption("haltOnFailFormatting", false);
+            .withSpecFile(zdlFile)
+            .withTargetFolder(moduleFolder)
+            .withOption("basePackage", modulePackage)
+            .withOption("persistence", PersistenceType.mongodb)
+            .withOption("style", ProgrammingStyle.imperative)
+            .withOption("useLombok", true)
+            .withOption("includeEmitEventsImplementation", true)
+            .withOption("forceOverwrite", true)
+            .withOption("haltOnFailFormatting", false);
+
 
         new MainGenerator().generate(plugin);
         //        int exitCode = MavenCompiler.compile(new File(targetFolder));
@@ -86,9 +87,11 @@ public class TestOnlineFoodDeliveryProject {
     }
 
     @Order(2)
-    @Test
-    public void generateSourceFromAPIs() throws Exception {
-        int exitCode = MavenCompiler.compile(new File(targetFolder));
+    @ParameterizedTest
+    @ValueSource(strings = {"customers", "orders", "restaurants", "delivery"})
+    public void generateSourceFromAPIs(String module) throws Exception {
+        var pom = "modules/" + module + "/pom.xml";
+        int exitCode = MavenCompiler.compile(pom, new File(targetFolder));
         Assertions.assertEquals(0, exitCode);
     }
 
@@ -96,29 +99,13 @@ public class TestOnlineFoodDeliveryProject {
     @ParameterizedTest
     @ValueSource(strings = {"customers", "orders", "restaurants", "delivery"})
     public void generateModule(String module) throws Exception {
+        var pom = "modules/" + module + "/pom.xml";
         var modulePackage = basePackage + "." + module;
         var moduleFolder = targetFolder + "modules/" + module;
         var zdlFile = targetFolder + "models/" + module + ".zdl";
 
         Plugin plugin = null;
         int exitCode = 0;
-
-        plugin = new ZDLToOpenAPIPlugin()
-                .withSpecFile(zdlFile)
-                .withOption("idType", "String")
-                .withOption("targetFile", "/src/main/resources/apis/openapi.yml")
-                .withTargetFolder(moduleFolder);
-
-        plugin = new ZDLToAsyncAPIPlugin()
-                .withSpecFile(zdlFile)
-                .withOption("asyncapiVersion", "v3")
-                .withOption("idType", "String")
-                .withOption("targetFile", "/src/main/resources/apis/asyncapi.yml")
-                .withTargetFolder(moduleFolder);
-
-        new MainGenerator().generate(plugin);
-        exitCode = MavenCompiler.compile(new File(targetFolder));
-        Assertions.assertEquals(0, exitCode);
 
         plugin = new BackendApplicationDefaultPlugin()
                 .withSpecFile(zdlFile)
@@ -133,7 +120,7 @@ public class TestOnlineFoodDeliveryProject {
 
         new MainGenerator().generate(plugin);
 
-        exitCode = MavenCompiler.compile(new File(targetFolder));
+        exitCode = MavenCompiler.compile(pom, new File(targetFolder));
         Assertions.assertEquals(0, exitCode);
 
         plugin = new OpenAPIControllersPlugin()
@@ -149,7 +136,7 @@ public class TestOnlineFoodDeliveryProject {
                 .withTargetFolder(moduleFolder);
 
         new MainGenerator().generate(plugin);
-        exitCode = MavenCompiler.compile(new File(targetFolder));
+        exitCode = MavenCompiler.compile(pom, new File(targetFolder));
         Assertions.assertEquals(0, exitCode);
     }
 

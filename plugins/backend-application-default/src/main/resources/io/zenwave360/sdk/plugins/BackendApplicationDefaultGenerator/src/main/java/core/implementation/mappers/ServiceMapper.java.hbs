@@ -20,7 +20,7 @@ public interface {{service.name}}Mapper {
 
   {{~#each (findAggregateInputs entity) as |input|}}
     {{~#if (not (eq entity.className input))}}
-    {{entity.className}} asEntity({{mapperInputSignature input}});
+    // {{entity.className}} as{{entity.className}}({{mapperInputSignature input}});
     {{~/if}}
 
     {{#unless (skipEntityId entity)~}}@Mapping(target = "id", ignore = true){{/unless~}}

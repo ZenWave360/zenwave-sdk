@@ -1,11 +1,15 @@
 package io.zenwave360.sdk.plugins;
 
 import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
+import java.rmi.Naming;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.github.jknack.handlebars.Options;
 import io.zenwave360.sdk.options.ProgrammingStyle;
 import io.zenwave360.sdk.utils.NamingUtils;
 import io.zenwave360.sdk.zdl.ZDLFindUtils;
@@ -48,7 +52,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     public ProgrammingStyle style = ProgrammingStyle.imperative;
 
     @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. User '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
-    public List<String> paginatedDtoItemsJsonPath = List.of("$.properties.items", "$.properties.content.items");
+    public List<String> paginatedDtoItemsJsonPath = List.of("$.items", "$.properties.content.items");
 
     protected HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
@@ -56,9 +60,9 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
     List<Object[]> templates = List.of(
             new Object[] {"src/main/java", "web/mappers/BaseMapper.java", "mappers/BaseMapper.java", JAVA},
-            new Object[] {"src/main/java", "web/mappers/ServiceDTOsMapper.java", "mappers/{{service.name}}DTOsMapper.java", JAVA},
-            new Object[] {"src/main/java", "web/{{webFlavor}}/ServiceApiController.java", "{{service.name}}ApiController.java", JAVA},
-            new Object[] {"src/test/java", "web/{{webFlavor}}/ServiceApiControllerTest.java", "{{service.name}}ApiControllerTest.java", JAVA});
+            new Object[] {"src/main/java", "web/mappers/ServiceDTOsMapper.java", "mappers/{{serviceName}}DTOsMapper.java", JAVA},
+            new Object[] {"src/main/java", "web/{{webFlavor}}/ServiceApiController.java", "{{serviceName}}ApiController.java", JAVA},
+            new Object[] {"src/test/java", "web/{{webFlavor}}/ServiceApiControllerTest.java", "{{serviceName}}ApiControllerTest.java", JAVA});
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;
@@ -92,51 +96,75 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         Map<String, List<Map<String, Object>>> operationsByService = groupOperationsByService(operations);
 
         for (Map.Entry<String, List<Map<String, Object>>> operationByServiceEntry : operationsByService.entrySet()) {
-            Set<String> dtoNames = new HashSet();
-            dtoNames.addAll(JSONPath.get(operationByServiceEntry.getValue(), "$..x--request-dto"));
-            dtoNames.addAll(JSONPath.get(operationByServiceEntry.getValue(), "$..x--response.x--response-dto"));
-
             Collection<String> entitiesServices = operationByServiceEntry.getValue().stream()
                     .map(operation -> ZDLFindUtils.findServiceMethod((String) operation.get("operationId"), zdlModel)).filter(Objects::nonNull)
                     .map(method -> (String) method.get("serviceName"))
                     .collect(Collectors.toSet());
 
-            Map<String, Map<String, String>> requestDtosWithEntities = new HashMap<>();
-            Map<String, Map<String, String>> responseDtosWithEntities = new HashMap<>();
-            Map<String, Map<String, String>> responsePaginatedDtosWithEntities = new HashMap<>();
+
+            List<Map<String, Object>> serviceOperations = new ArrayList<>();
+            Map<String, Map<String, String>> mapperRequestDtoEntity = new HashMap<>();
+            Map<String, Map<String, Object>> mapperResponseDtoEntity = new HashMap<>();
+
             for (Map operation : operationByServiceEntry.getValue()) {
-                String requestDto = JSONPath.get(operation, "$.x--request-dto");
-                String responseDto = JSONPath.get(operation, "$.x--response.x--response-dto");
-                Map responseSchema = JSONPath.get(operation, "$.x--response.x--response-schema");
                 var method = ZDLFindUtils.findServiceMethod((String) operation.get("operationId"), zdlModel);
-                if (method == null) {
-                    continue;
-                }
+
+                String requestDto = JSONPath.get(operation, "$.x--request-dto");
+                String requestDtoName = requestDto != null ? openApiModelNamePrefix + requestDto + openApiModelNameSuffix : null;
                 String inputType = ZDLHttpUtils.getRequestBodyType(method, zdlModel);
+                String responseSchemaName = JSONPath.get(operation, "$.x--response.x--response-dto");
+                String responseEntityName = responseSchemaName != null ? openApiModelNamePrefix + responseSchemaName + openApiModelNameSuffix : null;
+                String responseDtoName = responseSchemaName != null ? openApiModelNamePrefix + responseSchemaName + openApiModelNameSuffix : null;
                 String outputType = JSONPath.get(method, "$.returnType");
-                Map inputEntity = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + inputType);
-                Map outputEntity = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + outputType);
-                if(inputEntity != null) {
-                    Maps.getOrCreateDefault(requestDtosWithEntities, requestDto, new HashMap<>()).put(inputType, (String) inputEntity.get("className"));
+                boolean isResponseArray = JSONPath.get(method, "$.returnTypeIsArray", false);
+                boolean isResponsePaginated = JSONPath.get(method, "$.options.paginated", false);
+                if (JSONPath.get(method, "$.returnTypeIsArray", false)) {
+                    var innerArrayDTO = innerArrayDTO(JSONPath.get(operation, "$.x--response.x--response-schema"));
+                    responseDtoName = innerArrayDTO != null ? openApiModelNamePrefix + innerArrayDTO + openApiModelNameSuffix : responseDtoName;
                 }
-                if (outputEntity != null) {
-                    if (JSONPath.get(method, "$.returnTypeIsArray", false)) {
-                        String paginatedDto = ObjectUtils.firstNonNull(findPaginatedDto(responseSchema), responseDto);
-                        Maps.getOrCreateDefault(responseDtosWithEntities, responseDto, new HashMap<>()).put(outputType, String.format("Page<%s>", outputEntity.get("className")));
-                        Maps.getOrCreateDefault(responsePaginatedDtosWithEntities, paginatedDto, new HashMap<>()).put(outputType, (String) outputEntity.get("className"));
-                    } else {
-                        Maps.getOrCreateDefault(responseDtosWithEntities, responseDto, new HashMap<>()).put(outputType, (String) outputEntity.get("className"));
-                    }
+
+                serviceOperations.add(Maps.of(
+                        "operationId", operation.get("operationId"),
+                        "operation", operation,
+                        "serviceMethod", method,
+                        "statusCode", statusCode(operation),
+                        "requestBodySchema", requestDto,
+                        "requestDtoName", requestDtoName,
+                        "methodParameters", methodParameters(operation),
+                        "reqBodyVariableName", reqBodyVariableName(method, zdlModel),
+                        "serviceMethodParameter", serviceMethodParameter(method, zdlModel),
+                        "serviceMethodCall", serviceMethodCall(method, operation, zdlModel),
+                        "mappedInputVariable", mappedInputVariable(method),
+                        "inputType", inputType,
+                        "responseSchemaName", responseSchemaName,
+                        "responseDtoName", responseDtoName,
+                        "responseEntityName", responseEntityName,
+                        "responseEntityExpression", responseEntityExpression(responseEntityName, responseDtoName, isResponseArray, isResponsePaginated),
+                        "methodReturnType", outputType,
+                        "methodReturnTypeInstance", NamingUtils.asInstanceName(outputType),
+                        "returnTypeIsOptional", JSONPath.get(method, "$.returnTypeIsOptional", false),
+                        "isResponseArray", isResponseArray,
+                        "isResponsePaginated", isResponsePaginated
+                ));
+
+                if(requestDto != null && inputType != null) {
+                    var requestKey = format("%s_%s", requestDtoName, inputType);
+                    Maps.getOrCreateDefault(mapperRequestDtoEntity, requestKey, new HashMap<>())
+                            .putAll(Map.of("requestDto", requestDtoName, "inputType", inputType));
+                }
+                if(responseSchemaName != null && outputType != null) {
+                    var responseKey = format("%s_%s_%s_%s", responseDtoName, outputType, isResponseArray, isResponsePaginated);
+                    Maps.getOrCreateDefault(mapperResponseDtoEntity, responseKey, new HashMap<>())
+                            .putAll(Map.of("responseDto", responseDtoName, "responseEntityName", responseEntityName, "outputType", outputType,
+                                    "isResponseArray", isResponseArray, "isResponsePaginated", isResponsePaginated));
                 }
             }
 
             Map serviceModel = Map.of(
-                    "service", Map.of(
-                            "name", operationByServiceEntry.getKey(),
-                            "operations", operationByServiceEntry.getValue()),
-                    "requestDtosWithEntities", requestDtosWithEntities,
-                    "responseDtosWithEntities", responseDtosWithEntities,
-                    "responsePaginatedDtosWithEntities", responsePaginatedDtosWithEntities,
+                    "serviceName", operationByServiceEntry.getKey(),
+                    "serviceOperations", serviceOperations,
+                    "mapperRequestDtoEntity", mapperRequestDtoEntity,
+                    "mapperResponseDtoEntity", mapperResponseDtoEntity,
                     "entitiesServices", entitiesServices);
 
             for (Object[] template : templates) {
@@ -147,7 +175,66 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         return templateOutputList;
     }
 
-    String findPaginatedDto(Map<String, Object> responseSchema) {
+    private static String responseEntityExpression(String responseEntityName, String responseDtoName, boolean isResponseArray, boolean isResponsePaginated) {
+        if(isResponsePaginated) {
+            return responseEntityName;
+        }
+        if(isResponseArray) {
+            return format("List<%s>", responseDtoName);
+        }
+        return defaultString(responseEntityName, "Void");
+    }
+
+    private Object methodParameters(Map operation) {
+        List<Map<String, Object>> params = (List) operation.getOrDefault("parameters", Collections.emptyList());
+        List methodParams = params.stream()
+                .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
+                .map(param -> {
+                    String javaType = getJavaTypeOrOptional(param);
+                    String name = JSONPath.get(param, "$.name");
+                    return javaType + " " + name;
+                }).collect(Collectors.toList());
+        if (operation.containsKey("x--request-dto")) {
+            var dto = (String) operation.get("x--request-dto");
+            methodParams.add(format("%s%s%s %s", openApiModelNamePrefix, dto, openApiModelNameSuffix, "reqBody"));
+        }
+        return StringUtils.join(methodParams, ", ");
+    }
+
+    private String reqBodyVariableName(Map<String, Object> serviceMethod, Map zdl) {
+        if (serviceMethod == null) { return "reqBody"; }
+        var parameterType = JSONPath.get(serviceMethod, "parameter");
+        var isInline = JSONPath.get(zdl, "$.inputs." + parameterType + ".options.inline", false);
+        if(isInline) {
+            var paramSignature = ZDLJavaSignatureUtils.inputSignature((String) parameterType, (Map) serviceMethod, zdl, inputDTOSuffix);
+            var  methodParametersCallSignature = paramSignature.get(paramSignature.size() - 1).split(" ")[1];
+            var params = methodParametersCallSignature.split(", ");
+            var reqBody = "";
+            for (int i = 0; i < params.length; i++) {
+                if(!"id".equals(params[i]) && !"pageable".equals(params[i])) {
+                    reqBody = params[i];
+                }
+            }
+            return methodParametersCallSignature.replaceFirst(reqBody, "reqBody");
+        }
+        return "reqBody";
+    }
+
+    private String serviceMethodParameter(Map<String, Object> method, Map<String, Object> zdlModel) {
+        if(method == null) { return "Entity"; }
+        return ZDLHttpUtils.getRequestBodyType(method, zdlModel);
+    }
+
+    private String mappedInputVariable(Map<String, Object> method) {
+        return "input";
+    }
+
+    String statusCode(Map operation) {
+        var status = (String) JSONPath.get(operation, "x--response.x--statusCode");
+        return "default".equals(status) ? "200" : status;
+    }
+
+    String innerArrayDTO(Map<String, Object> responseSchema) {
         for (String jsonPath : paginatedDtoItemsJsonPath) {
             String paginatedDto = JSONPath.get(responseSchema, jsonPath + ".x--schema-name");
             if (paginatedDto != null) {
@@ -157,12 +244,32 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         return null;
     }
 
-    String responseDTOClassName(Map<String, Object> operation) {
-        String responseDto = JSONPath.get(operation, "$.x--response.x--response-dto");
-        if (responseDto != null) {
-            return openApiModelNamePrefix + responseDto + openApiModelNameSuffix;
+    private String serviceMethodCall(Map serviceMethod, Map operation, Map zdl) {
+        if (serviceMethod == null) { // legacy
+            var operationId = JSONPath.get(operation, "operationId");
+            return format("%s(%s)", operationId, "input");
         }
-        return null;
+        var methodName = JSONPath.get(serviceMethod, "name");
+        var methodParametersCallSignature = ZDLJavaSignatureUtils.methodParametersCallSignature((Map) serviceMethod, zdl, inputDTOSuffix);
+        var paramId = ObjectUtils.firstNonNull(ZDLHttpUtils.getFirstPathParamsFromMethod((Map) serviceMethod), "id");
+
+        if(operation.get("x--request-schema") != null) {
+            // find the last parameter name, that is not the pagination: that is the reqBody variable name
+            var params = methodParametersCallSignature.split(", ");
+            var reqBody = "";
+            for (int i = 0; i < params.length; i++) {
+                if(!"id".equals(params[i]) && !"pageable".equals(params[i])) {
+                    reqBody = params[i];
+                }
+            }
+            methodParametersCallSignature = methodParametersCallSignature.replaceFirst(reqBody, "input");
+        }
+
+        methodParametersCallSignature = methodParametersCallSignature.replaceFirst("^id$", paramId);
+        methodParametersCallSignature = methodParametersCallSignature.replaceFirst("^id, ", paramId + ", ");
+        methodParametersCallSignature = methodParametersCallSignature.replaceAll("pageable", "pageOf(page, limit, sort)");
+
+        return format("%s(%s)", methodName, methodParametersCallSignature);
     }
 
     protected Map<String, List<Map<String, Object>>> groupOperationsByService(List<Map<String, Object>> operations) {
@@ -191,130 +298,6 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     }
 
     {
-        handlebarsEngine.getHandlebars().registerHelper("responseDTOClassName", (operation, options) -> {
-            return responseDTOClassName((Map) operation);
-        });
-        handlebarsEngine.getHandlebars().registerHelper("asMethodParameters", (context, options) -> {
-            if (context instanceof Map) {
-                Map operation = (Map) context;
-                List<Map<String, Object>> params = (List) operation.getOrDefault("parameters", Collections.emptyList());
-                List methodParams = params.stream()
-                        .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
-                        .map(param -> {
-                            String javaType = getJavaTypeOrOptional(param);
-                            String name = JSONPath.get(param, "$.name");
-                            return javaType + " " + name;
-                        }).collect(Collectors.toList());
-                if (operation.containsKey("x--request-dto")) {
-                    var dto = (String) operation.get("x--request-dto");
-                    methodParams.add(String.format("%s%s%s %s", openApiModelNamePrefix, dto, openApiModelNameSuffix, "reqBody"));
-                }
-                return StringUtils.join(methodParams, ", ");
-            }
-            return options.fn(context);
-        });
-        handlebarsEngine.getHandlebars().registerHelper("serviceMethodParameter", (method, options) -> {
-            if(method == null) { return "Entity"; }
-            return ZDLHttpUtils.getRequestBodyType((Map) method, (Map) options.get("zdl"));
-        });
-        handlebarsEngine.getHandlebars().registerHelper("mappedInputVariable", (serviceMethod, options) -> {
-            return "input";
-        });
-        handlebarsEngine.getHandlebars().registerHelper("methodReturnType", (method, options) -> {
-            if (method == null) { // legacy
-                var operation = (Map) options.get("operation");
-                var responseEntity = JSONPath.get(operation, "x--response.x--response-entity.className");
-                var responseEntityPaginated = JSONPath.get(operation, "x--response.x--response-entity-paginated.className");
-                return responseEntity;
-            }
-            return ZDLJavaSignatureUtils.methodReturnType((Map) method);
-        });
-        handlebarsEngine.getHandlebars().registerHelper("reqBodyVariableName", (serviceMethod, options) -> {
-            if (serviceMethod == null) { return "reqBody"; }
-            var zdl = (Map) options.get("zdl");
-            var parameterType = JSONPath.get(serviceMethod, "parameter");
-            var isInline = JSONPath.get(zdl, "$.inputs." + parameterType + ".options.inline", false);
-            if(isInline) {
-                var paramSignature = ZDLJavaSignatureUtils.inputSignature((String) parameterType, (Map) serviceMethod, zdl, inputDTOSuffix);
-                var  methodParametersCallSignature = paramSignature.get(paramSignature.size() - 1).split(" ")[1];
-                var params = methodParametersCallSignature.split(", ");
-                var reqBody = "";
-                for (int i = 0; i < params.length; i++) {
-                    if(!"id".equals(params[i]) && !"pageable".equals(params[i])) {
-                        reqBody = params[i];
-                    }
-                }
-                return methodParametersCallSignature.replaceFirst(reqBody, "reqBody");
-            }
-            return "reqBody";
-        });
-        handlebarsEngine.getHandlebars().registerHelper("serviceMethodCall", (serviceMethod, options) -> {
-            if (serviceMethod == null) { // legacy
-                var operation = (Map) options.get("operation");
-                var operationId = JSONPath.get(operation, "operationId");
-                return String.format("%s(%s)", operationId, "input");
-            }
-            var zdl = (Map) options.get("zdl");
-            var operation = (Map) options.get("operation");
-            var methodName = JSONPath.get(serviceMethod, "name");
-            var methodParametersCallSignature = ZDLJavaSignatureUtils.methodParametersCallSignature((Map) serviceMethod, zdl, inputDTOSuffix);
-            var paramId = ObjectUtils.firstNonNull(ZDLHttpUtils.getFirstPathParamsFromMethod((Map) serviceMethod), "id");
-
-            if(operation.get("x--request-schema") != null) {
-                // find the last parameter name, that is not the pagination: that is the reqBody variable name
-                var params = methodParametersCallSignature.split(", ");
-                var reqBody = "";
-                for (int i = 0; i < params.length; i++) {
-                    if(!"id".equals(params[i]) && !"pageable".equals(params[i])) {
-                        reqBody = params[i];
-                    }
-                }
-                methodParametersCallSignature = methodParametersCallSignature.replaceFirst(reqBody, "input");
-            }
-
-            methodParametersCallSignature = methodParametersCallSignature.replaceFirst("^id$", paramId);
-            methodParametersCallSignature = methodParametersCallSignature.replaceFirst("^id, ", paramId + ", ");
-            methodParametersCallSignature = methodParametersCallSignature.replaceAll("pageable", "pageOf(page, limit, sort)");
-
-
-
-            return String.format("%s(%s)", methodName, methodParametersCallSignature);
-        });
-        handlebarsEngine.getHandlebars().registerHelper("findServiceMethod", (operation, options) -> {
-            var zdl = options.get("zdl");
-            return ZDLFindUtils.findServiceMethod(JSONPath.get(operation, "operationId"), (Map) zdl);
-        });
-        handlebarsEngine.getHandlebars().registerHelper("hasPaginatedResponse", (operation, options) -> {
-            return JSONPath.get(operation, "x--response.x--response-entity-paginated") != null;
-        });
-        handlebarsEngine.getHandlebars().registerHelper("hasResponseEntity", (operation, options) -> {
-            return JSONPath.get(operation, "x--response.x--response-dto") != null;
-        });
-        handlebarsEngine.getHandlebars().registerHelper("requestEntity", (operation, options) -> {
-            return JSONPath.get(operation, "x--request-entity");
-        });
-        handlebarsEngine.getHandlebars().registerHelper("responseEntity", (operation, options) -> {
-            return JSONPath.get(operation, "x--response.x--response-entity");
-        });
-        handlebarsEngine.getHandlebars().registerHelper("responseEntityPaginated", (operation, options) -> {
-            return JSONPath.get(operation, "x--response.x--response-entity-paginated");
-        });
-
-        handlebarsEngine.getHandlebars().registerHelper("orVoid", (context, options) -> {
-            return StringUtils.isNotBlank((String) context) ? context : "Void";
-        });
-
-        handlebarsEngine.getHandlebars().registerHelper("asDtoName", (context, options) -> {
-            return StringUtils.isNotBlank((String) context) ? openApiModelNamePrefix + context + openApiModelNameSuffix : null;
-        });
-
-        handlebarsEngine.getHandlebars().registerHelper("entityService", (entityName, options) -> {
-            return ZDLFindUtils.findServiceName((String) entityName, options.get("zdl"));
-        });
-
-        handlebarsEngine.getHandlebars().registerHelper("statusCode", (context, options) -> {
-            return "default".equals(context) ? "200" : context;
-        });
         handlebarsEngine.getHandlebars().registerHelper("asMethodParametersInitializer", (context, options) -> {
             if (context instanceof Map) {
                 Map operation = (Map) context;
@@ -327,7 +310,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                             return javaType + " " + name + " = null;";
                         }).collect(Collectors.toList());
                 if (operation.containsKey("x--request-dto")) {
-                    methodParams.add(String.format("%s%s%s %s = null;", openApiModelNamePrefix, operation.get("x--request-dto"), openApiModelNameSuffix, "reqBody"));
+                    methodParams.add(format("%s%s%s %s = null;", openApiModelNamePrefix, operation.get("x--request-dto"), openApiModelNameSuffix, "reqBody"));
                 }
                 return StringUtils.join(methodParams, "\n");
             }
@@ -353,6 +336,8 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         });
 
     }
+
+
 
     protected int compareParamsByRequire(Map<String, Object> param1, Map<String, Object> param2) {
         boolean required1 = JSONPath.get(param1, "required", false);

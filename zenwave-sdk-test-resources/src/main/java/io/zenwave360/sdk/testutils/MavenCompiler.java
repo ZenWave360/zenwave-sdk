@@ -16,6 +16,7 @@ public class MavenCompiler {
 
     public static int compile(String pom, File baseDir, String... properties) throws MavenInvocationException, IOException {
         InvocationRequest request = new DefaultInvocationRequest();
+        request.setPomFileName(pom.endsWith("/pom.xml") ? pom : pom + "/pom.xml");
         if(properties != null) {
             Properties props = new Properties();
             for (String property : properties) {

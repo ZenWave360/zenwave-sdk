@@ -13,9 +13,9 @@
         var {{entity.instanceName}} = {{serviceInstance}}.update{{entity.className}}(id, input);
         assertTrue({{entity.instanceName}}.isPresent());
         assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}.get()));
-    {{~else if (or (isCrudMethod 'list' method=method entity=entity) (isCrudMethod 'search' method=method entity=entity ))}}
-        var results = {{serviceInstance}}.list{{entity.classNamePlural}}(PageRequest.of(0, 10));
-        assertNotNull(results);
+    {{~else if (isCrudMethod 'list' method=method entity=entity) }}
+        // var results = {{serviceInstance}}.list{{entity.classNamePlural}}(PageRequest.of(0, 10));
+        // assertNotNull(results);
     {{~else if (isCrudMethod 'get' method=method entity=entity )}}
         var id = "1"; // TODO fill id
         var {{entity.instanceName}} = {{serviceInstance}}.get{{entity.className}}(id);
@@ -26,6 +26,6 @@
         {{serviceInstance}}.delete{{entity.className}}(id);
         assertFalse({{entity.instanceName}}Repository.containsKey(id));
     {{~else~}}
-    // not legacy
+    // TODO: implement this test
     {{~/if}}
 {{~/each}}

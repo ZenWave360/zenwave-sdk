@@ -40,7 +40,7 @@ public class {{service.name}}Impl implements {{service.name}} {
     {{~/unless}}
 {{/each}}
 
-{{#if includeEmitEventsImplementation}}
+{{#if (includeEmitEventsImplementation service)}}
     private final EventsMapper eventsMapper = EventsMapper.INSTANCE;
     private final {{eventsProducerInterface service.name}} eventsProducer;
 {{/if}}
@@ -50,11 +50,11 @@ public class {{service.name}}Impl implements {{service.name}} {
      * Constructor.
      */
     public {{service.name}}Impl({{#joinWithTemplate service.entities delimiter=", "}}{{#unless (skipEntityRepository this)}}{{className}}Repository {{instanceName}}Repository{{/unless}}{{/joinWithTemplate}}
-                                {{#if includeEmitEventsImplementation}}, {{eventsProducerInterface service.name}} eventsProducer{{/if}}) {
+                                {{#if (includeEmitEventsImplementation service)}}, {{eventsProducerInterface service.name}} eventsProducer{{/if}}) {
         {{~#joinWithTemplate service.entities ~}}
             {{#unless (skipEntityRepository this)}}this.{{instanceName}}Repository = {{instanceName}}Repository;{{/unless}}
         {{~/joinWithTemplate~}}
-        {{~#if includeEmitEventsImplementation}}
+        {{~#if (includeEmitEventsImplementation service)}}
         this.eventsProducer = eventsProducer;
         {{~/if}}
     }

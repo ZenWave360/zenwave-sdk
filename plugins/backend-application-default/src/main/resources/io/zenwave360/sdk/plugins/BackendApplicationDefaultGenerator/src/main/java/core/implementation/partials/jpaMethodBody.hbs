@@ -14,9 +14,15 @@
         {{~> (partial 'withEvents')}}
         return {{wrapWithMapper entity}};
     {{~else if (isCrudMethod 'list' method=method entity=entity )}}
+        {{~#if method.options.paginated}}
         log.debug("Request list of {{entity.classNamePlural}}: {}", pageable);
         var page = {{entity.instanceName}}Repository.findAll(pageable);
         return {{wrapWithMapper entity}};
+        {{~else}}
+        log.debug("Request list of {{entity.classNamePlural}}");
+        var {{entity.instanceNamePlural}} = {{entity.instanceName}}Repository.findAll();
+        return {{wrapWithMapper entity}};
+        {{~/if}}
     {{~else if (isCrudMethod 'search' method=method entity=entity )}}
         log.debug("Request to search {{entity.classNamePlural}}: {} - {}", input, pageable);
         // TODO implement this search by criteria

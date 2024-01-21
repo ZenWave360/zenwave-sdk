@@ -20,7 +20,7 @@ public class SpringCloudStreams3AdaptersPlugin extends Plugin {
     public SpringCloudStreams3AdaptersPlugin() {
         super();
 //        withChain(DefaultYamlParser.class, AsyncApiProcessor.class, SpringCloudStreams3AdaptersGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
-        withChain(DefaultYamlParser.class, AsyncApiProcessor.class, ZDLParser.class, ZDLProcessor.class, EnrichAsyncAPIWithJDLProcessor.class, SpringCloudStreams3AdaptersGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
+        withChain(DefaultYamlParser.class, AsyncApiProcessor.class, ZDLParser.class, ZDLProcessor.class, SpringCloudStreams3AdaptersGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
     }
 
     @Override
