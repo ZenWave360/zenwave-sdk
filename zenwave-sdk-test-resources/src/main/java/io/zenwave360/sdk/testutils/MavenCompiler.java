@@ -11,7 +11,7 @@ import java.util.Properties;
 public class MavenCompiler {
 
     public static int compile(File baseDir, String... properties) throws MavenInvocationException, IOException {
-        return compile("pom.xml", baseDir, properties);
+        return compile("/pom.xml", baseDir, properties);
     }
 
     public static int compile(String pom, File baseDir, String... properties) throws MavenInvocationException, IOException {
