@@ -15,16 +15,8 @@ public class BackendMultiModuleApplicationGenerator extends BackendDefaultApplic
                 "{{asPackageFolder entitiesPackage}}/{{entity.name}}.java", JAVA, skipEntity, false);
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/outbound/{{persistence}}/{{style}}/EntityRepository.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder outboundPackage}}/{{persistence}}/{{entity.className}}Repository.java", JAVA, skipEntityRepository, true);
-        ts.addTemplate(ts.entityTemplates, "src/main/java","core/inbound/dtos/EntityCriteria.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder inboundDtosPackage}}/{{criteriaClassName entity }}.java", JAVA, skipSearchCriteria, false);
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/inbound/dtos/EntityInput.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}{{inputDTOSuffix entity}}.java", JAVA, skipEntityInput, false);
-        ts.addTemplate(ts.entityTemplates, "src/main/java","core/implementation/mappers/EntityMapper.java", "{{mavenModulesPrefix}}-impl",
-                "{{asPackageFolder coreImplementationPackage}}/mappers/{{entity.className}}Mapper.java", JAVA, skipEntity, true);
-        ts.addTemplate(ts.entityTemplates, "src/main/java","core/domain/search/EntityDocument.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder entitiesPackage}}/search/{{entity.className}}{{searchDTOSuffix}}.java", JAVA, skipElasticSearch, false);
-        ts.addTemplate(ts.entityTemplates, "src/main/java","core/outbound/search/EntitySearchRepository.java", "{{mavenModulesPrefix}}-infra",
-                "{{asPackageFolder outboundPackage}}/search/{{entity.className}}SearchRepository.java", JAVA, skipElasticSearch, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/BaseRepositoryIntegrationTest.java", "{{mavenModulesPrefix}}-infra",
                 "{{asPackageFolder infrastructurePackage}}/{{persistence}}/BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/EntityRepositoryIntegrationTest.java", "{{mavenModulesPrefix}}-infra",
@@ -42,7 +34,7 @@ public class BackendMultiModuleApplicationGenerator extends BackendDefaultApplic
                 "{{asPackageFolder inboundDtosPackage}}/{{enum.name}}.java", JAVA, null, false);
 
         ts.addTemplate(ts.inputTemplates, "src/main/java", "core/inbound/dtos/InputOrOutput.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}.java", JAVA, null, false);
+                "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}.java", JAVA, skipInput, false);
         ts.addTemplate(ts.outputTemplates, "src/main/java", "core/inbound/dtos/InputOrOutput.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}.java", JAVA, null, false);
 
@@ -50,13 +42,17 @@ public class BackendMultiModuleApplicationGenerator extends BackendDefaultApplic
                 "{{asPackageFolder inboundPackage}}/{{service.name}}.java", JAVA, null, false);
         ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/implementation/{{persistence}}/{{style}}/ServiceImpl.java", "{{mavenModulesPrefix}}-impl",
                 "{{asPackageFolder coreImplementationPackage}}/{{service.name}}Impl.java", JAVA, null, true);
+        ts.addTemplate(ts.serviceTemplates, "src/main/java","core/implementation/mappers/ServiceMapper.java", "{{mavenModulesPrefix}}-impl",
+                "{{asPackageFolder coreImplementationPackage}}/mappers/{{service.name}}Mapper.java", JAVA, null, true);
         ts.addTemplate(ts.serviceTemplates, "src/test/java", "core/implementation/{{persistence}}/{{style}}/ServiceTest.java", "{{mavenModulesPrefix}}-impl",
                 "{{asPackageFolder coreImplementationPackage}}/{{service.name}}Test.java", JAVA, null, true);
 
-        ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/InMemoryTestsConfig.java", "{{mavenModulesPrefix}}-impl",
-                "{{asPackageFolder configPackage}}/InMemoryTestsConfig.java", JAVA, null, false);
-        ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/InMemoryTestsManualContext.java", "{{mavenModulesPrefix}}-impl",
-                "{{asPackageFolder configPackage}}/InMemoryTestsManualContext.java", JAVA, null, false);
+        ts.addTemplate(ts.allServicesTemplates, "src/main/java", "core/implementation/mappers/EventsMapper.java",
+                "{{asPackageFolder coreImplementationPackage}}/mappers/EventsMapper.java", JAVA, skipEvents, true);
+        ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/RepositoriesInMemoryConfig.java", "{{mavenModulesPrefix}}-impl",
+                "{{asPackageFolder configPackage}}/RepositoriesInMemoryConfig.java", JAVA, null, true);
+        ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/ServicesInMemoryConfig.java", "{{mavenModulesPrefix}}-impl",
+                "{{asPackageFolder configPackage}}/ServicesInMemoryConfig.java", JAVA, null, true);
 
         ts.addTemplate(ts.singleTemplates, "src/main/java", "core/inbound/dtos/package-info.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder inboundDtosPackage}}/package-info.java", JAVA, null, true);

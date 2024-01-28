@@ -55,6 +55,12 @@ input CustomerInput {
 input AddressInputCopy {
 }
 
+@inline
+input CustomerAddressId {
+  customerId String
+  address Address
+}
+
 /**
  Service javadoc comment
  */
@@ -80,6 +86,9 @@ service CustomerService for (Customer) {
   @get({path: "/customers", params: {search: "string"}})
   @paginated
   listCustomers() Customer[]
+
+  @post("/customers/{customerId}/address")
+  addCustomerAddress(CustomerAddressId) Customer?
 }
 
 @copy(Customer)

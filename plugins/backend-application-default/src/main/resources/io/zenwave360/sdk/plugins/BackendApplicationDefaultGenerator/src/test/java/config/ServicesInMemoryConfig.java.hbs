@@ -1,0 +1,41 @@
+package {{basePackage}}.config;
+
+{{#if services}}
+import {{basePackage}}.core.implementation.*;
+{{/if}}
+{{#if includeEmitEventsImplementation}}
+import {{outboundEventsPackage}}.*;
+{{/if}}
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+
+/**
+ * Services InMemory Config. It can be used standalone or with @SpringBootTest.
+ */
+@Configuration
+@Profile("in-memory")
+public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
+
+{{#if (includeEmitEventsImplementation service)}}
+    protected final EventsProducerInMemoryContext eventsProducerInMemoryContext = new EventsProducerInMemoryContext();
+{{/if}}
+
+{{~#each services as |service|}}
+    protected final {{service.name}}Impl {{asInstanceName service.name}} = new {{service.name}}Impl(
+        {{~#joinWithTemplate service.entities delimiter=", " as |entity| ~}}
+{{#unless (skipEntityRepository entity)}}{{entity.instanceName}}Repository(){{/unless}}
+        {{~/joinWithTemplate~}}
+        {{#if (includeEmitEventsImplementation service)}}
+        , eventsProducerInMemoryContext.{{eventsProducerInstance service.name}}()
+        {{/if}}
+        );
+{{~/each}}
+
+{{~#each services as |service|}}
+    @Bean
+    public {{service.name}}Impl {{asInstanceName service.name}}() {
+        return {{asInstanceName service.name}};
+    }
+{{~/each}}
+}

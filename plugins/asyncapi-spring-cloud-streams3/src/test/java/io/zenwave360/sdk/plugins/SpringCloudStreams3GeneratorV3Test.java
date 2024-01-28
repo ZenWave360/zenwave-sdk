@@ -65,7 +65,7 @@ public class SpringCloudStreams3GeneratorV3Test {
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/ICustomerOrderEventsProducer.java"));
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/CustomerOrderEventsProducer.java"));
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/test/java/io/example/integration/test/api/provider_for_events/CustomerOrderEventsProducerCaptor.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/test/java/io/example/integration/test/api/provider_for_events/ProducerInMemoryContext.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/test/java/io/example/integration/test/api/provider_for_events/EventsProducerInMemoryContext.java"));
     }
 
     @Test

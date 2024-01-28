@@ -1,23 +1,16 @@
 package io.zenwave360.sdk.generators;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+import io.zenwave360.sdk.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import io.zenwave360.sdk.parsers.DefaultYamlParser;
 import io.zenwave360.sdk.parsers.Model;
-import io.zenwave360.sdk.processors.OpenApiProcessor;
 import io.zenwave360.sdk.templating.TemplateOutput;
 
 public class AbstractOpenAPIGeneratorTest {
-
-    private Model loadAsyncapiModelFromResource(String resource) throws Exception {
-        Map<String, Object> model = new DefaultYamlParser().withSpecFile(URI.create(resource)).parse();
-        return (Model) new OpenApiProcessor().process(model).get("api");
-    }
 
     private AbstractOpenAPIGenerator newAbstractAsyncapiGenerator() {
         return new AbstractOpenAPIGenerator() {
@@ -30,7 +23,7 @@ public class AbstractOpenAPIGeneratorTest {
 
     @Test
     public void test_filter_operations_by_tag_and_verb() throws Exception {
-        Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/openapi/openapi-petstore.yml");
+        Model model = TestUtils.loadYmlModelFromResource("classpath:io/zenwave360/sdk/resources/openapi/openapi-petstore.yml");
         AbstractOpenAPIGenerator openapiGenerator = newAbstractAsyncapiGenerator();
         Map<String, List<Map<String, Object>>> allOperations = openapiGenerator.getOperationsGroupedByTag(model);
         Map<String, List<Map<String, Object>>> getOperations = openapiGenerator.getOperationsGroupedByTag(model, AbstractOpenAPIGenerator.OperationType.GET);

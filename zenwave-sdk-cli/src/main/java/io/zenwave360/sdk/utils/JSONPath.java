@@ -14,6 +14,9 @@ public class JSONPath {
     private static final Configuration config = Configuration.defaultConfiguration();
 
     public static <T> T get(Object object, String jsonPath) {
+        if(object == null) {
+            return null;
+        }
         try {
             return (T) JsonPath.using(config).parse(object).read(jsonPath);
         } catch (PathNotFoundException e) {
@@ -34,6 +37,9 @@ public class JSONPath {
     }
 
     public static <T> T get(Object object, String jsonPath, T defaultIfNull) {
+        if(object == null) {
+            return null;
+        }
         try {
             return ObjectUtils.firstNonNull(JsonPath.using(config).parse(object).read(jsonPath), defaultIfNull);
         } catch (PathNotFoundException e) {

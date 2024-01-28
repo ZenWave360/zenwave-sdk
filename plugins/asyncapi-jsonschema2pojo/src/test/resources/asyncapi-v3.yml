@@ -63,65 +63,53 @@ operations:
 components:
   messages:
     CustomerInputMessage:
-      messageId: CustomerInputMessage
       name: CustomerInputMessage
-      title: Customer input javadoc comment
-      summary: Customer input javadoc comment
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/CustomerInput"
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/CustomerInput"
     CustomerEventMessage:
-      messageId: CustomerEventMessage
       name: CustomerEventMessage
-      title: 
-      summary: 
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/CustomerEvent"
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/CustomerEvent"
     CustomerCreatedMessage:
-      messageId: CustomerCreatedMessage
       name: CustomerCreatedMessage
-      title: 
-      summary: 
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/CustomerCreated"
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/CustomerCreated"
     CustomerCreatedFailedMessage:
-      messageId: CustomerCreatedFailedMessage
       name: CustomerCreatedFailedMessage
-      title: 
-      summary: 
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/CustomerCreatedFailed"
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/CustomerCreatedFailed"
     CustomerUpdatedMessage:
-      messageId: CustomerUpdatedMessage
       name: CustomerUpdatedMessage
-      title: 
-      summary: 
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/CustomerUpdated"
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/CustomerUpdated"
     CustomerDeletedMessage:
-      messageId: CustomerDeletedMessage
       name: CustomerDeletedMessage
-      title: 
-      summary: 
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/CustomerDeleted"
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/CustomerDeleted"
 
   messageTraits:
     CommonHeaders:

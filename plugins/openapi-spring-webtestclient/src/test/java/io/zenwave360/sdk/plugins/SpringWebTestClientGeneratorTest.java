@@ -84,7 +84,7 @@ public class SpringWebTestClientGeneratorTest {
         Assertions.assertEquals(2, templateOutputList.size());
         Assertions.assertEquals("io/example/controller/tests/" + camelCase(operationIds.replaceAll(",", "_")) +".java", templateOutputList.get(0).getTargetFile());
 
-        int exitCode = MavenCompiler.compile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
+        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
         Assertions.assertEquals(0, exitCode);
     }
 
@@ -114,7 +114,7 @@ public class SpringWebTestClientGeneratorTest {
             Assertions.assertTrue(file.exists(), "File " + file.getAbsolutePath() + " does not exist");
         });
 
-        int exitCode = MavenCompiler.compile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
+        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
         Assertions.assertEquals(0, exitCode);
     }
 
@@ -142,7 +142,7 @@ public class SpringWebTestClientGeneratorTest {
             Assertions.assertTrue(file.exists(), "File " + file.getAbsolutePath() + " does not exist");
         });
 
-        int exitCode = MavenCompiler.compile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
+        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
         Assertions.assertEquals(0, exitCode);
     }
 
@@ -170,7 +170,7 @@ public class SpringWebTestClientGeneratorTest {
             Assertions.assertTrue(file.exists(), "File " + file.getAbsolutePath() + " does not exist");
         });
 
-        int exitCode = MavenCompiler.compile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
+        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
         Assertions.assertEquals(0, exitCode);
     }
     public static class CapturingTemplateWriter implements TemplateWriter {

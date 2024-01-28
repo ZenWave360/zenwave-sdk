@@ -1,0 +1,25 @@
+package {{coreImplementationPackage}}.mappers;
+
+import {{entitiesPackage}}.*;
+import {{inboundDtosPackage}}.*;
+
+import java.util.List;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.factory.Mappers;
+
+
+@Mapper(uses = { BaseMapper.class })
+public interface EventsMapper {
+
+    EventsMapper INSTANCE = Mappers.getMapper(EventsMapper.class);
+
+{{~#each (listOfPairEventEntity zdl) as |pair|}}
+    {{~#if pair.entity}}
+    {{outboundEventsModelPackage}}.{{pair.event.name}} as{{{pair.event.name}}}({{pair.entity.className}} {{asInstanceName pair.entity.name}});
+    {{~else}}
+    {{outboundEventsModelPackage}}.{{pair.event.name}} as{{{pair.event.name}}}({{{methodParametersSignature method}}});
+    {{~/if}}
+{{~/each}}
+}

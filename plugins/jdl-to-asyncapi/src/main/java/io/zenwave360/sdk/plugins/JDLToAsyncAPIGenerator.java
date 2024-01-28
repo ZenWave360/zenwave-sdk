@@ -15,8 +15,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractZDLGenerator;
-import io.zenwave360.sdk.generators.JDLEntitiesToAvroConverter;
-import io.zenwave360.sdk.generators.JDLEntitiesToSchemasConverter;
+import io.zenwave360.sdk.generators.EntitiesToAvroConverter;
+import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
@@ -115,8 +115,8 @@ public class JDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         Map<String, Object> schemas = new LinkedHashMap<>();
         JSONPath.set(oasSchemas, "components.schemas", schemas);
 
-        JDLEntitiesToAvroConverter toAvroConverter = new JDLEntitiesToAvroConverter().withIdType(idType).withNamespace(avroPackage);
-        JDLEntitiesToSchemasConverter toSchemasConverter = new JDLEntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
+        EntitiesToAvroConverter toAvroConverter = new EntitiesToAvroConverter().withIdType(idType).withNamespace(avroPackage);
+        EntitiesToSchemasConverter toSchemasConverter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withZdlBusinessEntityProperty(jdlBusinessEntityProperty);
         toSchemasConverter.includeVersion = false;
 
         List<Map<String, Object>> entities = (List) JSONPath.get(zdlModel, "$.entities[*]");
@@ -159,7 +159,7 @@ public class JDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         }
     }
 
-    protected List<TemplateOutput> createAvroRequestAndEventTypeEnums(JDLEntitiesToAvroConverter converter) {
+    protected List<TemplateOutput> createAvroRequestAndEventTypeEnums(EntitiesToAvroConverter converter) {
         List<TemplateOutput> outputList = new ArrayList<>();
         String targetFolder = getTargetAvroFolder();
         if(includeCommands) {
@@ -180,7 +180,7 @@ public class JDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         return targetFolder == null ? "avro" : targetFolder + "/avro";
     }
 
-    protected List<TemplateOutput> convertToAvro(JDLEntitiesToAvroConverter converter, Map<String, Object> entityOrEnum, Map<String, Object> zdlModel) {
+    protected List<TemplateOutput> convertToAvro(EntitiesToAvroConverter converter, Map<String, Object> entityOrEnum, Map<String, Object> zdlModel) {
         String name = (String) entityOrEnum.get("name");
         Map avro = converter.convertToAvro(entityOrEnum, zdlModel);
         String avroJson = writeAsString(jsonMapper, avro);

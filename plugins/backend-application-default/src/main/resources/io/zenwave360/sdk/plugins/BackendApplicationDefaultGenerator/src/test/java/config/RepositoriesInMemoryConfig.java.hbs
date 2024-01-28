@@ -1,0 +1,23 @@
+package {{basePackage}}.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+
+import {{basePackage}}.core.outbound.{{persistence}}.*;
+import {{basePackage}}.infrastructure.{{persistence}}.inmemory.*;
+
+
+//@Configuration
+public class RepositoriesInMemoryConfig {
+
+{{~#each services as |service|}}
+  {{~#each service.entities as |entity|}}
+    protected final {{entity.className}}Repository {{entity.instanceName}}Repository = new {{entity.className}}RepositoryInMemory();
+    @Bean @Primary
+    public <T extends {{entity.className}}Repository> T {{entity.instanceName}}Repository() {
+        return (T) {{entity.instanceName}}Repository;
+    }
+  {{~/each}}
+{{~/each}}
+
+}

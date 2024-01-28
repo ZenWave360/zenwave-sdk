@@ -9,7 +9,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractZDLGenerator;
-import io.zenwave360.sdk.generators.JDLEntitiesToSchemasConverter;
+import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
+import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.zdl.ZDLFindUtils;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
@@ -21,7 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import static java.util.Collections.emptyList;
 
-public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
+public class ZDLToOpenAPIGenerator implements Generator {
 
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
@@ -40,17 +41,14 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
 
     @DocumentedOption(description = "Target file")
     public String targetFile = "openapi.yml";
-    @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
-    public String jdlBusinessEntityProperty = "x-business-entity";
+    @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas (default: x-business-entity)")
+    public String zdlBusinessEntityProperty = "x-business-entity";
 
-    @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas for paginated lists")
+    @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas for paginated lists")
     public String zdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
 
     @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. Examples: '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
     public List<String> paginatedDtoItemsJsonPath = List.of("$.items", "$.properties.content.items");
-
-    @DocumentedOption(description = "Suffix for search criteria DTOs (default: Criteria)")
-    public String criteriaDTOSuffix = "Criteria";
 
     @DocumentedOption(description = "JsonSchema type for id fields and parameters.")
     public String idType = "string";
@@ -72,9 +70,9 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
-    private final TemplateInput zdlToOpenAPITemplate = new TemplateInput("io/zenwave360/sdk/plugins/OpenAPIToJDLGenerator/ZDLToOpenAPI.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
+    private final TemplateInput zdlToOpenAPITemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZDLToOpenAPIGenerator/ZDLToOpenAPI.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
 
-    protected Map<String, Object> getJDLModel(Map<String, Object> contextModel) {
+    protected Map<String, Object> getZDLModel(Map<String, Object> contextModel) {
         return (Map) contextModel.get(sourceProperty);
     }
 
@@ -94,10 +92,10 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
         });
         handlebarsEngine.getHandlebars().registerHelper("serviceAggregates", (context, options) -> {
             Map service = options.hash("service", new HashMap<>());
-            Map jdl = options.hash("zdl", new HashMap<>());
+            Map zdl = options.hash("zdl", new HashMap<>());
             List<String> aggregateNames = JSONPath.get(service, "$.aggregates", List.of());
             String aggregatesRegex = aggregateNames.isEmpty() ? "" : " =~ /(" + StringUtils.join(aggregateNames, "|") + ")/";
-            return JSONPath.<List<Map<String, Object>>>get(jdl, "$.channels[*][*][?(@.operationId" + aggregatesRegex + ")]");
+            return JSONPath.<List<Map<String, Object>>>get(zdl, "$.channels[*][*][?(@.operationId" + aggregatesRegex + ")]");
         });
         handlebarsEngine.getHandlebars().registerHelper("httpResponseStatus", (context, options) -> {
             Map operation = (Map) context;
@@ -123,7 +121,7 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
 
     @Override
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {
-        Map<String, Object> zdlModel = getJDLModel(contextModel);
+        Map<String, Object> zdlModel = getZDLModel(contextModel);
         List<String> serviceNames = JSONPath.get(zdlModel, "$.options.options.service[*].value");
         ((Map) zdlModel).put("serviceNames", serviceNames);
 
@@ -140,7 +138,7 @@ public class ZDLToOpenAPIGenerator extends AbstractZDLGenerator {
         Map<String, Object> schemas = new LinkedHashMap<>();
         JSONPath.set(oasSchemas, "components.schemas", schemas);
 
-        JDLEntitiesToSchemasConverter converter = new JDLEntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
+        EntitiesToSchemasConverter converter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withZdlBusinessEntityProperty(zdlBusinessEntityProperty);
 
         List<Map<String, Object>> entities = (List) JSONPath.get(zdlModel, "$.allEntitiesAndEnums[*]");
         for (Map<String, Object> entity : entities) {

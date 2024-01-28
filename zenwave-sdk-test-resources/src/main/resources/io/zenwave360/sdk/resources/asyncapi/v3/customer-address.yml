@@ -75,57 +75,62 @@ components:
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/Customer"
+        schema:
+          $ref: "#/components/schemas/Customer"
     CustomerMessage:
       messageId: CustomerMessage
       name: CustomerMessage
       title: Customer javadoc comment
       summary: Customer javadoc comment
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/Customer"
+        schema:
+          schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+          $ref: "#/components/schemas/Customer"
     CustomerEventMessage:
       messageId: CustomerEventMessage
       name: CustomerEventMessage
       title:
       summary:
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/CustomerEvent"
+        schema:
+          schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+          $ref: "#/components/schemas/CustomerEvent"
     CustomerCreatedMessage:
       messageId: CustomerCreatedMessage
       name: CustomerCreatedMessage
       title:
       summary:
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
         $ref: "#/components/schemas/CustomerCreated"
     CustomerUpdatedMessage:
       messageId: CustomerUpdatedMessage
       name: CustomerUpdatedMessage
       title:
       summary:
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/CustomerUpdated"
+        schema:
+          schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+          $ref: "#/components/schemas/CustomerUpdated"
     CustomerDeletedMessage:
       messageId: CustomerDeletedMessage
       name: CustomerDeletedMessage
       title:
       summary:
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/CustomerDeleted"
+        schema:
+          schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+          $ref: "#/components/schemas/CustomerDeleted"
 
   messageTraits:
     CommonHeaders:

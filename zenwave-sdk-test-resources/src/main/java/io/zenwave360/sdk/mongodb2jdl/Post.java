@@ -36,6 +36,9 @@ public class Post implements Serializable {
     @Field("date")
     private Instant date;
 
+    @Field("postType")
+    private PostType postType;
+
     @Field("blog")
     @DBRef
     private Blog blog;

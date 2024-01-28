@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.zenwave360.example.modulith</groupId>
+        <artifactId>zenwave-modulith-playground</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+    <artifactId>restaurants-module</artifactId>
+
+    <properties>
+        <basePackage>io.zenwave360.example.restaurants</basePackage><!-- used by openapi and asyncapi plugins in parent -->
+        <asyncapiOrdersClientPackage>${basePackage}.client.orders</asyncapiOrdersClientPackage>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.github.zenwave360.zenwave-sdk</groupId>
+                <artifactId>zenwave-sdk-maven-plugin</artifactId>
+
+                <executions>
+                    <!-- Generates AsyncAPI PROVIDER (own API) -->
+                    <!-- (Config is inherited from parent) -->
+                    <execution>
+                        <id>generate-asyncapi-provider-dtos</id>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/apis/asyncapi.yml</inputSpec>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-asyncapi-provider-implementation</id>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/apis/asyncapi.yml</inputSpec>
+                        </configuration>
+                    </execution>
+
+                    <!-- Generate AsyncAPI CLIENT for Orders API -->
+                    <execution>
+                        <id>generate-asyncapi-orders-dtos</id>
+                        <phase>generate-sources</phase>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/../orders/src/main/resources/apis/asyncapi.yml</inputSpec>
+                            <generatorName>jsonschema2pojo</generatorName>
+                            <configOptions>
+                                <modelPackage>${asyncapiOrdersClientPackage}.events.dtos</modelPackage>
+                                <jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
+                                <jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-asyncapi-orders-client</id>
+                        <phase>generate-sources</phase>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/../orders/src/main/resources/apis/asyncapi.yml</inputSpec>
+                            <generatorName>spring-cloud-streams3</generatorName>
+                            <configOptions>
+                                <role>client</role>
+                                <style>imperative</style>
+                                <bindingPrefix>restaurants_</bindingPrefix>
+                                <modelPackage>${asyncapiOrdersClientPackage}.events.dtos</modelPackage>
+                                <producerApiPackage>${asyncapiOrdersClientPackage}.events.producer</producerApiPackage>
+                                <consumerApiPackage>${asyncapiOrdersClientPackage}.events.consumer</consumerApiPackage>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

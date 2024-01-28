@@ -9,8 +9,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractZDLGenerator;
-import io.zenwave360.sdk.generators.JDLEntitiesToAvroConverter;
-import io.zenwave360.sdk.generators.JDLEntitiesToSchemasConverter;
+import io.zenwave360.sdk.generators.EntitiesToAvroConverter;
+import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
@@ -18,6 +18,7 @@ import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
+import io.zenwave360.sdk.zdl.ZDLFindUtils;
 
 import static io.zenwave360.sdk.utils.NamingUtils.asJavaTypeName;
 import static org.apache.commons.lang.StringUtils.trimToNull;
@@ -39,8 +40,8 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
     @DocumentedOption(description = "Target file")
     public String targetFile = "asyncapi.yml";
-    @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
-    public String jdlBusinessEntityProperty = "x-business-entity";
+    @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas (default: x-business-entity)")
+    public String zdlBusinessEntityProperty = "x-business-entity";
 
     @DocumentedOption(description = "Schema format for messages' payload")
     public SchemaFormat schemaFormat = SchemaFormat.schema;
@@ -69,7 +70,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         });
     }
 
-    private final TemplateInput jdlToAsyncAPITemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZDLToAsyncAPIGenerator/ZDLToAsyncAPI{{asyncapiVersion}}.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
+    private final TemplateInput zdlToAsyncAPITemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZDLToAsyncAPIGenerator/ZDLToAsyncAPI{{asyncapiVersion}}.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
 
     protected Map<String, Object> getModel(Map<String, Object> contextModel) {
         return (Map) contextModel.get(sourceProperty);
@@ -106,9 +107,9 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         }
         addAllEventsAsMessages(messages, JSONPath.get(model, "$.events", Map.of()));
 
-        var methodsWithEvents = JSONPath.get(model, "$.services[*].methods[*][?(@.withEvents.length() > 0)]", Collections.<Map>emptyList());
+        var methodsWithEvents = ZDLFindUtils.methodsWithEvents(model);
         for (Map<String, Object> method : methodsWithEvents) {
-            var withEvents = allEvents((List) method.getOrDefault("withEvents", List.of())); // flatten list
+            var withEvents = ZDLFindUtils.methodEventsFlatList(method);
             for (int i = 0; i < withEvents.size(); i++) {
                 String withEvent = (String) withEvents.get(i);
                 var event = JSONPath.get(model, "$.events['" + withEvent + "']", Map.<String, Object>of());
@@ -117,7 +118,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
                 }
                 if (AsyncapiVersionType.v3.equals(asyncapiVersion)) {
                     buildEventChannel(event, channels);
-                    buildEventOperation(method, withEvents, withEvent, model, operations);
+                    buildEventOperation(method, withEvent, model, operations);
                 }
 
             }
@@ -130,14 +131,14 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
         for (Map<String, Object> schema : filterSchemasToInclude(model, methodsWithCommands)) {
             if (schemaFormat == SchemaFormat.schema) {
-                JDLEntitiesToSchemasConverter toSchemasConverter = new JDLEntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withJdlBusinessEntityProperty(jdlBusinessEntityProperty);
+                EntitiesToSchemasConverter toSchemasConverter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withZdlBusinessEntityProperty(zdlBusinessEntityProperty);
                 toSchemasConverter.includeVersion = false;
                 String entityName = (String) schema.get("name");
                 Map<String, Object> asyncAPISchema = toSchemasConverter.convertToSchema(schema, model);
                 schemas.put(entityName, asyncAPISchema);
             }
             if (schemaFormat == SchemaFormat.avro) {
-                JDLEntitiesToAvroConverter toAvroConverter = new JDLEntitiesToAvroConverter().withIdType(idType).withNamespace(avroPackage);
+                EntitiesToAvroConverter toAvroConverter = new EntitiesToAvroConverter().withIdType(idType).withNamespace(avroPackage);
                 outputList.addAll(convertToAvro(toAvroConverter, schema, model));
             }
         }
@@ -149,7 +150,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
             asyncAPISchemasString = asyncAPISchemasString.substring(asyncAPISchemasString.indexOf("components:") + 12);
         }
 
-        outputList.add(generateTemplateOutput(contextModel, jdlToAsyncAPITemplate, model, asyncAPISchemasString));
+        outputList.add(generateTemplateOutput(contextModel, zdlToAsyncAPITemplate, model, asyncAPISchemasString));
         return outputList;
     }
 
@@ -164,11 +165,10 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         }
     }
 
-    private void buildEventOperation(Map<String, Object> method, List<String> withEvents, String withEvent, Map<String, Object> model, Map<String, Object> operations) {
-        var operationId = "on" + asJavaTypeName((String) method.get("name"));
-        var operationIdSuffix = (withEvents.size() > 0? withEvent : "");
-        var channelName = JSONPath.get(model, "$.events." + withEvent + ".options.asyncapi.channel", withEvent + "Channel");
-        operations.put(operationId + operationIdSuffix, Map.of("action", "send","serviceName", method.get("serviceName"), "channel", channelName));
+    private void buildEventOperation(Map<String, Object> method, String eventName, Map<String, Object> model, Map<String, Object> operations) {
+        var operationId = "on" + asJavaTypeName(eventName);
+        var channelName = JSONPath.get(model, "$.events." + eventName + ".options.asyncapi.channel", eventName + "Channel");
+        operations.put(operationId, Map.of("action", "send","serviceName", method.get("serviceName"), "channel", channelName));
     }
 
     private void buildEventChannel(Map<String, Object> event, Map<String, Object> channels) {
@@ -186,6 +186,9 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
     }
 
     private void buildMethodCommand(Map method, Map<String, Object> channels, Map<String, Object> operations, Map<String, Object> model, LinkedHashMap<Object, Object> messages) {
+        if(isMethodCommandThirdPartyAPI(method, model)) {
+            return;
+        }
         var operationId = JSONPath.get(method, "$.options.asyncapi.operationId", (String) null);
         var commandName = firstNonNull(operationId, "do" + asJavaTypeName((String) method.get("name")));
         var channelName = JSONPath.get(method, "$.options.asyncapi.channel", commandName + "Channel");
@@ -206,6 +209,12 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         channel.put("messages", channelMessages);
         channels.put(channelName, channel);
         operations.put(commandName, Maps.of("action", "receive", "serviceName", method.get("serviceName"), "channel", channelName));
+    }
+
+    private boolean isMethodCommandThirdPartyAPI(Map method, Map<String, Object> model) {
+        var api = JSONPath.get(method, "$.options.asyncapi.api", (String) null);
+        var role = JSONPath.get(model, "$.apis." + api + ".role");
+        return "client".equals(role);
     }
 
     private void buildCommandChannelV2(Map method, Map<String, Object> channels, Map<String, Object> model, LinkedHashMap<Object, Object> messages) {
@@ -251,18 +260,6 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         if(topic != null) {
             channel.put("x-address", topic);
         }
-    }
-
-    protected List<String> allEvents(List events) {
-        List<String> allEvents = new ArrayList<>();
-        for (Object event : events) {
-            if(event instanceof String) {
-                allEvents.add((String) event);
-            } else if(event instanceof List) {
-                allEvents.addAll((Collection<? extends String>) event);
-            }
-        }
-        return allEvents;
     }
 
     protected List<Map<String, Object>> filterSchemasToInclude(Map<String, Object> model, List<Map> methodsWithCommands) {
@@ -335,7 +332,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         return targetFolder == null ? "avro" : targetFolder + "/avro";
     }
 
-    protected List<TemplateOutput> convertToAvro(JDLEntitiesToAvroConverter converter, Map<String, Object> entityOrEnum, Map<String, Object> zdlModel) {
+    protected List<TemplateOutput> convertToAvro(EntitiesToAvroConverter converter, Map<String, Object> entityOrEnum, Map<String, Object> zdlModel) {
         String name = (String) entityOrEnum.get("name");
         Map avro = converter.convertToAvro(entityOrEnum, zdlModel);
         String avroJson = writeAsString(jsonMapper, avro);

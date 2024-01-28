@@ -153,24 +153,25 @@ jbang zw -p <pluginConfigClass or short-code> optionName=value optionName2=value
 You can get a list of all available plugins:
 
 ```shell
-$ jbang zw -h -f list
-INFO Reflections - Reflections took 428 ms to scan 44 urls, producing 2493 keys and 14406 values
+$ jbang zw -h list
+INFO Reflections - Reflections took 461 ms to scan 56 urls, producing 2393 keys and 11675 values
+ZW> SDK (1.4.0)
+
 Available plugins:
 
-backend-application-default    io.zenwave360.sdk.plugins.BackendApplicationDefaultPlugin: Generates a full backend application using a flexible hexagonal architecture (1.3.0)
-spring-cloud-streams3-adapters io.zenwave360.sdk.plugins.SpringCloudStreams3AdaptersPlugin: Generates tests for Spring Cloud Streams Consumers. (1.3.0)
-jdl-to-asyncapi                io.zenwave360.sdk.plugins.JDLToAsyncAPIPlugin: Generates a full AsyncAPI definitions for CRUD operations from JDL models (1.3.0)
-spring-webtestclient           io.zenwave360.sdk.plugins.SpringWebTestClientPlugin: Generates test for SpringMVC or Spring WebFlux using WebTestClient based on OpenAPI specification. (1.3.0)
-fork-plugin                    io.zenwave360.sdk.plugins.ForkPlugin: Creates a new standalone maven module cloning an existing plugin (1.3.0)
-jsonschema2pojo                io.zenwave360.sdk.plugins.AsyncApiJsonSchema2PojoPlugin: Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files (1.3.0)
-spring-cloud-streams3-tests    io.zenwave360.sdk.plugins.SpringCloudStreams3TestsPlugin: Generates tests for Spring Cloud Streams Consumers. (1.3.0)
-openapi-controllers            io.zenwave360.sdk.plugins.OpenAPIControllersPlugin: Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces. (1.3.0)
-openapi-to-jdl                 io.zenwave360.sdk.plugins.OpenAPIToJDLPlugin: Generates JDL model from OpenAPI schemas (1.3.0)
-spring-cloud-streams3          io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin: Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI (1.3.0)
-rest-assured                   io.zenwave360.sdk.plugins.RestAssuredPlugin: Generates REST-Assured tests based on OpenAPI specification. (1.3.0)
-zdl-to-openapi                 io.zenwave360.sdk.plugins.ZDLToOpenAPIPlugin: Generates a full OpenAPI definitions for CRUD operations from JDL models (1.3.0)
-zdl-to-markdown                io.zenwave360.sdk.plugins.ZdlToMarkdownPlugin: Generates Markdown glossary from Zdl Models (1.3.0)
-zdl-to-asyncapi                io.zenwave360.sdk.plugins.ZDLToAsyncAPIPlugin: Generates a full OpenAPI definitions for CRUD operations from JDL models (1.3.0)
+backend-application-default    io.zenwave360.sdk.plugins.BackendApplicationDefaultPlugin: Generates a full backend application using a flexible hexagonal architecture (1.4.0)
+spring-cloud-streams3-adapters io.zenwave360.sdk.plugins.SpringCloudStreams3AdaptersPlugin: Generates tests for Spring Cloud Streams Consumers. (1.4.0)
+jdl-to-asyncapi                io.zenwave360.sdk.plugins.JDLToAsyncAPIPlugin: Generates a full AsyncAPI definitions for CRUD operations from JDL models (1.4.0)
+spring-webtestclient           io.zenwave360.sdk.plugins.SpringWebTestClientPlugin: Generates test for SpringMVC or Spring WebFlux using WebTestClient based on OpenAPI specification. (1.4.0)
+fork-plugin                    io.zenwave360.sdk.plugins.ForkPlugin: Creates a new standalone maven module cloning an existing plugin (1.4.0)
+jsonschema2pojo                io.zenwave360.sdk.plugins.AsyncApiJsonSchema2PojoPlugin: Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files (1.4.0)
+openapi-controllers            io.zenwave360.sdk.plugins.OpenAPIControllersPlugin: Generates implementations based on ZDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces. (1.4.0)
+openapi-to-jdl                 io.zenwave360.sdk.plugins.OpenAPIToJDLPlugin: Generates JDL model from OpenAPI schemas (1.4.0)
+spring-cloud-streams3          io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin: Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI (1.4.0)
+rest-assured                   io.zenwave360.sdk.plugins.RestAssuredPlugin: Generates REST-Assured tests based on OpenAPI specification. (1.4.0)
+zdl-to-openapi                 io.zenwave360.sdk.plugins.ZDLToOpenAPIPlugin: Generates a draft OpenAPI definitions from your ZDL entities and services. (1.4.0)
+zdl-to-markdown                io.zenwave360.sdk.plugins.ZdlToMarkdownPlugin: Generates Markdown glossary from Zdl Models (1.4.0)
+zdl-to-asyncapi                io.zenwave360.sdk.plugins.ZDLToAsyncAPIPlugin: Generates a draft AsyncAPI file with events from your ZDL services. (1.4.0)
 ```
 
 NOTE: it will list any available plugin, standard or custom, inside any of these root java packages "io", "com" or "org".
@@ -214,12 +215,12 @@ You can always fork an existing plugin with the following command:
 jbang zw -p io.zenwave360.sdk.plugins.ForkPlugin -h
 ```
 
-| **Option**              | **Description**                                                                     | **Type** | **Default**                                                                | **Values** |
-|-------------------------|-------------------------------------------------------------------------------------|----------|----------------------------------------------------------------------------|------------|
-| `targetFolder`          |                                                                                     | String   |                                                                            |            |
-| `sourcePluginClassName` | Plugin Plugin class to fork                                                         | String   |                                                                            |            |
-| `targetPluginClassName` | New Plugin Plugin class. It will be used for class name, package and maven groupId. | String   |                                                                            |            |
-| `downloadURL`           | Download URL for the source code of original plugin in zip format                   | URL      | https://github.com/ZenWave360/zenwave-sdk/archive/refs/tags/v1.0.0.zip |            |
+| **Option**              | **Description**                                                                     | **Type** | **Default**                                                            | **Values** |
+|-------------------------|-------------------------------------------------------------------------------------|----------|------------------------------------------------------------------------|------------|
+| `targetFolder`          |                                                                                     | String   |                                                                        |            |
+| `sourcePluginClassName` | Plugin Plugin class to fork                                                         | String   |                                                                        |            |
+| `targetPluginClassName` | New Plugin Plugin class. It will be used for class name, package and maven groupId. | String   |                                                                        |            |
+| `downloadURL`           | Download URL for the source code of original plugin in zip format                   | URL      | https://github.com/ZenWave360/zenwave-sdk/archive/refs/tags/v1.3.0.zip |            |
 
 Example:
 

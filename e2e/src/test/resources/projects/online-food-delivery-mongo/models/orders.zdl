@@ -1,0 +1,200 @@
+/**
+ * ZenWave Online Food Delivery - Orders Module.
+ */
+config {
+    title "ZenWave Online Food Delivery - Orders Module"
+    basePackage "io.zenwave360.example.orders"
+    targetFolder "modules/orders"
+    persistence mongodb
+
+    // these are code generation plugins for ZenWave IntelliJ Plugin, for models you can skip to 'entities' section
+    plugins {
+
+        ZDLToOpenAPIPlugin {
+            idType string
+            targetFile "{{targetFolder}}/src/main/resources/apis/openapi.yml"
+        }
+
+        ZDLToAsyncAPIPlugin {
+            asyncapiVersion v3
+            idType string
+            targetFile "{{targetFolder}}/src/main/resources/apis/asyncapi.yml"
+        }
+
+        BackendApplicationDefaultPlugin {
+            useLombok true
+            includeEmitEventsImplementation true
+            // --force // overwite all files
+        }
+
+        OpenAPIControllersPlugin {
+            formatter google // comments in one line are better for demos
+            // TODO fix this: specFile "{{targetFolder}}/src/main/resources/apis/openapi.yml"
+            specFile "modules/orders/src/main/resources/apis/openapi.yml"
+            zdlFile "models/orders.zdl"
+
+            // these should match the values of openapi-generator-maven-plugin
+            openApiApiPackage "{{basePackage}}.adapters.web"
+            openApiModelPackage "{{basePackage}}.adapters.web.model"
+            openApiModelNameSuffix DTO
+        }
+
+        SpringCloudStreams3AdaptersPlugin {
+            apiId "restaurants"
+            role client
+            specFile "modules/restaurants/src/main/resources/apis/asyncapi.yml"
+            modelPackage "{{basePackage}}.client.{{apiId}}.events.dtos"
+            consumerApiPackage "{{basePackage}}.client.{{apiId}}.events.consumer"
+        }
+        SpringCloudStreams3AdaptersPlugin {
+            apiId "delivery"
+            role client
+            specFile "modules/delivery/src/main/resources/apis/asyncapi.yml"
+            modelPackage "{{basePackage}}.client.{{apiId}}.events.dtos"
+            consumerApiPackage "{{basePackage}}.client.{{apiId}}.events.consumer"
+        }
+
+    }
+}
+
+apis {
+    asyncapi(provider) default {
+        uri "orders/src/main/resources/apis/asyncapi.yml"
+    }
+    asyncapi(client) RestaurantsAsyncAPI {
+        uri "restaurants/src/main/resources/apis/asyncapi.yml"
+    }
+    asyncapi(client) DeliveryAsyncAPI {
+        uri "delivery/src/main/resources/apis/asyncapi.yml"
+    }
+}
+
+// == Entities =============================
+
+@aggregate
+entity CustomerOrder {
+    orderTime Instant
+    status OrderStatus
+    customerDetails Customer {
+      customerId String required
+      firstName String required
+      lastName String required
+      email String required
+      phone String required
+      address Address {
+        street String required
+        city String
+        state String
+        zip String
+      }
+    }
+    restaurantDetails Restaurant {
+      restaurantId String required
+      name String required
+      phone String required
+      addresses Address {
+        street String required
+        city String
+        state String
+        zip String
+      }
+    }
+    orderItems OrderItemInput[] {
+       menuItemId String required
+       name String required
+       description String
+       price BigDecimal required
+       quantity Integer required
+    }
+}
+
+enum OrderStatus {
+    RECEIVED, KITCHEN_ACCEPTED, DELIVERY_ACCEPTED, CONFIRMED,
+    KITCHEN_IN_PROGRESS, KITCHEN_READY, KITCHEN_DELIVERED,
+    ON_DELIVERY, DELIVERED, CANCELLED
+}
+
+// == Serices =============================
+
+input CustomerOrderInput {
+    orderTime Instant
+    status OrderStatus
+    customerId String required
+    restaurantId String required
+    addressIdentifier String required
+    orderItems OrderItem[] {
+       menuItemId String required
+       name String required
+       description String
+       price BigDecimal required
+       quantity Integer required
+    }
+}
+
+input OrdersFilter {
+    status OrderStatus
+    customerName String
+    restaurantName String
+}
+
+input KitchenStatusInput {
+    kitchenOrderId String
+    kitchenStatus KitchenStatus
+}
+
+input DeliveryStatusInput {
+    deliveryOrderId String
+    deliveryStatus DeliveryStatus
+}
+
+input CancelOrderInput {
+    id String
+    reason String
+}
+
+@input
+enum KitchenStatus {
+    REJECTED, ACCEPTED, IN_PROGRESS, READY, DELIVERED, CANCELLED
+}
+
+@input
+enum DeliveryStatus {
+    REJECTED, ACCEPTED, IN_PROGRESS, DELIVERED, CANCELLED
+}
+
+@rest("/orders")
+service OrdersService for (CustomerOrder) {
+    @get("/{orderId}")
+    getCustomerOrder(id) CustomerOrder?
+    @post
+    createOrder(CustomerOrderInput) CustomerOrder withEvents OrderEvent
+    @put("/{orderId}")
+    updateOrder(id, CustomerOrderInput) CustomerOrder withEvents OrderEvent OrderStatusUpdated
+
+    @asyncapi({api: RestaurantsAsyncAPI, channel: "KitchenOrdersStatusChannel"})
+    updateKitchenStatus(id, KitchenStatusInput) CustomerOrder withEvents OrderEvent OrderStatusUpdated
+    @asyncapi({api: DeliveryAsyncAPI, channel: "DeliveryStatusChannel"})
+    updateDeliveryStatus(id, DeliveryStatusInput) CustomerOrder withEvents OrderEvent OrderStatusUpdated
+
+    @asyncapi({channel: "CancelOrdersChannel", topic: "orders.cancel_orders"})
+    @put("/{orderId}/cancel")
+    cancelOrder(id, CancelOrderInput) CustomerOrder withEvents OrderEvent OrderStatusUpdated
+
+    @post("/search")
+    searchOrders(OrdersFilter) CustomerOrder[]
+}
+
+@copy(CustomerOrder)
+@asyncapi({channel: "OrdersChannel", topic: "orders.orders"})
+event OrderEvent {
+   id String
+   // + all fields from CustomerOrder (carried state transfer)
+}
+
+@asyncapi({channel: "OrderUpdatesChannel", topic: "orders.order_updates"})
+event OrderStatusUpdated {
+    id String
+    dateTime Instant
+    status OrderStatus
+    previousStatus OrderStatus
+}

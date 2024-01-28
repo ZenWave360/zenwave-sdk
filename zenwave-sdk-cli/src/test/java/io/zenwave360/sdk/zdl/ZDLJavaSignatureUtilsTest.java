@@ -1,7 +1,6 @@
 package io.zenwave360.sdk.zdl;
 
 import io.zenwave360.sdk.parsers.ZDLParser;
-import io.zenwave360.sdk.processors.JDLProcessor;
 import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.utils.JSONPath;
 import org.junit.jupiter.api.Assertions;
@@ -28,11 +27,82 @@ public class ZDLJavaSignatureUtilsTest {
     }
 
     @Test
+    void methodParametersSignature() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
+        var method = JSONPath.get(model, "$.services.AttachmentService.methods.downloadAttachmentFile", Map.of());
+        var inputDTOSuffix = "InputDTO";
+        var signature = ZDLJavaSignatureUtils.methodParametersSignature("String", method, model, inputDTOSuffix);
+        Assertions.assertEquals("String businessUnit, String orderId, String documentManagerId", signature);
+    }
+
+    @Test
+    void methodParametersCallSignature() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
+        var method = JSONPath.get(model, "$.services.AttachmentService.methods.downloadAttachmentFile", Map.of());
+        var inputDTOSuffix = "InputDTO";
+        var signature = ZDLJavaSignatureUtils.methodParametersCallSignature(method, model, inputDTOSuffix);
+        Assertions.assertEquals("businessUnit, orderId, documentManagerId", signature);
+    }
+
+    @Test
+    void mapperInputCallSignature() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
+        var signature = ZDLJavaSignatureUtils.mapperInputCallSignature("PurchaseOrder", model);
+        Assertions.assertEquals("input", signature);
+    }
+
+    @Test
+    void mapperInputCallSignatureInline() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
+        var signature = ZDLJavaSignatureUtils.mapperInputCallSignature("AttachmentFileId", model);
+        Assertions.assertEquals("businessUnit, orderId, documentManagerId", signature);
+    }
+
+
+    @Test
+    void mapperInputSignature() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
+        var inputDTOSuffix = "InputDTO";
+        var signature = ZDLJavaSignatureUtils.mapperInputSignature("AttachmentFileId", model, inputDTOSuffix);
+        Assertions.assertEquals("String businessUnit, String orderId, String documentManagerId", signature);
+    }
+
+    @Test
+    void inputFieldInitializer() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
+        var inputDTOSuffix = "InputDTO";
+        var signature = ZDLJavaSignatureUtils.inputFieldInitializer("AttachmentFileId", model, inputDTOSuffix);
+        Assertions.assertEquals("""
+                        String businessUnit = null;
+                        String orderId = null;
+                        String documentManagerId = null;
+                        """, signature);
+    }
+
+    @Test
+    void methodInputCall() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
+        var method = JSONPath.get(model, "$.services.AttachmentService.methods.downloadAttachmentFile", Map.of());
+        var inputDTOSuffix = "InputDTO";
+        var signature = ZDLJavaSignatureUtils.methodInputCall(method, model, inputDTOSuffix);
+        Assertions.assertEquals(List.of("businessUnit", "orderId", "documentManagerId"), signature);
+    }
+
+
+    @Test
     void methodReturnType() throws IOException {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
         var method = JSONPath.get(model, "$.services.AttachmentService.methods.uploadFile", Map.of());
         var returnType = ZDLJavaSignatureUtils.methodReturnType(method);
         Assertions.assertEquals("PurchaseOrder", returnType);
+    }
+
+    @Test
+    void methodReturnTypeVoid() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
+        var method = JSONPath.get(model, "$.services.AttachmentService.methods.startBackgroundAdminProcess", Map.of());
+        var returnType = ZDLJavaSignatureUtils.methodReturnType(method);
+        Assertions.assertEquals("void", returnType);
     }
 
     @Test
@@ -42,6 +112,15 @@ public class ZDLJavaSignatureUtilsTest {
         var returnType = ZDLJavaSignatureUtils.methodReturnType(method);
         Assertions.assertEquals("List<AttachmentFile>", returnType);
     }
+
+    @Test
+    void methodReturnTypeArrayPaginated() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
+        var method = JSONPath.get(model, "$.services.AttachmentService.methods.listAttachmentFilesPaginated", Map.of());
+        var returnType = ZDLJavaSignatureUtils.methodReturnType(method);
+        Assertions.assertEquals("Page<AttachmentFile>", returnType);
+    }
+
 
     @Test
     void methodReturnTypeOptional() throws IOException {

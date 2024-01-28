@@ -1,6 +1,6 @@
 {{~#each entities as |entity|}}
     {{~#if (isCrudMethod 'create' method=method entity=entity )}}
-        var input = new {{entity.className}}{{inputDTOSuffix}}();
+        var input = new {{methodParameterType method}}();
         // TODO fill input data
         {{~#each entity.fields as |field|}}
         // input.set{{capitalize field.name}}({{{populateField field}}});
@@ -10,7 +10,7 @@
         assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}));
     {{~else if (isCrudMethod 'update' method=method entity=entity )}}
         var id = 1L; // TODO fill id
-        var input = new {{entity.className}}{{inputDTOSuffix}}();
+        var input = new {{methodParameterType method}}();
         // TODO fill input data
         {{~#each entity.fields as |field|}}
         // input.set{{capitalize field.name}}({{{populateField field}}});
@@ -19,14 +19,9 @@
         var {{entity.instanceName}} = {{serviceInstance}}.update{{entity.className}}(id, input);
         assertTrue({{entity.instanceName}}.isPresent());
         assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}.get()));
-    {{~else if (isCrudMethod 'list' method=method entity=entity )}}
-        var results = {{serviceInstance}}.list{{entity.classNamePlural}}(PageRequest.of(0, 10));
-        assertNotNull(results);
-    {{~else if (isCrudMethod 'search' method=method entity=entity )}}
-        var criteria = new {{criteriaClassName entity}}();
-        // TODO fill criteria
-        var results = {{serviceInstance}}.search{{entity.classNamePlural}}(criteria, PageRequest.of(0, 10));
-        assertNotNull(results);
+    {{~else if (isCrudMethod 'list' method=method entity=entity) }}
+        // var results = {{serviceInstance}}.list{{entity.classNamePlural}}(PageRequest.of(0, 10));
+        // assertNotNull(results);
     {{~else if (isCrudMethod 'get' method=method entity=entity )}}
         var id = 1L; // TODO fill id
         var {{entity.instanceName}} = {{serviceInstance}}.get{{entity.className}}(id);
@@ -37,6 +32,6 @@
         {{serviceInstance}}.delete{{entity.className}}(id);
         assertFalse({{entity.instanceName}}Repository.containsKey(id));
     {{~else~}}
-    // not legacy
+    // TODO: implement this test
     {{~/if}}
 {{~/each}}

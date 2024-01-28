@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.zenwave360.example.modulith</groupId>
+        <artifactId>zenwave-modulith-playground</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+    <artifactId>orders-module</artifactId>
+
+    <properties>
+        <basePackage>io.zenwave360.example.orders</basePackage><!-- used by openapi and asyncapi plugins in parent -->
+        <asyncapiRestaurantsClientPackage>${basePackage}.client.restaurants</asyncapiRestaurantsClientPackage>
+        <asyncapiDeliveryClientPackage>${basePackage}.client.delivery</asyncapiDeliveryClientPackage>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.github.zenwave360.zenwave-sdk</groupId>
+                <artifactId>zenwave-sdk-maven-plugin</artifactId>
+
+                <executions>
+                    <!-- Generates AsyncAPI PROVIDER (own API) -->
+                    <!-- (Config is inherited from parent) -->
+                    <execution>
+                        <id>generate-asyncapi-provider-dtos</id>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/apis/asyncapi.yml</inputSpec>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-asyncapi-provider-implementation</id>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/apis/asyncapi.yml</inputSpec>
+                        </configuration>
+                    </execution>
+
+                    <!-- Generate AsyncAPI CLIENT for Restaurants API -->
+                    <execution>
+                        <id>generate-asyncapi-restaurants-dtos</id>
+                        <phase>generate-sources</phase>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/../restaurants/src/main/resources/apis/asyncapi.yml</inputSpec>
+                            <generatorName>jsonschema2pojo</generatorName>
+                            <configOptions>
+                                <modelPackage>${asyncapiRestaurantsClientPackage}.events.dtos</modelPackage>
+                                <jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
+                                <jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-asyncapi-restaurants-client</id>
+                        <phase>generate-sources</phase>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/../restaurants/src/main/resources/apis/asyncapi.yml</inputSpec>
+                            <generatorName>spring-cloud-streams3</generatorName>
+                            <configOptions>
+                                <role>client</role>
+                                <style>imperative</style>
+                                <bindingPrefix>restaurants_</bindingPrefix>
+                                <operationIds>onKitchenOrderStatusUpdated</operationIds>
+                                <modelPackage>${asyncapiRestaurantsClientPackage}.events.dtos</modelPackage>
+                                <producerApiPackage>${asyncapiRestaurantsClientPackage}.events.producer</producerApiPackage>
+                                <consumerApiPackage>${asyncapiRestaurantsClientPackage}.events.consumer</consumerApiPackage>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+
+                    <!-- Generate AsyncAPI CLIENT for Delivery API -->
+                    <execution>
+                        <id>generate-asyncapi-delivery-dtos</id>
+                        <phase>generate-sources</phase>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/../delivery/src/main/resources/apis/asyncapi.yml</inputSpec>
+                            <generatorName>jsonschema2pojo</generatorName>
+                            <configOptions>
+                                <modelPackage>${asyncapiDeliveryClientPackage}.events.dtos</modelPackage>
+                                <jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
+                                <jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-asyncapi-delivery-client</id>
+                        <phase>generate-sources</phase>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/../delivery/src/main/resources/apis/asyncapi.yml</inputSpec>
+                            <generatorName>spring-cloud-streams3</generatorName>
+                            <configOptions>
+                                <role>client</role>
+                                <style>imperative</style>
+                                <bindingPrefix>delivery_</bindingPrefix>
+                                <operationIds>onDeliveryStatusUpdated</operationIds>
+                                <modelPackage>${asyncapiDeliveryClientPackage}.events.dtos</modelPackage>
+                                <producerApiPackage>${asyncapiDeliveryClientPackage}.events.producer</producerApiPackage>
+                                <consumerApiPackage>${asyncapiDeliveryClientPackage}.events.consumer</consumerApiPackage>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+
+            </plugin>
+
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>6.6.0</version>
+                <executions>
+                    <execution>
+                        <id>openapi-generator-client-customers</id>
+                        <goals><goal>generate</goal></goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <inputSpec>${project.basedir}/../customers/src/main/resources/apis/openapi.yml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <library>spring-http-interface</library>
+                            <apiPackage>${basePackage}.customers.client</apiPackage>
+                            <modelPackage>${basePackage}.customers.client.model</modelPackage>
+                            <modelNameSuffix>DTO</modelNameSuffix>
+                            <addCompileSourceRoot>true</addCompileSourceRoot>
+                            <typeMappings>
+                                <typeMapping>Double=java.math.BigDecimal</typeMapping>
+                            </typeMappings>
+                            <configOptions>
+                                <useJakartaEe>true</useJakartaEe>
+                                <documentationProvider>none</documentationProvider>
+                                <openApiNullable>false</openApiNullable>
+                                <useOptional>true</useOptional>
+                                <useTags>true</useTags>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>openapi-generator-client-restaurants</id>
+                        <goals><goal>generate</goal></goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <inputSpec>${project.basedir}/../restaurants/src/main/resources/apis/openapi.yml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <library>spring-http-interface</library>
+                            <apiPackage>${basePackage}.restaurants.client</apiPackage>
+                            <modelPackage>${basePackage}.restaurants.client.model</modelPackage>
+                            <modelNameSuffix>DTO</modelNameSuffix>
+                            <addCompileSourceRoot>true</addCompileSourceRoot>
+                            <typeMappings>
+                                <typeMapping>Double=java.math.BigDecimal</typeMapping>
+                            </typeMappings>
+                            <configOptions>
+                                <useJakartaEe>true</useJakartaEe>
+                                <documentationProvider>none</documentationProvider>
+                                <openApiNullable>false</openApiNullable>
+                                <useOptional>true</useOptional>
+                                <useTags>true</useTags>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

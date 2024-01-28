@@ -1,13 +1,14 @@
 package {{basePackage}}.core.implementation;
 
-import {{basePackage}}.core.domain.*;
-import {{basePackage}}.core.inbound.*;
-import {{basePackage}}.core.inbound.dtos.*;
-import {{basePackage}}.core.implementation.mappers.*;
-import {{basePackage}}.core.outbound.jpa.*;
-{{#if zdl.options.options.search}}
-import {{basePackage}}.core.outbound.search.*;
+import {{entitiesPackage}}.*;
+import {{inboundPackage}}.*;
+import {{inboundDtosPackage}}.*;
+import {{coreImplementationPackage}}.mappers.*;
+import {{outboundPackage}}.jpa.*;
+{{#if includeEmitEventsImplementation}}
+import {{outboundEventsPackage}}.*;
 {{/if}}
+
 
 import java.util.List;
 import java.util.Optional;
@@ -24,29 +25,40 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional(readOnly = true)
+{{~#if useLombok}}
+@lombok.AllArgsConstructor
+{{~/if}}
 public class {{service.name}}Impl implements {{service.name}} {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    private final {{service.name}}Mapper {{asInstanceName service.name}}Mapper = {{service.name}}Mapper.INSTANCE;
+
 {{#each entities as |entity|}}
-    private final {{entity.className}}Mapper {{entity.instanceName}}Mapper = {{entity.className}}Mapper.INSTANCE;
     {{~#unless (skipEntityRepository this)}}
     private final {{entity.className}}Repository {{entity.instanceName}}Repository;
     {{~/unless}}
-    {{~#if options.search}}
-    private final {{entity.className}}SearchRepository {{entity.instanceName}}SearchRepository;
-    {{~/if}}
 {{/each}}
 
+{{#if (includeEmitEventsImplementation service)}}
+    private final EventsMapper eventsMapper = EventsMapper.INSTANCE;
+    private final {{eventsProducerInterface service.name}} eventsProducer;
+{{/if}}
+
+{{#unless useLombok~}}
     /**
      * Constructor.
      */
-    public {{service.name}}Impl({{#joinWithTemplate service.entities delimiter=", "}}{{#unless (skipEntityRepository this)}}{{className}}Repository {{instanceName}}Repository{{/unless}}{{#if options.search}}, {{className}}SearchRepository {{instanceName}}SearchRepository{{/if}}{{/joinWithTemplate}}) {
+    public {{service.name}}Impl({{#joinWithTemplate service.entities delimiter=", "}}{{#unless (skipEntityRepository this)}}{{className}}Repository {{instanceName}}Repository{{/unless}}{{/joinWithTemplate}}
+                                {{#if (includeEmitEventsImplementation service)}}, {{eventsProducerInterface service.name}} eventsProducer{{/if}}) {
         {{~#joinWithTemplate service.entities ~}}
             {{#unless (skipEntityRepository this)}}this.{{instanceName}}Repository = {{instanceName}}Repository;{{/unless}}
-            {{#if options.search}}this.{{instanceName}}SearchRepository = {{instanceName}}SearchRepository;{{/if}}
         {{~/joinWithTemplate~}}
+        {{~#if (includeEmitEventsImplementation service)}}
+        this.eventsProducer = eventsProducer;
+        {{~/if}}
     }
+{{/unless~}}
 
 {{#each service.methods as |method|}}
     {{~> (partial '../../partials/jpaMethodAnnotations')~}}

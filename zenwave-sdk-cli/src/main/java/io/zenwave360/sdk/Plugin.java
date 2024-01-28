@@ -121,19 +121,6 @@ public class Plugin {
         return this;
     }
 
-    public Plugin withChain(String... processorClasses) {
-        if (processorClasses != null) {
-            chain = Arrays.stream(processorClasses).map(c -> {
-                try {
-                    return getClass().getClassLoader().loadClass(c);
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            }).collect(Collectors.toList());
-        }
-        return this;
-    }
-
     public Plugin removeFromChain(Class... processorClasses) {
         Arrays.stream(processorClasses).forEach(processorClass -> chain.remove(processorClass));
         return this;

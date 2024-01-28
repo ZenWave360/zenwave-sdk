@@ -1,5 +1,6 @@
 package io.zenwave360.sdk.plugins;
 
+import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 import static org.jsonschema2pojo.SourceType.JSONSCHEMA;
 import static org.jsonschema2pojo.SourceType.YAMLSCHEMA;
 
@@ -11,6 +12,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
+import io.zenwave360.sdk.utils.AsyncAPIUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -74,8 +76,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
         Model apiModel = getApiModel(contextModel);
 
         List<Map<String, Object>> allMessages = new ArrayList<>();
-        var asyncapiVersion = (String) JSONPath.get(apiModel, "$.asyncapi");
-        if (asyncapiVersion.startsWith("2.")) {
+        if (AsyncAPIUtils.isV2(apiModel)) {
             String operationIdsRegex = operationIds.isEmpty() ? "" : " =~ /(" + StringUtils.join(operationIds, "|") + ")/";
             List<Map<String, Object>> operations = JSONPath.get(apiModel, "$.channels[*][*][?(@.operationId" + operationIdsRegex + ")]");
 
@@ -84,7 +85,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             allMessages.addAll(messages);
             allMessages.addAll(oneOfMessages);
         }
-        if (asyncapiVersion.startsWith("3.")) {
+        if (AsyncAPIUtils.isV3(apiModel)) {
             if (!messageNames.isEmpty()) {
                 String messageNamesRegex = messageNames.isEmpty() ? "" : " =~ /(" + StringUtils.join(messageNames, "|") + ")/";
                 Set<Map<String, Object>> messages = new HashSet<>(JSONPath.get(apiModel, "$.components.messages[*][?(@.name" + messageNamesRegex + ")]"));
@@ -110,10 +111,12 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
     public void generate(Model apiModel, List<Map<String, Object>> messages) throws IOException, URISyntaxException {
         for (final Map<String, Object> message : messages) {
-            Map<String, Object> payload = (Map) message.get("payload");
+            var schemaPath = AsyncAPIUtils.isV3(apiModel) ? "$.payload.schema" : "$.payload";
+            Map<String, Object> payload = JSONPath.get(message, schemaPath);
             String name = (String)  ObjectUtils.firstNonNull(payload.get("x--schema-name"), message.get("name"));
             $Ref payloadRef = apiModel.getRefs().getOriginalRef(payload);
-            String schemaFormat = (String) message.get("schemaFormat"); // TODO get also global schemaFormat
+            var schemaFormatPath = AsyncAPIUtils.isV3(apiModel) ? "$.payload.schemaFormat" : "$.schemaFormat";
+            var schemaFormat = (String) firstNonNull(JSONPath.get(message, schemaFormatPath), JSONPath.get(apiModel, "$.schemaFormat"));
             AsyncApiProcessor.SchemaFormatType schemaFormatType = AsyncApiProcessor.SchemaFormatType.getFormat(schemaFormat);
 
             final JsonSchema2PojoConfiguration config = JsonSchema2PojoConfiguration.of(jsonschema2pojo);

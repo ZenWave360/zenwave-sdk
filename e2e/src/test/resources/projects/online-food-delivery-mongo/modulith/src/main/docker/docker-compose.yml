@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:5.0.20
+    ports:
+      - '27017:27017'
+  kafka:
+    image: bashj79/kafka-kraft
+    ports:
+      - '9092:9092'

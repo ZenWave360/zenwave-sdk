@@ -2,7 +2,7 @@ package {{controllersPackage}};
 
 import {{openApiApiPackage}}.*;
 import {{openApiModelPackage}}.*;
-import {{basePackage}}.config.InMemoryTestsManualContext;
+import {{basePackage}}.config.ServicesInMemoryConfig;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -13,26 +13,26 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Test controller for {{service.name}}ApiController.
+ * Test controller for {{serviceName}}ApiController.
  */
-public class {{service.name}}ApiControllerTest {
+public class {{serviceName}}ApiControllerTest {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    {{service.name}}ApiController controller = new {{service.name}}ApiController()
-{{~#if jdl.isDummy}}/*{{/if}}
+    ServicesInMemoryConfig context = new ServicesInMemoryConfig();
+
+    {{serviceName}}ApiController controller = new {{serviceName}}ApiController()
 {{#each entitiesServices as |coreServiceName|}}
-        .set{{coreServiceName}}(InMemoryTestsManualContext.INSTANCE.{{asInstanceName coreServiceName}}())
+        .set{{coreServiceName}}(context.{{asInstanceName coreServiceName}}())
 {{/each}}
-{{#if jdl.isDummy}}*/{{/if~}}
     ;
 
-{{#each service.operations as |operation|}}
+{{#each serviceOperations}}
     @Test
-    public void {{operation.operationId}}Test() {
+    public void {{operationId}}Test() {
         {{{asMethodParametersInitializer operation}}}
-        var response = controller.{{operation.operationId}}({{{asMethodParameterValues operation}}});
-        Assertions.assertEquals({{operation.x--response.x--statusCode}}, response.getStatusCode().value());
+        var response = controller.{{operationId}}({{{asMethodParameterValues operation}}});
+        Assertions.assertEquals({{statusCode}}, response.getStatusCode().value());
     }
 {{/each}}
 

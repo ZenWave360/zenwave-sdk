@@ -3,10 +3,7 @@ package io.zenwave360.sdk.zdl;
 import io.zenwave360.sdk.utils.JSONPath;
 import org.apache.commons.lang3.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ZDLFindUtils {
@@ -14,6 +11,10 @@ public class ZDLFindUtils {
     public static List<String> findAllServiceFacingEntities(Map<String, Object> model) {
         var serviceEntities = ZDLFindUtils.findMethodParameterAndReturnTypes(model);
         return ZDLFindUtils.findDependentEntities(model, serviceEntities);
+    }
+
+    public static List<Map<String, Object>> methodsWithEvents(Map<String, Object> model) {
+        return JSONPath.get(model, "$.services[*].methods[*][?(@.withEvents.length() > 0)]", Collections.<Map<String, Object>>emptyList());
     }
 
     public static List<String> findAllPaginatedEntities(Map<String, Object> model) {
@@ -58,8 +59,10 @@ public class ZDLFindUtils {
     }
 
     public static List<String> findMethodParameterAndReturnTypes(Map<String, Object> model) {
-        var entities = JSONPath.get(model, "$.services[*].methods[*]['parameter','returnType']");
-        return new ArrayList(new HashSet(JSONPath.get(entities, "$[*][*]")));
+        var entities = new ArrayList<String>();
+        entities.addAll(JSONPath.get(model, "$.services[*].methods[*]['parameter']"));
+        entities.addAll(JSONPath.get(model, "$.services[*].methods[*]['returnType']"));
+        return entities.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList());
     }
 
     public static String findServiceName(String entityName, Map<String, Object> model) {
@@ -89,5 +92,18 @@ public class ZDLFindUtils {
         return methods.stream()
                 .filter(method -> operationId.equals(JSONPath.get(method, "$.name")) || operationId.equals(JSONPath.get(method, "$.options[*].operationId"))
                 ).findFirst().orElse(null);
+    }
+
+    public static  List<String> methodEventsFlatList(Map<String, Object> method) {
+        var events = (List) method.getOrDefault("withEvents", List.of());
+        List<String> allEvents = new ArrayList<>();
+        for (Object event : events) {
+            if(event instanceof String) {
+                allEvents.add((String) event);
+            } else if(event instanceof List) {
+                allEvents.addAll((Collection<? extends String>) event);
+            }
+        }
+        return allEvents;
     }
 }

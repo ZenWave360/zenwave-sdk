@@ -9,9 +9,8 @@ MAX_LENGTH=100
 */
   @aggregate
 entity Customer {
-  username String required unique /** username javadoc comment */
+  username String required unique minlength(3) /** username javadoc comment */
   email String required unique /** email javadoc comment */
-  tags String[] /** tags javadoc comment */
 }
 
 enum AddressType {  HOME(1) /** home description */,  WORK(1) /** work description */ }

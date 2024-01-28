@@ -56,6 +56,9 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     @DocumentedOption(description = "SC Streams Binder class suffix")
     public String consumerSuffix = "Consumer";
 
+    @DocumentedOption(description = "SC Streams Binding Name Prefix (used in @Component name)"  )
+    public String bindingPrefix = "";
+
     @DocumentedOption(description = "Business/Service interface prefix")
     public String servicePrefix = "I";
 
@@ -70,6 +73,9 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
     @DocumentedOption(description = "Spring bean id for the tracing id supplier for runtime header with expression: '$tracingIdSupplier'")
     public String tracingIdSupplierQualifier = "tracingIdSupplier";
+
+    @DocumentedOption(description = "Include Kafka common headers 'kafka_messageKey' as x-runtime-header")
+    private boolean includeKafkaCommonHeaders = false;
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
     {
@@ -141,10 +147,10 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     protected List<TemplateInput> producerTemplates = Arrays.asList(
             new TemplateInput(templatesPath + "/producer/IProducer.java", "src/main/java/{{asPackageFolder producerApiPackage}}/I{{apiClassName}}.java"),
             new TemplateInput(templatesPath + "/producer/outbox/{{transactionalOutbox}}/Producer.java", "src/main/java/{{asPackageFolder producerApiPackage}}/{{apiClassName}}.java").withSkip((context) -> skipProducerImplementation),
-            new TemplateInput(templatesPath + "/producer/mocks/ProducerCaptor.java", "src/test/java/{{asPackageFolder producerApiPackage}}/{{apiClassName}}Captor.java"));
+            new TemplateInput(templatesPath + "/producer/mocks/EventsProducerCaptor.java", "src/test/java/{{asPackageFolder producerApiPackage}}/{{apiClassName}}Captor.java"));
 
     protected List<TemplateInput> producerByServicesTemplates = Arrays.asList(
-            new TemplateInput(templatesPath + "/producer/mocks/ProducerInMemoryContext.java", "src/test/java/{{asPackageFolder producerApiPackage}}/ProducerInMemoryContext.java"));
+            new TemplateInput(templatesPath + "/producer/mocks/EventsProducerInMemoryContext.java", "src/test/java/{{asPackageFolder producerApiPackage}}/EventsProducerInMemoryContext.java"));
     protected List<TemplateInput> consumerTemplates = Arrays.asList(
             new TemplateInput(templatesPath + "/consumer/{{style}}/Consumer.java", "src/main/java/{{asPackageFolder consumerApiPackage}}/{{consumerName operation.x--operationIdCamelCase}}.java"),
             new TemplateInput(templatesPath + "/consumer/{{style}}/IService.java", "src/main/java/{{asPackageFolder consumerApiPackage}}/{{serviceInterfaceName operation.x--operationIdCamelCase}}.java"));

@@ -25,7 +25,7 @@ import io.zenwave360.sdk.writers.TemplateFileWriter;
  *     targetFolder=.
  * ```
  */
-@DocumentedPlugin(value = "Generates implementations based on JDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.", shortCode = "openapi-controllers")
+@DocumentedPlugin(value = "Generates implementations based on ZDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.", shortCode = "openapi-controllers")
 public class OpenAPIControllersPlugin extends Plugin {
 
     @DocumentedOption(description = "ZDL file to parse", required = false)
@@ -33,7 +33,7 @@ public class OpenAPIControllersPlugin extends Plugin {
 
     public OpenAPIControllersPlugin() {
         super();
-        withChain(DefaultYamlParser.class, OpenApiProcessor.class, ZDLParser.class, ZDLProcessor.class, EnrichOpenAPIWithJDLProcessor.class, OpenAPIControllersGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
+        withChain(DefaultYamlParser.class, OpenApiProcessor.class, ZDLParser.class, ZDLProcessor.class, OpenAPIControllersGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
     }
 
     @Override
@@ -41,7 +41,8 @@ public class OpenAPIControllersPlugin extends Plugin {
 
         if (!getOptions().containsKey("zdlFile")) {
             removeFromChain(ZDLParser.class, ZDLProcessor.class);
-            addBeforeInChain(EnrichOpenAPIWithJDLProcessor.class, JDLDummyDataFromSchemasProcessor.class);
+            addBeforeInChain(OpenAPIControllersGenerator.class, DummyDataFromSchemasProcessor.class);
+            withOption("haltOnFailFormatting", false);
         }
         // because we have more than one model, we need to configure how they are passed around from parser to processor and generator
         // we use class name for passing the properties, in case one class is repeated in chain we'd use the index number in the chain

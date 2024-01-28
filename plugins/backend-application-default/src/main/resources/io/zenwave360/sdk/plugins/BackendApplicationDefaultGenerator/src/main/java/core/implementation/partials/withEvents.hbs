@@ -1,0 +1,18 @@
+{{~#if method.withEvents}}
+{{~#if includeEmitEventsImplementation}}
+    {{~#if method.returnTypeIsOptional}} if({{entity.instanceName}}.isPresent()) { {{~/if}}
+        // emit events
+        {{~#each (methodEvents method) as |event|}}
+            {{~#if (methodEntity method)}}
+            var {{asInstanceName event.name}} = eventsMapper.as{{event.name}}({{entity.instanceName}}{{#if method.returnTypeIsOptional~}} .get() {{~/if}});
+            {{~else}}
+            var {{asInstanceName event.name}} = eventsMapper.as{{event.name}}({{{methodParametersCallSignature method}}});
+            {{~/if}}
+            eventsProducer.{{operationNameForEvent event.name}}({{asInstanceName event.name}});
+        {{~/each}}
+    {{~#if method.returnTypeIsOptional}} } {{~/if}}
+{{~else}}
+// TODO emit events: {{method.withEvents}}
+// set 'includeEmitEventsImplementation' to generate an skeleton of this (and remember to set --force to overwrite this existing file)
+{{~/if}}
+{{~/if~}}

@@ -1,0 +1,44 @@
+package {{adaptersPackage}};
+
+{{#if modelPackage~}}
+import {{modelPackage}}.*;
+{{~/if}}
+{{#if consumerApiPackage~}}
+import {{consumerApiPackage}}.*;
+{{~#each operation.x--messages as |message|}}
+import {{consumerApiPackage}}.{{serviceInterfaceName operation.x--operationIdCamelCase}}.{{message.x--javaType}}Headers;
+{{~/each}}
+{{~/if}}
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+
+@Component
+public class {{serviceName operation.x--operationIdCamelCase}} implements {{serviceInterfaceName operation.x--operationIdCamelCase}} {
+
+    private Logger log = LoggerFactory.getLogger(getClass());
+
+    private EventsMapper mapper = EventsMapper.INSTANCE;
+    // TODO: private EntityService service;
+
+{{#each operation.x--messages as |message|}}
+    {{~#assign "methodName"}}{{operation.operationId}}{{methodSuffix message operation}}{{/assign}}
+    /**
+     * {{{operation.summary}}}
+     */
+    {{~#if exposeMessage}}
+    public void {{methodName}}(Message<{{message.x--javaType}}> msg) {
+        log.debug("Received command request for {{methodName}}: {} with headers {}", msg.getPayload(), msg.getHeaders());
+        // TODO: service.{{operation.operationId}}(mapper.asEntity(msg.getPayload()));
+    };
+    {{~else}}
+    public void {{methodName}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers) {
+        log.debug("Received command request for {{methodName}}: {} with headers {}", payload, headers);
+        // TODO: service.{{operation.operationId}}(mapper.asEntity(payload));
+    };
+    {{~/if}}
+{{/each~}}
+}
+
