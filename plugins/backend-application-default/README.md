@@ -1,4 +1,4 @@
-# JDL 2 Backend Application Generator
+# ZDL Backend Application Default Plugin
 > 👉 ZenWave360 Helps You Create Software Easy to Understand
 
 Generates a full backend application using a flexible hexagonal architecture.

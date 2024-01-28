@@ -24,6 +24,7 @@ config {
 
         BackendApplicationDefaultPlugin {
             useLombok true
+            includeEmitEventsImplementation true
             // --force // overwite all files
         }
 

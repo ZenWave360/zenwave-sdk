@@ -1,14 +1,14 @@
-# JDL To OpenAPI Generator
+# ZDL To OpenAPI Generator
 > 👉 ZenWave360 Helps You Create Software Easy to Understand
 
-Generate OpenAPI definition from JDL entities:
+Generate OpenAPI definition from ZDL Models:
 
 - Component Schemas for entities, plain and paginated lists
 - CRUD operations for entities
 
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.ZDLToOpenAPIPlugin \
-    specFile=src/main/resources/model/orders-model.jdl \
+    specFile=src/main/resources/model/orders-model.zdl \
     idType=integer \
     idTypeFormat=int64 \
     targetFile=src/main/resources/model/openapi.yml

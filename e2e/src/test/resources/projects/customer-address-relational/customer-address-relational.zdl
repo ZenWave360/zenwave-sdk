@@ -1,25 +1,26 @@
-
 /**
- * ZenWave Online Food Delivery - Customers Module.
+ * Simple Event-Driven CRUD for Customer/Addresses.
  */
 config {
-    title "ZenWave Online Food Delivery - Customers Module"
-    basePackage "io.zenwave360.example.customers"
-    targetFolder "modules/customers"
-    persistence mongodb
+    title "ZenWave Playground Customer-Address MariaDB"
+    basePackage "io.zenwave360.example"
+    persistence jpa
+    databaseType mariadb
+//    haltOnFailFormatting false
 
-    // these are code generation plugins for ZenWave IntelliJ Plugin, for models you can skip to 'entities' section
     plugins {
 
         ZDLToOpenAPIPlugin {
-            idType string
-            targetFile "{{targetFolder}}/src/main/resources/apis/openapi.yml"
+            idType integer
+            idTypeFormat int64
+            targetFile "src/main/resources/apis/openapi.yml"
         }
 
         ZDLToAsyncAPIPlugin {
             asyncapiVersion v3
-            idType string
-            targetFile "{{targetFolder}}/src/main/resources/apis/asyncapi.yml"
+            idType integer
+            idTypeFormat int64
+            targetFile "src/main/resources/apis/asyncapi.yml"
         }
 
         BackendApplicationDefaultPlugin {
@@ -30,11 +31,10 @@ config {
 
         OpenAPIControllersPlugin {
             formatter google // comments in one line are better for demos
-            // TODO fix this: specFile "{{targetFolder}}/src/main/resources/apis/openapi.yml"
-            specFile "modules/customers/src/main/resources/apis/openapi.yml"
-            zdlFile "models/customers.zdl"
+            specFile "src/main/resources/apis/openapi.yml"
+            zdlFile "customer-address-relational.zdl"
 
-            // these should match the values of openapi-generator-maven-plugin
+            // thse should match the values of openapi-generator-maven-plugin
             openApiApiPackage "{{basePackage}}.adapters.web"
             openApiModelPackage "{{basePackage}}.adapters.web.model"
             openApiModelNameSuffix DTO
@@ -49,25 +49,25 @@ config {
 */
 @aggregate
 entity Customer {
-  firstName String required minlength(2) maxlength(250) /** first name javadoc comment */
-  lastName String required minlength(2) maxlength(250) /** last name javadoc comment */
-  email String required unique /** email javadoc comment */
-  phone String required
-  /**
-   * address is a nested entity
-   */
-  addresses Address[] {
-    identifier String required /** Description identifier for this Address */
+    username String required unique /** username javadoc comment */
+    email String required unique /** email javadoc comment */
+}
 
-    street String required
-    city String
-    state String
-    zip String
+@aggregate
+entity Address {
+    street String required /** street javadoc comment */
+    city String /** city javadoc comment */
+    state String /** state javadoc comment */
+    zip String /** zip javadoc comment */
     type AddressType required /** address type is an enum */
-  }
 }
 
 enum AddressType {  HOME(1) /** home description */,  WORK(1) /** work description */ }
+
+relationship ManyToOne {
+    Address{customer} to Customer
+}
+
 
 // == Services =============================
 

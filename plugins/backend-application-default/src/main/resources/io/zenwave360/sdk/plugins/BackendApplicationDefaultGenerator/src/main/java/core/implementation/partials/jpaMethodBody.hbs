@@ -9,8 +9,8 @@
     {{~else if (isCrudMethod 'update' method=method entity=entity )}}
         log.debug("Request to update {{entity.className}}: {}", input);
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id);
-        {{entity.instanceName}} = {{entity.instanceName}}.map(existing{{entity.instanceName}} -> {{asInstanceName service.name}}Mapper.update(existing{{entity.instanceName}}, {{{mapperInputCallSignature method.parameter}}}));
         // saving is unnecessary: https://vladmihalcea.com/best-spring-data-jparepository/
+        {{entity.instanceName}} = {{entity.instanceName}}.map(existing{{entity.instanceName}} -> {{asInstanceName service.name}}Mapper.update(existing{{entity.instanceName}}, {{{mapperInputCallSignature method.parameter}}}));
         {{~> (partial 'withEvents')}}
         return {{wrapWithMapper entity}};
     {{~else if (isCrudMethod 'list' method=method entity=entity )}}

@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  mariadb:
+    image: mariadb:10.7.1
+    # volumes:
+    #   - ~/volumes/mysql/:/var/lib/mysql/
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_DATABASE=zenwave-playground
+    ports:
+      - 127.0.0.1:3306:3306
+    command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
+  kafka:
+    image: bashj79/kafka-kraft
+    ports:
+      - '9092:9092'

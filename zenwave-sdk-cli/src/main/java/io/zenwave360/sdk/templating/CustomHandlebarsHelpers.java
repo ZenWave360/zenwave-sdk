@@ -107,6 +107,13 @@ public class CustomHandlebarsHelpers {
         return StringUtils.endsWith(first, second);
     }
 
+    public static boolean contains(String first, Options options) throws IOException {
+        String second = options.param(0);
+        boolean ignoreCase = options.hash("ignoreCase", false);
+        return ignoreCase? StringUtils.containsIgnoreCase(first, second) : StringUtils.contains(first, second);
+    }
+
+
     public static Object ifTruthy(final Object value, final Options options)
             throws IOException {
         if (isTruthy(value)) {

@@ -1,5 +1,6 @@
 package io.zenwave360.sdk.plugins;
 
+import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.processors.AbstractBaseProcessor;
 import io.zenwave360.sdk.processors.Processor;
 import io.zenwave360.sdk.utils.FluentMap;
@@ -9,6 +10,12 @@ import io.zenwave360.sdk.zdl.ZDLHttpUtils;
 import java.util.Map;
 
 public class PathsProcessor extends AbstractBaseProcessor implements Processor {
+
+    @DocumentedOption(description = "JsonSchema type for id fields and parameters.")
+    public String idType = "string";
+
+    @DocumentedOption(description = "JsonSchema type format for id fields and parameters.")
+    public String idTypeFormat = null;
 
     {
         targetProperty = "zdl";

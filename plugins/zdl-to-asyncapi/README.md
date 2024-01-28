@@ -1,4 +1,4 @@
-# JDL To OpenAPI Generator
+# ZDL To AsyncAPI Generator
 > 👉 ZenWave360 Helps You Create Software that's Easy to Understand
 
 Generate OpenAPI definition from JDL entities:
@@ -8,7 +8,7 @@ Generate OpenAPI definition from JDL entities:
 
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.ZDLToAsyncAPIPlugin \
-    specFile=src/main/resources/model/orders-model.jdl \
+    specFile=src/main/resources/model/orders-model.zdl \
     idType=integer \
     idTypeFormat=int64 \
     targetFile=src/main/resources/model/openapi.yml
@@ -36,26 +36,4 @@ jbang zw -p io.zenwave360.sdk.plugins.ZDLToAsyncAPIPlugin \
 
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.ZDLToAsyncAPIPlugin --help
-```
-
-# OpenAPI To JDL
-
-Generates JDL model from OpenAPI schemas
-
-## Options
-
-| **Option**         | **Description**                                                            | **Type** | **Default**             | **Values** |
-|--------------------|----------------------------------------------------------------------------|----------|-------------------------|------------|
-| `specFile`         | API Specification File                                                     | URI      |                         |            |
-| `targetFolder`     | Target folder to generate code to. If left empty, it will print to stdout. | File     |                         |            |
-| `entities`         | Entities to generate code for                                              | List     | []                      |            |
-| `targetFile`       | Target file                                                                | String   | entities.jdl            |            |
-| `useRelationships` | Whether to use JDL relationships or plain field                            | boolean  | true                    |            |
-| `basePackage`      | Java Models package name                                                   | String   | io.example.domain.model |            |
-
-
-## Getting Help
-
-```shell
-jbang zw -p io.zenwave360.sdk.plugins.OpenAPIToJDLPlugin --help
 ```

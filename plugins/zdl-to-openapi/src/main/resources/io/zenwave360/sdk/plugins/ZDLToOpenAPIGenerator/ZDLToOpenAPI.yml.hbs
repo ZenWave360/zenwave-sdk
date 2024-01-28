@@ -33,7 +33,12 @@ paths:
           in: path
           required: true
           schema:
+            {{~#if (contains pathParam 'id' ignoreCase=true)}}
+            type: {{idType}}
+            {{#if idTypeFormat}}format: {{idTypeFormat}}{{/if}}
+            {{~else}}
             type: string
+            {{~/if}}
         {{~/each}}
         {{~#each path.params as |param|}}
         - name: "{{param}}"
