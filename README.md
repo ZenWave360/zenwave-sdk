@@ -17,7 +17,7 @@
 
 ZenWave SDK is a configurable and extensible toolkit for **Domain Driven Design (DDD)** and **API-First** that can generate code from a mix of different models including:
 
-- JHipster Domain Language (JDL)
+- ZDL Domain Language
 - AsyncAPI
 - OpenAPI
 
@@ -60,17 +60,17 @@ jbang alias add --name=zw \
     --repos=mavencentral,snapshots=https://s01.oss.sonatype.org/content/repositories/snapshots \
     --deps=\
 org.slf4j:slf4j-simple:1.7.36,\
-io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3:1.3.0,\
-io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:1.3.0,\
-io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:1.3.0,\
-io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured:1.3.0,\
-io.github.zenwave360.zenwave-sdk.plugins:backend-application-default:1.3.0,\
-io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi:1.3.0,\
-io.github.zenwave360.zenwave-sdk.plugins:zdl-to-asyncapi:1.3.0,\
-io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:1.3.0,\
-io.github.zenwave360.zenwave-sdk.plugins:zdl-to-markdown:1.3.0,\
-io.github.zenwave360.zenwave-sdk.plugins:openapi-controllers:1.3.0
-    io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli:1.3.0
+io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3:1.4.0,\
+io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:1.4.0,\
+io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:1.4.0,\
+io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured:1.4.0,\
+io.github.zenwave360.zenwave-sdk.plugins:backend-application-default:1.4.0,\
+io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi:1.4.0,\
+io.github.zenwave360.zenwave-sdk.plugins:zdl-to-asyncapi:1.4.0,\
+io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:1.4.0,\
+io.github.zenwave360.zenwave-sdk.plugins:zdl-to-markdown:1.4.0,\
+io.github.zenwave360.zenwave-sdk.plugins:openapi-controllers:1.4.0
+    io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli:1.4.0
 ```
 
 You can include any **custom plugin** jars in the `--deps` option.
@@ -220,7 +220,7 @@ jbang zw -p io.zenwave360.sdk.plugins.ForkPlugin -h
 | `targetFolder`          |                                                                                     | String   |                                                                        |            |
 | `sourcePluginClassName` | Plugin Plugin class to fork                                                         | String   |                                                                        |            |
 | `targetPluginClassName` | New Plugin Plugin class. It will be used for class name, package and maven groupId. | String   |                                                                        |            |
-| `downloadURL`           | Download URL for the source code of original plugin in zip format                   | URL      | https://github.com/ZenWave360/zenwave-sdk/archive/refs/tags/v1.3.0.zip |            |
+| `downloadURL`           | Download URL for the source code of original plugin in zip format                   | URL      | https://github.com/ZenWave360/zenwave-sdk/archive/refs/tags/v1.4.0.zip |            |
 
 Example:
 
