@@ -21,7 +21,7 @@ import io.zenwave360.sdk.utils.Maps;
 import io.zenwave360.sdk.zdl.ZDLFindUtils;
 
 import static io.zenwave360.sdk.utils.NamingUtils.asJavaTypeName;
-import static org.apache.commons.lang.StringUtils.trimToNull;
+import static org.apache.commons.lang3.StringUtils.trimToNull;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
@@ -349,6 +349,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         model.putAll(this.asConfigurationMap());
         model.put("context", contextModel);
         model.put("zdlModel", zdlModel);
+        model.put("isDefaultSchemaFormat", schemaFormat == SchemaFormat.schema);
         model.put("schemaFormatString", schemaFormat == SchemaFormat.schema ? defaultSchemaFormat : avroSchemaFormat);
         model.put("schemasAsString", schemasAsString);
         return handlebarsEngine.processTemplate(model, template).get(0);

@@ -1,28 +1,4 @@
 {{~#each zdlModel.entities as |entity|}}
-  {{~#unless (skipOperations entity)}}
-{{~#if entity.options.searchCriteria}}
-  /{{entity.kebabCasePlural}}/search:
-    post:
-      summary: Search {{entity.classNamePlural}}
-      operationId: search{{entity.classNamePlural}}
-      tags: [{{asTagName entity.options.service}}]
-      parameters:
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/sort'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/{{entity.options.searchCriteria}}"
-      responses:
-        "200":
-          description: {{entity.classNamePlural}}
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/{{entity.className}}Paginated"
-{{~/if}}
   /{{entity.kebabCasePlural}}:
     get:
       summary: Find {{entity.classNamePlural}}
@@ -101,5 +77,4 @@
       responses:
         "204":
           description: {{entity.className}} deleted
-  {{/unless}}
 {{/each~}}

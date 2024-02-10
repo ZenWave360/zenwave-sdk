@@ -31,14 +31,6 @@ public class ZDLToOpenAPIGenerator implements Generator {
     @DocumentedOption(description = "API Title")
     public String title;
 
-    @DocumentedOption(description = "Entities to generate code for")
-    public List<String> entities = new ArrayList<>();
-
-    @DocumentedOption(description = "Skip generating operations for entities annotated with these")
-    public List<String> annotationsToGenerate = List.of("aggregate");
-    @DocumentedOption(description = "Skip generating operations for entities annotated with these")
-    public List<String> skipForAnnotations = List.of("vo", "embedded", "skip");
-
     @DocumentedOption(description = "Target file")
     public String targetFile = "openapi.yml";
     @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas (default: x-business-entity)")
@@ -76,20 +68,7 @@ public class ZDLToOpenAPIGenerator implements Generator {
         return (Map) contextModel.get(sourceProperty);
     }
 
-    protected boolean isGenerateSchemaEntity(Map<String, Object> entity) {
-        String entityName = (String) entity.get("name");
-        return entities.isEmpty() || entities.contains(entityName);
-    }
-
     {
-        handlebarsEngine.getHandlebars().registerHelper("skipOperations", (context, options) -> {
-            Map entity = (Map) context;
-            String annotationsFilter = annotationsToGenerate.stream().map(a -> "@." + a).collect(Collectors.joining(" || "));
-            String skipAnnotationsFilter = skipForAnnotations.stream().map(a -> "@." + a).collect(Collectors.joining(" || "));
-            boolean isGenerate = annotationsToGenerate.isEmpty() || !((List) JSONPath.get(entity, "$.options[?(" + annotationsFilter + ")]")).isEmpty();
-            boolean isSkip = skipForAnnotations.isEmpty() || !((List) JSONPath.get(entity, "$.options[?(" + skipAnnotationsFilter + ")]")).isEmpty();
-            return !isGenerate || isSkip;
-        });
         handlebarsEngine.getHandlebars().registerHelper("serviceAggregates", (context, options) -> {
             Map service = options.hash("service", new HashMap<>());
             Map zdl = options.hash("zdl", new HashMap<>());
@@ -125,10 +104,6 @@ public class ZDLToOpenAPIGenerator implements Generator {
         List<String> serviceNames = JSONPath.get(zdlModel, "$.options.options.service[*].value");
         ((Map) zdlModel).put("serviceNames", serviceNames);
 
-        if(this.entities == null) {
-            this.entities = ZDLFindUtils.findAllServiceFacingEntities(zdlModel);
-        }
-
         var paginatedEntities = ZDLFindUtils.findAllPaginatedEntities(zdlModel);
         var listedEntities = ZDLFindUtils.findAllEntitiesReturnedAsList(zdlModel);
         zdlModel.put("paginatedEntities", paginatedEntities);
@@ -140,11 +115,9 @@ public class ZDLToOpenAPIGenerator implements Generator {
 
         EntitiesToSchemasConverter converter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withZdlBusinessEntityProperty(zdlBusinessEntityProperty);
 
-        List<Map<String, Object>> entities = (List) JSONPath.get(zdlModel, "$.allEntitiesAndEnums[*]");
+        var methodsWithRest = JSONPath.get(zdlModel, "$.services[*].methods[*][?(@.options.get || @.options.post || @.options.put || @.options.delete || @.options.patch)]", Collections.<Map>emptyList());
+        List<Map<String, Object>> entities = filterSchemasToInclude(zdlModel, methodsWithRest);
         for (Map<String, Object> entity : entities) {
-            if (!isGenerateSchemaEntity(entity)) {
-                continue;
-            }
             String entityName = (String) entity.get("name");
             Map<String, Object> openAPISchema = converter.convertToSchema(entity, zdlModel);
             schemas.put(entityName, openAPISchema);
@@ -166,14 +139,11 @@ public class ZDLToOpenAPIGenerator implements Generator {
             }
         }
 
-        List<Map<String, Object>> enums = JSONPath.get(zdlModel, "$.enums.enums[*]", emptyList());
-        for (Map<String, Object> enumValue : enums) {
-            if (!isGenerateSchemaEntity(enumValue)) {
-                continue;
-            }
-            Map<String, Object> enumSchema = converter.convertToSchema(enumValue, zdlModel);
-            schemas.put((String) enumValue.get("name"), enumSchema);
-        }
+//        List<Map<String, Object>> enums = JSONPath.get(zdlModel, "$.enums[*]", emptyList());
+//        for (Map<String, Object> enumValue : enums) {
+//            Map<String, Object> enumSchema = converter.convertToSchema(enumValue, zdlModel);
+//            schemas.put((String) enumValue.get("name"), enumSchema);
+//        }
 
         String openAPISchemasString = null;
         try {
@@ -186,6 +156,80 @@ public class ZDLToOpenAPIGenerator implements Generator {
 
         return List.of(generateTemplateOutput(contextModel, zdlToOpenAPITemplate, zdlModel, openAPISchemasString));
     }
+
+    protected List<Map<String, Object>> filterSchemasToInclude(Map<String, Object> model, List<Map> methodsWithCommands) {
+        Map<String, Object> allEntitiesAndEnums = (Map) model.get("allEntitiesAndEnums");
+        Map<String, Object> relationships = (Map) model.get("relationships");
+
+        List<Map<String, Object>> schemasToInclude = new ArrayList<>();
+        JSONPath.get(methodsWithCommands, "$.[*].parameter", List.of()).forEach(parameter -> {
+            var entity = JSONPath.get(allEntitiesAndEnums, "$.['" + parameter + "']", null);
+            if (entity != null) {
+                if (JSONPath.get(entity, "$.options.inline", false)) {
+                    var fields = JSONPath.get(entity, "$.fields[*].type", List.<String>of());
+                    for (String type : fields) {
+                        var inlineEntity = JSONPath.get(allEntitiesAndEnums, "$.['" + parameter + "']", null);
+                        if(inlineEntity != null) {
+                            schemasToInclude.add((Map) inlineEntity);
+                        }
+                    }
+                } else {
+                    schemasToInclude.add((Map) entity);
+                }
+            }
+        });
+        JSONPath.get(methodsWithCommands, "$.[*].returnType", List.of()).forEach(parameter -> {
+            var entity = JSONPath.get(allEntitiesAndEnums, "$.['" + parameter + "']", null);
+            if(entity != null) {
+                schemasToInclude.add((Map) entity);
+            }
+        });
+
+        Set<String> includeNames = new HashSet<>();
+        for (Map<String, Object> schema : schemasToInclude) {
+            includeNames.add((String) schema.get("name"));
+            addReferencedTypeToIncludeNames(schema, allEntitiesAndEnums, includeNames);
+        }
+
+        for (String includeName : new ArrayList<>(includeNames)) {
+            Map<String, Object> entity = (Map) allEntitiesAndEnums.get(includeName);
+            if (entity != null) {
+                addRelationshipTypeToIncludeNames(entity, allEntitiesAndEnums, relationships, includeNames);
+            }
+        }
+
+        List<Map<String, Object>> schemasToIncludeList = new ArrayList<>(schemasToInclude);
+        for (String includeName : includeNames) {
+            Map<String, Object> entity = (Map) allEntitiesAndEnums.get(includeName);
+            if (entity != null) {
+                schemasToIncludeList.add(entity);
+            }
+        }
+
+        return schemasToIncludeList;
+    }
+
+    private void addRelationshipTypeToIncludeNames(Map<String, Object> entity, Map<String, Object> entitiesMap, Map<String, Object> relationships, Set<String> includeNames) {
+        var entityName = entity.get("name");
+        var relatedTypes = new HashSet<String>(JSONPath.get(relationships, "$..[?(@.from == '" + entityName + "')].to", List.of()));
+        for (String fieldType : relatedTypes) {
+            if (entitiesMap.containsKey(fieldType) && !includeNames.contains(fieldType)) {
+                includeNames.add(fieldType);
+                addReferencedTypeToIncludeNames((Map) entitiesMap.get(fieldType), entitiesMap, includeNames);
+            }
+        }
+    }
+
+    protected void addReferencedTypeToIncludeNames(Map<String, Object> entity, Map<String, Object> entitiesMap, Set<String> includeNames) {
+        var fieldTypes = new HashSet<String>(JSONPath.get(entity, "$.fields[*].type", List.of()));
+        for (String fieldType : fieldTypes) {
+            if (entitiesMap.containsKey(fieldType) && !includeNames.contains(fieldType)) {
+                includeNames.add(fieldType);
+                addReferencedTypeToIncludeNames((Map) entitiesMap.get(fieldType), entitiesMap, includeNames);
+            }
+        }
+    }
+
 
     public TemplateOutput generateTemplateOutput(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> zdlModel, String schemasAsString) {
         Map<String, Object> model = new HashMap<>();

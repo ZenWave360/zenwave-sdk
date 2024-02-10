@@ -38,7 +38,7 @@ public class ZDL2JDLProcessor extends AbstractBaseProcessor {
             JSONPath.set(model, "$.options.options.search", true);
         }
 
-        var enums = JSONPath.get(model, "$.enums.enums[*].name", List.of());
+        var enums = JSONPath.get(model, "$.enums[*].name", List.of());
         var entities = JSONPath.get(model, "$.entities[*].name", List.of());
         var fields = JSONPath.get(model, "$.entities[*].fields.[*]", List.of());
         for (Object field : fields) {

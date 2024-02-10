@@ -49,7 +49,7 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
             var associations = JSONPath.get(entity, "relationships[?(@.fieldName)].otherEntityName", List.of());
             var entityAssociations = new ArrayList<Map>();
             compositions.stream().map(name -> Maps.of("linkType", "--*", "entity", JSONPath.get(zdlModel, "$.entities." + name))).forEach(entityAssociations::add);
-            compositions.stream().map(name -> Maps.of("linkType", "--*", "entity", JSONPath.get(zdlModel, "$.enums.enums." + name))).forEach(entityAssociations::add);
+            compositions.stream().map(name -> Maps.of("linkType", "--*", "entity", JSONPath.get(zdlModel, "$.enums." + name))).forEach(entityAssociations::add);
             associations.stream().map(name -> Maps.of("linkType", "--o", "entity", JSONPath.get(zdlModel, "$.entities." + name))).forEach(entityAssociations::add);
             return entityAssociations.stream().filter(e -> e.get("entity") != null).collect(Collectors.toList());
         });

@@ -66,6 +66,10 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
             return null;
         }
 
+        public String getSchemaFormat(String asyncApiVersion) {
+            return schemaFormatPrefix + "version=" + asyncApiVersion;
+        }
+
     }
 
     @DocumentedOption(description = "AsyncAPI extension property name for runtime autoconfiguration of headers.")
@@ -202,8 +206,9 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
     }
 
     private String findSchemaFormat(Map<String, Object> apiModel, Map<String, Object> message) {
-        var schemaFormatPath = AsyncAPIUtils.isV3(apiModel) ? "$.payload.schemaFormat" : "$.schemaFormat";
-        var schemaFormat = firstNonNull(JSONPath.get(message, schemaFormatPath), JSONPath.get(apiModel, "$.schemaFormat"));
+        var asyncapiVersion = JSONPath.get(apiModel, "$.asyncapi");
+        var defaultSchemaFormat = AsyncApiProcessor.SchemaFormatType.ASYNCAPI_YAML.getSchemaFormat((String) asyncapiVersion);
+        var schemaFormat = firstNonNull(JSONPath.getFirst(message, "$.payload.schemaFormat", "$.schemaFormat"), defaultSchemaFormat);
         return normalizeSchemaFormat((String) schemaFormat);
     }
 
@@ -211,16 +216,15 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
         String schemaFormat = findSchemaFormat(apiModel, message);
         String javaType = null;
         if ("avro".equals(schemaFormat)) {
-            String name = JsonPath.read(message, "payload.name");
-            String namespace = JsonPath.read(message, "payload.namespace");
+            String name = JSONPath.getFirst(message, "$.payload.schema.name", "$.payload.name");
+            String namespace = JSONPath.getFirst(message,"$.payload.schema.namespace", "$.payload.namespace");
             javaType = namespace + "." + name;
         }
         if ("jsonSchema".equals(schemaFormat)) {
-            javaType = JsonPath.read(message, "payload.javaType");
+            javaType = JSONPath.getFirst(message,"$.payload.schema.javaType", "$.payload.javaType");
         }
         if ("asyncapi".equals(schemaFormat) || "openapi".equals(schemaFormat)) {
-            var schemaNamePath = AsyncAPIUtils.isV3(apiModel) ? "payload.schema.x--schema-name" : "payload.x--schema-name";
-            javaType = normalizeTagName(JSONPath.get(message, schemaNamePath));
+            javaType = normalizeTagName(JSONPath.getFirst(message, "$.payload.schema.x--schema-name", "$.payload.x--schema-name"));
             if (javaType == null) {
                 javaType = normalizeTagName((String) message.getOrDefault("x-javaType", message.getOrDefault("messageId", message.get("name"))));
             }

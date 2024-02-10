@@ -26,14 +26,14 @@
       <version>${handlebars-java.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.github.jknack</groupId>
-      <artifactId>handlebars-jackson2</artifactId>
-      <version>${handlebars-java.version}</version>
-    </dependency>
-    <dependency>
       <groupId>io.github.zenwave360</groupId>
       <artifactId>json-schema-ref-parser-jvm</artifactId>
       <version>${json-schema-ref-parser-jvm.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jknack</groupId>
+      <artifactId>handlebars-jackson2</artifactId>
+      <version>${handlebars-java.version}</version>
     </dependency>
     <dependency>
       <groupId>io.github.zenwave360.zenwave-sdk</groupId>

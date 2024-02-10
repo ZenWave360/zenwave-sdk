@@ -120,7 +120,7 @@ public class JDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         toSchemasConverter.includeVersion = false;
 
         List<Map<String, Object>> entities = (List) JSONPath.get(zdlModel, "$.entities[*]");
-        List<Map<String, Object>> enums = (List) JSONPath.get(zdlModel, "$.enums.enums[*]");
+        List<Map<String, Object>> enums = (List) JSONPath.get(zdlModel, "$.enums[*]");
         List<Map> entitiesAndEnums = new ArrayList<>();
         entitiesAndEnums.addAll(entities);
         entitiesAndEnums.addAll(enums);

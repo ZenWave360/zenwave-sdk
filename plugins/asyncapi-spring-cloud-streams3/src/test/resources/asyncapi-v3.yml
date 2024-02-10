@@ -67,21 +67,23 @@ components:
       name: CustomerInputMessage
       title: Customer input javadoc comment
       summary: Customer input javadoc comment
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/CustomerInput"
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/CustomerInput"
     CustomerEventMessage:
       messageId: CustomerEventMessage
       name: CustomerEventMessage
       title: 
       summary: 
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/CustomerEvent"
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/CustomerEvent"
     CustomerCreatedMessage:
       messageId: CustomerCreatedMessage
       name: CustomerCreatedMessage

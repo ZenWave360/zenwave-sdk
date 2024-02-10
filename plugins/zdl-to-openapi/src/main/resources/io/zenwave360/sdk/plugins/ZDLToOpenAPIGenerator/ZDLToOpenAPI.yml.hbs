@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: {{title}}
+  title: "{{title}}"
   version: 0.0.1
   description: "{{title}}"
   contact:
@@ -28,23 +28,24 @@ paths:
       tags: [{{#joinWithTemplate operation.tags delimiter=", " as |tag|}}{{asTagName tag}}{{/joinWithTemplate}}]
       {{~#if operation.hasParams}}
       parameters:
-        {{~#each operation.pathParams as |pathParam|}}
-        - name: "{{pathParam}}"
+        {{~#each operation.pathParamsMap as |pathParam|}}
+        - name: "{{pathParam.name}}"
           in: path
           required: true
           schema:
-            {{~#if (contains pathParam 'id' ignoreCase=true)}}
-            type: {{idType}}
-            {{#if idTypeFormat}}format: {{idTypeFormat}}{{/if}}
-            {{~else}}
-            type: string
+            type: {{pathParam.type}}
+            {{~#if pathParam.format}}
+            format: {{pathParam.format}}
             {{~/if}}
         {{~/each}}
-        {{~#each path.params as |param|}}
-        - name: "{{param}}"
+        {{~#each path.queryParams as |queryParam|}}
+        - name: "{{queryParam.name}}"
           in: query
           schema:
-            type: string
+            type: {{queryParam.type}}
+            {{~#if queryParam.format}}
+            format: {{queryParam.format}}
+            {{~/if}}
         {{~/each}}
         {{~#if operation.paginated}}
         - $ref: "#/components/parameters/page"
