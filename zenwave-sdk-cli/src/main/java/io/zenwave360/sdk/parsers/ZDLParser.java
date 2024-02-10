@@ -64,7 +64,7 @@ public class ZDLParser implements Parser {
         if(zdlString == null) {
             zdlString = Arrays.stream(specFiles).map(this::loadSpecFile).collect(Collectors.joining());
         }
-        Map<String, Object> zdlModel = ZdlParser.parseModel(zdlString);
+        Map<String, Object> zdlModel = new ZdlParser().parseModel(zdlString);
         var problems = JSONPath.get(zdlModel, "$.problems", List.of());
         if(!problems.isEmpty()) {
             for (Object problem : problems) {
