@@ -1,4 +1,5 @@
 # Site settings
+url: https://www.zenwave360.io/zenwave-sdk/
 title: ZenWave SDK
 description: DDD and API-First Modeling Tools
 github_username: ivangsa
