@@ -168,7 +168,7 @@ public class ZDLToOpenAPIGenerator implements Generator {
                 if (JSONPath.get(entity, "$.options.inline", false)) {
                     var fields = JSONPath.get(entity, "$.fields[*].type", List.<String>of());
                     for (String type : fields) {
-                        var inlineEntity = JSONPath.get(allEntitiesAndEnums, "$.['" + parameter + "']", null);
+                        var inlineEntity = JSONPath.get(allEntitiesAndEnums, "$.['" + type + "']", null);
                         if(inlineEntity != null) {
                             schemasToInclude.add((Map) inlineEntity);
                         }

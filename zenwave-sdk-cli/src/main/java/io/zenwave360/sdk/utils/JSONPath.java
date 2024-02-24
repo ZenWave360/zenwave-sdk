@@ -18,6 +18,7 @@ public class JSONPath {
             return null;
         }
         try {
+            jsonPath = escapeByteArrayType(jsonPath);
             return (T) JsonPath.using(config).parse(object).read(jsonPath);
         } catch (PathNotFoundException e) {
             return null;
@@ -41,6 +42,7 @@ public class JSONPath {
             return null;
         }
         try {
+            jsonPath = escapeByteArrayType(jsonPath);
             return ObjectUtils.firstNonNull(JsonPath.using(config).parse(object).read(jsonPath), defaultIfNull);
         } catch (PathNotFoundException e) {
             return defaultIfNull;
@@ -68,5 +70,13 @@ public class JSONPath {
             }
         }
         JsonPath.parse(object).set(jsonPath, value);
+    }
+
+    /** 'byte[]' is a valid field type in ZDL so we need to test for it in 'entities', 'enums'... */
+    private static String escapeByteArrayType(String jsonPath) {
+        if(jsonPath == null) {
+            return null;
+        }
+        return jsonPath.replace(".byte[]", "['byte[]']");
     }
 }

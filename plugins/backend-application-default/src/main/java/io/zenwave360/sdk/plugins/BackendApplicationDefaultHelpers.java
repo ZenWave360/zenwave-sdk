@@ -251,6 +251,9 @@ public class BackendApplicationDefaultHelpers {
             if (documentedOptions > 0) {
                 return "@DocumentReference";
             }
+            if(JSONPath.get(field, "options.transient", false)) {
+                return "@org.springframework.data.annotation.Transient";
+            }
             return "@Field";
         }
         return "";

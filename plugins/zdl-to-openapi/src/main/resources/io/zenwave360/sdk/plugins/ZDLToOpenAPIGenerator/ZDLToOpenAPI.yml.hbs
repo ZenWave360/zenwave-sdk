@@ -38,7 +38,7 @@ paths:
             format: {{pathParam.format}}
             {{~/if}}
         {{~/each}}
-        {{~#each path.queryParams as |queryParam|}}
+        {{~#each operation.queryParamsMap as |queryParam|}}
         - name: "{{queryParam.name}}"
           in: query
           schema:

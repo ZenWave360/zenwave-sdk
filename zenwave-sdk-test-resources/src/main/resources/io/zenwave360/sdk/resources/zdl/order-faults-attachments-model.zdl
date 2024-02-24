@@ -20,6 +20,7 @@ entity PurchaseOrder { // Order is a reserved word
     mimetype String
     url String
     orderLineIds String[]
+    @transient contents byte[]
   }
 }
 
