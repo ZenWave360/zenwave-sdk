@@ -1,6 +1,6 @@
-package {{basePackage}}.infrastructure.jpa.inmemory;
+package {{infrastructurePackage}}.jpa.inmemory;
 
-import {{basePackage}}.core.domain.*;
+import {{entitiesPackage}}.*;
 import {{basePackage}}.core.outbound.jpa.{{entity.className}}Repository;
 
 public class {{entity.className}}RepositoryInMemory extends InMemoryJpaRepository<{{entity.className}}> implements {{entity.className}}Repository {
