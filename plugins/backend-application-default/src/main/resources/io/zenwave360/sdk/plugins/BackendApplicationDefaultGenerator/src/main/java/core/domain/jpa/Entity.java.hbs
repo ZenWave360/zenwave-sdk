@@ -32,7 +32,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 {{~/if}}
 {{~#if entity.options.auditing}}@EntityListeners(AuditingEntityListener.class){{~/if}}
-public class {{entity.className}} {{addExtends entity}} implements Serializable {
+public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}} implements Serializable {
 
     @java.io.Serial
     private static final long serialVersionUID = 1L;

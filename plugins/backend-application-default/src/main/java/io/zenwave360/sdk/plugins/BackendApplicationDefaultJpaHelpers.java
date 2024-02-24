@@ -41,4 +41,5 @@ public class BackendApplicationDefaultJpaHelpers {
             })
             .collect(Collectors.toList());
     }
+
 }

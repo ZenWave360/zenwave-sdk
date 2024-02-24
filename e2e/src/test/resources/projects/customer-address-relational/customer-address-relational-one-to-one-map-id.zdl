@@ -65,7 +65,7 @@ entity Address {
 enum AddressType {  HOME(1) /** home description */,  WORK(1) /** work description */ }
 
 relationship OneToOne {
-    Customer{address} to @Id Address{customer}
+    Customer{address required} to @Id Address{customer}
 }
 
 

@@ -1,4 +1,7 @@
 {{#if relationship.ownerSide}}
+    {{~#if relationship.required}}
+@NotNull
+    {{~/if}}
 @OneToMany(mappedBy = "{{relationship.otherEntityFieldName}}"{{#if entity.options.aggregate}}, cascade = CascadeType.ALL, orphanRemoval = true{{/if}})
 {{else}}
 @ManyToOne(fetch = FetchType.LAZY)

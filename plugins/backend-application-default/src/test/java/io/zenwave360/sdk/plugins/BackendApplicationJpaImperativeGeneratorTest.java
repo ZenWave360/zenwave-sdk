@@ -37,7 +37,7 @@ public class BackendApplicationJpaImperativeGeneratorTest {
     public void test_generator_hexagonal_jpa() throws Exception {
         String targetFolder = "target/zdl/test_generator_hexagonal_jpa_customer_address";
         Plugin plugin = new BackendApplicationDefaultPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address-relational.zdl")
+                .withSpecFile("C:\\Users\\IvanGarcia\\workspace\\zenwave\\zenwave-sdk\\e2e\\src\\test\\resources\\projects\\customer-address-relational\\customer-address-relational-one-to-one-map-id.zdl")
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.jpa)

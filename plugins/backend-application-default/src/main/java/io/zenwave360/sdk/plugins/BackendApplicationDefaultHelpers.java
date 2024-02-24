@@ -321,6 +321,10 @@ public class BackendApplicationDefaultHelpers {
         return "";
     };
 
+    public String abstractClass(Map entity, Options options) {
+        return JSONPath.get(entity, "options.abstract", false)? " abstract " : "";
+    }
+
     public Object eventsProducerInterface(String serviceName, Options options) {
         return String.format("I%sEventsProducer", serviceName.replaceAll("(Service|UseCases)", ""));
     }
