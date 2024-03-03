@@ -36,6 +36,7 @@ enum OrderFaultType { TIME, QUALITY }
 @rest("/order-attachments")
 service AttachmentService for (PurchaseOrder) {
 
+  @async("asyncExecutor")
   @post("/{businessUnit}/{orderId}")
   uploadFile(PurchaseOrder) PurchaseOrder
 

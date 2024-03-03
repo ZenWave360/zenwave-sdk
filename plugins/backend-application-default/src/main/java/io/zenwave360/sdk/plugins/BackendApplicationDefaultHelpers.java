@@ -5,7 +5,9 @@ import java.util.stream.Collectors;
 
 import io.zenwave360.sdk.utils.NamingUtils;
 import io.zenwave360.sdk.zdl.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.ZDLHttpUtils;
 import io.zenwave360.sdk.zdl.ZDLJavaSignatureUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.jknack.handlebars.Options;
@@ -14,6 +16,7 @@ import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.utils.JSONPath;
 
 import static io.zenwave360.sdk.utils.NamingUtils.asJavaTypeName;
+import static java.lang.String.format;
 
 public class BackendApplicationDefaultHelpers {
 

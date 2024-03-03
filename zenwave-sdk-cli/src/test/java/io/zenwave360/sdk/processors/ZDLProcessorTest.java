@@ -29,4 +29,15 @@ public class ZDLProcessorTest {
         Assertions.assertTrue(customerEventFields.size() > 1);
     }
 
+    @Test
+    public void testProcessZDL_ProcessAsyncMethods() throws Exception {
+        var model = loadZDL("classpath:io/zenwave360/sdk/zdl/async-methods.zdl");
+        var methods = JSONPath.get(model, "$.zdl.services.SomeEntityService.methods", Map.of());
+        Assertions.assertNotNull(methods);
+        Assertions.assertEquals(4, methods.size());
+        var syncMethods = JSONPath.get(model, "$.zdl.services.SomeEntityService.methods[*][?(!@.options.async)]", List.of());
+        Assertions.assertNotNull(syncMethods);
+        Assertions.assertEquals(2, syncMethods.size());
+    }
+
 }

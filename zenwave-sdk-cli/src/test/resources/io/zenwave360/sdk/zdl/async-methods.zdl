@@ -1,0 +1,14 @@
+
+@aggregate
+entity SomeEntity {
+}
+
+service SomeEntityService for (SomeEntity) {
+
+   @async("asyncExecutor")
+   oneMethod(id, SomeEntity)
+
+   @async("asyncExecutor")
+   anotherMethod(id, SomeEntity) SomeEntity
+
+}

@@ -5,6 +5,9 @@ import {{inboundDtosPackage}}.*;
 import java.math.*;
 import java.time.*;
 import java.util.*;
+{{~#if (jsonPath service 'methods[*][?(@.options.async)]')}}
+import java.util.concurrent.CompletableFuture;
+{{~/if}}
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

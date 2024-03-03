@@ -34,6 +34,7 @@ public class HandlebarsEngineTest {
         Assertions.assertTrue(templateOutput.getContent().contains("asJavaTypeName TratraTratra"));
         Assertions.assertTrue(templateOutput.getContent().contains("kebabCase some-camel-case-with-spaces"));
         Assertions.assertTrue(templateOutput.getContent().contains("asPackageFolder io/zenwave360/sdk/templating"));
+        Assertions.assertTrue(templateOutput.getContent().contains("jsonPath entity1"));
         Assertions.assertTrue(templateOutput.getContent().contains("Prefix2Suffix"));
         Assertions.assertTrue(templateOutput.getContent().contains("ifTruthy true: true"));
         Assertions.assertTrue(templateOutput.getContent().contains("ifTruthy false: false"));

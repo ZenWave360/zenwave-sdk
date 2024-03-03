@@ -94,7 +94,7 @@ public class ZDLJavaSignatureUtilsTest {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
         var method = JSONPath.get(model, "$.services.AttachmentService.methods.uploadFile", Map.of());
         var returnType = ZDLJavaSignatureUtils.methodReturnType(method);
-        Assertions.assertEquals("PurchaseOrder", returnType);
+        Assertions.assertEquals("CompletableFuture<PurchaseOrder>", returnType);
     }
 
     @Test

@@ -114,6 +114,10 @@ public class ZDLJavaSignatureUtils {
         if(isOptional) {
             return String.format("Optional<%s>", returnType);
         }
+        var isAsync = JSONPath.get(method, "options.async") != null;
+        if(isAsync) {
+            return String.format("CompletableFuture<%s>", returnType);
+        }
         return (String) returnType;
     }
 
