@@ -147,6 +147,11 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
         ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/ServicesInMemoryConfig.java",
                 "{{asPackageFolder configPackage}}/ServicesInMemoryConfig.java", JAVA, null, true);
 
+        ts.addTemplate(ts.singleTemplates, "src/test/java", "config/TestDataLoader-{{persistence}}.java",
+                "{{asPackageFolder configPackage}}/TestDataLoader.java", JAVA, null, true);
+        ts.addTemplate(ts.singleTemplates, "src/test/java", "config/DockerComposeInitializer-{{persistence}}.java",
+                "{{asPackageFolder configPackage}}/DockerComposeInitializer.java", JAVA, null, true);
+
         ts.addTemplate(ts.singleTemplates, "src/main/java", "core/inbound/dtos/package-info.java",
                 "{{asPackageFolder inboundDtosPackage}}/package-info.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/main/java", "infrastructure/package-info.java",

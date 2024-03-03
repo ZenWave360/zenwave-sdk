@@ -54,6 +54,11 @@ public class BackendMultiModuleApplicationGenerator extends BackendDefaultApplic
         ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/ServicesInMemoryConfig.java", "{{mavenModulesPrefix}}-impl",
                 "{{asPackageFolder configPackage}}/ServicesInMemoryConfig.java", JAVA, null, true);
 
+        ts.addTemplate(ts.singleTemplates, "src/test/java", "config/TestDataLoader-{{persistence}}.java", "{{mavenModulesPrefix}}-impl",
+                "{{asPackageFolder configPackage}}/TestDataLoader.java", JAVA, null, true);
+        ts.addTemplate(ts.singleTemplates, "src/test/java", "config/DockerComposeInitializer-{{persistence}}.java", "{{mavenModulesPrefix}}-impl",
+                "{{asPackageFolder configPackage}}/DockerComposeInitializer.java", JAVA, null, true);
+
         ts.addTemplate(ts.singleTemplates, "src/main/java", "core/inbound/dtos/package-info.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder inboundDtosPackage}}/package-info.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/main/java", "infrastructure/package-info.java", "{{mavenModulesPrefix}}-infra",

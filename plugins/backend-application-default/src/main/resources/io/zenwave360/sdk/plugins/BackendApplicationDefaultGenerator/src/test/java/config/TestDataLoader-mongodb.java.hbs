@@ -1,0 +1,97 @@
+package {{basePackage}}.config;
+
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.boot.autoconfigure.mongo.MongoProperties;
+import org.springframework.boot.context.properties.PropertyMapper;
+import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.data.convert.Jsr310Converters;
+import org.springframework.data.mapping.model.FieldNamingStrategy;
+import org.springframework.data.mongodb.MongoManagedTypes;
+import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
+import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
+import org.springframework.data.mongodb.core.convert.NoOpDbRefResolver;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
+import org.springframework.data.util.NullableWrapperConverters;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class TestDataLoader {
+
+    private List<? extends Class<?>> mongoManagedTypes;
+
+    public TestDataLoader(List<? extends Class<?>> mongoManagedTypes) {
+        this.mongoManagedTypes = mongoManagedTypes;
+    }
+
+    public <T> List<T> loadCollectionTestDataAsObjects(Class<T> collectionClass) {
+        var jsonList = loadCollectionTestDataAsJson(collectionClass);
+        return jsonList.stream().map(json -> read(collectionClass, json)).collect(Collectors.toList());
+    }
+
+    public List<String> loadCollectionTestDataAsJson(Class collectionClass) {
+        var annotation = (Document) collectionClass.getAnnotation(Document.class);
+        var collection = annotation.collection();
+        return readDirectoryFilesAsString("src/test/resources/data/mongodb/" + collection);
+    }
+
+    public List<String> loadCollectionTestDataAsJson(String collection) {
+        return readDirectoryFilesAsString("src/test/resources/data/mongodb/" + collection);
+    }
+
+    public List<String> listAllMongodbCollectionsWithTestData() {
+        return listFolders("src/test/resources/data/mongodb");
+    }
+
+    protected List<String> listFolders(String directory) {
+        return Stream.of(new File(directory).listFiles()).map(File::getName).collect(Collectors.toList());
+    }
+
+    protected List<String> readDirectoryFilesAsString(String directory) {
+        return Stream.of(new File(directory).listFiles()).map(f -> {
+            try {
+                return Files.readString(f.toPath());
+            } catch (java.io.IOException e) {
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.toList());
+    }
+
+    public <T> T read(Class<T> type, String json) {
+        return mappingConverter.read(type, org.bson.Document.parse(json));
+    }
+
+    MappingMongoConverter mappingConverter = mappingConverter();
+
+    MappingMongoConverter mappingConverter() {
+        MappingMongoConverter mappingConverter = new MappingMongoConverter(NoOpDbRefResolver.INSTANCE, mongoMappingContext());
+        DefaultConversionService conversionService = (DefaultConversionService) mappingConverter.getConversionService();
+        Jsr310Converters.getConvertersToRegister().forEach(conversionService::addConverter);
+        NullableWrapperConverters.registerConvertersIn(conversionService);
+        conversionService.removeConvertible(Object.class, Object.class);
+        return mappingConverter;
+    }
+
+    MongoMappingContext mongoMappingContext() {
+        var properties = new MongoProperties();
+        var managedTypes = MongoManagedTypes.fromIterable(mongoManagedTypes);
+        PropertyMapper map = PropertyMapper.get().alwaysApplyingWhenNonNull();
+        MongoMappingContext context = new MongoMappingContext();
+        map.from(properties.isAutoIndexCreation()).to(context::setAutoIndexCreation);
+        context.setManagedTypes(managedTypes);
+        Class<?> strategyClass = properties.getFieldNamingStrategy();
+        if (strategyClass != null) {
+            context.setFieldNamingStrategy((FieldNamingStrategy) BeanUtils.instantiateClass(strategyClass));
+        }
+        var conversions = new MongoCustomConversions(Collections.emptyList());
+        context.setSimpleTypeHolder(conversions.getSimpleTypeHolder());
+        context.afterPropertiesSet();
+        return context;
+    }
+}

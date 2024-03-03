@@ -1,5 +1,8 @@
 package {{basePackage}}.config;
 
+{{#if entities}}
+import {{entitiesPackage}}.*;
+{{/if}}
 {{#if services}}
 import {{coreImplementationPackage}}.*;
 {{/if}}
@@ -9,6 +12,8 @@ import {{outboundEventsPackage}}.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+
+import java.util.List;
 
 /**
  * Services InMemory Config. It can be used standalone or with @SpringBootTest.
@@ -38,4 +43,17 @@ public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
         return {{asInstanceName service.name}};
     }
 {{~/each}}
+
+{{assign "aggregates" (jsonPath entities "[*][?(@.options.aggregate)]")}}
+{{~#each aggregates as |entity|}}
+	static List<{{entity.className}}> _{{entity.instanceNamePlural}};
+{{~/each}}
+	public void reloadTestData() {
+		var testDataLoader = new TestDataLoader(List.of({{#joinWithTemplate entities delimiter=', ' as |entity|}}{{entity.className}}.class{{/joinWithTemplate}}));
+        {{~#each aggregates as |entity|}}
+		var {{entity.instanceNamePlural}} = _{{entity.instanceNamePlural}} != null? _{{entity.instanceNamePlural}} : testDataLoader.loadCollectionTestDataAsObjects({{entity.className}}.class);
+		{{entity.className}}Repository().deleteAll();
+		{{entity.className}}Repository().saveAll({{entity.instanceNamePlural}});
+		{{~/each}}
+	}
 }
