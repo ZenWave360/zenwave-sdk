@@ -2,12 +2,12 @@ package io.zenwave360.sdk.generators;
 
 import java.util.*;
 
+import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Lists;
 import io.zenwave360.sdk.utils.Maps;
 
 public class EntitiesToSchemasConverter {
-    private static final List blobTypes = List.of("Blob", "AnyBlob", "ImageBlob");
 
     public String zdlBusinessEntityProperty = "x-business-entity";
 
@@ -176,28 +176,31 @@ public class EntitiesToSchemasConverter {
         } else if ("Duration".equals(entityType)) {
             property.put("type", "string");
             // property.put("format", "date-time");
-        } else if ("Integer".equals(entityType)) {
+        } else if ("Integer".equals(entityType) || "int".equals(entityType)) {
             property.put("type", "integer");
             property.put("format", "int32");
-        } else if ("Long".equals(entityType)) {
+        } else if ("Long".equals(entityType) || "long".equals(entityType)) {
             property.put("type", "integer");
             property.put("format", "int64");
-        } else if ("Float".equals(entityType)) {
+        } else if ("Float".equals(entityType) || "float".equals(entityType)) {
             property.put("type", "number");
             property.put("format", "float");
-        } else if ("Double".equals(entityType) || "BigDecimal".equals(entityType)) {
+        } else if ("Double".equals(entityType) || "double".equals(entityType) || "BigDecimal".equals(entityType)) {
             property.put("type", "number");
             property.put("format", "double");
-        } else if ("Boolean".equals(entityType)) {
+        } else if ("Boolean".equals(entityType) || "boolean".equals(entityType)) {
             property.put("type", "boolean");
         } else if ("UUID".equals(entityType)) {
             property.put("type", "string");
             property.put("pattern", "^[a-f\\d]{4}(?:[a-f\\d]{4}-){4}[a-f\\d]{12}$");
-        } else if (blobTypes.contains(entityType)) {
+        } else if (ZDLParser.blobTypes.contains(entityType)) {
             property.put("type", "string");
             property.put("format", "binary");
         } else {
             property.put("type", "string");
+        }
+        if (property.get("initialValue") != null) {
+            property.put("default", property.get("initialValue"));
         }
         return property;
     }

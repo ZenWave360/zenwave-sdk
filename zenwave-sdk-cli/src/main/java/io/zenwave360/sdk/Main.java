@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import avro.shaded.com.google.common.base.Objects;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +40,10 @@ public class Main implements Callable<Integer> {
         boolean noPlugin = !parsed.hasMatchedOption("p");
         boolean usage = parsed.hasMatchedOption("h") && !parsed.hasMatchedOption("p") && main.helpFormat == null;
 
+        if(main.helpFormat == Help.Format.json && !parsed.hasMatchedOption("p")) {
+            main.help();
+            return;
+        }
         if(usage || noOptions || noPlugin) {
             cmd.usage(System.out);
             main.helpFormat = Help.Format.list;
@@ -72,10 +78,13 @@ public class Main implements Callable<Integer> {
 
     public void help() {
         try {
-            Plugin plugin = Plugin.of(this.pluginClass)
-                    .withSpecFile((String) options.get("specFile"))
-                    .withTargetFolder((String) options.get("targetFolder"))
-                    .withOptions(options);
+            Plugin plugin = null;
+            if(StringUtils.isNotBlank(this.pluginClass)) {
+                plugin = Plugin.of(this.pluginClass)
+                        .withSpecFile((String) options.get("specFile"))
+                        .withTargetFolder((String) options.get("targetFolder"))
+                        .withOptions(options);
+            }
             String help = new Help().help(plugin, helpFormat);
             System.out.println(help);
         } catch (Exception e) {

@@ -1,6 +1,6 @@
-package {{basePackage}}.infrastructure.mongodb.inmemory;
+package {{infrastructurePackage}}.mongodb.inmemory;
 
-import {{basePackage}}.core.domain.*;
+import {{entitiesPackage}}.*;
 import {{basePackage}}.core.outbound.mongodb.{{entity.className}}Repository;
 
 public class {{entity.className}}RepositoryInMemory extends InMemoryMongodbRepository<{{entity.className}}> implements {{entity.className}}Repository {

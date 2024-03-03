@@ -26,6 +26,7 @@ public class ZDLProcessor extends AbstractBaseProcessor {
         }
 
         processServiceName(zdlModel);
+        processServiceAsyncMethods(zdlModel);
 
         contextModel = new ZDL2JDLProcessor().process(contextModel); // FIXME: why here in the middle of the process?
 
@@ -51,6 +52,23 @@ public class ZDLProcessor extends AbstractBaseProcessor {
             var aggregates = JSONPath.get(service.getValue(), "$.aggregates", List.of());
             for (Object aggregate : aggregates) {
                 JSONPath.set(zdlModel, "$.entities." + aggregate + ".options.service", service.getKey());
+            }
+        }
+    }
+
+    public void processServiceAsyncMethods(Map<String, Object> zdlModel) {
+        var asyncMethods = JSONPath.get(zdlModel, "$.services[*].methods[*][?(@.options.async)]", List.<Map>of());
+        for (Map asyncMethod : asyncMethods) {
+            Map service = JSONPath.get(zdlModel, "$.services." + asyncMethod.get("serviceName"));
+            var syncMethodName = asyncMethod.get("name") + "Sync";
+            if(JSONPath.get(service, "$.methods." + syncMethodName) == null) {
+                var syncMethod = Maps.copy(asyncMethod);
+                syncMethod.put("name", syncMethodName);
+                ((Map)syncMethod.get("options")).remove("async");
+                ((List)syncMethod.get("optionsList")).removeIf(o -> "async".equals(((Map)o).get("name")));
+                ((Map)service.get("methods")).put(syncMethodName, syncMethod);
+            } else {
+                log.error("Error Processing @async({}) in {}. Method {} already defined.", asyncMethod.get("name"), asyncMethod.get("serviceName"), syncMethodName);
             }
         }
     }
@@ -119,6 +137,7 @@ public class ZDLProcessor extends AbstractBaseProcessor {
             relationshipMap.put("entityName", from);
             relationshipMap.put("otherEntityName", to);
             relationshipMap.put("ownerSide", true);
+            relationshipMap.put("mapsId", JSONPath.get(relationship, "toOptions.Id", false));
             relationshipMap.put("isCollection", relationship.get("type").toString().endsWith("Many"));
             if(relationship.get("injectedFieldInFrom") != null) {
                 var fillInjectedFieldInFrom = StringUtils.replace((String) relationship.get("injectedFieldInFrom"), ")","").split("\\(");

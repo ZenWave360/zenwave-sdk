@@ -1,4 +1,4 @@
-package {{basePackage}}.core.domain;
+package {{entitiesPackage}};
 
 import java.io.Serializable;
 import java.math.*;
@@ -12,7 +12,7 @@ import jakarta.validation.constraints.*;
 {{~#if useLombok}}
 @lombok.Getter @lombok.Setter
 {{~/if}}
-public class {{entity.className}} {{addExtends entity}} implements Serializable {
+public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}} implements Serializable {
 
     @java.io.Serial
     private static final long serialVersionUID = 1L;

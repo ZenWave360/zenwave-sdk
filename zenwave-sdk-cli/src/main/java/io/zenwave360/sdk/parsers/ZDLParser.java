@@ -10,7 +10,7 @@ import io.zenwave360.sdk.utils.JSONPath;
 
 public class ZDLParser implements Parser {
 
-    public static final List blobTypes = List.of("Blob", "AnyBlob", "ImageBlob");
+    public static final List blobTypes = List.of("Blob", "AnyBlob", "ImageBlob", "byte");
 
     @DocumentedOption(description = "ZDL files to parse")
     public String[] specFiles;

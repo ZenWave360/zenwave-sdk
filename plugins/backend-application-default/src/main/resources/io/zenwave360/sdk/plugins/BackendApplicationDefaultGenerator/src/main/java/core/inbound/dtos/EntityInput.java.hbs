@@ -1,6 +1,6 @@
-package {{basePackage}}.core.inbound.dtos;
+package {{inboundDtosPackage}};
 
-import {{basePackage}}.core.domain.*;
+import {{entitiesPackage}}.*;
 import java.io.Serializable;
 import java.math.*;
 import java.time.*;
@@ -13,7 +13,7 @@ import jakarta.validation.constraints.*;
  {{~#if useLombok}}
  @lombok.Getter @lombok.Setter
  {{~/if}}
-public class {{entity.className}}{{inputDTOSuffix entity}} {{addExtends entity suffix=(inputDTOSuffix entity)}} implements Serializable {
+public {{abstractClass entity}} class {{entity.className}}{{inputDTOSuffix entity}} {{addExtends entity suffix=(inputDTOSuffix entity)}} implements Serializable {
 
 {{#unless (skipEntityId entity)~}}
     private {{idJavaType}} id;

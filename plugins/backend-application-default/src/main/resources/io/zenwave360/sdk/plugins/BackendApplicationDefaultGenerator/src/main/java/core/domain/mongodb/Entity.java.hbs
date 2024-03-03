@@ -1,4 +1,4 @@
-package {{basePackage}}.core.domain;
+package {{entitiesPackage}};
 
 import java.io.Serializable;
 import java.math.*;
@@ -24,7 +24,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 @lombok.Getter @lombok.Setter
 {{~/if}}
 {{#unless (skipEntityId entity)~}}@Document(collection = "{{entity.tableName}}"){{/unless~}}
-public class {{entity.className}} {{addExtends entity}} implements Serializable {
+public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}} implements Serializable {
 
     @java.io.Serial
     private static final long serialVersionUID = 1L;

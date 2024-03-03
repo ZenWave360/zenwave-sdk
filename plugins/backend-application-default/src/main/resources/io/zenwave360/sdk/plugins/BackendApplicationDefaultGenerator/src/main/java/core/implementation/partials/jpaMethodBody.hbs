@@ -42,7 +42,10 @@
 {{~#unless method.isCrudMethod}} {{!-- comes from helper isCrudMethod --}}
   {{~assign "entity" (methodEntity method)}}
   {{~assign "returnEntity" (methodReturnEntity method)}}
-  {{~#if (and entity method.paramId method.returnType method.returnTypeIsOptional)}}
+  {{~#if method.options.async}}
+      log.debug("Request {{method.name}}: {}", input);
+      {{#if method.returnType}}return CompletableFuture.completedFuture({{/if}} {{method.name}}Sync({{methodParametersCallSignature method}}){{#if method.returnType}}){{/if}};
+  {{~else if (and entity method.paramId method.returnType method.returnTypeIsOptional)}}
         log.debug("Request {{method.name}}: {}", id);
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).map(existing{{entity.className}} -> {
             return {{asInstanceName service.name}}Mapper.update(existing{{entity.className}}, {{{mapperInputCallSignature method.parameter}}});

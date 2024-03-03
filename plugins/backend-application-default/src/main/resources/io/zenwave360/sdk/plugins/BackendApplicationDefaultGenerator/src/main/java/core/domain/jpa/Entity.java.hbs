@@ -1,4 +1,4 @@
-package {{basePackage}}.core.domain;
+package {{entitiesPackage}};
 
 import java.io.Serializable;
 import java.math.*;
@@ -32,7 +32,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 {{~/if}}
 {{~#if entity.options.auditing}}@EntityListeners(AuditingEntityListener.class){{~/if}}
-public class {{entity.className}} {{addExtends entity}} implements Serializable {
+public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}} implements Serializable {
 
     @java.io.Serial
     private static final long serialVersionUID = 1L;
@@ -62,6 +62,7 @@ public class {{entity.className}} {{addExtends entity}} implements Serializable 
     @Column(name = "{{snakeCase field.name}}" {{#if field.validations.required}}, nullable = false{{/if}}{{#if field.validations.unique}}, unique = true{{/if}}{{#if field.validations.maxlength}}, length = {{field.validations.maxlength.value}}{{/if}})
   {{~/if~}}
     {{~#if field.isEnum}} @Enumerated(EnumType.STRING){{/if}}
+    {{~#if field.options.transient}} @javax.persistence.Transient {{/if}}
     private {{{fieldType field}}} {{field.name}} {{{fieldTypeInitializer field}}};
 {{/each}}
 

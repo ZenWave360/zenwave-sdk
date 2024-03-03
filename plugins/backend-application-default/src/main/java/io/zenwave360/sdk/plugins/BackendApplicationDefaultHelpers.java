@@ -5,7 +5,9 @@ import java.util.stream.Collectors;
 
 import io.zenwave360.sdk.utils.NamingUtils;
 import io.zenwave360.sdk.zdl.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.ZDLHttpUtils;
 import io.zenwave360.sdk.zdl.ZDLJavaSignatureUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.jknack.handlebars.Options;
@@ -14,6 +16,7 @@ import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.utils.JSONPath;
 
 import static io.zenwave360.sdk.utils.NamingUtils.asJavaTypeName;
+import static java.lang.String.format;
 
 public class BackendApplicationDefaultHelpers {
 
@@ -251,6 +254,9 @@ public class BackendApplicationDefaultHelpers {
             if (documentedOptions > 0) {
                 return "@DocumentReference";
             }
+            if(JSONPath.get(field, "options.transient", false)) {
+                return "@org.springframework.data.annotation.Transient";
+            }
             return "@Field";
         }
         return "";
@@ -317,6 +323,10 @@ public class BackendApplicationDefaultHelpers {
         }
         return "";
     };
+
+    public String abstractClass(Map entity, Options options) {
+        return JSONPath.get(entity, "options.abstract", false)? " abstract " : "";
+    }
 
     public Object eventsProducerInterface(String serviceName, Options options) {
         return String.format("I%sEventsProducer", serviceName.replaceAll("(Service|UseCases)", ""));

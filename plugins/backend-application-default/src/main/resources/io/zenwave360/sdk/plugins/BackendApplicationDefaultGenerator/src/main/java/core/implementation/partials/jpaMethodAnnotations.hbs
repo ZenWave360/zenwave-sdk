@@ -10,3 +10,6 @@
     @Transactional
     {{~/if}}
 {{~/each}}
+{{~#if method.options.async}}
+    @Async{{#if (not (eq method.options.async true))}}("{{method.options.async}}"){{/if}}
+{{~/if}}

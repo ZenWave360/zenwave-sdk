@@ -1,12 +1,12 @@
-package {{basePackage}}.core.implementation;
+package {{coreImplementationPackage}};
 
 import {{basePackage}}.config.*;
-import {{basePackage}}.core.domain.*;
-import {{basePackage}}.core.inbound.*;
-import {{basePackage}}.core.inbound.dtos.*;
+import {{entitiesPackage}}.*;
+import {{inboundPackage}}.*;
+import {{inboundDtosPackage}}.*;
 import {{basePackage}}.core.implementation.mappers.*;
 import {{basePackage}}.core.outbound.jpa.*;
-import {{basePackage}}.infrastructure.jpa.inmemory.*;
+import {{infrastructurePackage}}.jpa.inmemory.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;

@@ -44,7 +44,10 @@
 {{~#unless method.isCrudMethod}} {{!-- comes from helper isCrudMethod --}}
   {{~assign "entity" (methodEntity method)}}
   {{~assign "returnEntity" (methodReturnEntity method)}}
-  {{~#if (and entity method.returnType method.returnTypeIsArray)}}
+  {{~#if method.options.async}}
+        log.debug("Request {{method.name}}: {}", input);
+        {{#if method.returnType}}return CompletableFuture.completedFuture({{/if}} {{method.name}}Sync({{methodParametersCallSignature method}}){{#if method.returnType}}){{/if}};
+  {{~else if (and entity method.returnType method.returnTypeIsArray)}}
         {{~#if method.parameter}}
         log.debug("Request {{method.name}}: {}", input);
         {{~else}}

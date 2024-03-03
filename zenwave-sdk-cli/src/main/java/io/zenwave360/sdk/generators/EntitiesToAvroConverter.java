@@ -82,19 +82,19 @@ public class EntitiesToAvroConverter {
             } else if ("Duration".equals(entityField.get("type"))) {
                 field.put("type", typeList("string", isRequired));
                 // property.put("format", "date-time");
-            } else if ("Integer".equals(entityField.get("type"))) {
+            } else if ("Integer".equals(entityField.get("type")) || "int".equals(entityField.get("type"))) {
                 field.put("type", typeList("int", isRequired));
                 // field.put("format", "int32");
-            } else if ("Long".equals(entityField.get("type"))) {
+            } else if ("Long".equals(entityField.get("type")) || "long".equals(entityField.get("type"))) {
                 field.put("type", typeList("long", isRequired));
                 // field.put("format", "int64");
-            } else if ("Float".equals(entityField.get("type"))) {
+            } else if ("Float".equals(entityField.get("type")) || "float".equals(entityField.get("type"))) {
                 field.put("type", typeList("float", isRequired));
                 // field.put("format", "float");
-            } else if ("Double".equals(entityField.get("type")) || "BigDecimal".equals(entityField.get("type"))) {
+            } else if ("Double".equals(entityField.get("type")) || "double".equals(entityField.get("type")) || "BigDecimal".equals(entityField.get("type"))) {
                 field.put("type", typeList("double", isRequired));
                 // field.put("format", "double");
-            } else if ("Boolean".equals(entityField.get("type"))) {
+            } else if ("Boolean".equals(entityField.get("type")) || "boolean".equals(entityField.get("type"))) {
                 field.put("type", typeList("boolean", isRequired));
             } else if ("UUID".equals(entityField.get("type"))) {
                 field.put("type", typeList("string", isRequired));
