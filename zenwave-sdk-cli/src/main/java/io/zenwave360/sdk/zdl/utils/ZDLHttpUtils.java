@@ -24,19 +24,21 @@ public class ZDLHttpUtils {
         return httpOptions instanceof String? (String) httpOptions : JSONPath.get(httpOptions, "$.path", "");
     }
 
-    public static List<Map<String, Object>> getPathParamsAsObject(Map method, Map naturalIdTypes, String idType, String idTypeFormat) {
+    public static List<Map<String, Object>> getPathParamsAsObject(Map zdl, Map method, Map naturalIdTypes, String idType, String idTypeFormat) {
         var path = getPathFromMethod(method);
         var httpOption = getHttpOption(method);
         var params = new HashMap(naturalIdTypes);
+        var methodParameterType = (String) method.get("parameter");
         params.putAll(JSONPath.get(httpOption, "$.httpOptions.params", Map.of()));
         return (List) getPathParams(path).stream().map(param -> {
             var type = params.getOrDefault(param, "String");
             var typeAndFormat = EntitiesToSchemasConverter.schemaTypeAndFormat((String) type);
+            var description = JSONPath.get(zdl, "$.allEntitiesAndEnums." + methodParameterType + ".fields." + param + ".javadoc");
             if(!params.containsKey(param) && (param.startsWith("id") || param.endsWith("Id"))) {
                 typeAndFormat.put("type", idType);
                 typeAndFormat.put("format", idTypeFormat);
             }
-            return Maps.of("name", param,"type", typeAndFormat.get("type"), "format", typeAndFormat.get("format"));
+            return Maps.of("name", param,"type", typeAndFormat.get("type"), "format", typeAndFormat.get("format"), "description", description);
         }).toList();
     }
 
@@ -44,8 +46,8 @@ public class ZDLHttpUtils {
         var pathParams = getPathParamsFromMethod(method);
         var httpOption = getHttpOption(method);
         var params = new LinkedHashMap<String, Object>(JSONPath.get(httpOption, "$.httpOptions.params", Map.of()));
+        var methodParameterType = (String) method.get("parameter");
         if ("get".equals(httpOption.get("httpMethod"))) {
-            var methodParameterType = (String) method.get("parameter");
             var parameterEntity = JSONPath.get(zdl, "$.allEntitiesAndEnums." + methodParameterType);
             if (parameterEntity != null) {
                 var fields = JSONPath.get(parameterEntity, "$.fields", Map.<String, Map>of());
@@ -61,7 +63,8 @@ public class ZDLHttpUtils {
                 .map(entry -> {
                     var type = entry.getValue();
                     var typeAndFormat = EntitiesToSchemasConverter.schemaTypeAndFormat((String) type);
-                    return Maps.of("name", entry.getKey(), "type", typeAndFormat.get("type"), "format", typeAndFormat.get("format"));
+                    var description = JSONPath.get(zdl, "$.allEntitiesAndEnums." + methodParameterType + ".fields." + entry.getKey() + ".javadoc");
+                    return Maps.of("name", entry.getKey(), "type", typeAndFormat.get("type"), "format", typeAndFormat.get("format"), "description", description);
                 })
                 .toList();
     }

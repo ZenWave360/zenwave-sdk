@@ -43,7 +43,7 @@ public class ZDLHttpUtilsTest {
         String idType = "string";
         String idTypeFormat = null;
         Map naturalIdTypes = new HashMap();
-        var pathParamsMap = ZDLHttpUtils.getPathParamsAsObject(method, naturalIdTypes, idType, idTypeFormat);
+        var pathParamsMap = ZDLHttpUtils.getPathParamsAsObject(model, method, naturalIdTypes, idType, idTypeFormat);
         Assertions.assertEquals("customerId", pathParamsMap.get(0).get("name"));
     }
 

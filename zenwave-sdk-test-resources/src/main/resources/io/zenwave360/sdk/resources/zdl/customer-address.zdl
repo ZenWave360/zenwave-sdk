@@ -69,7 +69,7 @@ input AddressInputCopy {
 
 @inline
 input CustomerAddressId {
-  customerId String
+  customerId String /** customer id javadoc comment */
   address Address
 }
 

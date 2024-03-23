@@ -64,7 +64,7 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
                         var path = basePath + methodPath;
 //                        var params = httpOption.get("params");
                         var pathParams = ZDLHttpUtils.getPathParams(path);
-                        var pathParamsMap = ZDLHttpUtils.getPathParamsAsObject(method, naturalIdTypes, idType, idTypeFormat);
+                        var pathParamsMap = ZDLHttpUtils.getPathParamsAsObject(zdl, method, naturalIdTypes, idType, idTypeFormat);
                         var queryParamsMap = ZDLHttpUtils.getQueryParamsAsObject(method, zdl);
                         var hasParams = !pathParams.isEmpty() || !queryParamsMap.isEmpty() || paginated != null;
                         paths.appendTo(path, (String) methodVerb, new FluentMap()

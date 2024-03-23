@@ -43,6 +43,9 @@ paths:
         - name: "{{pathParam.name}}"
           in: path
           required: true
+          {{~#if pathParam.description}}
+          description: "{{pathParam.description}}"
+          {{~/if}}
           schema:
             type: {{pathParam.type}}
             {{~#if pathParam.format}}
@@ -52,6 +55,9 @@ paths:
         {{~#each operation.queryParamsMap as |queryParam|}}
         - name: "{{queryParam.name}}"
           in: query
+          {{~#if queryParam.description}}
+          description: "{{queryParam.description}}"
+          {{~/if}}
           schema:
             type: {{queryParam.type}}
             {{~#if queryParam.format}}
