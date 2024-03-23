@@ -8,7 +8,7 @@
     </parent>
     <name>${project.groupId}:${project.artifactId}</name>
     <groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
-    <artifactId>java-to-jdl</artifactId>
+    <artifactId>java-to-asyncapi</artifactId>
     <packaging>jar</packaging>
 
     <properties>
@@ -28,6 +28,11 @@
 
 
     <dependencies>
+        <dependency>
+            <groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
+            <artifactId>zdl-to-asyncapi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>

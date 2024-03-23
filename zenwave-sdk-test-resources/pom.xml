@@ -10,9 +10,8 @@
   <artifactId>zenwave-sdk-test-resources</artifactId>
 
   <properties>
-    <spring-boot-dependencies.version>2.6.7</spring-boot-dependencies.version>
-    <hibernate.version>5.6.7.Final</hibernate.version>
-    <validation-api.version>2.0.1.Final</validation-api.version>
+      <hibernate-core.version>6.6.11.Final</hibernate-core.version>
+      <validation-api.version>2.0.1.Final</validation-api.version>
   </properties>
 
   <dependencyManagement>
@@ -31,6 +30,7 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
+        <version>${hibernate-core.version}</version>
       <optional>true</optional>
     </dependency>
     <dependency>

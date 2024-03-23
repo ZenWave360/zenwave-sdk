@@ -1,0 +1,218 @@
+asyncapi: 3.0.0
+info:
+  title: ""
+  version: 0.0.1
+  tags:
+    - name: "Default"
+    - name: "EventsProducer"
+
+defaultContentType: application/json
+
+channels:
+  onLookup:
+    address: "add topic here"
+    messages:
+      LookupMessage:
+        $ref: '#/components/messages/LookupMessage'
+  onCustomerEventRecord:
+    address: "add topic here"
+    messages:
+      CustomerEventRecordMessage:
+        $ref: '#/components/messages/CustomerEventRecordMessage'
+  onCustomerEvent:
+    address: "add topic here"
+    messages:
+      CustomerEventMessage:
+        $ref: '#/components/messages/CustomerEventMessage'
+
+operations:
+  onLookup:
+    action: send
+    tags:
+      - name: EventsProducer
+    channel:
+      $ref: '#/channels/onLookup'
+  onCustomerEventRecord:
+    action: send
+    tags:
+      - name: EventsProducer
+    channel:
+      $ref: '#/channels/onCustomerEventRecord'
+  onCustomerEvent:
+    action: send
+    tags:
+      - name: EventsProducer
+    channel:
+      $ref: '#/channels/onCustomerEvent'
+
+
+components:
+  messages:
+    LookupMessage:
+      name: LookupMessage
+      title: ""
+      summary: ""
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        $ref: "#/components/schemas/Lookup"
+    CustomerEventRecordMessage:
+      name: CustomerEventRecordMessage
+      title: ""
+      summary: ""
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        $ref: "#/components/schemas/CustomerEventRecord"
+    CustomerEventMessage:
+      name: CustomerEventMessage
+      title: ""
+      summary: ""
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        $ref: "#/components/schemas/CustomerEvent"
+
+  messageTraits:
+    CommonHeaders:
+      headers:
+        type: object
+        properties:
+
+  schemas:
+    Lookup:
+      type: "object"
+      x-business-entity: "Lookup"
+      properties:
+        prevLookupClass:
+          type: "string"
+        cachedProtectionDomain:
+          type: "string"
+    CustomerEventRecord:
+      type: "object"
+      x-business-entity: "CustomerEventRecord"
+      properties:
+        stringField:
+          type: "string"
+        integerWrapper:
+          type: "integer"
+          format: "int32"
+        longWrapper:
+          type: "integer"
+          format: "int64"
+        intPrimitive:
+          type: "integer"
+          format: "int32"
+        longPrimitive:
+          type: "integer"
+          format: "int64"
+        bigDecimalField:
+          type: "number"
+          format: "double"
+        floatWrapper:
+          type: "number"
+          format: "float"
+        floatPrimitive:
+          type: "number"
+          format: "float"
+        doubleWrapper:
+          type: "number"
+          format: "double"
+        doublePrimitive:
+          type: "number"
+          format: "double"
+        enumField:
+          $ref: "#/components/schemas/EnumType"
+        booleanWrapper:
+          type: "boolean"
+        booleanPrimitive:
+          type: "boolean"
+        localDateField:
+          type: "string"
+          format: "date"
+        localDateTimeField:
+          type: "string"
+        zonedDateTimeField:
+          type: "string"
+          format: "date-time"
+        instantField:
+          type: "string"
+          format: "date-time"
+        durationField:
+          type: "string"
+        uuidField:
+          type: "string"
+          pattern: "^[a-f\\d]{4}(?:[a-f\\d]{4}-){4}[a-f\\d]{12}$"
+        bytePrimitive:
+          type: "string"
+          format: "binary"
+        byteArrayField:
+          type: "string"
+    CustomerEvent:
+      type: "object"
+      x-business-entity: "CustomerEvent"
+      properties:
+        stringField:
+          type: "string"
+        integerWrapper:
+          type: "integer"
+          format: "int32"
+        longWrapper:
+          type: "integer"
+          format: "int64"
+        intPrimitive:
+          type: "integer"
+          format: "int32"
+        longPrimitive:
+          type: "integer"
+          format: "int64"
+        bigDecimalField:
+          type: "number"
+          format: "double"
+        floatWrapper:
+          type: "number"
+          format: "float"
+        floatPrimitive:
+          type: "number"
+          format: "float"
+        doubleWrapper:
+          type: "number"
+          format: "double"
+        doublePrimitive:
+          type: "number"
+          format: "double"
+        enumField:
+          $ref: "#/components/schemas/EnumType"
+        booleanWrapper:
+          type: "boolean"
+        booleanPrimitive:
+          type: "boolean"
+        localDateField:
+          type: "string"
+          format: "date"
+        localDateTimeField:
+          type: "string"
+        zonedDateTimeField:
+          type: "string"
+          format: "date-time"
+        instantField:
+          type: "string"
+          format: "date-time"
+        durationField:
+          type: "string"
+        uuidField:
+          type: "string"
+          pattern: "^[a-f\\d]{4}(?:[a-f\\d]{4}-){4}[a-f\\d]{12}$"
+        bytePrimitive:
+          type: "string"
+          format: "binary"
+        byteArrayField:
+          type: "string"
+    EnumType:
+      type: "string"
+      x-business-entity: "EnumType"
+      enum:
+      - "A"
+      - "B"
+      - "C"
+

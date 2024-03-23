@@ -33,7 +33,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
     ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
     ObjectMapper jsonMapper = new ObjectMapper();
 
-    enum SchemaFormat {
+    public enum SchemaFormat {
         schema, avro
     }
 
@@ -43,7 +43,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
     public AsyncapiVersionType asyncapiVersion = AsyncapiVersionType.v3;
 
     @DocumentedOption(description = "Target file")
-    public String targetFile = "asyncapi.yml";
+    public String targetFile;
 
     @DocumentedOption(description = "AsyncAPI file to be merged on top of generated AsyncAPI file")
     public String asyncapiMergeFile;
@@ -164,8 +164,9 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         var template = generateTemplateOutput(contextModel, zdlToAsyncAPITemplate, model, asyncAPISchemasString);
         var templateContent = YamlOverlyMerger.mergeAndOverlay(template.getContent(), asyncapiMergeFile, asyncapiOverlayFiles);
         template = new TemplateOutput(template.getTargetFile(), templateContent, template.getMimeType(), template.isSkipOverwrite());
+        outputList.add(template);
 
-        return List.of(template);
+        return outputList;
     }
 
     private void addAllEventsAsMessages(LinkedHashMap<Object, Object> allMessages, Map<String, Map> events) {

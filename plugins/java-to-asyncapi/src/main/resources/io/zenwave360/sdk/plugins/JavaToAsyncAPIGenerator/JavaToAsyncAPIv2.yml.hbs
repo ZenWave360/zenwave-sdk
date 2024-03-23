@@ -1,0 +1,57 @@
+asyncapi: 2.6.0
+info:
+  title: "{{{zdlModel.config.title}}}"
+  version: 0.0.1
+
+defaultContentType: application/json
+
+tags:
+  - name: "Default"
+{{~#each zdlModel.serviceNames as |serviceName|}}
+  - name: "{{asTagName serviceName}}"
+{{~/each}}
+
+channels:
+{{~#each zdlModel.channels as |channel|}}
+  {{@key}}:
+    x-address: "{{channel.x-address}}"
+  {{~#each channel.operations as |operation|}}
+    {{@key}}:
+      summary: "{{operation.summary}}"
+      operationId: {{operation.operationId}}
+      tags:
+        - name: {{asTagName operation.serviceName}}
+      message:
+      {{~#if (eq (size operation.messages) 1)}}
+        $ref: "{{firstItem operation.messages}}"
+      {{~else}}
+        oneOf:
+        {{~#each operation.messages as |message|}}
+        - $ref: "{{message}}"
+        {{~/each}}
+      {{~/if}}
+  {{~/each}}
+{{~/each}}
+
+components:
+  messages:
+{{~#each zdlModel.messages as |message|}}
+    {{message.name}}Message:
+      messageId: {{message.name}}Message
+      name: {{message.name}}Message
+      title: "{{message.summary}}"
+      summary: "{{message.summary}}"
+      schemaFormat: {{{schemaFormatString}}}
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        $ref: "{{payloadRef message}}"
+{{~/each}}
+
+  messageTraits:
+    CommonHeaders:
+      headers:
+        type: object
+        properties: {}
+
+{{{schemasAsString}}}

@@ -9,12 +9,12 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
-import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -140,9 +140,9 @@ public class JavaToJDLGenerator implements Generator {
             // Annotation[] fieldAnnotations = f.getDeclaredAnnotations();
 
             Id idAnnotation = f.getDeclaredAnnotation(Id.class);
-            javax.persistence.Id jpaIdAnnotation = f.getDeclaredAnnotation(javax.persistence.Id.class);
+            jakarta.persistence.Id jpaIdAnnotation = f.getDeclaredAnnotation(jakarta.persistence.Id.class);
             Version versionAnnotation = f.getDeclaredAnnotation(Version.class);
-            javax.persistence.Version jpaVersionAnnotation = f.getDeclaredAnnotation(javax.persistence.Version.class);
+            jakarta.persistence.Version jpaVersionAnnotation = f.getDeclaredAnnotation(jakarta.persistence.Version.class);
             if(idAnnotation != null || versionAnnotation != null || jpaIdAnnotation != null || jpaVersionAnnotation != null) {
                 continue;
             }

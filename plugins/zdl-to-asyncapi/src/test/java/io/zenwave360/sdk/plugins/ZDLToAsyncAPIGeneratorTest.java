@@ -103,4 +103,19 @@ public class ZDLToAsyncAPIGeneratorTest {
 
         System.out.println(outputTemplates.get(0).getContent());
     }
+
+    @Test
+    public void test_merge_customer_address_zdl_to_asyncapi_avro() throws Exception {
+        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address-relational.zdl");
+        ZDLToAsyncAPIGenerator generator = new ZDLToAsyncAPIGenerator();
+        generator.idType = "integer";
+        generator.idTypeFormat = "int64";
+        generator.targetFile = "target/out/customer-address.avro.yml";
+        generator.schemaFormat = ZDLToAsyncAPIGenerator.SchemaFormat.avro;
+
+        List<TemplateOutput> outputTemplates = generator.generate(model);
+        Assertions.assertEquals(11, outputTemplates.size());
+
+        System.out.println(outputTemplates.get(0).getContent());
+    }
 }

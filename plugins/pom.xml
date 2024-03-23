@@ -30,6 +30,7 @@
 
     <modules>
         <module>java-to-jdl</module>
+        <module>java-to-asyncapi</module>
         <module>zdl-to-openapi</module>
         <module>jdl-to-asyncapi</module>
         <module>zdl-to-asyncapi</module>

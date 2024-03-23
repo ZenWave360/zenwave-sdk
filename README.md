@@ -201,17 +201,18 @@ jbang zw --help markdown -p <pluginConfigClass>
 
 Refer to individual plugin's documentation for more information:
 
-| **Plugin**                                                                               | **Description**                    | **Model Types**            |
-|------------------------------------------------------------------------------------------|------------------------------------|----------------------------|
-| [Backend Application Default](./plugins/backend-application-default/README.md)           | Backend Application Default        | ZDL                        |
-| [AsyncAPI JSON Schema to POJO](./plugins/asyncapi-jsonschema2pojo/README.md)             | AsyncAPI JSON Schema to POJO       | AsyncAPI, JsonSchema       |
-| [AsyncAPI to Spring Cloud Streams 3](./plugins/asyncapi-spring-cloud-streams3/README.md) | AsyncAPI to Spring Cloud Streams 3 | AsyncAPI, AVRO, JsonSchema |
-| [OpenAPI Controllers](./plugins/openapi-controllers/README.md)                           | JDL OpenAPI Controllers            | OpenAPI, ZDL               |
-| [OpenAPI to Spring WebTestClient](./plugins/openapi-spring-webtestclient/README.md)      | OpenAPI to Spring WebTestClient    | OpenAPI                    |
-| [ZDL to OpenAPI](./plugins/zdl-to-openapi/README.md)                                     | ZDL to OpenAPI and OpenAPI to ZDL  | ZDL, OpenAPI               |
-| [ZDL to AsyncAPI](./plugins/zdl-to-asyncapi/README.md)                                   | ZDL to AsyncAPI                    | ZDL, AsyncAPI              |
-| [ZDL to Markdown](./plugins/zdl-to-markdown/README.md)                                   | ZDL to Markdown                    | ZDL                        |
-| [Java 2 JDL Reverse Engineering](./plugins/java-to-jdl/README.md)                        | Java 2 JDL Reverse Engineering     | Java, JDL                  |
+| **Plugin**                                                                               | **Description**                     | **Model Types**            |
+|------------------------------------------------------------------------------------------|-------------------------------------|----------------------------|
+| [Backend Application Default](./plugins/backend-application-default/README.md)           | Backend Application Default         | ZDL                        |
+| [AsyncAPI JSON Schema to POJO](./plugins/asyncapi-jsonschema2pojo/README.md)             | AsyncAPI JSON Schema to POJO        | AsyncAPI, JsonSchema       |
+| [AsyncAPI to Spring Cloud Streams 3](./plugins/asyncapi-spring-cloud-streams3/README.md) | AsyncAPI to Spring Cloud Streams 3  | AsyncAPI, AVRO, JsonSchema |
+| [OpenAPI Controllers](./plugins/openapi-controllers/README.md)                           | JDL OpenAPI Controllers             | OpenAPI, ZDL               |
+| [OpenAPI to Spring WebTestClient](./plugins/openapi-spring-webtestclient/README.md)      | OpenAPI to Spring WebTestClient     | OpenAPI                    |
+| [ZDL to OpenAPI](./plugins/zdl-to-openapi/README.md)                                     | ZDL to OpenAPI and OpenAPI to ZDL   | ZDL, OpenAPI               |
+| [ZDL to AsyncAPI](./plugins/zdl-to-asyncapi/README.md)                                   | ZDL to AsyncAPI                     | ZDL, AsyncAPI              |
+| [ZDL to Markdown](./plugins/zdl-to-markdown/README.md)                                   | ZDL to Markdown                     | ZDL                        |
+| [Java 2 JDL Reverse Engineering](./plugins/java-to-jdl/README.md)                        | Java 2 JDL Reverse Engineering      | Java, JDL                  |
+| [Java 2 AsyncAPI Reverse Engineering](./plugins/java-to-asyncapi/README.md)              | Java 2 AsyncAPI Reverse Engineering | Java                       |
 
 # ZenWave SDK Documentation
 

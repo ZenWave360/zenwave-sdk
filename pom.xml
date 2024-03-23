@@ -76,7 +76,7 @@
         <palantir-java-format.version>2.55.0</palantir-java-format.version>
         <spring-javaformat.version>0.0.39</spring-javaformat.version>
         <junit.version>5.10.1</junit.version>
-        <spring-boot-dependencies.version>2.6.7</spring-boot-dependencies.version>
+        <spring-boot-dependencies.version>3.4.3</spring-boot-dependencies.version>
         <reflections.version>0.10.2</reflections.version>
         <junit.version>5.8.2</junit.version>
         <logcaptor.version>2.7.10</logcaptor.version>
