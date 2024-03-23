@@ -22,7 +22,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     private Logger log = LoggerFactory.getLogger(getClass());
 
     public enum TransactionalOutboxType {
-        none, mongodb, jdbc, modulith
+        none, modulith, mongodb, jdbc
     }
 
     @DocumentedOption(description = "Programming style")
@@ -49,20 +49,20 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     @DocumentedOption(description = "To avoid method erasure conflicts, when exposeMessage or reactive style this character will be used as separator to append message payload type to method names in consumer interfaces.")
     public String methodAndMessageSeparator = "$";
 
+    @DocumentedOption(description = "SC Streams Binding Name Prefix (used in @Component name)"  )
+    public String bindingPrefix = "";
+
     @DocumentedOption(description = "SC Streams Binder class prefix")
     public String consumerPrefix = "";
 
     @DocumentedOption(description = "SC Streams Binder class suffix")
     public String consumerSuffix = "Consumer";
 
-    @DocumentedOption(description = "SC Streams Binding Name Prefix (used in @Component name)"  )
-    public String bindingPrefix = "";
-
     @DocumentedOption(description = "Business/Service interface prefix")
-    public String servicePrefix = "I";
+    public String consumerServicePrefix = "I";
 
     @DocumentedOption(description = "Business/Service interface suffix")
-    public String serviceSuffix = "ConsumerService";
+    public String consumerServiceSuffix = "ConsumerService";
 
     @DocumentedOption(description = "Spring-Boot binding suffix. It will be appended to the operation name kebab-cased. E.g. <operation-id>-in-0")
     public String bindingSuffix = "-0";
@@ -75,10 +75,17 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
     private final HandlebarsEngine handlebarsEngine = getTemplateEngine();
     {
-        handlebarsEngine.getHandlebars().registerHelper("apiClassName", (context, options) -> {
-            String serviceName = (String) context;
+        handlebarsEngine.getHandlebars().registerHelper("producerInterfaceName", (serviceName, options) -> {
             AbstractAsyncapiGenerator.OperationRoleType operationRoleType = options.param(0);
-            return getApiClassName(serviceName, operationRoleType);
+            return getApiClassName((String) serviceName, operationRoleType);
+        });
+        handlebarsEngine.getHandlebars().registerHelper("producerClassName", (serviceName, options) -> {
+            AbstractAsyncapiGenerator.OperationRoleType operationRoleType = options.param(0);
+            return "Default" + getApiClassName((String) serviceName, operationRoleType);
+        });
+        handlebarsEngine.getHandlebars().registerHelper("producerInMemoryName", (serviceName, options) -> {
+            AbstractAsyncapiGenerator.OperationRoleType operationRoleType = options.param(0);
+            return "InMemory" + getApiClassName((String) serviceName, operationRoleType);
         });
         handlebarsEngine.getHandlebars().registerHelper("consumerName", (context, options) -> {
             return String.format("%s%s%s", consumerPrefix, context, consumerSuffix);
@@ -103,14 +110,14 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
             }
             return useEnterpriseEnvelope && !envelopTypes.isEmpty();
         });
-        handlebarsEngine.getHandlebars().registerHelper("serviceInterfaceName", (context, options) -> {
-            return String.format("%s%s%s", servicePrefix, context, serviceSuffix);
+        handlebarsEngine.getHandlebars().registerHelper("consumerServiceInterfaceName", (context, options) -> {
+            return String.format("%s%s%s", consumerServicePrefix, context, consumerServiceSuffix);
         });
-        handlebarsEngine.getHandlebars().registerHelper("serviceName", (context, options) -> {
-            return String.format("%s%s", context, serviceSuffix);
+        handlebarsEngine.getHandlebars().registerHelper("consumerServiceName", (context, options) -> {
+            return String.format("%s%s", context, consumerServiceSuffix);
         });
         handlebarsEngine.getHandlebars().registerHelper("testDoubleName", (context, options) -> {
-            return String.format("%s%s%s", context, serviceSuffix, "TestDouble");
+            return String.format("%s%s%s", context, consumerServiceSuffix, "TestDouble");
         });
         handlebarsEngine.getHandlebars().registerHelper("methodSuffix", (context, options) -> {
             boolean doExposeMessage = "true".equals(String.valueOf(options.hash.get("exposeMessage")));
@@ -177,12 +184,12 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
         ts.addTemplate(ts.producerTemplates, "producer/mocks/EventsProducerInMemoryContext.java", "src/test/java/{{asPackageFolder producerApiPackage}}/EventsProducerInMemoryContext.java");
 
-        ts.addTemplate(ts.producerByServiceTemplates, "producer/IProducer.java", "src/main/java/{{asPackageFolder producerApiPackage}}/I{{apiClassName serviceName operationRoleType}}.java");
-        ts.addTemplate(ts.producerByServiceTemplates, "producer/outbox/{{transactionalOutbox}}/Producer.java", "src/main/java/{{asPackageFolder producerApiPackage}}/{{apiClassName serviceName operationRoleType}}.java", JAVA, (context) -> skipProducerImplementation, false);
-        ts.addTemplate(ts.producerByServiceTemplates, "producer/mocks/EventsProducerCaptor.java", "src/test/java/{{asPackageFolder producerApiPackage}}/{{apiClassName serviceName operationRoleType}}Captor.java");
+        ts.addTemplate(ts.producerByServiceTemplates, "producer/IProducer.java", "src/main/java/{{asPackageFolder producerApiPackage}}/{{producerInterfaceName serviceName operationRoleType}}.java");
+        ts.addTemplate(ts.producerByServiceTemplates, "producer/outbox/{{transactionalOutbox}}/Producer.java", "src/main/java/{{asPackageFolder producerApiPackage}}/{{producerClassName serviceName operationRoleType}}.java", JAVA, (context) -> skipProducerImplementation, false);
+        ts.addTemplate(ts.producerByServiceTemplates, "producer/mocks/EventsProducerCaptor.java", "src/test/java/{{asPackageFolder producerApiPackage}}/{{producerInMemoryName serviceName operationRoleType}}.java");
 
         ts.addTemplate(ts.consumerByOperationTemplates, "consumer/{{style}}/Consumer.java", "src/main/java/{{asPackageFolder consumerApiPackage}}/{{consumerName operation.x--operationIdCamelCase}}.java");
-        ts.addTemplate(ts.consumerByOperationTemplates, "consumer/{{style}}/IService.java", "src/main/java/{{asPackageFolder consumerApiPackage}}/{{serviceInterfaceName operation.x--operationIdCamelCase}}.java");
+        ts.addTemplate(ts.consumerByOperationTemplates, "consumer/{{style}}/IService.java", "src/main/java/{{asPackageFolder consumerApiPackage}}/{{consumerServiceInterfaceName operation.x--operationIdCamelCase}}.java");
         return ts;
     }
 

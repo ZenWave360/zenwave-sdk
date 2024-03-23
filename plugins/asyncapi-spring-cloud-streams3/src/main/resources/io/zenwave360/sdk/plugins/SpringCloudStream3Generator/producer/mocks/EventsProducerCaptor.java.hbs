@@ -20,12 +20,12 @@ import {{modelPackage}}.*;
  * {{asyncapi.description}}
  */
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
-public class {{apiClassName serviceName operationRoleType}}Captor implements I{{apiClassName serviceName operationRoleType}} {
+public class {{producerInMemoryName serviceName operationRoleType}} implements {{producerInterfaceName serviceName operationRoleType}} {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
     protected ApplicationContext applicationContext;
-    public {{apiClassName serviceName operationRoleType}}Captor withApplicationContext(ApplicationContext applicationContext) {
+    public {{producerInMemoryName serviceName operationRoleType}} withApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
         return this;
     }

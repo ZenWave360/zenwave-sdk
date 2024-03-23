@@ -24,9 +24,9 @@ import {{modelPackage}}.*;
 /**
  * {{asyncapi.description}}
  */
-@Component("{{bindingPrefix}}{{apiClassName serviceName operationRoleType}}")
+@Component("{{bindingPrefix}}{{producerClassName serviceName operationRoleType}}")
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
-public class {{apiClassName serviceName operationRoleType}} implements I{{apiClassName serviceName operationRoleType}} {
+public class {{producerClassName serviceName operationRoleType}} implements {{producerInterfaceName serviceName operationRoleType}} {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -41,7 +41,7 @@ public class {{apiClassName serviceName operationRoleType}} implements I{{apiCla
     protected JdbcTemplate jdbcTemplate;
     protected ObjectMapper objectMapper = new ObjectMapper();
 
-    public {{apiClassName serviceName operationRoleType}}(StreamBridge streamBridge, ApplicationContext applicationContext, JdbcTemplate jdbcTemplate) {
+    public {{producerClassName serviceName operationRoleType}}(StreamBridge streamBridge, ApplicationContext applicationContext, JdbcTemplate jdbcTemplate) {
         this.streamBridge = streamBridge;
         this.applicationContext = applicationContext;
         this.jdbcTemplate = jdbcTemplate;

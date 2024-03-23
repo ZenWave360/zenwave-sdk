@@ -20,9 +20,9 @@ import {{modelPackage}}.*;
 /**
  * {{asyncapi.description}}
  */
-@Component("{{bindingPrefix}}{{apiClassName serviceName operationRoleType}}")
+@Component("{{bindingPrefix}}{{producerClassName serviceName operationRoleType}}")
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
-public class {{apiClassName serviceName operationRoleType}} implements I{{apiClassName serviceName operationRoleType}} {
+public class {{producerClassName serviceName operationRoleType}} implements {{producerInterfaceName serviceName operationRoleType}} {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
@@ -36,7 +36,7 @@ public class {{apiClassName serviceName operationRoleType}} implements I{{apiCla
     public EnvelopeWrapper envelopeWrapper;
 {{~/if}}
 
-    public {{apiClassName serviceName operationRoleType}}(ApplicationEventPublisher applicationEventPublisher, ApplicationContext applicationContext) {
+    public {{producerClassName serviceName operationRoleType}}(ApplicationEventPublisher applicationEventPublisher, ApplicationContext applicationContext) {
         this.applicationEventPublisher = applicationEventPublisher;
         this.applicationContext = applicationContext;
     }

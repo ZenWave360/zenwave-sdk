@@ -523,7 +523,7 @@ public class BackendApplicationDefaultHelpers {
     }
 
     public Object eventsProducerInterface(String serviceName, Options options) {
-        return String.format("I%sEventsProducer", serviceName.replaceAll("(Service|UseCases)", ""));
+        return String.format("%sEventsProducer", serviceName.replaceAll("(Service|UseCases)", ""));
     }
 
     public Object eventsProducerInstance(String serviceName, Options options) {

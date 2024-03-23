@@ -29,14 +29,14 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    protected {{serviceInterfaceName operation.x--operationIdCamelCase}} service;
+    protected {{consumerServiceInterfaceName operation.x--operationIdCamelCase}} service;
     protected StreamBridge streamBridge;
     protected Map<Class<? extends Exception>, String> errorQueueMap;
 {{~#if useEnterpriseEnvelope}}
     public EnvelopeUnWrapper envelopeUnWrapper;
 {{~/if}}
 
-    public {{consumerName operation.x--operationIdCamelCase}}({{serviceInterfaceName operation.x--operationIdCamelCase}} service, @Autowired(required=false) StreamBridge streamBridge) {
+    public {{consumerName operation.x--operationIdCamelCase}}({{consumerServiceInterfaceName operation.x--operationIdCamelCase}} service, @Autowired(required=false) StreamBridge streamBridge) {
         this.service = service;
         this.streamBridge = streamBridge;
     }
@@ -69,7 +69,7 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
                 {{~#if exposeMessage}}
                 service.{{operation.operationId}}{{methodSuffix message operation}}(MessageBuilder.createMessage(({{message.x--javaType}}) payload, message.getHeaders()));
                 {{~else}}
-                var headers = new {{serviceInterfaceName operation.x--operationIdCamelCase}}.{{message.x--javaTypeSimpleName}}Headers();
+                var headers = new {{consumerServiceInterfaceName operation.x--operationIdCamelCase}}.{{message.x--javaTypeSimpleName}}Headers();
                 headers.putAll(message.getHeaders());
                 service.{{operation.operationId}}{{methodSuffix message operation}}(({{message.x--javaType}}) payload, headers);
                 {{~/if}}

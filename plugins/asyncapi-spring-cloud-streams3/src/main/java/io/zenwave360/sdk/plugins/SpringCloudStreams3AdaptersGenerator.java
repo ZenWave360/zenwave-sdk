@@ -33,8 +33,8 @@ public class SpringCloudStreams3AdaptersGenerator extends SpringCloudStreams3Gen
     @DocumentedOption(description = "Package where your domain services/usecases interfaces are")
     public String servicesPackage = "{{basePackage}}.core.inbound";
 
-    @DocumentedOption(description = "Should use same value configured in BackendApplicationDefaultPlugin. Whether to use an input DTO for entities used as command parameter.")
-    public String inputDTOSuffix = "";
+//    @DocumentedOption(description = "Should use same value configured in BackendApplicationDefaultPlugin. Whether to use an input DTO for entities used as command parameter.")
+//    public String inputDTOSuffix = "";
 
     @DocumentedOption(description = "BaseConsumerTest class name")
     public String baseTestClassName = "BaseConsumerTest";
@@ -55,10 +55,10 @@ public class SpringCloudStreams3AdaptersGenerator extends SpringCloudStreams3Gen
     private String prefix = templatesPath + "/adapters/";
 
     private TemplateInput mapperTemplate = new TemplateInput(prefix + "{{style}}/EventsMapper.java", "src/main/java/{{asPackageFolder adaptersPackage}}/EventsMapper.java", JAVA);
-    private TemplateInput adapterTemplate = new TemplateInput(prefix + "{{style}}/ConsumerService.java", "src/main/java/{{asPackageFolder adaptersPackage}}/{{serviceName operation.x--operationIdCamelCase}}.java", JAVA);
+    private TemplateInput adapterTemplate = new TemplateInput(prefix + "{{style}}/ConsumerService.java", "src/main/java/{{asPackageFolder adaptersPackage}}/{{consumerServiceName operation.x--operationIdCamelCase}}.java", JAVA);
 
     private TemplateInput baseTestTemplate = new TemplateInput(prefix + "{{style}}/BaseConsumerTest.java", "src/test/java/{{asPackageFolder baseTestClassPackage}}/{{baseTestClassName}}.java", JAVA).withSkipOverwrite(true);
-    private TemplateInput testTemplate = new TemplateInput(prefix + "{{style}}/ConsumerTest.java", "src/test/java/{{asPackageFolder adaptersPackage}}/{{serviceName operation.x--operationIdCamelCase}}{{testSuffix}}.java", JAVA);
+    private TemplateInput testTemplate = new TemplateInput(prefix + "{{style}}/ConsumerTest.java", "src/test/java/{{asPackageFolder adaptersPackage}}/{{consumerServiceName operation.x--operationIdCamelCase}}{{testSuffix}}.java", JAVA);
 
     @Override
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {

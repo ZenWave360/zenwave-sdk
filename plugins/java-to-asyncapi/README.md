@@ -12,6 +12,7 @@ Inspecting your Java classes requires access to your project classpath. Add this
     <groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
     <artifactId>java-to-asyncapi</artifactId>
     <version>${zenwave.version}</version>
+    <scope>test</scope>
 </dependency>
 ```
 
@@ -19,19 +20,31 @@ And then just paste the following code snippets on any test class or main method
 
 
 ```java
-String asyncapi = new JavaToAsyncAPIGenerator()
-        .withEventProducerClass(EventProducer.class) // <-- your event producer class
-        .withAsyncapiVersion(AsyncapiVersionType.v3)
-        .withTargetFile("target/out/asyncapi.yml")
-        .generate();
-System.out.println(asyncapi); // printing only for debug purposes
+public class JavaEventsToAsyncAPI {
+
+    public static void main(String[] args) throws IOException {
+        String asyncapi = new JavaToAsyncAPIGenerator()
+                .withEventProducerClass(EventPublisher.class) // <-- your event publisher class
+                .withAsyncapiVersion(AsyncapiVersionType.v3)
+                .withTargetFile("target/asyncapi.yml")
+                .generate();
+        System.out.println(asyncapi); // printing for debug purposes
+    }
+
+}
 ```
 
 ```java
-String asyncapi = new JavaToAsyncAPIGenerator()
-        .withEventProducerClass(EventProducer.class) // <-- your event producer class
-        .withTargetFile("target/out/asyncapi-avro.yml")
-        .withSchemaFormat(JavaToAsyncAPIGenerator.SchemaFormat.avro)
-        .generate();
-System.out.println(asyncapi); // printing only for debug purposes
+public class JavaEventsToAsyncAPI {
+
+    public static void main(String[] args) throws IOException {
+        String asyncapi = new JavaToAsyncAPIGenerator()
+                .withEventProducerClass(EventPublisher.class) // <-- your event publisher class
+                .withTargetFile("target/asyncapi-avro.yml")
+                .withSchemaFormat(JavaToAsyncAPIGenerator.SchemaFormat.avro)
+                .generate();
+        System.out.println(asyncapi); // printing for debug purposes
+    }
+
+}
 ```
