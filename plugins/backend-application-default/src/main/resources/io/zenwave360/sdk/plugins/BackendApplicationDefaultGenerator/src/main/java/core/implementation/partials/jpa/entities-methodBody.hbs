@@ -4,6 +4,10 @@
 {{!-- @Async --}}
 {{~#if method.options.async}}
     {{#if method.returnType}}return CompletableFuture.completedFuture({{/if}} {{method.name}}Sync({{methodParametersCallSignature method}}){{#if method.returnType}}){{/if}};
+{{!-- @delete --}}
+{{~else if (and _entity method.options.delete method.paramId)}}
+    log.debug("Request to delete {{_entity.className}} : {}", id);
+    {{_entity.instanceName}}Repository.deleteById(id);
 {{!-- list search --}}
 {{~else if (and _entity method.returnType method.returnTypeIsArray)}}
     {{~#if (eq _entity.name returnEntity)}}
