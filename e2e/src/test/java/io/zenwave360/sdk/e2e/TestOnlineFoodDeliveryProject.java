@@ -119,8 +119,8 @@ public class TestOnlineFoodDeliveryProject {
 
         new MainGenerator().generate(plugin);
 
-        exitCode = MavenCompiler.compile(pom, new File(targetFolder));
-        Assertions.assertEquals(0, exitCode);
+//        exitCode = MavenCompiler.compile(pom, new File(targetFolder));
+//        Assertions.assertEquals(0, exitCode);
 
         plugin = new OpenAPIControllersPlugin()
                 .withApiFile(moduleFolder + "/src/main/resources/apis/openapi.yml")
@@ -134,8 +134,16 @@ public class TestOnlineFoodDeliveryProject {
                 .withTargetFolder(moduleFolder);
 
         new MainGenerator().generate(plugin);
-        exitCode = MavenCompiler.compile(pom, new File(targetFolder));
-        Assertions.assertEquals(0, exitCode);
+
+//        exitCode = MavenCompiler.compile(pom, new File(targetFolder));
+//        Assertions.assertEquals(0, exitCode);
     }
 
+    @Order(4)
+    @Test
+    public void compileModules() throws Exception {
+        var pom = "/pom.xml";
+        int exitCode = MavenCompiler.compile(pom, new File(targetFolder));
+        Assertions.assertEquals(0, exitCode);
+    }
 }

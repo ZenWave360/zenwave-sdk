@@ -6,7 +6,7 @@ import {{layout.inboundDtosPackage}}.*;
 import {{layout.coreImplementationMappersPackage}}.*;
 import {{layout.outboundRepositoryPackage}}.*;
 {{~#if (and includeEmitEventsImplementation (needsEventsProducer service))}}
-import {{layout.asyncApiModelPackage}}.*;
+// import {{layout.asyncApiModelPackage}}.*;
 import {{layout.asyncApiProducerApiPackage}}.*;
 {{~/if}}
 {{~#if (and includeEmitEventsImplementation (needsEventBus service))}}
