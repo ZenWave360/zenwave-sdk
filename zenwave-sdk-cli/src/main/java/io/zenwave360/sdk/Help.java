@@ -45,7 +45,7 @@ public class Help {
             var title = ObjectUtils.firstNonNull(pluginDocumentation.title(), NamingUtils.humanReadable(configuration.getClass().getSimpleName()));
             model.put("plugin", Maps.of("title", title, "summary", pluginDocumentation.summary(), "description", pluginDocumentation.description()));
         }
-        model.put("version", getClass().getPackage().getImplementationVersion());
+        model.put("version", getJarVersion(configuration.getClass()));
         model.put("config", configuration);
         model.put("options", options);
         model.put("undocumentedOptions", undocumentedOptions);
@@ -174,6 +174,24 @@ public class Help {
         }
         String template = "io/zenwave360/sdk/help/" + format.toString();
         return handlebarsEngine.processTemplate(model, new TemplateInput().withTemplateLocation(template).withTargetFile("")).get(0).getContent();
+    }
+
+    protected String getJarVersion(Class<?> clazz) {
+        try {
+            String className = clazz.getSimpleName() + ".class";
+            String classPath = clazz.getResource(className).toString();
+            if (classPath.startsWith("jar")) {
+                // Get jar file path: "jar:file:/path/to/my-jar-1.0.0.jar!/..."
+                String jarPath = classPath.substring(0, classPath.lastIndexOf("!")).substring("jar:file:".length());
+                // Extract version from jar name assuming format: name-version.jar
+                String jarName = jarPath.substring(jarPath.lastIndexOf("/") + 1);
+                String version = jarName.replaceAll(".*-(\\d+\\.\\d+\\.\\d+.*?)\\.jar", "$1");
+                return version;
+            }
+            return clazz.getPackage().getImplementationVersion();
+        } catch (Exception e) {
+            return "UNKNOWN";
+        }
     }
 
 }

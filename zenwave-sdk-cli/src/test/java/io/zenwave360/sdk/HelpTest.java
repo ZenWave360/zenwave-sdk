@@ -1,8 +1,10 @@
 package io.zenwave360.sdk;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 import io.zenwave360.sdk.plugins.NoOpPluginConfiguration;
+import org.slf4j.Logger;
 
 public class HelpTest {
 
@@ -36,4 +38,12 @@ public class HelpTest {
         Main.main("-h", Help.Format.list.toString());
     }
 
+    @Test
+    public void testGetJarVersion() {
+        Help help = new Help();
+        String version = help.getJarVersion(Test.class);
+        Assertions.assertNotNull(version);
+        Assertions.assertFalse(version.isEmpty());
+        Assertions.assertTrue(version.startsWith("5."));
+    }
 }
