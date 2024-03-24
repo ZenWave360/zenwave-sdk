@@ -75,8 +75,9 @@
         {{~/if}}
       {{~else}}
         log.debug("Request {{method.name}}");
-        // var {{entity.instanceName}} = new {{entity.className}}();
+        var {{entity.instanceName}}; // = new {{entity.className}}();
       {{~/if}}
+
       // TODO: implement this method
       {{~#if method.returnType}}
         {{~#if (eq entity.name returnEntity.name)}}
@@ -89,6 +90,7 @@
         {{~/if}}
       {{~/if}}
   {{~else~}}
+
         // TODO: implement this method
         {{~> (partial 'withEvents')}}
       {{~#if method.returnType}}

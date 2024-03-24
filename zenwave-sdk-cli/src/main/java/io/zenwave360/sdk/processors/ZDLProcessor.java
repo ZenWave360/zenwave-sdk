@@ -51,7 +51,12 @@ public class ZDLProcessor extends AbstractBaseProcessor {
         for (Map.Entry<Object, Object> service : services.entrySet()) {
             var aggregates = JSONPath.get(service.getValue(), "$.aggregates", List.of());
             for (Object aggregate : aggregates) {
-                JSONPath.set(zdlModel, "$.entities." + aggregate + ".options.service", service.getKey());
+                if(JSONPath.get(zdlModel, "$.entities." + aggregate) != null) {
+                    JSONPath.set(zdlModel, "$.entities." + aggregate + ".options.service", service.getKey());
+                }
+//                if(JSONPath.get(zdlModel, "$.aggregates." + aggregate) != null) {
+//                    JSONPath.set(zdlModel, "$.aggregates." + aggregate + ".options.service", service.getKey());
+//                }
             }
         }
     }

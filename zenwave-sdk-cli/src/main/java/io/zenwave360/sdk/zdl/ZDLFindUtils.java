@@ -94,6 +94,20 @@ public class ZDLFindUtils {
                 ).findFirst().orElse(null);
     }
 
+    public static boolean isAggregateRoot(Map zdl, String entityName) {
+        var aggregateNames = JSONPath.get(zdl, "$.aggregates[*][?(@.aggregateRoot == '" + entityName + "')].name", List.of());
+        return !aggregateNames.isEmpty();
+    }
+
+    public static Set<String> aggregateEvents(Map<String, Object> aggregate) {
+        var allEvents = new HashSet<String>();
+        var methods = JSONPath.get(aggregate, "$.commands[*]", List.<Map>of());
+        for (var method : methods) {
+            allEvents.addAll(methodEventsFlatList(method));
+        }
+        return allEvents;
+    }
+
     public static  List<String> methodEventsFlatList(Map<String, Object> method) {
         var events = (List) method.getOrDefault("withEvents", List.of());
         List<String> allEvents = new ArrayList<>();

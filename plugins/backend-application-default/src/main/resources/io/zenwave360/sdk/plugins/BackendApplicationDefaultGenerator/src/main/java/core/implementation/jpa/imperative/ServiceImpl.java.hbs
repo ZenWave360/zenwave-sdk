@@ -8,7 +8,9 @@ import {{outboundPackage}}.jpa.*;
 {{#if includeEmitEventsImplementation}}
 import {{outboundEventsPackage}}.*;
 {{/if}}
-
+{{#if (includeDomainEvents service)}}
+import {{domainEventsPackage}}.*;
+{{/if}}
 
 import java.math.*;
 import java.time.*;
@@ -21,6 +23,9 @@ import org.springframework.data.domain.Pageable;
 {{~#if (jsonPath service 'methods[*][?(@.options.async)]')}}
 import java.util.concurrent.CompletableFuture;
 import org.springframework.scheduling.annotation.Async;
+{{~/if}}
+{{~#if (includeEmitEventsImplementation service)}}
+import org.springframework.context.ApplicationEventPublisher;
 {{~/if}}
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +53,7 @@ public class {{service.name}}Impl implements {{service.name}} {
 {{#if (includeEmitEventsImplementation service)}}
     private final EventsMapper eventsMapper = EventsMapper.INSTANCE;
     private final {{eventsProducerInterface service.name}} eventsProducer;
+	private final ApplicationEventPublisher applicationEventPublisher;
 {{/if}}
 
 {{#unless useLombok~}}
@@ -55,12 +61,14 @@ public class {{service.name}}Impl implements {{service.name}} {
      * Constructor.
      */
     public {{service.name}}Impl({{#joinWithTemplate service.entities delimiter=", "}}{{#unless (skipEntityRepository this)}}{{className}}Repository {{instanceName}}Repository{{/unless}}{{/joinWithTemplate}}
-                                {{#if (includeEmitEventsImplementation service)}}, {{eventsProducerInterface service.name}} eventsProducer{{/if}}) {
+                                {{#if (includeEmitEventsImplementation service)}}, {{eventsProducerInterface service.name}} eventsProducer, ApplicationEventPublisher applicationEventPublisher{{/if}}
+                                ) {
         {{~#joinWithTemplate service.entities ~}}
             {{#unless (skipEntityRepository this)}}this.{{instanceName}}Repository = {{instanceName}}Repository;{{/unless}}
         {{~/joinWithTemplate~}}
         {{~#if (includeEmitEventsImplementation service)}}
         this.eventsProducer = eventsProducer;
+        this.applicationEventPublisher = applicationEventPublisher;
         {{~/if}}
     }
 {{/unless~}}
@@ -72,4 +80,26 @@ public class {{service.name}}Impl implements {{service.name}} {
     }
 {{/each}}
 
+{{#each (serviceAggregates service) as |aggregate|}}
+	private {{aggregate.name}} persistAndEmitEvents({{aggregate.name}} {{asInstanceName aggregate.name}}) {
+		var {{asInstanceName aggregate.aggregateRoot}} = {{asInstanceName aggregate.aggregateRoot}}Repository.save({{asInstanceName aggregate.name}}.getRootEntity());
+		{{asInstanceName aggregate.name}}.getEvents().forEach(event -> {
+		{{#each (aggregateEvents aggregate) as |event|}}
+            if (event instanceof {{event.className}}) {
+            {{~#if event.options.asyncapi }}
+		        {{~#if includeEmitEventsImplementation }}
+                eventsProducer.{{operationNameForEvent event.name}}({{asInstanceName event.name}});
+                {{~else}}
+                // TODO: set 'includeEmitEventsImplementation' to generate this
+                // eventsProducer.{{operationNameForEvent event.name}}({{asInstanceName event.name}});
+                {{~/if}}
+            {{~else}}
+                applicationEventPublisher.publishEvent(event);
+            {{~/if}}
+            }
+		{{/each}}
+		});
+		return {{asInstanceName aggregate.name}};
+	}
+{{/each}}
 }

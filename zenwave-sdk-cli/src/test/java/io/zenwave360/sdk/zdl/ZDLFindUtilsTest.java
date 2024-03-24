@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import io.zenwave360.sdk.utils.JSONPath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -87,6 +89,21 @@ public class ZDLFindUtilsTest {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
         var method = ZDLFindUtils.findServiceMethod("uploadFile", model);
         Assertions.assertEquals("AttachmentService", method.get("serviceName"));
+    }
+
+    @Test
+    public void isAggregateRoot() throws Exception {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/orders-with-aggregate.zdl");
+        Assertions.assertTrue(ZDLFindUtils.isAggregateRoot(model, "CustomerOrder"));
+        Assertions.assertFalse(ZDLFindUtils.isAggregateRoot(model, "Restaurant"));
+    }
+
+    @Test
+    public void aggregateEvents() throws Exception {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/orders-with-aggregate.zdl");
+        var aggregate = JSONPath.get(model, "$.aggregates.CustomerOrderAggregate", Map.<String, Object>of());
+        var events = ZDLFindUtils.aggregateEvents(aggregate);
+        Assertions.assertEquals(Set.of("OrderEvent", "OrderStatusUpdated"), events);
     }
 
     @Test

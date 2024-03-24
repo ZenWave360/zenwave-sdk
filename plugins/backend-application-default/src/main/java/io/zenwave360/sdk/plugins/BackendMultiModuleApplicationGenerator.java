@@ -11,6 +11,11 @@ public class BackendMultiModuleApplicationGenerator extends BackendDefaultApplic
     protected ZDLProjectTemplates configureProjectTemplates() {
         var ts = new ZDLProjectTemplates("io/zenwave360/sdk/plugins/BackendApplicationDefaultGenerator");
 
+        ts.addTemplate(ts.aggregateTemplates, "src/main/java","core/domain/common/Aggregate.java","{{mavenModulesPrefix}}-domain",
+                "{{asPackageFolder entitiesPackage}}/{{aggregate.name}}.java", JAVA, null, true);
+        ts.addTemplate(ts.domainEventsTemplates, "src/main/java","core/domain/common/DomainEvent.java","{{mavenModulesPrefix}}-domain",
+                "{{asPackageFolder domainEventsPackage}}/{{event.name}}.java", JAVA, null, true);
+
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/domain/{{persistence}}/Entity.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder entitiesPackage}}/{{entity.name}}.java", JAVA, skipEntity, false);
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/outbound/{{persistence}}/{{style}}/EntityRepository.java", "{{mavenModulesPrefix}}-domain",

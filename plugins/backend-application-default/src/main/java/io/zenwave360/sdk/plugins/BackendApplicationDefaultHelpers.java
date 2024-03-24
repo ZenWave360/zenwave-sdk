@@ -5,9 +5,7 @@ import java.util.stream.Collectors;
 
 import io.zenwave360.sdk.utils.NamingUtils;
 import io.zenwave360.sdk.zdl.ZDLFindUtils;
-import io.zenwave360.sdk.zdl.ZDLHttpUtils;
 import io.zenwave360.sdk.zdl.ZDLJavaSignatureUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.jknack.handlebars.Options;
@@ -42,9 +40,38 @@ public class BackendApplicationDefaultHelpers {
         return isCrudMethod;
     }
 
-    public Collection<String> findAggregateInputs(Map aggregate, Options options) {
+    public List<Map> serviceAggregates(Map service, Options options) {
         var zdl = options.get("zdl");
-        var aggregateName = (String) aggregate.get("name");
+        var aggregateNames = JSONPath.get(service, "aggregates", Collections.emptyList());
+        return aggregateNames.stream()
+                .map(aggregateName -> JSONPath.get(zdl, "$.allEntitiesAndEnums." + aggregateName, Map.of()))
+                .filter(aggregate -> "aggregates".equals(aggregate.get("type")))
+                .collect(Collectors.toList());
+    }
+
+    public boolean includeDomainEvents(Map service, Options options) {
+        var zdl = options.get("zdl");
+        return !JSONPath.get(zdl, "$.aggregates[*].commands[*].withEvents", List.of()).isEmpty();
+    }
+
+    public List<Map> aggregateEvents(Map<String, Object> aggregate, Options options) {
+        var zdl = options.get("zdl");
+        return ZDLFindUtils.aggregateEvents(aggregate).stream().map(event -> (Map) JSONPath.get(zdl, "$.events." + event)).toList();
+    }
+
+    public Collection<String> findAggregateInputs(Map aggregate, Options options) {
+        return new HashSet<>(JSONPath.get(aggregate, "$.commands[*].parameter", List.of()));
+    }
+
+    public String findEntityAggregate(String entityName, Options options) {
+        var zdl = options.get("zdl");
+        var aggregateNames = JSONPath.get(zdl, "$.aggregates[*][?(@.aggregateRoot == '" + entityName + "')].name", List.of());
+        return aggregateNames.isEmpty()? null : (String) aggregateNames.get(0);
+    }
+
+    public Collection<String> findServiceInputs(Map entity, Options options) {
+        var zdl = options.get("zdl");
+        var aggregateName = (String) entity.get("name");
         var inputDTOSuffix = (String) options.get("inputDTOSuffix");
         Set<String> inputs = new HashSet<String>();
         inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregateName + "' in @.aggregates)].methods[*].parameter"));
@@ -305,14 +332,14 @@ public class BackendApplicationDefaultHelpers {
         return pattern.replace("\\", "").replace("\\", "\\\\");
     }
 
-    public Object skipEntityRepository(Object context, Options options) {
-        Map entity = (Map) context;
-        return generator.skipEntityRepository.apply(Map.of("entity", entity));
+    public Object skipEntityRepository(Map entity, Options options) {
+        var zdl = options.get("zdl");
+        return generator.skipEntityRepository.apply(Map.of("zdl", zdl, "entity", entity));
     };
 
-    public Object skipEntityId(Object context, Options options) {
-        Map entity = (Map) context;
-        return generator.skipEntityId.apply(Map.of("entity", entity));
+    public Object skipEntityId(Map entity, Options options) {
+        var zdl = options.get("zdl");
+        return generator.skipEntityId.apply(Map.of("zdl", zdl, "entity", entity));
     };
 
     public Object addExtends(Object entity, Options options) {

@@ -15,10 +15,10 @@ import org.springframework.data.domain.Page;
 public interface {{service.name}}Mapper {
 
     {{service.name}}Mapper INSTANCE = Mappers.getMapper({{service.name}}Mapper.class);
-{{~#each service.aggregates as |entityName|}}
+{{~#each service.entityNames as |entityName|}}
     {{~assign "entity" (findEntity entityName)}}
 
-  {{~#each (findAggregateInputs entity) as |input|}}
+  {{~#each (findServiceInputs entity) as |input|}}
     {{~#if (not (eq entity.className input))}}
     // {{entity.className}} as{{entity.className}}({{mapperInputSignature input}});
     {{~/if}}
