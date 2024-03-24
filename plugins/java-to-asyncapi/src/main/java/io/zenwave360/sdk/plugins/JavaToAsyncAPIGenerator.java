@@ -35,6 +35,9 @@ public class JavaToAsyncAPIGenerator {
     @DocumentedOption(description = "Events Producer class to reverse engineer from")
     public Class eventProducerClass;
 
+    @DocumentedOption(description = "Service Name to use in AsyncAPI tags and CloudEvents source")
+    public String serviceName;
+
     @DocumentedOption(description = "Target file")
     public String targetFile = "asyncapi.yml";
 
@@ -50,10 +53,22 @@ public class JavaToAsyncAPIGenerator {
     @DocumentedOption(description = "Overlay Spec file to apply on top of generated AsyncAPI file")
     public List<String> asyncapiOverlayFiles;
 
+    @DocumentedOption(description = "Include Kafka common headers (kafka_messageKey)")
+    public boolean includeKafkaCommonHeaders = false;
+
+    @DocumentedOption(description = "Include CloudEvents headers (ce-*)")
+    public boolean includeCloudEventsHeaders = false;
+
+
     public boolean debugZdl = false;
 
     public JavaToAsyncAPIGenerator withEventProducerClass(Class eventProducerClass) {
         this.eventProducerClass = eventProducerClass;
+        return this;
+    }
+
+    public JavaToAsyncAPIGenerator withServiceName(String serviceName) {
+        this.serviceName = serviceName;
         return this;
     }
 
@@ -82,6 +97,16 @@ public class JavaToAsyncAPIGenerator {
         return this;
     }
 
+    public JavaToAsyncAPIGenerator withIncludeKafkaCommonHeaders(boolean includeKafkaCommonHeaders) {
+        this.includeKafkaCommonHeaders = includeKafkaCommonHeaders;
+        return this;
+    }
+
+    public JavaToAsyncAPIGenerator withIncludeCloudEventsHeaders(boolean includeCloudEventsHeaders) {
+        this.includeCloudEventsHeaders = includeCloudEventsHeaders;
+        return this;
+    }
+
     public JavaToAsyncAPIGenerator withDebugZdl(boolean debugZdl) {
         this.debugZdl = debugZdl;
         return this;
@@ -90,9 +115,10 @@ public class JavaToAsyncAPIGenerator {
     public String generate() throws IOException {
         StringBuilder zdl = new StringBuilder();
         var methods = eventProducerClass.getDeclaredMethods();
+        serviceName = serviceName != null ? serviceName : eventProducerClass.getSimpleName();
         if (methods != null) {
             zdl.append("@aggregate entity Dummy {} \n");
-            zdl.append("service EventsProducer for (Dummy) {\n");
+            zdl.append("service " + serviceName + " for (Dummy) {\n");
             for (Method method : methods) {
                 if (method.getParameters().length > 0) {
                     var event = method.getParameters()[0].getType();
@@ -123,6 +149,8 @@ public class JavaToAsyncAPIGenerator {
         generator.targetFile = targetFile;
         generator.asyncapiVersion = asyncapiVersion;
         generator.schemaFormat = ZDLToAsyncAPIGenerator.SchemaFormat.valueOf(schemaFormat.name());
+        generator.includeKafkaCommonHeaders = includeKafkaCommonHeaders;
+        generator.includeCloudEventsHeaders = includeCloudEventsHeaders;
         generator.asyncapiMergeFile = asyncapiMergeFile;
         generator.asyncapiOverlayFiles = asyncapiOverlayFiles;
 

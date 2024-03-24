@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,7 +144,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
                 String location = JSONPath.get(headers.get(header), "$." + runtimeHeadersProperty);
                 if(location != null) {
                     runtimeHeaders.add("\"" + header + "\"");
-                    runtimeHeaders.add("\"" + location + "\"");
+                    runtimeHeaders.add("\"" + StringEscapeUtils.escapeJava(location) + "\"");
                 }
             }
             return runtimeHeaders.stream().collect(Collectors.joining(", "));

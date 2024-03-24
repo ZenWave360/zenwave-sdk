@@ -69,6 +69,9 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
     @DocumentedOption(description = "Include Kafka common headers (kafka_messageKey)")
     public boolean includeKafkaCommonHeaders = false;
 
+    @DocumentedOption(description = "Include CloudEvents headers (ce-*)")
+    public boolean includeCloudEventsHeaders = false;
+
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 

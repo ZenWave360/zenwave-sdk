@@ -1,13 +1,26 @@
 {{~#if (hasRuntimeHeaders operations)}}
-    protected void processRuntimeHeaders(Object payload, Map<String, Object> headers, Map<String, String> runtimeHeaders) {
-        if(runtimeHeaders == null ||runtimeHeaders.isEmpty()) {
+    private final org.springframework.expression.ExpressionParser parser = new org.springframework.expression.spel.standard.SpelExpressionParser();
+    protected void processRuntimeHeaders(Object payload, Map<String, Object> headers,
+            Map<String, String> runtimeHeaders) {
+        if (runtimeHeaders == null || runtimeHeaders.isEmpty()) {
             return;
         }
-        if(headers == null) {
+        if (headers == null) {
             headers = new java.util.HashMap<>();
         }
-        for (Map.Entry<String, String> runtimeHeader :runtimeHeaders.entrySet()) {
-            String location = runtimeHeader.getValue().replace("$message.payload#/", "").trim();
+
+        var context = new org.springframework.expression.spel.support.StandardEvaluationContext(payload);
+
+        for (Map.Entry<String, String> runtimeHeader : runtimeHeaders.entrySet()) {
+            String location = runtimeHeader.getValue().replace("$message.payload#", "").trim();
+            if (location.startsWith("#{") && location.endsWith("}")) {
+                var expression = location.substring(2, location.length() - 1);
+                var value = parser.parseExpression(expression).getValue(context);
+                if (!headers.containsKey(runtimeHeader.getKey())) {
+                    headers.put(runtimeHeader.getKey(), value);
+                }
+                continue;
+            }
             if (location.startsWith("$")) {
                 var suppliedValue = getSuppliedValue(location.substring(1));
                 if (suppliedValue != null) {
@@ -15,24 +28,30 @@
                 }
                 continue;
             }
-            try {
-                var parts = java.util.Arrays.asList(location.split("/"));
-                var value = payload;
-                for (String part : parts) {
-                    if(value != null) {
-                        var pd = new java.beans.PropertyDescriptor(part, value.getClass());
-                        if(pd != null && pd.getReadMethod() != null) {
-                            value = pd.getReadMethod().invoke(value);
-                        } else {
-                            log.error("Unable to find property for: {} in class: {}", parts, payload.getClass());
+            if (location.startsWith("/")) {
+                var expression = location.substring(1);
+                try {
+                    var parts = java.util.Arrays.asList(expression.split("/"));
+                    var value = payload;
+                    for (String part : parts) {
+                        if (value != null) {
+                            var pd = new java.beans.PropertyDescriptor(part, value.getClass());
+                            if (pd != null && pd.getReadMethod() != null) {
+                                value = pd.getReadMethod().invoke(value);
+                            }
+                            else {
+                                log.error("Unable to find property for: {} in class: {}", parts, payload.getClass());
+                            }
                         }
                     }
+                    if (!headers.containsKey(runtimeHeader.getKey())) {
+                        headers.put(runtimeHeader.getKey(), value);
+                    }
                 }
-                if(!headers.containsKey(runtimeHeader.getKey())) {
-                    headers.put(runtimeHeader.getKey(), value);
+                catch (java.beans.IntrospectionException | java.lang.reflect.InvocationTargetException
+                        | IllegalAccessException e) {
+                    throw new RuntimeException(e);
                 }
-            } catch (java.beans.IntrospectionException | java.lang.reflect.InvocationTargetException | IllegalAccessException e) {
-                throw new RuntimeException(e);
             }
         }
     }

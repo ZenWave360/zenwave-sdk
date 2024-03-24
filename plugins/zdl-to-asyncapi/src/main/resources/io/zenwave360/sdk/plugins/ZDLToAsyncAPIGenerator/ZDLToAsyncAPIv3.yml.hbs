@@ -56,12 +56,40 @@ components:
       headers:
         type: object
         properties:
+{{~#unless (or includeKafkaCommonHeaders includeCloudEventsHeaders)}}
+          common_header:
+            type: string
+            description: Example header field. Customize headers according to your messaging requirements.
+{{~/unless}}
 {{~#if includeKafkaCommonHeaders}}
           kafka_messageKey:
             type: "{{idType}}"
             {{#if idTypeFormat}}format: "{{idTypeFormat}}"{{/if}}
             description: This header value will be populated automatically at runtime
             x-runtime-expression: $message.payload#/id
+{{~/if}}
+{{~#if includeCloudEventsHeaders}}
+          # CloudEvents Attributes
+          ce-id:
+            type: string
+            description: Unique identifier for the event
+            x-runtime-expression: $message.payload#{#this.id}
+          ce-source:
+            type: string
+            description: URI identifying the context where event happened
+            x-runtime-expression: $message.payload#{"{{asTagName (jsonPath zdlModel 'serviceNames[0]')}}"}
+          ce-specversion:
+            type: string
+            description: CloudEvents specification version
+            x-runtime-expression: $message.payload#{"1.0"}
+          ce-type:
+            type: string
+            description: Event type
+            x-runtime-expression: $message.payload#{#this.getClass().getSimpleName()}
+          ce-time:
+            type: string
+            description: Timestamp of when the event happened
+            x-runtime-expression: $message.payload#{T(java.time.Instant).now().toString()}
 {{~/if}}
 
 {{{schemasAsString}}}
