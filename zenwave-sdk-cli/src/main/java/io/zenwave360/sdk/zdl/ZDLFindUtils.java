@@ -1,6 +1,7 @@
 package io.zenwave360.sdk.zdl;
 
 import io.zenwave360.sdk.utils.JSONPath;
+import io.zenwave360.sdk.utils.Maps;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.*;
@@ -119,5 +120,93 @@ public class ZDLFindUtils {
             }
         }
         return allEvents;
+    }
+
+
+    public static List<Map<String, Object>> findAggregateCommandsForMethod(Map zdl, Map<String, Object> method) {
+        var serviceAggregateNames = JSONPath.get(zdl, "$.services." + method.get("serviceName") + ".aggregates", List.<String>of());
+        var methodAnnotatedAggregates = JSONPath.get(method, "$.options.aggregates", List.<String>of());
+        var returnType = JSONPath.get(method, "$.returnType");
+        if (methodAnnotatedAggregates.isEmpty()) {
+            String aggregateName = null;
+            String entityName = null;
+            String crudMethod = null;
+            String commandName = null;
+            if(serviceAggregateNames.size() == 1) {
+                aggregateName = serviceAggregateNames.get(0);
+                entityName = JSONPath.get(zdl, "$.allEntitiesAndEnums." + aggregateName + ".aggregateRoot");
+                if (entityName == null) {
+                    // if entityName is null we need to swap entityName and aggregateName b/c the 'aggregateName' is actually just an entity
+                    entityName = aggregateName;
+                    aggregateName = null;
+                }
+                crudMethod = findCrudMethod(zdl, method, entityName);
+                if (crudMethod != null) {
+                    aggregateName = null;
+                }
+            } else {
+                for (String serviceAggregate : serviceAggregateNames) {
+                    aggregateName = serviceAggregate;
+                    entityName = JSONPath.get(zdl, "$.allEntitiesAndEnums." + serviceAggregate + ".aggregateRoot");
+                    if (entityName == null) {
+                        // if entityName is null we need to swap entityName and aggregateName b/c the 'aggregateName' is actually just an entity
+                        entityName = aggregateName;
+                        aggregateName = null;
+                    }
+                    if(Objects.equals(returnType, entityName) || Objects.equals(returnType, aggregateName)) {
+                        commandName = findAggregateCommand(zdl, method, aggregateName);
+                        if(commandName != null) {
+                            break;
+                        }
+                    }
+                    crudMethod = findCrudMethod(zdl, method, entityName);
+                    if(crudMethod != null || Objects.equals(returnType, entityName)) {
+                        aggregateName = null;
+                        break;
+                    }
+                }
+            }
+
+            if(commandName == null && Objects.equals(returnType, entityName)) {
+                aggregateName = null; // if we didn't find an aggregate's command, we don't want to return an aggregate
+            }
+
+            return List.of(methodAggregateCommand(zdl, aggregateName, commandName, entityName, crudMethod));
+        }
+        return null;
+    }
+
+    private static Map<String, Object> methodAggregateCommand(Map zdl, String aggregateName, String commandName, String entityName, String crudMethod) {
+        var aggregate = JSONPath.get(zdl, "$.allEntitiesAndEnums." + aggregateName);
+        var entity = JSONPath.get(zdl, "$.allEntitiesAndEnums." + entityName);
+        var command = JSONPath.get(aggregate, "$.commands." + commandName);
+        return Maps.of("aggregate", aggregate, "entity", entity, "command", command, "crudMethod", crudMethod);
+    }
+
+    private static String findAggregateCommand(Map zdl, Map method, String aggregate) {
+        return JSONPath.get(zdl, "$.allEntitiesAndEnums." + aggregate + ".commands." + method.get("name") + ".name");
+    }
+
+    private static String findCrudMethod(Map zdl, Map method, String entityName) {
+        var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + entityName, Map.of());
+        return findCrudMethod(method, entity);
+    }
+
+    private static String findCrudMethod(Map method, Map entity) {
+        var entityName = (String) entity.get("name");
+        var entityNamePlural = (String) entity.get("classNamePlural");
+        var methodName = (String) method.get("name");
+        var isArray = "true".equals(String.valueOf(method.get("returnTypeIsArray")));
+        var isOptional = "true".equals(String.valueOf(method.get("returnTypeIsOptional")));
+        var entityMethodSuffix = isArray ? entityNamePlural : entityName;
+
+        for (String crudPrefix : List.of("create", "delete", "get")) {
+            var isCrudMethod = methodName.equals(crudPrefix + entityMethodSuffix);
+            if (isCrudMethod) {
+                return crudPrefix + entityMethodSuffix;
+            }
+        }
+
+        return null;
     }
 }

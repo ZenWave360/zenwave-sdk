@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Services InMemory Config. It can be used standalone or with @SpringBootTest.
@@ -27,6 +28,12 @@ public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
 
 {{#if (includeEmitEventsImplementation service)}}
     protected final EventsProducerInMemoryContext eventsProducerInMemoryContext = new EventsProducerInMemoryContext();
+    private ApplicationEventPublisher applicationEventPublisher = new ApplicationEventPublisher() {
+        @Override
+        public void publishEvent(Object event) {
+            publishedEvents.add(event);
+        }
+    };
 {{/if}}
 
 {{~#each services as |service|}}
@@ -66,12 +73,5 @@ public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
     public List<Object> getPublishedEvents() {
         return publishedEvents;
     }
-
-    private ApplicationEventPublisher applicationEventPublisher = new ApplicationEventPublisher() {
-        @Override
-        public void publishEvent(Object event) {
-            publishedEvents.add(event);
-        }
-    };
 {{~/if}}
 }

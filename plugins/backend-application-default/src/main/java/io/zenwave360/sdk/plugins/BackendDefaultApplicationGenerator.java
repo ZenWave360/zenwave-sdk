@@ -138,7 +138,7 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
 
         ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/inbound/Service.java",
                 "{{asPackageFolder inboundPackage}}/{{service.name}}.java", JAVA, null, false);
-        ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/implementation/{{persistence}}/{{style}}/ServiceImpl.java",
+        ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/implementation/{{style}}/ServiceImpl.java",
                 "{{asPackageFolder coreImplementationPackage}}/{{service.name}}Impl.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/main/java", "core/implementation/mappers/BaseMapper.java",
                 "{{asPackageFolder coreImplementationPackage}}/mappers/BaseMapper.java", JAVA, null, true);

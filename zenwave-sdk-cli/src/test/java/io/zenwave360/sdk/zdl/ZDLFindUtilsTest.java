@@ -15,7 +15,7 @@ import io.zenwave360.sdk.processors.ZDLProcessor;
 
 public class ZDLFindUtilsTest {
 
-    private Map<String, Object> loadZDL(String resource) throws IOException {
+    public static Map<String, Object> loadZDL(String resource) throws IOException {
         Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
         return (Map<String, Object>) new ZDLProcessor().process(model).get("zdl");
     }
@@ -113,4 +113,5 @@ public class ZDLFindUtilsTest {
         var events = ZDLFindUtils.methodEventsFlatList(method);
         Assertions.assertEquals(List.of("CustomerEvent", "CustomerCreated", "CustomerCreatedFailed"), events);
     }
+
 }

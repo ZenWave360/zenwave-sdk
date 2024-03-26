@@ -24,6 +24,50 @@ public class BackendApplicationDefaultHelpers {
         this.generator = generator;
     }
 
+    public String logMethodCall(Map method, Options options) {
+        var zdl = options.get("zdl");
+        var methodName = (String) method.get("name");
+        var parameters = ZDLJavaSignatureUtils.methodParametersCallSignature(method, (Map) zdl, generator.inputDTOSuffix);
+        var parameterPlaceHolders = Arrays.stream(parameters.split(", ")).map(p -> "{}").collect(Collectors.joining(" "));
+        if(parameters.isEmpty()) {
+            return String.format("log.debug(\"Request %s\");", methodName);
+        }
+        return String.format("log.debug(\"Request %s: %s\", %s);", methodName, parameterPlaceHolders, parameters);
+    }
+
+    public Map findAggregateCommandsForMethod(Map method, Options options) {
+        var zdl = options.get("zdl");
+        var aggregatesCommandsForMethod = ZDLFindUtils.findAggregateCommandsForMethod((Map) zdl, method);
+        if(aggregatesCommandsForMethod.isEmpty()) {
+            return Map.of("templateFile", "aggregates-void-methodBody");
+        }
+        if(aggregatesCommandsForMethod.size() == 1) {
+            var aggregate = JSONPath.get(aggregatesCommandsForMethod, "$[0].aggregate");
+            var entity = JSONPath.get(aggregatesCommandsForMethod, "$[0].entity");
+            var command = JSONPath.get(aggregatesCommandsForMethod, "$[0].command");
+            var crudMethod = JSONPath.get(aggregatesCommandsForMethod, "$[0].crudMethod");
+            if(aggregate != null && command != null) {
+                return Map.of("templateFile", "aggregates-commands-methodBody", "aggregatesCommandsForMethod", aggregatesCommandsForMethod);
+            }
+            if(aggregate != null && crudMethod != null) {
+                return Map.of("templateFile", "aggregates-crud-methodBody", "aggregatesCommandsForMethod", aggregatesCommandsForMethod);
+            }
+            if(entity != null && crudMethod != null) {
+                return Map.of("templateFile", "entities-crud-methodBody", "entity", entity, "crudMethod", crudMethod);
+            }
+            if(entity != null) {
+                return Map.of("templateFile", "entities-methodBody", "entity", entity);
+            }
+        }
+        return Map.of("templateFile", "aggregates-commands-methodBody", "aggregatesCommandsForMethod", aggregatesCommandsForMethod);
+    }
+    public boolean isWriteMethod(Map method, Options options) {
+        var methodName = (String) method.get("name");
+        var hasId = method.get("paramId") != null;
+        return hasId || methodName.startsWith("create") || methodName.startsWith("update") || methodName.startsWith("delete");
+    }
+
+    @Deprecated
     public boolean isCrudMethod(String crudMethodPrefix, Options options) {
         var entity = (Map<String, Object>) options.hash("entity");
         var entityName = (String) entity.get("name");
@@ -69,12 +113,11 @@ public class BackendApplicationDefaultHelpers {
         return aggregateNames.isEmpty()? null : (String) aggregateNames.get(0);
     }
 
-    public Collection<String> findServiceInputs(Map entity, Options options) {
+    public Collection<String> findServiceInputs(Map service, Options options) {
         var zdl = options.get("zdl");
-        var aggregateName = (String) entity.get("name");
         var inputDTOSuffix = (String) options.get("inputDTOSuffix");
         Set<String> inputs = new HashSet<String>();
-        inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregateName + "' in @.aggregates)].methods[*].parameter"));
+        inputs.addAll(JSONPath.get(service, "$.methods[*].parameter"));
         // inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregateName + "' in @.aggregates)].methods[*].returnType"));
         // inputs.add(aggregateName + inputDTOSuffix);
         inputs = inputs.stream().filter(Objects::nonNull).collect(Collectors.toSet());
@@ -86,12 +129,12 @@ public class BackendApplicationDefaultHelpers {
         return inputs;
     }
 
-    public Collection<String> findAggregateOutputs(Map aggregate, Options options) {
+    public Collection<String> findServiceOutputs(Map service, Options options) {
         var zdl = options.get("zdl");
-        var aggregateName = (String) aggregate.get("name");
+        var aggregates = (List<String>) service.get("aggregates");
         Set<String> outputs = new HashSet<String>();
-        outputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregateName + "' in @.aggregates)].methods[*].returnType"));
-        outputs = outputs.stream().filter(input -> input != null && !aggregateName.equals(input)).collect(Collectors.toSet());
+        outputs.addAll(JSONPath.get(service, "$.methods[*].returnType"));
+        outputs = outputs.stream().filter(input -> input != null && !aggregates.contains(input)).collect(Collectors.toSet());
         return outputs;
     }
 
@@ -209,20 +252,22 @@ public class BackendApplicationDefaultHelpers {
             return "";
         }
         var returnTypeIsArray = (Boolean) method.getOrDefault("returnTypeIsArray", false);
+        var isReturnTypeOptional = (Boolean) method.getOrDefault("returnTypeIsOptional", false);
         var instanceName = returnTypeIsArray? entity.get("instanceNamePlural") : entity.get("instanceName");
+        var serviceInstanceName = NamingUtils.asInstanceName((String) method.get("serviceName"));
         if (Objects.equals(entity.get("name"), returnType.get("name"))) {
-            if(JSONPath.get(method, "options.paginated", false)) {
-                return "page";
-            }
+//            if(JSONPath.get(method, "options.paginated", false)) {
+//                return (String) instanceName;
+//            }
             return (String) instanceName;
         } else {
             if(returnTypeIsArray) {
                 if(JSONPath.get(method, "options.paginated", false)) {
-                    return String.format("%sMapper.as%sPage(%s)", instanceName, returnType.get("className"), "page");
+                    return String.format("%sMapper.as%sPage(%s)", serviceInstanceName, returnType.get("className"), instanceName);
                 }
-                return String.format("%sMapper.as%sList(%s)", instanceName, returnType.get("className"), instanceName);
+                return String.format("%sMapper.as%sList(%s)", serviceInstanceName, returnType.get("className"), instanceName);
             } else {
-                return String.format("%sMapper.as%s(%s)", instanceName, returnType.get("className"), instanceName);
+                return String.format("%sMapper.as%s(%s)", serviceInstanceName, returnType.get("className"), instanceName);
             }
         }
     }
@@ -247,7 +292,14 @@ public class BackendApplicationDefaultHelpers {
 
     public Object findEntity(String entityName, Options options) {
         var zdl = options.get("zdl");
-        return JSONPath.get(zdl, "entities." + entityName);
+        var entity = JSONPath.get(zdl, "$.allEntitiesAndEnums." + entityName);
+        if("entities".equals(JSONPath.get(entity, "type"))) {
+            return entity;
+        }
+        if("aggregates".equals(JSONPath.get(entity, "type"))) {
+            return findEntity(JSONPath.get(entity, "$.aggregateRoot"), options);
+        }
+        return null;
     }
 
     public String inputDTOSuffix(Object entity, Options options) {

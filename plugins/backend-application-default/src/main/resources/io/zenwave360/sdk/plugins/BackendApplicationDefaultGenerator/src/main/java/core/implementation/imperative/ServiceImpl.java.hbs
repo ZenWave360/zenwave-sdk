@@ -4,7 +4,7 @@ import {{entitiesPackage}}.*;
 import {{inboundPackage}}.*;
 import {{inboundDtosPackage}}.*;
 import {{coreImplementationPackage}}.mappers.*;
-import {{outboundPackage}}.mongodb.*;
+import {{outboundPackage}}.{{persistence}}.*;
 {{#if includeEmitEventsImplementation}}
 import {{outboundEventsPackage}}.*;
 {{/if}}
@@ -74,9 +74,9 @@ public class {{service.name}}Impl implements {{service.name}} {
 {{/unless~}}
 
 {{#each service.methods as |method|}}
-    {{~> (partial '../../partials/mongodbMethodAnnotations')~}}
-    {{~> (partial '../../partials/serviceMethodSignature')}} {
-        {{~> (partial '../../partials/mongodbMethodBody')~}}
+    {{~> (partial '../partials/' persistence '/methodAnnotations')~}}
+    {{~> (partial '../partials/serviceMethodSignature')}} {
+        {{~> (partial '../partials/' persistence '/methodBody')~}}
     }
 {{/each}}
 
