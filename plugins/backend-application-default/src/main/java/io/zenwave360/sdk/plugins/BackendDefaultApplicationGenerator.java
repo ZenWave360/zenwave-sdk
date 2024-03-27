@@ -57,7 +57,7 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
     public String infrastructurePackage = "{{basePackage}}.infrastructure";
     public String adaptersPackage = "{{basePackage}}.adapters";
 
-    public String outboundEventsModelPackage = "{{basePackage}}.core.domain.events";
+    public String outboundEventsModelPackage = "{{basePackage}}.core.outbound.events.dtos";
     public String outboundEventsPackage = "{{basePackage}}.core.outbound.events";
 
 

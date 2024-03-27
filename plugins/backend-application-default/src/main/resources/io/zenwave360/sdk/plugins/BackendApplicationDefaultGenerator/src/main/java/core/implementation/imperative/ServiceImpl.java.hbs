@@ -88,10 +88,10 @@ public class {{service.name}}Impl implements {{service.name}} {
             if (event instanceof {{event.className}}) {
             {{~#if event.options.asyncapi }}
 		        {{~#if includeEmitEventsImplementation }}
-                eventsProducer.{{operationNameForEvent event.name}}({{asInstanceName event.name}});
+                eventsProducer.{{operationNameForEvent event.name}}(eventsMapper.as{{event.name}}(({{event.className}}) event));
                 {{~else}}
                 // TODO: set 'includeEmitEventsImplementation' to generate this
-                // eventsProducer.{{operationNameForEvent event.name}}({{asInstanceName event.name}});
+                // eventsProducer.{{operationNameForEvent event.name}}(eventsMapper.as{{event.name}}(({{event.className}}) event));
                 {{~/if}}
             {{~else}}
                 applicationEventPublisher.publishEvent(event);

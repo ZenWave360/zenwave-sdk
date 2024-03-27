@@ -170,6 +170,21 @@ enum DeliveryStatus {
     REJECTED, ACCEPTED, IN_PROGRESS, DELIVERED, CANCELLED
 }
 
+output CustomerOrderOutput {
+    orderTime Instant
+    status OrderStatus
+    customerId String required
+    restaurantId String required
+    addressIdentifier String required
+    orderItems OrderItem[] {
+       menuItemId String required
+       name String required
+       description String
+       price BigDecimal required
+       quantity Integer required
+    }
+}
+
 @rest("/orders")
 service OrdersService for (CustomerOrderAggregate) {
     @get("/{orderId}")
@@ -178,7 +193,7 @@ service OrdersService for (CustomerOrderAggregate) {
     getCustomerOrderAggregate(id) CustomerOrder?
 
     @post
-    createOrder(CustomerOrderInput) CustomerOrder withEvents OrderEvent
+    createOrder(CustomerOrderInput) CustomerOrderOutput withEvents OrderEvent
     @put("/{orderId}")
     updateOrder(id, CustomerOrderInput) CustomerOrder withEvents OrderEvent OrderStatusUpdated
 

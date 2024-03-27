@@ -1,1 +1,39 @@
-// aggregates commands
+{{#if (eq (size aggregateCommandsForMethod.aggregatesCommandsForMethod) 1)}}
+    {{~assign 'aggregateCommand' aggregateCommandsForMethod.aggregatesCommandsForMethod.0}}
+    {{~#if method.paramId}}
+    var {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.find{{aggregateCommand.aggregate.className}}ById({{method.paramId}}).orElseThrow();
+    {{~else}}
+    var {{asInstanceName aggregateCommand.aggregate.className}} = new {{aggregateCommand.aggregate.className}}();
+    {{~/if}}
+    {{asInstanceName aggregateCommand.aggregate.className}}.{{aggregateCommand.command.name}}({{#if method.parameter}}input{{/if}});
+    persistAndEmitEvents({{asInstanceName aggregateCommand.aggregate.className}});
+    {{~#if method.returnType}}
+        {{~#if (eq aggregateCommand.aggregate.className method.returnType)}}
+    return {{asInstanceName aggregateCommand.aggregate.className}};
+        {{~else if (eq aggregateCommand.aggregate.aggregateRoot method.returnType)}}
+    return {{asInstanceName aggregateCommand.aggregate.className}}.getRootEntity();
+        {{~else}}
+    return {{asInstanceName service.name}}Mapper.as{{returnType}}({{asInstanceName aggregateCommand.aggregate.className}}.getRootEntity());
+        {{~/if}}
+    {{~/if}}
+{{~else}}
+{{~#each aggregateCommandsForMethod.aggregatesCommandsForMethod as |aggregateCommand| }}
+    {{~#if method.paramId}}
+    var {{asInstanceName aggregate.className}} = {{entity.instanceName}}Repository.find{{aggregate.className}}ById({{method.paramId}}).orElseThrow();
+    {{~else}}
+    var {{asInstanceName aggregate.className}} = new {{aggregate.className}}();
+    {{~/if}}
+    {{asInstanceName aggregate.className}}.{{command.name}}({{#if method.parameter}}input{{/if}});
+    persistAndEmitEvents({{asInstanceName aggregate.className}});
+{{~/each}}
+{{~#if method.returnType}}
+    {{~#if (eq aggregate.className method.returnType)}}
+    return {{asInstanceName aggregate.className}};
+    {{~else if (eq aggregate.aggregateRoot method.returnType)}}
+    return {{asInstanceName aggregate.className}}.getRootEntity();
+    {{~else}}
+    return null;
+    {{~/if}}
+{{~/if}}
+{{~/if}}
+

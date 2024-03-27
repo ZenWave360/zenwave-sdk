@@ -89,6 +89,7 @@ public class BackendApplicationMongoImperativeGeneratorTest {
                 .withOption("persistence", PersistenceType.mongodb)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("forceOverwrite", true)
+//                .withOption("includeEmitEventsImplementation", true)
                 .withOption("haltOnFailFormatting", false);
 
         new MainGenerator().generate(plugin);

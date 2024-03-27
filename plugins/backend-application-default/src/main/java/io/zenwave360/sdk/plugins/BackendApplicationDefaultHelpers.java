@@ -2,6 +2,7 @@ package io.zenwave360.sdk.plugins;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.zenwave360.sdk.utils.NamingUtils;
 import io.zenwave360.sdk.zdl.ZDLFindUtils;
@@ -93,7 +94,7 @@ public class BackendApplicationDefaultHelpers {
                 .collect(Collectors.toList());
     }
 
-    public boolean includeDomainEvents(Map service, Options options) {
+    public boolean includeDomainEvents(Object service, Options options) {
         var zdl = options.get("zdl");
         return !JSONPath.get(zdl, "$.aggregates[*].commands[*].withEvents", List.of()).isEmpty();
     }
@@ -131,10 +132,12 @@ public class BackendApplicationDefaultHelpers {
 
     public Collection<String> findServiceOutputs(Map service, Options options) {
         var zdl = options.get("zdl");
-        var aggregates = (List<String>) service.get("aggregates");
+        var serviceAggregates = (List<String>) service.get("aggregates");
+        var aggregatesAndEntities = new HashSet<>(serviceAggregates);
+        serviceAggregates.stream().map(aggregate -> (String) JSONPath.get(zdl, "$.aggregates." + aggregate + ".aggregateRoot")).filter(Objects::nonNull).forEach(aggregatesAndEntities::add);
         Set<String> outputs = new HashSet<String>();
         outputs.addAll(JSONPath.get(service, "$.methods[*].returnType"));
-        outputs = outputs.stream().filter(input -> input != null && !aggregates.contains(input)).collect(Collectors.toSet());
+        outputs = outputs.stream().filter(input -> input != null && !aggregatesAndEntities.contains(input)).collect(Collectors.toSet());
         return outputs;
     }
 
@@ -168,6 +171,15 @@ public class BackendApplicationDefaultHelpers {
 
     public List<Map<String, Object>> methodsWithEvents(Map<String, Object> zdl, Options options) {
         return ZDLFindUtils.methodsWithEvents(zdl); // TODO review usages
+    }
+
+    public Collection<Map> domainEventsWithAsyncapiAnnotation(Map<String, Object> zdl, Options options) {
+        var domainEventNames = JSONPath.get(zdl, "$.aggregates[*].commands[*].withEvents", List.of()).stream()
+                .flatMap(e -> e instanceof List? ((List<?>) e).stream() : Stream.of(e))
+                .collect(Collectors.toSet());
+        return domainEventNames.stream().map(eventName -> (Map) JSONPath.get(zdl, "$.events." + eventName))
+                .filter(event -> JSONPath.get(event, "options.asyncapi") != null)
+                .toList();
     }
 
     public Collection<Map<String, Object>> listOfPairEventEntity(Map<String, Object> zdl, Options options) {

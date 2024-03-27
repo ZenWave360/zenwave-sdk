@@ -140,9 +140,12 @@ public class ZDLFindUtils {
                     entityName = aggregateName;
                     aggregateName = null;
                 }
-                crudMethod = findCrudMethod(zdl, method, entityName);
-                if (crudMethod != null) {
-                    aggregateName = null;
+                commandName = findAggregateCommand(zdl, method, aggregateName);
+                if (commandName == null) {
+                    crudMethod = findCrudMethod(zdl, method, entityName);
+                    if (crudMethod != null) {
+                        aggregateName = null;
+                    }
                 }
             } else {
                 for (String serviceAggregate : serviceAggregateNames) {

@@ -37,7 +37,8 @@
     return {{wrapWithMapper entity}};
 {{!-- Optional<Entity> get(id) --}}
 {{~else if (and entity method.paramId method.returnType method.returnTypeIsOptional)}}
-    return {{entity.instanceName}}Repository.findById(id).map({{asInstanceName service.name}}Mapper::as{{method.returnType}});
+    {{~assign 'needMapping' (not (eq entity.name method.returnType))}}
+    return {{entity.instanceName}}Repository.findById(id){{#if needMapping}}.map({{asInstanceName service.name}}Mapper::as{{method.returnType}}){{/if}};
 {{!-- Entity get(id) --}}
 {{~else if (and entity method.paramId method.returnType)}}
     return {{entity.instanceName}}Repository.findById(id);
