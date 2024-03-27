@@ -42,7 +42,7 @@ public class BackendApplicationMongoImperativeGeneratorTest {
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.mongodb)
                 .withOption("style", ProgrammingStyle.imperative)
-                .withOption("projectName", "customer-address")
+                .withOption("mavenModulesPrefix", "customer-address")
                 .withOption("multiModule", true)
                 .withOption("forceOverwrite", true)
                 .withOption("haltOnFailFormatting", false);

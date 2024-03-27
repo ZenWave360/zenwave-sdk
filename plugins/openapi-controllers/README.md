@@ -7,7 +7,7 @@ After you have generated SpringMVC interfaces and DTOs with OpenAPI generator, y
 
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.OpenAPIControllersPlugin    
-    specFile=src/main/resources/model/openapi.yml \
+    openapiFile=src/main/resources/model/openapi.yml \
     zdlFile=src/main/resources/model/orders-model.jdl \
     basePackage=io.zenwave360.example \
     openApiApiPackage=io.zenwave360.example.adapters.web \
@@ -20,7 +20,7 @@ jbang zw -p io.zenwave360.sdk.plugins.OpenAPIControllersPlugin
 
 | **Option**                  | **Description**                                                                                                                                                            | **Type**         | **Default**                           | **Values**                        |
 |-----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|---------------------------------------|-----------------------------------|
-| `specFile`                  | OpenAPI Specification File                                                                                                                                                 | URI              |                                       |                                   |
+| `openapiFile`               | OpenAPI Specification File                                                                                                                                                 | String           |                                       |                                   |
 | `zdlFile`                   | ZDL file to parse                                                                                                                                                          | String           |                                       |                                   |
 | `targetFolder`              | Target folder to generate code to. If left empty, it will print to stdout.                                                                                                 | File             |                                       |                                   |
 | `style`                     | Programming Style                                                                                                                                                          | ProgrammingStyle | imperative                            | imperative, reactive              |

@@ -4,6 +4,7 @@ package {{basePackage}}.config;
 import {{entitiesPackage}}.*;
 {{/if}}
 {{#if services}}
+import {{inboundPackage}}.*;
 import {{coreImplementationPackage}}.*;
 {{/if}}
 {{#if includeEmitEventsImplementation}}
@@ -49,8 +50,8 @@ public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
 
 {{~#each services as |service|}}
     @Bean
-    public {{service.name}}Impl {{asInstanceName service.name}}() {
-        return {{asInstanceName service.name}};
+    public <T extends {{service.name}}> T {{asInstanceName service.name}}() {
+        return (T) {{asInstanceName service.name}};
     }
 {{~/each}}
 
