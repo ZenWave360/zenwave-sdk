@@ -129,10 +129,16 @@ public class ZDLJavaSignatureUtils {
             }
             return String.format("List<%s%s%s>", prefix, type, suffix);
         }
+        if ("Map".equals(type)) {
+            return "Map<String, Object>";
+        }
         return String.format("%s%s%s", prefix, type, suffix);
     };
 
     public static String fieldTypeInitializer(Map field) {
+        if (field.get("initialValue") != null) {
+            return "= " + field.get("initialValue");
+        }
         if (field.get("isArray") == Boolean.TRUE) {
             if("byte".equalsIgnoreCase(String.valueOf(field.get("type")))) {
                 return "";
@@ -175,6 +181,8 @@ public class ZDLJavaSignatureUtils {
             value = "UUID.randomUUID()";
         } else if (ZDLParser.blobTypes.contains(field.get("type"))) {
             value = "null";
+        } else if ("Map".equals(field.get("type"))) {
+            value = "new java.util.HashMap()";
         } else {
             value = "new " + field.get("type") + "()";
         }

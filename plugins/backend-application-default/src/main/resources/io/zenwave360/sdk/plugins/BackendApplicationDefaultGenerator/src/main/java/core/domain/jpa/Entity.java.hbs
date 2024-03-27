@@ -22,11 +22,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 {{~#if useLombok}}
 @lombok.Getter @lombok.Setter
 {{~/if}}
-{{#if entity.options.embedded}}
+{{~#if (or entity.options.json entity.options.jsonb)}}
+// json embedded
+{{~else if entity.options.embedded}}
 @Embeddable
-{{else if entity.options.isSuperClass}}
+{{~else if entity.options.isSuperClass}}
 @MappedSuperclass
-{{else}}
+{{~else}}
 @Entity
 @Table(name = "{{snakeCase entity.tableName}}")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -53,15 +55,23 @@ public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}}
   {{~/if}}
   {{{fieldValidationAnnotations field}}}
   {{~#if field.isEntity}}
+    {{~#if (or field.options.json field.options.jsonb)}}
+	@org.hibernate.annotations.Type(io.hypersistence.utils.hibernate.type.json.JsonType.class)
+	@Column(name = "{{snakeCase field.name}}", columnDefinition = "{{~#if field.options.jsonb}}jsonb{{else}}json{{/if}}")
+    {{~else~}}
     @Embedded
     {{~ assign 'embeddedFields' (jsonPath zdl 'entities.' field.type '.fields[*]') ~}}
     {{~#joinWithTemplate embeddedFields as |it|}}
     @AttributeOverride( name = "{{it.name}}", column = @Column(name = "{{snakeCase field.name}}_{{name}}"))
     {{~/joinWithTemplate~}}
+    {{~/if~}}
+  {{~else if (or field.options.json field.options.jsonb)}}
+  	@org.hibernate.annotations.Type(io.hypersistence.utils.hibernate.type.json.JsonType.class)
+  	@Column(name = "{{snakeCase field.name}}", columnDefinition = "{{~#if field.options.jsonb}}jsonb{{else}}json{{/if}}")
   {{~else~}}
     @Column(name = "{{snakeCase field.name}}" {{#if field.validations.required}}, nullable = false{{/if}}{{#if field.validations.unique}}, unique = true{{/if}}{{#if field.validations.maxlength}}, length = {{field.validations.maxlength.value}}{{/if}})
-  {{~/if~}}
     {{~#if field.isEnum}} @Enumerated(EnumType.STRING){{/if}}
+  {{~/if~}}
     {{~#if field.options.transient}} @javax.persistence.Transient {{/if}}
     private {{{fieldType field}}} {{field.name}} {{{fieldTypeInitializer field}}};
 {{/each}}
