@@ -70,7 +70,22 @@ paths:
         - $ref: "#/components/parameters/sort"
         {{~/if}}
       {{~/if}}
-      {{~#if (and operation.requestBody (or (eq operation.httpMethod 'post') (eq operation.httpMethod 'put') (eq operation.httpMethod 'patch') ))}}
+      {{~#if operation.serviceMethod.options.fileupload}}
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    {{operation.serviceMethod.options.fileupload}}:
+                      type: string
+                      format: binary
+                {{~#if operation.requestBody}}
+                - $ref: "#/components/schemas/{{operation.requestBody}}{{ifTruthy (eq operation.httpMethod 'patch') dtoPatchSuffix ""}}"
+                {{/if}}
+      {{~else if (and operation.requestBody (or (eq operation.httpMethod 'post') (eq operation.httpMethod 'put') (eq operation.httpMethod 'patch') ))}}
       requestBody:
         required: true
         content:

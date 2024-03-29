@@ -1,0 +1,45 @@
+config {
+    title "Documents Model"
+    moduleBasePackage "com.example.clinical.modules.documents"
+    // you can choose: DefaultProjectLayout, CleanHexagonalProjectLayout, LayeredProjectLayout, SimpleDomainProjectLayout, HexagonalProjectLayout, CleanArchitectureProjectLayout
+    layout SimpleDomainProjectLayout
+}
+
+@aggregate
+entity DocumentInfo {
+    uuid String
+    fileName String required
+    documentType String required
+    contentType String required
+    tags String[]
+}
+
+entity DocumentData {
+    data Blob required
+}
+
+relationship OneToOne {
+    DocumentInfo{documentData required } to @Id DocumentData{document required}
+}
+
+@inline
+input DocumentIds {
+    documentIds Long[]
+}
+
+@rest("/documents")
+service DocumentService for (DocumentInfo) {
+
+    @get({path: "/"})
+    listDocumentInfo(DocumentIds) DocumentInfo[]
+
+    @get({path: "/{id}", params: {preview: boolean} })
+    downloadDocument(id) DocumentInfo
+
+    @post({path: "/upload", status: 201})
+    @fileupload("file")
+    uploadDocument(DocumentInfo) DocumentInfo
+
+    @delete({path: "/{id}", status: 204})
+    deleteDocumentInfo(id)
+}

@@ -1,9 +1,11 @@
 package io.zenwave360.sdk.plugins;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
 import io.zenwave360.sdk.processors.ZDLProcessor;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -34,6 +36,20 @@ public class ZDLToOpenAPIGeneratorTest {
 
 //        System.out.println(outputTemplates.get(0).getContent());
     }
+
+    @Test
+    public void test_customer_address_zdl_to_openapi_fileupload() throws Exception {
+        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/documents.zdl");
+        ZDLToOpenAPIGenerator generator = new ZDLToOpenAPIGenerator();
+
+        List<TemplateOutput> outputTemplates = generator.generate(model);
+        Assertions.assertEquals(1, outputTemplates.size());
+
+        FileUtils.writeStringToFile(new File("target/out/openapi-fileupload.yml"), outputTemplates.get(0).getContent(), "UTF-8");
+
+        //        System.out.println(outputTemplates.get(0).getContent());
+    }
+
 
     @Test
     public void test_operationIdsToIncludeExclude() throws Exception {
