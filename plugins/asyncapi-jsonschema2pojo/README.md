@@ -16,19 +16,20 @@ jbang zw -p io.zenwave360.sdk.plugins.AsyncApiJsonSchema2PojoPlugin \
 
 ## Options
 
-| **Option**            | **Description**                                                                                                | **Type** | **Default** | **Values** |
-|-----------------------|----------------------------------------------------------------------------------------------------------------|----------|-------------|------------|
-| `apiFile`             | API Specification File                                                                                         | URI      |             |            |
-| `apiFiles`            | API Spec files to parse (comma separated)                                                                      | List     |             |            |
-| `targetFolder`        | Target folder to generate code to.                                                                             | File     |             |            |
-| `modelPackage`        | Java Models package name                                                                                       | String   |             |            |
-| `jsonschema2pojo`     | JsonSchema2Pojo settings                                                                                       | Map      | {}          |            |
-| `modelNamePrefix`     | Sets the prefix for model classes and enums                                                                    | String   |             |            |
-| `modelNameSuffix`     | Sets the suffix for model classes and enums                                                                    | String   |             |            |
-| `messageNames`        | Message names to include in code generation (combined with operationIds). Generates code for ALL if left empty | List     | []          |            |
-| `bindingTypes`        | Binding names to include in code generation. Generates code for ALL bindings if left empty                     | List     |             |            |
-| `operationIds`        | Operation ids to include in code generation. Generates code for ALL if left empty                              | List     | []          |            |
-| `excludeOperationIds` | Operation ids to exclude in code generation. Skips code generation if is not included or is excluded.          | List     | []          |            |
+| **Option**                 | **Description**                                                                                                                                                       | **Type**                    | **Default** | **Values** |
+|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------|-------------|------------|
+| `apiFile`                  | API Specification File                                                                                                                                                | URI                         |             |            |
+| `apiFiles`                 | API Spec files to parse (comma separated)                                                                                                                             | List                        |             |            |
+| `targetFolder`             | Target folder to generate code to.                                                                                                                                    | File                        |             |            |
+| `modelPackage`             | Java Models package name                                                                                                                                              | String                      |             |            |
+| `generatedAnnotationClass` | Annotation class to mark generated code (e.g. `org.springframework.aot.generate.Generated`). When retained at runtime, this prevents code coverage tools like Jacoco from including generated classes in coverage reports. | Class<? extends Annotation> |             |            |
+| `jsonschema2pojo`          | JsonSchema2Pojo settings                                                                                                                                              | Map                         | {}          |            |
+| `modelNamePrefix`          | Sets the prefix for model classes and enums                                                                                                                           | String                      |             |            |
+| `modelNameSuffix`          | Sets the suffix for model classes and enums                                                                                                                           | String                      |             |            |
+| `messageNames`             | Message names to include in code generation (combined with operationIds). Generates code for ALL if left empty                                                        | List                        | []          |            |
+| `bindingTypes`             | Binding names to include in code generation. Generates code for ALL bindings if left empty                                                                            | List                        |             |            |
+| `operationIds`             | Operation ids to include in code generation. Generates code for ALL if left empty                                                                                     | List                        | []          |            |
+| `excludeOperationIds`      | Operation ids to exclude in code generation. Skips code generation if is not included or is excluded.                                                                 | List                        | []          |            |
 
 
 ## Getting Help

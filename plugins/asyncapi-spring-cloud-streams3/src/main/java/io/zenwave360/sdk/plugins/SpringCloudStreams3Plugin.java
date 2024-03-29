@@ -10,7 +10,7 @@ import io.zenwave360.sdk.writers.TemplateFileWriter;
 
 @DocumentedPlugin(title = "AsyncAPI and Spring Cloud Stream Generator",
         summary = "Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI",
-        mainOptions = { "apiFile", "apiFiles", "role", "style", "modelPackage", "producerApiPackage", "consumerApiPackage", "apiPackage", "transactionalOutbox", "bindingPrefix", "bindingSuffix" },
+        mainOptions = { "apiFile", "apiFiles", "role", "style", "modelPackage", "producerApiPackage", "consumerApiPackage", "apiPackage", "transactionalOutbox", "bindingPrefix", "bindingSuffix", "generatedAnnotationClass" },
         hiddenOptions = { "layout", "zdlFile", "zdlFiles" }
 )
 public class SpringCloudStreams3Plugin extends Plugin {

@@ -83,6 +83,7 @@
 									<modelPackage>${basePackage}.core.outbound.events.dtos</modelPackage>
 									<jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
 									<jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
+                                    <generatedAnnotationClass>org.springframework.aot.generate.Generated</generatedAnnotationClass>
 								</configOptions>
 							</configuration>
 						</execution>
@@ -100,6 +101,7 @@
 									<modelPackage>${basePackage}.core.outbound.events.dtos</modelPackage>
 									<producerApiPackage>${basePackage}.core.outbound.events</producerApiPackage>
 									<consumerApiPackage>${basePackage}.adapters.commands</consumerApiPackage>
+                                    <generatedAnnotationClass>org.springframework.aot.generate.Generated</generatedAnnotationClass>
 								</configOptions>
 							</configuration>
 						</execution>

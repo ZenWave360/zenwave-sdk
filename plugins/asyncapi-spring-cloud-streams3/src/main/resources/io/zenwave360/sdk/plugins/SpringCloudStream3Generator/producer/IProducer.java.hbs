@@ -8,6 +8,7 @@ import {{modelPackage}}.*;
  * {{asyncapi.description}}
  */
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
+{{~#if generatedAnnotationClass}}@{{generatedAnnotationClass}}{{~/if}}
 public interface {{producerInterfaceName serviceName operationRoleType}} {
 
 {{#each operations as |operation|}}

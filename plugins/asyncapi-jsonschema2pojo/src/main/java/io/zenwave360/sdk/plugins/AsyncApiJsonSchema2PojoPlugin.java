@@ -8,7 +8,7 @@ import io.zenwave360.sdk.parsers.DefaultYamlParser;
 import io.zenwave360.sdk.processors.AsyncApiProcessor;
 
 @DocumentedPlugin(summary = "Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files.",
-        mainOptions = {"apiFile", "apiFiles", "targetFolder", "modelPackage", "jsonschema2pojo"},
+        mainOptions = {"apiFile", "apiFiles", "targetFolder", "modelPackage", "generatedAnnotationClass", "jsonschema2pojo"},
         hiddenOptions = {"layout", "zdlFile", "zdlFiles", "apiPackage", "producerApiPackage", "consumerApiPackage", "role", "runtimeHeadersProperty", "sourceFolder"},
         description = """
                 Command line usage example:

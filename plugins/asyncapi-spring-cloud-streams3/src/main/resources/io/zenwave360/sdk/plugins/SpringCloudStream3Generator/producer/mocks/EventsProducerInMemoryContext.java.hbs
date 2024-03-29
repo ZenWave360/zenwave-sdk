@@ -1,6 +1,7 @@
 package {{producerApiPackage}};
 
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
+{{~#if generatedAnnotationClass}}@{{generatedAnnotationClass}}{{~/if}}
 public class EventsProducerInMemoryContext {
 
 {{#each services as |service|}}

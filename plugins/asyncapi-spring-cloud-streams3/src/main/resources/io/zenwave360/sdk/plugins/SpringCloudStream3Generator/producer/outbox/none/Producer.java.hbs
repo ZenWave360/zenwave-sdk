@@ -21,6 +21,7 @@ import {{modelPackage}}.*;
  */
 @Component("{{bindingPrefix}}{{producerClassName serviceName operationRoleType}}")
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
+{{~#if generatedAnnotationClass}}@{{generatedAnnotationClass}}{{~/if}}
 public class {{producerClassName serviceName operationRoleType}} implements {{producerInterfaceName serviceName operationRoleType}} {
 
     protected Logger log = LoggerFactory.getLogger(getClass());

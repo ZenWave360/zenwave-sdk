@@ -2,6 +2,7 @@ package io.zenwave360.sdk.plugins;
 
 import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -73,6 +74,9 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
     @DocumentedOption(description = "Include Kafka common headers 'kafka_messageKey' as x-runtime-header")
     private boolean includeKafkaCommonHeaders = false;
+
+    @DocumentedOption(description = "Annotation class to mark generated code (e.g. `org.springframework.aot.generate.Generated`). When retained at runtime, this prevents code coverage tools like Jacoco from including generated classes in coverage reports.")
+    public String generatedAnnotationClass;
 
     private final HandlebarsEngine handlebarsEngine = getTemplateEngine();
     {
@@ -187,7 +191,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
         ts.addTemplate(ts.producerByServiceTemplates, "producer/IProducer.java", "src/main/java/{{asPackageFolder producerApiPackage}}/{{producerInterfaceName serviceName operationRoleType}}.java");
         ts.addTemplate(ts.producerByServiceTemplates, "producer/outbox/{{transactionalOutbox}}/Producer.java", "src/main/java/{{asPackageFolder producerApiPackage}}/{{producerClassName serviceName operationRoleType}}.java", JAVA, (context) -> skipProducerImplementation, false);
-        ts.addTemplate(ts.producerByServiceTemplates, "producer/mocks/EventsProducerCaptor.java", "src/test/java/{{asPackageFolder producerApiPackage}}/{{producerInMemoryName serviceName operationRoleType}}.java");
+        ts.addTemplate(ts.producerByServiceTemplates, "producer/mocks/InMemoryEventsProducer.java", "src/test/java/{{asPackageFolder producerApiPackage}}/{{producerInMemoryName serviceName operationRoleType}}.java");
 
         ts.addTemplate(ts.consumerByOperationTemplates, "consumer/{{style}}/Consumer.java", "src/main/java/{{asPackageFolder consumerApiPackage}}/{{consumerName operation.x--operationIdCamelCase}}.java");
         ts.addTemplate(ts.consumerByOperationTemplates, "consumer/{{style}}/IService.java", "src/main/java/{{asPackageFolder consumerApiPackage}}/{{consumerServiceInterfaceName operation.x--operationIdCamelCase}}.java");
