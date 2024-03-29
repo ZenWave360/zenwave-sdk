@@ -33,6 +33,7 @@ public class EntitiesToSchemasConverter {
         if (this.idTypeFormat != null) {
             idType.put("format", this.idTypeFormat);
         }
+        idType.put("readOnly", true);
         return idType;
     }
 
@@ -73,7 +74,9 @@ public class EntitiesToSchemasConverter {
         if (includeIdAndVersion(entity)) {
             properties.put("id", idTypeMap());
             if (includeVersion) {
-                properties.put("version", Maps.of("type", "integer"));
+                properties.put("version", Maps.of(
+                        "type", "integer",
+                        "description", "Version of the document (required in PUT for concurrency control, should be null in POSTs)."));
             }
         }
 

@@ -50,6 +50,19 @@ public class ZDLToOpenAPIGeneratorTest {
         //        System.out.println(outputTemplates.get(0).getContent());
     }
 
+    @Test
+    public void test_customer_address_zdl_to_openapi_filedownload() throws Exception {
+        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/documents.zdl");
+        ZDLToOpenAPIGenerator generator = new ZDLToOpenAPIGenerator();
+
+        List<TemplateOutput> outputTemplates = generator.generate(model);
+        Assertions.assertEquals(1, outputTemplates.size());
+
+        FileUtils.writeStringToFile(new File("target/out/openapi-filedownload.yml"), outputTemplates.get(0).getContent(), "UTF-8");
+
+        //        System.out.println(outputTemplates.get(0).getContent());
+    }
+
 
     @Test
     public void test_operationIdsToIncludeExclude() throws Exception {

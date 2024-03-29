@@ -96,12 +96,23 @@ paths:
       responses:
         "{{httpResponseStatus operation}}":
           description: "OK"
-        {{~#if operation.responseBody}}
+          {{~#if operation.serviceMethod.options.filedownload}}
+          headers:
+            Content-Disposition:
+              description: "Controls file download behavior. Values: 'inline' (display in browser) or 'attachment; filename=example.pdf' (download file)"
+              schema:
+                type: string
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: binary
+          {{~else if operation.responseBody}}
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/{{operation.responseBody}}{{responseBodyCollectionSuffix operation}}"
-        {{~/if}}
+          {{~/if}}
     {{~/each}}
   {{~/each}}
   {{~/if}}
