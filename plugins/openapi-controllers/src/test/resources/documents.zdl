@@ -1,6 +1,6 @@
 config {
     title "Documents Model"
-    moduleBasePackage "com.example.clinical.modules.documents"
+    moduleBasePackage "io.zenwave360.example"
     // you can choose: DefaultProjectLayout, CleanHexagonalProjectLayout, LayeredProjectLayout, SimpleDomainProjectLayout, HexagonalProjectLayout, CleanArchitectureProjectLayout
     layout SimpleDomainProjectLayout
 }
@@ -30,17 +30,8 @@ input DocumentIds {
 @rest("/documents")
 service DocumentService for (DocumentInfo) {
 
-    @get({path: "/"})
-    listDocumentInfo(DocumentIds) DocumentInfo[]
-
-    @get({path: "/{id}", params: {preview: boolean} })
-    @filedownload("documentData.data")
-    downloadDocument(id) DocumentInfo
-
     @post({path: "/upload", status: 201})
     @fileupload("file")
     uploadDocument(DocumentInfo) DocumentInfo
 
-    @delete({path: "/{id}", status: 204})
-    deleteDocumentInfo(id)
 }

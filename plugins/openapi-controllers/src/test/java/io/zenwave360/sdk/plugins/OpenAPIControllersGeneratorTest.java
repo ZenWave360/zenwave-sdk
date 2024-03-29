@@ -91,5 +91,25 @@ public class OpenAPIControllersGeneratorTest {
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
     }
 
+    @Test
+    public void test_generator_openapi_controllers_multipart() throws Exception {
+        Plugin plugin = new OpenAPIControllersPlugin()
+                .withApiFile("classpath:documents-openapi.yml")
+                .withZdlFile("classpath:documents.zdl")
+                .withOption("basePackage", "io.zenwave360.example")
+                .withOption("openApiApiPackage", "io.zenwave360.example.web.api")
+                .withOption("openApiModelPackage", "io.zenwave360.example.web.api.model")
+                .withOption("openApiModelNameSuffix", "DTO")
+                // .withOption("operationIds", List.of("addPet", "updatePet"))
+                .withOption("style", ProgrammingStyle.imperative)
+                //                .withOption("haltOnFailFormatting", false)
+                .withTargetFolder("target/out/multipart");
+
+        new MainGenerator().generate(plugin);
+
+        List<String> logs = logCaptor.getLogs();
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
+    }
 
 }

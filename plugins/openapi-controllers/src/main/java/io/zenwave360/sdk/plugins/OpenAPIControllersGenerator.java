@@ -141,7 +141,8 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                         "returnTypeIsOptional", JSONPath.get(method, "$.returnTypeIsOptional", false),
                         "isResponseArray", isResponseArray,
                         "isResponsePaginated", isResponsePaginated,
-                        "isBinaryDownload", isBinaryDownload
+                        "isBinaryDownload", isBinaryDownload,
+                        "isMultiPart", JSONPath.get(operation, "requestBody.content['multipart/form-data']") != null
                 ));
 
                 if ("patch".equals(httpVerb)) {
@@ -193,6 +194,12 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
     private String methodParameters(Map operation) {
         List<Map<String, Object>> params = (List) operation.getOrDefault("parameters", Collections.emptyList());
+        if(JSONPath.get(operation, "requestBody.content['multipart/form-data']") instanceof Map) {
+            params = JSONPath.get(operation, "requestBody.content['multipart/form-data'].schema.properties", Map.of())
+                    .entrySet().stream().map(entry -> {
+                        return Map.of("name", entry.getKey(), "schema", entry.getValue());
+                    }).toList();
+        };
         List methodParams = params.stream()
                 .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
                 .map(param -> {
@@ -345,45 +352,24 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     }
 
     {
-        handlebarsEngine.getHandlebars().registerHelper("asMethodParametersInitializer", (context, options) -> {
-            if (context instanceof Map) {
-                Map operation = (Map) context;
-                List<Map<String, Object>> params = (List) operation.getOrDefault("parameters", Collections.emptyList());
-                List methodParams = params.stream()
-                        .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
-                        .map(param -> {
-                            String javaType = getJavaTypeOrOptional(param);
-                            String name = JSONPath.get(param, "$.name");
-                            return javaType + " " + name + " = null;";
-                        }).collect(Collectors.toList());
-                if (operation.containsKey("x--request-dto")) {
-                    if("patch".equals(operation.get("x--httpVerb"))) {
-                        methodParams.add("Map reqBody = null;");
-                    } else {
-                        methodParams.add(format("%s%s%s %s = null;", openApiModelNamePrefix, operation.get("x--request-dto"), openApiModelNameSuffix, "reqBody"));
-                    }
+        handlebarsEngine.getHandlebars().registerHelper("asMethodParametersInitializer", (operation, options) -> {
+            if (operation instanceof Map) {
+                var methodParams = methodParameters((Map) operation).trim();
+                if(methodParams.isEmpty()) {
+                    return "";
                 }
-                return StringUtils.join(methodParams, "\n");
+                return Arrays.stream(methodParams.split(", "))
+                        .map(param -> param + " = null;")
+                        .collect(Collectors.joining("\n"));
             }
-            return options.fn(context);
+            return options.fn(operation);
         });
 
-        handlebarsEngine.getHandlebars().registerHelper("asMethodParameterValues", (context, options) -> {
-            if (context instanceof Map) {
-                Map operation = (Map) context;
-                List<Map<String, Object>> params = (List) operation.getOrDefault("parameters", Collections.emptyList());
-                List methodParams = params.stream()
-                        .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
-                        .map(param -> {
-                            String name = JSONPath.get(param, "$.name");
-                            return name;
-                        }).collect(Collectors.toList());
-                if (operation.containsKey("x--request-dto")) {
-                    methodParams.add("reqBody");
-                }
-                return StringUtils.join(methodParams, ", ");
+        handlebarsEngine.getHandlebars().registerHelper("asMethodParameterValues", (operation, options) -> {
+            if (operation instanceof Map) {
+                return methodParameterInstances((Map) operation);
             }
-            return options.fn(context);
+            return options.fn(operation);
         });
 
     }
@@ -405,6 +391,11 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     protected String getJavaType(Map<String, Object> param) {
         String type = JSONPath.get(param, "$.schema.type");
         String format = JSONPath.get(param, "$.schema.format");
+        String schemaName = JSONPath.get(param, "$.schema.x--schema-name");
+
+        if("binary".equals(format)) {
+            return "org.springframework.web.multipart.MultipartFile";
+        }
         if ("date".equals(format)) {
             return "LocalDate";
         }
@@ -425,6 +416,9 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         }
         if ("array".equals(type)) {
             return "List<String>";
+        }
+        if(schemaName != null) {
+            return openApiModelNamePrefix + schemaName + openApiModelNameSuffix;
         }
 
         return "String";
