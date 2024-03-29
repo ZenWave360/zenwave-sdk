@@ -1,13 +1,11 @@
 package {{layout.outboundRepositoryPackage}};
 {{~assign 'aggregate' (findEntityAggregate entity.name)}}
 
-import {{layout.entitiesPackage}}.{{entity.className}};
+import {{layout.entitiesPackage}}.*;
 import java.math.*;
 import java.time.*;
 import java.util.*;
-{{~#if aggregate}}
-import {{layout.entitiesPackage}}.{{aggregate}};
-{{~/if}}
+
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 

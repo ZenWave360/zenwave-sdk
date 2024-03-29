@@ -19,8 +19,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -73,7 +76,16 @@ public class {{serviceName}}ApiController implements {{serviceName}}Api {
     {{~else if serviceMethodParameter}}
         var {{mappedInputVariable}} = mapper.as{{serviceMethodParameter}}({{methodParameterInstances}});
     {{/if~}}
-    {{~#if isResponsePaginated ~}}
+    {{~#if isBinaryDownload ~}}
+        var {{{asInstanceName methodReturnType}}} = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}};
+        byte[] bytes = null; // TODO get bytes from {{{serviceMethod.options.filedownload}}}
+        ByteArrayResource resource = new ByteArrayResource(bytes);
+        return ResponseEntity
+            .status({{statusCode}})
+            .header("Content-Disposition", "inline") // or attachment; filename=example.pdf
+            .contentType(MediaType.APPLICATION_OCTET_STREAM) // TODO: set content type
+            .body(resource);
+    {{~else if isResponsePaginated ~}}
         var {{{asInstanceName methodReturnType}}}Page = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}};
         var responseDTO = mapper.as{{responseEntityName}}({{{asInstanceName methodReturnType}}}Page);
         return ResponseEntity.status({{statusCode}}).body(responseDTO);

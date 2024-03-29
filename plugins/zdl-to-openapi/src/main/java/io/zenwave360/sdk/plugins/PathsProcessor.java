@@ -45,8 +45,7 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
                     var paginated = JSONPath.get(method, "$.options.paginated");
                     var httpOption = ZDLHttpUtils.getHttpOption((Map) method);
                     if(httpOption != null) {
-                        var methodEntityName = JSONPath.get(method, "$.options.entity");
-                        var methodEntity = (Map) JSONPath.get(zdl, "$.entities." + methodEntityName);
+                        var methodEntity = ZDLFindUtils.methodEntity(method, zdl);
                         List<Map> naturalIdFields = ZDLFindUtils.naturalIdFields(methodEntity);
                         Map naturalIdTypes = new HashMap();
                         if(naturalIdFields != null) {

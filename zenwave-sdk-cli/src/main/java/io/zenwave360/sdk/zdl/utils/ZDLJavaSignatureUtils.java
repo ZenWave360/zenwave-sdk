@@ -5,12 +5,19 @@ import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.NamingUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.sql.Blob;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ZDLJavaSignatureUtils {
 
     public static String javaType(Map field) {
+        if("Blob".equals(field.get("type")) || "AnyBlob".equals(field.get("type")) || "ImageBlob".equals(field.get("type"))) {
+            return "byte[]";
+        }
+        if("TextBlob".equals(field.get("type"))) {
+            return "String";
+        }
         return (String) field.get("type");
     }
 

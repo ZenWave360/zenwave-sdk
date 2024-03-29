@@ -107,6 +107,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                 String outputType = JSONPath.get(method, "$.returnType");
                 boolean isResponseArray = method != null? JSONPath.get(method, "$.returnTypeIsArray", false) : false;
                 boolean isResponsePaginated = method != null? JSONPath.get(method, "$.options.paginated", false) : false;
+                boolean isBinaryDownload = JSONPath.get(method, "$.options.filedownload") != null;
                 if (isResponseArray) {
                     var innerArrayDTO = innerArrayDTO(JSONPath.get(operation, "$.x--response.x--response-schema"));
                     responseDtoName = innerArrayDTO != null ? openApiModelNamePrefix + innerArrayDTO + openApiModelNameSuffix : responseDtoName;
@@ -134,12 +135,13 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                         "responseSchemaName", responseSchemaName,
                         "responseDtoName", responseDtoName,
                         "responseEntityName", responseEntityName,
-                        "responseEntityExpression", responseEntityExpression(responseEntityName, responseDtoName, isResponseArray, isResponsePaginated),
+                        "responseEntityExpression", responseEntityExpression(responseEntityName, responseDtoName, isResponseArray, isResponsePaginated, isBinaryDownload),
                         "methodReturnType", outputType,
                         "methodReturnTypeInstance", NamingUtils.asInstanceName(outputType),
                         "returnTypeIsOptional", JSONPath.get(method, "$.returnTypeIsOptional", false),
                         "isResponseArray", isResponseArray,
-                        "isResponsePaginated", isResponsePaginated
+                        "isResponsePaginated", isResponsePaginated,
+                        "isBinaryDownload", isBinaryDownload
                 ));
 
                 if ("patch".equals(httpVerb)) {
@@ -176,7 +178,10 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         return templateOutputList;
     }
 
-    private static String responseEntityExpression(String responseEntityName, String responseDtoName, boolean isResponseArray, boolean isResponsePaginated) {
+    private static String responseEntityExpression(String responseEntityName, String responseDtoName, boolean isResponseArray, boolean isResponsePaginated, boolean isBinaryDownload) {
+        if(isBinaryDownload) {
+            return "Resource";
+        }
         if(isResponsePaginated) {
             return responseEntityName;
         }
@@ -257,7 +262,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         if (isInline) {
             var fields = JSONPath.get(parameterEntity, "$.fields", Map.<String, Map>of());
             for (Map field : fields.values()) {
-                if (JSONPath.get(field, "$.isComplexType", false)) {
+                if (JSONPath.get(field, "$.isComplexType", false) && !JSONPath.get(field, "$.isEnum", false)) {
                     return JSONPath.get(field, "$.type");
                 }
             }
@@ -292,7 +297,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         }
         var methodName = JSONPath.get(serviceMethod, "name");
         var methodParametersCallSignature = ZDLJavaSignatureUtils.methodParametersCallSignature((Map) serviceMethod, zdl, inputDTOSuffix);
-        var paramId = ObjectUtils.firstNonNull(ZDLHttpUtils.getFirstPathParamsFromMethod((Map) serviceMethod), "id");
+        var paramId = serviceMethod.get("paramId") != null? ObjectUtils.firstNonNull(ZDLHttpUtils.getFirstPathParamsFromMethod((Map) serviceMethod), "id") : null;
 
         if(operation.get("x--request-schema") != null) {
             // find the last parameter name, that is not the pagination: that is the reqBody variable name
@@ -306,7 +311,9 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
             methodParametersCallSignature = methodParametersCallSignature.replaceFirst(reqBody, "input");
         }
 
-        methodParametersCallSignature = methodParametersCallSignature.replaceFirst("^id$", paramId);
+        if(paramId != null) {
+            methodParametersCallSignature = methodParametersCallSignature.replaceFirst("id", paramId);
+        }
         methodParametersCallSignature = methodParametersCallSignature.replaceFirst("^id, ", paramId + ", ");
         methodParametersCallSignature = methodParametersCallSignature.replaceAll("pageable", "pageOf(page, limit, sort)");
 

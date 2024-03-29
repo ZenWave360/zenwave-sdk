@@ -323,14 +323,8 @@ public class BackendApplicationDefaultHelpers {
     }
 
     public Map<String, Object> methodEntity(Map<String, Object> method, Options options) {
-        var returnType = (String) method.get("returnType");
         var zdl = options.get("zdl");
-        var service = JSONPath.get(zdl, "$.services." + method.get("serviceName"));
-        var aggregates = JSONPath.get(service, "aggregates", Collections.emptyList());
-        if(aggregates.size() == 1 && StringUtils.equals(returnType, aggregates.get(0).toString())) {
-            return JSONPath.get(zdl, "$.entities." + returnType);
-        }
-        return null;
+        return ZDLFindUtils.methodEntity(method, (Map) zdl);
     }
 
     public Map<String, Object> methodReturnEntity(Map<String, Object> method, Options options) {

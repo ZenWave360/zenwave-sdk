@@ -6,6 +6,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 
 @Mapper
 public interface BaseMapper {
@@ -24,5 +26,9 @@ public interface BaseMapper {
 
     default OffsetDateTime map(LocalDateTime value) {
         return value != null ? OffsetDateTime.of(value, ZoneOffset.UTC) : null;
+    }
+
+    default Resource map(byte[] value) {
+        return new ByteArrayResource(value);
     }
 }

@@ -3,6 +3,7 @@ package io.zenwave360.sdk.zdl.utils;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,6 +17,16 @@ public class ZDLFindUtils {
 
     public static List<Map> naturalIdFields(Map<String, Object> entity) {
         return JSONPath.get(entity, "$.fields[*][?(@.options.naturalId)]", List.<Map>of());
+    }
+
+    public static Map<String, Object> methodEntity(Map<String, Object> method, Map zdl) {
+        var returnType = (String) method.get("returnType");
+        var service = JSONPath.get(zdl, "$.services." + method.get("serviceName"));
+        var aggregates = JSONPath.get(service, "aggregates", Collections.emptyList());
+        if(aggregates.size() == 1 && StringUtils.equals(returnType, aggregates.get(0).toString())) {
+            return JSONPath.get(zdl, "$.entities." + returnType);
+        }
+        return null;
     }
 
     public static List<Map<String, Object>> methodsWithEvents(Map<String, Object> model) {
