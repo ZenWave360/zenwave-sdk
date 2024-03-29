@@ -31,6 +31,12 @@ output MasterDataKeyValue {
     value String
 }
 
+@inline
+input MasterDataFilter {
+    type MasterDataType
+    lang String
+}
+
 @rest("/masterdata")
 service MasterDataService for (MasterData) {
     @post
@@ -44,8 +50,6 @@ service MasterDataService for (MasterData) {
     @delete("/{id}")
     deleteMasterData(id)
 
-    // Este enpoint esta incluido en webapp-openapi.yml y en masterdata-openapi.yml
-    // pero el controller solo se implementa en masterdata
-    @get("/type/{type}")
-    listMasterDataOfType(@natural id) MasterDataKeyValue[]
+    @get("/type/{type}/{lang}")
+    listMasterDataOfType(MasterDataFilter) MasterDataKeyValue[]
 }

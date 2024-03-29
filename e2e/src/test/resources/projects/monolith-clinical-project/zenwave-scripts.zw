@@ -107,43 +107,43 @@ config {
         OpenAPIControllersPlugin {
             zdlFiles "models/clinical.zdl"
             openapiFile "src/main/resources/public/apis/webapp-openapi.yml"
-            webModule "webapp"
+            customWebModule "{{basePackage}}.adapters.web.webapp"
         }
 
         OpenAPIControllersPlugin {
             zdlFiles "models/clinical.zdl,models/metrics.zdl,models/wearables-data.zdl"
             openapiFile "src/main/resources/public/apis/mobile-openapi.yml"
-            webModule "mobile"
+            customWebModule "{{basePackage}}.adapters.web.mobile"
         }
 
         OpenAPIControllersPlugin {
             zdlFiles "models/surveys.zdl"
             openapiFile "src/main/resources/public/apis/surveys-backoffice-openapi.yml"
-            webModule "surveys.backoffice"
+            customWebModule "{{basePackage}}.adapters.web.surveys.backoffice"
         }
 
         OpenAPIControllersPlugin {
             zdlFiles "models/surveys.zdl"
             openapiFile "src/main/resources/public/apis/surveys-public-openapi.yml"
-            webModule "surveys.api"
+            customWebModule "{{basePackage}}.adapters.web.surveys.api"
         }
 
         OpenAPIControllersPlugin {
             zdlFiles "models/documents.zdl"
             openapiFile "src/main/resources/public/apis/documents-openapi.yml"
-            webModule "documents"
+            customWebModule "{{basePackage}}.adapters.web.documents"
         }
 
         OpenAPIControllersPlugin {
             zdlFiles "models/masterdata.zdl"
             openapiFile "src/main/resources/public/apis/masterdata-openapi.yml"
-            webModule "masterdata"
+            customWebModule "{{basePackage}}.adapters.web.masterdata"
         }
 
         OpenAPIControllersPlugin {
             zdlFiles "models/terms-and-conditions.zdl"
             openapiFile "src/main/resources/public/apis/terms-and-conditions-openapi.yml"
-            webModule "termsandconditions"
+            customWebModule "{{basePackage}}.adapters.web.termsandconditions"
         }
 
         //-----------------------------
@@ -151,43 +151,43 @@ config {
         SpringWebTestClientPlugin {
             zdlFiles "models/clinical.zdl,models/metrics.zdl"
             openapiFile "src/main/resources/public/apis/webapp-openapi.yml"
-            webModule "webapp"
+            customWebModule "{{basePackage}}.adapters.web.webapp"
         }
 
         SpringWebTestClientPlugin {
             zdlFiles "models/clinical.zdl,models/metrics.zdl"
             openapiFile "src/main/resources/public/apis/mobile-openapi.yml"
-            webModule "mobile"
+            customWebModule "{{basePackage}}.adapters.web.mobile"
         }
 
         SpringWebTestClientPlugin {
             zdlFiles "models/surveys.zdl"
             openapiFile "src/main/resources/public/apis/surveys-backoffice-openapi.yml"
-            webModule "surveys.backoffice"
+            customWebModule "{{basePackage}}.adapters.web.surveys.backoffice"
         }
 
         SpringWebTestClientPlugin {
             zdlFiles "models/surveys.zdl"
             openapiFile "src/main/resources/public/apis/surveys-public-openapi.yml"
-            webModule "surveys.api"
+            customWebModule "{{basePackage}}.adapters.web.surveys.api"
         }
 
         SpringWebTestClientPlugin {
             zdlFiles "models/documents.zdl"
             openapiFile "src/main/resources/public/apis/documents-openapi.yml"
-            webModule "documents"
+            customWebModule "{{basePackage}}.adapters.web.documents"
         }
 
         SpringWebTestClientPlugin {
             zdlFiles "models/masterdata.zdl"
             openapiFile "src/main/resources/public/apis/masterdata-openapi.yml"
-            webModule "masterdata"
+            customWebModule "{{basePackage}}.adapters.web.masterdata"
         }
 
         SpringWebTestClientPlugin {
             zdlFiles "models/terms-and-conditions.zdl"
             openapiFile "src/main/resources/public/apis/terms-and-conditions-openapi.yml"
-            webModule "termsandconditions"
+            customWebModule "{{basePackage}}.adapters.web.termsandconditions"
         }
 
         //-----------------------------

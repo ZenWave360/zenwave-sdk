@@ -143,25 +143,30 @@ output SurveyAndQuestions {
     }
 }
 
+@inline
+input SurveyByNameAndPatient {
+    name String required maxlength(254)
+    patientId Long required
+    lang String maxlength(3)
+}
+
 /**
 * Public service to get Surveys and Questions for a patient and to answer the survey.
 */
 @apis(PublicAPI)
 @rest("/public/surveys")
 service SurveysService for (SurveyAnswers) {
-    @get({ path: "/{name}/hospital/{hospitalId}/questions", params: { lang: String } })
-    getSurveyAndQuestionsForHospital(@natural id) SurveyAndQuestions
 
     @get({ path: "/{name}/patient/{patientId}/questions", params: { lang: String } })
-    getSurveyAndQuestionsForPatient(@natural id) SurveyAndQuestions
+    getSurveyAndQuestionsForPatient(SurveyByNameAndPatient) SurveyAndQuestions
 
-    @post("/{name}/patient/{patientId}/answers")
+    @post("/{surveyId}/patient/{patientId}/answers/{date}")
     answerSurvey(@natural id, SurveyAnswers) SurveyAnswers
 
-    @patch({ path: "/{name}/patient/{patientId}/answers/{date}", params: { surveryId: Long } })
+    @patch({ path: "/{surveyId}/patient/{patientId}/answers/{date}", params: { surveryId: Long } })
     updateSurveyAnswers(@natural id, SurveyAnswers) SurveyAnswers?
 
-    @get("/{name}/patient/{patientId}/answers/{date}")
+    @get("/{surveyId}/patient/{patientId}/answers/{date}")
     getSurveyAnswers(@natural id) SurveyAnswers?
 
 }

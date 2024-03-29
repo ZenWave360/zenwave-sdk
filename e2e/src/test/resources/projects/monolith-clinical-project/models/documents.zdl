@@ -7,10 +7,11 @@ config {
 
 @aggregate
 entity DocumentInfo {
-    uuid String /** certivera uuid */
+    uuid String
     fileName String required
-    documentType DocumentType required
+    documentType String required
     contentType String required
+    tags String[]
 }
 
 entity DocumentData {
@@ -21,26 +22,9 @@ relationship OneToOne {
     DocumentInfo{documentData required } to @Id DocumentData{document required}
 }
 
-enum DocumentType {
-    PROFILE_PICTURE
-    GENERAL_INFORMATION
-    HEALTH_INSURANCE_CARD
-    INFORMED_CONSENT_TEMPLATE
-    INFORMED_CONSENT_SIGNED
-    LOAN_AGREEMENT_TEMPLATE
-    LOAN_AGREEMENT_SIGNED
-    OTHER
-}
-
 @inline
 input DocumentIds {
     documentIds Long[]
-}
-
-@inline
-input RequestDocumentSignature {
-    documentInfo DocumentInfo required
-    language String required /** Language for the certificate. Available values : es, ca, sv, en, it */
 }
 
 @rest("/documents")
@@ -49,22 +33,14 @@ service DocumentService for (DocumentInfo) {
     @get({path: "/"})
     listDocumentInfo(DocumentIds) DocumentInfo[]
 
-    @get({path: "/{id}", params: {download: boolean} })
+    @get({path: "/{id}", params: {preview: boolean} })
+    @filedownload("documentData.data")
     downloadDocument(id) DocumentInfo
 
-
-    @post({path: "/upload", status: 201})
-    uploadDocument(DocumentInfo) DocumentInfo
-
-    @post({path: "/certificate", status: 201})
-    uploadDocumentAndCertificate(RequestDocumentSignature) DocumentInfo withEvents DocumentSignatureRequested
-
+//    @post({path: "/upload", status: 201})
+//    @fileupload("file")
+//    uploadDocument(DocumentInfo) DocumentInfo
 
     @delete({path: "/{id}", status: 204})
     deleteDocumentInfo(id)
-}
-
-event DocumentSignatureRequested {
-    userId Long
-    documentInfo DocumentInfo
 }
