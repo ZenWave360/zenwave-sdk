@@ -1,4 +1,4 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-io.github.zenwave360.zenwave-sdk.plugins:zdl-to-asyncapi,io.zenwave360.sdk.plugins,ZDLToAsyncAPIGenerator,106,1264,23,55,18,202,24,37,2,20
 io.github.zenwave360.zenwave-sdk.plugins:zdl-to-asyncapi,io.zenwave360.sdk.plugins,ZDLToAsyncAPIPlugin,36,0,2,0,6,0,3,0,2,0
+io.github.zenwave360.zenwave-sdk.plugins:zdl-to-asyncapi,io.zenwave360.sdk.plugins,ZDLToAsyncAPIGenerator,106,1264,23,55,18,202,24,37,2,20
 io.github.zenwave360.zenwave-sdk.plugins:zdl-to-asyncapi,io.zenwave360.sdk.plugins,ZDLToAsyncAPIGenerator.SchemaFormat,0,15,0,0,0,2,0,1,0,1
