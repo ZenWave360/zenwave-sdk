@@ -1,4 +1,5 @@
-{{#if (eq (size aggregateCommandsForMethod.aggregatesCommandsForMethod) 1)}}
+    {{{logMethodCall method}}}
+{{~#if (eq (size aggregateCommandsForMethod.aggregatesCommandsForMethod) 1)}}
     {{~assign 'aggregateCommand' aggregateCommandsForMethod.aggregatesCommandsForMethod.0}}
     {{~#if method.paramId}}
     var {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.find{{aggregateCommand.aggregate.className}}ById({{method.paramId}}).orElseThrow();

@@ -68,6 +68,10 @@ public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
 	}
 
 {{~#if (includeEmitEventsImplementation service)}}
+    public EventsProducerInMemoryContext getEventsProducerInMemoryContext() {
+        return eventsProducerInMemoryContext;
+    }
+
     private List<Object> publishedEvents = new ArrayList<>();
 
     public List<Object> getPublishedEvents() {

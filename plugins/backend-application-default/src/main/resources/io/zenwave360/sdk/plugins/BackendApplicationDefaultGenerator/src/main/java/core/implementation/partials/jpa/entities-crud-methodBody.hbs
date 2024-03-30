@@ -1,4 +1,4 @@
-{{assign 'entity' aggregateCommandsForMethod.entity }}
+{{~assign 'entity' aggregateCommandsForMethod.entity }}
 {{~#if (isCrudMethod 'create' method=method entity=entity )}}
     log.debug("[CRUD] Request to save {{entity.className}}: {}", input);
     var {{entity.instanceName}} = {{asInstanceName service.name}}Mapper.update(new {{entity.className}}(), {{{mapperInputCallSignature method.parameter}}});

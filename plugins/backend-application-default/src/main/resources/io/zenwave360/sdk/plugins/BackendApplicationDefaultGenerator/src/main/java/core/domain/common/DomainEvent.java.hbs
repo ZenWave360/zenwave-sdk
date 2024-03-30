@@ -20,9 +20,7 @@ public {{abstractClass event}} class {{event.className}} {{addExtends event}} im
     private static final long serialVersionUID = 1L;
 
 {{#each event.fields as |field|}}
-    {{#each field.validations as |validation|~}}
-        // @{{validation.name}}("{{validation.value}}")
-    {{~/each}}
+    {{{fieldValidationAnnotations field}}}
     private {{{fieldType field}}} {{field.name}};
 {{/each}}
 
