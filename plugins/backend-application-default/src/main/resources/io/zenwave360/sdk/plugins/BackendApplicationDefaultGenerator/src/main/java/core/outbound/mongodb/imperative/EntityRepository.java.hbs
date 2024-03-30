@@ -1,13 +1,26 @@
-package {{basePackage}}.core.outbound.mongodb;
+package {{outboundPackage}}.mongodb;
+{{~assign 'aggregate' (findEntityAggregate entity.name)}}
 
-import {{basePackage}}.core.domain.{{entity.className}};
+import {{entitiesPackage}}.{{entity.className}};
+{{~#if aggregate}}
+import {{entitiesPackage}}.{{aggregate}};
+{{~/if}}
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 /**
  * Spring Data MongoDB repository for the {{entity.className}} entity.
  */
 @SuppressWarnings("unused")
 @Repository
-public interface {{entity.className}}Repository extends MongoRepository<{{entity.className}}, String> {}
+public interface {{entity.className}}Repository extends MongoRepository<{{entity.className}}, String> {
+
+{{~#if aggregate}}
+   default Optional<{{aggregate}}> find{{aggregate}}ById({{idJavaType}} id) {
+     return findById(id).map({{aggregate}}::new);
+   }
+{{~/if}}
+}

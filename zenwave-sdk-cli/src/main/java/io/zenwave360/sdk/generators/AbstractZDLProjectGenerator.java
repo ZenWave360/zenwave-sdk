@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import io.zenwave360.sdk.templating.*;
 import io.zenwave360.sdk.utils.JSONPath;
+import io.zenwave360.sdk.zdl.ZDLFindUtils;
 
 public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
 
@@ -30,6 +31,33 @@ public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
 
         var templateOutputList = new ArrayList<TemplateOutput>();
         var apiModel = getZDLModel(contextModel);
+
+        Map<String, Map<String, Object>> aggregates = (Map) apiModel.get("aggregates");
+        Set<Map<String, Object>> domainEvents = new HashSet<>();
+        for (Map<String, Object> aggregate : aggregates.values()) {
+            for (TemplateInput template : templates.aggregateTemplates) {
+                templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("aggregate", aggregate)));
+            }
+            var events = ZDLFindUtils.aggregateEvents(aggregate);
+            for (String eventName : events) {
+                var event = JSONPath.get(apiModel, "$.events." + eventName);
+                if(event != null) {
+                    domainEvents.add((Map<String, Object>) event);
+                }
+            }
+        }
+
+        // include all events not annotated with @asyncapi
+        domainEvents.addAll((List) JSONPath.get(apiModel, "$.events[*][?(!@.options.asyncapi && !@.options.embedded)]", List.of()));
+        // include all events referenced by fields
+        JSONPath.get(domainEvents, "$..fields[*].type", List.of()).stream().map(type -> (Map) JSONPath.get(apiModel, "$.events." + type)).filter(Objects::nonNull).forEach(domainEvents::add);
+
+        for (Map<String, Object> domainEvent : domainEvents) {
+            for (TemplateInput template : templates.domainEventsTemplates) {
+                templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("event", domainEvent)));
+            }
+        }
+
 
         Map<String, Map<String, Object>> entities = (Map) apiModel.get("entities");
         for (Map<String, Object> entity : entities.values()) {
@@ -106,7 +134,8 @@ public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
         if (entityNames.size() == 1 && "*".equals(entityNames.get(0))) {
             entityNames = JSONPath.get(apiModel, "$.entities[*].name");
         }
-        List<Map<String, Object>> entitiesByService = (List<Map<String, Object>>) entityNames.stream().map(e -> JSONPath.get(apiModel, "$.entities." + e)).collect(Collectors.toList());
+        entityNames = entityNames.stream().map(entity -> JSONPath.get(apiModel, "$.aggregates." + entity + ".aggregateRoot", entity)).toList();
+        List<Map<String, Object>> entitiesByService = (List<Map<String, Object>>) entityNames.stream().map(e -> JSONPath.get(apiModel, "$.entities." + e)).toList();
         List excludedNames = ((List) service.get("excludedNames"));
         if (excludedNames != null && excludedNames.size() > 0) {
             entitiesByService = entitiesByService.stream().filter(e -> !excludedNames.contains(e.get("name"))).collect(Collectors.toList());

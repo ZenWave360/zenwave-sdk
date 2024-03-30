@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.zenwave360.zenwave-sdk</groupId>
     <artifactId>zenwave-sdk</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -69,12 +69,12 @@
         <reflections.version>0.10.2</reflections.version>
         <handlebars-java.version>4.3.1</handlebars-java.version>
         <json-schema-ref-parser-jvm.version>0.8.4</json-schema-ref-parser-jvm.version>
-        <zdl-jvm.version>1.0.1</zdl-jvm.version>
+        <zdl-jvm.version>1.2.0-SNAPSHOT</zdl-jvm.version>
         <graphql-java.version>19.2</graphql-java.version>
         <google-java-format.version>1.7</google-java-format.version>
         <palantir-java-format.version>2.38.0</palantir-java-format.version>
         <spring-javaformat.version>0.0.39</spring-javaformat.version>
-        <junit.version>4.13.2</junit.version>
+        <junit.version>5.10.1</junit.version>
         <spring-boot-dependencies.version>2.6.7</spring-boot-dependencies.version>
         <reflections.version>0.10.2</reflections.version>
         <junit.version>5.8.2</junit.version>
@@ -190,7 +190,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.7</version>
+                <version>0.8.11</version>
                 <configuration>
                     <excludes>
                         <exclude>com/intuit/karate/core/**</exclude>

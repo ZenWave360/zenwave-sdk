@@ -11,6 +11,11 @@ public class BackendMultiModuleApplicationGenerator extends BackendDefaultApplic
     protected ZDLProjectTemplates configureProjectTemplates() {
         var ts = new ZDLProjectTemplates("io/zenwave360/sdk/plugins/BackendApplicationDefaultGenerator");
 
+        ts.addTemplate(ts.aggregateTemplates, "src/main/java","core/domain/common/Aggregate.java","{{mavenModulesPrefix}}-domain",
+                "{{asPackageFolder entitiesPackage}}/{{aggregate.name}}.java", JAVA, null, true);
+        ts.addTemplate(ts.domainEventsTemplates, "src/main/java","core/domain/common/DomainEvent.java","{{mavenModulesPrefix}}-domain",
+                "{{asPackageFolder domainEventsPackage}}/{{event.name}}.java", JAVA, null, true);
+
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/domain/{{persistence}}/Entity.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder entitiesPackage}}/{{entity.name}}.java", JAVA, skipEntity, false);
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/outbound/{{persistence}}/{{style}}/EntityRepository.java", "{{mavenModulesPrefix}}-domain",
@@ -40,7 +45,7 @@ public class BackendMultiModuleApplicationGenerator extends BackendDefaultApplic
 
         ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/inbound/Service.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder inboundPackage}}/{{service.name}}.java", JAVA, null, false);
-        ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/implementation/{{persistence}}/{{style}}/ServiceImpl.java", "{{mavenModulesPrefix}}-impl",
+        ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/implementation/{{style}}/ServiceImpl.java", "{{mavenModulesPrefix}}-impl",
                 "{{asPackageFolder coreImplementationPackage}}/{{service.name}}Impl.java", JAVA, null, true);
         ts.addTemplate(ts.serviceTemplates, "src/main/java","core/implementation/mappers/ServiceMapper.java", "{{mavenModulesPrefix}}-impl",
                 "{{asPackageFolder coreImplementationPackage}}/mappers/{{service.name}}Mapper.java", JAVA, null, true);

@@ -2,12 +2,11 @@ package io.zenwave360.sdk.plugins;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.zenwave360.sdk.utils.NamingUtils;
 import io.zenwave360.sdk.zdl.ZDLFindUtils;
-import io.zenwave360.sdk.zdl.ZDLHttpUtils;
 import io.zenwave360.sdk.zdl.ZDLJavaSignatureUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.jknack.handlebars.Options;
@@ -26,6 +25,50 @@ public class BackendApplicationDefaultHelpers {
         this.generator = generator;
     }
 
+    public String logMethodCall(Map method, Options options) {
+        var zdl = options.get("zdl");
+        var methodName = (String) method.get("name");
+        var parameters = ZDLJavaSignatureUtils.methodParametersCallSignature(method, (Map) zdl, generator.inputDTOSuffix);
+        var parameterPlaceHolders = Arrays.stream(parameters.split(", ")).map(p -> "{}").collect(Collectors.joining(" "));
+        if(parameters.isEmpty()) {
+            return String.format("log.debug(\"Request %s\");", methodName);
+        }
+        return String.format("log.debug(\"Request %s: %s\", %s);", methodName, parameterPlaceHolders, parameters);
+    }
+
+    public Map findAggregateCommandsForMethod(Map method, Options options) {
+        var zdl = options.get("zdl");
+        var aggregatesCommandsForMethod = ZDLFindUtils.findAggregateCommandsForMethod((Map) zdl, method);
+        if(aggregatesCommandsForMethod.isEmpty()) {
+            return Map.of("templateFile", "aggregates-void-methodBody");
+        }
+        if(aggregatesCommandsForMethod.size() == 1) {
+            var aggregate = JSONPath.get(aggregatesCommandsForMethod, "$[0].aggregate");
+            var entity = JSONPath.get(aggregatesCommandsForMethod, "$[0].entity");
+            var command = JSONPath.get(aggregatesCommandsForMethod, "$[0].command");
+            var crudMethod = JSONPath.get(aggregatesCommandsForMethod, "$[0].crudMethod");
+            if(aggregate != null && command != null) {
+                return Map.of("templateFile", "aggregates-commands-methodBody", "aggregatesCommandsForMethod", aggregatesCommandsForMethod);
+            }
+            if(aggregate != null && crudMethod != null) {
+                return Map.of("templateFile", "aggregates-crud-methodBody", "aggregatesCommandsForMethod", aggregatesCommandsForMethod);
+            }
+            if(entity != null && crudMethod != null) {
+                return Map.of("templateFile", "entities-crud-methodBody", "entity", entity, "crudMethod", crudMethod);
+            }
+            if(entity != null) {
+                return Map.of("templateFile", "entities-methodBody", "entity", entity);
+            }
+        }
+        return Map.of("templateFile", "aggregates-commands-methodBody", "aggregatesCommandsForMethod", aggregatesCommandsForMethod);
+    }
+    public boolean isWriteMethod(Map method, Options options) {
+        var methodName = (String) method.get("name");
+        var hasId = method.get("paramId") != null;
+        return hasId || methodName.startsWith("create") || methodName.startsWith("update") || methodName.startsWith("delete");
+    }
+
+    @Deprecated
     public boolean isCrudMethod(String crudMethodPrefix, Options options) {
         var entity = (Map<String, Object>) options.hash("entity");
         var entityName = (String) entity.get("name");
@@ -42,12 +85,40 @@ public class BackendApplicationDefaultHelpers {
         return isCrudMethod;
     }
 
-    public Collection<String> findAggregateInputs(Map aggregate, Options options) {
+    public List<Map> serviceAggregates(Map service, Options options) {
         var zdl = options.get("zdl");
-        var aggregateName = (String) aggregate.get("name");
+        var aggregateNames = JSONPath.get(service, "aggregates", Collections.emptyList());
+        return aggregateNames.stream()
+                .map(aggregateName -> JSONPath.get(zdl, "$.allEntitiesAndEnums." + aggregateName, Map.of()))
+                .filter(aggregate -> "aggregates".equals(aggregate.get("type")))
+                .collect(Collectors.toList());
+    }
+
+    public boolean includeDomainEvents(Object service, Options options) {
+        var zdl = options.get("zdl");
+        return !JSONPath.get(zdl, "$.aggregates[*].commands[*].withEvents", List.of()).isEmpty();
+    }
+
+    public List<Map> aggregateEvents(Map<String, Object> aggregate, Options options) {
+        var zdl = options.get("zdl");
+        return ZDLFindUtils.aggregateEvents(aggregate).stream().map(event -> (Map) JSONPath.get(zdl, "$.events." + event)).toList();
+    }
+
+    public Collection<String> findAggregateInputs(Map aggregate, Options options) {
+        return new HashSet<>(JSONPath.get(aggregate, "$.commands[*].parameter", List.of()));
+    }
+
+    public String findEntityAggregate(String entityName, Options options) {
+        var zdl = options.get("zdl");
+        var aggregateNames = JSONPath.get(zdl, "$.aggregates[*][?(@.aggregateRoot == '" + entityName + "')].name", List.of());
+        return aggregateNames.isEmpty()? null : (String) aggregateNames.get(0);
+    }
+
+    public Collection<String> findServiceInputs(Map service, Options options) {
+        var zdl = options.get("zdl");
         var inputDTOSuffix = (String) options.get("inputDTOSuffix");
         Set<String> inputs = new HashSet<String>();
-        inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregateName + "' in @.aggregates)].methods[*].parameter"));
+        inputs.addAll(JSONPath.get(service, "$.methods[*].parameter"));
         // inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregateName + "' in @.aggregates)].methods[*].returnType"));
         // inputs.add(aggregateName + inputDTOSuffix);
         inputs = inputs.stream().filter(Objects::nonNull).collect(Collectors.toSet());
@@ -59,12 +130,14 @@ public class BackendApplicationDefaultHelpers {
         return inputs;
     }
 
-    public Collection<String> findAggregateOutputs(Map aggregate, Options options) {
+    public Collection<String> findServiceOutputs(Map service, Options options) {
         var zdl = options.get("zdl");
-        var aggregateName = (String) aggregate.get("name");
+        var serviceAggregates = (List<String>) service.get("aggregates");
+        var aggregatesAndEntities = new HashSet<>(serviceAggregates);
+        serviceAggregates.stream().map(aggregate -> (String) JSONPath.get(zdl, "$.aggregates." + aggregate + ".aggregateRoot")).filter(Objects::nonNull).forEach(aggregatesAndEntities::add);
         Set<String> outputs = new HashSet<String>();
-        outputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregateName + "' in @.aggregates)].methods[*].returnType"));
-        outputs = outputs.stream().filter(input -> input != null && !aggregateName.equals(input)).collect(Collectors.toSet());
+        outputs.addAll(JSONPath.get(service, "$.methods[*].returnType"));
+        outputs = outputs.stream().filter(input -> input != null && !aggregatesAndEntities.contains(input)).collect(Collectors.toSet());
         return outputs;
     }
 
@@ -98,6 +171,15 @@ public class BackendApplicationDefaultHelpers {
 
     public List<Map<String, Object>> methodsWithEvents(Map<String, Object> zdl, Options options) {
         return ZDLFindUtils.methodsWithEvents(zdl); // TODO review usages
+    }
+
+    public Collection<Map> domainEventsWithAsyncapiAnnotation(Map<String, Object> zdl, Options options) {
+        var domainEventNames = JSONPath.get(zdl, "$.aggregates[*].commands[*].withEvents", List.of()).stream()
+                .flatMap(e -> e instanceof List? ((List<?>) e).stream() : Stream.of(e))
+                .collect(Collectors.toSet());
+        return domainEventNames.stream().map(eventName -> (Map) JSONPath.get(zdl, "$.events." + eventName))
+                .filter(event -> JSONPath.get(event, "options.asyncapi") != null)
+                .toList();
     }
 
     public Collection<Map<String, Object>> listOfPairEventEntity(Map<String, Object> zdl, Options options) {
@@ -182,20 +264,22 @@ public class BackendApplicationDefaultHelpers {
             return "";
         }
         var returnTypeIsArray = (Boolean) method.getOrDefault("returnTypeIsArray", false);
+        var isReturnTypeOptional = (Boolean) method.getOrDefault("returnTypeIsOptional", false);
         var instanceName = returnTypeIsArray? entity.get("instanceNamePlural") : entity.get("instanceName");
+        var serviceInstanceName = NamingUtils.asInstanceName((String) method.get("serviceName"));
         if (Objects.equals(entity.get("name"), returnType.get("name"))) {
-            if(JSONPath.get(method, "options.paginated", false)) {
-                return "page";
-            }
+//            if(JSONPath.get(method, "options.paginated", false)) {
+//                return (String) instanceName;
+//            }
             return (String) instanceName;
         } else {
             if(returnTypeIsArray) {
                 if(JSONPath.get(method, "options.paginated", false)) {
-                    return String.format("%sMapper.as%sPage(%s)", instanceName, returnType.get("className"), "page");
+                    return String.format("%sMapper.as%sPage(%s)", serviceInstanceName, returnType.get("className"), instanceName);
                 }
-                return String.format("%sMapper.as%sList(%s)", instanceName, returnType.get("className"), instanceName);
+                return String.format("%sMapper.as%sList(%s)", serviceInstanceName, returnType.get("className"), instanceName);
             } else {
-                return String.format("%sMapper.as%s(%s)", instanceName, returnType.get("className"), instanceName);
+                return String.format("%sMapper.as%s(%s)", serviceInstanceName, returnType.get("className"), instanceName);
             }
         }
     }
@@ -220,7 +304,14 @@ public class BackendApplicationDefaultHelpers {
 
     public Object findEntity(String entityName, Options options) {
         var zdl = options.get("zdl");
-        return JSONPath.get(zdl, "entities." + entityName);
+        var entity = JSONPath.get(zdl, "$.allEntitiesAndEnums." + entityName);
+        if("entities".equals(JSONPath.get(entity, "type"))) {
+            return entity;
+        }
+        if("aggregates".equals(JSONPath.get(entity, "type"))) {
+            return findEntity(JSONPath.get(entity, "$.aggregateRoot"), options);
+        }
+        return null;
     }
 
     public String inputDTOSuffix(Object entity, Options options) {
@@ -305,14 +396,14 @@ public class BackendApplicationDefaultHelpers {
         return pattern.replace("\\", "").replace("\\", "\\\\");
     }
 
-    public Object skipEntityRepository(Object context, Options options) {
-        Map entity = (Map) context;
-        return generator.skipEntityRepository.apply(Map.of("entity", entity));
+    public Object skipEntityRepository(Map entity, Options options) {
+        var zdl = options.get("zdl");
+        return generator.skipEntityRepository.apply(Map.of("zdl", zdl, "entity", entity));
     };
 
-    public Object skipEntityId(Object context, Options options) {
-        Map entity = (Map) context;
-        return generator.skipEntityId.apply(Map.of("entity", entity));
+    public Object skipEntityId(Map entity, Options options) {
+        var zdl = options.get("zdl");
+        return generator.skipEntityId.apply(Map.of("zdl", zdl, "entity", entity));
     };
 
     public Object addExtends(Object entity, Options options) {

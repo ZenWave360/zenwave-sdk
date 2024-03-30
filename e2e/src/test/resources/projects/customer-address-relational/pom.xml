@@ -194,7 +194,7 @@
 						<configuration>
 							<generatorName>jsonschema2pojo</generatorName>
 							<configOptions>
-								<modelPackage>io.zenwave360.example.core.domain.events</modelPackage>
+								<modelPackage>io.zenwave360.example.core.outbound.events.dtos</modelPackage>
 <!--								<jsonschema2pojo.includeTypeInfo>true</jsonschema2pojo.includeTypeInfo>-->
 								<jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
 								<jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
@@ -214,7 +214,7 @@
 								<role>provider</role>
 								<style>imperative</style>
 <!--								<transactionalOutbox>mongodb</transactionalOutbox>-->
-								<modelPackage>io.zenwave360.example.core.domain.events</modelPackage>
+								<modelPackage>io.zenwave360.example.core.outbound.events.dtos</modelPackage>
 								<producerApiPackage>io.zenwave360.example.core.outbound.events</producerApiPackage>
 								<consumerApiPackage>io.zenwave360.example.adapters.commands</consumerApiPackage>
 							</configOptions>

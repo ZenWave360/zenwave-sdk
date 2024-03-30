@@ -13,6 +13,7 @@ import io.zenwave360.sdk.options.DatabaseType;
 import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.options.ProgrammingStyle;
 import io.zenwave360.sdk.utils.JSONPath;
+import io.zenwave360.sdk.zdl.ZDLFindUtils;
 
 /**
  * Generates a backend application with the following structure:
@@ -48,6 +49,7 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
 
     public String configPackage = "{{basePackage}}.config";
     public String entitiesPackage = "{{basePackage}}.core.domain";
+    public String domainEventsPackage = "{{basePackage}}.core.domain.events";
     public String inboundPackage = "{{basePackage}}.core.inbound";
     public String inboundDtosPackage = "{{basePackage}}.core.inbound.dtos";
     public String outboundPackage = "{{basePackage}}.core.outbound";
@@ -55,7 +57,7 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
     public String infrastructurePackage = "{{basePackage}}.infrastructure";
     public String adaptersPackage = "{{basePackage}}.adapters";
 
-    public String outboundEventsModelPackage = "{{basePackage}}.core.domain.events";
+    public String outboundEventsModelPackage = "{{basePackage}}.core.outbound.events.dtos";
     public String outboundEventsPackage = "{{basePackage}}.core.outbound.events";
 
 
@@ -91,7 +93,7 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
         return !(JSONPath.get(model, "$.entity.options[?(" + annotationsFilter + ")]", List.of())).isEmpty();
     }
 
-    protected Function<Map<String, Object>, Boolean> skipEntityRepository = (model) -> !is(model, "aggregate");
+    protected Function<Map<String, Object>, Boolean> skipEntityRepository = (model) -> !(is(model, "aggregate") || ZDLFindUtils.isAggregateRoot(JSONPath.get(model, "zdl"), JSONPath.get(model, "$.entity.name")));
     protected Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo", "input", "abstract");
     protected Function<Map<String, Object>, Boolean> skipEntity = (model) -> is(model, "vo", "input");
     protected Function<Map<String, Object>, Boolean> skipEntityInput = (model) -> inputDTOSuffix == null || inputDTOSuffix.isEmpty();
@@ -101,6 +103,11 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
     @Override
     protected ZDLProjectTemplates configureProjectTemplates() {
         var ts = new ZDLProjectTemplates("io/zenwave360/sdk/plugins/BackendApplicationDefaultGenerator");
+
+        ts.addTemplate(ts.aggregateTemplates, "src/main/java","core/domain/common/Aggregate.java",
+                "{{asPackageFolder entitiesPackage}}/{{aggregate.name}}.java", JAVA, null, true);
+        ts.addTemplate(ts.domainEventsTemplates, "src/main/java","core/domain/common/DomainEvent.java",
+                "{{asPackageFolder domainEventsPackage}}/{{event.name}}.java", JAVA, null, true);
 
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/domain/{{persistence}}/Entity.java",
                 "{{asPackageFolder entitiesPackage}}/{{entity.name}}.java", JAVA, skipEntity, false);
@@ -131,7 +138,7 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
 
         ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/inbound/Service.java",
                 "{{asPackageFolder inboundPackage}}/{{service.name}}.java", JAVA, null, false);
-        ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/implementation/{{persistence}}/{{style}}/ServiceImpl.java",
+        ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/implementation/{{style}}/ServiceImpl.java",
                 "{{asPackageFolder coreImplementationPackage}}/{{service.name}}Impl.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/main/java", "core/implementation/mappers/BaseMapper.java",
                 "{{asPackageFolder coreImplementationPackage}}/mappers/BaseMapper.java", JAVA, null, true);
