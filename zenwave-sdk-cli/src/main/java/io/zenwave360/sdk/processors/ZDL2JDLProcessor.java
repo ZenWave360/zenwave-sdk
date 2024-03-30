@@ -26,6 +26,9 @@ public class ZDL2JDLProcessor extends AbstractBaseProcessor {
             var entityNames = (List) service.get("aggregates");
             for (Object entityName : entityNames) {
                 var entity = JSONPath.get(model, "$.entities['" + entityName + "']");
+                if(entity == null) {
+                    continue;
+                }
                 var options = JSONPath.get(entity, "$.options", new HashMap<>());
                 options.put("service", service.get("name"));
                 JSONPath.set(entity, "$.options", options);

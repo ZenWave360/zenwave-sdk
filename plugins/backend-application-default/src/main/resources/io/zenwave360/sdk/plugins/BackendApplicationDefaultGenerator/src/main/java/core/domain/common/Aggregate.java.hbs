@@ -1,0 +1,61 @@
+package {{entitiesPackage}};
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import {{domainEventsPackage}}.*;
+import {{inboundDtosPackage}}.*;
+
+import org.mapstruct.MappingTarget;
+import org.mapstruct.factory.Mappers;
+
+
+public class {{aggregate.name}} {
+    private static final Mapper mapper = Mappers.getMapper(Mapper.class);
+
+    private final {{aggregate.aggregateRoot}} rootEntity;
+
+    private final List<Object> events = new ArrayList<>();
+
+    public {{aggregate.name}}() {
+        this(new {{aggregate.aggregateRoot}}());
+    }
+    public {{aggregate.name}}({{aggregate.aggregateRoot}} rootEntity) {
+        this.rootEntity = rootEntity;
+    }
+
+    public String getId() {
+        return rootEntity.getId();
+    }
+
+    public {{aggregate.aggregateRoot}} getRootEntity() {
+        return rootEntity;
+    }
+
+    public List<?> getEvents() {
+        return Collections.unmodifiableList(events);
+    }
+
+{{#each aggregate.commands as |method|}}
+    {{~> (partial '../../implementation/partials/serviceMethodJavadoc')}}
+    public void {{method.name}}({{method.parameter}} input) {
+        // TODO: implement this command
+        mapper.update(rootEntity, input);
+        {{~#each (methodEvents method) as |event|}}
+        events.add(mapper.as{{event.name}}(rootEntity));
+        {{~/each}}
+    }
+{{/each}}
+
+    @org.mapstruct.Mapper
+    interface Mapper {
+        {{~#each (findAggregateInputs aggregate) as |input|}}
+        {{aggregate.aggregateRoot}} update(@MappingTarget {{aggregate.aggregateRoot}} entity, {{input}} input);
+        {{~/each}}
+
+        {{~#each (aggregateEvents aggregate) as |event|}}
+        {{event.className}} as{{event.name}}({{aggregate.aggregateRoot}} entity);
+        {{~/each}}
+    }
+}

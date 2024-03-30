@@ -80,7 +80,7 @@
 								<inputSpec>${project.basedir}/src/main/resources/apis/asyncapi.yml</inputSpec>
 								<generatorName>jsonschema2pojo</generatorName>
 								<configOptions>
-									<modelPackage>${basePackage}.core.domain.events</modelPackage>
+									<modelPackage>${basePackage}.core.outbound.events.dtos</modelPackage>
 									<jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
 									<jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
 								</configOptions>
@@ -97,7 +97,7 @@
 									<inputSpec>${project.basedir}/src/main/resources/apis/asyncapi.yml</inputSpec>
 									<role>provider</role>
 									<style>imperative</style>
-									<modelPackage>${basePackage}.core.domain.events</modelPackage>
+									<modelPackage>${basePackage}.core.outbound.events.dtos</modelPackage>
 									<producerApiPackage>${basePackage}.core.outbound.events</producerApiPackage>
 									<consumerApiPackage>${basePackage}.adapters.commands</consumerApiPackage>
 								</configOptions>
@@ -233,6 +233,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

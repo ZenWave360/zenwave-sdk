@@ -35,7 +35,7 @@ public class ZDLJavaSignatureUtils {
 
     public static String methodParametersCallSignature(Map method, Map zdl, String inputDTOSuffix) {
         return Arrays.stream(methodParametersSignature("not-used", method, zdl, inputDTOSuffix).split(", "))
-                .map(p -> p.split(" ")[1])
+                .map(p -> p.contains(" ")? p.split(" ")[1] : "")
                 .collect(Collectors.joining(", "));
     }
 

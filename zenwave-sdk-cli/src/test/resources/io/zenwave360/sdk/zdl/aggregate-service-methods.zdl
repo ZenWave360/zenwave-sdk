@@ -1,0 +1,51 @@
+
+aggregate MyAggregate(MyEntity) {
+    updateMyEntity(MyEntityInput)
+}
+
+aggregate MyAggregate2(MyEntity2) {
+    shouldResolveByReturnTypeWithCommand(MyEntity2)
+}
+
+@aggregate
+entity MyEntity {
+    someField String
+}
+
+@aggregate
+entity MyEntity2 {
+    someField String
+}
+
+input MyEntityInput {
+    someField String
+}
+
+output MyEntityOutput {
+    someField String
+}
+
+service MyServiceForEntity for (MyEntity) {
+    createMyEntity(MyEntityInput) MyEntityOutput
+    updateMyEntity(id, MyEntityInput) MyEntityOutput?
+    someMethod(MyEntityInput) MyEntityOutput
+}
+
+
+service MyServiceForEntities for (MyEntity, MyEntity2) {
+    shouldResolveByReturnType(MyEntity2) MyEntity2
+}
+
+service MyServiceForAggregate for (MyAggregate) {
+    createMyEntity(MyEntityInput) MyEntity
+    createMyAggregate(MyEntityInput) MyEntity
+}
+
+service MyServiceForAggregates for (MyAggregate, MyAggregate2) {
+    shouldResolveByReturnType(MyEntity2) MyEntity2
+    shouldResolveByReturnTypeWithCommand(MyEntity2) MyEntity2
+}
+
+service MyServiceForAggregatesAndEntities for (MyAggregate, MyEntity2) {
+
+}

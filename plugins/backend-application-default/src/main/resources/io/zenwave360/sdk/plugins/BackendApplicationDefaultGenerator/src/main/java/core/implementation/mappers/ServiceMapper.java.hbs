@@ -18,7 +18,7 @@ public interface {{service.name}}Mapper {
 {{~#each service.aggregates as |entityName|}}
     {{~assign "entity" (findEntity entityName)}}
 
-  {{~#each (findAggregateInputs entity) as |input|}}
+  {{~#each (findServiceInputs service) as |input|}}
     {{~#if (not (eq entity.className input))}}
     // {{entity.className}} as{{entity.className}}({{mapperInputSignature input}});
     {{~/if}}
@@ -27,7 +27,7 @@ public interface {{service.name}}Mapper {
     {{entity.className}} update(@MappingTarget {{entity.className}} entity, {{mapperInputSignature input}});
   {{~/each}}
 
-  {{~#each (findAggregateOutputs entity) as |output|}}
+  {{~#each (findServiceOutputs service) as |output|}}
     {{output}} as{{output}}({{entity.className}} entity);
     List<{{output}}> as{{output}}List(List<{{entity.className}}> entity);
     default Page<{{output}}> as{{output}}Page(Page<{{entity.className}}> page) {

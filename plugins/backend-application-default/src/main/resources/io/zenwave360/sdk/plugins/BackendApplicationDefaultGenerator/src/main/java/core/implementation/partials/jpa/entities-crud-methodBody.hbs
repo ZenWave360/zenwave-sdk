@@ -1,0 +1,40 @@
+{{~assign 'entity' aggregateCommandsForMethod.entity }}
+{{~#if (isCrudMethod 'create' method=method entity=entity )}}
+    log.debug("[CRUD] Request to save {{entity.className}}: {}", input);
+    var {{entity.instanceName}} = {{asInstanceName service.name}}Mapper.update(new {{entity.className}}(), {{{mapperInputCallSignature method.parameter}}});
+    {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}});
+    // TODO: you may need to reload the entity here to fetch relationships 'mapped by id'
+    {{~> (partial '../withEvents')}}
+    return {{wrapWithMapper entity}};
+{{~else if (isCrudMethod 'update' method=method entity=entity )}}
+    log.debug("[CRUD] Request to update {{entity.className}}: {}", input);
+    var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id);
+    // saving is unnecessary: https://vladmihalcea.com/best-spring-data-jparepository/
+    {{entity.instanceName}} = {{entity.instanceName}}.map(existing{{entity.instanceName}} -> {{asInstanceName service.name}}Mapper.update(existing{{entity.instanceName}}, {{{mapperInputCallSignature method.parameter}}}));
+    {{~> (partial '../withEvents')}}
+    return {{wrapWithMapper entity}};
+{{~else if (isCrudMethod 'list' method=method entity=entity )}}
+    {{~#if method.options.paginated}}
+    log.debug("[CRUD] Request list of {{entity.classNamePlural}}: {}", pageable);
+    var {{entity.instanceNamePlural}} = {{entity.instanceName}}Repository.findAll(pageable);
+    return {{wrapWithMapper entity}};
+    {{~else}}
+    log.debug("Request list of {{entity.classNamePlural}}");
+    var {{entity.instanceNamePlural}} = {{entity.instanceName}}Repository.findAll();
+    return {{wrapWithMapper entity}};
+    {{~/if}}
+{{~else if (isCrudMethod 'search' method=method entity=entity )}}
+    log.debug("[CRUD] Request to search {{entity.classNamePlural}}: {} - {}", input, pageable);
+    // TODO implement this search by criteria
+    var {{entity.instanceNamePlural}} = {{entity.instanceName}}Repository.findAll(pageable);
+    return {{wrapWithMapper entity}};
+{{~else if (isCrudMethod 'get' method=method entity=entity )}}
+    log.debug("[CRUD] Request to get {{entity.className}} : {}", id);
+    var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id);
+    return {{wrapWithMapper entity}};
+{{~else if (isCrudMethod 'delete' method=method entity=entity )}}
+    log.debug("[CRUD] Request to delete {{entity.className}} : {}", id);
+    {{entity.instanceName}}Repository.deleteById(id);
+    {{~> (partial '../withEvents')}}
+{{~/if}}
+

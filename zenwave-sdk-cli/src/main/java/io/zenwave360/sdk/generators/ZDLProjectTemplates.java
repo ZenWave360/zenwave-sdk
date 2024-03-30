@@ -17,6 +17,9 @@ public class ZDLProjectTemplates {
         this.templatesFolder = templatesFolder;
     }
 
+    public List<TemplateInput> aggregateTemplates = new ArrayList<>();
+
+    public List<TemplateInput> domainEventsTemplates = new ArrayList<>();
     public List<TemplateInput> entityTemplates = new ArrayList<>();
 
     public List<TemplateInput> enumTemplates = new ArrayList<>();

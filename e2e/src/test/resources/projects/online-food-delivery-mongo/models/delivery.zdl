@@ -61,9 +61,25 @@ apis {
     }
 }
 
+// == Aggregates =============================
+
+/**
+ * Delivery Aggregate
+ */
+aggregate DeliveryAggregate (Delivery) {
+
+    createDelivery(DeliveryInput) withEvents DeliveryStatusUpdated
+
+    onOrderStatusUpdated(OrderStatusUpdated) withEvents DeliveryStatusUpdated
+
+    updateDeliveryStatus(DeliveryStatusInput) withEvents DeliveryStatusUpdated
+
+}
+
+
 // == Entities =============================
 
-@aggregate
+//@aggregate
 entity Delivery {
     orderId String required
     customer Customer {
@@ -120,7 +136,7 @@ input DeliveryStatusInput {
 }
 
 @rest("/delivery")
-service DeliveryService for (Delivery) {
+service DeliveryService for (DeliveryAggregate) {
 
     @asyncapi({api: OrdersAsyncAPI, channel: "OrderCreatedChannel"})
     createDelivery(DeliveryInput) Delivery withEvents DeliveryStatusUpdated

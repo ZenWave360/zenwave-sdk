@@ -43,13 +43,10 @@ public class {{service.name}}Test  {
 {{#each entities as |entity|}}
     {{entity.className}}RepositoryInMemory {{entity.instanceName}}Repository = context.{{entity.instanceName}}Repository();
 {{/each}}
-    @BeforeEach
-    void setUp() {
-        {{~#each entities as |entity|}}
-        {{entity.instanceName}}Repository.clear();
-        {{entity.instanceName}}Repository.save(new {{entity.className}}());
-        {{~/each}}
-    }
+	@BeforeEach
+	void setUp() {
+		context.reloadTestData();
+	}
 
 {{#each entities as |entity|}}
     @Test
