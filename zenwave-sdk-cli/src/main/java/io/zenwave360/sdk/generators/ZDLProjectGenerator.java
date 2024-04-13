@@ -1,26 +1,54 @@
 package io.zenwave360.sdk.generators;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.zenwave360.sdk.templating.HandlebarsEngine;
+import io.zenwave360.sdk.templating.TemplateInput;
+import io.zenwave360.sdk.templating.TemplateOutput;
+import io.zenwave360.sdk.utils.CommaSeparatedCollectionDeserializationHandler;
+import io.zenwave360.sdk.utils.JSONPath;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
+import io.zenwave360.sdk.zdl.ProjectTemplates;
+import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
+import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
-import io.zenwave360.sdk.templating.*;
-import io.zenwave360.sdk.utils.JSONPath;
-import io.zenwave360.sdk.zdl.ProjectTemplates;
-import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
-
-public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
+public class ZDLProjectGenerator extends AbstractZDLGenerator {
 
     public String sourceProperty = "zdl";
 
+    public ProjectLayout layout;
+    public ProjectTemplates templates;
+
     private final HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
+
+    @JsonAnySetter
+    public Map<String, Object> options = new LinkedHashMap<>();
+
 
     protected HandlebarsEngine getTemplateEngine() {
         return handlebarsEngine;
     }
 
-    protected abstract ProjectTemplates configureProjectTemplates();
-
-    protected abstract boolean isGenerateEntity(Map<String, Object> entity);
+    @Override
+    public void onPropertiesSet() {
+        super.onPropertiesSet();
+        if(templates != null) {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            mapper.addHandler(new CommaSeparatedCollectionDeserializationHandler());
+            try {
+                mapper.updateValue(templates, asConfigurationMap());
+            } catch (JsonMappingException e) {
+                throw new RuntimeException(e);
+            }
+            templates.setLayout(layout);
+        }
+    }
 
     protected Map<String, Object> getZDLModel(Map<String, Object> contextModel) {
         return (Map) contextModel.get(sourceProperty);
@@ -28,16 +56,23 @@ public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
 
     @Override
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {
-        ProjectTemplates templates = configureProjectTemplates();
-
         var templateOutputList = new ArrayList<TemplateOutput>();
+        var generatedProjectFiles = generateProjectFiles(contextModel);
+        for (TemplateOutput templateOutput : generatedProjectFiles.getAllTemplateOutputs()) {
+            templateOutputList.addAll(getTemplateEngine().processTemplate(templateOutput.getContext(), templateOutput.getTemplateInput()));
+        }
+        return templateOutputList;
+    }
+
+    public GeneratedProjectFiles generateProjectFiles(Map<String, Object> contextModel) {
+        var generatedProjectFiles = new GeneratedProjectFiles();
         var apiModel = getZDLModel(contextModel);
 
         Map<String, Map<String, Object>> aggregates = (Map) apiModel.get("aggregates");
         Set<Map<String, Object>> domainEvents = new HashSet<>();
         for (Map<String, Object> aggregate : aggregates.values()) {
             for (TemplateInput template : templates.aggregateTemplates) {
-                templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("aggregate", aggregate)));
+                generatedProjectFiles.aggregates.addAll((String) aggregate.get("name"), generateTemplateOutput(contextModel, template, Map.of("aggregate", aggregate)));
             }
             var events = ZDLFindUtils.aggregateEvents(aggregate);
             for (String eventName : events) {
@@ -58,40 +93,40 @@ public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
 
         for (Map<String, Object> domainEvent : domainEvents) {
             for (TemplateInput template : templates.domainEventsTemplates) {
-                templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("event", domainEvent)));
+                generatedProjectFiles.domainEvents.addAll((String) domainEvent.get("name"), generateTemplateOutput(contextModel, template, Map.of("event", domainEvent)));
             }
         }
 
 
         Map<String, Map<String, Object>> entities = (Map) apiModel.get("entities");
         for (Map<String, Object> entity : entities.values()) {
-            if (!isGenerateEntity(entity)) {
-                continue;
-            }
+//            if (!isGenerateEntity(entity)) {
+//                continue;
+//            }
             for (TemplateInput template : templates.entityTemplates) {
-                templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("entity", entity)));
+                generatedProjectFiles.entities.addAll((String) entity.get("name"), generateTemplateOutput(contextModel, template, Map.of("entity", entity)));
             }
         }
 
         Map<String, Map<String, Object>> enums = JSONPath.get(apiModel, "$.enums");
         for (Map<String, Object> enumValue : enums.values()) {
-            if (!isGenerateEntity(enumValue)) {
-                continue;
-            }
+//            if (!isGenerateEntity(enumValue)) {
+//                continue;
+//            }
             var comment = enumValue.get("comment");
             var isInputEnum = JSONPath.get(enumValue, "$.options.input", false);
             var isEventEnum = JSONPath.get(enumValue, "$.options.event", false);
             if (isInputEnum) {
                 for (TemplateInput template : templates.inputEnumTemplates) {
-                    templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("enum", enumValue)));
+                    generatedProjectFiles.inputEnums.addAll((String) enumValue.get("name"), generateTemplateOutput(contextModel, template, Map.of("enum", enumValue)));
                 }
             } else if (isEventEnum) {
                 for (TemplateInput template : templates.eventEnumTemplates) {
-                    templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("enum", enumValue)));
+                    generatedProjectFiles.eventEnums.addAll((String) enumValue.get("name"), generateTemplateOutput(contextModel, template, Map.of("enum", enumValue)));
                 }
             } else {
                 for (TemplateInput template : templates.enumTemplates) {
-                    templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("enum", enumValue)));
+                    generatedProjectFiles.enums.addAll((String) enumValue.get("name"), generateTemplateOutput(contextModel, template, Map.of("enum", enumValue)));
                 }
             }
         }
@@ -99,13 +134,13 @@ public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
         List<Map<String, Object>> inputs = JSONPath.get(apiModel, "$.inputs[*]", Collections.emptyList());
         for (Map<String, Object> input : inputs) {
             for (TemplateInput template : templates.inputTemplates) {
-                templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("entity", input)));
+                generatedProjectFiles.inputs.addAll((String) input.get("name"), generateTemplateOutput(contextModel, template, Map.of("entity", input)));
             }
         }
         List<Map<String, Object>> outputs = JSONPath.get(apiModel, "$.outputs[*]", Collections.emptyList());
         for (Map<String, Object> output : outputs) {
             for (TemplateInput template : templates.outputTemplates) {
-                templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("entity", output)));
+                generatedProjectFiles.outputs.addAll((String) output.get("name"), generateTemplateOutput(contextModel, template, Map.of("entity", output)));
             }
         }
 
@@ -119,16 +154,11 @@ public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
                 flatEventNames.add((String) eventName);
             }
         }
-        var allEvents = new ArrayList<Map<String, Object>>();
+        var allExternalEvents = new ArrayList<Map<String, Object>>();
         for (Object eventName : flatEventNames) {
             var event = JSONPath.get(apiModel, "$.events." + eventName);
             if(event != null && JSONPath.get(event, "$.options.asyncapi") == null) {
-                allEvents.add((Map<String, Object>) event);
-            }
-        }
-        if(!allEvents.isEmpty()) {
-            for (TemplateInput template : templates.allEventsTemplates) {
-                templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("events", allEvents)));
+                allExternalEvents.add((Map<String, Object>) event);
             }
         }
 
@@ -139,26 +169,58 @@ public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
             service.put("name", serviceName);
             List<Map<String, Object>> entitiesByService = getEntitiesByService(service, apiModel);
             service.put("entities", entitiesByService);
-            boolean isGenerateService = entitiesByService.stream().anyMatch(entity -> isGenerateEntity(entity));
-            if (!isGenerateService) {
-                continue;
-            }
+//            boolean isGenerateService = entitiesByService.stream().anyMatch(entity -> isGenerateEntity(entity));
+//            if (!isGenerateService) {
+//                continue;
+//            }
             servicesList.add(service);
             for (TemplateInput template : templates.serviceTemplates) {
-                templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("service", service, "entities", entitiesByService)));
+                generatedProjectFiles.services.addAll(serviceName, generateTemplateOutput(contextModel, template, Map.of("service", service, "entities", entitiesByService)));
             }
         }
 
-        for (TemplateInput template : templates.allServicesTemplates) {
-            templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("services", servicesList, "entities", new ArrayList(entities.values()))));
+        if(!entities.isEmpty()) {
+            for (TemplateInput template : templates.allEntitiesTemplates) {
+                generatedProjectFiles.allEntities.addAll(generateTemplateOutput(contextModel, template, Map.of("entities", new ArrayList(entities.values()))));
+            }
+        }
+        if(!domainEvents.isEmpty()) {
+            for (TemplateInput template : templates.allDomainEventsTemplates) {
+                generatedProjectFiles.allDomainEvents.addAll(generateTemplateOutput(contextModel, template, Map.of("events", domainEvents.stream().toList())));
+            }
+        }
+        if(!enums.isEmpty()) {
+            for (TemplateInput template : templates.allEnumsTemplates) {
+                generatedProjectFiles.allEnums.addAll(generateTemplateOutput(contextModel, template, Map.of("enums", new ArrayList(enums.values()))));
+            }
+        }
+        if(!inputs.isEmpty()) {
+            for (TemplateInput template : templates.allInputsTemplates) {
+                generatedProjectFiles.allInputs.addAll(generateTemplateOutput(contextModel, template, Map.of("inputs", inputs)));
+            }
+        }
+        if(!outputs.isEmpty()) {
+            for (TemplateInput template : templates.allOutputsTemplates) {
+                generatedProjectFiles.allOutputs.addAll(generateTemplateOutput(contextModel, template, Map.of("outputs", outputs)));
+            }
+        }
+        if(!servicesList.isEmpty()) {
+            for (TemplateInput template : templates.allServicesTemplates) {
+                generatedProjectFiles.allServices.addAll(generateTemplateOutput(contextModel, template, Map.of("services", servicesList, "entities", new ArrayList(entities.values()))));
+            }
+        }
+        if(!allExternalEvents.isEmpty()) {
+            for (TemplateInput template : templates.allExternalEventsTemplates) {
+                generatedProjectFiles.allExternalEvents.addAll(generateTemplateOutput(contextModel, template, Map.of("events", allExternalEvents)));
+            }
         }
 
 
         for (TemplateInput template : templates.singleTemplates) {
-            templateOutputList.addAll(generateTemplateOutput(contextModel, template, Collections.emptyMap()));
+            generatedProjectFiles.singleFiles.addAll(generateTemplateOutput(contextModel, template, Collections.emptyMap()));
         }
 
-        return templateOutputList;
+        return generatedProjectFiles;
     }
 
     protected List<Map<String, Object>> getEntitiesByService(Map<String, Object> service, Map<String, Object> apiModel) {
@@ -178,10 +240,10 @@ public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
 
     protected List<TemplateOutput> generateTemplateOutput(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> extModel) {
         Map<String, Object> model = new HashMap<>();
-        model.putAll(this.asConfigurationMap());
+        model.putAll(asConfigurationMap());
         model.put("context", contextModel);
         model.put(sourceProperty, getZDLModel(contextModel));
         model.putAll(extModel);
-        return getTemplateEngine().processTemplates(model, List.of(template));
+        return getTemplateEngine().processTemplateNames(model, List.of(template));
     }
 }

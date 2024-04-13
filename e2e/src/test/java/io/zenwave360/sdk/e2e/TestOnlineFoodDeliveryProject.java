@@ -86,10 +86,9 @@ public class TestOnlineFoodDeliveryProject {
     }
 
     @Order(2)
-    @ParameterizedTest
-    @ValueSource(strings = {"customers", "orders", "restaurants", "delivery"})
-    public void generateSourceFromAPIs(String module) throws Exception {
-        var pom = "modules/" + module + "/pom.xml";
+    @Test
+    public void generateSourceFromAPIs() throws Exception {
+        var pom = "/pom.xml";
         int exitCode = MavenCompiler.compile(pom, new File(targetFolder));
         Assertions.assertEquals(0, exitCode);
     }

@@ -7,6 +7,7 @@ import java.util.Map;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.templating.TemplateOutput;
+import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.DefaultProjectLayout;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 
@@ -19,6 +20,8 @@ public class NoOpGenerator implements Generator {
     public String pluginOption;
 
     public List<String> array = new ArrayList<>();
+
+    public ProjectTemplates templates;
 
     public static Map<String, Object> context;
 

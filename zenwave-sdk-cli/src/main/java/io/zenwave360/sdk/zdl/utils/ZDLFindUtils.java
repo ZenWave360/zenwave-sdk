@@ -10,6 +10,11 @@ import java.util.stream.Collectors;
 
 public class ZDLFindUtils {
 
+    public static boolean is(Map<String, Object> model, String... annotations) {
+        String annotationsFilter = Arrays.stream(annotations).map(a -> "@." + a).collect(Collectors.joining(" || "));
+        return !(JSONPath.get(model, "$.entity.options[?(" + annotationsFilter + ")]", List.of())).isEmpty();
+    }
+
     public static List<String> findAllServiceFacingEntities(Map<String, Object> model) {
         var serviceEntities = ZDLFindUtils.findMethodParameterAndReturnTypes(model);
         return ZDLFindUtils.findDependentEntities(model, serviceEntities);

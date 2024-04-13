@@ -11,5 +11,7 @@ public interface TemplateEngine {
 
     List<TemplateOutput> processTemplates(Map<String, Object> model, List<TemplateInput> templateInputs);
 
-    List<TemplateOutput> processTemplates(String modelPrefix, Map<String, Object> apiModel, List<TemplateInput> templateInputs);
+    List<TemplateOutput> processTemplateNames(Map<String, Object> model, TemplateInput templateInput);
+
+    List<TemplateOutput> processTemplateNames(Map<String, Object> apiModel, List<TemplateInput> templateInputs);
 }

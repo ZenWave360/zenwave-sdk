@@ -16,6 +16,7 @@ import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.utils.JSONPath;
 
 import static io.zenwave360.sdk.utils.NamingUtils.asJavaTypeName;
+import static io.zenwave360.sdk.zdl.utils.ZDLFindUtils.is;
 import static java.lang.String.format;
 import static java.lang.String.join;
 
@@ -30,7 +31,7 @@ public class BackendApplicationDefaultHelpers {
     public String logMethodCall(Map method, Options options) {
         var zdl = options.get("zdl");
         var methodName = (String) method.get("name");
-        var parameters = ZDLJavaSignatureUtils.methodParametersCallSignature(method, (Map) zdl, generator.inputDTOSuffix);
+        var parameters = ZDLJavaSignatureUtils.methodParametersCallSignature(method, (Map) zdl);
         var parameterPlaceHolders = Arrays.stream(parameters.split(", ")).map(p -> "{}").collect(Collectors.joining(" "));
         if(parameters.isEmpty()) {
             return String.format("log.debug(\"Request %s\");", methodName);
@@ -222,17 +223,17 @@ public class BackendApplicationDefaultHelpers {
 
     public String methodParameterType(Map<String, Object> method, Options options) {
         var zdl = (Map) options.get("zdl");
-        return ZDLJavaSignatureUtils.methodParameterType(method, zdl, generator.inputDTOSuffix);
+        return ZDLJavaSignatureUtils.methodParameterType(method, zdl);
     }
 
     public String methodParametersSignature(Map<String, Object> method, Options options) {
         var zdl = (Map) options.get("zdl");
-        return ZDLJavaSignatureUtils.methodParametersSignature(generator.getIdJavaType(), method, zdl, generator.inputDTOSuffix);
+        return ZDLJavaSignatureUtils.methodParametersSignature(generator.getIdJavaType(), method, zdl);
     }
 
     public String methodParametersCallSignature(Map<String, Object> method, Options options) {
         var zdl = (Map) options.get("zdl");
-        return ZDLJavaSignatureUtils.methodParametersCallSignature(method, zdl, generator.inputDTOSuffix);
+        return ZDLJavaSignatureUtils.methodParametersCallSignature(method, zdl);
     }
 
     public boolean includeEmitEventsImplementation(Map service, Options options) {
@@ -270,7 +271,7 @@ public class BackendApplicationDefaultHelpers {
             for (Map<String, Object> event : methodEvents) {
                 var isAsyncApi = JSONPath.get(event, "options.asyncapi") != null;
                 if (entity == null) {
-                    var key = JSONPath.get(event, "name") + "-method-" + ZDLJavaSignatureUtils.methodParametersCallSignature(method, zdl, generator.inputDTOSuffix);
+                    var key = JSONPath.get(event, "name") + "-method-" + ZDLJavaSignatureUtils.methodParametersCallSignature(method, zdl);
                     result.put(key, Map.of("event", event, "method", method, "isAsyncApi", isAsyncApi));
                 } else {
                     var key = JSONPath.get(event, "name") + "-" + entity.get("name");
@@ -309,7 +310,7 @@ public class BackendApplicationDefaultHelpers {
 
     public String mapperInputSignature(String inputType, Options options) {
         var zdl = (Map) options.get("zdl");
-        return ZDLJavaSignatureUtils.mapperInputSignature(inputType, zdl, generator.inputDTOSuffix);
+        return ZDLJavaSignatureUtils.mapperInputSignature(inputType, zdl);
     }
 
     public String mapperInputCallSignature(String inputType, Options options) {
@@ -319,7 +320,7 @@ public class BackendApplicationDefaultHelpers {
 
     public String inputFieldInitializer(String inputType, Options options) {
         var zdl = (Map) options.get("zdl");
-        return ZDLJavaSignatureUtils.inputFieldInitializer(inputType, zdl, generator.inputDTOSuffix);
+        return ZDLJavaSignatureUtils.inputFieldInitializer(inputType, zdl);
     }
 
     public Map<String, Object> methodEntity(Map<String, Object> method, Options options) {
@@ -388,11 +389,6 @@ public class BackendApplicationDefaultHelpers {
             return findEntity(JSONPath.get(entity, "$.aggregateRoot"), options);
         }
         return null;
-    }
-
-    public String inputDTOSuffix(Object entity, Options options) {
-        var isInput = JSONPath.get(entity, "options.input.value", false);
-        return isInput? "" : generator.inputDTOSuffix;
     }
 
     public String populateField(Map field, Options options) {
@@ -474,12 +470,12 @@ public class BackendApplicationDefaultHelpers {
 
     public Object skipEntityRepository(Map entity, Options options) {
         var zdl = options.get("zdl");
-        return generator.skipEntityRepository.apply(Map.of("zdl", zdl, "entity", entity));
+        return is(Map.of("zdl", zdl, "entity", entity), "persistence");
     };
 
     public Object skipEntityId(Map entity, Options options) {
         var zdl = options.get("zdl");
-        return generator.skipEntityId.apply(Map.of("zdl", zdl, "entity", entity));
+        return is(Map.of("zdl", zdl, "entity", entity), "vo", "input");
     };
 
     public Object addExtends(Object entity, Options options) {

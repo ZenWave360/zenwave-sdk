@@ -1,25 +1,26 @@
 package io.zenwave360.sdk;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.zenwave360.sdk.formatters.Formatter;
+import io.zenwave360.sdk.generators.Generator;
+import io.zenwave360.sdk.parsers.Parser;
+import io.zenwave360.sdk.plugins.ConfigurationProvider;
+import io.zenwave360.sdk.processors.Processor;
+import io.zenwave360.sdk.templating.TemplateOutput;
+import io.zenwave360.sdk.utils.CommaSeparatedCollectionDeserializationHandler;
+import io.zenwave360.sdk.utils.ObjectInstantiatorDeserializationHandler;
+import io.zenwave360.sdk.writers.TemplateWriter;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.databind.*;
-import io.zenwave360.sdk.plugins.ConfigurationProvider;
-import io.zenwave360.sdk.utils.CommaSeparatedCollectionDeserializationHandler;
-import io.zenwave360.sdk.utils.Maps;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.zenwave360.sdk.formatters.Formatter;
-import io.zenwave360.sdk.generators.Generator;
-import io.zenwave360.sdk.parsers.Parser;
-import io.zenwave360.sdk.processors.Processor;
-import io.zenwave360.sdk.templating.TemplateOutput;
-import io.zenwave360.sdk.writers.TemplateWriter;
 
 public class MainGenerator {
 
@@ -66,11 +67,6 @@ public class MainGenerator {
         Object processorSimpleClassOptions = options.get(plugin.getClass().getSimpleName());
         Object chainIndexOptions = options.get(String.valueOf(chainIndex));
         var layout = configuration.getProcessedLayout();
-        Object layoutOptions = layout != null ? Map.of("layout", layout) : null;
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.addHandler(new CommaSeparatedCollectionDeserializationHandler());
 
         mapper.updateValue(plugin, options);
         if (processorSimpleClassOptions != null) {
@@ -82,8 +78,8 @@ public class MainGenerator {
         if (chainIndexOptions != null) {
             mapper.updateValue(plugin, chainIndexOptions);
         }
-        if (layoutOptions != null) {
-            mapper.updateValue(plugin, layoutOptions);
+        if (layout != null && FieldUtils.getField(plugin.getClass(), "layout") != null) {
+            FieldUtils.writeField(plugin, "layout", layout);
         }
 
         try {
@@ -91,6 +87,13 @@ public class MainGenerator {
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             // ignore
         }
+    }
+
+    private static final ObjectMapper mapper = new ObjectMapper();
+    static {
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.addHandler(new ObjectInstantiatorDeserializationHandler());
+        mapper.addHandler(new CommaSeparatedCollectionDeserializationHandler());
     }
 
 }

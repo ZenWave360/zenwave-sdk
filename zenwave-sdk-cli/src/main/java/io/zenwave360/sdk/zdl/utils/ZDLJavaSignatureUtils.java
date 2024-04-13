@@ -21,14 +21,12 @@ public class ZDLJavaSignatureUtils {
         return (String) field.get("type");
     }
 
-    public static String methodParameterType(Map method, Map zdl, String inputDTOSuffix) {
+    public static String methodParameterType(Map method, Map zdl) {
         var isPatch = JSONPath.get(method, "options.patch") != null;
         if(isPatch) {
             return "Map";
         }
-        var parameterName = (String) method.get("parameter");
-        var isEntity = JSONPath.get(zdl, "$.entities." + parameterName) != null;
-        return String.format("%s%s", parameterName, isEntity? inputDTOSuffix : "");
+        return (String) method.get("parameter");
     }
 
     public static String fieldsParamsSignature(List<Map> fields) {
@@ -62,7 +60,7 @@ public class ZDLJavaSignatureUtils {
     }
 
 
-    public static String methodParametersSignature(String idJavaType, Map method, Map zdl, String inputDTOSuffix) {
+    public static String methodParametersSignature(String idJavaType, Map method, Map zdl) {
         var params = new ArrayList<String>();
         if(JSONPath.get(method, "paramId") != null) {
             var hasNaturalId = JSONPath.get(method, "naturalId", false);
@@ -74,7 +72,7 @@ public class ZDLJavaSignatureUtils {
             }
         }
         if(JSONPath.get(method, "parameter") != null) {
-            params.addAll(methodInputSignature(method, zdl, inputDTOSuffix));
+            params.addAll(methodInputSignature(method, zdl));
         }
         if(JSONPath.get(method, "options.paginated") != null) {
             params.add("Pageable pageable");
@@ -82,36 +80,36 @@ public class ZDLJavaSignatureUtils {
         return StringUtils.join(params, ", ");
     }
 
-    public static String methodParametersCallSignature(Map method, Map zdl, String inputDTOSuffix) {
-        return Arrays.stream(methodParametersSignature("not-used", method, zdl, inputDTOSuffix).split(", "))
+    public static String methodParametersCallSignature(Map method, Map zdl) {
+        return Arrays.stream(methodParametersSignature("not-used", method, zdl).split(", "))
                 .map(p -> p.contains(" ")? p.split(" ")[1] : "")
                 .collect(Collectors.joining(", "));
     }
 
-    private static List<String> methodInputSignature(Map method, Map zdl, String inputDTOSuffix) {
-        return inputSignature((String) method.get("parameter"), method, zdl, inputDTOSuffix);
+    private static List<String> methodInputSignature(Map method, Map zdl) {
+        return inputSignature((String) method.get("parameter"), method, zdl);
     }
 
-    public static String mapperInputSignature(String inputType, Map zdl, String inputDTOSuffix) {
+    public static String mapperInputSignature(String inputType, Map zdl) {
         if("Map".equals(inputType) || "java.util.Map".equals(inputType)) {
             return "java.util.Map input";
         }
-        return StringUtils.join(inputSignature(inputType, null, zdl, inputDTOSuffix), ", ");
+        return StringUtils.join(inputSignature(inputType, null, zdl), ", ");
     }
 
     public static String mapperInputCallSignature(String inputType, Map zdl) {
-        return inputSignature(inputType, null, zdl, "notused").stream()
+        return inputSignature(inputType, null, zdl).stream()
                 .map(p -> p.split(" ")[1])
                 .collect(Collectors.joining(", "));
     }
 
-    public static String inputFieldInitializer(String inputType, Map zdl, String inputDTOSuffix) {
-        return inputSignature(inputType, null, zdl, inputDTOSuffix).stream()
+    public static String inputFieldInitializer(String inputType, Map zdl) {
+        return inputSignature(inputType, null, zdl).stream()
                 .map(p -> p + " = null;\n")
                 .collect(Collectors.joining());
     }
 
-    public static List<String> inputSignature(String inputType, Map method, Map zdl, String inputDTOSuffix) {
+    public static List<String> inputSignature(String inputType, Map method, Map zdl) {
         var params = new ArrayList<String>();
         if(inputType != null) {
             var isInline = JSONPath.get(zdl, "$.inputs." + inputType + ".options.inline", false);
@@ -121,14 +119,14 @@ public class ZDLJavaSignatureUtils {
                     params.add(String.format("%s %s", field.getValue().get("type"), field.getKey()));
                 }
             } else {
-                var methodParameterType = method != null? methodParameterType(method, zdl, inputDTOSuffix) : inputType;
+                var methodParameterType = method != null? methodParameterType(method, zdl) : inputType;
                 params.add(methodParameterType + " input");
             }
         }
         return params;
     }
 
-    public static List<String> methodInputCall(Map method, Map zdl, String inputDTOSuffix) {
+    public static List<String> methodInputCall(Map method, Map zdl) {
         var params = new ArrayList<String>();
         if(JSONPath.get(method, "parameter") != null) {
             var parameterType = (String) method.get("parameter");
@@ -139,7 +137,7 @@ public class ZDLJavaSignatureUtils {
                     params.add(field.getKey());
                 }
             } else {
-                var methodParameterType = methodParameterType(method, zdl, inputDTOSuffix);
+                var methodParameterType = methodParameterType(method, zdl);
                 params.add(methodParameterType + " input");
             }
         }

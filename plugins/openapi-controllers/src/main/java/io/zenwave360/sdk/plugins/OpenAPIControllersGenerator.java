@@ -5,11 +5,13 @@ import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.zenwave360.sdk.options.ProgrammingStyle;
+import io.zenwave360.sdk.utils.Lists;
 import io.zenwave360.sdk.utils.NamingUtils;
+import io.zenwave360.sdk.zdl.ProjectTemplates;
+import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 import io.zenwave360.sdk.zdl.utils.ZDLHttpUtils;
 import io.zenwave360.sdk.zdl.utils.ZDLJavaSignatureUtils;
@@ -19,7 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractOpenAPIGenerator;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
-import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateEngine;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
@@ -30,9 +31,6 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
     public String apiProperty = "api";
     public String zdlProperty = "zdl";
-
-    @DocumentedOption(description = "Should use same value configured in BackendApplicationDefaultPlugin. Whether to use an input DTO for entities used as command parameter.")
-    public String inputDTOSuffix = "";
 
     @DocumentedOption(description = "Programming Style")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
@@ -46,23 +44,28 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
     protected String templatesFolder = "io/zenwave360/sdk/plugins/OpenAPIControllersGenerator/";
 
-    List<Object[]> templates = List.of(
-            new Object[] {"src/main/java", "web/mappers/BaseMapper.java", "/{{asPackageFolder layout.adaptersWebMappersCommonPackage}}/BaseMapper.java", JAVA},
-            new Object[] {"src/main/java", "web/mappers/ServiceDTOsMapper.java", "/{{asPackageFolder layout.adaptersWebMappersPackage}}/{{serviceName}}DTOsMapper.java", JAVA},
-            new Object[] {"src/main/java", "web/{{webFlavor}}/ServiceApiController.java", "/{{asPackageFolder layout.adaptersWebPackage}}/{{serviceName}}ApiController.java", JAVA},
-            new Object[] {"src/test/java", "web/{{webFlavor}}/ServiceApiControllerTest.java", "/{{asPackageFolder layout.adaptersWebPackage}}/{{serviceName}}ApiControllerTest.java", JAVA});
+    public ProjectTemplates templates = new ProjectTemplates();
+    {
+        templates.setTemplatesFolder(templatesFolder);
+        var layoutNames = new ProjectLayout(); // layoutNames
+        templates.addTemplate(templates.singleTemplates, "src/main/java", "web/mappers/BaseMapper.java",
+                layoutNames.adaptersWebMappersCommonPackage, "/BaseMapper.java", JAVA, null, true);
+        templates.addTemplate(templates.serviceTemplates, "src/main/java", "web/mappers/ServiceDTOsMapper.java",
+                layoutNames.adaptersWebMappersPackage, "{{serviceName}}DTOsMapper.java", JAVA, null, true);
+        templates.addTemplate(templates.serviceTemplates, "src/main/java", "web/{{webFlavor}}/ServiceApiController.java",
+                layoutNames.adaptersWebPackage, "{{serviceName}}ApiController.java", JAVA, null, false);
+        templates.addTemplate(templates.serviceTemplates, "src/test/java", "web/{{webFlavor}}/ServiceApiControllerTest.java",
+                layoutNames.adaptersWebPackage, "{{serviceName}}ApiControllerTest.java", JAVA, null, true);
+    }
+
+    @Override
+    public void onPropertiesSet() {
+        super.onPropertiesSet();
+        templates.setLayout(layout);
+    }
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;
-    }
-
-    protected TemplateInput asTemplateInput(Object[] templateNames) {
-        Function<Map<String, Object>, Boolean> skip = templateNames.length > 4 ? (Function) templateNames[4] : null;
-        return new TemplateInput()
-                .withTemplateLocation(templatesFolder + templateNames[0] + "/" + templateNames[1])
-                .withTargetFile(templateNames[0].toString() + templateNames[2])
-                .withMimeType((OutputFormatType) templateNames[3])
-                .withSkip(skip);
     }
 
     protected Map<String, Object> getZDLModel(Map<String, Object> contextModel) {
@@ -171,8 +174,9 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                     "mapperResponseDtoEntity", mapperResponseDtoEntity,
                     "entitiesServices", entitiesServices);
 
-            for (Object[] template : templates) {
-                templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(template), serviceModel));
+            var templates = Lists.concat(this.templates.singleTemplates, this.templates.serviceTemplates);
+            for (var template : templates) {
+                templateOutputList.addAll(generateTemplateOutput(contextModel, template, serviceModel));
             }
         }
 
@@ -244,7 +248,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         var parameterType = JSONPath.get(serviceMethod, "parameter");
         var isInline = JSONPath.get(zdl, "$.inputs." + parameterType + ".options.inline", false);
         if(isInline) {
-            var paramSignature = ZDLJavaSignatureUtils.inputSignature((String) parameterType, (Map) serviceMethod, zdl, inputDTOSuffix);
+            var paramSignature = ZDLJavaSignatureUtils.inputSignature((String) parameterType, (Map) serviceMethod, zdl);
             var  methodParametersCallSignature = paramSignature.get(paramSignature.size() - 1).split(" ")[1];
             var params = methodParametersCallSignature.split(", ");
             var reqBody = "";
@@ -303,7 +307,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
             return format("%s(%s)", operationId, "input");
         }
         var methodName = JSONPath.get(serviceMethod, "name");
-        var methodParametersCallSignature = ZDLJavaSignatureUtils.methodParametersCallSignature((Map) serviceMethod, zdl, inputDTOSuffix);
+        var methodParametersCallSignature = ZDLJavaSignatureUtils.methodParametersCallSignature((Map) serviceMethod, zdl);
         var paramId = serviceMethod.get("paramId") != null? ObjectUtils.firstNonNull(ZDLHttpUtils.getFirstPathParamsFromMethod((Map) serviceMethod), "id") : null;
 
         if(operation.get("x--request-schema") != null) {

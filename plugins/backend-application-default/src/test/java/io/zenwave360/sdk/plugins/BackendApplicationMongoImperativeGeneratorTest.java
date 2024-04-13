@@ -33,13 +33,14 @@ public class BackendApplicationMongoImperativeGeneratorTest {
     @Test
     public void test_generator_mongodb_customer_address_multimodule() throws Exception {
         String targetFolder = "target/zdl/test_generator_mongodb_customer_address_multimodule";
-        Plugin plugin = new BackendApplicationMultiModulePlugin()
+        Plugin plugin = new BackendApplicationDefaultPlugin()
                 .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.mongodb)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("mavenModulesPrefix", "customer-address")
+                .withOption("includeEmitEventsImplementation", false)
                 .withOption("forceOverwrite", true)
                 .withOption("haltOnFailFormatting", false);
 

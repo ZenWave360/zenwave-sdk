@@ -1,32 +1,25 @@
 package io.zenwave360.sdk.plugins;
 
-import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
-
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
-import io.zenwave360.sdk.generators.AbstractZDLProjectGenerator;
+import io.zenwave360.sdk.generators.ZDLProjectGenerator;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.options.DatabaseType;
 import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.options.ProgrammingStyle;
 import io.zenwave360.sdk.utils.JSONPath;
-import io.zenwave360.sdk.zdl.layouts.CleanArchitectureProjectLayout;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Generates a backend application following configured project layout.
  */
-public class BackendApplicationDefaultGenerator extends AbstractZDLProjectGenerator {
-
-    public ProjectLayout layout;
-
-//    @DocumentedOption(description = "Entities to generate code for")
-    public List<String> entities = new ArrayList<>();
+public class BackendApplicationDefaultGenerator extends ZDLProjectGenerator {
 
     @DocumentedOption(description = "Persistence")
     public PersistenceType persistence = PersistenceType.mongodb;
@@ -49,123 +42,29 @@ public class BackendApplicationDefaultGenerator extends AbstractZDLProjectGenera
     @DocumentedOption(description = "Specifies the Java data type for the ID fields of entities. Defaults to Long for JPA and String for MongoDB if not explicitly set.")
     public String idJavaType;
 
-
-//    @DocumentedOption(description = "If not empty, it will generate (and use) an `input` DTO for each entity used as command parameter")
-    public String inputDTOSuffix = "";
+    public String mavenModulesPrefix;
 
     {
         getTemplateEngine().getHandlebars().registerHelpers(new BackendApplicationDefaultHelpers(this));
         getTemplateEngine().getHandlebars().registerHelpers(new BackendApplicationDefaultJpaHelpers(this));
     }
 
-    protected boolean is(Map<String, Object> model, String... annotations) {
-        String annotationsFilter = Arrays.stream(annotations).map(a -> "@." + a).collect(Collectors.joining(" || "));
-        return !(JSONPath.get(model, "$.entity.options[?(" + annotationsFilter + ")]", List.of())).isEmpty();
-    }
-
-    protected Function<Map<String, Object>, Boolean> skipEntityRepository = (model) -> is(model, "persistence") // if polyglot persistence -> skip
-            || !(is(model, "aggregate") || ZDLFindUtils.isAggregateRoot(JSONPath.get(model, "zdl"), JSONPath.get(model, "$.entity.name")));
-    protected Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo", "input", "abstract");
-    protected Function<Map<String, Object>, Boolean> skipEntity = (model) -> is(model, "vo", "input");
-    protected Function<Map<String, Object>, Boolean> skipEntityInput = (model) -> inputDTOSuffix == null || inputDTOSuffix.isEmpty();
-
-    protected Function<Map<String, Object>, Boolean> skipEvents = (model) -> !includeEmitEventsImplementation;
-    protected Function<Map<String, Object>, Boolean> skipEventsBus = (model) -> ((Collection) model.get("events")).isEmpty();
-    protected Function<Map<String, Object>, Boolean> skipInput = (model) -> is(model, "inline");
-
     @Override
-    protected ProjectTemplates configureProjectTemplates() {
-        var ts = new ProjectTemplates("io/zenwave360/sdk/plugins/BackendApplicationDefaultGenerator");
-
-        var layout = new ProjectLayout(); // layoutNames
-
-        ts.addTemplate(ts.aggregateTemplates, "src/main/java", "core/domain/common/Aggregate.java",
-                layout.entitiesPackage, "{{aggregate.name}}.java", JAVA, null, true);
-        ts.addTemplate(ts.domainEventsTemplates, "src/main/java", "core/domain/common/DomainEvent.java",
-                layout.domainEventsPackage, "{{event.name}}.java", JAVA, null, true);
-
-        ts.addTemplate(ts.entityTemplates, "src/main/java", "core/domain/{{persistence}}/Entity.java",
-                layout.entitiesPackage, "{{entity.name}}.java", JAVA, skipEntity, false);
-        ts.addTemplate(ts.entityTemplates, "src/main/java", "core/outbound/{{persistence}}/{{style}}/EntityRepository.java",
-                layout.outboundRepositoryPackage, "{{entity.className}}Repository.java", JAVA, skipEntityRepository, true);
-        ts.addTemplate(ts.entityTemplates, "src/main/java", "core/inbound/dtos/EntityInput.java",
-                layout.inboundDtosPackage, "{{entity.className}}{{inputDTOSuffix entity}}.java", JAVA, skipEntityInput, false);
-        ts.addTemplate(ts.entityTemplates, "src/test/java", "infrastructure/{{persistence}}/{{style}}/BaseRepositoryIntegrationTest.java",
-                layout.infrastructureRepositoryCommonPackage, "BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
-        ts.addTemplate(ts.entityTemplates, "src/test/java", "infrastructure/{{persistence}}/{{style}}/EntityRepositoryIntegrationTest.java",
-                layout.infrastructureRepositoryPackage, "{{entity.className}}RepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
-        ts.addTemplate(ts.entityTemplates, "src/test/java", "infrastructure/{{persistence}}/{{style}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java",
-                layout.infrastructureRepositoryPackage, "inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true);
-        ts.addTemplate(ts.entityTemplates, "src/test/java", "infrastructure/{{persistence}}/{{style}}/inmemory/EntityRepositoryInMemory.java",
-                layout.infrastructureRepositoryPackage, "inmemory/{{entity.className}}RepositoryInMemory.java", JAVA, skipEntityRepository, true);
-        ts.addTemplate(ts.entityTemplates, "src/test/java", "infrastructure/{{persistence}}/{{style}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java",
-                layout.infrastructureRepositoryPackage, "inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true);
-
-        ts.addTemplate(ts.enumTemplates, "src/main/java", "core/domain/common/DomainEnum.java",
-                layout.entitiesPackage, "{{enum.name}}.java", JAVA, null, false);
-        ts.addTemplate(ts.inputEnumTemplates, "src/main/java", "core/domain/common/InputEnum.java",
-                layout.inboundDtosPackage, "{{enum.name}}.java", JAVA, null, false);
-        ts.addTemplate(ts.eventEnumTemplates, "src/main/java", "core/domain/common/EventEnum.java",
-                layout.domainEventsPackage, "{{enum.name}}.java", JAVA, skipInput, false);
-
-        ts.addTemplate(ts.inputTemplates, "src/main/java", "core/inbound/dtos/InputOrOutput.java",
-                layout.inboundDtosPackage, "{{entity.className}}.java", JAVA, skipInput, false);
-        ts.addTemplate(ts.outputTemplates, "src/main/java", "core/inbound/dtos/InputOrOutput.java",
-                layout.inboundDtosPackage, "{{entity.className}}.java", JAVA, null, false);
-
-        ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/inbound/Service.java",
-                layout.inboundPackage, "{{service.name}}.java", JAVA, null, false);
-        ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/implementation/{{style}}/ServiceImpl.java",
-                layout.coreImplementationPackage, "{{service.name}}Impl.java", JAVA, null, true);
-        ts.addTemplate(ts.singleTemplates, "src/main/java", "core/implementation/mappers/BaseMapper.java",
-                layout.coreImplementationMappersCommonPackage, "BaseMapper.java", JAVA, null, true);
-        ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/implementation/mappers/ServiceMapper.java",
-                layout.coreImplementationMappersPackage, "{{service.name}}Mapper.java", JAVA, null, true);
-        ts.addTemplate(ts.serviceTemplates, "src/test/java", "core/implementation/{{persistence}}/{{style}}/ServiceTest.java",
-                layout.coreImplementationPackage, "{{service.name}}Test.java", JAVA, null, true);
-
-        ts.addTemplate(ts.allServicesTemplates, "src/main/java", "core/implementation/mappers/EventsMapper.java",
-                layout.coreImplementationMappersPackage, "EventsMapper.java", JAVA, skipEvents, true);
-        ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/RepositoriesInMemoryConfig.java",
-                layout.moduleConfigPackage, "RepositoriesInMemoryConfig.java", JAVA, null, true);
-        ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/ServicesInMemoryConfig.java",
-                layout.moduleConfigPackage, "ServicesInMemoryConfig.java", JAVA, null, true);
-
-        ts.addTemplate(ts.allEventsTemplates, "src/main/java", "core/outbound/events/EventPublisher.java",
-                layout.outboundEventsPackage, "EventPublisher.java", JAVA, skipEventsBus, false);
-        ts.addTemplate(ts.allEventsTemplates, "src/main/java", "infrastructure/events/DefaultEventPublisher.java",
-                layout.infrastructureEventsPackage, "DefaultEventPublisher.java", JAVA, skipEventsBus, false);
-        ts.addTemplate(ts.allEventsTemplates, "src/test/java", "infrastructure/events/InMemoryEventPublisher.java",
-                layout.infrastructureEventsPackage, "InMemoryEventPublisher.java", JAVA, skipEventsBus, false);
-
-        ts.addTemplate(ts.singleTemplates, "src/test/java", "config/TestDataLoader-{{persistence}}.java",
-                layout.moduleConfigPackage, "TestDataLoader.java", JAVA, null, true);
-        ts.addTemplate(ts.singleTemplates, "src/test/java", "config/DockerComposeInitializer-{{persistence}}.java",
-                layout.configPackage, "DockerComposeInitializer.java", JAVA, null, true);
-
-        ts.addTemplate(ts.singleTemplates, "src/main/java", "core/inbound/dtos/package-info.java",
-                layout.inboundDtosPackage, "package-info.java", JAVA, null, true);
-        ts.addTemplate(ts.singleTemplates, "src/main/java", "infrastructure/package-info.java",
-                layout.infrastructurePackage, "package-info.java", JAVA, null, true);
-
-        if(this.layout instanceof CleanArchitectureProjectLayout) {
-            ts.addTemplate(ts.singleTemplates, "src/test/java", "ArchitectureTest.java",
-                    layout.moduleBasePackage, "ArchitectureTest.java", JAVA, null, true);
+    public void onPropertiesSet() {
+        if (templates == null) {
+            if (StringUtils.isNotBlank(mavenModulesPrefix)) {
+                templates =new BackendApplicationMultiModuleProjectTemplates();
+            } else {
+                templates = new BackendApplicationProjectTemplates();
+            }
         }
-
-        return ts;
-    }
-    protected boolean isGenerateEntity(Map entity) {
-        boolean skip = JSONPath.get(entity, "options.skip", false);
-        String entityName = (String) entity.get("name");
-        return !skip && (entities.isEmpty() || entities.contains(entityName));
+        super.onPropertiesSet();
     }
 
     @Override
     public Map<String, Object> asConfigurationMap() {
         var config = super.asConfigurationMap();
         config.put("idJavaType", getIdJavaType());
-//        config.put("webFlavor", style == ProgrammingStyle.imperative ? WebFlavorType.mvc : WebFlavorType.webflux);
         return config;
     }
 

@@ -76,7 +76,6 @@ public class Help {
             });
         }
 
-        System.out.println("Hidden options: " + hiddenOptions);
         sortFields(fields, pluginDocumentation.mainOptions());
         for (Field field : fields) {
             DocumentedOption documentedOption = field.getAnnotation(DocumentedOption.class);

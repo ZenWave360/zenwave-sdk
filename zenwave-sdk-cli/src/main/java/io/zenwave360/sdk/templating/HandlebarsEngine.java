@@ -1,6 +1,8 @@
 package io.zenwave360.sdk.templating;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,11 +14,14 @@ import com.github.jknack.handlebars.context.FieldValueResolver;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
 import com.github.jknack.handlebars.helper.StringHelpers;
+import com.github.jknack.handlebars.io.*;
+import org.apache.commons.io.FileUtils;
 
 public class HandlebarsEngine implements TemplateEngine {
 
     Context context;
-    Handlebars handlebars = new Handlebars();
+    Handlebars handlebars = new Handlebars()
+            .with(new CompositeTemplateLoader(new FolderTemplateLoader(), new ClassPathTemplateLoader()));
 
     public HandlebarsEngine() {
         context = Context
@@ -51,20 +56,10 @@ public class HandlebarsEngine implements TemplateEngine {
     }
 
     @Override
-    public List<TemplateOutput> processTemplates(Map<String, Object> model, List<TemplateInput> templateInputs) {
-        return this.processTemplates(null, model, templateInputs);
-    }
-
-    @Override
-    public List<TemplateOutput> processTemplates(String modelPrefix, Map<String, Object> apiModel, List<TemplateInput> templateInputs) {
-        var currentModel = new HashMap((Map)context.model());
-        ((Map) context.model()).putAll(apiModel);
-//        Context context = Context.newBuilder(this.context).build();
-//        if (modelPrefix != null) {
-//            context.combine(modelPrefix, apiModel);
-//        } else {
-//            context.combine(apiModel);
-//        }
+    public List<TemplateOutput> processTemplates(Map<String, Object> apiModel, List<TemplateInput> templateInputs) {
+        var currentModel = new HashMap((Map) context.model());
+        var contextModel = (Map) context.model();
+        contextModel.putAll(apiModel);
         List<TemplateOutput> templateOutputList = new ArrayList<>();
         templateInputs.forEach(templateInput -> {
             if (templateInput.getSkip() == null || !Boolean.TRUE.equals(templateInput.getSkip().apply(apiModel))) {
@@ -78,8 +73,46 @@ public class HandlebarsEngine implements TemplateEngine {
                 }
             }
         });
-        ((Map<?, ?>) context.model()).clear();
-        ((Map) context.model()).putAll(currentModel);
+        contextModel.clear();
+        contextModel.putAll(currentModel);
         return templateOutputList;
+    }
+
+    @Override
+    public List<TemplateOutput> processTemplateNames(Map<String, Object> model, TemplateInput templateInput) {
+        return this.processTemplateNames(model, List.of(templateInput));
+    }
+
+    @Override
+    public List<TemplateOutput> processTemplateNames(Map<String, Object> apiModel, List<TemplateInput> templateInputs) {
+        var currentModel = new HashMap((Map) context.model());
+        var contextModel = (Map) context.model();
+        contextModel.putAll(apiModel);
+        List<TemplateOutput> templateOutputList = new ArrayList<>();
+        templateInputs.forEach(templateInput -> {
+            if (templateInput.getSkip() == null || !Boolean.TRUE.equals(templateInput.getSkip().apply(apiModel))) {
+                try {
+                    String targetFile = handlebars.compileInline(templateInput.getTargetFile()).apply(context);
+                    String templateLocation = handlebars.compileInline(templateInput.getTemplateLocation()).apply(context);
+                    //                    String content = handlebars.compile(templateLocation).apply(context);
+                    templateOutputList.add(new TemplateOutput(templateInput, targetFile, apiModel, templateInput.getMimeType(), templateInput.isSkipOverwrite()));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        contextModel.clear();
+        contextModel.putAll(currentModel);
+        return templateOutputList;
+    }
+
+    private static class FolderTemplateLoader extends URLTemplateLoader {
+        private File root = new File("./.zenwave/templates");
+
+        @Override
+        protected URL getResource(final String location) throws IOException {
+            File file = new File(root, location);
+            return file.exists() ? file.toURI().toURL() : null;
+        }
     }
 }
