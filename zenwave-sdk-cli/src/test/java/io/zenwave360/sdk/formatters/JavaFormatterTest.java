@@ -3,6 +3,7 @@ package io.zenwave360.sdk.formatters;
 import com.google.googlejavaformat.java.FormatterException;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateOutput;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import org.eclipse.jface.text.BadLocationException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,10 @@ public class JavaFormatterTest {
                 }
                 """;
 
-        String formattedContent = formatter.format(List.of(new TemplateOutput("test.java", source, OutputFormatType.JAVA.toString(), false))).get(0).getContent();
+        GeneratedProjectFiles generatedProjectFiles = new GeneratedProjectFiles();
+        generatedProjectFiles.singleFiles.add(new TemplateOutput("test.java", source, OutputFormatType.JAVA.toString(), false));
+        formatter.format(generatedProjectFiles);
+        String formattedContent = generatedProjectFiles.getAllTemplateOutputs().get(0).getContent();
 //        System.out.println(formattedContent);
     }
 
@@ -63,7 +67,10 @@ public class JavaFormatterTest {
                 }
                 """;
 
-        String formattedContent = formatter.format(List.of(new TemplateOutput("test.java", source, OutputFormatType.JAVA.toString(), false))).get(0).getContent();
+        GeneratedProjectFiles generatedProjectFiles = new GeneratedProjectFiles();
+        generatedProjectFiles.singleFiles.add(new TemplateOutput("test.java", source, OutputFormatType.JAVA.toString(), false));
+        formatter.format(generatedProjectFiles);
+        String formattedContent = generatedProjectFiles.getAllTemplateOutputs().get(0).getContent();
 //        System.out.println(formattedContent);
 
         // This code is raw palantir formatter usage

@@ -1,11 +1,11 @@
 package io.zenwave360.sdk.formatters;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 
 import com.palantir.javaformat.java.FormatterException;
 import com.palantir.javaformat.java.JavaFormatterOptions;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +35,9 @@ public class PalantirJavaFormatter implements Formatter {
     private final com.palantir.javaformat.java.Formatter formatter =
             com.palantir.javaformat.java.Formatter.createFormatter(JavaFormatterOptions.builder().style(JavaFormatterOptions.Style.PALANTIR).build());
 
-    public List<TemplateOutput> format(List<TemplateOutput> templateOutputList) {
-        return templateOutputList.stream().map(t -> format(t)).collect(Collectors.toList());
+    public void format(GeneratedProjectFiles generatedProjectFiles) {
+        generatedProjectFiles.getAllTemplateOutputs().stream()
+                .map(t -> format(t)).collect(Collectors.toList());
     }
 
     public TemplateOutput format(TemplateOutput templateOutput) {

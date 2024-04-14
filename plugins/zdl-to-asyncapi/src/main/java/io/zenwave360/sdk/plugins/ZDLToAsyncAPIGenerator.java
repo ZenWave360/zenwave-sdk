@@ -1,15 +1,12 @@
 package io.zenwave360.sdk.plugins;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
 import java.util.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import io.zenwave360.jsonrefparser.parser.Parser;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractZDLGenerator;
 import io.zenwave360.sdk.generators.EntitiesToAvroConverter;
@@ -22,6 +19,7 @@ import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 
 import static io.zenwave360.sdk.utils.NamingUtils.asJavaTypeName;
@@ -92,8 +90,8 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
 
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
-        List<TemplateOutput> outputList = new ArrayList<>();
+    public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
+        GeneratedProjectFiles generatedProjectFiles = new GeneratedProjectFiles();
         Map<String, Object> model = getModel(contextModel);
         List<String> serviceNames = JSONPath.get(model, "$.services[*].name");
         model.put("serviceNames", serviceNames);
@@ -153,7 +151,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
             }
             if (schemaFormat == SchemaFormat.avro) {
                 EntitiesToAvroConverter toAvroConverter = new EntitiesToAvroConverter().withIdType(idType).withNamespace(avroPackage);
-                outputList.addAll(convertToAvro(toAvroConverter, schema, model));
+                generatedProjectFiles.singleFiles.addAll(convertToAvro(toAvroConverter, schema, model));
             }
         }
 
@@ -167,9 +165,9 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         var template = generateTemplateOutput(contextModel, zdlToAsyncAPITemplate, model, asyncAPISchemasString);
         var templateContent = YamlOverlyMerger.mergeAndOverlay(template.getContent(), asyncapiMergeFile, asyncapiOverlayFiles);
         template = new TemplateOutput(template.getTargetFile(), templateContent, template.getMimeType(), template.isSkipOverwrite());
-        outputList.add(template);
+        generatedProjectFiles.singleFiles.add(template);
 
-        return outputList;
+        return generatedProjectFiles;
     }
 
     private void addAllEventsAsMessages(LinkedHashMap<Object, Object> allMessages, Map<String, Map> events) {
@@ -370,7 +368,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         model.put("isDefaultSchemaFormat", schemaFormat == SchemaFormat.schema);
         model.put("schemaFormatString", schemaFormat == SchemaFormat.schema ? defaultSchemaFormat : avroSchemaFormat);
         model.put("schemasAsString", schemasAsString);
-        return handlebarsEngine.processTemplate(model, template).get(0);
+        return handlebarsEngine.processTemplate(model, template);
     }
 
     {

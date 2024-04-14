@@ -4,18 +4,18 @@ import java.util.List;
 import java.util.Map;
 
 import io.zenwave360.sdk.TestUtils;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import io.zenwave360.sdk.parsers.Model;
-import io.zenwave360.sdk.templating.TemplateOutput;
 
 public class AbstractOpenAPIGeneratorTest {
 
     private AbstractOpenAPIGenerator newAbstractAsyncapiGenerator() {
         return new AbstractOpenAPIGenerator() {
             @Override
-            public List<TemplateOutput> generate(Map<String, Object> apiModel) {
+            public GeneratedProjectFiles generate(Map<String, Object> apiModel) {
                 return null;
             }
         };

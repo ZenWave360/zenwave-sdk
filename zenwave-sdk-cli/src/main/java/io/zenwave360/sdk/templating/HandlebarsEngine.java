@@ -15,7 +15,6 @@ import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.io.*;
-import org.apache.commons.io.FileUtils;
 
 public class HandlebarsEngine implements TemplateEngine {
 
@@ -51,8 +50,8 @@ public class HandlebarsEngine implements TemplateEngine {
     }
 
     @Override
-    public List<TemplateOutput> processTemplate(Map<String, Object> model, TemplateInput templateInput) {
-        return this.processTemplates(model, List.of(templateInput));
+    public TemplateOutput processTemplate(Map<String, Object> model, TemplateInput templateInput) {
+        return this.processTemplates(model, List.of(templateInput)).get(0);
     }
 
     @Override

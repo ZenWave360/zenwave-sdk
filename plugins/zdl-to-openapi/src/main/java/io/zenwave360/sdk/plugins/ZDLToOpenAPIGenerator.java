@@ -1,8 +1,5 @@
 package io.zenwave360.sdk.plugins;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -10,14 +7,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import io.zenwave360.jsonrefparser.$RefParser;
-import io.zenwave360.jsonrefparser.parser.Parser;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.generators.Generator;
-import io.zenwave360.sdk.parsers.DefaultYamlParser;
 import io.zenwave360.sdk.processors.YamlOverlyMerger;
 import io.zenwave360.sdk.utils.AntStyleMatcher;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
@@ -113,7 +108,7 @@ public class ZDLToOpenAPIGenerator implements Generator {
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
+    public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
         Map<String, Object> zdlModel = getZDLModel(contextModel);
         List<String> serviceNames = JSONPath.get(zdlModel, "$.options.options.service[*].value");
         ((Map) zdlModel).put("serviceNames", serviceNames);
@@ -179,7 +174,9 @@ public class ZDLToOpenAPIGenerator implements Generator {
         var templateContent = YamlOverlyMerger.mergeAndOverlay(template.getContent(), openapiMergeFile, openapiOverlayFiles);
         template = new TemplateOutput(template.getTargetFile(), templateContent, template.getMimeType(), template.isSkipOverwrite());
 
-        return List.of(template);
+        var generatedProjectFiles = new GeneratedProjectFiles();
+        generatedProjectFiles.singleFiles.add(template);
+        return generatedProjectFiles;
     }
 
     protected List<Map> filterOperationsToInclude(List<Map> methods) {
@@ -279,6 +276,6 @@ public class ZDLToOpenAPIGenerator implements Generator {
         model.put("context", contextModel);
         model.put("zdlModel", zdlModel);
         model.put("schemasAsString", schemasAsString);
-        return handlebarsEngine.processTemplate(model, template).get(0);
+        return handlebarsEngine.processTemplate(model, template);
     }
 }

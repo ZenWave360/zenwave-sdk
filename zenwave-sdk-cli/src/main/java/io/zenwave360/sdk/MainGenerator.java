@@ -7,18 +7,16 @@ import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.parsers.Parser;
 import io.zenwave360.sdk.plugins.ConfigurationProvider;
 import io.zenwave360.sdk.processors.Processor;
-import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.CommaSeparatedCollectionDeserializationHandler;
 import io.zenwave360.sdk.utils.ObjectInstantiatorDeserializationHandler;
 import io.zenwave360.sdk.writers.TemplateWriter;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -31,7 +29,7 @@ public class MainGenerator {
         log.debug("Processed Options {}", configuration.processOptions());
         log.debug("Processors chain is {}", configuration.getChain().stream().map(c -> c.getName()).collect(Collectors.toList()));
         Map<String, Object> model = new HashMap<>();
-        List<TemplateOutput> templateOutputList = new ArrayList<>();
+        GeneratedProjectFiles generatedProjectFiles = new GeneratedProjectFiles();
 
         int chainIndex = 0;
         for (Class pluginClass : configuration.getChain()) {
@@ -50,13 +48,13 @@ public class MainGenerator {
                 model = ((Processor) plugin).process(model);
             }
             if (plugin instanceof Generator) {
-                templateOutputList.addAll(((Generator) plugin).generate(model));
+                generatedProjectFiles.addAll(((Generator) plugin).generate(model));
             }
             if (plugin instanceof Formatter) {
-                templateOutputList = ((Formatter) plugin).format(templateOutputList);
+                ((Formatter) plugin).format(generatedProjectFiles);
             }
             if (plugin instanceof TemplateWriter) {
-                ((TemplateWriter) plugin).write(templateOutputList);
+                ((TemplateWriter) plugin).write(generatedProjectFiles.getAllTemplateOutputs());
             }
         }
     }

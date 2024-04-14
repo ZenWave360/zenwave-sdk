@@ -29,7 +29,7 @@ public class OpenAPIToJDLGeneratorTest {
         OpenAPIToJDLGenerator generator = new OpenAPIToJDLGenerator();
         generator.useRelationships = true;
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         System.out.println(outputTemplates.get(0).getContent());
         Assertions.assertEquals(1, outputTemplates.size());
         Assertions.assertTrue(outputTemplates.get(0).getContent().contains("enum PetStatus"));
@@ -43,7 +43,7 @@ public class OpenAPIToJDLGeneratorTest {
         OpenAPIToJDLGenerator generator = new OpenAPIToJDLGenerator();
         generator.useRelationships = false;
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         System.out.println(outputTemplates.get(0).getContent());
         Assertions.assertEquals(1, outputTemplates.size());
         Assertions.assertTrue(outputTemplates.get(0).getContent().contains("enum PetStatus"));

@@ -54,6 +54,27 @@ public class GeneratedProjectFiles {
         return templateOutputList;
     }
 
+    public void addAll(GeneratedProjectFiles other) {
+        aggregates.putAll(other.aggregates);
+        domainEvents.putAll(other.domainEvents);
+        entities.putAll(other.entities);
+        enums.putAll(other.enums);
+        inputs.putAll(other.inputs);
+        inputEnums.putAll(other.inputEnums);
+        eventEnums.putAll(other.eventEnums);
+        outputs.putAll(other.outputs);
+        services.putAll(other.services);
+        events.putAll(other.events);
+        allEntities.addAll(other.allEntities);
+        allDomainEvents.addAll(other.allDomainEvents);
+        allEnums.addAll(other.allEnums);
+        allInputs.addAll(other.allInputs);
+        allOutputs.addAll(other.allOutputs);
+        allServices.addAll(other.allServices);
+        allExternalEvents.addAll(other.allExternalEvents);
+        singleFiles.addAll(other.singleFiles);
+    }
+
     public static class TemplateOutputListMap extends LinkedHashMap<String, List<TemplateOutput>> {
         public void addAll(String key, List<TemplateOutput> templateOutput) {
             if(!containsKey(key)) {

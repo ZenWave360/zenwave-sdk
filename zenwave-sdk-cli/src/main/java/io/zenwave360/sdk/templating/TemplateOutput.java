@@ -37,6 +37,15 @@ public class TemplateOutput {
         this.skipOverwrite = skipOverwrite;
     }
 
+    public void merge(TemplateOutput templateOutput) {
+        this.templateInput = templateOutput.getTemplateInput();
+        this.targetFile = templateOutput.getTargetFile();
+        this.content = templateOutput.getContent();
+        this.context = templateOutput.getContext();
+        this.mimeType = templateOutput.getMimeType();
+        this.skipOverwrite = templateOutput.isSkipOverwrite();
+    }
+
     public TemplateInput getTemplateInput() {
         return templateInput;
     }

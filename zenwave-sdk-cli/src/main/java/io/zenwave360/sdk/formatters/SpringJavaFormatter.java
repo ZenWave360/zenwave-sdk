@@ -6,6 +6,7 @@ import io.spring.javaformat.config.JavaFormatConfig;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateOutput;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -13,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class SpringJavaFormatter implements io.zenwave360.sdk.formatters.Formatter {
@@ -36,8 +36,9 @@ public class SpringJavaFormatter implements io.zenwave360.sdk.formatters.Formatt
 //    private final com.palantir.javaformat.java.Formatter palantirFormatter =
 //            com.palantir.javaformat.java.Formatter.createFormatter(JavaFormatterOptions.builder().style(JavaFormatterOptions.Style.PALANTIR).build());
 
-    public List<TemplateOutput> format(List<TemplateOutput> templateOutputList) {
-        return templateOutputList.stream().map(t -> format(t)).collect(Collectors.toList());
+    public void format(GeneratedProjectFiles generatedProjectFiles) {
+        generatedProjectFiles.getAllTemplateOutputs().stream()
+                .map(t -> format(t)).collect(Collectors.toList());
     }
 
     public TemplateOutput format(TemplateOutput templateOutput) {

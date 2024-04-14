@@ -14,6 +14,7 @@ import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import org.apache.commons.lang3.StringUtils;
 
 public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
@@ -60,7 +61,8 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
+    public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
+        GeneratedProjectFiles generatedProjectFiles = new GeneratedProjectFiles();
         Map<String, Object> zdlModel = (Map) contextModel.get(sourceProperty);
 
         if(outputFormat == OutputFormat.aggregate) {
@@ -73,15 +75,16 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
             }
             zdlModel.put("aggregate", aggregate);
             zdlModel.put("entity", entity);
-            return List.of(generateTemplateOutput(contextModel, modelAggregateTemplate, zdlModel));
+            generatedProjectFiles.singleFiles.add(generateTemplateOutput(contextModel, modelAggregateTemplate, zdlModel));
 
         } else {
 
             var template = outputFormat == OutputFormat.glossary ? modelGlossaryTemplate : modelTaskListTemplate;
             targetFile = outputFormat == OutputFormat.glossary ? "zdl-glossary.md" : "zdl-task-list.md";
 
-            return List.of(generateTemplateOutput(contextModel, template, zdlModel));
+            generatedProjectFiles.singleFiles.add(generateTemplateOutput(contextModel, template, zdlModel));
         }
+        return generatedProjectFiles;
     }
 
     private final Map<String, String> inverseRelationshipTypes = Map.of("OneToMany", "ManyToOne","ManyToOne", "OneToMany","ManyToMany", "ManyToMany", "OneToOne", "OneToOne");
@@ -188,6 +191,6 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
         model.putAll(this.asConfigurationMap());
         model.put("context", contextModel);
         model.put("zdlModel", zdlModel);
-        return handlebarsEngine.processTemplate(model, template).get(0);
+        return handlebarsEngine.processTemplate(model, template);
     }
 }

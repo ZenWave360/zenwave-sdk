@@ -35,7 +35,7 @@ public class ZDLToAsyncAPIGeneratorTest {
         generator.idType = "integer";
         generator.idTypeFormat = "int64";
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
 //        System.out.println(outputTemplates.get(0).getContent());
@@ -56,7 +56,7 @@ public class ZDLToAsyncAPIGeneratorTest {
         generator.idType = "integer";
         generator.idTypeFormat = "int64";
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
 //        System.out.println(outputTemplates.get(0).getContent());
@@ -76,7 +76,7 @@ public class ZDLToAsyncAPIGeneratorTest {
         generator.idType = "integer";
         generator.idTypeFormat = "int64";
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
 //        System.out.println(outputTemplates.get(0).getContent());
@@ -98,7 +98,7 @@ public class ZDLToAsyncAPIGeneratorTest {
         generator.asyncapiMergeFile = "classpath:/io/zenwave360/sdk/resources/asyncapi/asyncapi-merger.yml";
         generator.asyncapiOverlayFiles = List.of("classpath:/io/zenwave360/sdk/resources/asyncapi/asyncapi-overlay.yml");
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
         System.out.println(outputTemplates.get(0).getContent());
@@ -113,7 +113,7 @@ public class ZDLToAsyncAPIGeneratorTest {
         generator.targetFile = "target/out/customer-address.avro.yml";
         generator.schemaFormat = ZDLToAsyncAPIGenerator.SchemaFormat.avro;
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(11, outputTemplates.size());
 
         System.out.println(outputTemplates.get(0).getContent());

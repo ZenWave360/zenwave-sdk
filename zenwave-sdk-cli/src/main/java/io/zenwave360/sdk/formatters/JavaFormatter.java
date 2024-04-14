@@ -1,9 +1,7 @@
 package io.zenwave360.sdk.formatters;
 
-import java.util.List;
-
 import io.zenwave360.sdk.doc.DocumentedOption;
-import io.zenwave360.sdk.templating.TemplateOutput;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 
 public class JavaFormatter implements Formatter {
 
@@ -34,7 +32,7 @@ public class JavaFormatter implements Formatter {
     }
 
     @Override
-    public List<TemplateOutput> format(List<TemplateOutput> templateOutputList) {
-        return delegate.format(templateOutputList);
+    public void format(GeneratedProjectFiles generatedProjectFiles) {
+        delegate.format(generatedProjectFiles);
     }
 }

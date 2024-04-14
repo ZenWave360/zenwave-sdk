@@ -9,6 +9,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
@@ -55,11 +56,11 @@ public class JavaToJDLGenerator implements Generator {
     }
 
     public String generate() {
-        return generate(null).get(0).getContent();
+        return generate(null).singleFiles.get(0).getContent();
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
+    public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
         Class entityAnnotationClass = persistenceType == PersistenceType.JPA ? Entity.class : Document.class;
         Set<Class> entitySubClasses = getAnnotatedEntities(entityAnnotationClass);
 
@@ -87,7 +88,9 @@ public class JavaToJDLGenerator implements Generator {
         // ** generate **
         generateClasses(entitySubClasses, jdl);
 
-        return List.of(new TemplateOutput("", jdl.toString(), "text/jdl"));
+        var generatedProjectFiles = new GeneratedProjectFiles();
+        generatedProjectFiles.singleFiles.add(new TemplateOutput("", jdl.toString(), "text/jdl"));
+        return generatedProjectFiles;
     }
 
     protected void generateClasses(Collection<Class> entityClasses, StringBuilder jdl) {

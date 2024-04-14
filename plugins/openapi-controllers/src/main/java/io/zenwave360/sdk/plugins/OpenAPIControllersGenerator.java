@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import io.zenwave360.sdk.options.ProgrammingStyle;
 import io.zenwave360.sdk.utils.Lists;
 import io.zenwave360.sdk.utils.NamingUtils;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
@@ -49,7 +50,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         templates.setTemplatesFolder(templatesFolder);
         var layoutNames = new ProjectLayout(); // layoutNames
         templates.addTemplate(templates.singleTemplates, "src/main/java", "web/mappers/BaseMapper.java",
-                layoutNames.adaptersWebMappersCommonPackage, "/BaseMapper.java", JAVA, null, true);
+                layoutNames.adaptersWebMappersCommonPackage, "/BaseMapper.java", JAVA, null, false);
         templates.addTemplate(templates.serviceTemplates, "src/main/java", "web/mappers/ServiceDTOsMapper.java",
                 layoutNames.adaptersWebMappersPackage, "{{serviceName}}DTOsMapper.java", JAVA, null, true);
         templates.addTemplate(templates.serviceTemplates, "src/main/java", "web/{{webFlavor}}/ServiceApiController.java",
@@ -77,8 +78,8 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
-        var templateOutputList = new ArrayList<TemplateOutput>();
+    public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
+        var generatedProjectFiles = new GeneratedProjectFiles();
         var openApiModel = getOpenAPIModel(contextModel);
         var zdlModel = getZDLModel(contextModel);
 
@@ -176,11 +177,11 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
             var templates = Lists.concat(this.templates.singleTemplates, this.templates.serviceTemplates);
             for (var template : templates) {
-                templateOutputList.addAll(generateTemplateOutput(contextModel, template, serviceModel));
+                generatedProjectFiles.services.addAll(operationByServiceEntry.getKey(), generateTemplateOutput(contextModel, template, serviceModel));
             }
         }
 
-        return templateOutputList;
+        return generatedProjectFiles;
     }
 
     private static String responseEntityExpression(String responseEntityName, String responseDtoName, boolean isResponseArray, boolean isResponsePaginated, boolean isBinaryDownload) {

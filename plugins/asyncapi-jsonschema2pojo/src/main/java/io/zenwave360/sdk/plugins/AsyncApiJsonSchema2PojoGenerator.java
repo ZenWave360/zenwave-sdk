@@ -6,7 +6,6 @@ import static org.jsonschema2pojo.SourceType.YAMLSCHEMA;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,6 +13,7 @@ import java.net.URL;
 import java.util.*;
 
 import io.zenwave360.sdk.utils.AsyncAPIUtils;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +33,6 @@ import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractAsyncapiGenerator;
 import io.zenwave360.sdk.parsers.Model;
 import io.zenwave360.sdk.processors.AsyncApiProcessor;
-import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.NamingUtils;
 import io.zenwave360.jsonrefparser.$Ref;
@@ -73,7 +72,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
+    public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
         Model apiModel = getApiModel(contextModel);
 
         List<Map<String, Object>> allMessages = new ArrayList<>();
@@ -107,7 +106,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             throw new RuntimeException(e);
         }
 
-        return Collections.emptyList();
+        return new GeneratedProjectFiles();
     }
 
     public void generate(Model apiModel, List<Map<String, Object>> messages) throws IOException, URISyntaxException {

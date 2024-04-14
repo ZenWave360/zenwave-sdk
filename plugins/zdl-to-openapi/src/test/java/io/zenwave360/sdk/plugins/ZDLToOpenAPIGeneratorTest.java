@@ -31,7 +31,7 @@ public class ZDLToOpenAPIGeneratorTest {
         Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
         ZDLToOpenAPIGenerator generator = new ZDLToOpenAPIGenerator();
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
 //        System.out.println(outputTemplates.get(0).getContent());
@@ -42,7 +42,7 @@ public class ZDLToOpenAPIGeneratorTest {
         Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/documents.zdl");
         ZDLToOpenAPIGenerator generator = new ZDLToOpenAPIGenerator();
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
         FileUtils.writeStringToFile(new File("target/out/openapi-fileupload.yml"), outputTemplates.get(0).getContent(), "UTF-8");
@@ -55,7 +55,7 @@ public class ZDLToOpenAPIGeneratorTest {
         Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/documents.zdl");
         ZDLToOpenAPIGenerator generator = new ZDLToOpenAPIGenerator();
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
         FileUtils.writeStringToFile(new File("target/out/openapi-filedownload.yml"), outputTemplates.get(0).getContent(), "UTF-8");
@@ -75,7 +75,7 @@ public class ZDLToOpenAPIGeneratorTest {
         processor.operationIdsToExclude = generator.operationIdsToExclude;
         model = processor.process(model);
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
         var apiText = outputTemplates.get(0).getContent();
 
@@ -91,7 +91,7 @@ public class ZDLToOpenAPIGeneratorTest {
         Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
         ZDLToOpenAPIGenerator generator = new ZDLToOpenAPIGenerator();
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
 //        System.out.println(outputTemplates.get(0).getContent());
@@ -103,7 +103,7 @@ public class ZDLToOpenAPIGeneratorTest {
         ZDLToOpenAPIGenerator generator = new ZDLToOpenAPIGenerator();
         generator.openapiMergeFile = "classpath:io/zenwave360/sdk/resources/openapi/openapi-merger.yml";
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
 //        System.out.println(outputTemplates.get(0).getContent());
@@ -115,7 +115,7 @@ public class ZDLToOpenAPIGeneratorTest {
         ZDLToOpenAPIGenerator generator = new ZDLToOpenAPIGenerator();
         generator.openapiOverlayFiles = List.of("classpath:/io/zenwave360/sdk/resources/openapi/openapi-overlay.yml");
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
 //        System.out.println(outputTemplates.get(0).getContent());

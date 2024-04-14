@@ -154,7 +154,7 @@ public class JavaToAsyncAPIGenerator {
         generator.asyncapiMergeFile = asyncapiMergeFile;
         generator.asyncapiOverlayFiles = asyncapiOverlayFiles;
 
-        var templates = generator.generate(model);
+        var templates = generator.generate(model).getAllTemplateOutputs();
 
         if (targetFile != null) {
             new TemplateFileWriter()

@@ -7,6 +7,7 @@ import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import org.apache.commons.lang3.ObjectUtils;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
@@ -82,7 +83,7 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
     protected abstract Templates configureTemplates();
 
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
+    public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
         Templates templates = configureTemplates();
 
         Model apiModel = getApiModel(contextModel);
@@ -91,29 +92,29 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
         Map<String, Map<String, Object>> producerServicesMap = new HashMap<>();
         Map<String, Map<String, Object>> consumerServicesMap = new HashMap<>();
 
-        List<TemplateOutput> templateOutputList = new ArrayList<>();
-        templateOutputList.addAll(generateTemplateOutput(contextModel, templates.commonTemplates, Map.of()));
+        GeneratedProjectFiles generatedProjectFiles = new GeneratedProjectFiles();
+        generatedProjectFiles.singleFiles.addAll(generateTemplateOutput(contextModel, templates.commonTemplates, Map.of()));
 
         for (Map.Entry<String, List<Map<String, Object>>> operationsByTag : subscribeOperations.entrySet()) {
             AbstractAsyncapiGenerator.OperationRoleType operationRoleType = AbstractAsyncapiGenerator.OperationRoleType.valueOf(role, AsyncapiOperationType.subscribe);
-            templateOutputList.addAll(processServiceOperations(contextModel, operationsByTag, operationRoleType, templates));
+            generatedProjectFiles.singleFiles.addAll(processServiceOperations(contextModel, operationsByTag, operationRoleType, templates));
             addToServicesMap(operationRoleType.isProducer()? producerServicesMap : consumerServicesMap, operationsByTag, operationRoleType);
         }
         for (Map.Entry<String, List<Map<String, Object>>> operationsByTag : publishOperations.entrySet()) {
             AbstractAsyncapiGenerator.OperationRoleType operationRoleType = AbstractAsyncapiGenerator.OperationRoleType.valueOf(role, AsyncapiOperationType.publish);
-            templateOutputList.addAll(processServiceOperations(contextModel, operationsByTag, operationRoleType, templates));
+            generatedProjectFiles.singleFiles.addAll(processServiceOperations(contextModel, operationsByTag, operationRoleType, templates));
             addToServicesMap(operationRoleType.isProducer()? producerServicesMap : consumerServicesMap, operationsByTag, operationRoleType);
         }
 
         if (!producerServicesMap.isEmpty()) {
-            templateOutputList.addAll(generateTemplateOutput(contextModel, templates.producerTemplates, Map.of("services", producerServicesMap)));
+            generatedProjectFiles.singleFiles.addAll(generateTemplateOutput(contextModel, templates.producerTemplates, Map.of("services", producerServicesMap)));
         }
 
         if (!consumerServicesMap.isEmpty()) {
-            templateOutputList.addAll(generateTemplateOutput(contextModel, templates.consumerTemplates, Map.of("services", consumerServicesMap)));
+            generatedProjectFiles.singleFiles.addAll(generateTemplateOutput(contextModel, templates.consumerTemplates, Map.of("services", consumerServicesMap)));
         }
 
-        return templateOutputList;
+        return generatedProjectFiles;
     }
 
     public List<TemplateOutput> processServiceOperations(Map<String, Object> contextModel, Map.Entry<String, List<Map<String, Object>>> operationsByTag, AbstractAsyncapiGenerator.OperationRoleType operationRoleType, Templates templates) {

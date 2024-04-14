@@ -55,13 +55,13 @@ public class ZDLProjectGenerator extends AbstractZDLGenerator {
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
-        var templateOutputList = new ArrayList<TemplateOutput>();
+    public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
         var generatedProjectFiles = generateProjectFiles(contextModel);
         for (TemplateOutput templateOutput : generatedProjectFiles.getAllTemplateOutputs()) {
-            templateOutputList.addAll(getTemplateEngine().processTemplate(templateOutput.getContext(), templateOutput.getTemplateInput()));
+            var processedTemplateOutput = getTemplateEngine().processTemplate(templateOutput.getContext(), templateOutput.getTemplateInput());
+            templateOutput.merge(processedTemplateOutput);
         }
-        return templateOutputList;
+        return generatedProjectFiles;
     }
 
     public GeneratedProjectFiles generateProjectFiles(Map<String, Object> contextModel) {

@@ -52,7 +52,7 @@ public class AbstractAsyncapiGeneratorTest {
         AbstractAsyncapiGenerator asyncapiGenerator = newAbstractAsyncapiGenerator();
         asyncapiGenerator.role = AsyncapiRoleType.provider;
         var outputList = asyncapiGenerator.generate(Map.of(asyncapiGenerator.sourceProperty, model));
-        Assertions.assertEquals(15, outputList.size());
+        Assertions.assertEquals(15, outputList.getAllTemplateOutputs().size());
     }
 
     @Test
@@ -61,7 +61,7 @@ public class AbstractAsyncapiGeneratorTest {
         AbstractAsyncapiGenerator asyncapiGenerator = newAbstractAsyncapiGenerator();
         asyncapiGenerator.role = AsyncapiRoleType.provider;
         var outputList = asyncapiGenerator.generate(Map.of(asyncapiGenerator.sourceProperty, model));
-        Assertions.assertEquals(11, outputList.size());
+        Assertions.assertEquals(11, outputList.getAllTemplateOutputs().size());
     }
 
 

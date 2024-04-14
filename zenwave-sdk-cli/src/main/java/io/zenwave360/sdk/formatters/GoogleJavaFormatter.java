@@ -1,8 +1,8 @@
 package io.zenwave360.sdk.formatters;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,8 +28,9 @@ public class GoogleJavaFormatter implements io.zenwave360.sdk.formatters.Formatt
         this.haltOnFailFormatting = haltOnFailFormatting;
     }
 
-    public List<TemplateOutput> format(List<TemplateOutput> templateOutputList) {
-        return templateOutputList.stream().map(t -> format(t)).collect(Collectors.toList());
+    public void format(GeneratedProjectFiles generatedProjectFiles) {
+        generatedProjectFiles.getAllTemplateOutputs().stream()
+                .map(t -> format(t)).collect(Collectors.toList());
     }
 
     public TemplateOutput format(TemplateOutput templateOutput) {

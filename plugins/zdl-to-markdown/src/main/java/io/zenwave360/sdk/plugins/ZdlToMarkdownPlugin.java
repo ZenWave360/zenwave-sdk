@@ -26,7 +26,9 @@ public class ZdlToMarkdownPlugin extends Plugin {
         Map<String, Object> model = new ZDLParser().withContent(zdlContent).parse();
         model = new ZDLProcessor().process(model);
         model = new PathsProcessor().process(model);
-        var out = new ZdlToMarkdownGenerator().generate(model);
+        var out = new ZdlToMarkdownGenerator()
+                .generate(model)
+                .getAllTemplateOutputs();
         return out.get(0).getContent();
     }
 
@@ -34,7 +36,11 @@ public class ZdlToMarkdownPlugin extends Plugin {
         Map<String, Object> model = new ZDLParser().withContent(zdlContent).parse();
         model = new ZDLProcessor().process(model);
         model = new PathsProcessor().process(model);
-        var out = new ZdlToMarkdownGenerator().withOutputFormat(task_list).withSkipDiagrams(true).generate(model);
+        var out = new ZdlToMarkdownGenerator()
+                .withOutputFormat(task_list)
+                .withSkipDiagrams(true)
+                .generate(model)
+                .getAllTemplateOutputs();
         return out.get(0).getContent();
     }
 
@@ -42,7 +48,10 @@ public class ZdlToMarkdownPlugin extends Plugin {
         Map<String, Object> model = new ZDLParser().withContent(zdlContent).parse();
         model = new ZDLProcessor().process(model);
         model = new PathsProcessor().process(model);
-        var out = new ZdlToMarkdownGenerator().withOutputFormat(task_list).generate(model);
+        var out = new ZdlToMarkdownGenerator()
+                .withOutputFormat(task_list)
+                .generate(model)
+                .getAllTemplateOutputs();
         return out.get(0).getContent();
     }
 
@@ -54,7 +63,7 @@ public class ZdlToMarkdownPlugin extends Plugin {
         var out = new ZdlToMarkdownGenerator()
                 .withOutputFormat(aggregate)
                 .withAggregateName(aggregateName)
-                .generate(model);
+                .generate(model).getAllTemplateOutputs();
         return out.get(0).getContent();
     }
 

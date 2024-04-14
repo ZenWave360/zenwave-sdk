@@ -15,6 +15,7 @@ import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 
 public class SpringCloudStreams3AdaptersGenerator extends SpringCloudStreams3Generator {
 
@@ -61,7 +62,7 @@ public class SpringCloudStreams3AdaptersGenerator extends SpringCloudStreams3Gen
     private TemplateInput testTemplate = new TemplateInput(prefix + "{{style}}/ConsumerTest.java", "src/test/java/{{asPackageFolder adaptersPackage}}/{{consumerServiceName operation.x--operationIdCamelCase}}{{testSuffix}}.java", JAVA);
 
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
+    public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
         Model apiModel = getApiModel(contextModel);
 
         Map<String, List<Map<String, Object>>> subscribeOperations = getSubscribeOperationsGroupedByTag(apiModel);
@@ -79,16 +80,16 @@ public class SpringCloudStreams3AdaptersGenerator extends SpringCloudStreams3Gen
             dtoEntityMap.put(schemaName, Maps.of("schemaName", schemaName, "entity", JSONPath.get(schema, ("x--entity"))));
         });
 
-        List<TemplateOutput> templateOutputList = new ArrayList<>();
+        GeneratedProjectFiles generatedProjectFiles = new GeneratedProjectFiles();
 
-        templateOutputList.addAll(generateMapperTemplates(contextModel, mapperTemplate, dtoEntityMap));
-        templateOutputList.addAll(generateMapperTemplates(contextModel, baseTestTemplate, dtoEntityMap));
+        generatedProjectFiles.singleFiles.add(generateMapperTemplates(contextModel, mapperTemplate, dtoEntityMap));
+        generatedProjectFiles.singleFiles.add(generateMapperTemplates(contextModel, baseTestTemplate, dtoEntityMap));
         for (Map<String, Object> operation : consumerOperations) {
-            templateOutputList.addAll(generateOperationTemplates(contextModel, adapterTemplate, operation));
-            templateOutputList.addAll(generateOperationTemplates(contextModel, testTemplate, operation));
+            generatedProjectFiles.singleFiles.add(generateOperationTemplates(contextModel, adapterTemplate, operation));
+            generatedProjectFiles.singleFiles.add(generateOperationTemplates(contextModel, testTemplate, operation));
         }
 
-        return templateOutputList;
+        return generatedProjectFiles;
     }
 
     protected List<Map<String, Object>> filterConsumerOperations(Map<String, List<Map<String, Object>>> operationsByTags, AsyncapiOperationType publishOrSubscribe) {
@@ -107,7 +108,7 @@ public class SpringCloudStreams3AdaptersGenerator extends SpringCloudStreams3Gen
         return consumerOperations;
     }
 
-    public List<TemplateOutput> generateMapperTemplates(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> dtoEntityMap) {
+    public TemplateOutput generateMapperTemplates(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> dtoEntityMap) {
         Map<String, Object> model = new HashMap<>();
         model.putAll(this.asConfigurationMap());
         model.put("context", contextModel);
@@ -116,7 +117,7 @@ public class SpringCloudStreams3AdaptersGenerator extends SpringCloudStreams3Gen
         return getTemplateEngine().processTemplate(model, template);
     }
 
-    public List<TemplateOutput> generateOperationTemplates(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> operation) {
+    public TemplateOutput generateOperationTemplates(Map<String, Object> contextModel, TemplateInput template, Map<String, Object> operation) {
         Map<String, Object> model = new HashMap<>();
         model.putAll(this.asConfigurationMap());
         model.put("context", contextModel);

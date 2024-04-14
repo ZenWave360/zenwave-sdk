@@ -172,7 +172,7 @@ public class Help {
             }
         }
         String template = "io/zenwave360/sdk/help/" + format.toString();
-        return handlebarsEngine.processTemplate(model, new TemplateInput().withTemplateLocation(template).withTargetFile("")).get(0).getContent();
+        return handlebarsEngine.processTemplate(model, new TemplateInput().withTemplateLocation(template).withTargetFile("")).getContent();
     }
 
     protected String getJarVersion(Class<?> clazz) {
