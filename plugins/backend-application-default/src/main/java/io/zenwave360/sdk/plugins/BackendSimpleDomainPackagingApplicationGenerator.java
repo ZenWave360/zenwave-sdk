@@ -114,10 +114,9 @@ public class BackendSimpleDomainPackagingApplicationGenerator extends BackendDef
 
         ts.addTemplate(ts.singleTemplates, "src/main/java", "core/inbound/dtos/package-info.java",
                 "{{asPackageFolder inboundDtosPackage}}/package-info.java", JAVA, null, true);
-        ts.addTemplate(ts.singleTemplates, "src/main/java", "infrastructure/package-info.java",
-                "{{asPackageFolder infrastructurePackage}}/package-info.java", JAVA, null, true);
-        ts.addTemplate(ts.singleTemplates, "src/test/java", "ArchitectureTest.java",
-                "{{asPackageFolder basePackage}}/ArchitectureTest.java", JAVA, null, true);
+
+//        ts.addTemplate(ts.singleTemplates, "src/test/java", "ArchitectureTest.java",
+//                "{{asPackageFolder basePackage}}/ArchitectureTest.java", JAVA, null, true);
 
         return ts;
     }

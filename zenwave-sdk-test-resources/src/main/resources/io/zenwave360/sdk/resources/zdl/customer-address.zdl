@@ -24,7 +24,7 @@ entity Customer {
   /**
    * address is a nested entity
    */
-  address Address[] {
+  addresses Address[] {
     street String /** street javadoc comment */
     city String /** city javadoc comment */
     state String /** state javadoc comment */

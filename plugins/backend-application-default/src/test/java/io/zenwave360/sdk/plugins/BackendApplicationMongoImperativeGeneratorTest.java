@@ -58,6 +58,30 @@ public class BackendApplicationMongoImperativeGeneratorTest {
     }
 
     @Test
+    public void test_generator_simple_packaging_mongodb_customer_address() throws Exception {
+        String targetFolder = "target/zdl/test_generator_simple_packaging_mongodb_customer_address";
+        Plugin plugin = new BackendApplicationDefaultPlugin()
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
+                .withTargetFolder(targetFolder)
+                .withOption("basePackage", "io.zenwave360.example")
+                .withOption("persistence", PersistenceType.mongodb)
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("projectName", "customer-address")
+                .withOption("simpleDomainPackaging", true)
+                .withOption("forceOverwrite", true)
+                .withOption("haltOnFailFormatting", false);
+
+        new MainGenerator().generate(plugin);
+
+        List<String> logs = logCaptor.getLogs();
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
+        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
+
+        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/mongodb-elasticsearch-scs3-pom.xml", targetFolder);
+        Assertions.assertEquals(0, exitCode);
+    }
+
+    @Test
     public void test_generator_hexagonal_mongodb_order_faults_attachments() throws Exception {
         String targetFolder = "target/zdl/test_generator_hexagonal_mongodb_order_faults_attachments";
         Plugin plugin = new BackendApplicationDefaultPlugin()
