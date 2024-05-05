@@ -7,13 +7,13 @@ import java.time.OffsetDateTime;
 import java.util.TimeZone;
 
 @Mapper
-public abstract class BaseMapper {
+public interface BaseMapper {
 
-    public Instant asInstant(OffsetDateTime date) {
+    default Instant asInstant(OffsetDateTime date) {
         return date != null? date.toInstant() : null;
     }
 
-    public OffsetDateTime asOffsetDateTime(Instant date) {
+    default OffsetDateTime asOffsetDateTime(Instant date) {
         return date != null? OffsetDateTime.ofInstant(date, TimeZone.getTimeZone("UTC").toZoneId()) : null;
     }
 }

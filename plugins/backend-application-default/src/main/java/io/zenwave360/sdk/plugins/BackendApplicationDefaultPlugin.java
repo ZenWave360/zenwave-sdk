@@ -24,6 +24,9 @@ public class BackendApplicationDefaultPlugin extends Plugin {
         if (getOptions().containsKey("multiModule") && "true".equals(getOptions().get("multiModule").toString())) {
             replaceInChain(BackendDefaultApplicationGenerator.class, BackendMultiModuleApplicationGenerator.class);
         }
+        if (getOptions().containsKey("simpleDomainPackaging") && "true".equals(getOptions().get("simpleDomainPackaging").toString())) {
+            replaceInChain(BackendDefaultApplicationGenerator.class, BackendSimpleDomainPackagingApplicationGenerator.class);
+        }
         return (T) this;
     }
 

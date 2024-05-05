@@ -19,19 +19,19 @@ public class BackendMultiModuleApplicationGenerator extends BackendDefaultApplic
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/domain/{{persistence}}/Entity.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder entitiesPackage}}/{{entity.name}}.java", JAVA, skipEntity, false);
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/outbound/{{persistence}}/{{style}}/EntityRepository.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder outboundPackage}}/{{persistence}}/{{entity.className}}Repository.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder outboundRepositoryPackage}}/{{entity.className}}Repository.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/inbound/dtos/EntityInput.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}{{inputDTOSuffix entity}}.java", JAVA, skipEntityInput, false);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/BaseRepositoryIntegrationTest.java", "{{mavenModulesPrefix}}-infra",
-                "{{asPackageFolder infrastructurePackage}}/{{persistence}}/BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder infrastructureRepositoryPackage}}/BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/EntityRepositoryIntegrationTest.java", "{{mavenModulesPrefix}}-infra",
-                "{{asPackageFolder infrastructurePackage}}/{{persistence}}/{{entity.className}}RepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder infrastructureRepositoryPackage}}/{{entity.className}}RepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", "{{mavenModulesPrefix}}-impl",
-                "{{asPackageFolder infrastructurePackage}}/{{persistence}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder infrastructureRepositoryPackage}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/inmemory/EntityRepositoryInMemory.java", "{{mavenModulesPrefix}}-impl",
-                "{{asPackageFolder infrastructurePackage}}/{{persistence}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder infrastructureRepositoryPackage}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", "{{mavenModulesPrefix}}-impl",
-                "{{asPackageFolder infrastructurePackage}}/{{persistence}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder infrastructureRepositoryPackage}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true);
 
         ts.addTemplate(ts.enumTemplates, "src/main/java", "core/domain/common/Enum.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder entitiesPackage}}/{{enum.name}}.java", JAVA, null, false);

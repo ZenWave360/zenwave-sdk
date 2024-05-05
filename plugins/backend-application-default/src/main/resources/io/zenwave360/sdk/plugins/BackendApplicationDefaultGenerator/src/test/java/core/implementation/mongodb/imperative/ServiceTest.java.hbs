@@ -1,12 +1,13 @@
 package {{coreImplementationPackage}};
 
-import {{basePackage}}.config.*;
+import {{configPackage}}.*;
 import {{entitiesPackage}}.*;
 import {{inboundPackage}}.*;
 import {{inboundDtosPackage}}.*;
-import {{basePackage}}.core.implementation.mappers.*;
-import {{basePackage}}.core.outbound.mongodb.*;
-import {{infrastructurePackage}}.mongodb.inmemory.*;
+import {{coreImplementationPackage}}.mappers.*;
+import {{outboundRepositoryPackage}}.*;
+import {{infrastructureRepositoryPackage}}.inmemory.*;
+
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
