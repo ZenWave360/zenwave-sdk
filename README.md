@@ -37,25 +37,25 @@ ZenWave SDK is a configurable and extensible toolkit for **Domain Driven Design 
 The easiest way to install ZenWave SDK is as a [JBang alias](https://www.jbang.dev/documentation/guide/latest/alias_catalogs.html):
 
 ```shell
-jbang alias add --fresh --name=zw release@zenwave360/zenwave-sdk
+jbang alias add --fresh --force --name=zw release@zenwave360/zenwave-sdk
 ```
 
 or if you prefer to use the latest **snapshot** versions:
 
 ```shell
-jbang alias add --fresh --name=zw snapshots@zenwave360/zenwave-sdk
+jbang alias add --fresh --force --name=zw snapshots@zenwave360/zenwave-sdk
 ```
 
 or if you prefer to use the _next_ experimental/unstable **snapshot** versions:
 
 ```shell
-jbang alias add --fresh --name=zw next@zenwave360/zenwave-sdk
+jbang alias add --fresh --force --name=zw next@zenwave360/zenwave-sdk
 ```
 
 If you plan to use **custom plugins** you will need to use the command in the following format:
 
 ```shell
-jbang alias add --name=zw \
+jbang alias add --name=zw  --force \
     -m=io.zenwave360.sdk.Main \
     --repos=mavencentral,snapshots=https://s01.oss.sonatype.org/content/repositories/snapshots \
     --deps=\

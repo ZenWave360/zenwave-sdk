@@ -102,6 +102,8 @@ public class EntitiesToAvroConverter {
             } else if (ZDLParser.blobTypes.contains(entityField.get("type"))) {
                 field.put("type", typeList("bytes", isRequired));
                 // field.put("format", "binary");
+            } else if ("Map".equals(entityField.get("type"))) {
+                field.put("type", Map.of("type", "map", "values", "string"));
             } else {
                 field.put("type", entityField.get("type")); // TODO consider embedding
             }

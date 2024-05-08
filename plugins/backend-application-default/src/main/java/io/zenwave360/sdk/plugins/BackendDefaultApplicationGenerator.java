@@ -53,8 +53,10 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
     public String inboundPackage = "{{basePackage}}.core.inbound";
     public String inboundDtosPackage = "{{basePackage}}.core.inbound.dtos";
     public String outboundPackage = "{{basePackage}}.core.outbound";
+    public String outboundRepositoryPackage = "{{basePackage}}.core.outbound.{{persistence}}";
     public String coreImplementationPackage = "{{basePackage}}.core.implementation";
     public String infrastructurePackage = "{{basePackage}}.infrastructure";
+    public String infrastructureRepositoryPackage = "{{basePackage}}.infrastructure.{{persistence}}";
     public String adaptersPackage = "{{basePackage}}.adapters";
 
     public String outboundEventsModelPackage = "{{basePackage}}.core.outbound.events.dtos";
@@ -112,19 +114,19 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/domain/{{persistence}}/Entity.java",
                 "{{asPackageFolder entitiesPackage}}/{{entity.name}}.java", JAVA, skipEntity, false);
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/outbound/{{persistence}}/{{style}}/EntityRepository.java",
-                "{{asPackageFolder outboundPackage}}/{{persistence}}/{{entity.className}}Repository.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder outboundRepositoryPackage}}/{{entity.className}}Repository.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/inbound/dtos/EntityInput.java",
                 "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}{{inputDTOSuffix entity}}.java", JAVA, skipEntityInput, false);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/BaseRepositoryIntegrationTest.java",
-                "{{asPackageFolder infrastructurePackage}}/{{persistence}}/BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder infrastructureRepositoryPackage}}/BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/EntityRepositoryIntegrationTest.java",
-                "{{asPackageFolder infrastructurePackage}}/{{persistence}}/{{entity.className}}RepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder infrastructureRepositoryPackage}}/{{entity.className}}RepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java",
-                "{{asPackageFolder infrastructurePackage}}/{{persistence}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder infrastructureRepositoryPackage}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/inmemory/EntityRepositoryInMemory.java",
-                "{{asPackageFolder infrastructurePackage}}/{{persistence}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder infrastructureRepositoryPackage}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java",
-                "{{asPackageFolder infrastructurePackage}}/{{persistence}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder infrastructureRepositoryPackage}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true);
 
         ts.addTemplate(ts.enumTemplates, "src/main/java", "core/domain/common/Enum.java",
                 "{{asPackageFolder entitiesPackage}}/{{enum.name}}.java", JAVA, null, false);

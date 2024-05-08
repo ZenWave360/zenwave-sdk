@@ -1,10 +1,10 @@
-package {{basePackage}}.config;
+package {{configPackage}};
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
-import {{basePackage}}.core.outbound.{{persistence}}.*;
-import {{infrastructurePackage}}.{{persistence}}.inmemory.*;
+import {{outboundRepositoryPackage}}.*;
+import {{infrastructureRepositoryPackage}}.inmemory.*;
 
 
 //@Configuration

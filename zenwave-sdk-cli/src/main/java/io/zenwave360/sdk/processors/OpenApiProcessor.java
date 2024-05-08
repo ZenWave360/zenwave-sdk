@@ -54,7 +54,9 @@ public class OpenApiProcessor extends AbstractBaseProcessor implements Processor
         List<Map<String, Map>> properties = JSONPath.get(apiModel, "$.components.schemas..[?(@.properties)].properties");
         for (Map<String, Map> property : properties) {
             for (Map.Entry<String, Map> entry : property.entrySet()) {
-                entry.getValue().put("x--property-name", entry.getKey());
+                if(entry.getValue() instanceof Map) {
+                    entry.getValue().put("x--property-name", entry.getKey());
+                }
             }
         }
 

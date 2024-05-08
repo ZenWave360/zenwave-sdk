@@ -94,7 +94,7 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
     private String customDateTimePattern = null;
     private String refFragmentPathDelimiters = "#/.";
 
-    private boolean isUseJakartaValidation = false;
+    private boolean isUseJakartaValidation = true;
     private SourceSortOrder sourceSortOrder = SourceSortOrder.OS;
 
     public static JsonSchema2PojoConfiguration of(Map<String, String> settings) {

@@ -69,7 +69,7 @@
         <reflections.version>0.10.2</reflections.version>
         <handlebars-java.version>4.3.1</handlebars-java.version>
         <json-schema-ref-parser-jvm.version>0.8.4</json-schema-ref-parser-jvm.version>
-        <zdl-jvm.version>1.1.0</zdl-jvm.version>
+        <zdl-jvm.version>1.1.1</zdl-jvm.version>
         <graphql-java.version>19.2</graphql-java.version>
         <google-java-format.version>1.7</google-java-format.version>
         <palantir-java-format.version>2.38.0</palantir-java-format.version>

@@ -158,8 +158,8 @@ public class EntitiesToSchemasConverter {
         return schema;
     }
 
-    public static Map<String, String> schemaTypeAndFormat(String entityType) {
-        var property = new LinkedHashMap<String, String>();
+    public static Map<String, Object> schemaTypeAndFormat(String entityType) {
+        var property = new LinkedHashMap<String, Object>();
         if ("String".equals(entityType) || "TextBlob".equals(entityType)) {
             property.put("type", "string");
         } else if ("Enum".equals(entityType)) {
@@ -196,6 +196,9 @@ public class EntitiesToSchemasConverter {
         } else if (ZDLParser.blobTypes.contains(entityType)) {
             property.put("type", "string");
             property.put("format", "binary");
+        } else if ("Map".equals(entityType)) {
+            property.put("type", "object");
+            property.put("additionalProperties", false);
         } else {
             property.put("type", "string");
         }

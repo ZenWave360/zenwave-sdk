@@ -1,0 +1,63 @@
+logging:
+  level:
+    io.zenwave360.example: DEBUG
+    org.springframework.security: DEBUG
+#    org.apache.kafka: DEBUG
+spring:
+  security:
+    user:
+      name: user
+      password: password
+      roles: USER
+  jpa.hibernate.ddl-auto: update
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:mariadb://localhost:3306/zenwave-playground?useLegacyDatetimeCode=false&serverTimezone=UTC
+    username: root
+    password:
+    hikari:
+      poolName: Hikari
+      auto-commit: false
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  cloud:
+    stream:
+      function:
+        definition: do-create-customer;on-create-customer-customer-event;on-create-customer-customer-created;on-create-customer-customer-created-failed;on-update-customer-customer-event;on-update-customer-customer-updated;on-delete-customer-customer-deleted
+      bindings:
+        on-create-customer-customer-event-in-0:
+          destination: customer.events
+          content-type: application/json
+        on-create-customer-customer-created-out-0:
+          destination: customer.events
+          content-type: application/json
+        on-create-customer-customer-created-failed-out-0:
+          destination: customer.events
+          content-type: application/json
+        on-update-customer-customer-event-out-0:
+          destination: customer.events
+          content-type: application/json
+        on-update-customer-customer-updated-out-0:
+          destination: customer.events
+          content-type: application/json
+        on-delete-customer-customer-deleted-out-0:
+          destination: customer.events
+          content-type: application/json
+        do-create-customer-in-0:
+          destination: customer.requests
+          content-type: application/json
+          dead-letter-queue-error-map: >
+            {
+              'jakarta.validation.ValidationException': 'do-create-customer-validation-error-out-0',
+              'java.lang.Exception': 'do-create-customer-error-out-0'
+            }
+            

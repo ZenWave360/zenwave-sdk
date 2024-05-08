@@ -28,6 +28,9 @@ import io.zenwave360.sdk.writers.TemplateFileWriter;
 @DocumentedPlugin(value = "Generates implementations based on ZDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.", shortCode = "openapi-controllers")
 public class OpenAPIControllersPlugin extends Plugin {
 
+    @DocumentedOption(description = "OpenAPI file to parse", required = false)
+    public String openapiFile;
+
     @DocumentedOption(description = "ZDL file to parse", required = false)
     public String zdlFile;
 
@@ -46,7 +49,7 @@ public class OpenAPIControllersPlugin extends Plugin {
         }
         // because we have more than one model, we need to configure how they are passed around from parser to processor and generator
         // we use class name for passing the properties, in case one class is repeated in chain we'd use the index number in the chain
-        withOption("DefaultYamlParser.specFile", StringUtils.firstNonBlank(this.getSpecFile(), (String) getOptions().get("openapiFile")));
+        withOption("DefaultYamlParser.specFile", StringUtils.firstNonBlank((String) getOptions().get("openapiFile"), this.getSpecFile()));
         withOption("ZDLParser.specFile", getOptions().get("zdlFile"));
         return (T) this;
     }

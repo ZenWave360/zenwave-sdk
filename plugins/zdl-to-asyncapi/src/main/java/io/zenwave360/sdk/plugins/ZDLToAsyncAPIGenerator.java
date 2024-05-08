@@ -58,6 +58,9 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
     public String defaultSchemaFormat = "application/vnd.aai.asyncapi;version=3.0.0";
     public String avroSchemaFormat = "application/vnd.apache.avro+json;version=1.9.0";
 
+    @DocumentedOption(description = "Include Kafka common headers (kafka_messageKey)")
+    public boolean includeKafkaCommonHeaders = false;
+
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
