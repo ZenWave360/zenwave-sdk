@@ -25,6 +25,15 @@ public interface {{serviceInterfaceName operation.x--operationIdCamelCase}} {
     {{~/if}}
 {{/each~}}
 
+    /**
+     * Default method for handling unknown messages or tombstone records (null record values).
+     */
+    {{~#if exposeMessage}}
+    default void defaultHandler(Message msg) {};
+    {{~else}}
+    default void defaultHandler(Object payload, Map<String, Object> headers) {};
+    {{~/if}}
+
 {{#each messages as |message|}}
     {{~> (partial '../../common/Headers') isProducer=false}}
 {{/each}}

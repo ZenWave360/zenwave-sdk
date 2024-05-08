@@ -43,6 +43,11 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
             {{~/if}}
             }
         {{/each}}
+            {{~#if exposeMessage}}
+                service.defaultHandler(Flux.just(MessageBuilder.<Object>createMessage(m.getPayload(), m.getHeaders())));
+            {{~else}}
+                service.defaultHandler(Flux.just(m.getPayload()));
+            {{~/if}}
         });
     }
 }
