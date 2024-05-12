@@ -123,7 +123,7 @@ public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}}
       return false;
     }
     {{entity.className}} other = ({{entity.className}}) o;
-    return id != null && id.equals(other.id);
+    return getId() != null && getId().equals(other.getId());
   }
 
   @Override

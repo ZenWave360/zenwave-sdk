@@ -1,9 +1,6 @@
 {{#if relationship.ownerSide}}
-@ManyToOne({{#if (addRelationshipById relationship entity=entity)}}fetch = FetchType.LAZY{{else}}cascade = CascadeType.ALL{{/if}})
+@ManyToOne(fetch = FetchType.LAZY {{#unless (addRelationshipById relationship entity=entity)}}, cascade = CascadeType.ALL{{/unless}})
 @JoinColumn(name = "{{snakeCase relationship.fieldName}}_id"{{#if (addRelationshipById relationship entity=entity)}}, updatable = false, insertable = false{{/if}})
 {{else}}
-    {{~#if relationship.required}}
-@NotNull
-    {{~/if}}
 @OneToMany(mappedBy="{{relationship.otherEntityFieldName}}", fetch = FetchType.LAZY)
 {{/if}}

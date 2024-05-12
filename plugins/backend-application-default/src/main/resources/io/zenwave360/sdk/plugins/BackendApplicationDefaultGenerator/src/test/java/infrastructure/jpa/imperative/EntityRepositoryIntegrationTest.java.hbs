@@ -1,4 +1,4 @@
-package {{infrastructurePackage}}.jpa;
+package {{infrastructureRepositoryPackage}};
 
 import java.util.HashSet;
 import java.time.*;
@@ -75,7 +75,9 @@ public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositor
         // Persist aggregate root
         var created = {{entity.instanceName}}Repository.save({{entity.instanceName}});
 
-        entityManager.refresh(created); // reloading to get relationships persisted by id
+        // reloading to get relationships persisted by id
+        entityManager.flush();
+        entityManager.refresh(created);
         Assertions.assertTrue(created.getId() != null);
         Assertions.assertTrue(created.getVersion() != null);
         {{~#if (or entity.options.auditing entity.options.extendsAuditing)}}
