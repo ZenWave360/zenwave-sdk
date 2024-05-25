@@ -1,5 +1,7 @@
 package {{basePackage}}.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.Table;
 
 import java.io.File;
@@ -12,6 +14,8 @@ import java.util.stream.Stream;
 public class TestDataLoader {
 
     private List<? extends Class<?>> jpaManagedTypes;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     public TestDataLoader(List<? extends Class<?>> jpaManagedTypes) {
         this.jpaManagedTypes = jpaManagedTypes;
@@ -26,14 +30,6 @@ public class TestDataLoader {
 		var annotation = (Table) collectionClass.getAnnotation(Table.class);
 		var table = annotation.name();
         return readDirectoryFilesAsString("src/test/resources/data/jpa/" + table);
-    }
-
-    public List<String> loadCollectionTestDataAsJson(String table) {
-        return readDirectoryFilesAsString("src/test/resources/data/jpa/" + table);
-    }
-
-    public List<String> listAllMongodbCollectionsWithTestData() {
-        return listFolders("src/test/resources/data/jpa");
     }
 
     protected List<String> listFolders(String directory) {
@@ -51,7 +47,11 @@ public class TestDataLoader {
     }
 
     public <T> T read(Class<T> type, String json) {
-        return null; // TODO
+        try {
+            return objectMapper.readValue(json, type);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error reading json test data for " + type.getName(), e);
+        }
     }
 
 }

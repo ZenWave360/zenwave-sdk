@@ -51,6 +51,8 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     @DocumentedOption(description = "Programming Style")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
 
+    public boolean simpleDomainPackaging = false;
+
     @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. User '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
     public List<String> paginatedDtoItemsJsonPath = List.of("$.items", "$.properties.content.items");
 
@@ -75,6 +77,16 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                 .withTargetFile(templateNames[0] + "/{{asPackageFolder controllersPackage}}/" + templateNames[2])
                 .withMimeType((OutputFormatType) templateNames[3])
                 .withSkip(skip);
+    }
+
+    @Override
+    public void onPropertiesSet() {
+        if (simpleDomainPackaging) {
+            controllersPackage = "{{basePackage}}";
+            entitiesPackage = "{{basePackage}}.model";
+            inboundDtosPackage = "{{basePackage}}.dtos";
+            servicesPackage = "{{basePackage}}";
+        }
     }
 
     protected Map<String, Object> getZDLModel(Map<String, Object> contextModel) {

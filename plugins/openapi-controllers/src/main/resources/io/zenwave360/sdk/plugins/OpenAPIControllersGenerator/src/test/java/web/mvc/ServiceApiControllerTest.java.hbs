@@ -23,11 +23,7 @@ public class {{serviceName}}ApiControllerTest {
 
     ServicesInMemoryConfig context = new ServicesInMemoryConfig();
 
-    {{serviceName}}ApiController controller = new {{serviceName}}ApiController()
-{{#each entitiesServices as |coreServiceName|}}
-        .set{{coreServiceName}}(context.{{asInstanceName coreServiceName}}())
-{{/each}}
-    ;
+    {{serviceName}}ApiController controller = new {{serviceName}}ApiController({{#joinWithTemplate entitiesServices delimiter=", "}} context.{{asInstanceName this}}() {{/joinWithTemplate}});
 
 	@BeforeEach
 	void setUp() {

@@ -108,6 +108,17 @@ public class BackendApplicationDefaultHelpers {
         return new HashSet<>(JSONPath.get(aggregate, "$.commands[*].parameter", List.of()));
     }
 
+    public Collection<Map> findAggregates(Collection<Map> entities, Options options) {
+        return entities.stream().filter(entity -> isAggregate((String) entity.get("name"), options)).collect(Collectors.toList());
+    }
+
+    public boolean isAggregate(String entityName, Options options) {
+        var zdl = options.get("zdl");
+        var isAggregateRoot = JSONPath.get(zdl, "$.entities." + entityName + "[?(@.options.aggregate == true)]", List.of());
+        var aggregateName = findEntityAggregate(entityName, options);
+        return !isAggregateRoot.isEmpty() || aggregateName != null;
+    }
+
     public String findEntityAggregate(String entityName, Options options) {
         var zdl = options.get("zdl");
         var aggregateNames = JSONPath.get(zdl, "$.aggregates[*][?(@.aggregateRoot == '" + entityName + "')].name", List.of());

@@ -10,14 +10,13 @@ import {{infrastructureRepositoryPackage}}.inmemory.*;
 //@Configuration
 public class RepositoriesInMemoryConfig {
 
-{{~#each services as |service|}}
-  {{~#each service.entities as |entity|}}
+{{assign "aggregates" (findAggregates entities)}}
+{{~#each aggregates as |entity|}}
     protected final {{entity.className}}Repository {{entity.instanceName}}Repository = new {{entity.className}}RepositoryInMemory();
     @Bean @Primary
     public <T extends {{entity.className}}Repository> T {{entity.instanceName}}Repository() {
         return (T) {{entity.instanceName}}Repository;
     }
-  {{~/each}}
 {{~/each}}
 
 }

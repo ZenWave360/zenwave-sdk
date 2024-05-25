@@ -50,6 +50,12 @@ public class {{serviceName}}ApiController implements {{serviceName}}Api {
 
     private {{serviceName}}DTOsMapper mapper = {{serviceName}}DTOsMapper.INSTANCE;
 
+    public {{serviceName}}ApiController({{#joinWithTemplate entitiesServices delimiter=", "}}{{this}} {{asInstanceName this}}{{/joinWithTemplate}}) {
+        {{#joinWithTemplate entitiesServices}}
+        this.{{asInstanceName this}} = {{asInstanceName this}};
+        {{/joinWithTemplate}}
+    }
+
     @Override
     public Optional<NativeWebRequest> getRequest() {
         return Optional.ofNullable(request);
@@ -84,6 +90,9 @@ public class {{serviceName}}ApiController implements {{serviceName}}Api {
         {{responseDtoName}} responseDTO = mapper.as{{responseDtoName}}({{methodReturnTypeInstance}});
         return ResponseEntity.status({{statusCode}}).body(responseDTO);
         {{~/if}}
+    {{~else if (and serviceMethod.serviceName serviceMethodCall)}}
+        {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}};
+        return ResponseEntity.status({{statusCode}}).build();
     {{~else}}
         // TODO: {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}};
         return ResponseEntity.status({{statusCode}}).build();

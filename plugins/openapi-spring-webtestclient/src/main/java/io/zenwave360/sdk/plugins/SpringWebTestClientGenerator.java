@@ -24,10 +24,24 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
         service, operation, partial, businessFlow
     }
 
-    public String sourceProperty = "api";
+    public String apiProperty = "api";
+
+    @DocumentedOption(description = "The package to generate REST Controllers")
+    public String controllersPackage = "{{basePackage}}.adapters.web";
+
+    public String configPackage = "{{basePackage}}.config";
+
+    @DocumentedOption(description = "Package where your domain entities are")
+    public String entitiesPackage = "{{basePackage}}.core.domain";
+
+    @DocumentedOption(description = "Package where your inbound dtos are")
+    public String inboundDtosPackage = "{{basePackage}}.core.inbound.dtos";
+
+    @DocumentedOption(description = "Package where your domain services/usecases interfaces are")
+    public String servicesPackage = "{{basePackage}}.core.inbound";
 
     @DocumentedOption(description = "Package name for generated tests")
-    public String testsPackage = "{{basePackage}}.adapters.web.tests";
+    public String testsPackage = "{{basePackage}}.adapters.web";
 
     @DocumentedOption(description = "Generate test classes grouped by", required = true)
     public GroupByType groupBy = GroupByType.service;
@@ -50,29 +64,42 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
     @DocumentedOption(description = "@Transactional annotation class name")
     public String transactionalAnnotationClass = "org.springframework.transaction.annotation.Transactional";
 
-    public SpringWebTestClientGenerator withSourceProperty(String sourceProperty) {
-        this.sourceProperty = sourceProperty;
-        return this;
-    }
+    public boolean simpleDomainPackaging = false;
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
-    private String prefix = "io/zenwave360/sdk/plugins/SpringWebTestClientGenerator/";
-    private final TemplateInput partialTemplate = new TemplateInput(prefix + "partials/Operation.java", "{{asPackageFolder testsPackage}}/Operation.java");
+    private final String prefix = "io/zenwave360/sdk/plugins/SpringWebTestClientGenerator/";
+    private final TemplateInput partialTemplate = new TemplateInput(prefix + "partials/Operation.java", "src/test/java/{{asPackageFolder testsPackage}}/Operation.java");
 //    private final TemplateInput testSetTemplate = new TemplateInput(prefix + "ControllersTestSet.java", "{{asPackageFolder testsPackage}}/ControllersTestSet.java").withMimeType(JAVA);
 
-    private final TemplateInput baseTestClassTemplate = new TemplateInput(prefix + "BaseWebTestClientTest.java", "{{asPackageFolder baseTestClassPackage}}/{{baseTestClassName}}.java").withMimeType(JAVA).withSkipOverwrite(true);
+    private final TemplateInput baseTestClassTemplate = new TemplateInput(prefix + "BaseWebTestClientTest.java", "src/test/java/{{asPackageFolder baseTestClassPackage}}/{{baseTestClassName}}.java").withMimeType(JAVA).withSkipOverwrite(true);
 
-    private final TemplateInput businessFlowTestTemplate = new TemplateInput(prefix + "BusinessFlowTest.java", "{{asPackageFolder testsPackage}}/{{businessFlowTestName}}.java").withMimeType(JAVA);
-    private final TemplateInput serviceTestTemplate = new TemplateInput(prefix + "ServiceIT.java", "{{asPackageFolder testsPackage}}/{{serviceName}}{{testSuffix}}.java").withMimeType(JAVA);
-    private final TemplateInput operationTestTemplate = new TemplateInput(prefix + "OperationIT.java", "{{asPackageFolder testsPackage}}/{{serviceName}}/{{asJavaTypeName operationId}}{{testSuffix}}.java").withMimeType(JAVA);
+    private final TemplateInput businessFlowTestTemplate = new TemplateInput(prefix + "BusinessFlowTest.java", "src/test/java/{{asPackageFolder testsPackage}}/{{businessFlowTestName}}.java").withMimeType(JAVA);
+    private final TemplateInput serviceTestTemplate = new TemplateInput(prefix + "ServiceIT.java", "src/test/java/{{asPackageFolder testsPackage}}/{{serviceName}}{{testSuffix}}.java").withMimeType(JAVA);
+    private final TemplateInput operationTestTemplate = new TemplateInput(prefix + "OperationIT.java", "src/test/java/{{asPackageFolder testsPackage}}/{{serviceName}}/{{asJavaTypeName operationId}}{{testSuffix}}.java").withMimeType(JAVA);
+
+    @Override
+    public void onPropertiesSet() {
+        if(basePackage == null) {
+            basePackage = testsPackage;
+            configPackage = basePackage + ".config";
+        }
+        if (simpleDomainPackaging) {
+            testsPackage = "{{basePackage}}";
+            baseTestClassPackage = "{{basePackage}}.base";
+            controllersPackage = "{{basePackage}}";
+            entitiesPackage = "{{basePackage}}.model";
+            inboundDtosPackage = "{{basePackage}}.dtos";
+            servicesPackage = "{{basePackage}}";
+        }
+    }
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;
     }
 
     Model getApiModel(Map<String, Object> contextModel) {
-        return (Model) contextModel.get(sourceProperty);
+        return (Model) contextModel.get(apiProperty);
     }
 
     @Override

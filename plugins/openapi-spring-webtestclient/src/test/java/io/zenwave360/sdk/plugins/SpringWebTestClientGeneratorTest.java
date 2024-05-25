@@ -53,7 +53,7 @@ public class SpringWebTestClientGeneratorTest {
 
         var templateOutputList = CapturingTemplateWriter.templateOutputList;
         Assertions.assertEquals(1, templateOutputList.size());
-        Assertions.assertEquals("io/example/controller/tests/Operation.java", templateOutputList.get(0).getTargetFile());
+        Assertions.assertEquals("src/test/java/io/example/controller/tests/Operation.java", templateOutputList.get(0).getTargetFile());
     }
 
     @ParameterizedTest(name = "[{index}] {displayName} {0} {1}")
@@ -65,7 +65,7 @@ public class SpringWebTestClientGeneratorTest {
         String targetFolder = "target/test_output_business_flow_" + openapi.replaceAll("\\.", "_");
         Plugin plugin = new SpringWebTestClientPlugin()
                 .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
-                .withTargetFolder(targetFolder + "/src/test/java")
+                .withTargetFolder(targetFolder)
                 .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.businessFlow)
                 .withOption("businessFlowTestName", camelCase(operationIds.replaceAll(",", "_")))
                 .withOption("transactional", false)
@@ -82,7 +82,7 @@ public class SpringWebTestClientGeneratorTest {
 
         var templateOutputList = CapturingTemplateWriter.templateOutputList;
         Assertions.assertEquals(2, templateOutputList.size());
-        Assertions.assertEquals("io/example/controller/tests/" + camelCase(operationIds.replaceAll(",", "_")) +".java", templateOutputList.get(0).getTargetFile());
+        Assertions.assertEquals("src/test/java/io/example/controller/tests/" + camelCase(operationIds.replaceAll(",", "_")) +".java", templateOutputList.get(0).getTargetFile());
 
         int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
         Assertions.assertEquals(0, exitCode);
@@ -98,7 +98,7 @@ public class SpringWebTestClientGeneratorTest {
         String targetFolder = "target/test_output_by_one_service_" + openapi.replaceAll("\\.", "_");
         Plugin plugin = new SpringWebTestClientPlugin()
                 .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
-                .withTargetFolder(targetFolder + "/src/test/java")
+                .withTargetFolder(targetFolder)
                 .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.service)
                 .withOption("transactional", false)
                 .withOption("testsPackage", "io.example.controller.tests")
@@ -120,6 +120,36 @@ public class SpringWebTestClientGeneratorTest {
 
     @ParameterizedTest(name = "[{index}] {displayName} {0}")
     @CsvSource({
+            "openapi-petstore.yml, addPet, 'PetApiIT'",
+            "openapi-orders.yml, createCustomer, 'CustomerApiIT'"
+    })
+    public void test_output_by_one_service_simple_domain_packaging(String openapi, String operationId, String controllers) throws Exception {
+        String targetFolder = "target/test_output_by_one_service_simple_domain_packaging_" + openapi.replaceAll("\\.", "_");
+        Plugin plugin = new SpringWebTestClientPlugin()
+                .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
+                .withTargetFolder(targetFolder)
+                .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.service)
+                .withOption("transactional", false)
+                .withOption("simpleDomainPackaging", true)
+                .withOption("basePackage", "io.example")
+                .withOption("openApiApiPackage", "io.example.api")
+                .withOption("openApiModelPackage",  "io.example.api.model")
+                .withOption("openApiModelNameSuffix", "DTO")
+                .withOption("operationIds",  List.of(operationId));
+
+        new MainGenerator().generate(plugin);
+
+        Arrays.stream(controllers.split(",")).forEach(controller -> {
+            File file = new File(targetFolder + "/src/test/java/io/example/" + controller + ".java");
+            Assertions.assertTrue(file.exists(), "File " + file.getAbsolutePath() + " does not exist");
+        });
+
+        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
+        Assertions.assertEquals(0, exitCode);
+    }
+
+    @ParameterizedTest(name = "[{index}] {displayName} {0}")
+    @CsvSource({
             "openapi-petstore.yml, 'PetApiIT'",
             "openapi-orders.yml, 'CustomerApiIT'"
     })
@@ -127,7 +157,7 @@ public class SpringWebTestClientGeneratorTest {
         String targetFolder = "target/test_output_by_service_" + openapi.replaceAll("\\.", "_");
         Plugin plugin = new SpringWebTestClientPlugin()
                 .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
-                .withTargetFolder(targetFolder + "/src/test/java")
+                .withTargetFolder(targetFolder)
                 .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.service)
                 .withOption("transactional", false)
                 .withOption("testsPackage", "io.example.controller.tests")
@@ -155,7 +185,7 @@ public class SpringWebTestClientGeneratorTest {
         String targetFolder = "target/test_output_by_operation_" + openapi.replaceAll("\\.", "_");
         Plugin plugin = new SpringWebTestClientPlugin()
                 .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
-                .withTargetFolder(targetFolder + "/src/test/java")
+                .withTargetFolder(targetFolder)
                 .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.operation)
                 .withOption("transactional", false)
                 .withOption("testsPackage", "io.example.controller.tests")

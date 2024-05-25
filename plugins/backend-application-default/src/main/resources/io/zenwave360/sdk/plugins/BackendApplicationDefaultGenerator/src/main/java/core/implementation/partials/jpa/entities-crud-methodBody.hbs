@@ -6,13 +6,6 @@
     // TODO: you may need to reload the entity here to fetch relationships 'mapped by id'
     {{~> (partial '../withEvents')}}
     return {{wrapWithMapper entity}};
-{{~else if (isCrudMethod 'update' method=method entity=entity )}}
-    log.debug("[CRUD] Request to update {{entity.className}}: {}", input);
-    var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id);
-    // saving is unnecessary: https://vladmihalcea.com/best-spring-data-jparepository/
-    {{entity.instanceName}} = {{entity.instanceName}}.map(existing{{entity.instanceName}} -> {{asInstanceName service.name}}Mapper.update(existing{{entity.instanceName}}, {{{mapperInputCallSignature method.parameter}}}));
-    {{~> (partial '../withEvents')}}
-    return {{wrapWithMapper entity}};
 {{~else if (isCrudMethod 'list' method=method entity=entity )}}
     {{~#if method.options.paginated}}
     log.debug("[CRUD] Request list of {{entity.classNamePlural}}: {}", pageable);

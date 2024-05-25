@@ -5,7 +5,6 @@
     * Test: {{operation.description}} for {{response.description}}.
     */
     @Test
-    @Order({{@index}})
     public void test{{asJavaTypeName operation.operationId}}_{{response.x--statusCode}}() {
         {{~#assign "requestDTOClassName"}}{{asDtoName operation.x--request-dto }}{{/assign~}}
         {{~#assign "requestBodyVar"}}requestBody{{/assign~}}
