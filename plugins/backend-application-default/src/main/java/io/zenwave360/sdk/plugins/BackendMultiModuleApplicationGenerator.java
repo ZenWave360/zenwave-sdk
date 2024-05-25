@@ -65,6 +65,10 @@ public class BackendMultiModuleApplicationGenerator extends BackendDefaultApplic
                 "{{asPackageFolder configPackage}}/TestDataLoader.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/test/java", "config/DockerComposeInitializer-{{persistence}}.java", "{{mavenModulesPrefix}}-core-impl",
                 "{{asPackageFolder configPackage}}/DockerComposeInitializer.java", JAVA, null, true);
+        ts.addTemplate(ts.singleTemplates, "src/test/java", "config/TestDataLoader-{{persistence}}.java", "{{mavenModulesPrefix}}-infra",
+                "{{asPackageFolder configPackage}}/TestDataLoader.java", JAVA, null, true);
+        ts.addTemplate(ts.singleTemplates, "src/test/java", "config/DockerComposeInitializer-{{persistence}}.java", "{{mavenModulesPrefix}}-infra",
+                "{{asPackageFolder configPackage}}/DockerComposeInitializer.java", JAVA, null, true);
 
         ts.addTemplate(ts.singleTemplates, "src/main/java", "core/inbound/dtos/package-info.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder inboundDtosPackage}}/package-info.java", JAVA, null, true);

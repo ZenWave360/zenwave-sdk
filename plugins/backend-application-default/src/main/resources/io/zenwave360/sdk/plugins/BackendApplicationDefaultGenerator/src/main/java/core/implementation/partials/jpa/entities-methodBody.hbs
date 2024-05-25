@@ -17,8 +17,7 @@
     var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).map(existing{{entity.className}} -> {
         return {{asInstanceName service.name}}Mapper.update(existing{{entity.className}}, {{{mapperInputCallSignature method.parameter}}});
     })
-    // saving is unnecessary https://vladmihalcea.com/best-spring-data-jparepository/
-    // .map({{entity.instanceName}}Repository::save)
+    .map({{entity.instanceName}}Repository::save)
     {{~#unless (eq entity.name method.returnType)}}
     .map({{asInstanceName service.name}}Mapper::as{{returnType}})
     {{~/unless}}
@@ -30,8 +29,7 @@
     var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).map(existing{{entity.className}} -> {
         return {{asInstanceName service.name}}Mapper.update(existing{{entity.className}}, {{{mapperInputCallSignature method.parameter}}});
     })
-    // saving is unnecessary https://vladmihalcea.com/best-spring-data-jparepository/
-    // .map({{entity.instanceName}}Repository::save)
+    .map({{entity.instanceName}}Repository::save)
     .orElseThrow();
     {{~> (partial '../withEvents')}}
     return {{wrapWithMapper entity}};

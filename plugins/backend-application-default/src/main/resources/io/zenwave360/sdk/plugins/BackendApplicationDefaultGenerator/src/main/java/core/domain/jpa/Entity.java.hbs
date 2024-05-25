@@ -109,7 +109,9 @@ public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}}
     {{~#if (eq relationship.type 'OneToOne')}}
     public {{entity.className}} set{{capitalize relationship.fieldName}}({{{relationshipFieldType relationship}}} {{relationship.fieldName}}) {
         this.{{relationship.fieldName}} = {{relationship.fieldName}};
-        {{relationship.fieldName}}.set{{capitalize relationship.otherEntityFieldName}}(this);
+        if ({{relationship.fieldName}} != null) {
+            {{relationship.fieldName}}.set{{capitalize relationship.otherEntityFieldName}}(this);
+        }
         return this;
     }
     {{~/if}}
@@ -119,6 +121,11 @@ public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}}
         {{relationship.fieldName}}.set{{capitalize relationship.otherEntityFieldName}}(this);
         return this;
     }
+    public {{entity.className}} remove{{capitalize relationship.fieldName}}({{relationship.otherEntityName}} {{relationship.fieldName}}) {
+        this.{{relationship.fieldName}}.remove({{relationship.fieldName}});
+        {{relationship.fieldName}}.set{{capitalize relationship.otherEntityFieldName}}(null);
+        return this;
+    }
     {{~/if}}
     {{~#if (eq relationship.type 'ManyToMany')}}
     public {{entity.className}} add{{capitalize relationship.fieldName}}({{relationship.otherEntityName}} {{relationship.fieldName}}) {
@@ -126,11 +133,21 @@ public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}}
         {{relationship.fieldName}}.get{{capitalize relationship.otherEntityFieldName}}().add(this);
         return this;
     }
+    public {{entity.className}} remove{{capitalize relationship.fieldName}}({{relationship.otherEntityName}} {{relationship.fieldName}}) {
+        this.{{relationship.fieldName}}.remove({{relationship.fieldName}});
+        {{relationship.fieldName}}.get{{capitalize relationship.otherEntityFieldName}}().remove(this);
+        return this;
+    }
     {{~/if}}
     {{~#if (and (eq relationship.type 'ManyToOne') relationship.otherEntityFieldName)}}
     public {{entity.className}} set{{capitalize relationship.fieldName}}({{{relationshipFieldType relationship}}} {{relationship.fieldName}}) {
         this.{{relationship.fieldName}} = {{relationship.fieldName}};
         {{relationship.fieldName}}.get{{capitalize relationship.otherEntityFieldName}}().add(this);
+        return this;
+    }
+    public {{entity.className}} remove{{capitalize relationship.fieldName}}({{{relationshipFieldType relationship}}} {{relationship.fieldName}}) {
+        this.{{relationship.fieldName}} = {{relationship.fieldName}};
+        {{relationship.fieldName}}.get{{capitalize relationship.otherEntityFieldName}}().remove(this);
         return this;
     }
     {{~/if}}

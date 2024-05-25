@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -24,7 +25,13 @@ import {{modelPackage}}.*;
 
 @Component("{{bindingPrefix}}{{operation.x--operationIdKebabCase}}")
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
-public class {{consumerName operation.x--operationIdCamelCase}} implements Function<Message<{{messageType operation}}>, Void> {
+public class {{consumerName operation.x--operationIdCamelCase}} implements
+    {{~#if (eq functionalInterfaceImplementation 'function')~}}
+    Function<Message<{{messageType operation}}>, Void>
+    {{~else~}}
+    Consumer<Message<{{messageType operation}}>>
+    {{~/if~}}
+{
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
@@ -51,7 +58,13 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Funct
     }
 {{~/if}}
 
-    @Override
+    // NOTE: implementing both accept and apply facilitates code generation.
+    // See what this class actually implements.
+
+    public void accept(Message<{{messageType operation}}> message) {
+        apply(message);
+    }
+
     public Void apply(Message<{{messageType operation}}> message) {
         log.debug("Received message: {}", message);
         try {
@@ -86,12 +99,14 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Funct
             if (streamBridge != null && resolvedDLQ != null) {
                 try {
                     log.debug("Sending message to dead letter queue: {}", resolvedDLQ);
+                    Object payload = message.getPayload();
                     var headers = new HashMap(message.getHeaders());
+                    headers.put("x-original-headers", message.getHeaders().toString());
                     headers.put("x-exception-type", e.getClass().getName());
                     headers.put("x-exception-message", e.getMessage());
                     headers.put("x-exception-stacktrace ", getStackTraceAsString(e));
-                    headers.put("x-exception-payload-type", message.getPayload().getClass().getName());
-                    streamBridge.send(resolvedDLQ, MessageBuilder.createMessage(message.getPayload(), new MessageHeaders(headers)));
+                    headers.put("x-exception-payload-type", payload.getClass().getName());
+                    streamBridge.send(resolvedDLQ, MessageBuilder.createMessage(payload, new MessageHeaders(headers)));
                     return null;
                 } catch (Exception e1) {
                     log.error("Error sending message to dead letter queue: {}", resolvedDLQ, e1);

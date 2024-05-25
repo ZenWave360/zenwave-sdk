@@ -55,7 +55,7 @@ public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
     }
 {{~/each}}
 
-{{assign "aggregates" (jsonPath entities "[*][?(@.options.aggregate)]")}}
+{{assign "aggregates" (findAggregates entities)}}
 {{~#each aggregates as |entity|}}
 	static List<{{entity.className}}> _{{entity.instanceNamePlural}};
 {{~/each}}
@@ -63,8 +63,8 @@ public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
 		var testDataLoader = new TestDataLoader(List.of({{#joinWithTemplate entities delimiter=', ' as |entity|}}{{entity.className}}.class{{/joinWithTemplate}}));
         {{~#each aggregates as |entity|}}
 		var {{entity.instanceNamePlural}} = _{{entity.instanceNamePlural}} != null? _{{entity.instanceNamePlural}} : testDataLoader.loadCollectionTestDataAsObjects({{entity.className}}.class);
-		{{entity.className}}Repository().deleteAll();
-		{{entity.className}}Repository().saveAll({{entity.instanceNamePlural}});
+		{{entity.instanceName}}Repository().deleteAll();
+		{{entity.instanceName}}Repository().saveAll({{entity.instanceNamePlural}});
 		{{~/each}}
 	}
 

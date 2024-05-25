@@ -118,7 +118,7 @@ public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
         }
 
         for (TemplateInput template : templates.allServicesTemplates) {
-            templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("services", servicesList, "entities", entities.values())));
+            templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("services", servicesList, "entities", new ArrayList(entities.values()))));
         }
 
 

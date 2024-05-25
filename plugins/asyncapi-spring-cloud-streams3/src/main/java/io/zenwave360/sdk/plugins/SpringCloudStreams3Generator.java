@@ -27,6 +27,10 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
         none, mongodb, jdbc
     }
 
+    public enum FunctionalInterfaceImplementation {
+        consumer, function
+    }
+
     public String sourceProperty = "api";
 
     @DocumentedOption(description = "Programming style")
@@ -67,6 +71,9 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
     @DocumentedOption(description = "Spring-Boot binding suffix. It will be appended to the operation name kebab-cased. E.g. <operation-id>-in-0")
     public String bindingSuffix = "-0";
+
+    @DocumentedOption(description = "Whether to use a 'java.util.function.Consumer' or 'java.util.function.Function' as the functional interface implementation.")
+    public FunctionalInterfaceImplementation functionalInterfaceImplementation = FunctionalInterfaceImplementation.consumer;
 
     @DocumentedOption(description = "AsyncAPI extension property name for runtime auto-configuration of headers.")
     public String runtimeHeadersProperty = "x-runtime-expression";

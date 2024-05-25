@@ -10,10 +10,7 @@ import {{infrastructureRepositoryPackage}}.inmemory.*;
 
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.mapstruct.factory.Mappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +28,6 @@ import static org.mockito.Mockito.*;
 /**
  * Acceptance Test for {{service.name}}.
  */
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class {{service.name}}Test  {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -47,35 +43,8 @@ public class {{service.name}}Test  {
 		context.reloadTestData();
 	}
 
-{{#each entities as |entity|}}
-    @Test
-    @Order(0)
-    void testCRUD{{entity.className}}() {
-        /*
-        var input = new {{entity.className}}{{inputDTOSuffix}}();
-        // TODO fill input data
-        var {{entity.instanceName}} = {{serviceInstance}}.create{{entity.className}}(input);
-        assertNotNull({{entity.instanceName}}.getId());
-        assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}));
-
-        var id = {{entity.instanceName}}.getId();
-        var {{entity.instanceName}}Update = new {{entity.className}}{{inputDTOSuffix}}();
-        // TODO fill update data
-        assertTrue({{entity.instanceName}}Repository.containsKey(id));
-        var {{entity.instanceName}}Updated = {{serviceInstance}}.update{{entity.className}}(id, {{entity.instanceName}}Update);
-        assertTrue({{entity.instanceName}}Updated.isPresent());
-        assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}Updated.get()));
-
-        assertTrue({{entity.instanceName}}Repository.containsKey(id));
-        {{serviceInstance}}.delete{{entity.className}}(id);
-        assertFalse({{entity.instanceName}}Repository.containsKey(id));
-        */
-    }
-{{/each}}
-
 {{#each service.methods as |method|}}
     @Test
-    @Order({{@index}})
     void {{method.name}}Test() {
         {{~> (partial 'testMethodBody')~}}
     }
