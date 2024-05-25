@@ -57,6 +57,9 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
     @DocumentedOption(description = "Operation ids to include in code generation. Generates code for ALL if left empty")
     public List<String> operationIds = new ArrayList<>();
 
+    @DocumentedOption(description = "Operation ids to include in code generation. Generates code for ALL if left empty")
+    public List<String> excludeOperationIds = new ArrayList<>();
+
     public Map<String, List<Map<String, Object>>> getPublishOperationsGroupedByTag(Model apiModel) {
         return getOperationsGroupedByTag(apiModel, AsyncapiOperationType.publish);
     }
@@ -155,10 +158,15 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
     }
 
     public boolean isSkipOperation(Map<String, Object> operation) {
-        if(operationIds == null || operationIds.isEmpty()) {
-            return false;
+        boolean isIncluded = true;
+        if(operationIds != null && !operationIds.isEmpty()) {
+            isIncluded = operationIds.contains((String) operation.get("operationId"));
         }
-        return !operationIds.contains((String) operation.get("operationId"));
+        boolean isExcluded = false;
+        if(excludeOperationIds != null && !excludeOperationIds.isEmpty()) {
+            isExcluded = excludeOperationIds.contains((String) operation.get("operationId"));
+        }
+        return !isIncluded || isExcluded;
     }
 
 

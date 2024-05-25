@@ -59,6 +59,31 @@ public class AbstractAsyncapiGeneratorTest {
     }
 
     @Test
+    public void test_filter_operations_for_provider_nobindings_includes() throws Exception {
+        Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-circular-refs.yml");
+        AbstractAsyncapiGenerator asyncapiGenerator = newAbstractAsyncapiGenerator();
+        asyncapiGenerator.role = AsyncapiRoleType.provider;
+        asyncapiGenerator.operationIds = Arrays.asList("doCreateProduct");
+        Map<String, List<Map<String, Object>>> consumerOperations = asyncapiGenerator.getSubscribeOperationsGroupedByTag(model);
+        Map<String, List<Map<String, Object>>> producerOperations = asyncapiGenerator.getPublishOperationsGroupedByTag(model);
+        Assertions.assertEquals(1, consumerOperations.size());
+        Assertions.assertEquals("doCreateProduct", consumerOperations.get("DefaultService").get(0).get("operationId"));
+        Assertions.assertTrue(producerOperations.isEmpty());
+    }
+
+    @Test
+    public void test_filter_operations_for_provider_nobindings_excludes() throws Exception {
+        Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-circular-refs.yml");
+        AbstractAsyncapiGenerator asyncapiGenerator = newAbstractAsyncapiGenerator();
+        asyncapiGenerator.role = AsyncapiRoleType.provider;
+        asyncapiGenerator.excludeOperationIds = Arrays.asList("doCreateProduct");
+        Map<String, List<Map<String, Object>>> consumerOperations = asyncapiGenerator.getSubscribeOperationsGroupedByTag(model);
+        Map<String, List<Map<String, Object>>> producerOperations = asyncapiGenerator.getPublishOperationsGroupedByTag(model);
+        Assertions.assertEquals(0, consumerOperations.size());
+    }
+
+
+    @Test
     public void test_filter_operations_for_provider_nobindings_v3() throws Exception {
         Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v3/customer-order-asyncapi.yml");
         AbstractAsyncapiGenerator asyncapiGenerator = newAbstractAsyncapiGenerator();
