@@ -57,7 +57,7 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
     @DocumentedOption(description = "Operation ids to include in code generation. Generates code for ALL if left empty")
     public List<String> operationIds = new ArrayList<>();
 
-    @DocumentedOption(description = "Operation ids to include in code generation. Generates code for ALL if left empty")
+    @DocumentedOption(description = "Operation ids to exclude in code generation. Skips code generation if is not included or is excluded.")
     public List<String> excludeOperationIds = new ArrayList<>();
 
     public Map<String, List<Map<String, Object>>> getPublishOperationsGroupedByTag(Model apiModel) {
