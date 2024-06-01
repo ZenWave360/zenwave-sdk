@@ -64,7 +64,6 @@
         <module>backend-application-default</module>
         <module>openapi-controllers</module>
         <module>openapi-spring-webtestclient</module>
-        <module>openapi-rest-assured</module>
 <!--        <module>openapi-pact-consumer</module>-->
     </modules>
 </project>

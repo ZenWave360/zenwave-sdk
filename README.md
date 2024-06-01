@@ -63,7 +63,6 @@ org.slf4j:slf4j-simple:1.7.36,\
 io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3:1.4.0,\
 io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:1.4.0,\
 io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:1.4.0,\
-io.github.zenwave360.zenwave-sdk.plugins:openapi-rest-assured:1.4.0,\
 io.github.zenwave360.zenwave-sdk.plugins:backend-application-default:1.4.0,\
 io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi:1.4.0,\
 io.github.zenwave360.zenwave-sdk.plugins:zdl-to-asyncapi:1.4.0,\
@@ -168,7 +167,6 @@ jsonschema2pojo                io.zenwave360.sdk.plugins.AsyncApiJsonSchema2Pojo
 openapi-controllers            io.zenwave360.sdk.plugins.OpenAPIControllersPlugin: Generates implementations based on ZDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces. (1.4.0)
 openapi-to-jdl                 io.zenwave360.sdk.plugins.OpenAPIToJDLPlugin: Generates JDL model from OpenAPI schemas (1.4.0)
 spring-cloud-streams3          io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin: Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI (1.4.0)
-rest-assured                   io.zenwave360.sdk.plugins.RestAssuredPlugin: Generates REST-Assured tests based on OpenAPI specification. (1.4.0)
 zdl-to-openapi                 io.zenwave360.sdk.plugins.ZDLToOpenAPIPlugin: Generates a draft OpenAPI definitions from your ZDL entities and services. (1.4.0)
 zdl-to-markdown                io.zenwave360.sdk.plugins.ZdlToMarkdownPlugin: Generates Markdown glossary from Zdl Models (1.4.0)
 zdl-to-asyncapi                io.zenwave360.sdk.plugins.ZDLToAsyncAPIPlugin: Generates a draft AsyncAPI file with events from your ZDL services. (1.4.0)
@@ -202,7 +200,6 @@ Refer to individual plugin's documentation for more information:
 | [ZDL to OpenAPI](./plugins/zdl-to-openapi/README.md)                                     | ZDL to OpenAPI and OpenAPI to ZDL  | ZDL, OpenAPI               |
 | [ZDL to AsyncAPI](./plugins/zdl-to-asyncapi/README.md)                                   | ZDL to AsyncAPI                    | ZDL, AsyncAPI              |
 | [ZDL to Markdown](./plugins/zdl-to-markdown/README.md)                                   | ZDL to Markdown                    | ZDL                        |
-| [REST-Assured](./plugins/openapi-rest-assured/README.md)                                 | OpenAPI to REST-Assured            | OpenAPI                    |
 | [Java 2 JDL Reverse Engineering](./plugins/java-to-jdl/README.md)                        | Java 2 JDL Reverse Engineering     | Java, JDL                  |
 
 ## Forking an Standard or Custom Plugin
