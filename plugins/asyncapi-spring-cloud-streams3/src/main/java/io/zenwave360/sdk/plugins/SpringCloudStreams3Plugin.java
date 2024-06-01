@@ -6,7 +6,6 @@ import io.zenwave360.sdk.formatters.JavaFormatter;
 import io.zenwave360.sdk.parsers.DefaultYamlParser;
 import io.zenwave360.sdk.processors.AsyncApiProcessor;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
-import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 
 @DocumentedPlugin(value = "Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI", shortCode = "spring-cloud-streams3")
 public class SpringCloudStreams3Plugin extends Plugin {

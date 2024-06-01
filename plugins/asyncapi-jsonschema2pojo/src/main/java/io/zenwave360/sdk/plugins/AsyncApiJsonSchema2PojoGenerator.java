@@ -67,8 +67,13 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
         return this;
     }
 
-    Model getApiModel(Map<String, Object> contextModel) {
+    public Model getApiModel(Map<String, Object> contextModel) {
         return (Model) contextModel.get(sourceProperty);
+    }
+
+    @Override
+    protected Templates configureTemplates() {
+        return null;
     }
 
     @Override

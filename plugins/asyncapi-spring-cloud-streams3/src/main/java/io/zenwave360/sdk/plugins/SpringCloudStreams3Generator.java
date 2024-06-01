@@ -1,23 +1,21 @@
 package io.zenwave360.sdk.plugins;
 
-import java.util.*;
-import java.util.function.Function;
+import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractAsyncapiGenerator;
-import io.zenwave360.sdk.options.asyncapi.AsyncapiOperationType;
 import io.zenwave360.sdk.options.ProgrammingStyle;
-import io.zenwave360.sdk.options.asyncapi.AsyncapiRoleType;
-import io.zenwave360.sdk.parsers.Model;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
-import io.zenwave360.sdk.templating.TemplateEngine;
-import io.zenwave360.sdk.templating.TemplateInput;
-import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
@@ -26,8 +24,6 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     public enum TransactionalOutboxType {
         none, mongodb, jdbc
     }
-
-    public String sourceProperty = "api";
 
     @DocumentedOption(description = "Programming style")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
@@ -77,8 +73,13 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     @DocumentedOption(description = "Include Kafka common headers 'kafka_messageKey' as x-runtime-header")
     private boolean includeKafkaCommonHeaders = false;
 
-    private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
+    private final HandlebarsEngine handlebarsEngine = getTemplateEngine();
     {
+        handlebarsEngine.getHandlebars().registerHelper("apiClassName", (context, options) -> {
+            String serviceName = (String) context;
+            AbstractAsyncapiGenerator.OperationRoleType operationRoleType = options.param(0);
+            return getApiClassName(serviceName, operationRoleType);
+        });
         handlebarsEngine.getHandlebars().registerHelper("consumerName", (context, options) -> {
             return String.format("%s%s%s", consumerPrefix, context, consumerSuffix);
         });
@@ -144,114 +145,22 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
     protected String templatesPath = "io/zenwave360/sdk/plugins/SpringCloudStream3Generator";
 
-    protected List<TemplateInput> producerTemplates = Arrays.asList(
-            new TemplateInput(templatesPath + "/producer/IProducer.java", "src/main/java/{{asPackageFolder producerApiPackage}}/I{{apiClassName}}.java"),
-            new TemplateInput(templatesPath + "/producer/outbox/{{transactionalOutbox}}/Producer.java", "src/main/java/{{asPackageFolder producerApiPackage}}/{{apiClassName}}.java").withSkip((context) -> skipProducerImplementation),
-            new TemplateInput(templatesPath + "/producer/mocks/EventsProducerCaptor.java", "src/test/java/{{asPackageFolder producerApiPackage}}/{{apiClassName}}Captor.java"));
+    protected Templates configureTemplates() {
+        var ts = new Templates(templatesPath);
 
-    protected List<TemplateInput> producerByServicesTemplates = Arrays.asList(
-            new TemplateInput(templatesPath + "/producer/mocks/EventsProducerInMemoryContext.java", "src/test/java/{{asPackageFolder producerApiPackage}}/EventsProducerInMemoryContext.java"));
-    protected List<TemplateInput> consumerTemplates = Arrays.asList(
-            new TemplateInput(templatesPath + "/consumer/{{style}}/Consumer.java", "src/main/java/{{asPackageFolder consumerApiPackage}}/{{consumerName operation.x--operationIdCamelCase}}.java"),
-            new TemplateInput(templatesPath + "/consumer/{{style}}/IService.java", "src/main/java/{{asPackageFolder consumerApiPackage}}/{{serviceInterfaceName operation.x--operationIdCamelCase}}.java"));
+        ts.addTemplate(ts.producerTemplates, "producer/mocks/EventsProducerInMemoryContext.java", "src/test/java/{{asPackageFolder producerApiPackage}}/EventsProducerInMemoryContext.java");
 
-    public TemplateEngine getTemplateEngine() {
-        return handlebarsEngine;
+        ts.addTemplate(ts.producerByServiceTemplates, "producer/IProducer.java", "src/main/java/{{asPackageFolder producerApiPackage}}/I{{apiClassName serviceName operationRoleType}}.java");
+        ts.addTemplate(ts.producerByServiceTemplates, "producer/outbox/{{transactionalOutbox}}/Producer.java", "src/main/java/{{asPackageFolder producerApiPackage}}/{{apiClassName serviceName operationRoleType}}.java", JAVA, (context) -> skipProducerImplementation, false);
+        ts.addTemplate(ts.producerByServiceTemplates, "producer/mocks/EventsProducerCaptor.java", "src/test/java/{{asPackageFolder producerApiPackage}}/{{apiClassName serviceName operationRoleType}}Captor.java");
+
+        ts.addTemplate(ts.consumerByOperationTemplates, "consumer/{{style}}/Consumer.java", "src/main/java/{{asPackageFolder consumerApiPackage}}/{{consumerName operation.x--operationIdCamelCase}}.java");
+        ts.addTemplate(ts.consumerByOperationTemplates, "consumer/{{style}}/IService.java", "src/main/java/{{asPackageFolder consumerApiPackage}}/{{serviceInterfaceName operation.x--operationIdCamelCase}}.java");
+        return ts;
     }
 
-    public List<TemplateInput> getTemplates(boolean isProducer) {
-        return isProducer ? producerTemplates : consumerTemplates;
-    }
-
-    public static String getApiClassName(String serviceName, OperationRoleType operationRoleType) {
+    public static String getApiClassName(String serviceName, AbstractAsyncapiGenerator.OperationRoleType operationRoleType) {
         return operationRoleType != null? serviceName + operationRoleType.getServiceSuffix() : serviceName;
     }
 
-    Model getApiModel(Map<String, Object> contextModel) {
-        return (Model) contextModel.get(sourceProperty);
-    }
-
-    @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
-        List<TemplateOutput> templateOutputList = new ArrayList<>();
-        Model apiModel = getApiModel(contextModel);
-        Map<String, List<Map<String, Object>>> subscribeOperations = getSubscribeOperationsGroupedByTag(apiModel);
-        Map<String, List<Map<String, Object>>> publishOperations = getPublishOperationsGroupedByTag(apiModel);
-        Map<String, Map<String, Object>> producerServicesMap = new HashMap<>();
-
-        for (Map.Entry<String, List<Map<String, Object>>> operationsByTag : subscribeOperations.entrySet()) {
-            OperationRoleType operationRoleType = OperationRoleType.valueOf(role, AsyncapiOperationType.subscribe);
-            templateOutputList.addAll(generateTemplateOutput(contextModel, operationsByTag.getKey(), operationsByTag.getValue(), operationRoleType));
-
-            // prepare for producerMocksTemplates
-            if(operationRoleType.isProducer()) {
-                producerServicesMap.put(operationsByTag.getKey(), Map.of("operations", operationsByTag.getValue(), "apiClassName", getApiClassName(operationsByTag.getKey(), operationRoleType)));
-            }
-        }
-        for (Map.Entry<String, List<Map<String, Object>>> operationsByTag : publishOperations.entrySet()) {
-            OperationRoleType operationRoleType = OperationRoleType.valueOf(role, AsyncapiOperationType.publish);
-            templateOutputList.addAll(generateTemplateOutput(contextModel, operationsByTag.getKey(), operationsByTag.getValue(), operationRoleType));
-
-            // prepare for producerMocksTemplates
-            if(operationRoleType.isProducer()) {
-                producerServicesMap.put(operationsByTag.getKey(), Map.of("operations", operationsByTag.getValue(), "apiClassName", getApiClassName(operationsByTag.getKey(), operationRoleType)));
-            }
-        }
-
-        if (!producerServicesMap.isEmpty()) {
-            templateOutputList.addAll(generateTemplateOutput(contextModel, producerByServicesTemplates, producerServicesMap));
-        }
-
-        return templateOutputList;
-    }
-
-    protected void populateApiClassName(List<Map<String, Object>> operations, String serviceName, OperationRoleType operationRoleType) {
-        for (Map<String, Object> operation : operations) {
-            operation.put("apiClassName", getApiClassName(serviceName, operationRoleType));
-        }
-    }
-
-    public List<TemplateOutput> generateTemplateOutput(Map<String, Object> contextModel, String serviceName, List<Map<String, Object>> operations, OperationRoleType operationRoleType) {
-        boolean isProducer = operationRoleType.isProducer();
-        if (isProducer) {
-            // producer operations are grouped by tag
-            return generateTemplateOutput(contextModel, getTemplates(isProducer), serviceName, operations, operationRoleType);
-        } else {
-            // consumer templates are grouped by operationId
-            return operations.stream().flatMap(operation -> generateTemplateOutput(contextModel, getTemplates(isProducer), serviceName, operation, operationRoleType).stream()).collect(Collectors.toList());
-        }
-    }
-
-    public List<TemplateOutput> generateTemplateOutput(Map<String, Object> contextModel, List<TemplateInput> templates, String serviceName, Map<String, Object> operation, OperationRoleType operationRoleType) {
-        Map<String, Object> model = new HashMap<>();
-        model.putAll(this.asConfigurationMap());
-        model.put("context", contextModel);
-        model.put("asyncapi", getApiModel(contextModel));
-        model.put("serviceName", serviceName);
-        model.put("operation", operation);
-        model.put("messages", new HashSet(JSONPath.get(operation, "$.x--messages[*]")));
-        model.put("apiClassName", getApiClassName(serviceName, operationRoleType));
-        return getTemplateEngine().processTemplates(model, templates);
-    }
-
-    public List<TemplateOutput> generateTemplateOutput(Map<String, Object> contextModel, List<TemplateInput> templates, String serviceName, List<Map<String, Object>> operations, OperationRoleType operationRoleType) {
-        Map<String, Object> model = new HashMap<>();
-        model.putAll(this.asConfigurationMap());
-        model.put("context", contextModel);
-        model.put("asyncapi", getApiModel(contextModel));
-        model.put("serviceName", serviceName);
-        model.put("operations", operations);
-        model.put("messages", new HashSet(JSONPath.get(operations, "$[*].x--messages[*]")));
-        model.put("apiClassName", getApiClassName(serviceName, operationRoleType));
-        return getTemplateEngine().processTemplates(model, templates);
-    }
-
-    public List<TemplateOutput> generateTemplateOutput(Map<String, Object> contextModel, List<TemplateInput> templates, Map<String, Map<String, Object>> servicesMap) {
-        Map<String, Object> model = new HashMap<>();
-        model.putAll(this.asConfigurationMap());
-        model.put("context", contextModel);
-        model.put("asyncapi", getApiModel(contextModel));
-        model.put("services", servicesMap);
-        return getTemplateEngine().processTemplates(model, templates);
-    }
 }

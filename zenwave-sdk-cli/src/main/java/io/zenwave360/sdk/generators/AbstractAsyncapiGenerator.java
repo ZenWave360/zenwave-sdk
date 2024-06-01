@@ -1,15 +1,22 @@
 package io.zenwave360.sdk.generators;
 
 import java.util.*;
+import java.util.function.Function;
 
-import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
-import io.zenwave360.sdk.utils.JSONPath;
+import io.zenwave360.sdk.templating.HandlebarsEngine;
+import io.zenwave360.sdk.templating.OutputFormatType;
+import io.zenwave360.sdk.templating.TemplateInput;
+import io.zenwave360.sdk.templating.TemplateOutput;
 import org.apache.commons.lang3.ObjectUtils;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiOperationType;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiRoleType;
+import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
 import io.zenwave360.sdk.parsers.Model;
+import io.zenwave360.sdk.utils.JSONPath;
+
+import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
 
 public abstract class AbstractAsyncapiGenerator implements Generator {
 
@@ -41,6 +48,8 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
         }
     }
 
+    public String sourceProperty = "api";
+
     @DocumentedOption(description = "Java API package name for producerApiPackage and consumerApiPackage if not specified.")
     public String apiPackage;
     @DocumentedOption(description = "Java API package name for outbound (producer) services. It can override apiPackage for producers.")
@@ -59,6 +68,78 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
 
     @DocumentedOption(description = "Operation ids to exclude in code generation. Skips code generation if is not included or is excluded.")
     public List<String> excludeOperationIds = new ArrayList<>();
+
+    private final HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
+
+    protected Model getApiModel(Map<String, Object> contextModel) {
+        return (Model) contextModel.get(sourceProperty);
+    }
+
+    protected HandlebarsEngine getTemplateEngine() {
+        return handlebarsEngine;
+    }
+
+    protected abstract Templates configureTemplates();
+
+    @Override
+    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
+        Templates templates = configureTemplates();
+
+        Model apiModel = getApiModel(contextModel);
+        Map<String, List<Map<String, Object>>> subscribeOperations = getSubscribeOperationsGroupedByTag(apiModel);
+        Map<String, List<Map<String, Object>>> publishOperations = getPublishOperationsGroupedByTag(apiModel);
+        Map<String, Map<String, Object>> producerServicesMap = new HashMap<>();
+        Map<String, Map<String, Object>> consumerServicesMap = new HashMap<>();
+
+        List<TemplateOutput> templateOutputList = new ArrayList<>();
+        templateOutputList.addAll(generateTemplateOutput(contextModel, templates.commonTemplates, Map.of()));
+
+        for (Map.Entry<String, List<Map<String, Object>>> operationsByTag : subscribeOperations.entrySet()) {
+            AbstractAsyncapiGenerator.OperationRoleType operationRoleType = AbstractAsyncapiGenerator.OperationRoleType.valueOf(role, AsyncapiOperationType.subscribe);
+            templateOutputList.addAll(processServiceOperations(contextModel, operationsByTag, operationRoleType, templates));
+            addToServicesMap(operationRoleType.isProducer()? producerServicesMap : consumerServicesMap, operationsByTag, operationRoleType);
+        }
+        for (Map.Entry<String, List<Map<String, Object>>> operationsByTag : publishOperations.entrySet()) {
+            AbstractAsyncapiGenerator.OperationRoleType operationRoleType = AbstractAsyncapiGenerator.OperationRoleType.valueOf(role, AsyncapiOperationType.publish);
+            templateOutputList.addAll(processServiceOperations(contextModel, operationsByTag, operationRoleType, templates));
+            addToServicesMap(operationRoleType.isProducer()? producerServicesMap : consumerServicesMap, operationsByTag, operationRoleType);
+        }
+
+        if (!producerServicesMap.isEmpty()) {
+            templateOutputList.addAll(generateTemplateOutput(contextModel, templates.producerTemplates, Map.of("services", producerServicesMap)));
+        }
+
+        if (!consumerServicesMap.isEmpty()) {
+            templateOutputList.addAll(generateTemplateOutput(contextModel, templates.consumerTemplates, Map.of("services", consumerServicesMap)));
+        }
+
+        return templateOutputList;
+    }
+
+    public List<TemplateOutput> processServiceOperations(Map<String, Object> contextModel, Map.Entry<String, List<Map<String, Object>>> operationsByTag, AbstractAsyncapiGenerator.OperationRoleType operationRoleType, Templates templates) {
+        boolean isProducer = operationRoleType.isProducer();
+        var serviceName = operationsByTag.getKey();
+        var operations = operationsByTag.getValue();
+        var messages = new HashSet(JSONPath.get(operations, "$[*].x--messages[*]"));
+
+        List<TemplateOutput> templateOutputList = new ArrayList<>();
+        templateOutputList.addAll(generateTemplateOutput(contextModel, isProducer? templates.producerByServiceTemplates : templates.consumerByServiceTemplates,
+                Map.of("serviceName", serviceName, "operations", operations, "messages", messages, "operationRoleType", operationRoleType)));
+
+        for (Map<String, Object> operation : operations) {
+            messages = new HashSet(JSONPath.get(operation, "$.x--messages[*]"));
+            templateOutputList.addAll(generateTemplateOutput(contextModel, isProducer? templates.producerByOperationTemplates : templates.consumerByOperationTemplates,
+                    Map.of("serviceName", serviceName, "operation", operation, "messages", messages, "operationRoleType", operationRoleType)));
+
+        }
+        return templateOutputList;
+    }
+
+    public void addToServicesMap(Map<String, Map<String, Object>> servicesMap, Map.Entry<String, List<Map<String, Object>>> operationsByTag, AbstractAsyncapiGenerator.OperationRoleType operationRoleType) {
+        var serviceName = operationsByTag.getKey();
+        var operations = operationsByTag.getValue();
+        servicesMap.put(serviceName, Map.of("operations", operations, "operationRoleType", operationRoleType));
+    }
 
     public Map<String, List<Map<String, Object>>> getPublishOperationsGroupedByTag(Model apiModel) {
         return getOperationsGroupedByTag(apiModel, AsyncapiOperationType.publish);
@@ -146,17 +227,6 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
         return false;
     }
 
-    /**
-     * Returns true if generating code for a provider and operation is an event(operationType=publish) or project is a client and operation is a command(operationType=subscribe).
-     *
-     * @param operation
-     * @return
-     */
-    public boolean isProducer(Map<String, Object> operation) {
-        var operationType = AsyncapiOperationType.valueOf(operation.get("x--operationType").toString());
-        return isProducer(this.role, operationType);
-    }
-
     public boolean isSkipOperation(Map<String, Object> operation) {
         boolean isIncluded = true;
         if(operationIds != null && !operationIds.isEmpty()) {
@@ -182,5 +252,53 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
             return true;
         }
         return false;
+    }
+
+    protected List<TemplateOutput> generateTemplateOutput(Map<String, Object> contextModel, List<TemplateInput> templates, Map<String, Object> extModel) {
+        Map<String, Object> baseModel = new HashMap<>();
+        baseModel.putAll(this.asConfigurationMap());
+        baseModel.put("context", contextModel);
+        baseModel.put("asyncapi", getApiModel(contextModel));
+
+        var templateOutputList = new ArrayList<TemplateOutput>();
+        for (TemplateInput template : templates) {
+            var model = new HashMap<>(baseModel);
+            model.putAll(extModel);
+            templateOutputList.addAll(getTemplateEngine().processTemplates(model, List.of(template)));
+        }
+        return templateOutputList;
+    }
+
+    public static class Templates {
+
+        public final String templatesFolder;
+
+        public Templates(String templatesFolder) {
+            this.templatesFolder = templatesFolder;
+        }
+
+        public List<TemplateInput> commonTemplates = new ArrayList<>();
+
+        public List<TemplateInput> producerTemplates = new ArrayList<>();
+        public List<TemplateInput> producerByServiceTemplates = new ArrayList<>();
+        public List<TemplateInput> producerByOperationTemplates = new ArrayList<>();
+
+        public List<TemplateInput> consumerTemplates = new ArrayList<>();
+        public List<TemplateInput> consumerByServiceTemplates = new ArrayList<>();
+        public List<TemplateInput> consumerByOperationTemplates = new ArrayList<>();
+
+        public void addTemplate(List<TemplateInput> templates, String templateLocation, String targetFile) {
+            addTemplate(templates, templateLocation, targetFile, JAVA, null, false);
+        }
+
+        public void addTemplate(List<TemplateInput> templates, String templateLocation, String targetFile, OutputFormatType mimeType, Function<Map<String, Object>, Boolean> skip, boolean skipOverwrite) {
+            var template = new TemplateInput()
+                    .withTemplateLocation(templatesFolder + "/" + templateLocation)
+                    .withTargetFile(targetFile)
+                    .withMimeType(mimeType)
+                    .withSkipOverwrite(skipOverwrite)
+                    .withSkip(skip);
+            templates.add(template);
+        }
     }
 }

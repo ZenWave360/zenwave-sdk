@@ -8,7 +8,7 @@ import {{modelPackage}}.*;
  * {{asyncapi.description}}
  */
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
-public interface I{{apiClassName}} {
+public interface I{{apiClassName serviceName operationRoleType}} {
 
 {{#each operations as |operation|}}
     {{#each operation.x--messages as |message|}}
