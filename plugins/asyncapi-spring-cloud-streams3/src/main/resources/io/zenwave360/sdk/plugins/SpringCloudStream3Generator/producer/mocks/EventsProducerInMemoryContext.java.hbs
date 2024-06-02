@@ -4,10 +4,11 @@ package {{producerApiPackage}};
 public class EventsProducerInMemoryContext {
 
 {{#each services as |service|}}
-    private {{service.apiClassName}}Captor {{asInstanceName service.apiClassName}}Captor = new {{service.apiClassName}}Captor();
+    {{~assign 'apiClassName' (apiClassName @key service.operationRoleType)}}
+    private {{apiClassName}}Captor {{asInstanceName apiClassName}}Captor = new {{apiClassName}}Captor();
 
-    public {{service.apiClassName}}Captor {{asInstanceName service.apiClassName}}() {
-        return {{asInstanceName service.apiClassName}}Captor;
+    public {{apiClassName}}Captor {{asInstanceName apiClassName}}() {
+        return {{asInstanceName apiClassName}}Captor;
     }
 {{/each}}
 }

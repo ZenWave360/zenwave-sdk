@@ -29,9 +29,9 @@ import {{modelPackage}}.*;
 /**
  * {{asyncapi.description}}
  */
-@Component("{{bindingPrefix}}{{apiClassName}}")
+@Component("{{bindingPrefix}}{{apiClassName serviceName operationRoleType}}")
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
-public class {{apiClassName}} implements I{{apiClassName}} {
+public class {{apiClassName serviceName operationRoleType}} implements I{{apiClassName serviceName operationRoleType}} {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -49,7 +49,7 @@ public class {{apiClassName}} implements I{{apiClassName}} {
 
 {{> (partial '../../partials/tracing-id-supplier')}}
 
-    public {{apiClassName}}(StreamBridge streamBridge, MongoTemplate mongoTemplate) {
+    public {{apiClassName serviceName operationRoleType}}(StreamBridge streamBridge, MongoTemplate mongoTemplate) {
         this.streamBridge = streamBridge;
         this.mongoTemplate = mongoTemplate;
     }

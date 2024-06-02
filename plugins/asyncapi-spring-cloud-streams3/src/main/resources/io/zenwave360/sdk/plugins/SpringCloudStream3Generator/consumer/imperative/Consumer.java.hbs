@@ -25,13 +25,7 @@ import {{modelPackage}}.*;
 
 @Component("{{bindingPrefix}}{{operation.x--operationIdKebabCase}}")
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
-public class {{consumerName operation.x--operationIdCamelCase}} implements
-    {{~#if (eq functionalInterfaceImplementation 'function')~}}
-    Function<Message<{{messageType operation}}>, Void>
-    {{~else~}}
-    Consumer<Message<{{messageType operation}}>>
-    {{~/if~}}
-{
+public class {{consumerName operation.x--operationIdCamelCase}} implements Consumer<Message<{{messageType operation}}>> {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
@@ -58,14 +52,8 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements
     }
 {{~/if}}
 
-    // NOTE: implementing both accept and apply facilitates code generation.
-    // See what this class actually implements.
-
+    @Override
     public void accept(Message<{{messageType operation}}> message) {
-        apply(message);
-    }
-
-    public Void apply(Message<{{messageType operation}}> message) {
         log.debug("Received message: {}", message);
         try {
             Object payload = {{#if (hasEnterpriseEnvelope operation)}}unwrap(message.getPayload()){{else}}message.getPayload(){{/if}};
@@ -78,7 +66,7 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements
                 headers.putAll(message.getHeaders());
                 service.{{operation.operationId}}{{methodSuffix message operation}}(({{message.x--javaType}}) payload, headers);
                 {{~/if}}
-                return null;
+                return;
             }
             {{~/each}}
             log.warn("Received message without any business handler: [payload: {}, message: {}]", payload.getClass().getName(), message);
@@ -87,7 +75,7 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements
             {{~else}}
             service.defaultHandler(payload, message.getHeaders());
             {{~/if}}
-            return null;
+            return;
         } catch (Exception e) {
             if(log.isDebugEnabled()) {
                 log.error("Error processing message: {}", message, e);
@@ -107,7 +95,7 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements
                     headers.put("x-exception-stacktrace ", getStackTraceAsString(e));
                     headers.put("x-exception-payload-type", payload.getClass().getName());
                     streamBridge.send(resolvedDLQ, MessageBuilder.createMessage(payload, new MessageHeaders(headers)));
-                    return null;
+                    return;
                 } catch (Exception e1) {
                     log.error("Error sending message to dead letter queue: {}", resolvedDLQ, e1);
                 }

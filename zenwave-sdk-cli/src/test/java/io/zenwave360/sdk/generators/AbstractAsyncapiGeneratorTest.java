@@ -8,6 +8,8 @@ import java.util.Map;
 import io.zenwave360.sdk.generators.AbstractAsyncapiGenerator.OperationRoleType;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiOperationType;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiRoleType;
+import io.zenwave360.sdk.templating.HandlebarsEngine;
+import io.zenwave360.sdk.templating.TemplateInput;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -27,11 +29,44 @@ public class AbstractAsyncapiGeneratorTest {
     private AbstractAsyncapiGenerator newAbstractAsyncapiGenerator() {
         return new AbstractAsyncapiGenerator() {
             @Override
-            public List<TemplateOutput> generate(Map<String, Object> apiModel) {
-                return null;
+            protected HandlebarsEngine getTemplateEngine() {
+                return new NOPHandlebarsEngine();
+            }
+
+            @Override
+            protected Templates configureTemplates() {
+                var ts = new Templates("");
+                ts.addTemplate(ts.commonTemplates, "", "");
+                ts.addTemplate(ts.producerTemplates, "{{services}}", "");
+                ts.addTemplate(ts.consumerTemplates, "{{services}}", "");
+                ts.addTemplate(ts.producerByServiceTemplates, "{{service}}", "");
+                ts.addTemplate(ts.consumerByServiceTemplates, "{{service}}", "");
+                ts.addTemplate(ts.producerByOperationTemplates, "{{operation}}", "");
+                ts.addTemplate(ts.consumerByOperationTemplates, "{{operation}}", "");
+                return ts;
             }
         };
     }
+
+    @Test
+    public void test_generate_v2() throws Exception {
+        Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-orders-relational.yml");
+        AbstractAsyncapiGenerator asyncapiGenerator = newAbstractAsyncapiGenerator();
+        asyncapiGenerator.role = AsyncapiRoleType.provider;
+        var outputList = asyncapiGenerator.generate(Map.of(asyncapiGenerator.sourceProperty, model));
+        Assertions.assertEquals(15, outputList.size());
+    }
+
+    @Test
+    public void test_generate_v3() throws Exception {
+        Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v3/customer-order-asyncapi.yml");
+        AbstractAsyncapiGenerator asyncapiGenerator = newAbstractAsyncapiGenerator();
+        asyncapiGenerator.role = AsyncapiRoleType.provider;
+        var outputList = asyncapiGenerator.generate(Map.of(asyncapiGenerator.sourceProperty, model));
+        Assertions.assertEquals(11, outputList.size());
+    }
+
+
 
     @Test
     public void testOperationRoleType() {
