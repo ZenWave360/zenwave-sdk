@@ -40,3 +40,11 @@ jobs:
         run: |
           git push
           git push --tags
+
+      - name: Build and Publish SNAPSHOT to the Maven Central
+        run: mvn -B clean install deploy -DskipTests -DdeployAtEnd=true
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          SIGN_KEY: ${{ secrets.SIGN_KEY }}
+          SIGN_KEY_PASS: ${{ secrets.SIGN_KEY_PASS }}

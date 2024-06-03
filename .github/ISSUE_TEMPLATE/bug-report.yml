@@ -1,0 +1,65 @@
+name: Bug Report
+description: File a bug report.
+title: "[Bug]: "
+labels: ["bug", "triage"]
+#projects: ["octo-org/1", "octo-org/44"]
+assignees:
+  - ivangsa
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: input
+    id: version
+    attributes:
+      label: ZenWave Version
+      description: Which version of ZenWave are you using?
+      placeholder: 1.6.0
+    validations:
+      required: true
+  - type: dropdown
+    id: execution
+    attributes:
+      label: Execution Environment
+      description: How did you executed ZenWave SDK?
+      options:
+        - JBang Alias (CLI)
+        - Maven Plugin
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: plugin
+    attributes:
+      label: ZenWave Plugin
+      description: Which ZenWave plugin are you using?
+      options:
+        - "BackendApplicationDefaultPlugin: Generates a full backend application using a flexible hexagonal architecture"
+        - "ZDLToOpenAPIPlugin: Generates a draft OpenAPI definitions from your ZDL entities and services."
+        - "ZDLToAsyncAPIPlugin: Generates a draft AsyncAPI file with events from your ZDL services."
+        - "OpenAPIControllersPlugin: Generates implementations based on ZDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces."
+        - "SpringWebTestClientPlugin: Generates test for SpringMVC or Spring WebFlux using WebTestClient based on OpenAPI specification."
+        - "AsyncApiJsonSchema2PojoPlugin: Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files"
+        - "SpringCloudStreams3Plugin: Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI"
+        - "SpringCloudStreams3AdaptersPlugin: Generates tests for Spring Cloud Streams Consumers."
+        - "ZdlToMarkdownPlugin: Generates Markdown glossary from Zdl Models"
+        - "JDLToAsyncAPIPlugin: Generates a full AsyncAPI definitions for CRUD operations from JDL models"
+        - "OpenAPIToJDLPlugin: Generates JDL model from OpenAPI schemas"
+        - "ZdlToJsonPlugin: Prints to StdOut ZDL Model as JSON"
+        - "ForkPlugin: Creates a new standalone maven module cloning an existing plugin"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Please, also attach relevant parts of your ZDL file.
+    validations:
+      required: true
+  - type: textarea
+    id: zdl
+    attributes:
+      label: Relevant ZDL Model
+      description: Please, also attach relevant parts of your ZDL file.
+
