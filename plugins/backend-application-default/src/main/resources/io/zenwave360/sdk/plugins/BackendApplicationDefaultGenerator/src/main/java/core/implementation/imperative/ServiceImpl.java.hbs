@@ -5,14 +5,12 @@ import {{inboundPackage}}.*;
 import {{inboundDtosPackage}}.*;
 import {{coreImplementationPackage}}.mappers.*;
 import {{outboundRepositoryPackage}}.*;
-{{#if includeEmitEventsImplementation}}
-    {{~#if (needsEventsProducer service)}}
+{{~#if (and includeEmitEventsImplementation (needsEventsProducer service))}}
 import {{outboundEventsPackage}}.*;
-    {{~/if}}
-    {{#if (includeDomainEvents service)}}
+{{~/if}}
+{{~#if (includeDomainEvents service)}}
 import {{domainEventsPackage}}.*;
-    {{/if}}
-{{/if}}
+{{~/if}}
 
 import java.math.*;
 import java.time.*;
