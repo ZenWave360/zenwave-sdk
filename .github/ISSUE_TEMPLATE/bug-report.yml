@@ -35,19 +35,19 @@ body:
       label: ZenWave Plugin
       description: Which ZenWave plugin are you using?
       options:
-        - "BackendApplicationDefaultPlugin: Generates a full backend application using a flexible hexagonal architecture"
-        - "ZDLToOpenAPIPlugin: Generates a draft OpenAPI definitions from your ZDL entities and services."
-        - "ZDLToAsyncAPIPlugin: Generates a draft AsyncAPI file with events from your ZDL services."
-        - "OpenAPIControllersPlugin: Generates implementations based on ZDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces."
-        - "SpringWebTestClientPlugin: Generates test for SpringMVC or Spring WebFlux using WebTestClient based on OpenAPI specification."
-        - "AsyncApiJsonSchema2PojoPlugin: Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files"
-        - "SpringCloudStreams3Plugin: Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI"
-        - "SpringCloudStreams3AdaptersPlugin: Generates tests for Spring Cloud Streams Consumers."
-        - "ZdlToMarkdownPlugin: Generates Markdown glossary from Zdl Models"
-        - "JDLToAsyncAPIPlugin: Generates a full AsyncAPI definitions for CRUD operations from JDL models"
-        - "OpenAPIToJDLPlugin: Generates JDL model from OpenAPI schemas"
-        - "ZdlToJsonPlugin: Prints to StdOut ZDL Model as JSON"
-        - "ForkPlugin: Creates a new standalone maven module cloning an existing plugin"
+        - BackendApplicationDefaultPlugin
+        - ZDLToOpenAPIPlugin
+        - ZDLToAsyncAPIPlugin
+        - OpenAPIControllersPlugin
+        - SpringWebTestClientPlugin
+        - AsyncApiJsonSchema2PojoPlugin
+        - SpringCloudStreams3Plugin
+        - SpringCloudStreams3AdaptersPlugin
+        - ZdlToMarkdownPlugin
+        - JDLToAsyncAPIPlugin
+        - OpenAPIToJDLPlugin
+        - ZdlToJsonPlugin
+        - ForkPlugin
     validations:
       required: true
   - type: textarea

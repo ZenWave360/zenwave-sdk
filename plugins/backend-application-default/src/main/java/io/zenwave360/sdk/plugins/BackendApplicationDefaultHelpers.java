@@ -16,6 +16,7 @@ import io.zenwave360.sdk.utils.JSONPath;
 
 import static io.zenwave360.sdk.utils.NamingUtils.asJavaTypeName;
 import static java.lang.String.format;
+import static java.lang.String.join;
 
 public class BackendApplicationDefaultHelpers {
 
@@ -96,7 +97,9 @@ public class BackendApplicationDefaultHelpers {
 
     public boolean includeDomainEvents(Object service, Options options) {
         var zdl = options.get("zdl");
-        return !JSONPath.get(zdl, "$.aggregates[*].commands[*].withEvents", List.of()).isEmpty();
+        var hasAggregateEvents = !JSONPath.get(zdl, "$.aggregates[*].commands[*].withEvents", List.of()).isEmpty();
+        var needEventBus = needsEventBus((Map) service, options);
+        return hasAggregateEvents || needEventBus;
     }
 
     public List<Map> aggregateEvents(Map<String, Object> aggregate, Options options) {
@@ -200,13 +203,16 @@ public class BackendApplicationDefaultHelpers {
             var entity = methodEntity(method, options);
             var methodEvents = methodEvents(method, options);
             for (Map<String, Object> event : methodEvents) {
+                var isAsyncApi = JSONPath.get(event, "options.asyncapi") != null;
                 if (entity == null) {
                     var key = JSONPath.get(event, "name") + "-method-" + ZDLJavaSignatureUtils.methodParametersCallSignature(method, zdl, generator.inputDTOSuffix);
-                    result.put(key, Map.of("event", event, "method", method));
+                    result.put(key, Map.of("event", event, "method", method, "isAsyncApi", isAsyncApi));
                 } else {
                     var key = JSONPath.get(event, "name") + "-" + entity.get("name");
-                    result.put(key, Map.of("event", event, "entity", entity));
-                    result.putAll(extraMappingsFromEventFields(event, entity, zdl));
+                    result.put(key, Map.of("event", event, "entity", entity, "isAsyncApi", isAsyncApi));
+                    if (isAsyncApi) {
+                        result.putAll(extraMappingsFromEventFields(event, entity, zdl));
+                    }
                 }
             }
         }
@@ -220,7 +226,7 @@ public class BackendApplicationDefaultHelpers {
             var targetEntity = JSONPath.get(zdl, "$.allEntitiesAndEnums." + targetField.get("type"));
             if (targetEntity != null && !JSONPath.get(targetEntity, "options.skip", false)) {
                 var key = targetField.get("type") + "-" + targetField.get("type");
-                result.put(key, Map.of("event",targetEntity, "entity", targetEntity));
+                result.put(key, Map.of("event", targetEntity, "entity", targetEntity, "isAsyncApi", true));
             }
         }
         return result;
@@ -428,6 +434,27 @@ public class BackendApplicationDefaultHelpers {
 
     public String abstractClass(Map entity, Options options) {
         return JSONPath.get(entity, "options.abstract", false)? " abstract " : "";
+    }
+
+    public boolean needsEventsProducer(Map service, Options options) {
+        Map<String, Object> zdl = options.get("zdl");
+        var methods = service != null?
+                JSONPath.get(service, "methods[*]", List.<Map<String, Object>>of())
+                : ZDLFindUtils.methodsWithEvents(zdl);
+        var eventNamesExpr = methods.stream().map(ZDLFindUtils::methodEventsFlatList).flatMap(List::stream).collect(Collectors.joining("|"));
+        var externalEvents = (List) JSONPath.get(zdl, "$.events[*][?(@.name =~ /(" + eventNamesExpr + ")/)].options.asyncapi");
+        return externalEvents != null && !externalEvents.isEmpty();
+    }
+
+    public boolean needsEventBus(Map service, Options options) {
+        Map<String, Object> zdl = options.get("zdl");
+        var methods = service != null?
+                JSONPath.get(service, "methods[*]", List.<Map<String, Object>>of())
+                : ZDLFindUtils.methodsWithEvents(zdl);
+        var eventNamesExpr = methods.stream().map(ZDLFindUtils::methodEventsFlatList).flatMap(List::stream).collect(Collectors.joining("|"));
+        var domainEvents = JSONPath.get(zdl, "$.events[*][?(@.name =~ /(" + eventNamesExpr + ")/)]", List.<Map>of()).stream()
+                .filter(event -> JSONPath.get(event, "options.asyncapi") == null).collect(Collectors.toSet());
+        return domainEvents != null && !domainEvents.isEmpty();
     }
 
     public Object eventsProducerInterface(String serviceName, Options options) {

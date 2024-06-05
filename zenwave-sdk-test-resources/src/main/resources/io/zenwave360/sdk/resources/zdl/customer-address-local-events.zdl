@@ -1,0 +1,64 @@
+/**
+* Global javadoc comment
+*/
+
+MAX_LENGTH=100
+
+apis {
+    asyncapi(provider) CustomerAddressAPI {
+        uri ""
+    }
+    asyncapi(client) ThirdPartyAPI {
+        uri ""
+    }
+}
+
+/**
+* Customer javadoc comment
+*/
+@aggregate
+entity Customer {
+  username String required unique /** username javadoc comment */
+  email String required unique /** email javadoc comment */
+  tags String[] /** tags javadoc comment */
+  /**
+   * address is a nested entity
+   */
+  addresses Address[] {
+    street String /** street javadoc comment */
+    city String /** city javadoc comment */
+    state String /** state javadoc comment */
+    zip String /** zip javadoc comment */
+    type AddressType /** address type is an enum */
+  }
+}
+
+enum AddressType {  HOME(1) /** home description */,  WORK(1) /** work description */ }
+
+
+/**
+ Service javadoc comment
+ */
+service CustomerService for (Customer) {
+
+  createCustomer(Customer) Customer withEvents CustomerEvent
+
+  updateCustomer(id, Customer) Customer? withEvents CustomerEvent CustomerUpdated
+}
+
+@copy(Customer)
+event CustomerEvent {
+  customerId String
+  eventType EventType
+}
+
+@event
+enum EventType {  CREATE(1) /** create description */,  UPDATE(1) /** update description */ }
+
+event CustomerUpdated {
+  customerId String
+  customer CustomerDetails {
+    username String
+    email String
+  }
+}

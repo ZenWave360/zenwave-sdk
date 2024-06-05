@@ -17,8 +17,10 @@ public class OpenAPIToJDLPlugin extends Plugin {
 
     @Override
     public <T extends Plugin> T processOptions() {
-        if (!getOptions().containsKey("targetFolder") && !getOptions().containsKey("targetFile")) {
+        if (!getOptions().containsKey("targetFile")) {
             replaceInChain(TemplateFileWriter.class, TemplateStdoutWriter.class);
+        } else if(!getOptions().containsKey("targetFolder")) {
+            withOption("targetFolder", ".");
         }
         return (T) this;
     }

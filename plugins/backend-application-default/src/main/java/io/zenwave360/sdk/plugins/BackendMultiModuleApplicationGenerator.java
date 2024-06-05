@@ -33,10 +33,12 @@ public class BackendMultiModuleApplicationGenerator extends BackendDefaultApplic
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", "{{mavenModulesPrefix}}-core-impl",
                 "{{asPackageFolder infrastructureRepositoryPackage}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true);
 
-        ts.addTemplate(ts.enumTemplates, "src/main/java", "core/domain/common/Enum.java", "{{mavenModulesPrefix}}-domain",
+        ts.addTemplate(ts.enumTemplates, "src/main/java", "core/domain/common/DomainEnum.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder entitiesPackage}}/{{enum.name}}.java", JAVA, null, false);
-        ts.addTemplate(ts.inputEnumTemplates, "src/main/java", "core/inbound/dtos/Enum.java", "{{mavenModulesPrefix}}-domain",
+        ts.addTemplate(ts.inputEnumTemplates, "src/main/java", "core/domain/common/InputEnum.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder inboundDtosPackage}}/{{enum.name}}.java", JAVA, null, false);
+        ts.addTemplate(ts.eventEnumTemplates, "src/main/java", "core/domain/common/EventEnum.java", "{{mavenModulesPrefix}}-domain",
+                "{{asPackageFolder domainEventsPackage}}/{{enum.name}}.java", JAVA, skipInput, false);
 
         ts.addTemplate(ts.inputTemplates, "src/main/java", "core/inbound/dtos/InputOrOutput.java", "{{mavenModulesPrefix}}-domain",
                 "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}.java", JAVA, skipInput, false);

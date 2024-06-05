@@ -39,7 +39,7 @@ public class BackendSimpleDomainPackagingApplicationGenerator extends BackendDef
     {
         configPackage = "{{basePackage}}.config";
         entitiesPackage = "{{basePackage}}.model";
-        domainEventsPackage = "{{basePackage}}";
+        domainEventsPackage = "{{basePackage}}.events";
         inboundPackage = "{{basePackage}}";
         inboundDtosPackage = "{{basePackage}}.dtos";
         outboundPackage = "{{basePackage}}";
@@ -79,10 +79,12 @@ public class BackendSimpleDomainPackagingApplicationGenerator extends BackendDef
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java",
                 "{{asPackageFolder infrastructureRepositoryPackage}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true);
 
-        ts.addTemplate(ts.enumTemplates, "src/main/java", "core/domain/common/Enum.java",
+        ts.addTemplate(ts.enumTemplates, "src/main/java", "core/domain/common/DomainEnum.java",
                 "{{asPackageFolder entitiesPackage}}/{{enum.name}}.java", JAVA, null, false);
-        ts.addTemplate(ts.inputEnumTemplates, "src/main/java", "core/inbound/dtos/Enum.java",
-                "{{asPackageFolder inboundDtosPackage}}/{{enum.name}}.java", JAVA, skipInput, false);
+        ts.addTemplate(ts.inputEnumTemplates, "src/main/java", "core/domain/common/InputEnum.java",
+                "{{asPackageFolder inboundDtosPackage}}/{{enum.name}}.java", JAVA, null, false);
+        ts.addTemplate(ts.eventEnumTemplates, "src/main/java", "core/domain/common/EventEnum.java",
+                "{{asPackageFolder domainEventsPackage}}/{{enum.name}}.java", JAVA, skipInput, false);
 
         ts.addTemplate(ts.inputTemplates, "src/main/java", "core/inbound/dtos/InputOrOutput.java",
                 "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}.java", JAVA, skipInput, false);
