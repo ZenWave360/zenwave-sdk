@@ -22,18 +22,18 @@ import java.util.stream.StreamSupport
 
 import org.apache.commons.lang3.ObjectUtils.firstNonNull
 
-class InMemoryJpaRepository<T> : JpaRepository<T, {{idJavaType}}> {
+open class InMemoryJpaRepository<T, ID> : JpaRepository<T, ID> {
 
-    interface PrimaryKeyGenerator<{{idJavaType}}> {
-        fun next(): {{idJavaType}}
+    interface PrimaryKeyGenerator<ID> {
+        fun next(): ID
     }
 
-    private val entities: MutableMap<{{idJavaType}}, T> = HashMap()
+    private val entities: MutableMap<ID, T> = HashMap()
 
-    // private val primaryKeyGenerator: PrimaryKeyGenerator<{{idJavaType}}> = PrimaryKeyGenerator { UUID.randomUUID().toString() }
+    // private val primaryKeyGenerator: PrimaryKeyGenerator<ID> = PrimaryKeyGenerator { UUID.randomUUID().toString() }
     private var nextId: Long = 0
-    private val primaryKeyGenerator: PrimaryKeyGenerator<Long> = object : PrimaryKeyGenerator<Long> {
-        override fun next(): Long = nextId++
+    private val primaryKeyGenerator: PrimaryKeyGenerator<ID> = object : PrimaryKeyGenerator<ID> {
+        override fun next(): ID = nextId++ as ID
     }
 
     fun clear() {
@@ -41,11 +41,11 @@ class InMemoryJpaRepository<T> : JpaRepository<T, {{idJavaType}}> {
         entities.clear()
     }
 
-    fun getEntities(): Map<{{idJavaType}}, T> {
+    fun getEntities(): MutableMap<ID, T> {
         return entities
     }
 
-    fun containsKey(key: {{idJavaType}}): Boolean {
+    fun containsKey(key: ID): Boolean {
         return entities.containsKey(key)
     }
 
@@ -53,7 +53,7 @@ class InMemoryJpaRepository<T> : JpaRepository<T, {{idJavaType}}> {
         return entities.containsValue(entity)
     }
 
-    protected fun <F> readField(target: Any, fieldName: String): F {
+    protected fun <F> readField(target: T, fieldName: String): F {
         try {
             @Suppress("UNCHECKED_CAST")
             return FieldUtils.readField(target, fieldName, true) as F
@@ -62,7 +62,7 @@ class InMemoryJpaRepository<T> : JpaRepository<T, {{idJavaType}}> {
         }
     }
 
-    protected fun writeField(target: Any, fieldName: String, value: Any?) {
+    protected fun writeField(target: T, fieldName: String, value: Any?) {
         try {
             FieldUtils.writeField(target, fieldName, value, true)
         } catch (e: IllegalAccessException) {
@@ -70,8 +70,8 @@ class InMemoryJpaRepository<T> : JpaRepository<T, {{idJavaType}}> {
         }
     }
 
-    protected fun <F> findByField(fieldName: String, value: F): List<T> {
-        return entities.values.stream().filter { entity -> isSameValue(value, readField(entity, fieldName)) }.collect(Collectors.toList())
+    protected fun <F> findByField(fieldName: String, value: F): MutableList<T> {
+        return entities.values.stream().filter { entity -> isSameValue(value, readField(entity, fieldName)) }.toList()
     }
 
     protected fun <F> findByUniqueField(fieldName: String, value: F): T? {
@@ -95,15 +95,15 @@ class InMemoryJpaRepository<T> : JpaRepository<T, {{idJavaType}}> {
         }
     }
 
-    override fun getReferenceById(id: {{idJavaType}}): T {
+    override fun getReferenceById(id: ID): T & Any {
         return findByUniqueField("id", id) ?: throw EmptyResultDataAccessException("Entity with id $id not found", 1)
     }
 
-    override fun getOne(id: {{idJavaType}}): T {
+    override fun getOne(id: ID): T {
         return getReferenceById(id)
     }
 
-    override fun getById(id: {{idJavaType}}): T {
+    override fun getById(id: ID): T {
         return getReferenceById(id)
     }
 
@@ -111,13 +111,13 @@ class InMemoryJpaRepository<T> : JpaRepository<T, {{idJavaType}}> {
         if (entity == null) {
             throw IllegalArgumentException("entity must not be null")
         }
-        val id = firstNonNull(readField<{{idJavaType}}>(entity, "id"), primaryKeyGenerator.next())
+        val id = firstNonNull(readField<ID>(entity, "id"), primaryKeyGenerator.next())
         writeField(entity, "id", id)
         entities[id] = entity
         return entity
     }
 
-    override fun <S : T> saveAll(entitiesToSave: Iterable<S>): List<S> {
+    override fun <S : T> saveAll(entitiesToSave: Iterable<S>): MutableList<S> {
         if (entitiesToSave == null) {
             throw IllegalArgumentException("entitiesToSave must not be null")
         }
@@ -132,31 +132,31 @@ class InMemoryJpaRepository<T> : JpaRepository<T, {{idJavaType}}> {
         return save(entity)
     }
 
-    override fun <S : T> saveAllAndFlush(entities: Iterable<S>): List<S> {
+    override fun <S : T> saveAllAndFlush(entities: Iterable<S>): MutableList<S> {
         return saveAll(entities)
     }
 
-    override fun findById(id: {{idJavaType}}): Optional<T> {
-        return Optional.ofNullable(findByUniqueField("id", id))
+    override fun findById(id: ID): Optional<T> {
+        return Optional.ofNullable(findByUniqueField("id", id)) as Optional<T>
     }
 
-    override fun existsById(id: {{idJavaType}}): Boolean {
+    override fun existsById(id: ID): Boolean {
         return findById(id).isPresent
     }
 
-    override fun findAll(): List<T> {
+    override fun findAll(): MutableList<T> {
         return ArrayList(entities.values)
     }
 
-    override fun findAllById(ids: Iterable<{{idJavaType}}>): List<T> {
-        return entities.values.stream().filter { e -> contains(ids, readField(e, "id")) }.collect(Collectors.toList())
+    override fun findAllById(ids: Iterable<ID>): MutableList<T> {
+        return entities.values.stream().filter { e -> contains(ids, readField(e, "id")) }.toList()
     }
 
     override fun count(): Long {
         return entities.size.toLong()
     }
 
-    override fun deleteById(id: {{idJavaType}}) {
+    override fun deleteById(id: ID) {
         if (id == null) {
             throw IllegalArgumentException("id must not be null")
         }
@@ -173,7 +173,7 @@ class InMemoryJpaRepository<T> : JpaRepository<T, {{idJavaType}}> {
         entities.remove(readField(entity, "id"))
     }
 
-    override fun deleteAllById(ids: Iterable<{{idJavaType}}>) {
+    override fun deleteAllById(ids: Iterable<ID>) {
         if (ids == null) {
             throw IllegalArgumentException("ids must not be null")
         }
@@ -197,7 +197,7 @@ class InMemoryJpaRepository<T> : JpaRepository<T, {{idJavaType}}> {
         deleteAll(entities)
     }
 
-    override fun deleteAllByIdInBatch(ids: Iterable<{{idJavaType}}>) {
+    override fun deleteAllByIdInBatch(ids: Iterable<ID>) {
         deleteAllById(ids)
     }
 
@@ -205,7 +205,7 @@ class InMemoryJpaRepository<T> : JpaRepository<T, {{idJavaType}}> {
         deleteAll()
     }
 
-    override fun findAll(sort: Sort): List<T> {
+    override fun findAll(sort: Sort): MutableList<T> {
         // Sorting not implemented
         return findAll()
     }
@@ -221,11 +221,11 @@ class InMemoryJpaRepository<T> : JpaRepository<T, {{idJavaType}}> {
         throw UnsupportedOperationException("Not yet implemented")
     }
 
-    override fun <S : T> findAll(example: Example<S>): List<S> {
+    override fun <S : T> findAll(example: Example<S>): MutableList<S> {
         throw UnsupportedOperationException("Not yet implemented")
     }
 
-    override fun <S : T> findAll(example: Example<S>, sort: Sort): List<S> {
+    override fun <S : T> findAll(example: Example<S>, sort: Sort): MutableList<S> {
         throw UnsupportedOperationException("Not yet implemented")
     }
 

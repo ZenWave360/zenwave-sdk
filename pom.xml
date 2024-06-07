@@ -62,6 +62,7 @@
         <google-java-format.version>1.25.2</google-java-format.version>
         <palantir-java-format.version>2.55.0</palantir-java-format.version>
         <spring-javaformat.version>0.0.39</spring-javaformat.version>
+        <ktfmt.version>0.54</ktfmt.version>
         <junit.version>5.10.1</junit.version>
         <spring-boot-dependencies.version>3.4.3</spring-boot-dependencies.version>
         <reflections.version>0.10.2</reflections.version>

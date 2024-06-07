@@ -82,6 +82,10 @@ public class ZDLJavaSignatureUtils {
 
     public static String kotlinMethodParametersSignature(String idJavaType, Map method, Map zdl) {
         var signature = methodParametersSignature(idJavaType, method, zdl);
+        return toKotlinMethodSignature(signature);
+    }
+
+    public static String toKotlinMethodSignature(String signature) {
         var params = signature.split(", ");
         for (int i = 0; i < params.length; i++) {
             var param = params[i].split(" ");

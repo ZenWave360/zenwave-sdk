@@ -6,7 +6,7 @@ import java.math.*
 import java.time.*
 import java.util.*
 
-class {{entity.className}}RepositoryInMemory : InMemoryJpaRepository<{{entity.className}}>(), {{entity.className}}Repository {
+class {{entity.className}}RepositoryInMemory : InMemoryJpaRepository<{{entity.className}}, {{idJavaType}}>(), {{entity.className}}Repository {
 
 {{~#if (naturalIdFields entity)}}
     override fun {{{naturalIdsRepoMethodSignature entity}}} {

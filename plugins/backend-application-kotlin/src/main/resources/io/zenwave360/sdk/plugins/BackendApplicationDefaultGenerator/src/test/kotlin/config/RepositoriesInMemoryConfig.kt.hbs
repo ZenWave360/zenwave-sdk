@@ -12,11 +12,11 @@ open class RepositoriesInMemoryConfig {
 
 {{assign "aggregates" (findAggregates entities)}}
 {{~#each aggregates as |entity|}}
-    protected val {{entity.instanceName}}Repository: {{entity.className}}Repository = {{entity.className}}RepositoryInMemory()
-    
-    @Bean 
+    protected val {{entity.instanceName}}Repository = {{entity.className}}RepositoryInMemory()
+
+    @Bean
     @Primary
-    fun {{entity.instanceName}}Repository(): {{entity.className}}Repository {
+    fun {{entity.instanceName}}Repository(): {{entity.className}}RepositoryInMemory {
         return {{entity.instanceName}}Repository
     }
 {{~/each}}

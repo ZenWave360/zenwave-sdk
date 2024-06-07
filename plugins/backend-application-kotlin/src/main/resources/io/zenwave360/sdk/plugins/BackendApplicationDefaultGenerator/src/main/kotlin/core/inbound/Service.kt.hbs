@@ -17,6 +17,7 @@ import java.util.Optional
 interface {{service.name}} {
 
 {{#each service.methods as |method|}}
+    {{assign "isInterface" true}}
     {{~> (partial '../implementation/partials/serviceMethodJavadoc')}}
     {{~> (partial '../implementation/partials/serviceMethodSignature')}}
 {{/each}}

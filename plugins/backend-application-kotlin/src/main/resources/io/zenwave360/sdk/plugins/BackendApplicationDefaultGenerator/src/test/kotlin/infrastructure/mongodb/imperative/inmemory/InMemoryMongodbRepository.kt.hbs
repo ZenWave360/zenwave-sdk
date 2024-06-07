@@ -22,7 +22,7 @@ import java.util.stream.StreamSupport
 
 import org.apache.commons.lang3.ObjectUtils.firstNonNull
 
-class InMemoryMongodbRepository<T> : MongoRepository<T, String> {
+open class InMemoryMongodbRepository<T> : MongoRepository<T, String> {
 
     interface PrimaryKeyGenerator<String> {
         fun next(): String
@@ -38,7 +38,7 @@ class InMemoryMongodbRepository<T> : MongoRepository<T, String> {
         }
     }
 
-    fun getEntities(): Map<String, T> {
+    fun getEntities(): MutableMap<String, T> {
         return entities
     }
 
@@ -50,7 +50,7 @@ class InMemoryMongodbRepository<T> : MongoRepository<T, String> {
         return entities.containsValue(entity)
     }
 
-    protected fun <F> readField(target: Any, fieldName: String): F {
+    protected fun <F> readField(target: T, fieldName: String): F {
         try {
             @Suppress("UNCHECKED_CAST")
             return FieldUtils.readField(target, fieldName, true) as F
@@ -59,7 +59,7 @@ class InMemoryMongodbRepository<T> : MongoRepository<T, String> {
         }
     }
 
-    protected fun writeField(target: Any, fieldName: String, value: Any?) {
+    protected fun writeField(target: T, fieldName: String, value: Any?) {
         try {
             FieldUtils.writeField(target, fieldName, value, true)
         } catch (e: IllegalAccessException) {
@@ -67,8 +67,8 @@ class InMemoryMongodbRepository<T> : MongoRepository<T, String> {
         }
     }
 
-    protected fun <F> findByField(fieldName: String, value: F): List<T> {
-        return entities.values.stream().filter { entity -> isSameValue(value, readField(entity, fieldName)) }.collect(Collectors.toList())
+    protected fun <F> findByField(fieldName: String, value: F): MutableList<T> {
+        return entities.values.stream().filter { entity -> isSameValue(value, readField(entity, fieldName)) }.toList()
     }
 
     protected fun <F> findByUniqueField(fieldName: String, value: F): T? {
@@ -102,7 +102,7 @@ class InMemoryMongodbRepository<T> : MongoRepository<T, String> {
         return entity
     }
 
-    override fun <S : T> saveAll(entitiesToSave: Iterable<S>): List<S> {
+    override fun <S : T> saveAll(entitiesToSave: Iterable<S>): MutableList<S> {
         if (entitiesToSave == null) {
             throw IllegalArgumentException("entitiesToSave must not be null")
         }
@@ -110,19 +110,19 @@ class InMemoryMongodbRepository<T> : MongoRepository<T, String> {
     }
 
     override fun findById(id: String): Optional<T> {
-        return Optional.ofNullable(findByUniqueField("id", id))
+        return Optional.ofNullable(findByUniqueField("id", id)) as Optional<T>
     }
 
     override fun existsById(id: String): Boolean {
         return findById(id).isPresent
     }
 
-    override fun findAll(): List<T> {
+    override fun findAll(): MutableList<T> {
         return ArrayList(entities.values)
     }
 
-    override fun findAllById(ids: Iterable<String>): List<T> {
-        return entities.values.stream().filter { e -> contains(ids, readField(e, "id")) }.collect(Collectors.toList())
+    override fun findAllById(ids: Iterable<String>): MutableList<T> {
+        return entities.values.stream().filter { e -> contains(ids, readField(e, "id")) }.toList()
     }
 
     override fun count(): Long {
@@ -166,7 +166,7 @@ class InMemoryMongodbRepository<T> : MongoRepository<T, String> {
         entities.clear()
     }
 
-    override fun findAll(sort: Sort): List<T> {
+    override fun findAll(sort: Sort): MutableList<T> {
         return null
     }
 
@@ -181,7 +181,7 @@ class InMemoryMongodbRepository<T> : MongoRepository<T, String> {
         return save(entity)
     }
 
-    override fun <S : T> insert(entities: Iterable<S>): List<S> {
+    override fun <S : T> insert(entities: Iterable<S>): MutableList<S> {
         return saveAll(entities)
     }
 
@@ -189,11 +189,11 @@ class InMemoryMongodbRepository<T> : MongoRepository<T, String> {
         throw UnsupportedOperationException("Not yet implemented")
     }
 
-    override fun <S : T> findAll(example: Example<S>): List<S> {
+    override fun <S : T> findAll(example: Example<S>): MutableList<S> {
         throw UnsupportedOperationException("Not yet implemented")
     }
 
-    override fun <S : T> findAll(example: Example<S>, sort: Sort): List<S> {
+    override fun <S : T> findAll(example: Example<S>, sort: Sort): MutableList<S> {
         throw UnsupportedOperationException("Not yet implemented")
     }
 

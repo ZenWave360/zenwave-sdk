@@ -3,6 +3,7 @@ package io.zenwave360.sdk.plugins;
 import io.zenwave360.sdk.Plugin;
 import io.zenwave360.sdk.doc.DocumentedPlugin;
 import io.zenwave360.sdk.formatters.JavaFormatter;
+import io.zenwave360.sdk.formatters.KotlinFormatter;
 import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
@@ -40,7 +41,7 @@ public class BackendApplicationDefaultPlugin extends Plugin {
 
     public BackendApplicationDefaultPlugin() {
         super();
-        withChain(ZDLParser.class, ZDLProcessor.class, BackendApplicationDefaultGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
+        withChain(ZDLParser.class, ZDLProcessor.class, BackendApplicationDefaultGenerator.class, JavaFormatter.class, KotlinFormatter.class, TemplateFileWriter.class);
     }
 
     @Override

@@ -1,10 +1,13 @@
 package io.zenwave360.sdk.plugins;
 
 import com.github.jknack.handlebars.Options;
+import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.utils.JSONPath;
+import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 import io.zenwave360.sdk.zdl.utils.ZDLJavaSignatureUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BackendApplicationKotlinHelpers {
 
@@ -17,6 +20,12 @@ public class BackendApplicationKotlinHelpers {
     public String methodParametersSignature(Map<String, Object> method, Options options) {
         var zdl = (Map) options.get("zdl");
         return ZDLJavaSignatureUtils.kotlinMethodParametersSignature(generator.getIdJavaType(), method, zdl);
+    }
+
+    public String mapperInputSignature(String inputType, Options options) {
+        var zdl = (Map) options.get("zdl");
+        var signature = ZDLJavaSignatureUtils.mapperInputSignature(inputType, zdl);
+        return ZDLJavaSignatureUtils.toKotlinMethodSignature(signature);
     }
 
     public String returnType(Map<String, Object> method, Options options) {
@@ -37,12 +46,41 @@ public class BackendApplicationKotlinHelpers {
     };
 
     public String relationshipFieldTypeInitializer(Map field, Options options) {
-        return fixKotlinTypeInitializers(ZDLJavaSignatureUtils.relationshipFieldTypeInitializer(field));
+        var typeInitializer = ZDLJavaSignatureUtils.relationshipFieldTypeInitializer(field);
+        if(typeInitializer.trim().isEmpty()) {
+            return " = null";
+        }
+        return fixKotlinTypeInitializers(typeInitializer);
     };
 
     public String fieldTypeInitializer(Map field, Options options) {
-        return fixKotlinTypeInitializers(ZDLJavaSignatureUtils.fieldTypeInitializer(field));
+        var typeInitializer = fixKotlinTypeInitializers(ZDLJavaSignatureUtils.fieldTypeInitializer(field));
+        if(typeInitializer.trim().isEmpty()) {
+            return " = null";
+        }
+        return typeInitializer;
     };
+
+    public String idFieldInitialization(Map method, Options options) {
+        var zdl = options.get("zdl");
+        var hasNaturalId = JSONPath.get(method, "$.naturalId", false);
+        if(hasNaturalId) {
+            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("entity"));
+            List<Map> fields = ZDLFindUtils.naturalIdFields(entity);
+            return fields.stream().map(field -> String.format("val %s = %s;", field.get("name"), ZDLJavaSignatureUtils.populateField(field)))
+                    .collect(Collectors.joining("\n"));
+        }
+        return "val id: " + generator.getIdJavaType() + " = " + idInitialization(generator.getIdJavaType());
+    }
+
+    private String idInitialization(String idJavaType) {
+        return switch (idJavaType) {
+            case "Long" -> "1L";
+            case "Integer" -> "1";
+            case "String" -> "\"1\"";
+            default -> "";
+        };
+    }
 
     private String fixKotlinTypeInitializers(String type) {
         return type

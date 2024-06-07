@@ -13,9 +13,9 @@ data class {{entity.className}}(
 {{#each entity.fields as |field|}}
     {{{fieldValidationAnnotations field}}}
     {{~#if @last}}
-    val {{field.name}}: {{{fieldType field}}} {{{fieldTypeInitializer field}}}
+    val {{field.name}}: {{{fieldType field}}}{{#unless field.isArray}}?{{/unless}} {{{fieldTypeInitializer field}}}
     {{~else}}
-    val {{field.name}}: {{{fieldType field}}} {{{fieldTypeInitializer field}}},
+    val {{field.name}}: {{{fieldType field}}}{{#unless field.isArray}}?{{/unless}} {{{fieldTypeInitializer field}}},
     {{~/if}}
 {{/each}}
 ) {{addExtends entity}} : Serializable {

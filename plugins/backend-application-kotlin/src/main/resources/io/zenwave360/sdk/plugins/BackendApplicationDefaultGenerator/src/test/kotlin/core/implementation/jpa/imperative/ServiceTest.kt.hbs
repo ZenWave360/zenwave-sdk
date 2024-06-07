@@ -36,7 +36,7 @@ class {{service.name}}Test {
 
     val context = ServicesInMemoryConfig()
     {{~#assign "serviceInstance"}}{{asInstanceName service.name}}{{/assign}}
-    val {{serviceInstance}}: {{service.name}}Impl = context.{{serviceInstance}}()
+    val {{serviceInstance}}: {{service.name}} = context.{{serviceInstance}}()
 {{#each entities as |entity|}}
     val {{entity.instanceName}}Repository: {{entity.className}}RepositoryInMemory = context.{{entity.instanceName}}Repository()
 {{/each}}

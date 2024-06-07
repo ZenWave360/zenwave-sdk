@@ -18,11 +18,11 @@ data class {{entity.className}}{{inputDTOSuffix entity}}(
     {{{fieldValidationAnnotations field}}}
     {{~#assign "typeSuffix"}}{{#if field.isEntity}}{{inputDTOSuffix entity}}{{/if}}{{/assign}}
     {{~#if @last}}{{#unless ../entity.relationships}}
-    val {{field.name}}: {{{fieldType field suffix=typeSuffix}}} {{{fieldTypeInitializer field}}}
+    val {{field.name}}: {{{fieldType field suffix=typeSuffix}}}{{#unless field.isArray}}?{{/unless}} {{{fieldTypeInitializer field}}}
     {{~else}}
-    val {{field.name}}: {{{fieldType field suffix=typeSuffix}}} {{{fieldTypeInitializer field}}},
+    val {{field.name}}: {{{fieldType field suffix=typeSuffix}}}{{#unless field.isArray}}?{{/unless}} {{{fieldTypeInitializer field}}},
     {{~/unless}}{{~else}}
-    val {{field.name}}: {{{fieldType field suffix=typeSuffix}}} {{{fieldTypeInitializer field}}},
+    val {{field.name}}: {{{fieldType field suffix=typeSuffix}}}{{#unless field.isArray}}?{{/unless}} {{{fieldTypeInitializer field}}},
     {{~/if}}
 {{/each}}
 {{#each entity.relationships as |relationship|}}

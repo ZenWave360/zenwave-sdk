@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.1</version>
+        <version>3.5.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>tests</groupId>
@@ -19,7 +19,7 @@
         <spring-boot.version>${project.parent.version}</spring-boot.version>
         <archunit-junit5.version>1.0.1</archunit-junit5.version>
         <mapstruct.version>1.5.1.Final</mapstruct.version>
-        <spring-cloud.version>2021.0.3</spring-cloud.version>
+        <spring-cloud.version>2025.0.0</spring-cloud.version>
         <avro.version>1.11.1</avro.version>
         <testcontainers.version>1.17.2</testcontainers.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
@@ -131,13 +131,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-stream</artifactId>
-            <scope>test</scope>
-            <classifier>test-binder</classifier>
-            <type>test-jar</type>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>

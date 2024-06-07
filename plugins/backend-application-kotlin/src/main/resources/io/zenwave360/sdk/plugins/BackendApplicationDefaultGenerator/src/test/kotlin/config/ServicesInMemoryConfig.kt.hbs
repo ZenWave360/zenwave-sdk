@@ -52,8 +52,8 @@ open class ServicesInMemoryConfig : RepositoriesInMemoryConfig() {
 
 {{~#each services as |service|}}
     @Bean
-    fun {{asInstanceName service.name}}(): {{service.name}} {
-        return {{asInstanceName service.name}}
+    fun <T : {{service.name}}> {{asInstanceName service.name}}(): T {
+        return {{asInstanceName service.name}} as T
     }
 {{~/each}}
 
@@ -63,7 +63,7 @@ open class ServicesInMemoryConfig : RepositoriesInMemoryConfig() {
 		var _{{entity.instanceNamePlural}}: List<{{entity.className}}>? = null
 	}
 {{~/each}}
-	
+
 	fun reloadTestData() {
         {{assign "phisicalEntities" (jsonPath entities "$[?(@.options.skip != true)]")}}
 		val testDataLoader = TestDataLoader(listOf({{#joinWithTemplate phisicalEntities delimiter=', ' as |entity|}}{{entity.className}}::class.java{{/joinWithTemplate}}))

@@ -47,6 +47,7 @@ jobs:
             ./plugins/java-to-jdl/target/site/jacoco/jacoco.csv
             ./plugins/java-to-asyncapi/target/site/jacoco/jacoco.csv
             ./plugins/backend-application-default/target/site/jacoco/jacoco.csv
+            ./plugins/backend-application-kotlin/target/site/jacoco/jacoco.csv
             ./plugins/openapi-controllers/target/site/jacoco/jacoco.csv
             ./plugins/zdl-to-openapi/target/site/jacoco/jacoco.csv
             ./plugins/jdl-to-asyncapi/target/site/jacoco/jacoco.csv

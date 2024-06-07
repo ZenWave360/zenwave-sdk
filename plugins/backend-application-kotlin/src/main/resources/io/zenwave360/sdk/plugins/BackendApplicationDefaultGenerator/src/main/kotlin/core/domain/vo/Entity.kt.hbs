@@ -14,7 +14,7 @@ data class {{entity.className}}(
     {{#each field.validations as |validation|~}}
     // @{{validation.name}}("{{validation.value}}")
     {{~/each}}
-    var {{field.name}}: {{{fieldType field}}}{{#unless @last}},{{/unless}}
+    var {{field.name}}: {{{fieldType field}}}?{{#unless @last}},{{/unless}}
 {{/each}}
 ) {{addExtends entity}} : Serializable {
 

@@ -34,10 +34,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 data class {{entity.className}}(
 {{#unless (skipEntityId entity)~}}
     {{~> (partial 'partials/id' databaseType)}}
-    var id: {{idJavaType}}?,
+    var id: {{idJavaType}}? = null,
 
     @Version
-    var version: Int?,
+    var version: Int? = null,
 {{/unless~}}
 
 {{#each entity.fields as |field|}}

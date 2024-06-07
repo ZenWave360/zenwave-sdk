@@ -25,7 +25,7 @@ interface {{service.name}}Mapper {
     fun as{{entity.className}}({{mapperInputSignature input.className}}): {{entity.className}}
     {{~/if}}
     {{#unless (skipEntityId entity)~}}@Mapping(target = "id", ignore = true){{/unless~}}
-    fun update(entity: {{entity.className}}, {{mapperInputSignature input.className}}): {{entity.className}}
+    fun update(@MappingTarget entity: {{entity.className}}, {{mapperInputSignature input.className}}): {{entity.className}}
 {{~/each}}
 // output mappings
 {{~#each (serviceEntityReturnTypePairs service) as |entry|}}
@@ -48,8 +48,8 @@ interface {{service.name}}Mapper {
     @AfterMapping
     fun manageRelationships(entity: {{entity.className}}) {
         {{~#each relationships as |relationship|}}
-        entity.get{{capitalize relationship.fieldName}}()?.forEach { {{relationship.fieldName}} ->
-            {{relationship.fieldName}}.set{{capitalize relationship.otherEntityFieldName}}(entity)
+        entity.{{relationship.fieldName}}?.forEach { {{relationship.fieldName}} ->
+            {{relationship.fieldName}}.{{relationship.otherEntityFieldName}} = entity
         }
         {{~/each}}
     }

@@ -35,7 +35,7 @@ import java.util.Optional
  */
 @Service
 @Transactional(readOnly = true)
-class {{service.name}}Impl(
+open class {{service.name}}Impl(
 {{#each entities as |entity|}}
     {{~#unless (skipEntityRepository this)}}
     private val {{entity.instanceName}}Repository: {{entity.className}}Repository{{#unless @last}},{{/unless}}
