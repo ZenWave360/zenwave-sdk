@@ -1,0 +1,27 @@
+{{~#if (eq requestPayloadType 'dto')}}
+    {{~#if requestDTOClassName}}
+        val {{requestBodyVar}} = {{requestDTOClassName}}()
+        {{~#each operation.x--request-schema.properties as |property parentPropertyName|}}
+        {{requestBodyVar}}.{{asInstanceName @key}} = {{{newPropertyObject property}}}
+            {{~#if (eq property.type 'object')}}
+                {{~#each property.properties as |innerProperty|}}
+        {{requestBodyVar}}.{{asInstanceName parentPropertyName}}?.{{asInstanceName @key}} = {{{populateProperty innerProperty openApiModelNameSuffix=openApiModelNameSuffix}}}
+                {{~/each}}
+            {{~else if (eq property.type 'array')}}
+                {{~#each property.items.properties as |innerProperty|}}
+        {{requestBodyVar}}.{{asInstanceName parentPropertyName}}?.get(0)?.{{asInstanceName @key}} = {{{populateProperty innerProperty openApiModelNameSuffix=openApiModelNameSuffix}}}
+                {{~/each}}
+            {{~else}}
+            {{~/if}}
+        {{~/each}}
+    {{~/if}}
+{{~else}}
+    {{~#if operation.x--request-schema}}
+        val {{requestBodyVar}} = """
+{{{indent (requestExample operation.x--request-schema) spaces=12}}}
+        """
+    {{~/if}}
+{{~/if}}
+{{~#each operation.parameters as |param|}}
+        val {{asInstanceName param.name}}{{i}} = "{{param.example}}"
+{{~/each~}}

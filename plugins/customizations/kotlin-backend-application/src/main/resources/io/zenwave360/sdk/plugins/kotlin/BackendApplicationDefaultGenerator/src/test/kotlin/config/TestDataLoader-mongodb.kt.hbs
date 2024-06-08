@@ -1,0 +1,92 @@
+package {{layout.moduleConfigPackage}}
+
+import org.springframework.beans.BeanUtils
+import org.springframework.boot.autoconfigure.mongo.MongoProperties
+import org.springframework.boot.context.properties.PropertyMapper
+import org.springframework.core.convert.support.DefaultConversionService
+import org.springframework.data.convert.Jsr310Converters
+import org.springframework.data.mapping.model.FieldNamingStrategy
+import org.springframework.data.mongodb.MongoManagedTypes
+import org.springframework.data.mongodb.core.convert.MappingMongoConverter
+import org.springframework.data.mongodb.core.convert.MongoCustomConversions
+import org.springframework.data.mongodb.core.convert.NoOpDbRefResolver
+import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext
+import org.springframework.data.util.NullableWrapperConverters
+import org.bson.Document as BsonDocument
+
+import java.io.File
+import java.nio.file.Files
+import java.util.Collections
+
+class TestDataLoader(private val mongoManagedTypes: List<Class<*>>) {
+
+    private val mappingConverter: MappingMongoConverter
+
+    init {
+        mappingConverter = mappingConverter()
+    }
+
+    fun <T> loadCollectionTestDataAsObjects(collectionClass: Class<T>): List<T> {
+        val jsonList = loadCollectionTestDataAsJson(collectionClass)
+        return jsonList.map { json -> read(collectionClass, json) }
+    }
+
+    fun loadCollectionTestDataAsJson(collectionClass: Class<*>): List<String> {
+        val annotation = collectionClass.getAnnotation(Document::class.java)
+        val collection = annotation.collection
+        return readDirectoryFilesAsString("src/test/resources/data/mongodb/$collection")
+    }
+
+    fun loadCollectionTestDataAsJson(collection: String): List<String> {
+        return readDirectoryFilesAsString("src/test/resources/data/mongodb/$collection")
+    }
+
+    fun listAllMongodbCollectionsWithTestData(): List<String> {
+        return listFolders("src/test/resources/data/mongodb")
+    }
+
+    protected fun listFolders(directory: String): List<String> {
+        return File(directory).listFiles()?.map { it.name } ?: emptyList()
+    }
+
+    protected fun readDirectoryFilesAsString(directory: String): List<String> {
+        return File(directory).listFiles()?.map { f ->
+            try {
+                Files.readString(f.toPath())
+            } catch (e: java.io.IOException) {
+                throw RuntimeException(e)
+            }
+        } ?: emptyList()
+    }
+
+    fun <T> read(type: Class<T>, json: String): T {
+        return mappingConverter.read(type, BsonDocument.parse(json))
+    }
+
+    private fun mappingConverter(): MappingMongoConverter {
+        val mappingConverter = MappingMongoConverter(NoOpDbRefResolver.INSTANCE, mongoMappingContext())
+        val conversionService = mappingConverter.conversionService as DefaultConversionService
+        Jsr310Converters.getConvertersToRegister().forEach { conversionService.addConverter(it) }
+        NullableWrapperConverters.registerConvertersIn(conversionService)
+        conversionService.removeConvertible(Object::class.java, Object::class.java)
+        return mappingConverter
+    }
+
+    private fun mongoMappingContext(): MongoMappingContext {
+        val properties = MongoProperties()
+        val managedTypes = MongoManagedTypes.fromIterable(mongoManagedTypes)
+        val map = PropertyMapper.get().alwaysApplyingWhenNonNull()
+        val context = MongoMappingContext()
+        map.from(properties.isAutoIndexCreation).to(context::setAutoIndexCreation)
+        context.setManagedTypes(managedTypes)
+        val strategyClass = properties.fieldNamingStrategy
+        if (strategyClass != null) {
+            context.setFieldNamingStrategy(BeanUtils.instantiateClass(strategyClass) as FieldNamingStrategy)
+        }
+        val conversions = MongoCustomConversions(emptyList<Any>())
+        context.setSimpleTypeHolder(conversions.simpleTypeHolder)
+        context.afterPropertiesSet()
+        return context
+    }
+}

@@ -1,0 +1,41 @@
+{{~#each operations as |operation|~}}
+    {{~#each operation.responses as |response|}}
+
+        /**
+        * Test: {{operation.description}} for {{response.description}}.
+        */
+        @Test
+        fun test{{asJavaTypeName operation.operationId}}_{{response.x--statusCode}}() {
+        {{~#assign "requestDTOClassName"}}{{asDtoName operation.x--request-dto }}{{/assign~}}
+        {{~#assign "requestBodyVar"}}requestBody{{/assign~}}
+        {{> (partial 'requestSetup')}}
+
+        webTestClient.method({{upper operation.x--httpVerb}}).uri({{> (partial 'uriBuilder')}})
+        .accept(MediaType.APPLICATION_JSON)
+        {{~#if operation.x--request-dto}}
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue({{requestBodyVar}})
+        {{~/if}}
+        .exchange()
+        .expectStatus().isEqualTo({{response.x--statusCode}})
+        {{~#if response.x--response-schema}}
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+        {{~/if}}
+        {{~#each response.x--response-schema.properties as |property parentPropertyName|}}
+            .jsonPath("$.{{@key}}").isNotEmpty()
+            {{~#if (eq property.type 'object')}}
+                {{~#each property.properties as |innerProperty|}}
+                    .jsonPath("$.{{parentPropertyName}}.{{@key}}").isNotEmpty()
+                {{~/each}}
+            {{~else if (eq property.type 'array')}}
+                .jsonPath("$.{{@key}}").isArray()
+                {{~#each property.items.properties as |innerProperty|}}
+                    .jsonPath("$.{{parentPropertyName}}[0].{{@key}}").isNotEmpty()
+                {{~/each}}
+            {{~else}}
+            {{~/if}}
+        {{~/each}}
+        }
+    {{~/each~}}
+{{~/each~}}

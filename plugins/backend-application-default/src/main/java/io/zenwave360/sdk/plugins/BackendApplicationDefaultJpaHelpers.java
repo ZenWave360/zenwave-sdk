@@ -15,7 +15,7 @@ public class BackendApplicationDefaultJpaHelpers {
 
     private final BackendApplicationDefaultGenerator generator;
 
-    BackendApplicationDefaultJpaHelpers(BackendApplicationDefaultGenerator generator) {
+    public BackendApplicationDefaultJpaHelpers(BackendApplicationDefaultGenerator generator) {
         this.generator = generator;
     }
 

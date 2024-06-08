@@ -40,9 +40,8 @@
         <module>backend-application-default</module>
         <module>openapi-controllers</module>
         <module>openapi-spring-webtestclient</module>
-        <module>backend-application-kotlin</module>
         <module>openapi-karate</module>
         <module>zenwave-mcp-server</module>
-<!--        <module>openapi-pact-consumer</module>-->
+        <module>customizations</module>
     </modules>
 </project>

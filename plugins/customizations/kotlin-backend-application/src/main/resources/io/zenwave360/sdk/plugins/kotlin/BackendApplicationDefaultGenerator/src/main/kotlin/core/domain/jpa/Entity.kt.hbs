@@ -1,0 +1,180 @@
+package {{layout.entitiesPackage}}
+
+import java.io.Serializable
+import java.math.*
+import java.time.*
+import java.util.*
+import jakarta.persistence.*
+import jakarta.validation.constraints.*
+import org.hibernate.annotations.Cache
+import org.hibernate.annotations.CacheConcurrencyStrategy
+{{~#if entity.options.auditing}}
+import org.springframework.data.annotation.CreatedBy
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedBy
+import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+{{~/if}}
+
+/**
+* {{entity.comment}}
+*/
+{{~#if (or entity.options.json entity.options.jsonb)}}
+// @Embeddable // json embedded
+{{~else if entity.options.embedded}}
+@Embeddable
+{{~else if entity.options.isSuperClass}}
+@MappedSuperclass
+{{~else}}
+@Entity
+@Table(name = "{{snakeCase entity.tableName}}")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+{{~/if}}
+{{~#if entity.options.auditing}}@EntityListeners(AuditingEntityListener::class){{~/if}}
+data class {{entity.className}}(
+{{#unless (skipEntityId entity)~}}
+    {{~> (partial 'partials/id' databaseType)}}
+    var id: {{idJavaType}}? = null,
+
+    @Version
+    var version: Int? = null,
+{{/unless~}}
+
+{{#each entity.fields as |field|}}
+    {{~#if field.javadoc}}
+    /**
+    * {{{field.javadoc}}}
+    */
+    {{~/if}}
+    {{{fieldValidationAnnotations field}}}
+    {{~#if field.isEntity}}
+        {{~#if (or field.options.json field.options.jsonb)}}
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    @Column(name = "{{snakeCase field.name}}")
+        {{~else~}}
+    @Embedded
+        {{~ assign 'embeddedFields' (jsonPath zdl 'entities.' field.type '.fields[*]') ~}}
+        {{~#joinWithTemplate embeddedFields as |it|}}
+    @AttributeOverride(name = "{{it.name}}", column = Column(name = "{{snakeCase field.name}}_{{name}}"))
+        {{~/joinWithTemplate~}}
+        {{~/if~}}
+    {{~else if (or field.options.json field.options.jsonb)}}
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    @Column(name = "{{snakeCase field.name}}")
+    {{~else~}}
+    @Column(name = "{{snakeCase field.name}}"{{#if field.validations.required}}, nullable = false{{/if}}{{#if field.validations.unique}}, unique = true{{/if}}{{#if field.validations.maxlength}}, length = {{field.validations.maxlength.value}}{{/if}})
+    {{~#if field.isEnum}}
+        {{~#if (jsonPath zdl 'enums.' field.type '.hasValue')}}
+    @Convert(converter = {{{fieldType field}}}.{{{fieldType field}}}Converter::class)
+        {{~else}}
+    @Enumerated(EnumType.STRING)
+        {{/if}}
+    {{/if}}
+    {{~/if~}}
+    {{~#if field.options.transient}} @jakarta.persistence.Transient {{/if}}
+    {{~#if field.options.naturalId}} @org.hibernate.annotations.NaturalId {{/if}}
+    {{~#if (endsWith field.type 'Blob')}} @Lob {{/if}}
+    var {{field.name}}: {{{fieldType field}}} {{~#unless field.isArray~}} ? {{~/unless}} {{{fieldTypeInitializer field}}}{{#unless @last}},{{/unless}}
+{{/each}}
+
+{{#each entity.relationships as |relationship|}}
+    {{#if relationship.fieldName~}}
+        {{~#if @first}}{{#if ../entity.fields}},{{/if}}{{/if}}
+        {{~#assign 'fetchType' }}{{ifTruthy relationship.options.eager "EAGER" "LAZY"}}{{/assign}}
+        {{#if (addRelationshipById relationship entity=entity)}}
+    {{#if relationship.required}}@field:NotNull{{/if}}
+    @Column(name = "{{snakeCase relationship.fieldName}}_id")
+    var {{relationship.fieldName}}Id: {{idJavaType}}? = null,
+        {{~/if}}
+    {{{fieldValidationAnnotations relationship}}}
+    {{> (partial 'partials/' relationship.type)}}
+    var {{relationship.fieldName}}: {{{relationshipFieldType relationship}}} {{{relationshipFieldTypeInitializer relationship}}}{{#unless @last}},{{/unless}}
+    {{/if~}}
+{{/each}}
+) {{addExtends entity}} : Serializable {
+
+    companion object {
+        private const val serialVersionUID = 1L
+    }
+
+{{~#if entity.options.auditing}}
+    @CreatedBy
+    @Column(name = "created_by", updatable = false)
+    var createdBy: String? = null
+
+    @CreatedDate
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP", updatable = false)
+    var createdDate: LocalDateTime? = null
+
+    @LastModifiedBy
+    @Column(name = "last_modified_by")
+    var lastModifiedBy: String? = null
+
+    @LastModifiedDate
+    @Column(name = "last_modified_date", columnDefinition = "TIMESTAMP")
+    var lastModifiedDate: LocalDateTime? = null
+{{~/if}}
+
+{{~#each (jsonPath entity '$.relationships[*][?(@.ownerSide == true)]') as |relationship|}}
+    // manage relationships
+    {{~#if (eq relationship.type 'OneToOne')}}
+    fun set{{capitalize relationship.fieldName}}({{relationship.fieldName}}: {{{relationshipFieldType relationship}}}?): {{entity.className}} {
+        this.{{relationship.fieldName}} = {{relationship.fieldName}}
+        {{relationship.fieldName}}?.set{{capitalize relationship.otherEntityFieldName}}(this)
+        return this
+    }
+    {{~/if}}
+    {{~#if (eq relationship.type 'OneToMany')}}
+    fun add{{capitalize relationship.fieldName}}({{relationship.fieldName}}: {{relationship.otherEntityName}}): {{entity.className}} {
+        this.{{relationship.fieldName}} += {{relationship.fieldName}}
+        {{relationship.fieldName}}.{{relationship.otherEntityFieldName}} = this
+        return this
+    }
+
+    fun remove{{capitalize relationship.fieldName}}({{relationship.fieldName}}: {{relationship.otherEntityName}}): {{entity.className}} {
+        this.{{relationship.fieldName}} -= {{relationship.fieldName}}
+        {{relationship.fieldName}}.{{relationship.otherEntityFieldName}} = null
+        return this
+    }
+    {{~/if}}
+    {{~#if (eq relationship.type 'ManyToMany')}}
+    fun add{{capitalize relationship.fieldName}}({{relationship.fieldName}}: {{relationship.otherEntityName}}): {{entity.className}} {
+        this.{{relationship.fieldName}} += {{relationship.fieldName}}
+        {{relationship.fieldName}}.{{relationship.otherEntityFieldName}} += this
+        return this
+    }
+
+    fun remove{{capitalize relationship.fieldName}}({{relationship.fieldName}}: {{relationship.otherEntityName}}): {{entity.className}} {
+        this.{{relationship.fieldName}} -= {{relationship.fieldName}}
+        {{relationship.fieldName}}.{{relationship.otherEntityFieldName}} -= this
+        return this
+    }
+    {{~/if}}
+    {{~#if (and (eq relationship.type 'ManyToOne') relationship.otherEntityFieldName)}}
+    fun set{{capitalize relationship.fieldName}}({{relationship.fieldName}}: {{{relationshipFieldType relationship}}}?): {{entity.className}} {
+        this.{{relationship.fieldName}} = {{relationship.fieldName}}
+        {{relationship.fieldName}}?.{{relationship.otherEntityFieldName}} += this
+        return this
+    }
+
+    fun remove{{capitalize relationship.fieldName}}({{relationship.fieldName}}: {{{relationshipFieldType relationship}}}?): {{entity.className}} {
+        this.{{relationship.fieldName}} = {{relationship.fieldName}}
+        {{relationship.fieldName}}?.{{relationship.otherEntityFieldName}} -= this
+        return this
+    }
+    {{~/if}}
+{{/each}}
+
+{{#unless (skipEntityId entity)~}}
+    /* https://vladmihalcea.com/the-best-way-to-implement-equals-hashcode-and-tostring-with-jpa-and-hibernate/ */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is {{entity.className}}) return false
+        return id != null && id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return javaClass.hashCode()
+    }
+{{~/unless}}
+}

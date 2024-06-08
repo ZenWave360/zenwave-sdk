@@ -24,7 +24,7 @@ public class BackendApplicationDefaultHelpers {
 
     private final BackendApplicationDefaultGenerator generator;
 
-    BackendApplicationDefaultHelpers(BackendApplicationDefaultGenerator generator) {
+    public BackendApplicationDefaultHelpers(BackendApplicationDefaultGenerator generator) {
         this.generator = generator;
     }
 
