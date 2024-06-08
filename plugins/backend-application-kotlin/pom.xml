@@ -17,6 +17,16 @@
             <artifactId>backend-application-default</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.zenwave360.sdk.plugins</groupId>
+            <artifactId>openapi-controllers</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zenwave360.sdk.plugins</groupId>
+            <artifactId>backend-application-default</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

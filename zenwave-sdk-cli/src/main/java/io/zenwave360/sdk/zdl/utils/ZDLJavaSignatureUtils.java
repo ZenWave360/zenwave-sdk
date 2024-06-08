@@ -29,6 +29,30 @@ public class ZDLJavaSignatureUtils {
         return (String) method.get("parameter");
     }
 
+
+    public static String findServiceMethodMainParameter(Map<String, Object> method, Map<String, Object> zdlModel) {
+        if(method == null) {
+            return null;
+        }
+        var methodParameterType = (String) method.get("parameter");
+        var parameterEntity = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + methodParameterType);
+        if(parameterEntity == null) {
+            return null;
+        }
+        var isInline = JSONPath.get(parameterEntity, "$.options.inline", false);
+        if (isInline) {
+            var fields = JSONPath.get(parameterEntity, "$.fields", Map.<String, Map>of());
+            for (Map field : fields.values()) {
+                if (JSONPath.get(field, "$.isComplexType", false) && !JSONPath.get(field, "$.isEnum", false)) {
+                    return JSONPath.get(field, "$.type");
+                }
+            }
+            return null;
+        }
+        return methodParameterType;
+    }
+
+
     public static String fieldsParamsSignature(List<Map> fields) {
         if(fields == null) {
             return "";

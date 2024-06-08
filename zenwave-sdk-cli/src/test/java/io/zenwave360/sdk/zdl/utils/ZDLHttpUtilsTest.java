@@ -1,9 +1,12 @@
 package io.zenwave360.sdk.zdl.utils;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.zenwave360.sdk.parsers.DefaultYamlParser;
+import io.zenwave360.sdk.processors.OpenApiProcessor;
 import io.zenwave360.sdk.utils.JSONPath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -16,6 +19,23 @@ public class ZDLHttpUtilsTest {
     private Map<String, Object> loadZDL(String resource) throws IOException {
         Map<String, Object> model = new ZDLParser().withZdlFile(resource).parse();
         return (Map<String, Object>) new ZDLProcessor().process(model).get("zdl");
+    }
+
+    private Map<String, Object> loadOpenAPI(String resource) throws IOException {
+        Map<String, Object> model = new DefaultYamlParser().withApiFile(URI.create(resource)).parse();
+        return (Map<String, Object>) new OpenApiProcessor().process(model).get("api");
+    }
+
+    @Test
+    void testFindMethodParams() throws IOException {
+        var model = loadOpenAPI("classpath:io/zenwave360/sdk/resources/openapi/customer-address-openapi.yml");
+        var operation = (Map) JSONPath.get(model, "$.paths./customers/customers/{customerId}.put");
+
+        var parameters = ZDLHttpUtils.methodParameters(operation, "", "DTO");
+        Assertions.assertNotNull(parameters);
+        Assertions.assertEquals(2, parameters.size());
+        Assertions.assertEquals("String", parameters.get(0).getKey());
+        Assertions.assertEquals("CustomerInputDTO", parameters.get(1).getKey());
     }
 
     @Test

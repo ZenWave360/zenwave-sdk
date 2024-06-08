@@ -129,7 +129,7 @@ public class ZDLFindUtils {
         return allEvents;
     }
 
-    public static  List<String> methodEventsFlatList(Map<String, Object> method) {
+    public static List<String> methodEventsFlatList(Map<String, Object> method) {
         var events = (List) method.getOrDefault("withEvents", List.of());
         List<String> allEvents = new ArrayList<>();
         for (Object event : events) {
@@ -141,7 +141,6 @@ public class ZDLFindUtils {
         }
         return allEvents;
     }
-
 
     public static List<Map<String, Object>> findAggregateCommandsForMethod(Map zdl, Map<String, Object> method) {
         var serviceAggregateNames = JSONPath.get(zdl, "$.services." + method.get("serviceName") + ".aggregates", List.<String>of());

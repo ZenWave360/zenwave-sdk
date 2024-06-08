@@ -38,9 +38,9 @@
         <module>asyncapi-spring-cloud-streams3</module>
         <module>asyncapi-jsonschema2pojo</module>
         <module>backend-application-default</module>
-        <module>backend-application-kotlin</module>
         <module>openapi-controllers</module>
         <module>openapi-spring-webtestclient</module>
+        <module>backend-application-kotlin</module>
         <module>openapi-karate</module>
         <module>zenwave-mcp-server</module>
 <!--        <module>openapi-pact-consumer</module>-->

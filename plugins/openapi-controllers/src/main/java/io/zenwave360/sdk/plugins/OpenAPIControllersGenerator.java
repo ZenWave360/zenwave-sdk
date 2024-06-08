@@ -27,6 +27,7 @@ import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
@@ -43,26 +44,14 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
     protected HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
-    protected String templatesFolder = "io/zenwave360/sdk/plugins/OpenAPIControllersGenerator";
-
-    public ProjectTemplates templates = new ProjectTemplates();
-    {
-        templates.setTemplatesFolder(templatesFolder);
-        var layoutNames = new ProjectLayout(); // layoutNames
-        templates.addTemplate(templates.singleTemplates, "src/main/java", "web/mappers/BaseMapper.java",
-                layoutNames.adaptersWebMappersCommonPackage, "/BaseMapper.java", JAVA, null, false);
-        templates.addTemplate(templates.serviceTemplates, "src/main/java", "web/mappers/ServiceDTOsMapper.java",
-                layoutNames.adaptersWebMappersPackage, "{{serviceName}}DTOsMapper.java", JAVA, null, true);
-        templates.addTemplate(templates.serviceTemplates, "src/main/java", "web/{{webFlavor}}/ServiceApiController.java",
-                layoutNames.adaptersWebPackage, "{{serviceName}}ApiController.java", JAVA, null, false);
-        templates.addTemplate(templates.serviceTemplates, "src/test/java", "web/{{webFlavor}}/ServiceApiControllerTest.java",
-                layoutNames.adaptersWebPackage, "{{serviceName}}ApiControllerTest.java", JAVA, null, true);
-    }
+    public ProjectTemplates templates = new OpenAPIControllersTemplates();
 
     @Override
     public void onPropertiesSet() {
         super.onPropertiesSet();
         templates.setLayout(layout);
+        templates.getTemplateHelpers(this)
+                .forEach(helper -> handlebarsEngine.getHandlebars().registerHelpers(helper));
     }
 
     public TemplateEngine getTemplateEngine() {
@@ -197,53 +186,6 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         return defaultString(responseEntityName, "Void");
     }
 
-    private String methodParameters(Map operation) {
-        List<Map<String, Object>> params = (List) operation.getOrDefault("parameters", Collections.emptyList());
-        if(JSONPath.get(operation, "requestBody.content['multipart/form-data']") instanceof Map) {
-            params = JSONPath.get(operation, "requestBody.content['multipart/form-data'].schema.properties", Map.of())
-                    .entrySet().stream().map(entry -> {
-                        return Map.of("name", entry.getKey(), "schema", entry.getValue());
-                    }).toList();
-        };
-        List methodParams = params.stream()
-                .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
-                .map(param -> {
-                    String javaType = getJavaTypeOrOptional(param);
-                    String name = JSONPath.get(param, "$.name");
-                    return javaType + " " + name;
-                }).collect(Collectors.toList());
-        if (operation.containsKey("x--request-dto")) {
-            if("patch".equals(JSONPath.get(operation, "x--httpVerb"))) {
-                methodParams.add("Map input");
-            } else {
-                var dto = (String) operation.get("x--request-dto");
-                methodParams.add(format("%s%s%s %s", openApiModelNamePrefix, dto, openApiModelNameSuffix, "reqBody"));
-            }
-        }
-        return StringUtils.join(methodParams, ", ");
-    }
-
-    private String methodParameterInstances(Map operation) {
-        var methodParameters = methodParameters(operation);
-        if(methodParameters.isEmpty()) {
-            return "";
-        }
-        return Arrays.stream(methodParameters(operation).split(", "))
-                .map(param -> param.split(" ")[1])
-                .collect(Collectors.joining(", "));
-    }
-
-    private Object methodParameterPlaceholders(Map operation) {
-        var methodParameters = methodParameters(operation);
-        if(methodParameters.isEmpty()) {
-            return "";
-        }
-        return Arrays.stream(methodParameters(operation).split(", "))
-                .map(param -> "{}")
-                .collect(Collectors.joining(", "));
-    }
-
-
     private String reqBodyVariableName(Map<String, Object> serviceMethod, Map zdl) {
         if (serviceMethod == null) { return "reqBody"; }
         var parameterType = JSONPath.get(serviceMethod, "parameter");
@@ -263,24 +205,36 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         return "reqBody";
     }
 
+    private String methodParameters(Map operation) {
+        return ZDLHttpUtils.methodParameters(operation, openApiModelNamePrefix, openApiModelNameSuffix).stream().map(param -> {
+            return param.getKey() + " " + param.getValue();
+        }).collect(Collectors.joining(", "));
+    }
+
+    public String methodParameterInstances(Map operation) {
+        var methodParameters = methodParameters(operation);
+        if (methodParameters.isEmpty()) {
+            return "";
+        }
+        return Arrays.stream(methodParameters(operation).split(", "))
+                .map(param -> param.split(" ")[1])
+                .collect(Collectors.joining(", "));
+    }
+
+    private Object methodParameterPlaceholders(Map operation) {
+        var methodParameters = methodParameters(operation);
+        if (methodParameters.isEmpty()) {
+            return "";
+        }
+        return Arrays.stream(methodParameters(operation).split(", "))
+                .map(param -> "{}")
+                .collect(Collectors.joining(", "));
+    }
+
+
     private String serviceMethodParameter(Map<String, Object> method, Map<String, Object> zdlModel) {
         if(method == null) { return "Entity"; }
-        var methodParameterType = (String) method.get("parameter");
-        var parameterEntity = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + methodParameterType);
-        if(parameterEntity == null) {
-            return null;
-        }
-        var isInline = JSONPath.get(parameterEntity, "$.options.inline", false);
-        if (isInline) {
-            var fields = JSONPath.get(parameterEntity, "$.fields", Map.<String, Map>of());
-            for (Map field : fields.values()) {
-                if (JSONPath.get(field, "$.isComplexType", false) && !JSONPath.get(field, "$.isEnum", false)) {
-                    return JSONPath.get(field, "$.type");
-                }
-            }
-            return null;
-        }
-        return methodParameterType;
+        return ZDLJavaSignatureUtils.findServiceMethodMainParameter(method, zdlModel);
     }
 
     private String mappedInputVariable(Map<String, Object> method) {
@@ -356,80 +310,4 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         return getTemplateEngine().processTemplates(model, List.of(template));
     }
 
-    {
-        handlebarsEngine.getHandlebars().registerHelper("asMethodParametersInitializer", (operation, options) -> {
-            if (operation instanceof Map) {
-                var methodParams = methodParameters((Map) operation).trim();
-                if(methodParams.isEmpty()) {
-                    return "";
-                }
-                return Arrays.stream(methodParams.split(", "))
-                        .map(param -> param + " = null;")
-                        .collect(Collectors.joining("\n"));
-            }
-            return options.fn(operation);
-        });
-
-        handlebarsEngine.getHandlebars().registerHelper("asMethodParameterValues", (operation, options) -> {
-            if (operation instanceof Map) {
-                return methodParameterInstances((Map) operation);
-            }
-            return options.fn(operation);
-        });
-
-    }
-
-
-
-    protected int compareParamsByRequire(Map<String, Object> param1, Map<String, Object> param2) {
-        boolean required1 = JSONPath.get(param1, "required", false);
-        boolean required2 = JSONPath.get(param2, "required", false);
-        return (required1 && required2) || (!required1 && !required2) ? 0 : required1 ? -1 : 1;
-    }
-
-    protected String getJavaTypeOrOptional(Map<String, Object> param) {
-        boolean isOptional = isOptional(param);
-        String javaType = getJavaType(param);
-        return useOptional && isOptional ? "Optional<" + javaType + ">" : javaType;
-    }
-
-    protected String getJavaType(Map<String, Object> param) {
-        String type = JSONPath.get(param, "$.schema.type");
-        String format = JSONPath.get(param, "$.schema.format");
-        String schemaName = JSONPath.get(param, "$.schema.x--schema-name");
-
-        if("binary".equals(format)) {
-            return "org.springframework.web.multipart.MultipartFile";
-        }
-        if ("date".equals(format)) {
-            return "LocalDate";
-        }
-        if ("date-time".equals(format)) {
-            return "Instant";
-        }
-        if ("integer".equals(type) && "int64".equals(format)) {
-            return "Long";
-        }
-        if ("integer".equals(type)) {
-            return "Integer";
-        }
-        if ("number".equals(type)) {
-            return "BigDecimal";
-        }
-        if ("boolean".equals(type)) {
-            return "Boolean";
-        }
-        if ("array".equals(type)) {
-            return "List<String>";
-        }
-        if(schemaName != null) {
-            return openApiModelNamePrefix + schemaName + openApiModelNameSuffix;
-        }
-
-        return "String";
-    }
-
-    protected boolean isOptional(Map param) {
-        return "query".equals(JSONPath.get(param, "in")) && !JSONPath.get(param, "required", false);
-    }
 }
