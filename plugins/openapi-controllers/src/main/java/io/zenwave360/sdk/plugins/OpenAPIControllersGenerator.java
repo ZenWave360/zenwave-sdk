@@ -54,9 +54,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                 .forEach(helper -> handlebarsEngine.getHandlebars().registerHelpers(helper));
     }
 
-    public TemplateEngine getTemplateEngine() {
-        return handlebarsEngine;
-    }
+
 
     protected Map<String, Object> getZDLModel(Map<String, Object> contextModel) {
         return (Map) contextModel.get(zdlProperty);
@@ -307,6 +305,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         model.put("zdl", getZDLModel(contextModel));
         model.put("webFlavor", style == ProgrammingStyle.imperative ? "mvc" : "webflux");
         model.putAll(extModel);
+        model.putAll(templates.getDocumentedOptions());
         return getTemplateEngine().processTemplates(model, List.of(template));
     }
 

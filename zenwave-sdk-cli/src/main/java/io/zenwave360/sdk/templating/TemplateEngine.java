@@ -14,4 +14,6 @@ public interface TemplateEngine {
     List<TemplateOutput> processTemplateNames(Map<String, Object> model, TemplateInput templateInput);
 
     List<TemplateOutput> processTemplateNames(Map<String, Object> apiModel, List<TemplateInput> templateInputs);
+
+    void registerHelpers(Object helper);
 }

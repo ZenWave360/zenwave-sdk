@@ -39,6 +39,7 @@ public class BackendApplicationMongoImperativeGeneratorTest {
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.mongodb)
                 .withOption("style", ProgrammingStyle.imperative)
+                .withOption("templates", "new " + BackendApplicationMultiModuleProjectTemplates.class.getName())
                 .withOption("mavenModulesPrefix", "customer-address")
                 .withOption("includeEmitEventsImplementation", false)
                 .withOption("forceOverwrite", true)
@@ -47,11 +48,8 @@ public class BackendApplicationMongoImperativeGeneratorTest {
         new MainGenerator().generate(plugin);
 
         List<String> logs = logCaptor.getLogs();
-        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
-        // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
-
-        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/mongodb-elasticsearch-scs3-pom.xml", targetFolder);
-        Assertions.assertEquals(0, exitCode);
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: customer-address-domain/src/main/java/io/zenwave360/example/core/domain/Customer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: customer-address-core-impl/src/main/java/io/zenwave360/example/core/implementation/CustomerServiceImpl.java"));
     }
 
     @Test

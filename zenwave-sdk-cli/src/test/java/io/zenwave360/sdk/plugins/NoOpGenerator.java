@@ -6,13 +6,14 @@ import java.util.Map;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
+import io.zenwave360.sdk.templating.TemplateEngine;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.DefaultProjectLayout;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 
-public class NoOpGenerator implements Generator {
+public class NoOpGenerator extends Generator {
 
     @DocumentedOption(description = "Project layout")
     public ProjectLayout layout = new DefaultProjectLayout();
@@ -34,4 +35,5 @@ public class NoOpGenerator implements Generator {
         generatedProjectFiles.singleFiles.add(new TemplateOutput("nop.txt", "nop", "text/plain", true));
         return generatedProjectFiles;
     }
+
 }

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+import com.github.jknack.handlebars.Handlebars;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractZDLGenerator;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
@@ -39,7 +40,9 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
     @DocumentedOption(description = "Target file")
     public String targetFile = "zdl-glossary.md";
 
-    private final HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
+    private Handlebars getHandlebars() {
+        return ((HandlebarsEngine) getTemplateEngine()).getHandlebars();
+    }
 
     private final TemplateInput modelGlossaryTemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZdlToMarkdownGenerator/ZdlToMarkdownGenerator.md", "{{targetFile}}").withMimeType(OutputFormatType.MARKDOWN);
     private final TemplateInput modelTaskListTemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZdlToMarkdownGenerator/ZdlToMarkdownTaskList.md", "{{targetFile}}").withMimeType(OutputFormatType.MARKDOWN);
@@ -89,7 +92,7 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
 
     private final Map<String, String> inverseRelationshipTypes = Map.of("OneToMany", "ManyToOne","ManyToOne", "OneToMany","ManyToMany", "ManyToMany", "OneToOne", "OneToOne");
     {
-        handlebarsEngine.getHandlebars().registerHelper("entityAssociations", (entity, options) -> {
+        getHandlebars().registerHelper("entityAssociations", (entity, options) -> {
             var zdlModel = options.context.get("zdlModel", true);
             var compositions = JSONPath.get(entity, "fields[*][?(@.isEntity==true || @.isEnum==true)].type", List.of());
             var associations = JSONPath.get(entity, "relationships[?(@.fieldName)].otherEntityName", List.of());
@@ -99,12 +102,12 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
             associations.stream().map(name -> Maps.of("linkType", "o--", "entity", JSONPath.get(zdlModel, "$.entities." + name))).forEach(entityAssociations::add);
             return entityAssociations.stream().filter(e -> e.get("entity") != null).collect(Collectors.toList());
         });
-        handlebarsEngine.getHandlebars().registerHelper("relationshipType", (relationship, options) -> {
+        getHandlebars().registerHelper("relationshipType", (relationship, options) -> {
             boolean isOwnerSide = JSONPath.get(relationship, "ownerSide", false);
             var type = JSONPath.get(relationship, "type");
             return isOwnerSide ? type : inverseRelationshipTypes.get(type);
         });
-        handlebarsEngine.getHandlebars().registerHelper("methodParamsSignature", (method, options) -> {
+        getHandlebars().registerHelper("methodParamsSignature", (method, options) -> {
             var params = new ArrayList<>();
             if(JSONPath.get(method, "paramId") != null) {
                 params.add("id");
@@ -115,7 +118,7 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
             return StringUtils.join(params, ", ");
         });
 
-        handlebarsEngine.getHandlebars().registerHelper("methodReturnType", (method, options) -> {
+        getHandlebars().registerHelper("methodReturnType", (method, options) -> {
             var returnType = JSONPath.get(method, "returnType", "");
             if(JSONPath.get(method, "returnTypeIsArray", false)) {
                 returnType = returnType + "[]";
@@ -126,12 +129,12 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
             return returnType;
         });
 
-        handlebarsEngine.getHandlebars().registerHelper("methodEvents", (method, options) -> {
+        getHandlebars().registerHelper("methodEvents", (method, options) -> {
             var events = JSONPath.get(method, "withEvents", List.of());
             return StringUtils.join(events, " ").replaceAll(", ", " | ");
         });
 
-        handlebarsEngine.getHandlebars().registerHelper("serviceInputs", (service, options) -> {
+        getHandlebars().registerHelper("serviceInputs", (service, options) -> {
             var zdlModel = options.context.get("zdlModel", true);
             var inputs = new LinkedHashSet<>();
             var methods = JSONPath.get(service, "methods", Map.of());
@@ -150,7 +153,7 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
             }).filter(Objects::nonNull).collect(Collectors.toList());
         });
 
-        handlebarsEngine.getHandlebars().registerHelper("serviceOutputs", (service, options) -> {
+        getHandlebars().registerHelper("serviceOutputs", (service, options) -> {
             var zdlModel = options.context.get("zdlModel", true);
             var outputs = new LinkedHashSet<>();
             var methods = JSONPath.get(service, "methods", Map.of());
@@ -166,7 +169,7 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
             }).filter(Objects::nonNull).collect(Collectors.toList());
         });
 
-        handlebarsEngine.getHandlebars().registerHelper("serviceEvents", (service, options) -> {
+        getHandlebars().registerHelper("serviceEvents", (service, options) -> {
             var zdlModel = options.context.get("zdlModel", true);
             var events = new LinkedHashSet<>();
             var methods = JSONPath.get(service, "methods", Map.of());
@@ -191,6 +194,6 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
         model.putAll(this.asConfigurationMap());
         model.put("context", contextModel);
         model.put("zdlModel", zdlModel);
-        return handlebarsEngine.processTemplate(model, template);
+        return getTemplateEngine().processTemplate(model, template);
     }
 }

@@ -81,9 +81,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
                 .forEach(helper -> handlebarsEngine.getHandlebars().registerHelpers(helper));
     }
 
-    public TemplateEngine getTemplateEngine() {
-        return handlebarsEngine;
-    }
+
 
     Model getApiModel(Map<String, Object> contextModel) {
         return (Model) contextModel.get(apiProperty);

@@ -1,5 +1,6 @@
 package io.zenwave360.sdk.plugins.kotlin;
 
+import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.plugins.BackendApplicationDefaultGenerator;
 import io.zenwave360.sdk.plugins.BackendApplicationDefaultHelpers;
@@ -21,6 +22,7 @@ import static io.zenwave360.sdk.zdl.utils.ZDLFindUtils.is;
 
 public class BackendApplicationKotlinTemplates extends ProjectTemplates {
 
+    @DocumentedOption(description = "Whether to add AsyncAPI/ApplicationEventPublisher as service dependencies. Depends on the naming convention of zenwave-asyncapi plugin to work.")
     public boolean includeEmitEventsImplementation = true;
 
     protected Function<Map<String, Object>, Boolean> skipEntityRepository = (model) -> is(model, "persistence") // if polyglot persistence -> skip

@@ -15,7 +15,7 @@ import com.jayway.jsonpath.JsonPath;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.parsers.Model;
 
-public abstract class AbstractOpenAPIGenerator implements Generator {
+public abstract class AbstractOpenAPIGenerator extends Generator {
 
     public enum OperationType {
         GET, PUT, POST, DELETE, PATCH, HEAD, PARAMETERS

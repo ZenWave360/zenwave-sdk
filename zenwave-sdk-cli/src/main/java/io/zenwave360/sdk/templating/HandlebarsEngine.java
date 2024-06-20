@@ -45,6 +45,11 @@ public class HandlebarsEngine implements TemplateEngine {
     }
 
     @Override
+    public void registerHelpers(Object helper) {
+        handlebars.registerHelpers(helper);
+    }
+
+    @Override
     public String processInline(String template, Map<String, Object> model) throws IOException {
         return handlebars.compileInline(template).apply(model);
     }

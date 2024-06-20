@@ -24,7 +24,7 @@ public class ZDLJavaSignatureUtils {
     public static String methodParameterType(Map method, Map zdl) {
         var isPatch = JSONPath.get(method, "options.patch") != null;
         if(isPatch) {
-            return "java.util.Map<String,Object>";
+            return "java.util.Map";
         }
         return (String) method.get("parameter");
     }
@@ -106,7 +106,7 @@ public class ZDLJavaSignatureUtils {
 
     public static String kotlinMethodParametersSignature(String idJavaType, Map method, Map zdl) {
         var signature = methodParametersSignature(idJavaType, method, zdl);
-        signature = signature.replace("java.util.Map<String,Object>", "java.util.Map<String,Any?>");
+        signature = signature.replace("java.util.Map", "java.util.Map<String,Any?>");
         return toKotlinMethodSignature(signature);
     }
 

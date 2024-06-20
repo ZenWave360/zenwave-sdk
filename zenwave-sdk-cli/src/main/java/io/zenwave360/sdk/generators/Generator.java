@@ -13,13 +13,21 @@ import io.zenwave360.sdk.templating.TemplateEngine;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 
-public interface Generator {
+public abstract class Generator {
 
-    GeneratedProjectFiles generate(Map<String, Object> contextModel);
+    private final HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
-    default void onPropertiesSet() { }
+    public TemplateEngine getTemplateEngine() {
+        return handlebarsEngine;
+    }
 
-    default Map<String, Object> asConfigurationMap() {
+    public abstract GeneratedProjectFiles generate(Map<String, Object> contextModel);
+
+    public void onPropertiesSet() {
+        // no op
+    }
+
+    public Map<String, Object> asConfigurationMap() {
         return Generator.asConfigurationMap(this);
     }
 

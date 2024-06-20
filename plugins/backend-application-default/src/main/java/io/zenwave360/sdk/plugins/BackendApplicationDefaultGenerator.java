@@ -42,18 +42,8 @@ public class BackendApplicationDefaultGenerator extends ZDLProjectGenerator {
     @DocumentedOption(description = "Specifies the Java data type for the ID fields of entities. Defaults to Long for JPA and String for MongoDB if not explicitly set.")
     public String idJavaType;
 
-    public String mavenModulesPrefix;
-
-    @Override
-    public void onPropertiesSet() {
-        if (templates == null) {
-            if (StringUtils.isNotBlank(mavenModulesPrefix)) {
-                templates =new BackendApplicationMultiModuleProjectTemplates();
-            } else {
-                templates = new BackendApplicationProjectTemplates();
-            }
-        }
-        super.onPropertiesSet();
+    {
+        templates = new BackendApplicationProjectTemplates();
     }
 
     @Override
