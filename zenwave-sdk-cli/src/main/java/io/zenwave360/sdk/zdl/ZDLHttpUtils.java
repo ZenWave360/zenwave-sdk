@@ -20,6 +20,9 @@ public class ZDLHttpUtils {
     }
 
     public static String getPathFromMethodOptions(Map httpOption) {
+        if (httpOption == null) {
+            return "";
+        }
         var httpOptions = httpOption.get("httpOptions");
         return httpOptions instanceof String? (String) httpOptions : JSONPath.get(httpOptions, "$.path", "");
     }

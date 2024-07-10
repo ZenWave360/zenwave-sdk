@@ -22,8 +22,6 @@ import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
-import lombok.SneakyThrows;
-
 public class DockerComposeInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private Logger log = LoggerFactory.getLogger(getClass());
@@ -60,7 +58,6 @@ public class DockerComposeInitializer implements ApplicationContextInitializer<C
 	}
 	static boolean isContainerRunning = false;
 
-    @SneakyThrows
     @Override
     public void initialize(ConfigurableApplicationContext ctx) {
         if(isDockerComposeRunningAllServices(SERVICES)) {

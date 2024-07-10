@@ -23,7 +23,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @lombok.Getter @lombok.Setter
 {{~/if}}
 {{~#if (or entity.options.json entity.options.jsonb)}}
-// json embedded
+// @Embeddable // json embedded
 {{~else if entity.options.embedded}}
 @Embeddable
 {{~else if entity.options.isSuperClass}}
@@ -56,8 +56,9 @@ public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}}
   {{{fieldValidationAnnotations field}}}
   {{~#if field.isEntity}}
     {{~#if (or field.options.json field.options.jsonb)}}
-	@org.hibernate.annotations.Type(io.hypersistence.utils.hibernate.type.json.JsonType.class)
-	@Column(name = "{{snakeCase field.name}}", columnDefinition = "{{~#if field.options.jsonb}}jsonb{{else}}json{{/if}}")
+	@org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+{{!-- 	@Column(name = "{{snakeCase field.name}}", columnDefinition = "{{~#if field.options.jsonb}}jsonb{{else}}json{{/if}}") --}}
+    @Column(name = "{{snakeCase field.name}}")
     {{~else~}}
     @Embedded
     {{~ assign 'embeddedFields' (jsonPath zdl 'entities.' field.type '.fields[*]') ~}}
@@ -66,8 +67,8 @@ public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}}
     {{~/joinWithTemplate~}}
     {{~/if~}}
   {{~else if (or field.options.json field.options.jsonb)}}
-  	@org.hibernate.annotations.Type(io.hypersistence.utils.hibernate.type.json.JsonType.class)
-  	@Column(name = "{{snakeCase field.name}}", columnDefinition = "{{~#if field.options.jsonb}}jsonb{{else}}json{{/if}}")
+  	@org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+  	@Column(name = "{{snakeCase field.name}}")
   {{~else~}}
     @Column(name = "{{snakeCase field.name}}" {{#if field.validations.required}}, nullable = false{{/if}}{{#if field.validations.unique}}, unique = true{{/if}}{{#if field.validations.maxlength}}, length = {{field.validations.maxlength.value}}{{/if}})
     {{~#if field.isEnum}} @Enumerated(EnumType.STRING){{/if}}
@@ -78,12 +79,13 @@ public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}}
 
 {{#each entity.relationships as |relationship|}}
 {{#if relationship.fieldName~}}
+  {{~#assign 'fetchType' }}{{ifTruthy relationship.options.eager "EAGER" "LAZY"}}{{/assign}}
   {{#if (addRelationshipById relationship entity=entity)}}
     {{#if relationship.required}}@NotNull{{/if}}
     @Column(name = "{{snakeCase relationship.fieldName}}_id")
     private {{idJavaType}} {{relationship.fieldName}}Id;
   {{~/if}}
-    {{#unless (addRelationshipById relationship entity=entity)}}{{#if relationship.required}}@NotNull{{/if}}{{/unless}}
+    {{{fieldValidationAnnotations relationship}}}
     {{> (partial 'partials/' relationship.type)}}
     private {{{relationshipFieldType relationship}}} {{relationship.fieldName}} {{{relationshipFieldTypeInitializer relationship}}};
 {{/if~}}

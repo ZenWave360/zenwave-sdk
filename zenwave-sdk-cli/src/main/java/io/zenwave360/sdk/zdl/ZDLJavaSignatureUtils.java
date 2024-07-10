@@ -187,6 +187,10 @@ public class ZDLJavaSignatureUtils {
             value = "new " + field.get("type") + "()";
         }
 
+        if (JSONPath.get(field,"isArray", false)) {
+            return "List.of(" + value + ")";
+        }
+
         return value;
     }
 

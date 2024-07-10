@@ -20,7 +20,7 @@
 		<spring-cloud.version>2022.0.4</spring-cloud.version>
 		<spring-modulith-bom.version>1.1.1</spring-modulith-bom.version>
 
-		<zenwave.version>1.4.0-SNAPSHOT</zenwave.version>
+		<zenwave.version>1.6.0</zenwave.version>
 
 		<jakarta.validation-api.version>3.0.2</jakarta.validation-api.version>
 		<mapstruct.version>1.5.3.Final</mapstruct.version>

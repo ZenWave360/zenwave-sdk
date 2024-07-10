@@ -13,7 +13,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 import org.springframework.data.mongodb.core.mapping.Field;
 {{~#if entity.options.auditing}}
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 {{/if}}
 
@@ -47,10 +49,14 @@ public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}}
 {{/each}}
 
 {{~#if entity.options.auditing}}
+    @CreatedBy
+    protected String createdBy;
     @CreatedDate
-    private LocalDateTime createdDate;
+    protected LocalDateTime createdDate;
+    @LastModifiedBy
+    protected String lastModifiedBy;
     @LastModifiedDate
-    private LocalDateTime lastModifiedDate;
+    protected LocalDateTime lastModifiedDate;
 {{/if~}}
 
 {{#each entity.fields as |field|}}

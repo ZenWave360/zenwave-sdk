@@ -1,6 +1,7 @@
 {{#if relationship.ownerSide}}
-@OneToMany({{#if relationship.otherEntityFieldName}}mappedBy = "{{relationship.otherEntityFieldName}}",{{/if}} fetch = FetchType.LAZY{{#if entity.options.aggregate}}, cascade = CascadeType.ALL, orphanRemoval = true{{/if}})
+@OneToMany({{#if relationship.otherEntityFieldName}}mappedBy = "{{relationship.otherEntityFieldName}}",{{/if}} fetch = FetchType.{{fetchType}}{{#if entity.options.aggregate}}, cascade = CascadeType.ALL, orphanRemoval = true{{/if}})
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 {{else}}
-@ManyToOne(fetch = FetchType.LAZY)
+@ManyToOne(fetch = FetchType.{{fetchType}})
 @JoinColumn(name = "{{snakeCase relationship.fieldName}}_id")
 {{/if}}
