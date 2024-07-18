@@ -1,19 +1,56 @@
+{{~#if (eq persistence 'jpa')}}
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
+{{~/if}}
+
+{{~#if enum.hasValue}}
+import java.util.Arrays;
+{{~/if}}
+
 /**
  * Enum for {{defaultIfEmpty enum.description enum.name}}.
  */
 public enum {{ enum.name }} {
     {{#each enum.values }}
-    {{ this.name }}("{{defaultIfEmpty this.value this.name }}"),
+    {{ this.name }} {{~#if this.value}}({{this.value}}){{/if}},
     {{~/each}}
     ;
 
-    private final String value;
+{{~#if enum.hasValue}}
+    private final Integer value;
 
-    private {{ enum.name }}(String value) {
+    private {{ enum.name }}(Integer value) {
         this.value = value;
     }
 
-    public String getValue() {
+    public Integer getValue() {
         return value;
     }
+
+    public static {{ enum.name }} fromValue(Integer value) {
+        return Arrays.stream({{ enum.name }}.values())
+                .filter(e -> e.value.equals(value)).findFirst().orElse(null);
+    }
+
+    {{~#if (eq persistence 'jpa')}}
+    @Converter
+    static class {{ enum.name }}Converter implements AttributeConverter<{{ enum.name }}, Integer> {
+
+        @Override
+        public Integer convertToDatabaseColumn({{ enum.name }} attribute) {
+            if (attribute == null) {
+                return null;
+            }
+
+            return attribute.value;
+        }
+
+        @Override
+        public {{ enum.name }} convertToEntityAttribute(Integer dbData) {
+            return {{ enum.name }}.fromValue(dbData);
+        }
+
+    }
+    {{~/if}}
+{{~/if}}
 }
