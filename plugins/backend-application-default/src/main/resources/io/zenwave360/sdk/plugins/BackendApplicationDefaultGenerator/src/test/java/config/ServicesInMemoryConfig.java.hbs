@@ -8,11 +8,14 @@ import {{inboundPackage}}.*;
 import {{coreImplementationPackage}}.*;
 {{/if}}
 {{#if includeEmitEventsImplementation}}
+    {{~#if (needsEventsProducer service)}}
 import {{outboundEventsPackage}}.*;
-{{/if}}
-{{~#if (includeEmitEventsImplementation service)}}
+    {{~/if}}
+    {{#if (includeDomainEvents service)}}
+import {{domainEventsPackage}}.*;
+    {{/if}}
 import org.springframework.context.ApplicationEventPublisher;
-{{~/if}}
+{{/if}}
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -28,7 +31,9 @@ import java.util.ArrayList;
 public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
 
 {{#if (includeEmitEventsImplementation service)}}
+    {{~#if (needsEventsProducer service)}}
     protected final EventsProducerInMemoryContext eventsProducerInMemoryContext = new EventsProducerInMemoryContext();
+    {{~/if}}
     private ApplicationEventPublisher applicationEventPublisher = new ApplicationEventPublisher() {
         @Override
         public void publishEvent(Object event) {
@@ -43,7 +48,8 @@ public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
 {{#unless (skipEntityRepository entity)}}{{entity.instanceName}}Repository(){{/unless}}
         {{~/joinWithTemplate~}}
         {{#if (includeEmitEventsImplementation service)}}
-        , eventsProducerInMemoryContext.{{eventsProducerInstance service.name}}(), applicationEventPublisher
+            {{~#if (needsEventsProducer service)}}, eventsProducerInMemoryContext.{{eventsProducerInstance service.name}}(){{/if~}}
+            , applicationEventPublisher
         {{/if}}
         );
 {{~/each}}
@@ -69,9 +75,11 @@ public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
 	}
 
 {{~#if (includeEmitEventsImplementation service)}}
+    {{~#if (needsEventsProducer service)}}
     public EventsProducerInMemoryContext getEventsProducerInMemoryContext() {
         return eventsProducerInMemoryContext;
     }
+    {{~/if}}
 
     private List<Object> publishedEvents = new ArrayList<>();
 

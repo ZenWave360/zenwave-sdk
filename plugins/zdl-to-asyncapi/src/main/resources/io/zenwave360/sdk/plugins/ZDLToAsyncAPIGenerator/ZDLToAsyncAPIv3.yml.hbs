@@ -58,13 +58,10 @@ components:
         properties:
 {{~#if includeKafkaCommonHeaders}}
           kafka_messageKey:
-            type: string
+            type: "{{idType}}"
+            {{#if idTypeFormat}}format: "{{idTypeFormat}}"{{/if}}
             description: This header value will be populated automatically at runtime
             x-runtime-expression: $message.payload#/id
 {{~/if}}
-          tracingId:
-            type: string
-            description: This header value can be populated automatically at runtime (when using ZenWave code generator)
-            x-runtime-expression: $tracingIdSupplier
 
 {{{schemasAsString}}}

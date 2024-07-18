@@ -75,7 +75,7 @@ paths:
 {{~/each}}
 
 {{{schemasAsString}}}
-{{~#if zdlModel.paginatedEntities}}
+{{~#if (or zdlModel.paginatedEntities service.isLegacy)}}
     Page:
       type: object
       required:

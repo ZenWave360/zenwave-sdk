@@ -142,6 +142,8 @@ public class ZDLProcessor extends AbstractBaseProcessor {
             relationshipMap.put("entityName", from);
             relationshipMap.put("otherEntityName", to);
             relationshipMap.put("ownerSide", true);
+            relationshipMap.put("options", relationship.get("fromOptions"));
+            relationshipMap.put("validations", relationship.get("fromValidations"));
 //            relationshipMap.put("mapsId", JSONPath.get(relationship, "toOptions.Id", false));
             relationshipMap.put("isCollection", relationship.get("type").toString().endsWith("Many"));
             if(relationship.get("injectedFieldInFrom") != null) {
@@ -157,6 +159,8 @@ public class ZDLProcessor extends AbstractBaseProcessor {
             relationshipMap.put("entityName", to);
             relationshipMap.put("otherEntityName", from);
             relationshipMap.put("ownerSide", false);
+            relationshipMap.put("options", relationship.get("toOptions"));
+            relationshipMap.put("validations", relationship.get("toValidations"));
             relationshipMap.put("mapsId", JSONPath.get(relationship, "toOptions.Id", false));
             relationshipMap.put("isCollection", relationship.get("type").toString().startsWith("Many"));
             if(relationship.get("injectedFieldInTo") != null) {

@@ -15,6 +15,8 @@ import com.github.jknack.handlebars.Options;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.NamingUtils;
 
+import static org.apache.commons.lang3.StringUtils.upperCase;
+
 public class CustomHandlebarsHelpers {
 
     public static String date(Object props, Options options) {
@@ -23,6 +25,15 @@ public class CustomHandlebarsHelpers {
     public static String populateProperty(Map property, Options options) {
         String type = (String) property.get("type");
         String format = (String) property.get("format");
+        List<String> enums = (List) property.get("enum");
+        if (enums != null && !enums.isEmpty()) {
+            String otherEntity = (String) property.get("x--schema-name");
+            String openApiModelNameSuffix = options.hash("openApiModelNameSuffix", "");
+            if(otherEntity == null) {
+                return "\"null\"";
+            }
+            return String.format("%s%s.%s", otherEntity, openApiModelNameSuffix, upperCase(enums.get(0)));
+        }
         if ("date".equals(format)) {
             return "new Date()";
         }

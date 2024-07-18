@@ -50,7 +50,10 @@ public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
         // include all events not annotated with @asyncapi
         domainEvents.addAll((List) JSONPath.get(apiModel, "$.events[*][?(!@.options.asyncapi && !@.options.embedded)]", List.of()));
         // include all events referenced by fields
-        JSONPath.get(domainEvents, "$..fields[*].type", List.of()).stream().map(type -> (Map) JSONPath.get(apiModel, "$.events." + type)).filter(Objects::nonNull).forEach(domainEvents::add);
+        JSONPath.get(new ArrayList(domainEvents), "$..fields[*].type", List.of()).stream()
+                .map(type -> (Map) JSONPath.get(apiModel, "$.events." + type))
+                .filter(Objects::nonNull)
+                .forEach(domainEvents::add);
 
         for (Map<String, Object> domainEvent : domainEvents) {
             for (TemplateInput template : templates.domainEventsTemplates) {
@@ -75,9 +78,14 @@ public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
                 continue;
             }
             var comment = enumValue.get("comment");
-            var isDtoInput = JSONPath.get(enumValue, "$.options.input", false);
-            if (isDtoInput) {
+            var isInputEnum = JSONPath.get(enumValue, "$.options.input", false);
+            var isEventEnum = JSONPath.get(enumValue, "$.options.event", false);
+            if (isInputEnum) {
                 for (TemplateInput template : templates.inputEnumTemplates) {
+                    templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("enum", enumValue)));
+                }
+            } else if (isEventEnum) {
+                for (TemplateInput template : templates.eventEnumTemplates) {
                     templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("enum", enumValue)));
                 }
             } else {

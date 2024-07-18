@@ -10,7 +10,6 @@ import io.zenwave360.sdk.utils.JSONPath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -78,4 +77,54 @@ public class BackendApplicationDefaultHelpersTest {
                 entityEvent);
 
     }
+
+    @Test
+    void listOfPairEventEntityLocalEvents() throws Exception {
+        var zdl = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address-local-events.zdl");
+        var methodParametersCallSignature = helpers.listOfPairEventEntity(zdl, options(Map.of("zdl", zdl)));
+        var entityEvent = methodParametersCallSignature.stream()
+                .map(p -> JSONPath.getFirst(p, "entity.name", "method.name") + "=" + JSONPath.get(p, "event.name"))
+                .sorted()
+                .peek(System.out::println)
+                .toList();
+        Assertions.assertEquals(
+                List.of(
+                        "Customer=CustomerEvent",
+                        "Customer=CustomerUpdated"),
+                entityEvent);
+
+    }
+
+    @Test
+    void needsEventsProducer() throws Exception {
+        var zdl = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
+        var service = JSONPath.get(zdl, "$.services.CustomerService");
+        var needsEventsProducer = helpers.needsEventsProducer((Map) service, options(Map.of("zdl", zdl)));
+        Assertions.assertTrue(needsEventsProducer);
+    }
+
+    @Test
+    void needsEventsProducerLocalEvents() throws Exception {
+        var zdl = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address-local-events.zdl");
+        var service = JSONPath.get(zdl, "$.services.CustomerService");
+        var needsEventsProducer = helpers.needsEventsProducer((Map) service, options(Map.of("zdl", zdl)));
+        Assertions.assertFalse(needsEventsProducer);
+    }
+
+    @Test
+    void needsEventBus() throws Exception {
+        var zdl = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
+        var service = JSONPath.get(zdl, "$.services.CustomerService");
+        var needsEventsProducer = helpers.needsEventBus((Map) service, options(Map.of("zdl", zdl)));
+        Assertions.assertFalse(needsEventsProducer);
+    }
+
+    @Test
+    void needsEventBusLocalEvents() throws Exception {
+        var zdl = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address-local-events.zdl");
+        var service = JSONPath.get(zdl, "$.services.CustomerService");
+        var needsEventsProducer = helpers.needsEventBus((Map) service, options(Map.of("zdl", zdl)));
+        Assertions.assertTrue(needsEventsProducer);
+    }
+
 }

@@ -5,12 +5,12 @@ import {{inboundPackage}}.*;
 import {{inboundDtosPackage}}.*;
 import {{coreImplementationPackage}}.mappers.*;
 import {{outboundRepositoryPackage}}.*;
-{{#if includeEmitEventsImplementation}}
+{{~#if (and includeEmitEventsImplementation (needsEventsProducer service))}}
 import {{outboundEventsPackage}}.*;
-{{/if}}
-{{#if (includeDomainEvents service)}}
+{{~/if}}
+{{~#if (includeDomainEvents service)}}
 import {{domainEventsPackage}}.*;
-{{/if}}
+{{~/if}}
 
 import java.math.*;
 import java.time.*;
@@ -52,7 +52,9 @@ public class {{service.name}}Impl implements {{service.name}} {
 
 {{#if (includeEmitEventsImplementation service)}}
     private final EventsMapper eventsMapper = EventsMapper.INSTANCE;
+    {{~#if (needsEventsProducer service)}}
     private final {{eventsProducerInterface service.name}} eventsProducer;
+    {{~/if}}
 	private final ApplicationEventPublisher applicationEventPublisher;
 {{/if}}
 
@@ -61,7 +63,10 @@ public class {{service.name}}Impl implements {{service.name}} {
      * Constructor.
      */
     public {{service.name}}Impl({{#joinWithTemplate service.entities delimiter=", "}}{{#unless (skipEntityRepository this)}}{{className}}Repository {{instanceName}}Repository{{/unless}}{{/joinWithTemplate}}
-                                {{#if (includeEmitEventsImplementation service)}}, {{eventsProducerInterface service.name}} eventsProducer, ApplicationEventPublisher applicationEventPublisher{{/if}}
+                                {{~#if (includeEmitEventsImplementation service)}}
+                                    {{~#if (needsEventsProducer service)}}, {{eventsProducerInterface service.name}} eventsProducer{{/if~}}
+                                    , ApplicationEventPublisher applicationEventPublisher
+                                {{~/if~}}
                                 ) {
         {{~#joinWithTemplate service.entities ~}}
             {{#unless (skipEntityRepository this)}}this.{{instanceName}}Repository = {{instanceName}}Repository;{{/unless}}

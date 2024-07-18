@@ -24,7 +24,7 @@ public class OpenAPIToJDLGenerator extends AbstractZDLGenerator {
     public List<String> entities = new ArrayList<>();
 
     @DocumentedOption(description = "Target file")
-    public String targetFile = "entities.jdl";
+    public String targetFile;
 
     @DocumentedOption(description = "Whether to use JDL relationships or plain field")
     public boolean useRelationships = true;

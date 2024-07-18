@@ -92,7 +92,6 @@ jbang zw -p io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin --help
 | `transactionalOutbox`           | Transactional outbox type for message producers.                                                                                                                                        | TransactionalOutboxType | none                 | none, mongodb, jdbc               |
 | `useEnterpriseEnvelope`         | Include support for enterprise envelop wrapping/unwrapping.                                                                                                                             | boolean                 | false                |                                   |
 | `runtimeHeadersProperty`        | AsyncAPI extension property name for runtime auto-configuration of headers.                                                                                                             | String                  | x-runtime-expression |                                   |
-| `tracingIdSupplierQualifier`    | Spring bean id for the tracing id supplier for runtime header with expression: '$tracingIdSupplier'                                                                                     | String                  | tracingIdSupplier    |                                   |
 | `envelopeJavaTypeExtensionName` | AsyncAPI Message extension name for the envelop java type for wrapping/unwrapping.                                                                                                      | String                  | x-envelope-java-type |                                   |
 | `includeKafkaCommonHeaders`     | Include Kafka common headers 'kafka_messageKey' as x-runtime-header                                                                                                                     | boolean                 | false                |                                   |
 | `consumerPrefix`                | SC Streams Binder class prefix                                                                                                                                                          | String                  |                      |                                   |
@@ -111,7 +110,7 @@ jbang zw -p io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin --help
 ZenWave SDK provides `x-runtime-expression` for automatic header population at runtime. Values for this extension property are:
 
 - `$message.payload#/<json pointer fragment>`: follows the same format as AsyncAPI [Correlation ID](https://www.asyncapi.com/docs/reference/specification/v2.5.0#correlationIdObject) object.
-- `$tracingIdSupplier`: will use the tracing id `java.function.Supplier` configured in your Spring context.
+- `$supplierBeanName`: will use a bean named `supplierBeanName` (you can use any other name) of type `java.function.Supplier` configured in your Spring context.
 
 ```yaml
     CustomerEventMessage:
@@ -127,20 +126,19 @@ ZenWave SDK provides `x-runtime-expression` for automatic header population at r
           tracingId:
             type: string
             description: This one will be populated automatically at runtime
-            x-runtime-expression: $tracingIdSupplier
+            x-runtime-expression: $supplierBeanName
 ```
 
 ```xml
 <configOption>
-    <tracingIdSupplierQualifier>myTracingIdSupplier</tracingIdSupplierQualifier><!-- default is "tracingIdSupplier" -->
     <runtimeHeadersProperty>x-custom-runtime-expression</runtimeHeadersProperty><!-- you can also override this extension property name -->
 </configOption>
 ```
 
 ```java
-    @Bean("myTracingIdSupplier")
-    public Supplier tracingIdSupplier() {
-        return () -> "test-tracing-id";
+    @Bean("supplierBeanName")
+    public Supplier supplierBeanName() {
+        return () -> "some-value";
     }
 ```
 
