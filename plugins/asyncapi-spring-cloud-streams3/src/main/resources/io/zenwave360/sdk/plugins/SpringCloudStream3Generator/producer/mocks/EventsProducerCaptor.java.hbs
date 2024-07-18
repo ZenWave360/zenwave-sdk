@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
@@ -23,11 +24,15 @@ public class {{apiClassName serviceName operationRoleType}}Captor implements I{{
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
+    protected ApplicationContext applicationContext;
+    public {{apiClassName serviceName operationRoleType}}Captor withApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+        return this;
+    }
+
 {{~#each operations as |operation|}}
     public String {{operation.operationId}}BindingName = "{{bindingPrefix}}{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
 {{~/each}}
-
-{{> (partial '../partials/tracing-id-supplier')}}
 
 {{~#if useEnterpriseEnvelope}}
     public EnvelopeWrapper envelopeWrapper;
@@ -63,7 +68,7 @@ public class {{apiClassName serviceName operationRoleType}}Captor implements I{{
         headers = headers != null ? headers : new {{message.x--javaTypeSimpleName}}Headers();
         processRuntimeHeaders(payload, headers, {{message.x--javaTypeSimpleName}}Headers._runtimeheaders);
         {{~/if}}
-        Message message = MessageBuilder.createMessage({{#if (hasEnterpriseEnvelope operation)}}wrap(payload){{else}}payload{{/if}}, new MessageHeaders(headers));
+        Message message = MessageBuilder.createMessage({{#if (hasEnterpriseEnvelope operation)}}wrap(wrapNullPayload(payload)){{else}}wrapNullPayload(payload){{/if}}, new MessageHeaders(headers));
         return appendCapturedMessage({{operation.operationId}}BindingName, message);
     }
 
@@ -83,5 +88,6 @@ public class {{apiClassName serviceName operationRoleType}}Captor implements I{{
     }
 {{/if~}}
 
+{{> (partial '../partials/wrapNullPayload') }}
 {{> (partial '../partials/runtime-headers') }}
 }

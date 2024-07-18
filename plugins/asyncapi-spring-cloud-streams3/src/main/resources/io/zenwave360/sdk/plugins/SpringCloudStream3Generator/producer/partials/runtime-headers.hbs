@@ -7,10 +7,11 @@
             headers = new java.util.HashMap<>();
         }
         for (Map.Entry<String, String> runtimeHeader :runtimeHeaders.entrySet()) {
-            String location = runtimeHeader.getValue().replace("$message.payload#/", "");
-            if("$tracingIdSupplier".equals(location.trim())) {
-                if(tracingIdSupplier != null) {
-                    headers.put(runtimeHeader.getKey(), tracingIdSupplier.get());
+            String location = runtimeHeader.getValue().replace("$message.payload#/", "").trim();
+            if (location.startsWith("$")) {
+                var suppliedValue = getSuppliedValue(location.substring(1));
+                if (suppliedValue != null) {
+                    headers.put(runtimeHeader.getKey(), suppliedValue.orElse(null));
                 }
                 continue;
             }
@@ -27,10 +28,25 @@
                         }
                     }
                 }
-                headers.put(runtimeHeader.getKey(), value);
+                if(!headers.containsKey(runtimeHeader.getKey())) {
+                    headers.put(runtimeHeader.getKey(), value);
+                }
             } catch (java.beans.IntrospectionException | java.lang.reflect.InvocationTargetException | IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
         }
     }
+
+	protected java.util.Optional<Object> getSuppliedValue(String supplierBeanKey) {
+		try {
+			var supplier = applicationContext.getBean(supplierBeanKey);
+			if (supplier instanceof java.util.function.Supplier) {
+				return java.util.Optional.ofNullable(((java.util.function.Supplier) supplier).get());
+			}
+		}
+		catch (org.springframework.beans.factory.NoSuchBeanDefinitionException e) {
+			log.warn("Unable to find supplier bean: {}", supplierBeanKey);
+		}
+		return null;
+	}
 {{~/if}}

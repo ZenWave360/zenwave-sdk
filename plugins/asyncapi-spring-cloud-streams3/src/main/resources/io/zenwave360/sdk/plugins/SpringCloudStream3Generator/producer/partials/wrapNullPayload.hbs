@@ -1,0 +1,11 @@
+    protected Object wrapNullPayload(Object payload) {
+        if (payload != null) {
+            return payload;
+        }
+        try {
+            return Class.forName("org.springframework.kafka.support.KafkaNull").getField("INSTANCE").get(null);
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
+            log.warn("Unable to find KafkaNull class, returning null");
+            return null;
+        }
+    }

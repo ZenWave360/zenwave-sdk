@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.messaging.MessageListener;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -40,17 +41,17 @@ public class {{apiClassName serviceName operationRoleType}} implements I{{apiCla
     public String {{operation.operationId}}OutboxCollection = {{operation.operationId}}BindingName;
 {{~/each}}
 
-    protected StreamBridge streamBridge;
+    protected final StreamBridge streamBridge;
+    protected final ApplicationContext applicationContext;
     protected MongoTemplate mongoTemplate;
 
     public String resumeTokensCollectionName = "ChangeStreamResumeTokens";
     public int skipMessagesBeforePersistingResumeToken = 100;
     private Map<String, Integer> messageCounters = new HashMap();
 
-{{> (partial '../../partials/tracing-id-supplier')}}
-
-    public {{apiClassName serviceName operationRoleType}}(StreamBridge streamBridge, MongoTemplate mongoTemplate) {
+    public {{apiClassName serviceName operationRoleType}}(StreamBridge streamBridge, ApplicationContext applicationContext, MongoTemplate mongoTemplate) {
         this.streamBridge = streamBridge;
+        this.applicationContext = applicationContext;
         this.mongoTemplate = mongoTemplate;
     }
 
@@ -74,7 +75,7 @@ public class {{apiClassName serviceName operationRoleType}} implements I{{apiCla
     public void sendOutboxMessage(org.springframework.data.mongodb.core.messaging.Message<ChangeStreamDocument<Document>, Map> outboxMessage, String collectionName, String eventBindingName) {
         log.debug("Sending outbox message to stream {}", eventBindingName);
         // send message to the stream
-        Message message = MessageBuilder.createMessage(outboxMessage.getBody().get("payload"), new MessageHeaders((Map<String, Object>) outboxMessage.getBody().get("headers")));
+        Message message = MessageBuilder.createMessage(wrapNullPayload(outboxMessage.getBody().get("payload")), new MessageHeaders((Map<String, Object>) outboxMessage.getBody().get("headers")));
         streamBridge.send(eventBindingName, message);
 
         // persist resume token
@@ -111,7 +112,7 @@ public class {{apiClassName serviceName operationRoleType}} implements I{{apiCla
         headers = headers != null ? headers : new {{message.x--javaTypeSimpleName}}Headers();
         processRuntimeHeaders(payload, headers, {{message.x--javaTypeSimpleName}}Headers._runtimeheaders);
         {{~/if}}
-        Message message = MessageBuilder.createMessage(payload, new MessageHeaders(headers));
+        Message message = MessageBuilder.createMessage(wrapNullPayload(payload), new MessageHeaders(headers));
         // return streamBridge.send({{operation.operationId}}BindingName, message, outputContentType);
         return saveMessageToOutbox(message, {{operation.operationId}}OutboxCollection);
     }
@@ -119,6 +120,7 @@ public class {{apiClassName serviceName operationRoleType}} implements I{{apiCla
     {{~/each}}
 {{~/each}}
 
+{{> (partial '../../partials/wrapNullPayload')}}
 {{> (partial '../../partials/runtime-headers')}}
 
 }

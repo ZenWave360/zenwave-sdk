@@ -67,9 +67,6 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     @DocumentedOption(description = "AsyncAPI extension property name for runtime auto-configuration of headers.")
     public String runtimeHeadersProperty = "x-runtime-expression";
 
-    @DocumentedOption(description = "Spring bean id for the tracing id supplier for runtime header with expression: '$tracingIdSupplier'")
-    public String tracingIdSupplierQualifier = "tracingIdSupplier";
-
     @DocumentedOption(description = "Include Kafka common headers 'kafka_messageKey' as x-runtime-header")
     private boolean includeKafkaCommonHeaders = false;
 
@@ -140,6 +137,33 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
                 }
             }
             return runtimeHeaders.stream().collect(Collectors.joining(", "));
+        });
+        handlebarsEngine.getHandlebars().registerHelper("propertyType", (context, options) -> {
+            Map property = (Map) context;
+            String type = (String) property.get("type");
+            String format = (String) property.get("format");
+            if ("date".equals(format)) {
+                return "LocalDate";
+            }
+            if ("date-time".equals(format)) {
+                return "Instant";
+            }
+            if ("integer".equals(type) && "int32".equals(format)) {
+                return "Integer";
+            }
+            if ("integer".equals(type) && "int64".equals(format)) {
+                return "Long";
+            }
+            if ("number".equals(type)) {
+                return "BigDecimal";
+            }
+            if ("boolean".equals(type)) {
+                return "Boolean";
+            }
+            if("string".equals(type)) {
+                return "String";
+            }
+            return "Object";
         });
     }
 
