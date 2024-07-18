@@ -3,11 +3,11 @@ io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,ZD
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,AbstractBaseProcessor,0,69,0,8,0,15,0,8,0,4
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,AsyncApiProcessor.SchemaFormatType,58,173,12,0,11,11,12,3,6,3
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,AsyncApiProcessor,34,636,10,64,6,118,10,37,0,10
-io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,ZDLProcessor,49,589,12,32,4,110,12,21,0,11
+io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,ZDLProcessor,49,617,12,32,4,114,12,21,0,11
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,OpenApiProcessor,2,390,9,35,0,78,9,23,0,10
-io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl,ZDLHttpUtils,173,190,22,16,24,38,21,12,6,8
+io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl,ZDLHttpUtils,175,192,23,17,25,39,22,12,6,8
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl,ZDLFindUtils,53,599,15,49,9,113,16,40,3,21
-io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl,ZDLJavaSignatureUtils,101,598,29,65,18,102,28,39,1,19
+io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl,ZDLJavaSignatureUtils,104,606,30,66,19,103,29,39,1,19
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.writers,TemplateStdoutWriter,0,48,0,0,0,11,0,5,0,5
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.writers,TemplateFileWriter,15,103,2,8,4,21,3,10,1,7
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.formatters,PalantirJavaFormatter,150,0,14,0,30,0,13,0,6,0
@@ -44,7 +44,7 @@ io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk,MainGenerator
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,TemplateInput,43,63,0,2,13,21,3,13,3,12
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,OutputFormatType,0,27,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,HandlebarsEngine,22,119,4,2,4,25,4,6,1,6
-io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,CustomHandlebarsHelpers,102,397,22,46,20,78,24,38,5,23
+io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,CustomHandlebarsHelpers,102,443,23,51,20,85,25,40,5,23
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,TemplateOutput,15,42,0,0,5,15,1,6,1,6
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,Parser.ParseException,4,0,0,0,2,0,1,0,1,0
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,ZDLParser,18,152,2,8,5,31,4,10,2,7
@@ -57,7 +57,7 @@ io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,Ab
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,ZDLProjectTemplates,0,182,0,4,0,34,0,6,0,4
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,EntitiesToAvroConverter,68,589,18,64,12,82,19,31,1,8
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,Generator,14,84,0,12,4,16,0,9,0,3
-io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,AbstractZDLProjectGenerator,169,443,26,30,27,73,21,18,3,8
+io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,AbstractZDLProjectGenerator,136,512,23,37,23,85,18,23,2,9
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,AbstractZDLGenerator,0,6,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,AbstractOpenAPIGenerator,21,138,4,18,4,22,6,13,2,6
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,AbstractAsyncapiGenerator.OperationRoleType,5,69,2,10,2,10,3,8,1,4

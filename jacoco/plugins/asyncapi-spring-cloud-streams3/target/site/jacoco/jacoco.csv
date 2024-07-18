@@ -3,4 +3,4 @@ io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwa
 io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.sdk.plugins,SpringCloudStreams3Generator.TransactionalOutboxType,0,21,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.sdk.plugins,SpringCloudStreams3Plugin,0,31,0,0,0,4,0,2,0,2
 io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.sdk.plugins,SpringCloudStreams3AdaptersPlugin,0,89,1,1,0,9,1,2,0,2
-io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.sdk.plugins,SpringCloudStreams3Generator,20,476,2,32,1,77,3,28,1,13
+io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3,io.zenwave360.sdk.plugins,SpringCloudStreams3Generator,40,525,12,40,7,89,11,30,1,14
