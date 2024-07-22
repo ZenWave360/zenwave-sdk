@@ -45,11 +45,11 @@
       <artifactId>zdl-jvm</artifactId>
       <version>${zdl-jvm.version}</version>
     </dependency>
-    <dependency>
-      <groupId>com.graphql-java</groupId>
-      <artifactId>graphql-java</artifactId>
-      <version>${graphql-java.version}</version>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>com.graphql-java</groupId>-->
+<!--      <artifactId>graphql-java</artifactId>-->
+<!--      <version>${graphql-java.version}</version>-->
+<!--    </dependency>-->
 
     <dependency>
       <groupId>com.google.googlejavaformat</groupId>
