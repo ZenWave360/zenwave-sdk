@@ -3,7 +3,7 @@
     log.debug("[CRUD] Request to save {{entity.className}}: {}", input);
     var {{entity.instanceName}} = {{asInstanceName service.name}}Mapper.update(new {{entity.className}}(), {{{mapperInputCallSignature method.parameter}}});
     {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}});
-    // TODO: you may need to reload the entity here to fetch relationships 'mapped by id'
+    // TODO: may need to reload the entity to fetch relationships 'mapped by id'
     {{~> (partial '../withEvents')}}
     return {{wrapWithMapper entity}};
 {{~else if (isCrudMethod 'list' method=method entity=entity )}}
