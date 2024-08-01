@@ -14,6 +14,7 @@ import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.options.ProgrammingStyle;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.ZDLFindUtils;
+import org.apache.commons.lang3.ObjectUtils;
 
 /**
  * Generates a backend application with the following structure:
@@ -80,6 +81,9 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
 
     @DocumentedOption(description = "Whether to add IEntityEventProducer interfaces as service dependencies. Depends on the naming convention of zenwave-asyncapi plugin to work.")
     public boolean includeEmitEventsImplementation = false;
+
+    @DocumentedOption(description = "Specifies the Java data type for the ID fields of entities. Defaults to Long for JPA and String for MongoDB if not explicitly set.")
+    public String idJavaType;
 
 
     @DocumentedOption(description = "If not empty, it will generate (and use) an `input` DTO for each entity used as command parameter")
@@ -187,7 +191,7 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
     }
 
     public String getIdJavaType() {
-        return this.persistence == PersistenceType.jpa ? "Long" : "String";
+        return ObjectUtils.firstNonNull(idJavaType, this.persistence == PersistenceType.jpa ? "Long" : "String");
     }
 
 }
