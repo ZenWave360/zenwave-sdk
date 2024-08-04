@@ -19,6 +19,9 @@ public abstract class AbstractOpenAPIGenerator implements Generator {
         GET, PUT, POST, DELETE, PATCH, HEAD, PARAMETERS
     }
 
+    @DocumentedOption(description = "OpenAPI specification file. Overrides `specFile`")
+    public String openapiFile;
+
     @DocumentedOption(description = "Applications base package")
     public String basePackage;
 
@@ -46,6 +49,13 @@ public abstract class AbstractOpenAPIGenerator implements Generator {
 
     public String getModelPackageFolder() {
         return this.openApiModelPackage.replaceAll("\\.", "/");
+    }
+
+    public List<Map<String, Object>> getOperationsByOperationIds(Model apiModel, List<String> operationIds) {
+        List<Map<String, Object>> operations = JsonPath.read(apiModel, "$.paths[*].*");
+        return operationIds.stream().map(operationId -> operations.stream()
+                .filter(operation -> operation.get("operationId").equals(operationId)).findFirst().orElse(Map.of("operationId", operationId)))
+                .toList();
     }
 
     public Map<String, List<Map<String, Object>>> getOperationsGroupedByTag(Model apiModel, OperationType... operationTypes) {

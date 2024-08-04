@@ -105,7 +105,7 @@ public class JsonSchemaToJsonFaker {
 
     protected String randomString(String propertyName, String pattern, Integer min, Integer max) {
         String result;
-        String lowerPropertyName = propertyName.toLowerCase();
+        String lowerPropertyName = propertyName != null? propertyName.toLowerCase() : "";
         if(min == null) {
             min = 1;
         }

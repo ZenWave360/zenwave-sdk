@@ -109,7 +109,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
         Map<String, List<Map<String, Object>>> operationsByTag = getOperationsGroupedByTag(apiModel);
 
         if (groupBy == GroupByType.partial) {
-            List<Map<String, Object>> operations = operationsByTag.values().stream().flatMap(List::stream).collect(Collectors.toList());
+            List<Map<String, Object>> operations = getOperationsByOperationIds(apiModel, operationIds);
             templateOutputList.add(generateTemplateOutput(contextModel, partialTemplate, null, operations));
         }
 

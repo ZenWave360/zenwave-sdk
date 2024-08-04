@@ -1,0 +1,15 @@
+@openapi-file={{openapiFile}}
+Feature: {{operationId}}
+
+Background:
+* url baseUrl
+# * def auth = { username: '', password: '' }
+* def authHeader = call read('classpath:karate-auth.js') auth
+* configure headers = authHeader || {}
+
+{{#each operations as |operation| ~}}
+    @operationId={{operationId}}
+    Scenario: {{operationId}}
+    {{> (partial 'partials/Operation.feature')}}
+
+{{/each~}}

@@ -54,6 +54,7 @@ jobs:
             ./plugins/zdl-to-asyncapi/target/site/jacoco/jacoco.csv
             ./plugins/zdl-to-markdown/target/site/jacoco/jacoco.csv
             ./plugins/openapi-spring-webtestclient/target/site/jacoco/jacoco.csv
+            ./plugins/openapi-karate/target/site/jacoco/jacoco.csv
             ./zenwave-sdk-cli/target/site/jacoco/jacoco.csv
 
       - name: Log coverage percentage
