@@ -24,6 +24,7 @@
         "io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3:1.7.0-SNAPSHOT",
         "io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:1.7.0-SNAPSHOT",
         "io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:1.7.0-SNAPSHOT",
+        "io.github.zenwave360.zenwave-sdk.plugins:openapi-karate:1.7.0-SNAPSHOT",
         "io.github.zenwave360.zenwave-sdk.plugins:backend-application-default:1.7.0-SNAPSHOT",
         "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi:1.7.0-SNAPSHOT",
         "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-asyncapi:1.7.0-SNAPSHOT",
