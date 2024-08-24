@@ -6,7 +6,7 @@ Generates test for KarateDSL based on OpenAPI and Arazzo specifications.
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.OpenAPIKaratePlugin \
     specFile=src/main/resources/model/openapi.yml \
-    targetFolder=src/test/java \
+    targetFolder=src/test/resources \
     testsPackage=io.zenwave360.example.adapters.web.tests \
     groupBy=service
 ```
@@ -14,7 +14,7 @@ jbang zw -p io.zenwave360.sdk.plugins.OpenAPIKaratePlugin \
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.OpenAPIKaratePlugin \
     specFile=src/main/resources/model/openapi.yml \
-    targetFolder=src/test/java \
+    targetFolder=src/test/resources \
     testsPackage=io.zenwave360.example.adapters.web.tests \
     groupBy=businessFlow \
     businessFlowTestName=CustomerCRUDTest \
