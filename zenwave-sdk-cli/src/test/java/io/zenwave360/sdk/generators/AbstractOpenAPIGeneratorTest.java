@@ -38,4 +38,34 @@ public class AbstractOpenAPIGeneratorTest {
         Assertions.assertTrue(parametersInPath.isEmpty());
     }
 
+    @Test
+    public void test_getOperationsByOperationIds_Pets() throws Exception {
+        Model model = TestUtils.loadYmlModelFromResource("classpath:io/zenwave360/sdk/resources/openapi/openapi-petstore.yml");
+        AbstractOpenAPIGenerator openapiGenerator = newAbstractAsyncapiGenerator();
+        var operationIds = List.of("addPet", "getPetById", "updatePet", "deletePet", "getPetById");
+        List<Map<String, Object>> operations = openapiGenerator.getOperationsByOperationIds(model, operationIds);
+
+        Assertions.assertEquals(5, operations.size());
+        Assertions.assertEquals("addPet", operations.get(0).get("operationId"));
+        Assertions.assertEquals("getPetById", operations.get(1).get("operationId"));
+        Assertions.assertEquals("updatePet", operations.get(2).get("operationId"));
+        Assertions.assertEquals("deletePet", operations.get(3).get("operationId"));
+        Assertions.assertEquals("getPetById", operations.get(4).get("operationId"));
+    }
+
+    @Test
+    public void test_getOperationsByOperationIds_Orders() throws Exception {
+        Model model = TestUtils.loadYmlModelFromResource("classpath:io/zenwave360/sdk/resources/openapi/openapi-orders.yml");
+        AbstractOpenAPIGenerator openapiGenerator = newAbstractAsyncapiGenerator();
+        var operationIds = List.of("createCustomer", "getCustomer", "updateCustomer", "deleteCustomer", "getCustomer");
+        List<Map<String, Object>> operations = openapiGenerator.getOperationsByOperationIds(model, operationIds);
+
+        Assertions.assertEquals(5, operations.size());
+        Assertions.assertEquals("createCustomer", operations.get(0).get("operationId"));
+        Assertions.assertEquals("getCustomer", operations.get(1).get("operationId"));
+        Assertions.assertEquals("updateCustomer", operations.get(2).get("operationId"));
+        Assertions.assertEquals("deleteCustomer", operations.get(3).get("operationId"));
+        Assertions.assertEquals("getCustomer", operations.get(4).get("operationId"));
+    }
+
 }

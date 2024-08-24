@@ -66,6 +66,7 @@ public class {{serviceName}}ApiController implements {{serviceName}}Api {
 
     @Override
     public ResponseEntity<{{{responseEntityExpression}}}> {{operationId}}({{{methodParameters}}}) {
+        log.debug("REST request to {{operationId}}: {{methodParameterPlaceholders}}", {{methodParameterInstances}});
     {{~#if requestBodySchema~}}
         var {{mappedInputVariable}} = mapper.as{{serviceMethodParameter}}({{reqBodyVariableName}});
     {{/if~}}

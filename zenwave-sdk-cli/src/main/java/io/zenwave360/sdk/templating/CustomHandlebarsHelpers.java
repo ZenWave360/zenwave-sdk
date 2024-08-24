@@ -15,6 +15,7 @@ import com.github.jknack.handlebars.Options;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.NamingUtils;
 
+import static org.apache.commons.lang3.StringUtils.repeat;
 import static org.apache.commons.lang3.StringUtils.upperCase;
 
 public class CustomHandlebarsHelpers {
@@ -224,5 +225,10 @@ public class CustomHandlebarsHelpers {
                 throw new RuntimeException(e);
             }
         }).collect(Collectors.joining(delimiter));
+    }
+
+    public static String indent(String text, Options options) {
+        var spaces = (int) options.hash("spaces", 0);
+        return text.lines().map(l -> repeat(" ", spaces) + l).collect(Collectors.joining("\n"));
     }
 }

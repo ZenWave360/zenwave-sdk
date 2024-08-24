@@ -143,6 +143,8 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                         "requestBodySchema", requestDto,
                         "requestDtoName", requestDtoName,
                         "methodParameters", methodParameters(operation),
+                        "methodParameterInstances", methodParameterInstances(operation),
+                        "methodParameterPlaceholders", methodParameterPlaceholders(operation),
                         "reqBodyVariableName", reqBodyVariableName(method, zdlModel),
                         "serviceMethodParameter", serviceMethodParameter(method, zdlModel),
                         "serviceMethodCall", serviceMethodCall(method, operation, zdlModel),
@@ -197,7 +199,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         return defaultString(responseEntityName, "Void");
     }
 
-    private Object methodParameters(Map operation) {
+    private String methodParameters(Map operation) {
         List<Map<String, Object>> params = (List) operation.getOrDefault("parameters", Collections.emptyList());
         List methodParams = params.stream()
                 .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
@@ -212,6 +214,27 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         }
         return StringUtils.join(methodParams, ", ");
     }
+
+    private Object methodParameterInstances(Map operation) {
+        var methodParameters = methodParameters(operation);
+        if(methodParameters.isEmpty()) {
+            return "";
+        }
+        return Arrays.stream(methodParameters(operation).split(", "))
+                .map(param -> param.split(" ")[1])
+                .collect(Collectors.joining(", "));
+    }
+
+    private Object methodParameterPlaceholders(Map operation) {
+        var methodParameters = methodParameters(operation);
+        if(methodParameters.isEmpty()) {
+            return "";
+        }
+        return Arrays.stream(methodParameters(operation).split(", "))
+                .map(param -> "{}")
+                .collect(Collectors.joining(", "));
+    }
+
 
     private String reqBodyVariableName(Map<String, Object> serviceMethod, Map zdl) {
         if (serviceMethod == null) { return "reqBody"; }

@@ -1,0 +1,18 @@
+@openapi-file={{openapiFile}}
+Feature: {{businessFlowTestName}}
+
+Background:
+* url baseUrl
+# * def auth = { username: '', password: '' }
+* def authHeader = call read('classpath:karate-auth.js') auth
+* configure headers = authHeader || {}
+
+@business-flow
+@operationId={{operationIds}}
+Scenario: {{businessFlowTestName}}
+
+{{#each operations as |operation| ~}}
+# {{operation.operationId}}
+{{~> (partial 'partials/Operation.feature')}}
+
+{{/each~}}

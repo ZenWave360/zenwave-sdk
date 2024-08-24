@@ -1,0 +1,21 @@
+{{~#if (pathParams operation)}}
+* def pathParams = { {{{paramsExample (pathParams operation)}}} }
+{{~/if}}
+Given path {{{karatePath operation}}}
+{{~#if (queryParams operation)}}
+And def queryParams = {{{paramsExample (queryParams operation)}}}
+{{~/if}}
+{{~#if operation.x--request-dto}}
+And request
+"""
+{{{requestExample operation.x--request-schema}}}
+"""
+{{~/if}}
+When method {{operation.x--httpVerb}}
+Then status {{operation.x--response.x--statusCode}}
+{{~#if operation.x--response}}
+* def {{operation.operationId}}Response = response
+    {{~#if operation.x--response.x--response-schema}}
+* def {{asInstanceName operation.x--response.x--response-dto}}Id = response.id
+    {{~/if}}
+{{~/if}}

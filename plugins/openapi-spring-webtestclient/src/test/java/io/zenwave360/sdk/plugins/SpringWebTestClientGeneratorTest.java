@@ -56,18 +56,21 @@ public class SpringWebTestClientGeneratorTest {
         Assertions.assertEquals("src/test/java/io/example/controller/tests/Operation.java", templateOutputList.get(0).getTargetFile());
     }
 
-    @ParameterizedTest(name = "[{index}] {displayName} {0} {1}")
+    @ParameterizedTest(name = "[{index}] {displayName} {0} {1} {2}")
     @CsvSource({
-            "openapi-petstore.yml, 'addPet,getPetById,updatePet,deletePet,getPetById'",
-            "openapi-orders.yml, 'createCustomer,getCustomer,updateCustomer,deleteCustomer,getCustomer'"
+            "openapi-petstore.yml, 'addPet,getPetById,updatePet,deletePet,getPetById', json",
+            "openapi-petstore.yml, 'addPet,getPetById,updatePet,deletePet,getPetById', dto",
+            "openapi-orders.yml, 'createCustomer,getCustomer,updateCustomer,deleteCustomer,getCustomer', json",
+            "openapi-orders.yml, 'createCustomer,getCustomer,updateCustomer,deleteCustomer,getCustomer', dto",
     })
-    public void test_output_business_flow(String openapi, String operationIds) throws Exception {
-        String targetFolder = "target/test_output_business_flow_" + openapi.replaceAll("\\.", "_");
+    public void test_output_business_flow(String openapi, String operationIds, String requestPayloadType) throws Exception {
+        String targetFolder = "target/test_output_business_flow_" + requestPayloadType + "_" + openapi.replaceAll("\\.", "_");
         Plugin plugin = new SpringWebTestClientPlugin()
                 .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
                 .withTargetFolder(targetFolder)
                 .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.businessFlow)
                 .withOption("businessFlowTestName", camelCase(operationIds.replaceAll(",", "_")))
+                .withOption("requestPayloadType", requestPayloadType)
                 .withOption("transactional", false)
                 .withOption("testsPackage", "io.example.controller.tests")
                 .withOption("openApiApiPackage", "io.example.api")

@@ -6,7 +6,18 @@ info:
   contact:
     email: email@domain.com
 servers:
-  - url: http://localhost:8080/api
+  - description: localhost
+    url: http://localhost:8080/api
+  - description: custom
+    url: "{protocol}://{server}/{path}"
+    variables:
+      protocol:
+        enum: ['http', 'https']
+        default: 'http'
+      server:
+        default: 'localhost:8080'
+      path:
+        default: 'api'
 tags:
   - name: "Default"
 {{~#each zdlModel.serviceNames as |serviceName|}}

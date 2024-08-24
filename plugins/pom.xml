@@ -64,6 +64,7 @@
         <module>backend-application-default</module>
         <module>openapi-controllers</module>
         <module>openapi-spring-webtestclient</module>
+        <module>openapi-karate</module>
 <!--        <module>openapi-pact-consumer</module>-->
     </modules>
 </project>
