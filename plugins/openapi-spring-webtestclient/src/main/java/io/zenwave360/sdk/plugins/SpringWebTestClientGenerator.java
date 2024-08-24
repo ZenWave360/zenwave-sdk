@@ -3,6 +3,7 @@ package io.zenwave360.sdk.plugins;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.zenwave360.sdk.generators.JsonSchemaToJsonFaker;
 import io.zenwave360.sdk.options.WebFlavorType;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.NamingUtils;
@@ -22,6 +23,10 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
 
     enum GroupByType {
         service, operation, partial, businessFlow
+    }
+
+    enum RequestPayloadType {
+        json, dto
     }
 
     public String apiProperty = "api";
@@ -64,9 +69,14 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
     @DocumentedOption(description = "@Transactional annotation class name")
     public String transactionalAnnotationClass = "org.springframework.transaction.annotation.Transactional";
 
+    @DocumentedOption(description = "Whether to use a JSON string or instantiate a java DTO as request payload")
+    public RequestPayloadType requestPayloadType = RequestPayloadType.json;
+
     public boolean simpleDomainPackaging = false;
 
-    private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
+    private final HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
+
+    private final JsonSchemaToJsonFaker jsonSchemaToJsonFaker = new JsonSchemaToJsonFaker();
 
     private final String prefix = "io/zenwave360/sdk/plugins/SpringWebTestClientGenerator/";
     private final TemplateInput partialTemplate = new TemplateInput(prefix + "partials/Operation.java", "src/test/java/{{asPackageFolder testsPackage}}/Operation.java");
@@ -147,6 +157,9 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
     }
 
     {
+        handlebarsEngine.getHandlebars().registerHelper("requestExample", (schema, options) -> {
+            return jsonSchemaToJsonFaker.generateExampleAsJson((Map) schema);
+        });
         handlebarsEngine.getHandlebars().registerHelper("asDtoName", (context, options) -> {
             return asDtoName((String) context);
         });

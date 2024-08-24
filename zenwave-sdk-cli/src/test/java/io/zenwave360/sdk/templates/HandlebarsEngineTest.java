@@ -24,6 +24,23 @@ public class HandlebarsEngineTest {
         model.put("nullValue", null);
         model.put("name", "nameFromParent");
         model.put("entities", Map.of("entity1", Map.of("name", "entity1"), "entity2", Map.of("name", "entity2")));
+        String json = """
+{
+  "id" : 60,
+  "name" : "doggie",
+  "category" : {
+    "id" : 46,
+    "name" : "Dogs"
+  },
+  "photoUrls" : [ "photoUrls-fxqn80w4m" ],
+  "tags" : [ {
+    "id" : 75,
+    "name" : "name-vfrtwybo0y7lpiy42pyzt"
+  } ],
+  "status" : "available"
+}
+        """;
+        model.put("json", json);
         TemplateOutput templateOutput = handlebarsEngine.processTemplate(model, new TemplateInput("io/zenwave360/sdk/templating/handlebars-test", "").withSkipOverwrite(true)).get(0);
         System.out.println(templateOutput.getContent());
 
@@ -51,5 +68,6 @@ public class HandlebarsEngineTest {
         Assertions.assertTrue(templateOutput.getContent().contains("and false: false"));
         Assertions.assertTrue(templateOutput.getContent().contains("or true: true"));
         Assertions.assertTrue(templateOutput.getContent().contains("or false: false"));
+        Assertions.assertTrue(templateOutput.getContent().contains("    {\n      \"id\" : 60,"));
     }
 }

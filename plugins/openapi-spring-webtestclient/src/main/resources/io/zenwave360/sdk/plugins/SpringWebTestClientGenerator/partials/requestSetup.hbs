@@ -1,3 +1,4 @@
+{{~#if (eq requestPayloadType 'dto')}}
     {{~#if requestDTOClassName}}
         {{requestDTOClassName}} {{requestBodyVar}} = new {{requestDTOClassName}}();
         {{~#each operation.x--request-schema.properties as |property parentPropertyName|}}
@@ -14,6 +15,13 @@
             {{~/if}}
         {{~/each}}
     {{~/if}}
-    {{~#each operation.parameters as |param|}}
+{{~else}}
+    {{~#if operation.x--request-schema}}
+        String {{requestBodyVar}} = """
+{{{indent (requestExample operation.x--request-schema) spaces=12}}}
+        """;
+    {{~/if}}
+{{~/if}}
+{{~#each operation.parameters as |param|}}
         var {{asInstanceName param.name}}{{i}} = "{{param.example}}";
-    {{~/each~}}
+{{~/each~}}
