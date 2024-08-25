@@ -1,4 +1,4 @@
-# Spring WebTestClient Generator
+# OpenAPI to Karate Generator
 > 👉 ZenWave360 Helps You Create Software Easy to Understand
 
 Generates test for KarateDSL based on OpenAPI and Arazzo specifications.
