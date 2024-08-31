@@ -6,20 +6,20 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositoryIntegrationTest {
+class {{entity.className}}RepositoryIntegrationTest extends BaseRepositoryIntegrationTest {
 
     @Autowired
     {{entity.className}}Repository {{entity.instanceName}}Repository;
 
     @Test
-    public void findAllTest() {
+    void findAllTest() {
         var results = {{entity.instanceName}}Repository.findAll();
         Assertions.assertFalse(results.isEmpty());
     }
 
 
     @Test
-    public void findByIdTest() {
+    void findByIdTest() {
         var id = "1";
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).orElseThrow();
         Assertions.assertTrue({{entity.instanceName}}.getId() != null);
@@ -30,7 +30,7 @@ public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositor
     }
 
     @Test
-    public void saveTest() {
+    void saveTest() {
         {{entity.className}} {{entity.instanceName}} = new {{entity.className}}();
         {{~#each entity.fields as |field|}}
         {{entity.instanceName}}.set{{capitalize field.name}}(null);
@@ -45,7 +45,7 @@ public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositor
     }
 
     @Test
-    public void updateTest() {
+    void updateTest() {
         var id = "1";
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).orElseThrow();
         {{~#each entity.fields as |field|}}
@@ -59,7 +59,7 @@ public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositor
     }
 
     @Test
-    public void deleteTest() {
+    void deleteTest() {
         var id = "1";
         {{entity.instanceName}}Repository.deleteById(id);
         var notFound = {{entity.instanceName}}Repository.findById(id);

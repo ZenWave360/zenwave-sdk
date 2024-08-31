@@ -12,7 +12,7 @@ import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 import static com.tngtech.archunit.library.Architectures.onionArchitecture;
 
 @AnalyzeClasses(packages = "{{basePackage}}", importOptions = DoNotIncludeTests.class)
-public class ArchitectureTest {
+class ArchitectureTest {
 
     /**
      * Validates that dependencies between layers respect hexagonal/onion/clean architecture.
