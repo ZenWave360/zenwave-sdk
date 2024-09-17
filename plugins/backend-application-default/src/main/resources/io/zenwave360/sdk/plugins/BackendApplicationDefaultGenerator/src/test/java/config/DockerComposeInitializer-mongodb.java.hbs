@@ -88,7 +88,7 @@ public class DockerComposeInitializer implements ApplicationContextInitializer<C
 		var serviceNames = services.stream().map(Service::name).toList();
 		return Stream.of("docker-compose", "docker-compose.exe").anyMatch(cmd -> {
 			try {
-				return getDockerComposeRunningServices(cmd, "-f", DOCKER_COMPOSE_FILE, "ps").containsAll(serviceNames);
+				return getDockerComposeRunningServices(cmd, "-f", DOCKER_COMPOSE_FILE, "ps", "--services").containsAll(serviceNames);
 			}
 			catch (IOException | InterruptedException e) {
 				return false;
@@ -96,7 +96,6 @@ public class DockerComposeInitializer implements ApplicationContextInitializer<C
 		});
 	}
 
-	private static final int SERVICE_COLUMN = 3;
 	public List<String> getDockerComposeRunningServices(String... command) throws IOException, InterruptedException {
 		List<String> services = new ArrayList<>();
 		var process = new ProcessBuilder(command).start();
@@ -104,16 +103,13 @@ public class DockerComposeInitializer implements ApplicationContextInitializer<C
 
 		String line;
 		while ((line = reader.readLine()) != null) {
-			if (!line.isEmpty()) {
-				String[] columns = line.split("\\s+");
-				if (columns.length > SERVICE_COLUMN) {
-					services.add(columns[SERVICE_COLUMN]);
-				}
-			}
+            if (!line.isEmpty()) {
+                services.add(line);
+            }
 		}
 
 		process.waitFor();
-		return services.size() > 1? services.subList(1, services.size()) : services;
+		return services;
 	}
 
     boolean isPortOpen(String host, int port) {
