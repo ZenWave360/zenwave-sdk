@@ -66,6 +66,7 @@ paths:
       {{~/if}}
       {{~#if (and operation.requestBody (or (eq operation.httpMethod 'post') (eq operation.httpMethod 'put') (eq operation.httpMethod 'patch') ))}}
       requestBody:
+        required: true
         content:
           application/json:
             schema:
