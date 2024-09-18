@@ -2,7 +2,7 @@ GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,ZDL2JDLProcessor,1,178,1,17,0,34,1,10,0,2
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,AbstractBaseProcessor,0,69,0,8,0,15,0,8,0,4
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,AsyncApiProcessor.SchemaFormatType,58,173,12,0,11,11,12,3,6,3
-io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,AsyncApiProcessor,34,636,10,64,6,118,10,37,0,10
+io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,AsyncApiProcessor,34,649,10,64,6,121,10,37,0,10
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,ZDLProcessor,49,617,12,32,4,114,12,21,0,11
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,OpenApiProcessor,2,390,9,35,0,78,9,23,0,10
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl,ZDLHttpUtils,175,192,23,17,25,39,22,12,6,8
