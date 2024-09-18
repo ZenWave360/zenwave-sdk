@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.1</version>
+		<version>3.3.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<packaging>pom</packaging>
@@ -134,7 +134,7 @@
 					<plugin>
 						<groupId>org.openapitools</groupId>
 						<artifactId>openapi-generator-maven-plugin</artifactId>
-						<version>6.6.0</version>
+						<version>7.8.0</version>
 						<executions>
 							<execution>
 								<id>openapi-generator-server</id>
@@ -149,9 +149,7 @@
 									<modelPackage>${basePackage}.adapters.web.model</modelPackage>
 									<modelNameSuffix>DTO</modelNameSuffix>
 									<addCompileSourceRoot>true</addCompileSourceRoot>
-									<supportingFilesToGenerate>
-										ApiUtil.java
-									</supportingFilesToGenerate>
+									<generateSupportingFiles>false</generateSupportingFiles>
 									<typeMappings>
 										<typeMapping>Double=java.math.BigDecimal</typeMapping>
 									</typeMappings>
@@ -162,7 +160,9 @@
 										<useOptional>true</useOptional>
 										<useTags>true</useTags>
 										<interfaceOnly>true</interfaceOnly>
+										<skipDefaultInterface>true</skipDefaultInterface>
 										<delegatePattern>false</delegatePattern>
+										<sortParamsByRequiredFlag>false</sortParamsByRequiredFlag>
 									</configOptions>
 								</configuration>
 							</execution>
@@ -181,6 +181,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-json</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

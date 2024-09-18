@@ -72,6 +72,12 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
 
     }
 
+    @DocumentedOption(description = "Sets the prefix for model classes and enums")
+    public String modelNamePrefix = "";
+
+    @DocumentedOption(description = "Sets the suffix for model classes and enums")
+    public String modelNameSuffix = "";
+
     @DocumentedOption(description = "AsyncAPI extension property name for runtime autoconfiguration of headers.")
     public String runtimeHeadersProperty = "x-runtime-expression";
 
@@ -228,6 +234,7 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
             if (javaType == null) {
                 javaType = normalizeTagName((String) message.getOrDefault("x-javaType", message.getOrDefault("messageId", message.get("name"))));
             }
+            javaType = modelNamePrefix + javaType + modelNameSuffix;
         }
 
         if (javaType != null) {

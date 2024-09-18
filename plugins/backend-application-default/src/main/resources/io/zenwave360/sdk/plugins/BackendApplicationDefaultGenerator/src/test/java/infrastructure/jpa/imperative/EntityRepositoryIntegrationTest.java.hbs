@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.persistence.EntityManager;
 
-public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositoryIntegrationTest {
+class {{entity.className}}RepositoryIntegrationTest extends BaseRepositoryIntegrationTest {
 
     @Autowired
     EntityManager entityManager;
@@ -22,26 +22,26 @@ public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositor
     {{entity.className}}Repository {{entity.instanceName}}Repository;
 
     @Test
-    public void findAllTest() {
+    void findAllTest() {
         var results = {{entity.instanceName}}Repository.findAll();
         Assertions.assertFalse(results.isEmpty());
     }
 
 
     @Test
-    public void findByIdTest() {
+    void findByIdTest() {
         var id = 1L;
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).orElseThrow();
-        Assertions.assertTrue({{entity.instanceName}}.getId() != null);
-        Assertions.assertTrue({{entity.instanceName}}.getVersion() != null);
+        Assertions.assertNotNull({{entity.instanceName}}.getId());
+        Assertions.assertNotNull({{entity.instanceName}}.getVersion());
         {{~#if (or entity.options.auditing entity.options.extendsAuditing)}}
-        Assertions.assertTrue({{entity.instanceName}}.getCreatedBy() != null);
-        Assertions.assertTrue({{entity.instanceName}}.getCreatedDate() != null);
+        Assertions.assertNotNull({{entity.instanceName}}.getCreatedBy());
+        Assertions.assertNotNull({{entity.instanceName}}.getCreatedDate());
         {{~/if}}
     }
 
     @Test
-    public void saveTest() {
+    void saveTest() {
         {{entity.className}} {{entity.instanceName}} = new {{entity.className}}();
         {{~#each entity.fields as |field|}}
         {{entity.instanceName}}.set{{capitalize field.name}}({{{populateField field}}});
@@ -79,18 +79,18 @@ public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositor
         // reloading to get relationships persisted by id
         entityManager.flush();
         entityManager.refresh(created);
-        Assertions.assertTrue(created.getId() != null);
-        Assertions.assertTrue(created.getVersion() != null);
+        Assertions.assertNotNull(created.getId());
+        Assertions.assertNotNull(created.getVersion());
         {{~#if (or entity.options.auditing entity.options.extendsAuditing)}}
-        Assertions.assertTrue(created.getCreatedBy() != null);
-        Assertions.assertTrue(created.getCreatedDate() != null);
+        Assertions.assertNotNull(created.getCreatedBy());
+        Assertions.assertNotNull(created.getCreatedDate());
         {{~/if}}
 
 {{#each entity.relationships as |relationship|}}
 {{~#if relationship.fieldName}}
     {{~#if relationship.ownerSide}}
         {{~#if (endsWith relationship.type 'OneToOne')}}
-        Assertions.assertTrue({{entity.instanceName}}.get{{capitalize relationship.fieldName}}().getId() != null);
+        Assertions.assertNotNull({{entity.instanceName}}.get{{capitalize relationship.fieldName}}().getId() != null);
         {{~else if (endsWith relationship.type 'ToOne')}}
         Assertions.assertTrue({{entity.instanceName}}.get{{capitalize relationship.fieldName}}().getId() == {{relationship.fieldName}}Id);
         {{~else}}
@@ -102,7 +102,7 @@ public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositor
     }
 
     @Test
-    public void updateTest() {
+    void updateTest() {
         var id = 1L;
         var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).orElseThrow();
         {{~#each entity.fields as |field|}}
@@ -116,7 +116,7 @@ public class {{entity.className}}RepositoryIntegrationTest extends BaseRepositor
     }
 
     @Test
-    public void deleteTest() {
+    void deleteTest() {
         var id = 1L;
         {{entity.instanceName}}Repository.deleteById(id);
         var notFound = {{entity.instanceName}}Repository.findById(id);

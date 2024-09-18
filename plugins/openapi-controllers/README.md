@@ -16,7 +16,62 @@ jbang zw -p io.zenwave360.sdk.plugins.OpenAPIControllersPlugin
     targetFolder=.
 ```
 
-## Options
+## Configuring OpenAPI Generator for Compatibility
+
+Default options for https://openapi-generator.tech/docs/generators/spring/ have changes over time and different versions. Here is a sample configuration that works with this version of ZenWave360 SDK.
+
+```xml
+<plugin>
+    <groupId>org.openapitools</groupId>
+    <artifactId>openapi-generator-maven-plugin</artifactId>
+    <version>7.8.0</version>
+    <executions>
+        <execution>
+            <goals>
+                <goal>generate</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+                <inputSpec>${project.basedir}/src/main/resources/public/apis/openapi.yml</inputSpec>
+                <skipIfSpecIsUnchanged>true</skipIfSpecIsUnchanged>
+                <generatorName>spring</generatorName>
+                <apiPackage>${openApiApiPackage}</apiPackage>
+                <modelPackage>${openApiModelPackage}</modelPackage>
+                <modelNameSuffix>DTO</modelNameSuffix>
+                <addCompileSourceRoot>true</addCompileSourceRoot>
+                <generateSupportingFiles>false</generateSupportingFiles>
+                <typeMappings>
+                    <typeMapping>Double=java.math.BigDecimal</typeMapping>
+                </typeMappings>
+                <configOptions>
+                    <useSpringBoot3>true</useSpringBoot3>
+                    <documentationProvider>none</documentationProvider>
+                    <openApiNullable>false</openApiNullable>
+                    <useOptional>true</useOptional>
+                    <useTags>true</useTags>
+                    <interfaceOnly>true</interfaceOnly>
+                    <skipDefaultInterface>true</skipDefaultInterface>
+                    <delegatePattern>false</delegatePattern>
+                    <sortParamsByRequiredFlag>false</sortParamsByRequiredFlag><!-- this is important -->
+                </configOptions>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+```
+
+Also, make sure you set `required: true` for `requestBody` in your OpenAPI definition for post, put, patch...
+
+```yaml
+requestBody:
+  required: true # this is important
+  content:
+    application/json:
+      schema:
+        $ref: "#/components/schemas/Customer"
+```
+
+## Plugin Options
 
 | **Option**                  | **Description**                                                                                                                                                            | **Type**         | **Default**                           | **Values**                        |
 |-----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|---------------------------------------|-----------------------------------|
@@ -41,7 +96,6 @@ jbang zw -p io.zenwave360.sdk.plugins.OpenAPIControllersPlugin
 | `skipFormatting`            | Skip java sources output formatting                                                                                                                                        | boolean          | false                                 |                                   |
 | `haltOnFailFormatting`      | Halt on formatting errors                                                                                                                                                  | boolean          | true                                  |                                   |
 | `continueOnZdlError`        | Continue even when ZDL contains fatal errors                                                                                                                               | boolean          | true                                  |                                   |
-
 
 ## Getting Help
 

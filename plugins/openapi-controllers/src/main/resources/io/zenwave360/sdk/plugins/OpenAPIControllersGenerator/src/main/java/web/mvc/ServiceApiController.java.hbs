@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.context.request.NativeWebRequest;
 
 
@@ -56,7 +57,6 @@ public class {{serviceName}}ApiController implements {{serviceName}}Api {
         {{/joinWithTemplate}}
     }
 
-    @Override
     public Optional<NativeWebRequest> getRequest() {
         return Optional.ofNullable(request);
     }
@@ -102,6 +102,12 @@ public class {{serviceName}}ApiController implements {{serviceName}}Api {
 {{~/each}}
 
   protected Pageable pageOf(Optional<Integer> page, Optional<Integer> limit, Optional<List<String>> sort) {
-    return PageRequest.of(page.orElse(0), limit.orElse(10));
+    Sort sortOrder = sort.map(s -> Sort.by(s.stream().map(sortParam -> {
+    String[] parts = sortParam.split(":");
+    String property = parts[0];
+    Sort.Direction direction = parts.length > 1 ? Sort.Direction.fromString(parts[1]) : Sort.Direction.ASC;
+    return new Sort.Order(direction, property);
+    }).toList())).orElse(Sort.unsorted());
+    return PageRequest.of(page.orElse(0), limit.orElse(10), sortOrder);
   }
 }
