@@ -3,7 +3,7 @@
 {{~/if}}
 Given path {{{karatePath operation}}}
 {{~#if (queryParams operation)}}
-And def queryParams = {{{paramsExample (queryParams operation)}}}
+And def queryParams = { {{{paramsExample (queryParams operation)}}} }
 {{~/if}}
 {{~#if operation.x--request-dto}}
 And request

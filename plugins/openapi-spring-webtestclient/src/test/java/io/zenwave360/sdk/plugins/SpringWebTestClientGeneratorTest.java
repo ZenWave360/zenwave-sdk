@@ -94,8 +94,8 @@ public class SpringWebTestClientGeneratorTest {
 
     @ParameterizedTest(name = "[{index}] {displayName} {0}")
     @CsvSource({
-            "openapi-petstore.yml, addPet, 'PetApiIT'",
-            "openapi-orders.yml, createCustomer, 'CustomerApiIT'"
+            "openapi-petstore.yml, addPet, 'PetApiIntegrationTest'",
+            "openapi-orders.yml, createCustomer, 'CustomerApiIntegrationTest'"
     })
     public void test_output_by_one_service(String openapi, String operationId, String controllers) throws Exception {
         String targetFolder = "target/test_output_by_one_service_" + openapi.replaceAll("\\.", "_");
@@ -123,8 +123,8 @@ public class SpringWebTestClientGeneratorTest {
 
     @ParameterizedTest(name = "[{index}] {displayName} {0}")
     @CsvSource({
-            "openapi-petstore.yml, addPet, 'PetApiIT'",
-            "openapi-orders.yml, createCustomer, 'CustomerApiIT'"
+            "openapi-petstore.yml, addPet, 'PetApiIntegrationTest'",
+            "openapi-orders.yml, createCustomer, 'CustomerApiIntegrationTest'"
     })
     public void test_output_by_one_service_simple_domain_packaging(String openapi, String operationId, String controllers) throws Exception {
         String targetFolder = "target/test_output_by_one_service_simple_domain_packaging_" + openapi.replaceAll("\\.", "_");
@@ -153,8 +153,8 @@ public class SpringWebTestClientGeneratorTest {
 
     @ParameterizedTest(name = "[{index}] {displayName} {0}")
     @CsvSource({
-            "openapi-petstore.yml, 'PetApiIT'",
-            "openapi-orders.yml, 'CustomerApiIT'"
+            "openapi-petstore.yml, 'PetApiIntegrationTest'",
+            "openapi-orders.yml, 'CustomerApiIntegrationTest'"
     })
     public void test_output_by_service(String openapi, String controllers) throws Exception {
         String targetFolder = "target/test_output_by_service_" + openapi.replaceAll("\\.", "_");
@@ -181,8 +181,8 @@ public class SpringWebTestClientGeneratorTest {
 
     @ParameterizedTest(name = "[{index}] {displayName} {0}")
     @CsvSource({
-            "openapi-petstore.yml, 'PetApi/AddPetIT'",
-            "openapi-orders.yml, 'CustomerOrderApi/CreateCustomerOrderIT'"
+            "openapi-petstore.yml, 'PetApi/AddPetIntegrationTest'",
+            "openapi-orders.yml, 'CustomerOrderApi/CreateCustomerOrderIntegrationTest'"
     })
     public void test_output_by_operation(String openapi, String controllers) throws Exception {
         String targetFolder = "target/test_output_by_operation_" + openapi.replaceAll("\\.", "_");
