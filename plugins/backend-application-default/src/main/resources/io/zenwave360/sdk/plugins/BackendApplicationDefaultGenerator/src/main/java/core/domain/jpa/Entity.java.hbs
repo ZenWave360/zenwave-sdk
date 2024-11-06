@@ -99,10 +99,10 @@ public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}}
 
 {{~#if entity.options.auditing}}
     @CreatedBy
-    @Column(name = "created_by")
+    @Column(name = "created_by", updatable = false)
     protected String createdBy;
     @CreatedDate
-    @Column(name = "created_date", columnDefinition = "TIMESTAMP")
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP", updatable = false)
     protected LocalDateTime createdDate;
     @LastModifiedBy
     @Column(name = "last_modified_by")
