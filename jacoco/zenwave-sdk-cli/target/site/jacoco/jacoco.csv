@@ -23,7 +23,7 @@ io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.plugins,ZdlTo
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.plugins,ForkPluginGenerator,33,925,10,52,7,180,9,42,0,20
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.options,PersistenceType,15,0,0,0,2,0,1,0,1,0
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.options,ProgrammingStyle,15,0,0,0,2,0,1,0,1,0
-io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.options,DatabaseType,15,0,0,0,3,0,1,0,1,0
+io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.options,DatabaseType,58,0,4,0,10,0,4,0,2,0
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.options,WebFlavorType,15,0,0,0,2,0,1,0,1,0
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.utils,NamingUtils,24,75,4,6,6,14,7,6,3,5
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.utils,Maps,12,121,1,13,3,28,2,11,1,5
@@ -56,7 +56,7 @@ io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,Defau
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,AbstractOpenAPIGenerator.OperationType,0,45,0,0,0,2,0,1,0,1
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,ZDLProjectTemplates,0,182,0,4,0,34,0,6,0,4
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,EntitiesToAvroConverter,68,589,18,64,12,82,19,31,1,8
-io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,JsonSchemaToJsonFaker,105,461,28,60,20,86,27,33,0,14
+io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,JsonSchemaToJsonFaker,112,465,29,61,22,87,29,33,1,14
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,Generator,14,84,0,12,4,16,0,9,0,3
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,AbstractZDLProjectGenerator,136,512,23,37,23,85,18,23,2,9
 io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,AbstractZDLGenerator,0,6,0,0,0,2,0,1,0,1
