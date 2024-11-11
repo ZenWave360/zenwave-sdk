@@ -39,6 +39,16 @@ public class JsonSchemaToJsonFaker {
         return generateObject(null, schema);
     }
 
+    /**
+     * Returns either a Map or a List of Maps that represents a JSON object.
+     *
+     * @param schema
+     * @return
+     */
+    public Object generateExample(String propertyName, Map<String, Object> schema) {
+        return generateObject(propertyName, schema);
+    }
+
     public String generateExampleAsJson(Map<String, Object> schema) {
         var jsonExample = generateExample(schema);
         try {
@@ -96,6 +106,11 @@ public class JsonSchemaToJsonFaker {
             int index = random.nextInt(enums.size());
             return enums.get(index);
         }
+
+        if ("sort".equals(propertyName)) {
+            return "id:asc";
+        }
+
         Integer min = asInteger(schemaNode.get("min-length"));
         Integer max = asInteger(schemaNode.get("max-length"));
 

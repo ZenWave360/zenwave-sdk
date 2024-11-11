@@ -127,7 +127,7 @@ public class OpenAPIKarateGenerator extends AbstractOpenAPIGenerator {
 
         handlebarsEngine.getHandlebars().registerHelper("paramsExample", (params, options) -> {
             return ((Collection<Map>) params).stream()
-                    .map(p -> p.get("name") + ": " + firstNonNull(p.get("example"), jsonSchemaToJsonFaker.generateExample((Map<String, Object>) p.get("schema"))))
+                    .map(p -> p.get("name") + ": " + firstNonNull(p.get("example"), jsonSchemaToJsonFaker.generateExample((String) p.get("name"), (Map<String, Object>) p.get("schema"))))
                     .collect(Collectors.joining(", "));
         });
 

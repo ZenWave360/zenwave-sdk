@@ -58,7 +58,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
     public String baseTestClassPackage = "{{testsPackage}}";
 
     @DocumentedOption(description = "Class name suffix for generated test classes")
-    public String testSuffix = "IT";
+    public String testSuffix = "IntegrationTest";
 
     @DocumentedOption(description = "Business Flow Test name")
     public String businessFlowTestName;
