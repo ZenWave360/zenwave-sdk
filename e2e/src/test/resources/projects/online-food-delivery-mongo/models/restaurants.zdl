@@ -30,9 +30,8 @@ config {
 
         OpenAPIControllersPlugin {
             formatter google // comments in one line are better for demos
-            // TODO fix this: specFile "{{targetFolder}}/src/main/resources/apis/openapi.yml"
-            specFile "modules/restaurants/src/main/resources/apis/openapi.yml"
-            zdlFile "models/restaurants.zdl"
+            // TODO fix this: apiFile "{{targetFolder}}/src/main/resources/apis/openapi.yml"
+            apiFile "modules/restaurants/src/main/resources/apis/openapi.yml"
 
             // these should match the values of openapi-generator-maven-plugin
             openApiApiPackage "{{basePackage}}.adapters.web"
@@ -43,7 +42,7 @@ config {
         SpringCloudStreams3AdaptersPlugin {
             apiId "orders"
             role client
-            specFile "modules/orders/src/main/resources/apis/asyncapi.yml"
+            apiFile "modules/orders/src/main/resources/apis/asyncapi.yml"
             modelPackage "{{basePackage}}.client.{{apiId}}.events.dtos"
             consumerApiPackage "{{basePackage}}.client.{{apiId}}.events.consumer"
         }

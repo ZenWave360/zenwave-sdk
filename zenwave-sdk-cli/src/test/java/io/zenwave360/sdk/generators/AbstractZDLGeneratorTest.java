@@ -12,7 +12,7 @@ public class AbstractZDLGeneratorTest {
 
     private Map<String, Object> loadAsyncapiModelFromResource(String resource) throws Exception {
         String targetProperty = "zdl";
-        return new ZDLParser().withSpecFile(resource).withTargetProperty(targetProperty).parse();
+        return new ZDLParser().withZdlFile(resource).withTargetProperty(targetProperty).parse();
     }
 
     private AbstractZDLGenerator newAbstractZDLGenerator() {

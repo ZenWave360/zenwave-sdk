@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 import io.zenwave360.sdk.utils.CommaSeparatedCollectionDeserializationHandler;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,29 +58,29 @@ public class MainGenerator {
         }
     }
 
-    public static void applyConfiguration(int chainIndex, Object processor, Plugin plugin) throws JsonMappingException {
-        Map<String, Object> options = plugin.getOptions();
-        Object processorFullClassOptions = options.get(processor.getClass().getName());
-        Object processorSimpleClassOptions = options.get(processor.getClass().getSimpleName());
+    public static void applyConfiguration(int chainIndex, Object plugin, Plugin configuration) throws Exception {
+        Map<String, Object> options = configuration.getOptions();
+        Object processorFullClassOptions = options.get(plugin.getClass().getName());
+        Object processorSimpleClassOptions = options.get(plugin.getClass().getSimpleName());
         Object chainIndexOptions = options.get(String.valueOf(chainIndex));
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.addHandler(new CommaSeparatedCollectionDeserializationHandler());
 
-        mapper.updateValue(processor, options);
+        mapper.updateValue(plugin, options);
         if (processorSimpleClassOptions != null) {
-            mapper.updateValue(processor, processorSimpleClassOptions);
+            mapper.updateValue(plugin, processorSimpleClassOptions);
         }
         if (processorFullClassOptions != null) {
-            mapper.updateValue(processor, processorFullClassOptions);
+            mapper.updateValue(plugin, processorFullClassOptions);
         }
         if (chainIndexOptions != null) {
-            mapper.updateValue(processor, chainIndexOptions);
+            mapper.updateValue(plugin, chainIndexOptions);
         }
 
         try {
-            processor.getClass().getMethod("onPropertiesSet").invoke(processor);
+            plugin.getClass().getMethod("onPropertiesSet").invoke(plugin);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             // ignore
         }

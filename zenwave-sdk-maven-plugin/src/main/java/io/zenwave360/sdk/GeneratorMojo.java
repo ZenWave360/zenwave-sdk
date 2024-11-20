@@ -1,7 +1,6 @@
 package io.zenwave360.sdk;
 
 import java.io.File;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
@@ -36,6 +35,19 @@ public class GeneratorMojo extends AbstractMojo {
      */
     @Parameter(name = "inputSpec", property = "zenwave.inputSpec", required = true)
     private String inputSpec;
+
+    /**
+     * Location of the ZDL model, as URL or file.
+     */
+    @Parameter(name = "zdlFile", property = "zenwave.zdlFile", required = true)
+    private String zdlFile;
+
+    /**
+     * Location of the ZDL model, as URL or file.
+     */
+    @Parameter(name = "zdlFiles", property = "zenwave.zdlFiles", required = true)
+    private String[] zdlFiles;
+
 
     /**
      * Location of the output directory.
@@ -108,9 +120,21 @@ public class GeneratorMojo extends AbstractMojo {
                 projectClassLoader = new URLClassLoader(classpathFiles.toArray(new URL[0]), this.getClass().getClassLoader());
             }
 
-            String specFile = inputSpec.startsWith("classpath:") ? inputSpec : new File(inputSpec).toURI().toString();
+            String apiFile = inputSpec.startsWith("classpath:") ? inputSpec : new File(inputSpec).toURI().toString();
+            List<String> zdls = new ArrayList<>();
+            if(zdlFile != null) {
+                zdls.add(zdlFile);
+            }
+            if(apiFile.endsWith(".zdl") && !zdls.contains(apiFile)) {
+                zdls.add(apiFile);
+            }
+            if(zdlFiles != null) {
+                zdls.addAll(Arrays.asList(zdlFiles));
+            }
+            zdls = zdls.stream().map(zdl -> zdl.startsWith("classpath:") ? zdl : new File(zdl).toURI().toString()).collect(Collectors.toList());
             Plugin plugin = Plugin.of(this.generatorName)
-                    .withSpecFile(specFile)
+                    .withApiFile(apiFile)
+                    .withZdlFiles(zdls)
                     .withTargetFolder(targetFolder.getAbsolutePath())
                     .withProjectClassLoader(projectClassLoader)
                     .withOptions(options);

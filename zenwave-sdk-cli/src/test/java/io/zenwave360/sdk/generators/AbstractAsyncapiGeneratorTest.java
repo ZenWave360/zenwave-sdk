@@ -9,20 +9,18 @@ import io.zenwave360.sdk.generators.AbstractAsyncapiGenerator.OperationRoleType;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiOperationType;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiRoleType;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
-import io.zenwave360.sdk.templating.TemplateInput;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import io.zenwave360.sdk.parsers.DefaultYamlParser;
 import io.zenwave360.sdk.parsers.Model;
 import io.zenwave360.sdk.processors.AsyncApiProcessor;
-import io.zenwave360.sdk.templating.TemplateOutput;
 
 public class AbstractAsyncapiGeneratorTest {
 
     private Model loadAsyncapiModelFromResource(String resource) throws Exception {
         String targetProperty = "api";
-        Map<String, Object> model = new DefaultYamlParser().withSpecFile(URI.create(resource)).withTargetProperty(targetProperty).parse();
+        Map<String, Object> model = new DefaultYamlParser().withApiFile(URI.create(resource)).withTargetProperty(targetProperty).parse();
         return (Model) new AsyncApiProcessor().process(model).get(targetProperty);
     }
 

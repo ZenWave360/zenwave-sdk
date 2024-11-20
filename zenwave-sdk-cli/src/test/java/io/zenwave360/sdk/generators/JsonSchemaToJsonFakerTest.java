@@ -4,12 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.zenwave360.sdk.parsers.DefaultYamlParser;
 import io.zenwave360.sdk.utils.JSONPath;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 
 public class JsonSchemaToJsonFakerTest {
@@ -17,7 +15,7 @@ public class JsonSchemaToJsonFakerTest {
     private JsonSchemaToJsonFaker jsonSchemaToJsonFaker = new JsonSchemaToJsonFaker();
 
     private Map<String, Object> loadOpenAPIModelFromResource(String resource) throws Exception {
-        return new DefaultYamlParser().withSpecFile(URI.create(resource)).parse();
+        return new DefaultYamlParser().withApiFile(URI.create(resource)).parse();
     }
 
     @ParameterizedTest

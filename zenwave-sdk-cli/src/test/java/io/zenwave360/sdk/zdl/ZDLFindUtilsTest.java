@@ -16,7 +16,7 @@ import io.zenwave360.sdk.processors.ZDLProcessor;
 public class ZDLFindUtilsTest {
 
     public static Map<String, Object> loadZDL(String resource) throws IOException {
-        Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
+        Map<String, Object> model = new ZDLParser().withZdlFile(resource).parse();
         return (Map<String, Object>) new ZDLProcessor().process(model).get("zdl");
     }
 

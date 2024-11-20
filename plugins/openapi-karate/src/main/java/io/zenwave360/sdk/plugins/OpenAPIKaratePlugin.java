@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import static io.zenwave360.sdk.plugins.OpenAPIKarateGenerator.GroupByType.businessFlow;
 
-@DocumentedPlugin(value = "Generates test for SpringMVC or Spring WebFlux using WebTestClient based on OpenAPI specification.", shortCode = "spring-webtestclient")
+@DocumentedPlugin(value = "Generates test for SpringMVC or Spring WebFlux using WebTestClient based on OpenAPI specification.", shortCode = "openapi-karate")
 public class OpenAPIKaratePlugin extends Plugin {
 
     private Logger log = LoggerFactory.getLogger(getClass());
@@ -29,7 +29,6 @@ public class OpenAPIKaratePlugin extends Plugin {
             replaceInChain(TemplateFileWriter.class, TemplateStdoutWriter.class);
             withOption("businessFlowTestName", "BusinessFlowTest");
         }
-        withOption("DefaultYamlParser.specFile", StringUtils.firstNonBlank((String) getOptions().get("openapiFile"), this.getSpecFile()));
         return (T) this;
     }
 }

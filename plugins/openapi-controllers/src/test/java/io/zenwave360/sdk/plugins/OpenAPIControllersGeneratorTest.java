@@ -31,7 +31,7 @@ public class OpenAPIControllersGeneratorTest {
     @Test
     public void test_generator_openapi_controllers_no_zdl() throws Exception {
         Plugin plugin = new OpenAPIControllersPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/oas-controllers-with-no-zdl.yml")
+                .withApiFile("classpath:io/zenwave360/sdk/resources/openapi/oas-controllers-with-no-zdl.yml")
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("openApiApiPackage", "io.zenwave360.example.web.api")
                 .withOption("openApiModelPackage", "io.zenwave360.example.web.api.model")
@@ -51,7 +51,7 @@ public class OpenAPIControllersGeneratorTest {
     @Test
     public void test_generator_openapi_controllers_zdl_customer_address() throws Exception {
         Plugin plugin = new OpenAPIControllersPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/customer-address-openapi.yml")
+                .withApiFile("classpath:io/zenwave360/sdk/resources/openapi/customer-address-openapi.yml")
                 .withOption("zdlFile", "classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("openApiApiPackage", "io.zenwave360.example.web.api")
@@ -72,7 +72,7 @@ public class OpenAPIControllersGeneratorTest {
     @Test
     public void test_generator_openapi_controllers_zdl_customer_address_simple_domain_packaging() throws Exception {
         Plugin plugin = new OpenAPIControllersPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/customer-address-openapi.yml")
+                .withApiFile("classpath:io/zenwave360/sdk/resources/openapi/customer-address-openapi.yml")
                 .withOption("zdlFile", "classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("simpleDomainPackaging", true)

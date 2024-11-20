@@ -13,7 +13,7 @@ import io.zenwave360.sdk.utils.JSONPath;
 public class ZDLProcessorTest {
 
     private Map<String, Object> loadZDL(String resource) throws IOException {
-        Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
+        Map<String, Object> model = new ZDLParser().withZdlFile(resource).parse();
         return new ZDLProcessor().process(model);
     }
 

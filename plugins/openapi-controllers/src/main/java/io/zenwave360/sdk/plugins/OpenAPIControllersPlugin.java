@@ -16,7 +16,7 @@ import io.zenwave360.sdk.writers.TemplateFileWriter;
  *
  * ```shell
  * jbang zw -p io.zenwave360.sdk.plugins.OpenAPIControllersPlugin \
- *     specFile=src/main/resources/model/openapi.yml \
+ *     apiFile=src/main/resources/model/openapi.yml \
  *     zdlFile=src/main/resources/model/orders-model.zdl \
  *     basePackage=io.zenwave360.example \
  *     openApiApiPackage=io.zenwave360.example.adapters.web \
@@ -27,12 +27,6 @@ import io.zenwave360.sdk.writers.TemplateFileWriter;
  */
 @DocumentedPlugin(value = "Generates implementations based on ZDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.", shortCode = "openapi-controllers")
 public class OpenAPIControllersPlugin extends Plugin {
-
-    @DocumentedOption(description = "OpenAPI file to parse", required = false)
-    public String openapiFile;
-
-    @DocumentedOption(description = "ZDL file to parse", required = false)
-    public String zdlFile;
 
     public OpenAPIControllersPlugin() {
         super();
@@ -47,10 +41,6 @@ public class OpenAPIControllersPlugin extends Plugin {
             addBeforeInChain(OpenAPIControllersGenerator.class, DummyDataFromSchemasProcessor.class);
             withOption("haltOnFailFormatting", false);
         }
-        // because we have more than one model, we need to configure how they are passed around from parser to processor and generator
-        // we use class name for passing the properties, in case one class is repeated in chain we'd use the index number in the chain
-        withOption("DefaultYamlParser.specFile", StringUtils.firstNonBlank((String) getOptions().get("openapiFile"), this.getSpecFile()));
-        withOption("ZDLParser.specFile", getOptions().get("zdlFile"));
         return (T) this;
     }
 }

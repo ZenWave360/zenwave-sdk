@@ -19,7 +19,7 @@ public class ZDLParserTest {
     @Test
     public void testParseZDL() throws URISyntaxException, IOException {
         String targetProperty = "model";
-        ZDLParser parser = new ZDLParser().withSpecFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl").withTargetProperty(targetProperty);
+        ZDLParser parser = new ZDLParser().withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl").withTargetProperty(targetProperty);
         long startTime = System.currentTimeMillis();
         Map<String, Object> model = (Map) parser.parse().get(targetProperty);
         System.out.println("ZDLParser load time: " + (System.currentTimeMillis() - startTime));
@@ -32,7 +32,7 @@ public class ZDLParserTest {
     public void testParseZDLWithProblems() throws URISyntaxException, IOException {
         String targetProperty = "model";
         ZDLParser parser = new ZDLParser()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address-problems.zdl")
+                .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address-problems.zdl")
                 .withTargetProperty(targetProperty);
         parser.continueOnZdlError = false;
 
@@ -48,7 +48,7 @@ public class ZDLParserTest {
     @Test
     public void testParseJDL() throws URISyntaxException, IOException {
         String targetProperty = "model";
-        ZDLParser parser = new ZDLParser().withSpecFile("classpath:io/zenwave360/sdk/resources/jdl/21-points.jh").withTargetProperty(targetProperty);
+        ZDLParser parser = new ZDLParser().withZdlFile("classpath:io/zenwave360/sdk/resources/jdl/21-points.jh").withTargetProperty(targetProperty);
         long startTime = System.currentTimeMillis();
         Map<String, Object> model = (Map) parser.parse().get(targetProperty);
         System.out.println("ZDLParser load time: " + (System.currentTimeMillis() - startTime));

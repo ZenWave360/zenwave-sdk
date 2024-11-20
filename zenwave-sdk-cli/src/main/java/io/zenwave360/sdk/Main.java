@@ -1,10 +1,11 @@
 package io.zenwave360.sdk;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import avro.shaded.com.google.common.base.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,8 +68,14 @@ public class Main implements Callable<Integer> {
         if(forceOverwrite) {
             options.put("forceOverwrite", true);
         }
+        var specFile = (String) options.get("specFile");
+        var apiFile = isApi(specFile) ? specFile : null;
+        var zdlFile = specFile != null && specFile.endsWith(".zdl") ? specFile : null;
         Plugin plugin = Plugin.of(this.pluginClass)
-                .withSpecFile((String) options.get("specFile"))
+                .withApiFile(apiFile)
+                .withZdlFile(zdlFile)
+                .withApiFiles(split(options.get("apiFiles")))
+                .withZdlFiles(split(options.get("zdlFiles")))
                 .withTargetFolder((String) options.get("targetFolder"))
                 .withForceOverwrite(forceOverwrite)
                 .withOptions(options);
@@ -76,12 +83,23 @@ public class Main implements Callable<Integer> {
         return 0;
     }
 
+    private boolean isApi(String specFile) {
+        return specFile != null && (specFile.endsWith(".yml") || specFile.endsWith(".yaml") || specFile.endsWith(".json"));
+    }
+
+    private List<String> split(Object property) {
+        if(property instanceof String) {
+            return Arrays.stream(((String) property).split(",")).map(String::trim).toList();
+        }
+        return null;
+    }
+
     public void help() {
         try {
             Plugin plugin = null;
             if(StringUtils.isNotBlank(this.pluginClass)) {
                 plugin = Plugin.of(this.pluginClass)
-                        .withSpecFile((String) options.get("specFile"))
+                        .withApiFile((String) options.get("specFile"))
                         .withTargetFolder((String) options.get("targetFolder"))
                         .withOptions(options);
             }

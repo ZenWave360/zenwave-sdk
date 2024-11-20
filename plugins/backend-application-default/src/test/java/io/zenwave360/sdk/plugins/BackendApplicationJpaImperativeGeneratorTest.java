@@ -1,7 +1,6 @@
 package io.zenwave360.sdk.plugins;
 
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.*;
 
@@ -9,8 +8,6 @@ import io.zenwave360.sdk.MainGenerator;
 import io.zenwave360.sdk.Plugin;
 import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.options.ProgrammingStyle;
-import io.zenwave360.sdk.parsers.ZDLParser;
-import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.testutils.MavenCompiler;
 import nl.altindag.log.LogCaptor;
 
@@ -37,7 +34,7 @@ public class BackendApplicationJpaImperativeGeneratorTest {
     public void test_generator_hexagonal_jpa() throws Exception {
         String targetFolder = "target/zdl/test_generator_hexagonal_jpa_customer_address";
         Plugin plugin = new BackendApplicationDefaultPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address-relational.zdl")
+                .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address-relational.zdl")
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.jpa)

@@ -19,7 +19,7 @@ public class OpenAPIToJDLGeneratorTest {
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
     private Map<String, Object> loadApiModelFromResource(String resource) throws Exception {
-        Map<String, Object> model = new DefaultYamlParser().withSpecFile(URI.create(resource)).parse();
+        Map<String, Object> model = new DefaultYamlParser().withApiFile(URI.create(resource)).parse();
         return new OpenApiProcessor().process(model);
     }
 

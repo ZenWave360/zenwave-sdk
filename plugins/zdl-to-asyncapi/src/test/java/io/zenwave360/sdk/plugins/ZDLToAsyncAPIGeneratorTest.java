@@ -23,7 +23,7 @@ public class ZDLToAsyncAPIGeneratorTest {
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
     private Map<String, Object> loadZDLModelFromResource(String resource) throws Exception {
-        Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
+        Map<String, Object> model = new ZDLParser().withZdlFile(resource).parse();
         return new ZDLProcessor().process(model);
     }
 
@@ -42,7 +42,7 @@ public class ZDLToAsyncAPIGeneratorTest {
 
         var tmpFile = new File("target/customer-address.yml");
         FileUtils.writeStringToFile(tmpFile, outputTemplates.get(0).getContent(), "UTF-8");
-        var api = new DefaultYamlParser().withSpecFile(tmpFile.toURI()).parse();
+        var api = new DefaultYamlParser().withApiFile(tmpFile.toURI()).parse();
 
         Map<String, Object> oasSchema = mapper.readValue(outputTemplates.get(0).getContent(), Map.class);
         Assertions.assertTrue(((List) JSONPath.get(oasSchema, "$.components.schemas.Customer.required")).contains("username"));
@@ -63,7 +63,7 @@ public class ZDLToAsyncAPIGeneratorTest {
 
         var tmpFile = new File("target/customer-address.yml");
         FileUtils.writeStringToFile(tmpFile, outputTemplates.get(0).getContent(), "UTF-8");
-        var api = new DefaultYamlParser().withSpecFile(tmpFile.toURI()).parse();
+        var api = new DefaultYamlParser().withApiFile(tmpFile.toURI()).parse();
 
         Map<String, Object> oasSchema = mapper.readValue(outputTemplates.get(0).getContent(), Map.class);
         Assertions.assertTrue(((List) JSONPath.get(oasSchema, "$.components.schemas.Customer.required")).contains("username"));
@@ -83,7 +83,7 @@ public class ZDLToAsyncAPIGeneratorTest {
 
         var tmpFile = new File("target/customer-address.yml");
         FileUtils.writeStringToFile(tmpFile, outputTemplates.get(0).getContent(), "UTF-8");
-        var api = new DefaultYamlParser().withSpecFile(tmpFile.toURI()).parse();
+        var api = new DefaultYamlParser().withApiFile(tmpFile.toURI()).parse();
 
         Map<String, Object> oasSchema = mapper.readValue(outputTemplates.get(0).getContent(), Map.class);
         Assertions.assertTrue(((List) JSONPath.get(oasSchema, "$.components.schemas.Customer.required")).contains("username"));

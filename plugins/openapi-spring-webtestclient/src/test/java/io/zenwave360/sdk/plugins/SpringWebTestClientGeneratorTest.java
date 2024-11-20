@@ -27,7 +27,7 @@ public class SpringWebTestClientGeneratorTest {
     private static final String OPENAPI_RESOURCES = "../../../../zenwave-sdk-test-resources/src/main/resources/io/zenwave360/sdk/resources/openapi/";
 
     private Map<String, Object> loadApiModelFromResource(String resource) throws Exception {
-        Map<String, Object> model = new DefaultYamlParser().withSpecFile(URI.create(resource)).parse();
+        Map<String, Object> model = new DefaultYamlParser().withApiFile(URI.create(resource)).parse();
         return new OpenApiProcessor().process(model);
     }
 
@@ -39,7 +39,7 @@ public class SpringWebTestClientGeneratorTest {
     })
     public void test_output_partial_one_operation(String openapi, String operationId) throws Exception {
         Plugin plugin = new SpringWebTestClientPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
+                .withApiFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
                 .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.partial)
                 .withOption("transactional", false)
                 .withOption("testsPackage", "io.example.controller.tests")
@@ -66,7 +66,7 @@ public class SpringWebTestClientGeneratorTest {
     public void test_output_business_flow(String openapi, String operationIds, String requestPayloadType) throws Exception {
         String targetFolder = "target/test_output_business_flow_" + requestPayloadType + "_" + openapi.replaceAll("\\.", "_");
         Plugin plugin = new SpringWebTestClientPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
+                .withApiFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
                 .withTargetFolder(targetFolder)
                 .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.businessFlow)
                 .withOption("businessFlowTestName", camelCase(operationIds.replaceAll(",", "_")))
@@ -100,7 +100,7 @@ public class SpringWebTestClientGeneratorTest {
     public void test_output_by_one_service(String openapi, String operationId, String controllers) throws Exception {
         String targetFolder = "target/test_output_by_one_service_" + openapi.replaceAll("\\.", "_");
         Plugin plugin = new SpringWebTestClientPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
+                .withApiFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
                 .withTargetFolder(targetFolder)
                 .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.service)
                 .withOption("transactional", false)
@@ -129,7 +129,7 @@ public class SpringWebTestClientGeneratorTest {
     public void test_output_by_one_service_simple_domain_packaging(String openapi, String operationId, String controllers) throws Exception {
         String targetFolder = "target/test_output_by_one_service_simple_domain_packaging_" + openapi.replaceAll("\\.", "_");
         Plugin plugin = new SpringWebTestClientPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
+                .withApiFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
                 .withTargetFolder(targetFolder)
                 .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.service)
                 .withOption("transactional", false)
@@ -159,7 +159,7 @@ public class SpringWebTestClientGeneratorTest {
     public void test_output_by_service(String openapi, String controllers) throws Exception {
         String targetFolder = "target/test_output_by_service_" + openapi.replaceAll("\\.", "_");
         Plugin plugin = new SpringWebTestClientPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
+                .withApiFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
                 .withTargetFolder(targetFolder)
                 .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.service)
                 .withOption("transactional", false)
@@ -187,7 +187,7 @@ public class SpringWebTestClientGeneratorTest {
     public void test_output_by_operation(String openapi, String controllers) throws Exception {
         String targetFolder = "target/test_output_by_operation_" + openapi.replaceAll("\\.", "_");
         Plugin plugin = new SpringWebTestClientPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
+                .withApiFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
                 .withTargetFolder(targetFolder)
                 .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.operation)
                 .withOption("transactional", false)

@@ -15,7 +15,7 @@ import io.zenwave360.sdk.utils.JSONPath;
 public class DummyDataFromSchemasProcessorTest {
 
     private Map<String, Object> loadOpenApi(String resource) throws Exception {
-        Map<String, Object> model = new DefaultYamlParser().withSpecFile(URI.create(resource)).withTargetProperty("api").parse();
+        Map<String, Object> model = new DefaultYamlParser().withApiFile(URI.create(resource)).withTargetProperty("api").parse();
         return new OpenApiProcessor().process(model);
     }
 

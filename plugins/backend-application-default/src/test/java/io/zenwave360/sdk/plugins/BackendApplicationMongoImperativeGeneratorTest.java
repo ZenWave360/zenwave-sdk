@@ -1,7 +1,6 @@
 package io.zenwave360.sdk.plugins;
 
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.*;
 
@@ -9,8 +8,6 @@ import io.zenwave360.sdk.MainGenerator;
 import io.zenwave360.sdk.Plugin;
 import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.options.ProgrammingStyle;
-import io.zenwave360.sdk.parsers.ZDLParser;
-import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.testutils.MavenCompiler;
 import nl.altindag.log.LogCaptor;
 
@@ -37,7 +34,7 @@ public class BackendApplicationMongoImperativeGeneratorTest {
     public void test_generator_hexagonal_mongodb_customer_address() throws Exception {
         String targetFolder = "target/zdl/test_generator_hexagonal_mongodb_customer_address_multimodule";
         Plugin plugin = new BackendApplicationDefaultPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
+                .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.mongodb)
@@ -61,7 +58,7 @@ public class BackendApplicationMongoImperativeGeneratorTest {
     public void test_generator_simple_packaging_mongodb_customer_address() throws Exception {
         String targetFolder = "target/zdl/test_generator_simple_packaging_mongodb_customer_address";
         Plugin plugin = new BackendApplicationDefaultPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
+                .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.mongodb)
@@ -85,7 +82,7 @@ public class BackendApplicationMongoImperativeGeneratorTest {
     public void test_generator_hexagonal_mongodb_order_faults_attachments() throws Exception {
         String targetFolder = "target/zdl/test_generator_hexagonal_mongodb_order_faults_attachments";
         Plugin plugin = new BackendApplicationDefaultPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl")
+                .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl")
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.mongodb)
@@ -107,7 +104,7 @@ public class BackendApplicationMongoImperativeGeneratorTest {
     public void test_generator_hexagonal_mongodb_orders_with_aggregate() throws Exception {
         String targetFolder = "target/zdl/test_generator_hexagonal_mongodb_orders_with_aggregate";
         Plugin plugin = new BackendApplicationDefaultPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/zdl/orders-with-aggregate.zdl")
+                .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/orders-with-aggregate.zdl")
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.mongodb)

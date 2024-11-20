@@ -14,7 +14,7 @@ import java.util.Map;
 public class AbstractZDLProjectGeneratorTest {
 
     private Map<String, Object> loadZDL(String resource) throws IOException {
-        Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
+        Map<String, Object> model = new ZDLParser().withZdlFile(resource).parse();
         return new ZDLProcessor().process(model);
     }
 

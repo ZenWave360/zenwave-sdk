@@ -19,7 +19,7 @@ public class OpenApiProcessorTest {
     Configuration config = Configuration.builder().options(Option.DEFAULT_PATH_LEAF_TO_NULL).build();
 
     private Map<String, Object> loadOpenAPIModelFromResource(String resource) throws Exception {
-        return new DefaultYamlParser().withSpecFile(URI.create(resource)).parse();
+        return new DefaultYamlParser().withApiFile(URI.create(resource)).parse();
     }
 
     @Test
