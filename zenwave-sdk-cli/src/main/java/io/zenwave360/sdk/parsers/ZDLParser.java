@@ -5,10 +5,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import io.github.zenwave360.zdl.ZdlParser;
+import io.zenwave360.sdk.Plugin;
 import io.zenwave360.sdk.doc.DocumentedOption;
+import io.zenwave360.sdk.plugins.ConfigurationProvider;
 import io.zenwave360.sdk.utils.JSONPath;
 
-public class ZDLParser implements Parser {
+public class ZDLParser implements Parser, ConfigurationProvider {
 
     public static final List blobTypes = List.of("Blob", "AnyBlob", "ImageBlob", "byte");
 
@@ -88,5 +90,14 @@ public class ZDLParser implements Parser {
         Map<String, Object> model = new LinkedHashMap<>();
         model.put(targetProperty, zdlModel);
         return model;
+    }
+
+    @Override
+    public void updateConfiguration(Plugin configuration, Map<String, Object> model) {
+        var zdl = model.get(targetProperty);
+        var config = JSONPath.get(zdl, "$.config", Map.<String, Object>of());
+        for (var entry : config.entrySet()) {
+            configuration.withOption(entry.getKey(), entry.getValue());
+        }
     }
 }

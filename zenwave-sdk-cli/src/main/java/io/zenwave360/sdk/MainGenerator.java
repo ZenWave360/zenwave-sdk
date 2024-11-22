@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
+import io.zenwave360.sdk.plugins.ConfigurationProvider;
 import io.zenwave360.sdk.utils.CommaSeparatedCollectionDeserializationHandler;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
@@ -42,6 +43,9 @@ public class MainGenerator {
             if (plugin instanceof Parser) {
                 Map parsed = ((Parser) plugin).withProjectClassLoader(configuration.getProjectClassLoader()).parse();
                 model.putAll(parsed);
+            }
+            if (plugin instanceof ConfigurationProvider) {
+                ((ConfigurationProvider) plugin).updateConfiguration(configuration, model);
             }
             if (plugin instanceof Processor) {
                 model = ((Processor) plugin).process(model);
