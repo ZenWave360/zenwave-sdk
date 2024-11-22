@@ -39,13 +39,13 @@ public class GeneratorMojo extends AbstractMojo {
     /**
      * Location of the ZDL model, as URL or file.
      */
-    @Parameter(name = "zdlFile", property = "zenwave.zdlFile", required = true)
+    @Parameter(name = "zdlFile", property = "zenwave.zdlFile")
     private String zdlFile;
 
     /**
      * Location of the ZDL model, as URL or file.
      */
-    @Parameter(name = "zdlFiles", property = "zenwave.zdlFiles", required = true)
+    @Parameter(name = "zdlFiles", property = "zenwave.zdlFiles")
     private String[] zdlFiles;
 
 
@@ -127,6 +127,7 @@ public class GeneratorMojo extends AbstractMojo {
             }
             if(apiFile.endsWith(".zdl") && !zdls.contains(apiFile)) {
                 zdls.add(apiFile);
+                apiFile = null;
             }
             if(zdlFiles != null) {
                 zdls.addAll(Arrays.asList(zdlFiles));

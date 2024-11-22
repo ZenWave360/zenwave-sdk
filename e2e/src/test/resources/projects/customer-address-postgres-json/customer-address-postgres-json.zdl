@@ -5,7 +5,7 @@ config {
     title "ZenWave Playground Customer-Address MariaDB"
     basePackage "io.zenwave360.example"
     persistence jpa
-    databaseType mariadb
+    databaseType postgresql
 //    haltOnFailFormatting false
 
     plugins {
