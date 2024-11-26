@@ -11,7 +11,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <zenwave-sdk.version>${project.parent.version}</zenwave-sdk.version>
+        <zenwave-sdk.version>1.7.0-SNAPSHOT</zenwave-sdk.version>
     </properties>
 
     <dependencies>
