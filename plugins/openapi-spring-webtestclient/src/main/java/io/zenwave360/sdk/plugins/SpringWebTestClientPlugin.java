@@ -32,7 +32,7 @@ public class SpringWebTestClientPlugin extends Plugin {
             replaceInChain(TemplateFileWriter.class, TemplateStdoutWriter.class);
             withOption("businessFlowTestName", "BusinessFlowTest");
         }
-        withOption("DefaultYamlParser.specFile", StringUtils.firstNonBlank((String) getOptions().get("openapiFile"), this.getSpecFile()));
+        withOption("DefaultYamlParser.apiFile", StringUtils.firstNonBlank((String) getOptions().get("openapiFile"), this.getSpecFile()));
         return (T) this;
     }
 }

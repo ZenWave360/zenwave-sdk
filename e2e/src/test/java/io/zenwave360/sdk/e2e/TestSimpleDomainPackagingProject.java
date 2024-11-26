@@ -39,7 +39,7 @@ public class TestSimpleDomainPackagingProject {
         int exitCode = 0;
 
         plugin = new ZDLToOpenAPIPlugin()
-                .withSpecFile(zdlFile)
+                .withZdlFile(zdlFile)
                 .withOption("idType", "integer")
                 .withOption("idTypeFormat", "int64")
                 .withOption("targetFile", "/src/main/resources/apis/openapi.yml")
@@ -47,7 +47,7 @@ public class TestSimpleDomainPackagingProject {
         new MainGenerator().generate(plugin);
 
         plugin = new ZDLToAsyncAPIPlugin()
-                .withSpecFile(zdlFile)
+                .withZdlFile(zdlFile)
                 .withOption("asyncapiVersion", "v3")
                 .withOption("idType", "integer")
                 .withOption("idTypeFormat", "int64")
@@ -56,7 +56,7 @@ public class TestSimpleDomainPackagingProject {
         new MainGenerator().generate(plugin);
 
         plugin = new BackendApplicationDefaultPlugin()
-                .withSpecFile(zdlFile)
+                .withZdlFile(zdlFile)
                 .withTargetFolder(targetFolder)
 
                 .withOption("simpleDomainPackaging", true)
@@ -76,7 +76,7 @@ public class TestSimpleDomainPackagingProject {
         Assertions.assertEquals(0, exitCode);
 
         plugin = new OpenAPIControllersPlugin()
-                .withSpecFile(targetFolder + "/src/main/resources/apis/openapi.yml")
+                .withApiFile(targetFolder + "/src/main/resources/apis/openapi.yml")
                 .withOption("zdlFile", zdlFile)
                 .withOption("basePackage", basePackage)
                 .withOption("controllersPackage", "{{basePackage}}")

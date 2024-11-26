@@ -21,7 +21,7 @@ public class AsyncApiProcessorTest {
     Configuration config = Configuration.builder().options(Option.DEFAULT_PATH_LEAF_TO_NULL).build();
 
     private Map<String, Object> loadAsyncapiModelFromResource(String resource) throws Exception {
-        return new DefaultYamlParser().withSpecFile(URI.create(resource)).withTargetProperty(targetProperty).parse();
+        return new DefaultYamlParser().withApiFile(URI.create(resource)).withTargetProperty(targetProperty).parse();
     }
 
     @Test

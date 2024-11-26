@@ -32,7 +32,7 @@ public class SpringCloudStreams3AdaptersGeneratorTest {
     @Test
     public void test_generate_imperative_adapters_events() throws Exception {
         Plugin plugin = new SpringCloudStreams3AdaptersPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-events.yml")
+                .withApiFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-events.yml")
                 .withTargetFolder("target/zenwave630/out/v2")
                 .withOption("apiId", "orders")
                 .withOption("basePackage", "io.example.integration.test")
@@ -54,7 +54,7 @@ public class SpringCloudStreams3AdaptersGeneratorTest {
     @Test
     public void test_generate_imperative_adapters_orders_relational() throws Exception {
         Plugin plugin = new SpringCloudStreams3AdaptersPlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-orders-relational.yml")
+                .withApiFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-orders-relational.yml")
                 .withTargetFolder("target/zenwave630/out/v2")
                 .withOption("apiId", "provider")
                 .withOption("basePackage", "io.example.orders.relational")

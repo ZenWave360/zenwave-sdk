@@ -19,7 +19,7 @@ public class BackendApplicationDefaultHelpersTest {
     private BackendApplicationDefaultHelpers helpers = new BackendApplicationDefaultHelpers(generator);
 
     private Map<String, Object> loadZDLModelFromResource(String resource) throws Exception {
-        Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
+        Map<String, Object> model = new ZDLParser().withZdlFile(resource).parse();
         return (Map<String, Object>) new ZDLProcessor().process(model).get("zdl");
     }
 

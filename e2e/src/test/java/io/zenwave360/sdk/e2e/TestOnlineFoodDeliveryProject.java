@@ -1,7 +1,6 @@
 package io.zenwave360.sdk.e2e;
 
 import java.io.File;
-import java.util.List;
 
 import io.zenwave360.sdk.plugins.BackendApplicationDefaultPlugin;
 import io.zenwave360.sdk.plugins.OpenAPIControllersPlugin;
@@ -44,7 +43,7 @@ public class TestOnlineFoodDeliveryProject {
         var zdlFile = targetFolder + "models/" + module + ".zdl";
 
         Plugin plugin = new BackendApplicationDefaultPlugin()
-            .withSpecFile(zdlFile)
+            .withZdlFile(zdlFile)
             .withTargetFolder(moduleFolder)
             .withOption("basePackage", modulePackage)
             .withOption("persistence", PersistenceType.mongodb)
@@ -71,14 +70,14 @@ public class TestOnlineFoodDeliveryProject {
         Plugin plugin = null;
 
         plugin = new ZDLToOpenAPIPlugin()
-                .withSpecFile(zdlFile)
+                .withZdlFile(zdlFile)
                 .withOption("idType", "string")
                 .withOption("targetFile", "/src/main/resources/apis/openapi.yml")
                 .withTargetFolder(moduleFolder);
         new MainGenerator().generate(plugin);
 
         plugin = new ZDLToAsyncAPIPlugin()
-                .withSpecFile(zdlFile)
+                .withZdlFile(zdlFile)
                 .withOption("asyncapiVersion", "v3")
                 .withOption("idType", "string")
                 .withOption("targetFile", "/src/main/resources/apis/asyncapi.yml")
@@ -108,7 +107,7 @@ public class TestOnlineFoodDeliveryProject {
         int exitCode = 0;
 
         plugin = new BackendApplicationDefaultPlugin()
-                .withSpecFile(zdlFile)
+                .withZdlFile(zdlFile)
                 .withTargetFolder(moduleFolder)
                 .withOption("basePackage", modulePackage)
                 .withOption("persistence", PersistenceType.mongodb)
@@ -124,8 +123,8 @@ public class TestOnlineFoodDeliveryProject {
         Assertions.assertEquals(0, exitCode);
 
         plugin = new OpenAPIControllersPlugin()
-                .withSpecFile(moduleFolder + "/src/main/resources/apis/openapi.yml")
-                .withOption("zdlFile", zdlFile)
+                .withApiFile(moduleFolder + "/src/main/resources/apis/openapi.yml")
+                .withZdlFile(zdlFile)
                 .withOption("basePackage", modulePackage)
                 .withOption("controllersPackage", "{{basePackage}}.adapters.web")
                 .withOption("openApiApiPackage", "{{basePackage}}.adapters.web")

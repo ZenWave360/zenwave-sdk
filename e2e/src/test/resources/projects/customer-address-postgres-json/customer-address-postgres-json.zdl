@@ -5,7 +5,7 @@ config {
     title "ZenWave Playground Customer-Address MariaDB"
     basePackage "io.zenwave360.example"
     persistence jpa
-    databaseType mariadb
+    databaseType postgresql
 //    haltOnFailFormatting false
 
     plugins {
@@ -31,8 +31,7 @@ config {
 
         OpenAPIControllersPlugin {
             formatter google // comments in one line are better for demos
-            specFile "src/main/resources/apis/openapi.yml"
-            zdlFile "customer-address-relational.zdl"
+            apiFile "src/main/resources/apis/openapi.yml"
 
             // thse should match the values of openapi-generator-maven-plugin
             openApiApiPackage "{{basePackage}}.adapters.web"

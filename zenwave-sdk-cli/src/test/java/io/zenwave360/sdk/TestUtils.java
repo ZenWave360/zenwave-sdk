@@ -10,7 +10,7 @@ import io.zenwave360.sdk.processors.OpenApiProcessor;
 public class TestUtils {
 
     public static Model loadYmlModelFromResource(String resource) throws Exception {
-        Map<String, Object> model = new DefaultYamlParser().withSpecFile(URI.create(resource)).parse();
+        Map<String, Object> model = new DefaultYamlParser().withApiFile(URI.create(resource)).parse();
         return (Model) new OpenApiProcessor().process(model).get("api");
     }
 }

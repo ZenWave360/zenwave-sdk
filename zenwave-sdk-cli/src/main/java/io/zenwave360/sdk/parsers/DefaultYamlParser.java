@@ -12,14 +12,29 @@ import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.jsonrefparser.$RefParser;
 import io.zenwave360.jsonrefparser.$RefParserOptions;
 import io.zenwave360.jsonrefparser.$RefParserOptions.OnMissing;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
 
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
     @DocumentedOption(description = "API Specification File")
-    public URI specFile;
+    public URI apiFile;
     public String targetProperty = "api";
 
     private ClassLoader projectClassLoader;
+
+    @DocumentedOption(description = "API Specification File (@deprecated use apiFile)")
+    public void setSpecFile(URI specFile) {
+        apiFile = specFile;
+    }
+
+    @DocumentedOption(description = "API Specification File (@deprecated use apiFile)")
+    public void setOpenapiFile(URI openapiFile) {
+        apiFile = openapiFile;
+    }
+
 
     @Override
     public DefaultYamlParser withProjectClassLoader(ClassLoader projectClassLoader) {
@@ -27,13 +42,13 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
         return this;
     }
 
-    public DefaultYamlParser withSpecFile(URI specFile) {
-        this.specFile = specFile;
+    public DefaultYamlParser withApiFile(URI specFile) {
+        this.apiFile = specFile;
         return this;
     }
 
-    public DefaultYamlParser withSpecFile(File specFile) {
-        this.specFile = specFile.getAbsoluteFile().toURI();
+    public DefaultYamlParser withApiFile(File specFile) {
+        this.apiFile = specFile.getAbsoluteFile().toURI();
         return this;
     }
 
@@ -44,11 +59,15 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
 
     @Override
     public Map<String, Object> parse() throws IOException {
-        $RefParser parser = new $RefParser(specFile)
-                .withResourceClassLoader(this.projectClassLoader)
-                .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing(OnMissing.SKIP));
-        Map model = new LinkedHashMap<>();
-        model.put(targetProperty, new Model(specFile, parser.parse().dereference().mergeAllOf().getRefs()));
+        Map<String, Object> model = new LinkedHashMap<>();
+        if(apiFile != null) {
+            $RefParser parser = new $RefParser(apiFile)
+                    .withResourceClassLoader(this.projectClassLoader)
+                    .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing(OnMissing.SKIP));
+            model.put(targetProperty, new Model(apiFile, parser.parse().dereference().mergeAllOf().getRefs()));
+        } else {
+            log.error("No API Specification (apiFile) provided");
+        }
         return model;
     }
 }

@@ -19,7 +19,7 @@ public class JDLToOpenAPIGeneratorTest {
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
     private Map<String, Object> loadZDLModelFromResource(String resource) throws Exception {
-        Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
+        Map<String, Object> model = new ZDLParser().withZdlFile(resource).parse();
         model = new ZDLProcessor().process(model);
         model = new PathsProcessor().process(model);
         return model;

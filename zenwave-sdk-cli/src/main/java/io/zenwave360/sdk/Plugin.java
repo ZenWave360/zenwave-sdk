@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.reflections.Reflections;
@@ -17,8 +16,18 @@ import io.zenwave360.sdk.utils.NamingUtils;
 
 public class Plugin {
 
-    @DocumentedOption(description = "Spec file to parse", required = true)
-    public String specFile;
+    @DocumentedOption(description = "API Spec file to parse", required = true)
+    public String apiFile;
+
+    @DocumentedOption(description = "API Spec files to parse", required = true)
+    public List<String> apiFiles;
+
+
+    @DocumentedOption(description = "ZDL file to parse", required = true)
+    public String zdlFile;
+
+    @DocumentedOption(description = "ZDL files to parse")
+    public List<String> zdlFiles;
 
     @DocumentedOption(description = "Target folder for generated output", required = false)
     public String targetFolder;
@@ -57,9 +66,33 @@ public class Plugin {
         return (T) this;
     }
 
-    public Plugin withSpecFile(String specFile) {
-        this.specFile = specFile != null? specFile.replaceAll("\\\\", "/") : specFile;
-        this.options.put("specFile", this.specFile);
+    public Plugin withApiFile(String apiFile) {
+        this.apiFile = apiFile != null? apiFile.replaceAll("\\\\", "/") : apiFile;
+        this.options.put("apiFile", this.apiFile);
+        return this;
+    }
+
+    public Plugin withApiFiles(List<String> apiFiles) {
+        if(apiFiles == null) {
+            return this;
+        }
+        this.apiFiles = apiFiles.stream().map(apiFile -> apiFile != null? apiFile.replaceAll("\\\\", "/") : apiFile).toList();
+        this.options.put("zdlFiles", this.apiFiles);
+        return this;
+    }
+
+    public Plugin withZdlFile(String zdlFile) {
+        this.zdlFile = zdlFile != null? zdlFile.replaceAll("\\\\", "/") : zdlFile;
+        this.options.put("zdlFile", this.zdlFile);
+        return this;
+    }
+
+    public Plugin withZdlFiles(List<String> zdlFiles) {
+        if(zdlFiles == null) {
+            return this;
+        }
+        this.zdlFiles = zdlFiles.stream().map(zdlFile -> zdlFile != null? zdlFile.replaceAll("\\\\", "/") : zdlFile).toList();
+        this.options.put("zdlFiles", this.zdlFiles);
         return this;
     }
 
@@ -82,6 +115,8 @@ public class Plugin {
     }
 
     public Plugin withOption(String name, Object value) {
+        var field = FieldUtils.getField(this.getClass(), name);
+
         String lastPath = name;
         Map<String, Object> nestedTempObject = options;
         String[] paths = name.split("\\.");
@@ -95,12 +130,15 @@ public class Plugin {
             }
         }
         if(value instanceof String && ((String) value).contains(",")) {
-            value = Arrays.asList(((String) value).split(","));
+            value = Arrays.stream(((String) value).split(",")).map(String::trim).toList();
+        }
+        if (value instanceof String && field != null && List.class.isAssignableFrom(field.getType())) {
+            value = List.of(value);
         }
         nestedTempObject.put(lastPath, value);
 
         try {
-            if (FieldUtils.getField(this.getClass(), name) != null) {
+            if(field != null) {
                 FieldUtils.writeField(this, name, value);
             }
         } catch (IllegalAccessException e) {
@@ -162,20 +200,33 @@ public class Plugin {
         return options.get(name).toString().equals(value.toString());
     }
 
+    @DocumentedOption(description = "Spec file to parse (@deprecated user apiFile or zdlFile)", required = true)
     public String getSpecFile() {
-        return specFile;
+        return apiFile;
     }
 
     public void setSpecFile(String specFile) {
-        this.specFile = specFile;
+        this.apiFile = specFile;
+    }
+
+    public String getApiFile() {
+        return apiFile;
+    }
+
+    public void setApiFile(String apiFile) {
+        this.apiFile = apiFile;
+    }
+
+    public String getZdlFile() {
+        return zdlFile;
+    }
+
+    public void setZdlFile(String zdlFile) {
+        this.zdlFile = zdlFile;
     }
 
     public List<Class> getChain() {
         return chain;
-    }
-
-    public void setChain(List<Class> chain) {
-        this.chain = chain;
     }
 
     public Map<String, Object> getOptions() {

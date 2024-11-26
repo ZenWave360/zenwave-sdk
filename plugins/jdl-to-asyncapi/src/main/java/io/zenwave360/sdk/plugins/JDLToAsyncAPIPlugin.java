@@ -23,6 +23,9 @@ public class JDLToAsyncAPIPlugin extends Plugin {
         if (!options.containsKey("targetFolder") && !options.containsKey("targetFile")) {
             withChain(ZDLParser.class, ZDLProcessor.class, JDLToAsyncAPIGenerator.class, JavaFormatter.class, TemplateStdoutWriter.class);
         }
+        if(options.containsKey("specFile")) {
+            withOption("zdlFile", options.get("specFile"));
+        }
         return super.withOptions(options);
     }
 }

@@ -10,16 +10,20 @@
     <artifactId>plugins-parent</artifactId>
     <packaging>pom</packaging>
 
+    <properties>
+        <zenwave-sdk.version>${project.parent.version}</zenwave-sdk.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>io.github.zenwave360.zenwave-sdk</groupId>
             <artifactId>zenwave-sdk-cli</artifactId>
-            <version>${project.version}</version>
+            <version>${zenwave-sdk.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.zenwave360.zenwave-sdk</groupId>
             <artifactId>zenwave-sdk-test-resources</artifactId>
-            <version>${project.version}</version>
+            <version>${zenwave-sdk.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

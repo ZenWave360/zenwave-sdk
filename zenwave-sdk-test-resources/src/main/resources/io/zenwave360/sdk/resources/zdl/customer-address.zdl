@@ -4,6 +4,15 @@
 
 MAX_LENGTH=100
 
+config {
+    basePackage "com.example.zenwave"
+    plugins {
+        ZDLToAsyncAPIPlugin {
+            targetFile "src/main/resources/public/apis/asyncapi.yml"
+        }
+    }
+}
+
 apis {
     asyncapi(provider) CustomerAddressAPI {
         uri ""

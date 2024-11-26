@@ -82,6 +82,9 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
     @DocumentedOption(description = "Whether to add IEntityEventProducer interfaces as service dependencies. Depends on the naming convention of zenwave-asyncapi plugin to work.")
     public boolean includeEmitEventsImplementation = false;
 
+    @DocumentedOption(description = "Controls whether to add a read/write relationship by id when mapping relationships between aggregate (not recommended) keeping the relationship by object readonly.")
+    public boolean addRelationshipsById = false;
+
     @DocumentedOption(description = "Specifies the Java data type for the ID fields of entities. Defaults to Long for JPA and String for MongoDB if not explicitly set.")
     public String idJavaType;
 

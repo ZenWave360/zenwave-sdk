@@ -28,7 +28,7 @@ public class OpenAPIKarateGeneratorTest {
     public void test_output_business_flow(String openapi, String operationIds) throws Exception {
         String targetFolder = "target/test_output_business_flow_" + openapi.replaceAll("\\.", "_");
         Plugin plugin = new OpenAPIKaratePlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
+                .withApiFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
                 .withTargetFolder(targetFolder)
                 .withOption("groupBy", OpenAPIKarateGenerator.GroupByType.businessFlow)
                 .withOption("businessFlowTestName", camelCase(operationIds.replaceAll(",", "_")))
@@ -55,7 +55,7 @@ public class OpenAPIKarateGeneratorTest {
     public void test_output_by_one_service(String openapi, String operationId, String controllers) throws Exception {
         String targetFolder = "target/test_output_by_one_service_" + openapi.replaceAll("\\.", "_");
         Plugin plugin = new OpenAPIKaratePlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
+                .withApiFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
                 .withTargetFolder(targetFolder)
                 .withOption("groupBy", OpenAPIKarateGenerator.GroupByType.service)
                 .withOption("testsPackage", "io.example.controller.tests")
@@ -78,7 +78,7 @@ public class OpenAPIKarateGeneratorTest {
     public void test_output_by_one_service_simple_domain_packaging(String openapi, String operationId, String controllers) throws Exception {
         String targetFolder = "target/test_output_by_one_service_simple_domain_packaging_" + openapi.replaceAll("\\.", "_");
         Plugin plugin = new OpenAPIKaratePlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
+                .withApiFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
                 .withTargetFolder(targetFolder)
                 .withOption("groupBy", OpenAPIKarateGenerator.GroupByType.service)
                 .withOption("simpleDomainPackaging", true)
@@ -101,7 +101,7 @@ public class OpenAPIKarateGeneratorTest {
     public void test_output_by_service(String openapi, String controllers) throws Exception {
         String targetFolder = "target/test_output_by_service_" + openapi.replaceAll("\\.", "_");
         Plugin plugin = new OpenAPIKaratePlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
+                .withApiFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
                 .withTargetFolder(targetFolder)
                 .withOption("groupBy", OpenAPIKarateGenerator.GroupByType.service)
                 .withOption("testsPackage", "io.example.controller.tests");
@@ -122,7 +122,7 @@ public class OpenAPIKarateGeneratorTest {
     public void test_output_by_operation(String openapi, String controllers) throws Exception {
         String targetFolder = "target/test_output_by_operation_" + openapi.replaceAll("\\.", "_");
         Plugin plugin = new OpenAPIKaratePlugin()
-                .withSpecFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
+                .withApiFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
                 .withTargetFolder(targetFolder)
                 .withOption("groupBy", OpenAPIKarateGenerator.GroupByType.operation)
                 .withOption("testsPackage", "io.example.controller.tests");

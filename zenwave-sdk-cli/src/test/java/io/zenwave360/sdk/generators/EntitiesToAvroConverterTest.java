@@ -16,7 +16,7 @@ import io.zenwave360.sdk.utils.JSONPath;
 public class EntitiesToAvroConverterTest {
 
     private Map<String, Object> loadZDLModelFromResource(String resource) throws Exception {
-        Map<String, Object> model = new ZDLParser().withSpecFile(resource).parse();
+        Map<String, Object> model = new ZDLParser().withZdlFile(resource).parse();
         return (Map) new ZDLProcessor().process(model).get("zdl");
     }
 
