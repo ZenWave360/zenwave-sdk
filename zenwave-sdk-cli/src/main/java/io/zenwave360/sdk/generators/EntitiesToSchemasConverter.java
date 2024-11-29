@@ -14,6 +14,9 @@ public class EntitiesToSchemasConverter {
     public String idType = "string";
     public String idTypeFormat = null;
 
+    public boolean useNullableForAllFields = false;
+    public String dtoPatchSuffix = "";
+
     public boolean includeVersion = true;
 
     public EntitiesToSchemasConverter withIdType(String idType) {
@@ -38,6 +41,12 @@ public class EntitiesToSchemasConverter {
 
     public EntitiesToSchemasConverter withZdlBusinessEntityProperty(String zdlBusinessEntityProperty) {
         this.zdlBusinessEntityProperty = zdlBusinessEntityProperty;
+        return this;
+    }
+
+    public EntitiesToSchemasConverter withUseNullableForAllFields(boolean useNullableForAllFields, String dtoPatchSuffix) {
+        this.useNullableForAllFields = useNullableForAllFields;
+        this.dtoPatchSuffix = dtoPatchSuffix;
         return this;
     }
 
@@ -89,15 +98,20 @@ public class EntitiesToSchemasConverter {
                     || JSONPath.get(zdlModel, "$.events." + field.get("type")) != null;
 
             if (isComplexType) {
-                property.put("$ref", "#/components/schemas/" + field.get("type"));
+                property.put("$ref", "#/components/schemas/" + field.get("type") + dtoPatchSuffix);
             } else {
-                property.putAll(schemaTypeAndFormat((String) field.get("type")));
+                property.putAll(schemaTypeAndFormat((String) field.get("type") + dtoPatchSuffix));
             }
 
-            String required = JSONPath.get(field, "$.validations.required.value");
-            if (required != null) {
-                requiredProperties.add((String) field.get("name"));
+            if(useNullableForAllFields) {
+                property.put("nullable", true);
+            } else {
+                String required = JSONPath.get(field, "$.validations.required.value");
+                if (required != null) {
+                    requiredProperties.add((String) field.get("name"));
+                }
             }
+
             String minlength = JSONPath.get(field, "$.validations.minlength.value");
             if (minlength != null) {
                 property.put("minLength", asNumber(minlength));
@@ -143,7 +157,7 @@ public class EntitiesToSchemasConverter {
                     var readOnlyWarning = isAddRelationshipById ? "(read-only) " : "";
                     // TODO desc+$ref: property.put("description", readOnlyWarning + relationship.getOrDefault("comment", ""));
                 }
-                property.put("$ref", "#/components/schemas/" + relationship.get("otherEntityName"));
+                property.put("$ref", "#/components/schemas/" + relationship.get("otherEntityName") + dtoPatchSuffix);
                 if (isCollection) {
                     property = Maps.of("type", "array", "items", property);
                 }

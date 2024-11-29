@@ -31,6 +31,12 @@ public class ZDLToOpenAPIGenerator implements Generator {
     @DocumentedOption(description = "API Title")
     public String title;
 
+    @DocumentedOption(description = "OpenAPI file to use as base. Generated API will be merged with this file.")
+    public String baseOpenapi;
+
+    @DocumentedOption(description = "DTO Suffix used for schemas in PATCH operations")
+    public String dtoPatchSuffix = "Patch";
+
     @DocumentedOption(description = "Target file")
     public String targetFile = "openapi.yml";
     @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas (default: x-business-entity)")
@@ -52,6 +58,7 @@ public class ZDLToOpenAPIGenerator implements Generator {
         "get", 200,
         "post", 201,
         "put", 200,
+        "patch", 200,
         "delete", 204
     );
 
@@ -114,36 +121,14 @@ public class ZDLToOpenAPIGenerator implements Generator {
         JSONPath.set(oasSchemas, "components.schemas", schemas);
 
         EntitiesToSchemasConverter converter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withZdlBusinessEntityProperty(zdlBusinessEntityProperty);
-
         var methodsWithRest = JSONPath.get(zdlModel, "$.services[*].methods[*][?(@.options.get || @.options.post || @.options.put || @.options.delete || @.options.patch)]", Collections.<Map>emptyList());
         List<Map<String, Object>> entities = filterSchemasToInclude(zdlModel, methodsWithRest);
-        for (Map<String, Object> entity : entities) {
-            String entityName = (String) entity.get("name");
-            Map<String, Object> openAPISchema = converter.convertToSchema(entity, zdlModel);
-            schemas.put(entityName, openAPISchema);
+        generateAndAddSchemas(entities, converter, zdlModel, schemas, listedEntities, paginatedEntities, "");
 
-            if(listedEntities.contains(entityName)) {
-                Map<String, Object> listSchema = Maps.of("type", "array", "items", Map.of("$ref", "#/components/schemas/" + entityName));
-                schemas.put(entityName + "List", listSchema);
-            }
-
-            if(paginatedEntities.contains(entityName)) {
-                Map<String, Object> paginatedSchema = new HashMap<>();
-                paginatedSchema.put("allOf", List.of(
-                        Map.of("$ref", "#/components/schemas/Page"),
-                        Map.of(zdlBusinessEntityPaginatedProperty, entityName),
-                        Map.of("properties",
-                                Map.of("content",
-                                        Maps.of("type", "array", "items", Map.of("$ref", "#/components/schemas/" + entityName))))));
-                schemas.put(entityName + "Paginated", paginatedSchema);
-            }
-        }
-
-//        List<Map<String, Object>> enums = JSONPath.get(zdlModel, "$.enums[*]", emptyList());
-//        for (Map<String, Object> enumValue : enums) {
-//            Map<String, Object> enumSchema = converter.convertToSchema(enumValue, zdlModel);
-//            schemas.put((String) enumValue.get("name"), enumSchema);
-//        }
+        EntitiesToSchemasConverter converterForPatchOperation = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withUseNullableForAllFields(true, dtoPatchSuffix).withZdlBusinessEntityProperty(zdlBusinessEntityProperty);
+        var methodsWithPatch = JSONPath.get(zdlModel, "$.services[*].methods[*][?(@.options.patch)]", Collections.<Map>emptyList());
+        List<Map<String, Object>> entitiesForPatch = filterSchemasToInclude(zdlModel, methodsWithPatch);
+        generateAndAddSchemas(entitiesForPatch, converterForPatchOperation, zdlModel, schemas, listedEntities, paginatedEntities, dtoPatchSuffix);
 
         String openAPISchemasString = null;
         try {
@@ -155,6 +140,30 @@ public class ZDLToOpenAPIGenerator implements Generator {
         openAPISchemasString = openAPISchemasString.substring(openAPISchemasString.indexOf("\n") + 1);
 
         return List.of(generateTemplateOutput(contextModel, zdlToOpenAPITemplate, zdlModel, openAPISchemasString));
+    }
+
+    protected void generateAndAddSchemas(List<Map<String, Object>> entities, EntitiesToSchemasConverter converter, Map<String, Object> zdlModel, Map<String, Object> schemas, List<String> listedEntities, List<String> paginatedEntities, String dtoPatchSuffix) {
+        for (Map<String, Object> entity : entities) {
+            String entityName = (String) entity.get("name");
+            Map<String, Object> openAPISchema = converter.convertToSchema(entity, zdlModel);
+            schemas.put(entityName + dtoPatchSuffix, openAPISchema);
+
+            if(listedEntities.contains(entityName)) {
+                Map<String, Object> listSchema = Maps.of("type", "array", "items", Map.of("$ref", "#/components/schemas/" + entityName + dtoPatchSuffix));
+                schemas.put(entityName + "List", listSchema);
+            }
+
+            if(paginatedEntities.contains(entityName)) {
+                Map<String, Object> paginatedSchema = new HashMap<>();
+                paginatedSchema.put("allOf", List.of(
+                        Map.of("$ref", "#/components/schemas/Page"),
+                        Map.of(zdlBusinessEntityPaginatedProperty, entityName),
+                        Map.of("properties",
+                                Map.of("content",
+                                        Maps.of("type", "array", "items", Map.of("$ref", "#/components/schemas/" + entityName + dtoPatchSuffix))))));
+                schemas.put(entityName + dtoPatchSuffix + "Paginated", paginatedSchema);
+            }
+        }
     }
 
     protected List<Map<String, Object>> filterSchemasToInclude(Map<String, Object> model, List<Map> methodsWithCommands) {
