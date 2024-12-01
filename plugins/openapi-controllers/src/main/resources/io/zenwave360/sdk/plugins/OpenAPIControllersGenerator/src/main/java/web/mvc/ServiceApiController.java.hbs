@@ -101,6 +101,7 @@ public class {{serviceName}}ApiController implements {{serviceName}}Api {
     }
 {{~/each}}
 
+{{~#if useOptional~}}
   protected Pageable pageOf(Optional<Integer> page, Optional<Integer> limit, Optional<List<String>> sort) {
     Sort sortOrder = sort.map(s -> Sort.by(s.stream().map(sortParam -> {
     String[] parts = sortParam.split(":");
@@ -110,4 +111,15 @@ public class {{serviceName}}ApiController implements {{serviceName}}Api {
     }).toList())).orElse(Sort.unsorted());
     return PageRequest.of(page.orElse(0), limit.orElse(10), sortOrder);
   }
+{{~else}}
+  protected Pageable pageOf(Integer page, Integer limit, List<String> sort) {
+    Sort sortOrder = sort != null ? Sort.by(sort.stream().map(sortParam -> {
+    String[] parts = sortParam.split(":");
+    String property = parts[0];
+    Sort.Direction direction = parts.length > 1 ? Sort.Direction.fromString(parts[1]) : Sort.Direction.ASC;
+    return new Sort.Order(direction, property);
+    }).toList()) : Sort.unsorted();
+    return PageRequest.of(page != null ? page : 0, limit != null ? limit : 10, sortOrder);
+  }
+{{~/if}}
 }
