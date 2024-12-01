@@ -51,6 +51,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     @DocumentedOption(description = "Programming Style")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
 
+    public boolean useOptional = false;
     public boolean simpleDomainPackaging = false;
 
     @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. User '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
@@ -382,7 +383,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     protected String getJavaTypeOrOptional(Map<String, Object> param) {
         boolean isOptional = isOptional(param);
         String javaType = getJavaType(param);
-        return isOptional ? "Optional<" + javaType + ">" : javaType;
+        return useOptional && isOptional ? "Optional<" + javaType + ">" : javaType;
     }
 
     protected String getJavaType(Map<String, Object> param) {
