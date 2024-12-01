@@ -56,7 +56,7 @@ public class AbstractZDLProjectGeneratorTest {
     void testAbstractZDLProjectGenerator() throws IOException {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
         var outputList = zdlProjectGenerator.generate(model);
-        Assertions.assertEquals(11, outputList.size());
+        Assertions.assertEquals(12, outputList.size());
     }
 
     @Test

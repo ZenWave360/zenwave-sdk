@@ -23,9 +23,9 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
 
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
-        Map apiModel = targetProperty != null ? (Map) contextModel.get(targetProperty) : (Map) contextModel;
+        Map zdl = targetProperty != null ? (Map) contextModel.get(targetProperty) : (Map) contextModel;
 
-        var services = JSONPath.get(apiModel, "$.services", Map.of());
+        var services = JSONPath.get(zdl, "$.services", Map.of());
         services.values().forEach(service -> {
             var restOption = JSONPath.get(service, "$.options.rest");
             if(restOption != null) {
@@ -42,7 +42,7 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
 //                        var params = httpOption.get("params");
                         var pathParams = ZDLHttpUtils.getPathParams(path);
                         var pathParamsMap = ZDLHttpUtils.getPathParamsAsObject(method, idType, idTypeFormat);
-                        var queryParamsMap = ZDLHttpUtils.getQueryParamsAsObject(method);
+                        var queryParamsMap = ZDLHttpUtils.getQueryParamsAsObject(method, zdl);
                         var hasParams = !pathParams.isEmpty() || !queryParamsMap.isEmpty() || paginated != null;
                         paths.appendTo(path, (String) methodVerb, new FluentMap()
                                 .with("operationId", methodName)
@@ -54,7 +54,7 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
                                 .with("pathParams", pathParams)
                                 .with("pathParamsMap", pathParamsMap)
                                 .with("queryParamsMap", queryParamsMap)
-                                .with("requestBody", ZDLHttpUtils.getRequestBodyType(method, apiModel))
+                                .with("requestBody", ZDLHttpUtils.getRequestBodyType(method, zdl))
                                 .with("responseBody", method.get("returnType"))
                                 .with("isResponseBodyArray", method.get("returnTypeIsArray"))
                                 .with("paginated", paginated)

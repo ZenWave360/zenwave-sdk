@@ -70,6 +70,13 @@ input CustomerAddressId {
   address Address
 }
 
+input CustomerSearchCriteria {
+  name String
+  email String
+  city String
+  state String
+}
+
 /**
  Service javadoc comment
  */
@@ -95,9 +102,11 @@ service CustomerService for (Customer) {
   @get("/customers/{customerId}")
   getCustomer(id) Customer?
 
-  @get({path: "/customers", params: {search: String}})
-  @paginated
+  @get({path: "/customers", params: {search: String}}) @paginated
   listCustomers() Customer[]
+
+  @get({path: "/customers/search"}) @paginated
+  searchCustomers(CustomerSearchCriteria) Customer[]
 
   @post("/customers/{customerId}/address")
   addCustomerAddress(CustomerAddressId) Customer?

@@ -42,10 +42,22 @@ public class ZDLHttpUtils {
         }).toList();
     }
 
-    public static List<Map<String, Object>> getQueryParamsAsObject(Map method) {
+    public static List<Map<String, Object>> getQueryParamsAsObject(Map method, Map zdl) {
         var pathParams = getPathParamsFromMethod(method);
         var httpOption = getHttpOption(method);
-        var params = JSONPath.get(httpOption, "$.httpOptions.params", Map.of());
+        var params = new LinkedHashMap<String, Object>(JSONPath.get(httpOption, "$.httpOptions.params", Map.of()));
+        if ("get".equals(httpOption.get("httpMethod"))) {
+            var methodParameterType = (String) method.get("parameter");
+            var parameterEntity = JSONPath.get(zdl, "$.allEntitiesAndEnums." + methodParameterType);
+            if (parameterEntity != null) {
+                var fields = JSONPath.get(parameterEntity, "$.fields", Map.<String, Map>of());
+                for (var field : fields.values()) {
+                    if (!JSONPath.get(field, "$.isComplexType", false)) {
+                        params.put((String) field.get("name"), field.get("type"));
+                    }
+                }
+            }
+        }
         return (List) params.entrySet().stream().filter(entry -> !pathParams.contains(entry.getKey())).map(entry -> {
             var type = entry.getValue();
             var typeAndFormat = EntitiesToSchemasConverter.schemaTypeAndFormat((String) type);
