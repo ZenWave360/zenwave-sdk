@@ -136,6 +136,8 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                     responseDtoName = innerArrayDTO != null ? openApiModelNamePrefix + innerArrayDTO + openApiModelNameSuffix : responseDtoName;
                 }
 
+                var methodParameters = methodParameters(operation);
+
                 serviceOperations.add(Maps.of(
                         "operationId", operation.get("operationId"),
                         "operation", operation,
@@ -143,7 +145,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                         "statusCode", statusCode(operation),
                         "requestBodySchema", requestDto,
                         "requestDtoName", requestDtoName,
-                        "methodParameters", methodParameters(operation),
+                        "methodParameters", methodParameters,
                         "methodParameterInstances", methodParameterInstances(operation),
                         "methodParameterPlaceholders", methodParameterPlaceholders(operation),
                         "reqBodyVariableName", reqBodyVariableName(method, zdlModel),
@@ -162,12 +164,16 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                         "isResponsePaginated", isResponsePaginated
                 ));
 
-                if(requestDto != null && inputType != null) {
+                if (requestDto != null && inputType != null) {
                     var requestKey = format("%s_%s", requestDtoName, inputType);
                     Maps.getOrCreateDefault(mapperRequestDtoEntity, requestKey, new HashMap<>())
                             .putAll(Map.of("requestDto", requestDtoName, "inputType", inputType));
+                } else if (inputType != null && StringUtils.isNotBlank(methodParameters)) {
+                    var requestKey = format("%s_%s", methodParameters, inputType);
+                    Maps.getOrCreateDefault(mapperRequestDtoEntity, requestKey, new HashMap<>())
+                            .putAll(Map.of("methodParameters", methodParameters, "inputType", inputType));
                 }
-                if(responseSchemaName != null && outputType != null) {
+                if (responseSchemaName != null && outputType != null) {
                     var responseKey = format("%s_%s_%s_%s", responseDtoName, outputType, isResponseArray, isResponsePaginated);
                     Maps.getOrCreateDefault(mapperResponseDtoEntity, responseKey, new HashMap<>())
                             .putAll(Map.of("responseDto", responseDtoName, "responseEntityName", responseEntityName, "outputType", outputType,
@@ -216,7 +222,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         return StringUtils.join(methodParams, ", ");
     }
 
-    private Object methodParameterInstances(Map operation) {
+    private String methodParameterInstances(Map operation) {
         var methodParameters = methodParameters(operation);
         if(methodParameters.isEmpty()) {
             return "";

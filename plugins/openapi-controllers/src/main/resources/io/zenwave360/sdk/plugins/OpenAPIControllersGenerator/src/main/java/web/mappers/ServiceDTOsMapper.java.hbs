@@ -18,7 +18,12 @@ public interface {{serviceName}}DTOsMapper {
 
     // request mappings
 {{~#each mapperRequestDtoEntity as |entry|}}
-    {{inputType}} as{{inputType}}({{requestDto}} dto);
+    {{~#if requestDto}}
+        {{inputType}} as{{inputType}}({{requestDto}} dto);
+    {{~/if}}
+    {{~#if methodParameters}}
+        {{inputType}} as{{inputType}}({{{methodParameters}}});
+    {{~/if}}
 {{~/each}}
 
     // response mappings

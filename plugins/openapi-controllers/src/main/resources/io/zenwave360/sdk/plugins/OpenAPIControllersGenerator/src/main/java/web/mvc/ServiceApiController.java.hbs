@@ -69,6 +69,8 @@ public class {{serviceName}}ApiController implements {{serviceName}}Api {
         log.debug("REST request to {{operationId}}: {{methodParameterPlaceholders}}", {{methodParameterInstances}});
     {{~#if requestBodySchema~}}
         var {{mappedInputVariable}} = mapper.as{{serviceMethodParameter}}({{reqBodyVariableName}});
+    {{~else if serviceMethodParameter}}
+        var {{mappedInputVariable}} = mapper.as{{serviceMethodParameter}}({{methodParameterInstances}});
     {{/if~}}
     {{~#if isResponsePaginated ~}}
         var {{{asInstanceName methodReturnType}}}Page = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}};
