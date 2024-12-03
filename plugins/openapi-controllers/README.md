@@ -46,7 +46,7 @@ Default options for https://openapi-generator.tech/docs/generators/spring/ have 
                 <configOptions>
                     <useSpringBoot3>true</useSpringBoot3>
                     <documentationProvider>none</documentationProvider>
-                    <openApiNullable>true</openApiNullable><!-- use true for full 'patch' support -->
+                    <openApiNullable>false</openApiNullable>
                     <useOptional>false</useOptional>
                     <useTags>true</useTags>
                     <interfaceOnly>true</interfaceOnly>

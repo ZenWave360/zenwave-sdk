@@ -31,6 +31,9 @@ public class ZDLToOpenAPIGenerator implements Generator {
     @DocumentedOption(description = "API Title")
     public String title;
 
+    @DocumentedOption(description = "DTO Suffix used for schemas in PATCH operations")
+    public String dtoPatchSuffix = "Patch";
+
     @DocumentedOption(description = "Target file")
     public String targetFile = "openapi.yml";
     @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas (default: x-business-entity)")
@@ -52,6 +55,7 @@ public class ZDLToOpenAPIGenerator implements Generator {
         "get", 200,
         "post", 201,
         "put", 200,
+        "patch", 200,
         "delete", 204
     );
 
@@ -139,11 +143,13 @@ public class ZDLToOpenAPIGenerator implements Generator {
             }
         }
 
-//        List<Map<String, Object>> enums = JSONPath.get(zdlModel, "$.enums[*]", emptyList());
-//        for (Map<String, Object> enumValue : enums) {
-//            Map<String, Object> enumSchema = converter.convertToSchema(enumValue, zdlModel);
-//            schemas.put((String) enumValue.get("name"), enumSchema);
-//        }
+        var methodsWithPatch = JSONPath.get(zdlModel, "$.services[*].methods[*][?(@.options.patch)]", Collections.<Map>emptyList());
+        List<String> entitiesForPatch = methodsWithPatch.stream().map(method -> (String) method.get("parameter")).collect(Collectors.toList());
+        for (String entityName : entitiesForPatch) {
+            if (entityName != null) {
+                schemas.put(entityName + dtoPatchSuffix, Map.of("allOf", List.of(Map.of("$ref", "#/components/schemas/" + entityName))));
+            }
+        }
 
         String openAPISchemasString = null;
         try {

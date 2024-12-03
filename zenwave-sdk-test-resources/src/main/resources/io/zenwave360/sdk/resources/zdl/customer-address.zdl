@@ -93,6 +93,9 @@ service CustomerService for (Customer) {
   @asyncapi({ api: ThirdPartyAPI, operationId: "doUpdateCustomer"})
   updateCustomer(id, CustomerInput) Customer? withEvents CustomerEvent CustomerUpdated /** update customer javadoc comment */
 
+  @patch("/customers/{customerId}")
+  patchCustomer(id, CustomerInput) Customer? withEvents CustomerEvent CustomerUpdated /** update customer javadoc comment */
+
   @delete("/customers/{customerId}")
   deleteCustomer(id) withEvents CustomerDeleted
 
