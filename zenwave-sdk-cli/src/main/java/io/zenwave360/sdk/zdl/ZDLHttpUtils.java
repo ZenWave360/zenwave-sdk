@@ -108,12 +108,11 @@ public class ZDLHttpUtils {
 
     public static Map<String, Object> getHttpOption(Map method) {
         var get = JSONPath.get(method, "$.options.get");
-        var post = JSONPath.get(method, "$.options.post");
         var put = JSONPath.get(method, "$.options.put");
-        var patch = JSONPath.get(method, "$.options.patch");
+        var post = JSONPath.get(method, "$.options.post");
         var delete = JSONPath.get(method, "$.options.delete");
-        var httpOptions = ObjectUtils.firstNonNull(get, put, post, patch, delete);
-        var httpMethod = get != null? "get" : put != null? "put" : post != null? "post" : delete != null? "delete" : patch != null? "patch" : null;
+        var httpOptions = ObjectUtils.firstNonNull(get, put, post, delete);
+        var httpMethod = get != null? "get" : put != null? "put" : post != null? "post" : delete != null? "delete" : null;
         if (httpMethod == null) {
             return null;
         }
