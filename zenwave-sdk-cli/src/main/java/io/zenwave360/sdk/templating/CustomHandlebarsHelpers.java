@@ -109,6 +109,10 @@ public class CustomHandlebarsHelpers {
         return StringUtils.equals(String.valueOf(first), String.valueOf(second));
     }
 
+    public static boolean neq(Object first, Options options) throws IOException {
+        return !eq(first, options);
+    }
+
     public static boolean startsWith(String first, Options options) throws IOException {
         String second = options.param(0);
         return StringUtils.startsWith(first, second);

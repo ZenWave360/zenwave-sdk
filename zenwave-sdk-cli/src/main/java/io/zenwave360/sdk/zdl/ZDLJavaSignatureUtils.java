@@ -14,6 +14,10 @@ public class ZDLJavaSignatureUtils {
     }
 
     public static String methodParameterType(Map method, Map zdl, String inputDTOSuffix) {
+        var isPatch = JSONPath.get(method, "options.patch") != null;
+        if(isPatch) {
+            return "Map";
+        }
         var parameterName = (String) method.get("parameter");
         var isEntity = JSONPath.get(zdl, "$.entities." + parameterName) != null;
         return String.format("%s%s", parameterName, isEntity? inputDTOSuffix : "");

@@ -23,7 +23,7 @@ public class TestPatchAndNaturalIdProject {
     private String basePackage = "io.zenwave360.example";
 
     @Test
-    public void testCustomerAddressPostgresJson() throws Exception {
+    public void testPatchAndNaturalIdProject() throws Exception {
         String sourceFolder = "src/test/resources/projects/patch-and-natural-id/";
         String targetFolder = "target/patch-and-natural-id/";
         String zdlFile = targetFolder + "/patch-and-natural-id.zdl";

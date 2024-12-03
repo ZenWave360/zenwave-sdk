@@ -122,6 +122,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
             for (Map operation : operationByServiceEntry.getValue()) {
                 var method = ZDLFindUtils.findServiceMethod((String) operation.get("operationId"), zdlModel);
 
+                String httpVerb = JSONPath.get(operation, "x--httpVerb");
                 String requestDto = JSONPath.get(operation, "$.x--request-dto");
                 String requestDtoName = requestDto != null ? openApiModelNamePrefix + requestDto + openApiModelNameSuffix : null;
                 String inputType = method != null? ZDLHttpUtils.getRequestBodyType(method, zdlModel) : "Entity";
@@ -141,6 +142,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                 serviceOperations.add(Maps.of(
                         "operationId", operation.get("operationId"),
                         "operation", operation,
+                        "httpMethod", httpVerb,
                         "serviceMethod", method,
                         "statusCode", statusCode(operation),
                         "requestBodySchema", requestDto,
@@ -164,7 +166,9 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                         "isResponsePaginated", isResponsePaginated
                 ));
 
-                if (requestDto != null && inputType != null) {
+                if ("patch".equals(httpVerb)) {
+                    // skip mapper for Map input
+                } else if (requestDto != null && inputType != null) {
                     var requestKey = format("%s_%s", requestDtoName, inputType);
                     Maps.getOrCreateDefault(mapperRequestDtoEntity, requestKey, new HashMap<>())
                             .putAll(Map.of("requestDto", requestDtoName, "inputType", inputType));
@@ -216,8 +220,12 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                     return javaType + " " + name;
                 }).collect(Collectors.toList());
         if (operation.containsKey("x--request-dto")) {
-            var dto = (String) operation.get("x--request-dto");
-            methodParams.add(format("%s%s%s %s", openApiModelNamePrefix, dto, openApiModelNameSuffix, "reqBody"));
+            if("patch".equals(JSONPath.get(operation, "x--httpVerb"))) {
+                methodParams.add("Map input");
+            } else {
+                var dto = (String) operation.get("x--request-dto");
+                methodParams.add(format("%s%s%s %s", openApiModelNamePrefix, dto, openApiModelNameSuffix, "reqBody"));
+            }
         }
         return StringUtils.join(methodParams, ", ");
     }
@@ -351,7 +359,11 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                             return javaType + " " + name + " = null;";
                         }).collect(Collectors.toList());
                 if (operation.containsKey("x--request-dto")) {
-                    methodParams.add(format("%s%s%s %s = null;", openApiModelNamePrefix, operation.get("x--request-dto"), openApiModelNameSuffix, "reqBody"));
+                    if("patch".equals(operation.get("x--httpVerb"))) {
+                        methodParams.add("Map reqBody = null;");
+                    } else {
+                        methodParams.add(format("%s%s%s %s = null;", openApiModelNamePrefix, operation.get("x--request-dto"), openApiModelNameSuffix, "reqBody"));
+                    }
                 }
                 return StringUtils.join(methodParams, "\n");
             }

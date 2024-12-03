@@ -35,6 +35,10 @@ or false: {{or "false" "false" "false"}}
     Inside else 2
 {{/if}}
 
+{{#if (neq var "not equals")}}
+    Inside if 3
+{{/if}}
+
 path: '{{path 'api' 'v1' 'users'}}'
 
 {{> (partial 'partial')}}

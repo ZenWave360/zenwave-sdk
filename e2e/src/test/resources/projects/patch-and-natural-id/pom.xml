@@ -21,7 +21,7 @@
 		<zenwave.version>1.7.0-SNAPSHOT</zenwave.version>
 
 		<jakarta.validation-api.version>3.0.2</jakarta.validation-api.version>
-		<mapstruct.version>1.5.3.Final</mapstruct.version>
+		<mapstruct.version>1.6.3</mapstruct.version>
 		<archunit-junit5.version>1.0.1</archunit-junit5.version>
 		<spring-cloud-stream-schema.version>2.2.1.RELEASE</spring-cloud-stream-schema.version>
 	</properties>
@@ -144,7 +144,7 @@
 			<plugin>
 				<groupId>org.openapitools</groupId>
 				<artifactId>openapi-generator-maven-plugin</artifactId>
-				<version>7.8.0</version>
+				<version>7.10.0</version>
 				<executions>
 					<execution>
 						<goals>
@@ -162,6 +162,9 @@
 							<typeMappings>
 								<typeMapping>Double=java.math.BigDecimal</typeMapping>
 							</typeMappings>
+							<schemaMappings>
+								CustomerPatch=java.util.Map
+							</schemaMappings>
 							<configOptions>
 								<useSpringBoot3>true</useSpringBoot3>
 								<documentationProvider>none</documentationProvider>

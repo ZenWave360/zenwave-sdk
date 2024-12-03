@@ -12,6 +12,18 @@
     var {{entity.instanceNamePlural}} = {{entity.instanceName}}Repository.findAll({{#if method.options.paginated}}pageable{{/if}});
     return {{wrapWithMapper entity}};
     {{~/if}}
+{{!-- Optional<Entity> patch(id, Map) --}}
+{{~else if (and entity method.options.patch method.paramId method.parameter method.returnType method.returnTypeIsOptional)}}
+    var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).map(existing{{entity.className}} -> {
+    return {{asInstanceName service.name}}Mapper.update(existing{{entity.className}}, {{{mapperInputCallSignature method.parameter}}});
+    })
+    .map({{entity.instanceName}}Repository::save)
+    {{~#unless (eq entity.name method.returnType)}}
+        .map({{asInstanceName service.name}}Mapper::as{{returnType}})
+    {{~/unless}}
+    ;
+    {{~> (partial '../withEvents')}}
+    return {{entity.instanceName}};
 {{!-- Optional<Entity> update(id, Entity) --}}
 {{~else if (and entity method.paramId method.parameter method.returnType method.returnTypeIsOptional)}}
     var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).map(existing{{entity.className}} -> {

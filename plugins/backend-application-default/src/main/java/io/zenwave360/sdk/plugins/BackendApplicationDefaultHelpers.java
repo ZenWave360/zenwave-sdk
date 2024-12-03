@@ -133,6 +133,9 @@ public class BackendApplicationDefaultHelpers {
         var inputDTOSuffix = (String) options.get("inputDTOSuffix");
         Set<String> inputs = new HashSet<String>();
         inputs.addAll(JSONPath.get(service, "$.methods[*].parameter"));
+        if(JSONPath.get(service, "$.methods[*][?(@.options.patch)]", List.of()).size() > 0) {
+            inputs.add("java.util.Map");
+        }
         // inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregateName + "' in @.aggregates)].methods[*].returnType"));
         // inputs.add(aggregateName + inputDTOSuffix);
         inputs = inputs.stream().filter(Objects::nonNull).collect(Collectors.toSet());
