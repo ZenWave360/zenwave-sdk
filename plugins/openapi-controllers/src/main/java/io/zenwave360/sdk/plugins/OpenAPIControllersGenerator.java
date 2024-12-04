@@ -138,6 +138,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                 }
 
                 var methodParameters = methodParameters(operation);
+                var serviceMethodParameter = serviceMethodParameter(method, zdlModel);
 
                 serviceOperations.add(Maps.of(
                         "operationId", operation.get("operationId"),
@@ -151,7 +152,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                         "methodParameterInstances", methodParameterInstances(operation),
                         "methodParameterPlaceholders", methodParameterPlaceholders(operation),
                         "reqBodyVariableName", reqBodyVariableName(method, zdlModel),
-                        "serviceMethodParameter", serviceMethodParameter(method, zdlModel),
+                        "serviceMethodParameter", serviceMethodParameter,
                         "serviceMethodCall", serviceMethodCall(method, operation, zdlModel),
                         "mappedInputVariable", mappedInputVariable(method),
                         "inputType", inputType,
@@ -172,10 +173,10 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                     var requestKey = format("%s_%s", requestDtoName, inputType);
                     Maps.getOrCreateDefault(mapperRequestDtoEntity, requestKey, new HashMap<>())
                             .putAll(Map.of("requestDto", requestDtoName, "inputType", inputType));
-                } else if (inputType != null && StringUtils.isNotBlank(methodParameters)) {
+                } else if (inputType != null && StringUtils.isNotBlank(serviceMethodParameter)) {
                     var requestKey = format("%s_%s", methodParameters, inputType);
                     Maps.getOrCreateDefault(mapperRequestDtoEntity, requestKey, new HashMap<>())
-                            .putAll(Map.of("methodParameters", methodParameters, "inputType", inputType));
+                            .putAll(Map.of("methodParameters", methodParameters, "inputType", serviceMethodParameter));
                 }
                 if (responseSchemaName != null && outputType != null) {
                     var responseKey = format("%s_%s_%s_%s", responseDtoName, outputType, isResponseArray, isResponsePaginated);
@@ -272,7 +273,22 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
     private String serviceMethodParameter(Map<String, Object> method, Map<String, Object> zdlModel) {
         if(method == null) { return "Entity"; }
-        return ZDLHttpUtils.getRequestBodyType(method, zdlModel);
+        var methodParameterType = (String) method.get("parameter");
+        var parameterEntity = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + methodParameterType);
+        if(parameterEntity == null) {
+            return null;
+        }
+        var isInline = JSONPath.get(parameterEntity, "$.options.inline", false);
+        if (isInline) {
+            var fields = JSONPath.get(parameterEntity, "$.fields", Map.<String, Map>of());
+            for (Map field : fields.values()) {
+                if (JSONPath.get(field, "$.isComplexType", false)) {
+                    return JSONPath.get(field, "$.type");
+                }
+            }
+            return null;
+        }
+        return methodParameterType;
     }
 
     private String mappedInputVariable(Map<String, Object> method) {
