@@ -22,7 +22,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     private Logger log = LoggerFactory.getLogger(getClass());
 
     public enum TransactionalOutboxType {
-        none, mongodb, jdbc
+        none, mongodb, jdbc, modulith
     }
 
     @DocumentedOption(description = "Programming style")
@@ -30,6 +30,9 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
     @DocumentedOption(description = "Transactional outbox type for message producers.")
     public TransactionalOutboxType transactionalOutbox = TransactionalOutboxType.none;
+
+    @DocumentedOption(description = "Include ApplicationEvent listener for consuming messages within the modulith.")
+    public boolean includeApplicationEventListener = false;
 
     @DocumentedOption(description = "Generate only the producer interface and skip the implementation.")
     public boolean skipProducerImplementation = false;
