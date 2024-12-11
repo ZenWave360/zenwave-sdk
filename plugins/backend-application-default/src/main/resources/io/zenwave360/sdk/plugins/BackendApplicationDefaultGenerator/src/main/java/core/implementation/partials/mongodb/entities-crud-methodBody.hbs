@@ -1,4 +1,6 @@
 {{assign 'entity' aggregateCommandsForMethod.entity }}
+{{~assign 'hasNaturalId' (isTruthy method.options.naturalId) }}
+{{~assign 'notHasNaturalId' (isFalsy hasNaturalId) }}
 {{~#if (isCrudMethod 'create' method=method entity=entity )}}
     log.debug("[CRUD] Request to save {{entity.className}}: {}", input);
     var {{entity.instanceName}} = {{asInstanceName service.name}}Mapper.update(new {{entity.className}}(), {{{mapperInputCallSignature method.parameter}}});
@@ -20,13 +22,24 @@
     // TODO implement this search by criteria
     var {{entity.instanceNamePlural}} = {{entity.instanceName}}Repository.findAll(pageable);
     return {{wrapWithMapper entity}};
-{{~else if (isCrudMethod 'get' method=method entity=entity )}}
+{{~else if (and (isCrudMethod 'get' method=method entity=entity ) notHasNaturalId)}}
     log.debug("[CRUD] Request to get {{entity.className}} : {}", id);
     var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id);
     return {{wrapWithMapper entity}};
-{{~else if (isCrudMethod 'delete' method=method entity=entity )}}
+{{~else if (and (isCrudMethod 'get' method=method entity=entity ) hasNaturalId)}}
+    {{{logMethodCall method}}}
+    var {{entity.instanceName}} = {{entity.instanceName}}Repository.{{{naturalIdsRepoMethodCallSignature entity}}};
+    return {{wrapWithMapper entity}};
+{{~else if (and (isCrudMethod 'delete' method=method entity=entity ) notHasNaturalId)}}
     log.debug("[CRUD] Request to delete {{entity.className}} : {}", id);
     {{entity.instanceName}}Repository.deleteById(id);
     {{~> (partial '../withEvents')}}
+{{~else if (and (isCrudMethod 'delete' method=method entity=entity ) hasNaturalId)}}
+    {{{logMethodCall method}}}
+    var {{entity.instanceName}} = {{entity.instanceName}}Repository.{{{naturalIdsRepoMethodCallSignature entity}}};
+    if({{entity.instanceName}}.isPresent()) {
+        {{entity.instanceName}}Repository.delete({{entity.instanceName}}.get());
+        {{~> (partial '../withEvents')}}
+    }
 {{~/if}}
 

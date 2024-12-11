@@ -5,10 +5,7 @@ import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
 import org.apache.commons.lang3.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,10 +24,11 @@ public class ZDLHttpUtils {
         return httpOptions instanceof String? (String) httpOptions : JSONPath.get(httpOptions, "$.path", "");
     }
 
-    public static List<Map<String, Object>> getPathParamsAsObject(Map method, String idType, String idTypeFormat) {
+    public static List<Map<String, Object>> getPathParamsAsObject(Map method, Map naturalIdTypes, String idType, String idTypeFormat) {
         var path = getPathFromMethod(method);
         var httpOption = getHttpOption(method);
-        var params = JSONPath.get(httpOption, "$.httpOptions.params", Map.of());
+        var params = new HashMap(naturalIdTypes);
+        params.putAll(JSONPath.get(httpOption, "$.httpOptions.params", Map.of()));
         return (List) getPathParams(path).stream().map(param -> {
             var type = params.getOrDefault(param, "String");
             var typeAndFormat = EntitiesToSchemasConverter.schemaTypeAndFormat((String) type);
@@ -124,6 +122,6 @@ public class ZDLHttpUtils {
         else if(httpOptions instanceof Map) {
             optionsMap.putAll((Map) httpOptions);
         }
-        return Map.of("httpMethod", httpMethod, "httpOptions", optionsMap);
+        return Maps.of("httpMethod", httpMethod, "httpOptions", optionsMap);
     }
 }

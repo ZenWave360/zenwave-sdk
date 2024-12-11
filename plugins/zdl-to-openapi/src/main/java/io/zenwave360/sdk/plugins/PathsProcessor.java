@@ -5,8 +5,11 @@ import io.zenwave360.sdk.processors.AbstractBaseProcessor;
 import io.zenwave360.sdk.processors.Processor;
 import io.zenwave360.sdk.utils.FluentMap;
 import io.zenwave360.sdk.utils.JSONPath;
+import io.zenwave360.sdk.zdl.ZDLFindUtils;
 import io.zenwave360.sdk.zdl.ZDLHttpUtils;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PathsProcessor extends AbstractBaseProcessor implements Processor {
@@ -36,12 +39,22 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
                     var paginated = JSONPath.get(method, "$.options.paginated");
                     var httpOption = ZDLHttpUtils.getHttpOption((Map) method);
                     if(httpOption != null) {
+                        var naturalId = JSONPath.get(method, "$.options.naturalId");
+                        var naturalIdEntity = (Map) JSONPath.get(zdl, "$.entities." + naturalId);
+                        List<Map> naturalIdFields = ZDLFindUtils.naturalIdFields(naturalIdEntity);
+                        Map naturalIdTypes = new HashMap();
+                        if(naturalIdFields != null) {
+                            for (Map idField : naturalIdFields) {
+                                naturalIdTypes.put(idField.get("name"), idField.get("type"));
+                            }
+                        }
+
                         var methodVerb = httpOption.get("httpMethod");
                         var methodPath = ZDLHttpUtils.getPathFromMethod(method);
                         var path = basePath + methodPath;
 //                        var params = httpOption.get("params");
                         var pathParams = ZDLHttpUtils.getPathParams(path);
-                        var pathParamsMap = ZDLHttpUtils.getPathParamsAsObject(method, idType, idTypeFormat);
+                        var pathParamsMap = ZDLHttpUtils.getPathParamsAsObject(method, naturalIdTypes, idType, idTypeFormat);
                         var queryParamsMap = ZDLHttpUtils.getQueryParamsAsObject(method, zdl);
                         var hasParams = !pathParams.isEmpty() || !queryParamsMap.isEmpty() || paginated != null;
                         paths.appendTo(path, (String) methodVerb, new FluentMap()

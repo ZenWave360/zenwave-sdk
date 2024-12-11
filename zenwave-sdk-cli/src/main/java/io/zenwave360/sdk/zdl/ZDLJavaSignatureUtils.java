@@ -2,6 +2,7 @@ package io.zenwave360.sdk.zdl;
 
 import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.utils.JSONPath;
+import io.zenwave360.sdk.utils.NamingUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -23,10 +24,41 @@ public class ZDLJavaSignatureUtils {
         return String.format("%s%s", parameterName, isEntity? inputDTOSuffix : "");
     }
 
+    public static String fieldsParamsSignature(List<Map> fields) {
+        return fields.stream()
+                .map(f -> String.format("%s %s", f.get("type"), f.get("name")))
+                .collect(Collectors.joining(", "));
+    }
+
+    public static String fieldsParamsCallSignature(List<Map> fields) {
+        return fields.stream().map(f -> f.get("name").toString()).collect(Collectors.joining(", "));
+    }
+
+    public static String naturalIdsRepoMethodSignature(Map entity) {
+        List<Map> fields = ZDLFindUtils.naturalIdFields(entity);
+        var params = fieldsParamsSignature(fields);
+        var fieldNames = fields.stream().map(f -> NamingUtils.camelCase((String) f.get("name"))).toList();
+        return String.format("java.util.Optional<%s> findBy%s(%s)", entity.get("name"), StringUtils.join(fieldNames, "And"), params);
+    }
+
+    public static String naturalIdsRepoMethodCallSignature(Map entity) {
+        List<Map> fields = ZDLFindUtils.naturalIdFields(entity);
+        var params = fieldsParamsCallSignature(fields);
+        var fieldNames = fields.stream().map(f -> NamingUtils.camelCase((String) f.get("name"))).toList();
+        return String.format("findBy%s(%s)", StringUtils.join(fieldNames, "And"), params);
+    }
+
+
     public static String methodParametersSignature(String idJavaType, Map method, Map zdl, String inputDTOSuffix) {
         var params = new ArrayList<String>();
         if(JSONPath.get(method, "paramId") != null) {
-            params.add(idJavaType + " id");
+            var naturalIdEntity = JSONPath.get(method, "options.naturalId");
+            if (naturalIdEntity != null) {
+                var fields = ZDLFindUtils.naturalIdFields(JSONPath.get(zdl, "$.entities." + naturalIdEntity));
+                params.add(ZDLJavaSignatureUtils.fieldsParamsSignature(fields));
+            } else {
+                params.add(idJavaType + " id");
+            }
         }
         if(JSONPath.get(method, "parameter") != null) {
             params.addAll(methodInputSignature(method, zdl, inputDTOSuffix));

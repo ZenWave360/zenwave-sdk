@@ -128,6 +128,52 @@ public class BackendApplicationDefaultHelpers {
         return aggregateNames.isEmpty()? null : (String) aggregateNames.get(0);
     }
 
+    public List<Map> naturalIdFields(Map entity, Options options) {
+        return ZDLFindUtils.naturalIdFields(entity);
+    }
+
+    public String naturalIdsRepoMethodSignature(Map entity, Options options) {
+        return ZDLJavaSignatureUtils.naturalIdsRepoMethodSignature(entity);
+    }
+
+    public String naturalIdsRepoMethodCallSignature(Map entity, Options options) {
+        return ZDLJavaSignatureUtils.naturalIdsRepoMethodCallSignature(entity);
+    }
+
+    public String findById(Map method, Options options) {
+        var zdl = options.get("zdl");
+        var naturalIdEntity = JSONPath.get(method, "$.options.naturalId");
+        if(naturalIdEntity != null) {
+            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + naturalIdEntity);
+            return ZDLJavaSignatureUtils.naturalIdsRepoMethodCallSignature(entity);
+        }
+        return "findById(id)";
+    }
+
+    public String idFieldInitialization(Map method, Options options) {
+        var zdl = options.get("zdl");
+        var naturalIdEntity = JSONPath.get(method, "$.options.naturalId");
+        if(naturalIdEntity != null) {
+            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + naturalIdEntity);
+            List<Map> fields = ZDLFindUtils.naturalIdFields(entity);
+            return fields.stream().map(field -> String.format("var %s = %s;", field.get("name"), ZDLJavaSignatureUtils.populateField(field)))
+                    .collect(Collectors.joining("\n"));
+        }
+        return generator.getIdJavaType() + " id = null;";
+    }
+
+    public String idParamsCallSignature(Map method, Options options) {
+        var zdl = options.get("zdl");
+        var naturalIdEntity = JSONPath.get(method, "$.options.naturalId");
+        if(naturalIdEntity != null) {
+            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + naturalIdEntity);
+            var fields = ZDLFindUtils.naturalIdFields(entity);
+            return ZDLJavaSignatureUtils.fieldsParamsCallSignature(fields);
+        }
+        return "id";
+    }
+
+
     public Collection<String> findServiceInputs(Map service, Options options) {
         var zdl = options.get("zdl");
         var inputDTOSuffix = (String) options.get("inputDTOSuffix");

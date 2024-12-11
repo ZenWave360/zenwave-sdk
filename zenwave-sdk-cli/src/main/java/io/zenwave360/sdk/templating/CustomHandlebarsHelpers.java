@@ -156,6 +156,14 @@ public class CustomHandlebarsHelpers {
         return isTruthy(first) && Stream.of(options.params).allMatch(CustomHandlebarsHelpers::isTruthy);
     }
 
+    public static boolean isTruthy(Object value, Options options) throws IOException {
+        return isTruthy(value);
+    }
+
+    public static boolean isFalsy(Object value, Options options) throws IOException {
+        return !isTruthy(value);
+    }
+
     private static boolean isTruthy(Object value) {
         if (value == null) {
             return false;

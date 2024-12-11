@@ -14,7 +14,7 @@
     {{~/if}}
 {{!-- Optional<Entity> patch(id, Map) --}}
 {{~else if (and entity method.options.patch method.paramId method.parameter method.returnType method.returnTypeIsOptional)}}
-    var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).map(existing{{entity.className}} -> {
+    var {{entity.instanceName}} = {{entity.instanceName}}Repository.{{{findById method}}}.map(existing{{entity.className}} -> {
     return {{asInstanceName service.name}}Mapper.update(existing{{entity.className}}, {{{mapperInputCallSignature method.parameter}}});
     })
     .map({{entity.instanceName}}Repository::save)
@@ -26,7 +26,7 @@
     return {{entity.instanceName}};
 {{!-- Optional<Entity> update(id, Entity) --}}
 {{~else if (and entity method.paramId method.parameter method.returnType method.returnTypeIsOptional)}}
-    var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).map(existing{{entity.className}} -> {
+    var {{entity.instanceName}} = {{entity.instanceName}}Repository.{{{findById method}}}.map(existing{{entity.className}} -> {
         return {{asInstanceName service.name}}Mapper.update(existing{{entity.className}}, {{{mapperInputCallSignature method.parameter}}});
     })
     .map({{entity.instanceName}}Repository::save)
@@ -38,7 +38,7 @@
     return {{entity.instanceName}};
 {{!-- Entity update(id, Entity) --}}
 {{~else if (and entity method.paramId method.parameter method.returnType)}}
-    var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).map(existing{{entity.className}} -> {
+    var {{entity.instanceName}} = {{entity.instanceName}}Repository.{{{findById method}}}.map(existing{{entity.className}} -> {
         return {{asInstanceName service.name}}Mapper.update(existing{{entity.className}}, {{{mapperInputCallSignature method.parameter}}});
     })
     .map({{entity.instanceName}}Repository::save)
@@ -48,10 +48,10 @@
 {{!-- Optional<Entity> get(id) --}}
 {{~else if (and entity method.paramId method.returnType method.returnTypeIsOptional)}}
     {{~assign 'needMapping' (not (eq entity.name method.returnType))}}
-    return {{entity.instanceName}}Repository.findById(id){{#if needMapping}}.map({{asInstanceName service.name}}Mapper::as{{method.returnType}}){{/if}};
+    return {{entity.instanceName}}Repository.{{{findById method}}}{{#if needMapping}}.map({{asInstanceName service.name}}Mapper::as{{method.returnType}}){{/if}};
 {{!-- Entity get(id) --}}
 {{~else if (and entity method.paramId method.returnType)}}
-    return {{entity.instanceName}}Repository.findById(id);
+    return {{entity.instanceName}}Repository.{{{findById method}}};
 {{!-- Optional<Entity> get(MyEntity) --}}
 {{~else if (and entity method.parameter method.returnType method.returnTypeIsOptional)}}
     var {{entity.instanceName}} = {{asInstanceName service.name}}Mapper.update(new {{entity.className}}(), {{{mapperInputCallSignature method.parameter}}});

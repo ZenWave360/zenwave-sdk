@@ -14,6 +14,10 @@ public class ZDLFindUtils {
         return ZDLFindUtils.findDependentEntities(model, serviceEntities);
     }
 
+    public static List<Map> naturalIdFields(Map<String, Object> entity) {
+        return JSONPath.get(entity, "$.fields[*][?(@.options.naturalId)]", List.<Map>of());
+    }
+
     public static List<Map<String, Object>> methodsWithEvents(Map<String, Object> model) {
         return JSONPath.get(model, "$.services[*].methods[*][?(@.withEvents.length() > 0)]", Collections.<Map<String, Object>>emptyList());
     }
