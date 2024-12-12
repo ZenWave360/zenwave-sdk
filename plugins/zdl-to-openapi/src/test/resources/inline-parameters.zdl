@@ -1,0 +1,37 @@
+@aggregate
+entity MetricRecord {
+
+}
+
+
+@inline
+input MetricsSummarySearchCriteria {
+    hisNumber String required maxlength(100)
+}
+
+@inline
+input MetricsSearchCriteria {
+    hisNumber String required maxlength(100)
+    dateFrom LocalDateTime
+    dateTo LocalDateTime
+}
+
+output Metric {
+
+}
+
+@rest("/metrics")
+service MedicalRecordService for (MetricRecord) {
+    // esto es para la webapp
+    @get("/{hisNumber}/daily") @paginated
+    getDailyMetrics(MetricsSearchCriteria) Metric[]
+    // esto es para la webapp
+    @get("/{hisNumber}/frequently") @paginated
+    getFrequestMetrics(MetricsSearchCriteria) Metric[]
+
+    /**
+    * Summary metrics for mobile
+    */
+    @get("/{hisNumber}/summary")
+    getMetricsSummary(MetricsSummarySearchCriteria) Metric[]
+}

@@ -56,11 +56,14 @@ public class ZDLHttpUtils {
                 }
             }
         }
-        return (List) params.entrySet().stream().filter(entry -> !pathParams.contains(entry.getKey())).map(entry -> {
-            var type = entry.getValue();
-            var typeAndFormat = EntitiesToSchemasConverter.schemaTypeAndFormat((String) type);
-            return Maps.of("name", entry.getKey(),"type", typeAndFormat.get("type"), "format", typeAndFormat.get("format"));
-        }).toList();
+        return (List) params.entrySet().stream()
+                .filter(entry -> !pathParams.contains(entry.getKey()))
+                .map(entry -> {
+                    var type = entry.getValue();
+                    var typeAndFormat = EntitiesToSchemasConverter.schemaTypeAndFormat((String) type);
+                    return Maps.of("name", entry.getKey(), "type", typeAndFormat.get("type"), "format", typeAndFormat.get("format"));
+                })
+                .toList();
     }
     public static List<String> getPathParamsFromMethod(Map method) {
         var path = getPathFromMethod(method);

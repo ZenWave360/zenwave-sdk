@@ -16,18 +16,20 @@ jbang zw -p io.zenwave360.sdk.plugins.ZDLToOpenAPIPlugin \
 
 ## Options
 
-| **Option**                           | **Description**                                                                                                                                                                 | **Type** | **Default**                           | **Values** |
-|--------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|---------------------------------------|------------|
-| `specFile`                           | Spec file to parse                                                                                                                                                              | String   |                                       |            |
-| `targetFolder`                       | Target folder to generate code to. If left empty, it will print to stdout.                                                                                                      | File     |                                       |            |
-| `targetFile`                         | Target file                                                                                                                                                                     | String   | openapi.yml                           |            |
-| `title`                              | API Title                                                                                                                                                                       | String   |                                       |            |
-| `idType`                             | JsonSchema type for id fields and parameters.                                                                                                                                   | String   | string                                |            |
-| `idTypeFormat`                       | JsonSchema type format for id fields and parameters.                                                                                                                            | String   |                                       |            |
-| `zdlBusinessEntityProperty`          | Extension property referencing original zdl entity in components schemas (default: x-business-entity)                                                                           | String   | x-business-entity                     |            |
-| `zdlBusinessEntityPaginatedProperty` | Extension property referencing original zdl entity in components schemas for paginated lists                                                                                    | String   | x-business-entity-paginated           |            |
-| `paginatedDtoItemsJsonPath`          | JSONPath list to search for response DTO schemas for list or paginated results. Examples: '$.items' for lists or '$.properties.<content property>.items' for paginated results. | List     | [$.items, $.properties.content.items] |            |
-| `continueOnZdlError`                 | Continue even when ZDL contains fatal errors                                                                                                                                    | boolean  | true                                  |            |
+| **Option**              | **Description**                                                                                                                    | **Type** | **Default** | **Values** |
+|-------------------------|------------------------------------------------------------------------------------------------------------------------------------|----------|-------------|------------|
+| `zdlFile`               | ZDL file to parse                                                                                                                  | String   |             |            |
+| `zdlFiles`              | ZDL files to parse                                                                                                                 | List     | []          |            |
+| `title`                 | API Title                                                                                                                          | String   |             |            |
+| `targetFolder`          | Target folder to generate code to. If left empty, it will print to stdout.                                                         | File     |             |            |
+| `targetFile`            | Target file                                                                                                                        | String   | openapi.yml |            |
+| `idType`                | JsonSchema type for id fields and parameters.                                                                                      | String   | string      |            |
+| `idTypeFormat`          | JsonSchema type format for id fields and parameters.                                                                               | String   |             |            |
+| `dtoPatchSuffix`        | DTO Suffix used for schemas in PATCH operations                                                                                    | String   | Patch       |            |
+| `operationIdsToInclude` | Operation IDs to include. If empty, all operations will be included. (Supports Ant-style wildcards)                                | List     |             |            |
+| `operationIdsToExclude` | Operation IDs to exclude. If not empty it will be applied to the processed operationIds to include. (Supports Ant-style wildcards) | List     |             |            |
+| `continueOnZdlError`    | Continue even when ZDL contains fatal errors                                                                                       | boolean  | true        |            |
+
 
 
 ## Getting Help

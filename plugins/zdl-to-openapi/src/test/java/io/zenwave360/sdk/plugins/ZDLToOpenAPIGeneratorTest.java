@@ -36,6 +36,28 @@ public class ZDLToOpenAPIGeneratorTest {
     }
 
     @Test
+    public void test_operationIdsToIncludeExclude() throws Exception {
+        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
+        ZDLToOpenAPIGenerator generator = new ZDLToOpenAPIGenerator();
+        generator.operationIdsToInclude = List.of("getCustomer", "listCustomers");
+        generator.operationIdsToExclude = List.of("getCustomer");
+        var processor = new PathsProcessor();
+        processor.operationIdsToInclude = generator.operationIdsToInclude;
+        processor.operationIdsToExclude = generator.operationIdsToExclude;
+        model = processor.process(model);
+
+        List<TemplateOutput> outputTemplates = generator.generate(model);
+        Assertions.assertEquals(1, outputTemplates.size());
+        var apiText = outputTemplates.get(0).getContent();
+
+        System.out.println(apiText);
+
+        Assertions.assertTrue(apiText.contains("listCustomers"));
+        Assertions.assertFalse(apiText.contains("getCustomer"));
+        Assertions.assertFalse(apiText.contains("updateCustomer"));
+    }
+
+    @Test
     public void test_order_faults_zdl_to_openapi() throws Exception {
         Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
         ZDLToOpenAPIGenerator generator = new ZDLToOpenAPIGenerator();

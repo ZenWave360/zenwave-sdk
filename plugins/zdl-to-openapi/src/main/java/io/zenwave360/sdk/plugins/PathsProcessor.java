@@ -3,6 +3,7 @@ package io.zenwave360.sdk.plugins;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.processors.AbstractBaseProcessor;
 import io.zenwave360.sdk.processors.Processor;
+import io.zenwave360.sdk.utils.AntStyleMatcher;
 import io.zenwave360.sdk.utils.FluentMap;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.ZDLFindUtils;
@@ -19,6 +20,11 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
 
     @DocumentedOption(description = "JsonSchema type format for id fields and parameters.")
     public String idTypeFormat = null;
+
+    public List<String> operationIdsToInclude;
+
+    public List<String> operationIdsToExclude;
+
 
     {
         targetProperty = "zdl";
@@ -49,6 +55,10 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
                             }
                         }
 
+                        var operationId = (String) httpOption.getOrDefault("operationId", methodName);
+                        if(!isIncludeOperation(operationId)) {
+                            return;
+                        }
                         var methodVerb = httpOption.get("httpMethod");
                         var methodPath = ZDLHttpUtils.getPathFromMethod(method);
                         var path = basePath + methodPath;
@@ -58,7 +68,7 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
                         var queryParamsMap = ZDLHttpUtils.getQueryParamsAsObject(method, zdl);
                         var hasParams = !pathParams.isEmpty() || !queryParamsMap.isEmpty() || paginated != null;
                         paths.appendTo(path, (String) methodVerb, new FluentMap()
-                                .with("operationId", methodName)
+                                .with("operationId", operationId)
                                 .with("httpMethod", methodVerb)
                                 .with("tags", new String[]{(String) ((Map)service).get("name")})
                                 .with("summary", method.get("javadoc"))
@@ -81,5 +91,17 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
         });
 
         return contextModel;
+    }
+
+    protected boolean isIncludeOperation(String operationId) {
+        if (operationIdsToInclude != null && !operationIdsToInclude.isEmpty()) {
+            if (operationIdsToInclude.stream().noneMatch(include -> AntStyleMatcher.match(include, operationId))) {
+                return false;
+            }
+        }
+        if (operationIdsToExclude != null && !operationIdsToExclude.isEmpty()) {
+            return operationIdsToExclude.stream().noneMatch(exclude -> AntStyleMatcher.match(exclude, operationId));
+        }
+        return true;
     }
 }

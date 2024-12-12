@@ -11,6 +11,7 @@ import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractZDLGenerator;
 import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.generators.Generator;
+import io.zenwave360.sdk.utils.AntStyleMatcher;
 import io.zenwave360.sdk.zdl.ZDLFindUtils;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
@@ -36,20 +37,27 @@ public class ZDLToOpenAPIGenerator implements Generator {
 
     @DocumentedOption(description = "Target file")
     public String targetFile = "openapi.yml";
-    @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas (default: x-business-entity)")
-    public String zdlBusinessEntityProperty = "x-business-entity";
-
-    @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas for paginated lists")
-    public String zdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
-
-    @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. Examples: '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
-    public List<String> paginatedDtoItemsJsonPath = List.of("$.items", "$.properties.content.items");
 
     @DocumentedOption(description = "JsonSchema type for id fields and parameters.")
     public String idType = "string";
 
     @DocumentedOption(description = "JsonSchema type format for id fields and parameters.")
     public String idTypeFormat = null;
+
+    @DocumentedOption(description = "Operation IDs to include. If empty, all operations will be included. (Supports Ant-style wildcards)")
+    public List<String> operationIdsToInclude;
+
+    @DocumentedOption(description = "Operation IDs to exclude. If not empty it will be applied to the processed operationIds to include. (Supports Ant-style wildcards)")
+    public List<String> operationIdsToExclude;
+
+    //    @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas (default: x-business-entity)")
+    //    public String zdlBusinessEntityProperty = "x-business-entity";
+    //
+    //    @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas for paginated lists")
+    //    public String zdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
+
+    //    @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. Examples: '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
+    //    public List<String> paginatedDtoItemsJsonPath = List.of("$.items", "$.properties.content.items");
 
     protected Map<String, Integer> httpStatusCodes = Map.of(
         "get", 200,
@@ -117,10 +125,14 @@ public class ZDLToOpenAPIGenerator implements Generator {
         Map<String, Object> schemas = new LinkedHashMap<>();
         JSONPath.set(oasSchemas, "components.schemas", schemas);
 
-        EntitiesToSchemasConverter converter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withZdlBusinessEntityProperty(zdlBusinessEntityProperty);
+        var paths = JSONPath.get(zdlModel, "$.services[*].paths", List.<Map>of());
+
+        EntitiesToSchemasConverter converter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat);
 
         var methodsWithRest = JSONPath.get(zdlModel, "$.services[*].methods[*][?(@.options.get || @.options.post || @.options.put || @.options.delete || @.options.patch)]", Collections.<Map>emptyList());
+        methodsWithRest = filterOperationsToInclude(methodsWithRest);
         List<Map<String, Object>> entities = filterSchemasToInclude(zdlModel, methodsWithRest);
+
         for (Map<String, Object> entity : entities) {
             String entityName = (String) entity.get("name");
             Map<String, Object> openAPISchema = converter.convertToSchema(entity, zdlModel);
@@ -135,7 +147,6 @@ public class ZDLToOpenAPIGenerator implements Generator {
                 Map<String, Object> paginatedSchema = new HashMap<>();
                 paginatedSchema.put("allOf", List.of(
                         Map.of("$ref", "#/components/schemas/Page"),
-                        Map.of(zdlBusinessEntityPaginatedProperty, entityName),
                         Map.of("properties",
                                 Map.of("content",
                                         Maps.of("type", "array", "items", Map.of("$ref", "#/components/schemas/" + entityName))))));
@@ -144,7 +155,9 @@ public class ZDLToOpenAPIGenerator implements Generator {
         }
 
         var methodsWithPatch = JSONPath.get(zdlModel, "$.services[*].methods[*][?(@.options.patch)]", Collections.<Map>emptyList());
+        methodsWithPatch = filterOperationsToInclude(methodsWithPatch);
         List<String> entitiesForPatch = methodsWithPatch.stream().map(method -> (String) method.get("parameter")).collect(Collectors.toList());
+
         for (String entityName : entitiesForPatch) {
             if (entityName != null) {
                 schemas.put(entityName + dtoPatchSuffix, Map.of("allOf", List.of(Map.of("$ref", "#/components/schemas/" + entityName))));
@@ -161,6 +174,23 @@ public class ZDLToOpenAPIGenerator implements Generator {
         openAPISchemasString = openAPISchemasString.substring(openAPISchemasString.indexOf("\n") + 1);
 
         return List.of(generateTemplateOutput(contextModel, zdlToOpenAPITemplate, zdlModel, openAPISchemasString));
+    }
+
+    protected List<Map> filterOperationsToInclude(List<Map> methods) {
+        List<Map> includedMethods = methods;
+        if (operationIdsToInclude != null && !operationIdsToInclude.isEmpty()) {
+            includedMethods = methods.stream()
+                    .filter(method -> operationIdsToInclude.stream()
+                            .anyMatch(include -> AntStyleMatcher.match(include, (String) method.get("name"))))
+                    .toList();
+        }
+        if (operationIdsToExclude != null && !operationIdsToExclude.isEmpty()) {
+            includedMethods = includedMethods.stream()
+                    .filter(method -> operationIdsToExclude.stream()
+                            .noneMatch(exclude -> AntStyleMatcher.match(exclude, (String) method.get("name"))))
+                    .toList();
+        }
+        return includedMethods;
     }
 
     protected List<Map<String, Object>> filterSchemasToInclude(Map<String, Object> model, List<Map> methodsWithCommands) {
