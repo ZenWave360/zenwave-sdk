@@ -17,7 +17,7 @@ public class ZDLFindUtilsMethodAggregatesTest {
         var aggregatesMapForMethod = aggregateCommandsForMethod("MyServiceForEntity", "someMethod");
 
         Assertions.assertEquals(1, aggregatesMapForMethod.size());
-        assertEquals(null, "$[0].aggregate", aggregatesMapForMethod);
+        assertEquals(null, "$[0].aggregate.name", aggregatesMapForMethod);
         assertEquals("MyEntity", "$[0].entity.name", aggregatesMapForMethod);
     }
 
@@ -26,7 +26,7 @@ public class ZDLFindUtilsMethodAggregatesTest {
         var aggregatesMapForMethod = aggregateCommandsForMethod("MyServiceForEntity", "createMyEntity");
 
         Assertions.assertEquals(1, aggregatesMapForMethod.size());
-        assertEquals(null, "$[0].aggregate", aggregatesMapForMethod);
+        assertEquals(null, "$[0].aggregate.name", aggregatesMapForMethod);
         assertEquals("MyEntity", "$[0].entity.name", aggregatesMapForMethod);
         assertEquals("createMyEntity", "$[0].crudMethod", aggregatesMapForMethod);
     }
@@ -36,7 +36,7 @@ public class ZDLFindUtilsMethodAggregatesTest {
         var aggregatesMapForMethod = aggregateCommandsForMethod("MyServiceForEntities", "shouldResolveByReturnType");
 
         Assertions.assertEquals(1, aggregatesMapForMethod.size());
-        assertEquals(null, "$[0].aggregate", aggregatesMapForMethod);
+        assertEquals(null, "$[0].aggregate.name", aggregatesMapForMethod);
         assertEquals("MyEntity2", "$[0].entity.name", aggregatesMapForMethod);
     }
 
@@ -45,7 +45,7 @@ public class ZDLFindUtilsMethodAggregatesTest {
         var aggregatesMapForMethod = aggregateCommandsForMethod("MyServiceForAggregate", "createMyEntity");
 
         Assertions.assertEquals(1, aggregatesMapForMethod.size());
-        assertEquals(null, "$[0].aggregate", aggregatesMapForMethod);
+        assertEquals("MyAggregate", "$[0].aggregate.name", aggregatesMapForMethod);
         assertEquals("MyEntity", "$[0].entity.name", aggregatesMapForMethod);
         assertEquals("createMyEntity", "$[0].crudMethod", aggregatesMapForMethod);
     }
@@ -55,9 +55,9 @@ public class ZDLFindUtilsMethodAggregatesTest {
         var aggregatesMapForMethod = aggregateCommandsForMethod("MyServiceForAggregate", "createMyAggregate");
 
         Assertions.assertEquals(1, aggregatesMapForMethod.size());
-        assertEquals(null, "$[0].aggregate.name", aggregatesMapForMethod);
         assertEquals(null, "$[0].crudMethod", aggregatesMapForMethod);
         assertEquals("MyEntity", "$[0].entity.name", aggregatesMapForMethod);
+        assertEquals("MyAggregate", "$[0].aggregate.name", aggregatesMapForMethod);
     }
 
     @Test
@@ -65,7 +65,7 @@ public class ZDLFindUtilsMethodAggregatesTest {
         var aggregatesMapForMethod = aggregateCommandsForMethod("MyServiceForAggregates", "shouldResolveByReturnType");
 
         Assertions.assertEquals(1, aggregatesMapForMethod.size());
-        assertEquals(null, "$[0].aggregate", aggregatesMapForMethod);
+        assertEquals("MyAggregate2", "$[0].aggregate.name", aggregatesMapForMethod);
         assertEquals("MyEntity2", "$[0].entity.name", aggregatesMapForMethod);
     }
 

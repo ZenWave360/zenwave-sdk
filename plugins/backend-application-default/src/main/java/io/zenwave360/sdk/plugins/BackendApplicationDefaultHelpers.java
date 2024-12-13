@@ -51,8 +51,8 @@ public class BackendApplicationDefaultHelpers {
             if(aggregate != null && command != null) {
                 return Map.of("templateFile", "aggregates-commands-methodBody", "aggregatesCommandsForMethod", aggregatesCommandsForMethod);
             }
-            if(aggregate != null && crudMethod != null) {
-                return Map.of("templateFile", "aggregates-crud-methodBody", "aggregatesCommandsForMethod", aggregatesCommandsForMethod);
+            if (aggregate != null && crudMethod != null) {
+                // TODO: return Map.of("templateFile", "aggregates-crud-methodBody", "aggregatesCommandsForMethod", aggregatesCommandsForMethod);
             }
             if(entity != null && crudMethod != null) {
                 return Map.of("templateFile", "entities-crud-methodBody", "entity", entity, "crudMethod", crudMethod);

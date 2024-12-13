@@ -49,13 +49,14 @@ public class ZDLProcessor extends AbstractBaseProcessor {
         var methods = JSONPath.get(zdlModel, "$.services[*].methods[*]", List.<Map>of());
         for (Map method : methods) {
             var serviceAggregates = JSONPath.get(zdlModel, "$.services." + method.get("serviceName") + ".aggregates", List.<String>of());
+            var entitiesForServices = serviceAggregates.stream().map(e -> (String) JSONPath.get(zdlModel, "$.aggregates." + e + ".aggregateRoot")).toList();
             String entity = null;
             String aggregate = null;
             if(serviceAggregates.size() == 1) {
                 entity = serviceAggregates.get(0);
             } else {
                 var returnType = JSONPath.get(method, "$.returnType");
-                if(serviceAggregates.contains(returnType)) {
+                if(serviceAggregates.contains(returnType) || entitiesForServices.contains(returnType)) {
                     entity = (String) returnType;
                 } else {
                     var entityForId = JSONPath.get(method, "$.options.entityForId");
@@ -66,10 +67,15 @@ public class ZDLProcessor extends AbstractBaseProcessor {
             }
 
             // check if entity is in fact and aggregate
-            var aggregateRoot = (String) JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + entity + ".aggregateRoot");
+            var aggregateRoot = (String) JSONPath.get(zdlModel, "$.aggregates." + entity + ".aggregateRoot");
             if(aggregateRoot != null) {
                 aggregate = entity;
                 entity = aggregateRoot;
+            }
+            // check if entity is the root of an aggregate and this service is for the aggregate itself
+            var aggregateEntity = JSONPath.get(zdlModel, "$.aggregates[*][?(@.aggregateRoot == '" + entity + "')].name", List.<String>of());
+            if(aggregateEntity.size() == 1 && serviceAggregates.contains(aggregateEntity.get(0))) {
+                aggregate = aggregateEntity.get(0);
             }
 
             if(entity != null) {
