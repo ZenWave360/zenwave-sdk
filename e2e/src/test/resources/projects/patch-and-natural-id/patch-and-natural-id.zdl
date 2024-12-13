@@ -2,6 +2,7 @@
  * Sample ZenWave Model Definition.
  * Use zenwave-scripts.zdl to generate your code from this model definition.
  */
+config {}
 
 /**
 * Customer entity
