@@ -1,8 +1,9 @@
+MAX_LENGTH=100
 /**
 * Global javadoc comment
 */
+config {}
 
-MAX_LENGTH=100
 
 /**
 * Customer javadoc comment

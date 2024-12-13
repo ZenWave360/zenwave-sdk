@@ -129,58 +129,14 @@ public class ZDLFindUtils {
 
     public static List<Map<String, Object>> findAggregateCommandsForMethod(Map zdl, Map<String, Object> method) {
         var serviceAggregateNames = JSONPath.get(zdl, "$.services." + method.get("serviceName") + ".aggregates", List.<String>of());
-        var methodAnnotatedAggregates = JSONPath.get(method, "$.options.aggregates", List.<String>of());
         var returnType = JSONPath.get(method, "$.returnType");
-        if (methodAnnotatedAggregates.isEmpty()) {
-            String aggregateName = null;
-            String entityName = null;
-            String crudMethod = null;
-            String commandName = null;
-            if(serviceAggregateNames.size() == 1) {
-                aggregateName = serviceAggregateNames.get(0);
-                entityName = JSONPath.get(zdl, "$.allEntitiesAndEnums." + aggregateName + ".aggregateRoot");
-                if (entityName == null) {
-                    // if entityName is null we need to swap entityName and aggregateName b/c the 'aggregateName' is actually just an entity
-                    entityName = aggregateName;
-                    aggregateName = null;
-                }
-                commandName = findAggregateCommand(zdl, method, aggregateName);
-                if (commandName == null) {
-                    crudMethod = findCrudMethod(zdl, method, entityName);
-                    if (crudMethod != null) {
-                        aggregateName = null;
-                    }
-                }
-            } else {
-                for (String serviceAggregate : serviceAggregateNames) {
-                    aggregateName = serviceAggregate;
-                    entityName = JSONPath.get(zdl, "$.allEntitiesAndEnums." + serviceAggregate + ".aggregateRoot");
-                    if (entityName == null) {
-                        // if entityName is null we need to swap entityName and aggregateName b/c the 'aggregateName' is actually just an entity
-                        entityName = aggregateName;
-                        aggregateName = null;
-                    }
-                    if(Objects.equals(returnType, entityName) || Objects.equals(returnType, aggregateName)) {
-                        commandName = findAggregateCommand(zdl, method, aggregateName);
-                        if(commandName != null) {
-                            break;
-                        }
-                    }
-                    crudMethod = findCrudMethod(zdl, method, entityName);
-                    if(crudMethod != null || Objects.equals(returnType, entityName)) {
-                        aggregateName = null;
-                        break;
-                    }
-                }
-            }
 
-            if(commandName == null && Objects.equals(returnType, entityName)) {
-                aggregateName = null; // if we didn't find an aggregate's command, we don't want to return an aggregate
-            }
+        String aggregateName = (String) method.get("aggregate");
+        String entityName = (String) method.get("entity");
+        String commandName = findAggregateCommand(zdl, method, aggregateName);
+        String crudMethod = findCrudMethod(zdl, method, entityName);
 
-            return List.of(methodAggregateCommand(zdl, aggregateName, commandName, entityName, crudMethod));
-        }
-        return null;
+        return List.of(methodAggregateCommand(zdl, aggregateName, commandName, entityName, crudMethod));
     }
 
     private static Map<String, Object> methodAggregateCommand(Map zdl, String aggregateName, String commandName, String entityName, String crudMethod) {

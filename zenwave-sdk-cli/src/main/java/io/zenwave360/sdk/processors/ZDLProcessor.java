@@ -3,11 +3,9 @@ package io.zenwave360.sdk.processors;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,6 +25,7 @@ public class ZDLProcessor extends AbstractBaseProcessor {
 
         processServiceName(zdlModel);
         processServiceAsyncMethods(zdlModel);
+        processMethodEntity(zdlModel);
 
         contextModel = new ZDL2JDLProcessor().process(contextModel); // FIXME: why here in the middle of the process?
 
@@ -44,6 +43,44 @@ public class ZDLProcessor extends AbstractBaseProcessor {
         processCopyAnnotation(zdlModel);
 
         return contextModel;
+    }
+
+    public void processMethodEntity(Map<String, Object> zdlModel) {
+        var methods = JSONPath.get(zdlModel, "$.services[*].methods[*]", List.<Map>of());
+        for (Map method : methods) {
+            var serviceAggregates = JSONPath.get(zdlModel, "$.services." + method.get("serviceName") + ".aggregates", List.<String>of());
+            String entity = null;
+            String aggregate = null;
+            if(serviceAggregates.size() == 1) {
+                entity = serviceAggregates.get(0);
+            } else {
+                var returnType = JSONPath.get(method, "$.returnType");
+                if(serviceAggregates.contains(returnType)) {
+                    entity = (String) returnType;
+                } else {
+                    var entityForId = JSONPath.get(method, "$.options.entityForId");
+                    if(entityForId != null) {
+                        entity = (String) entityForId;
+                    }
+                }
+            }
+
+            // check if entity is in fact and aggregate
+            var aggregateRoot = (String) JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + entity + ".aggregateRoot");
+            if(aggregateRoot != null) {
+                aggregate = entity;
+                entity = aggregateRoot;
+            }
+
+            if(entity != null) {
+                method.put("entity", entity);
+                method.put("aggregate", aggregate);
+            } else {
+                if(method.get("paramId") != null) {
+                    log.error("⚠️ We could not determine the 'entity' for the method {}. Please use `@entityForId(Entity)` annotation.", method.get("name"));
+                }
+            }
+        }
     }
 
     public void processServiceName(Map<String, Object> zdlModel) {

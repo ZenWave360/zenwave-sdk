@@ -60,6 +60,7 @@ public class BackendApplicationDefaultHelpers {
             if(entity != null) {
                 return Map.of("templateFile", "entities-methodBody", "entity", entity);
             }
+            return Map.of("templateFile", "entities-methodBody");
         }
         return Map.of("templateFile", "aggregates-commands-methodBody", "aggregatesCommandsForMethod", aggregatesCommandsForMethod);
     }
@@ -142,9 +143,9 @@ public class BackendApplicationDefaultHelpers {
 
     public String findById(Map method, Options options) {
         var zdl = options.get("zdl");
-        var naturalIdEntity = JSONPath.get(method, "$.options.naturalId");
-        if(naturalIdEntity != null) {
-            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + naturalIdEntity);
+        var hasNaturalId = JSONPath.get(method, "$.naturalId", false);
+        if(hasNaturalId) {
+            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("entity"));
             return ZDLJavaSignatureUtils.naturalIdsRepoMethodCallSignature(entity);
         }
         return "findById(id)";
@@ -152,9 +153,9 @@ public class BackendApplicationDefaultHelpers {
 
     public String idFieldInitialization(Map method, Options options) {
         var zdl = options.get("zdl");
-        var naturalIdEntity = JSONPath.get(method, "$.options.naturalId");
-        if(naturalIdEntity != null) {
-            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + naturalIdEntity);
+        var hasNaturalId = JSONPath.get(method, "$.naturalId", false);
+        if(hasNaturalId) {
+            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("entity"));
             List<Map> fields = ZDLFindUtils.naturalIdFields(entity);
             return fields.stream().map(field -> String.format("var %s = %s;", field.get("name"), ZDLJavaSignatureUtils.populateField(field)))
                     .collect(Collectors.joining("\n"));
@@ -164,9 +165,9 @@ public class BackendApplicationDefaultHelpers {
 
     public String idParamsCallSignature(Map method, Options options) {
         var zdl = options.get("zdl");
-        var naturalIdEntity = JSONPath.get(method, "$.options.naturalId");
-        if(naturalIdEntity != null) {
-            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + naturalIdEntity);
+        var hasNaturalId = JSONPath.get(method, "$.naturalId", false);
+        if(hasNaturalId) {
+            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("entity"));
             var fields = ZDLFindUtils.naturalIdFields(entity);
             return ZDLJavaSignatureUtils.fieldsParamsCallSignature(fields);
         }

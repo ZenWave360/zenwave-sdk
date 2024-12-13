@@ -1,9 +1,7 @@
+MAX_LENGTH=100
 /**
 * Global javadoc comment
 */
-
-MAX_LENGTH=100
-
 config {
     basePackage "com.example.zenwave"
     plugins {

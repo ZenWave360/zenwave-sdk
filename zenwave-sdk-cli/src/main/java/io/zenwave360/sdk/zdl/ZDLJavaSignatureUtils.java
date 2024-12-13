@@ -25,12 +25,18 @@ public class ZDLJavaSignatureUtils {
     }
 
     public static String fieldsParamsSignature(List<Map> fields) {
+        if(fields == null) {
+            return "";
+        }
         return fields.stream()
                 .map(f -> String.format("%s %s", f.get("type"), f.get("name")))
                 .collect(Collectors.joining(", "));
     }
 
     public static String fieldsParamsCallSignature(List<Map> fields) {
+        if(fields == null) {
+            return "";
+        }
         return fields.stream().map(f -> f.get("name").toString()).collect(Collectors.joining(", "));
     }
 
@@ -52,9 +58,9 @@ public class ZDLJavaSignatureUtils {
     public static String methodParametersSignature(String idJavaType, Map method, Map zdl, String inputDTOSuffix) {
         var params = new ArrayList<String>();
         if(JSONPath.get(method, "paramId") != null) {
-            var naturalIdEntity = JSONPath.get(method, "options.naturalId");
-            if (naturalIdEntity != null) {
-                var fields = ZDLFindUtils.naturalIdFields(JSONPath.get(zdl, "$.entities." + naturalIdEntity));
+            var hasNaturalId = JSONPath.get(method, "naturalId", false);
+            if (hasNaturalId) {
+                var fields = ZDLFindUtils.naturalIdFields(JSONPath.get(zdl, "$.entities." + method.get("entity")));
                 params.add(ZDLJavaSignatureUtils.fieldsParamsSignature(fields));
             } else {
                 params.add(idJavaType + " id");

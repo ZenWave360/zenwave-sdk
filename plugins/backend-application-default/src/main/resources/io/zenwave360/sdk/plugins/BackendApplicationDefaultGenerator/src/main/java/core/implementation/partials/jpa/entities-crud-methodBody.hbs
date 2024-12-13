@@ -1,7 +1,6 @@
 {{~assign 'entity' aggregateCommandsForMethod.entity }}
-{{~assign 'hasNaturalId' (isTruthy method.options.naturalId) }}
+{{~assign 'hasNaturalId' (isTruthy method.naturalId) }}
 {{~assign 'notHasNaturalId' (isFalsy hasNaturalId) }}
-// hasNaturalId: {{hasNaturalId}}, notHasNaturalId: {{notHasNaturalId}}
 {{~#if (isCrudMethod 'create' method=method entity=entity )}}
     log.debug("[CRUD] Request to save {{entity.className}}: {}", input);
     var {{entity.instanceName}} = {{asInstanceName service.name}}Mapper.update(new {{entity.className}}(), {{{mapperInputCallSignature method.parameter}}});

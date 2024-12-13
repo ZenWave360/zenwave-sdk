@@ -40,4 +40,11 @@ public class ZDLProcessorTest {
         Assertions.assertEquals(2, syncMethods.size());
     }
 
+    @Test
+    public void testProcessZDL_EntityForId() throws Exception {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/natural-ids.zdl");
+        var attachmentInput = JSONPath.get(model, "$.zdl.inputs.AddressInputCopy", Map.of());
+    }
+
+
 }
