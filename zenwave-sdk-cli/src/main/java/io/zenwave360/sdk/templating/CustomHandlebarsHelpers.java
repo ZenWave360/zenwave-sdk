@@ -186,7 +186,11 @@ public class CustomHandlebarsHelpers {
     }
 
     public static Object assign(final String variableName, final Options options) throws IOException {
-        var model = (Map) options.context.model();
+        var context = options.context;
+        while(context.parent() != null && context.parent().model() instanceof Map) {
+            context = context.parent();
+        }
+        var model = (Map) context.model();
         if (options.params.length == 1) {
             if (options.param(0) != null) {
                 model.put(variableName, options.param(0));
