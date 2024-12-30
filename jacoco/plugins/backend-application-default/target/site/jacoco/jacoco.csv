@@ -3,5 +3,5 @@ io.github.zenwave360.zenwave-sdk.plugins:backend-application-default,io.zenwave3
 io.github.zenwave360.zenwave-sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendMultiModuleApplicationGenerator,0,340,0,0,0,32,0,2,0,2
 io.github.zenwave360.zenwave-sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultJpaHelpers,86,58,15,5,9,13,9,5,0,4
 io.github.zenwave360.zenwave-sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendSimpleDomainPackagingApplicationGenerator,0,320,0,0,0,43,0,2,0,2
-io.github.zenwave360.zenwave-sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultHelpers,184,1351,35,109,23,222,40,97,10,55
+io.github.zenwave360.zenwave-sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultHelpers,243,1422,32,120,33,238,41,107,13,59
 io.github.zenwave360.zenwave-sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendDefaultApplicationGenerator,8,587,8,14,0,70,7,17,0,13
