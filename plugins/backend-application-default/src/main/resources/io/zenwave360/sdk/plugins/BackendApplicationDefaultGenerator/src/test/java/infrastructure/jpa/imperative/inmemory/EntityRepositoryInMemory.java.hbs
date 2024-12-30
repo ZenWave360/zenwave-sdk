@@ -4,4 +4,13 @@ import {{entitiesPackage}}.*;
 import {{outboundRepositoryPackage}}.{{entity.className}}Repository;
 
 public class {{entity.className}}RepositoryInMemory extends InMemoryJpaRepository<{{entity.className}}> implements {{entity.className}}Repository {
+
+{{~#if (naturalIdFields entity)}}
+    @Override
+    public {{{naturalIdsRepoMethodSignature entity}}} {
+        return getEntities().values().stream().filter(e ->
+            {{#joinWithTemplate (naturalIdFields entity) delimiter='&&'}} isSameValue({{name}}, readField(e, "{{name}}")) {{/joinWithTemplate}}
+        ).findFirst();
+    }
+{{~/if}}
 }

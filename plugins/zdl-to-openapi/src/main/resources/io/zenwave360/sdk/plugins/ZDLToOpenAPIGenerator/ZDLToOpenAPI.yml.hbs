@@ -70,7 +70,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/{{operation.requestBody}}"
+              $ref: "#/components/schemas/{{operation.requestBody}}{{ifTruthy (eq operation.httpMethod 'patch') dtoPatchSuffix ""}}"
       {{~/if}}
       responses:
         "{{httpResponseStatus operation}}":

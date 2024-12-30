@@ -1,9 +1,7 @@
+MAX_LENGTH=100
 /**
 * Global javadoc comment
 */
-
-MAX_LENGTH=100
-
 config {
     basePackage "com.example.zenwave"
     plugins {
@@ -70,6 +68,13 @@ input CustomerAddressId {
   address Address
 }
 
+input CustomerSearchCriteria {
+  name String
+  email String
+  city String
+  state String
+}
+
 /**
  Service javadoc comment
  */
@@ -86,15 +91,20 @@ service CustomerService for (Customer) {
   @asyncapi({ api: ThirdPartyAPI, operationId: "doUpdateCustomer"})
   updateCustomer(id, CustomerInput) Customer? withEvents CustomerEvent CustomerUpdated /** update customer javadoc comment */
 
+  @patch("/customers/{customerId}")
+  patchCustomer(id, CustomerInput) Customer? withEvents CustomerEvent CustomerUpdated /** update customer javadoc comment */
+
   @delete("/customers/{customerId}")
   deleteCustomer(id) withEvents CustomerDeleted
 
   @get("/customers/{customerId}")
   getCustomer(id) Customer?
 
-  @get({path: "/customers", params: {search: String}})
-  @paginated
+  @get({path: "/customers", params: {search: String}}) @paginated
   listCustomers() Customer[]
+
+  @get({path: "/customers/search"}) @paginated
+  searchCustomers(CustomerSearchCriteria) Customer[]
 
   @post("/customers/{customerId}/address")
   addCustomerAddress(CustomerAddressId) Customer?

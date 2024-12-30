@@ -51,8 +51,8 @@ public class BackendApplicationDefaultHelpers {
             if(aggregate != null && command != null) {
                 return Map.of("templateFile", "aggregates-commands-methodBody", "aggregatesCommandsForMethod", aggregatesCommandsForMethod);
             }
-            if(aggregate != null && crudMethod != null) {
-                return Map.of("templateFile", "aggregates-crud-methodBody", "aggregatesCommandsForMethod", aggregatesCommandsForMethod);
+            if (aggregate != null && crudMethod != null) {
+                // TODO: return Map.of("templateFile", "aggregates-crud-methodBody", "aggregatesCommandsForMethod", aggregatesCommandsForMethod);
             }
             if(entity != null && crudMethod != null) {
                 return Map.of("templateFile", "entities-crud-methodBody", "entity", entity, "crudMethod", crudMethod);
@@ -60,6 +60,7 @@ public class BackendApplicationDefaultHelpers {
             if(entity != null) {
                 return Map.of("templateFile", "entities-methodBody", "entity", entity);
             }
+            return Map.of("templateFile", "entities-methodBody");
         }
         return Map.of("templateFile", "aggregates-commands-methodBody", "aggregatesCommandsForMethod", aggregatesCommandsForMethod);
     }
@@ -128,11 +129,60 @@ public class BackendApplicationDefaultHelpers {
         return aggregateNames.isEmpty()? null : (String) aggregateNames.get(0);
     }
 
+    public List<Map> naturalIdFields(Map entity, Options options) {
+        return ZDLFindUtils.naturalIdFields(entity);
+    }
+
+    public String naturalIdsRepoMethodSignature(Map entity, Options options) {
+        return ZDLJavaSignatureUtils.naturalIdsRepoMethodSignature(entity);
+    }
+
+    public String naturalIdsRepoMethodCallSignature(Map entity, Options options) {
+        return ZDLJavaSignatureUtils.naturalIdsRepoMethodCallSignature(entity);
+    }
+
+    public String findById(Map method, Options options) {
+        var zdl = options.get("zdl");
+        var hasNaturalId = JSONPath.get(method, "$.naturalId", false);
+        if(hasNaturalId) {
+            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("entity"));
+            return ZDLJavaSignatureUtils.naturalIdsRepoMethodCallSignature(entity);
+        }
+        return "findById(id)";
+    }
+
+    public String idFieldInitialization(Map method, Options options) {
+        var zdl = options.get("zdl");
+        var hasNaturalId = JSONPath.get(method, "$.naturalId", false);
+        if(hasNaturalId) {
+            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("entity"));
+            List<Map> fields = ZDLFindUtils.naturalIdFields(entity);
+            return fields.stream().map(field -> String.format("var %s = %s;", field.get("name"), ZDLJavaSignatureUtils.populateField(field)))
+                    .collect(Collectors.joining("\n"));
+        }
+        return generator.getIdJavaType() + " id = null;";
+    }
+
+    public String idParamsCallSignature(Map method, Options options) {
+        var zdl = options.get("zdl");
+        var hasNaturalId = JSONPath.get(method, "$.naturalId", false);
+        if(hasNaturalId) {
+            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("entity"));
+            var fields = ZDLFindUtils.naturalIdFields(entity);
+            return ZDLJavaSignatureUtils.fieldsParamsCallSignature(fields);
+        }
+        return "id";
+    }
+
+
     public Collection<String> findServiceInputs(Map service, Options options) {
         var zdl = options.get("zdl");
         var inputDTOSuffix = (String) options.get("inputDTOSuffix");
         Set<String> inputs = new HashSet<String>();
         inputs.addAll(JSONPath.get(service, "$.methods[*].parameter"));
+        if(JSONPath.get(service, "$.methods[*][?(@.options.patch)]", List.of()).size() > 0) {
+            inputs.add("java.util.Map");
+        }
         // inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregateName + "' in @.aggregates)].methods[*].returnType"));
         // inputs.add(aggregateName + inputDTOSuffix);
         inputs = inputs.stream().filter(Objects::nonNull).collect(Collectors.toSet());

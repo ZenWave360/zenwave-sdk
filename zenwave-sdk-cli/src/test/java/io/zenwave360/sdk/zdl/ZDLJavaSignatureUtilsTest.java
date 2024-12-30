@@ -18,6 +18,23 @@ public class ZDLJavaSignatureUtilsTest {
     }
 
     @Test
+    void naturalIdsRepoMethodSignature() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/natural-ids.zdl");
+        var entity = JSONPath.get(model, "$.entities.Customer", Map.of());
+        var signature = ZDLJavaSignatureUtils.naturalIdsRepoMethodSignature(entity);
+        Assertions.assertEquals("java.util.Optional<Customer> findByCustomerIdAndAnotherId(Long customerId, String anotherId)", signature);
+    }
+
+    @Test
+    void naturalIdsRepoMethodCallSignature() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/natural-ids.zdl");
+        var entity = JSONPath.get(model, "$.entities.Customer", Map.of());
+        var signature = ZDLJavaSignatureUtils.naturalIdsRepoMethodCallSignature(entity);
+        Assertions.assertEquals("findByCustomerIdAndAnotherId(customerId, anotherId)", signature);
+    }
+
+
+    @Test
     void methodParameterType() throws IOException {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
         var method = JSONPath.get(model, "$.services.AttachmentService.methods.uploadFile", Map.of());

@@ -47,7 +47,7 @@ Default options for https://openapi-generator.tech/docs/generators/spring/ have 
                     <useSpringBoot3>true</useSpringBoot3>
                     <documentationProvider>none</documentationProvider>
                     <openApiNullable>false</openApiNullable>
-                    <useOptional>true</useOptional>
+                    <useOptional>false</useOptional>
                     <useTags>true</useTags>
                     <interfaceOnly>true</interfaceOnly>
                     <skipDefaultInterface>true</skipDefaultInterface>

@@ -1,0 +1,33 @@
+# Enforce LF line endings for all text files by default
+* text=auto eol=lf
+
+# Explicit exceptions for CRLF line endings
+*.bat           text eol=crlf
+*.cmd           text eol=crlf
+*.ps1           text eol=crlf
+
+# Explicitly mark binary files
+# (Git automatically detects these, but this is a safeguard for clarity)
+*.pdf           binary
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.gif           binary
+*.tif           binary
+*.tiff          binary
+*.ico           binary
+*.svg           binary
+*.eps           binary
+*.class         binary
+*.jar           binary
+*.war           binary
+*.7z            binary
+*.gz            binary
+*.rar           binary
+*.tar           binary
+*.zip           binary
+*.ttf           binary
+*.eot           binary
+*.otf           binary
+*.woff          binary
+*.woff2         binary

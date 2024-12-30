@@ -52,6 +52,13 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
     }
 {{~/if}}
 
+{{~#if includeApplicationEventListener}}
+    @org.springframework.modulith.events.ApplicationModuleListener
+    public void on(Message<{{messageType operation}}> message) {
+        accept(message);
+    }
+{{/if}}
+
     @Override
     public void accept(Message<{{messageType operation}}> message) {
         log.debug("Received message: {}", message);

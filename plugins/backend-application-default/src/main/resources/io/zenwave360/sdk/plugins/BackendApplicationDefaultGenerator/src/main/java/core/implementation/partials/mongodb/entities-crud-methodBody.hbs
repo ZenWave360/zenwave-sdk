@@ -1,32 +1,46 @@
-{{assign 'entity' aggregateCommandsForMethod.entity }}
-{{~#if (isCrudMethod 'create' method=method entity=entity )}}
-    log.debug("[CRUD] Request to save {{entity.className}}: {}", input);
-    var {{entity.instanceName}} = {{asInstanceName service.name}}Mapper.update(new {{entity.className}}(), {{{mapperInputCallSignature method.parameter}}});
-    {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}});
+{{~assign '_entity' aggregateCommandsForMethod.entity }}
+{{~assign 'hasNaturalId' (isTruthy method.naturalId) }}
+{{~assign 'notHasNaturalId' (isFalsy hasNaturalId) }}
+{{~#if (isCrudMethod 'create' method=method entity=_entity )}}
+    log.debug("[CRUD] Request to save {{_entity.className}}: {}", input);
+    var {{_entity.instanceName}} = {{asInstanceName service.name}}Mapper.update(new {{_entity.className}}(), {{{mapperInputCallSignature method.parameter}}});
+    {{_entity.instanceName}} = {{_entity.instanceName}}Repository.save({{_entity.instanceName}});
+    // TODO: may need to reload the entity to fetch relationships 'mapped by id'
     {{~> (partial '../withEvents')}}
-    return {{wrapWithMapper entity}};
-{{~else if (isCrudMethod 'list' method=method entity=entity )}}
+    return {{wrapWithMapper _entity}};
+{{~else if (isCrudMethod 'list' method=method entity=_entity )}}
     {{~#if method.options.paginated}}
-    log.debug("[CRUD] Request list of {{entity.classNamePlural}}: {}", pageable);
-    var {{entity.instanceNamePlural}} = {{entity.instanceName}}Repository.findAll(pageable);
-    return {{wrapWithMapper entity}};
+        log.debug("[CRUD] Request list of {{_entity.classNamePlural}}: {}", pageable);
+        var {{_entity.instanceNamePlural}} = {{_entity.instanceName}}Repository.findAll(pageable);
+        return {{wrapWithMapper _entity}};
     {{~else}}
-    log.debug("Request list of {{entity.classNamePlural}}");
-    var {{entity.instanceNamePlural}} = {{entity.instanceName}}Repository.findAll();
-    return {{wrapWithMapper entity}};
+        log.debug("Request list of {{_entity.classNamePlural}}");
+        var {{_entity.instanceNamePlural}} = {{_entity.instanceName}}Repository.findAll();
+        return {{wrapWithMapper _entity}};
     {{~/if}}
-{{~else if (isCrudMethod 'search' method=method entity=entity )}}
-    log.debug("[CRUD] Request to search {{entity.classNamePlural}}: {} - {}", input, pageable);
+{{~else if (isCrudMethod 'search' method=method entity=_entity )}}
+    log.debug("[CRUD] Request to search {{_entity.classNamePlural}}: {} - {}", input, pageable);
     // TODO implement this search by criteria
-    var {{entity.instanceNamePlural}} = {{entity.instanceName}}Repository.findAll(pageable);
-    return {{wrapWithMapper entity}};
-{{~else if (isCrudMethod 'get' method=method entity=entity )}}
-    log.debug("[CRUD] Request to get {{entity.className}} : {}", id);
-    var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id);
-    return {{wrapWithMapper entity}};
-{{~else if (isCrudMethod 'delete' method=method entity=entity )}}
-    log.debug("[CRUD] Request to delete {{entity.className}} : {}", id);
-    {{entity.instanceName}}Repository.deleteById(id);
+    var {{_entity.instanceNamePlural}} = {{_entity.instanceName}}Repository.findAll(pageable);
+    return {{wrapWithMapper _entity}};
+{{~else if (and (isCrudMethod 'get' method=method entity=_entity ) notHasNaturalId)}}
+    log.debug("[CRUD] Request to get {{_entity.className}} : {}", id);
+    var {{_entity.instanceName}} = {{_entity.instanceName}}Repository.findById(id);
+    return {{wrapWithMapper _entity}};
+{{~else if (and (isCrudMethod 'get' method=method entity=_entity ) hasNaturalId)}}
+    {{{logMethodCall method}}}
+    var {{_entity.instanceName}} = {{_entity.instanceName}}Repository.{{{naturalIdsRepoMethodCallSignature _entity}}};
+    return {{wrapWithMapper _entity}};
+{{~else if (and (isCrudMethod 'delete' method=method entity=_entity ) notHasNaturalId)}}
+    log.debug("[CRUD] Request to delete {{_entity.className}} : {}", id);
+    {{_entity.instanceName}}Repository.deleteById(id);
     {{~> (partial '../withEvents')}}
+{{~else if (and (isCrudMethod 'delete' method=method entity=_entity ) hasNaturalId)}}
+    {{{logMethodCall method}}}
+    var {{_entity.instanceName}} = {{_entity.instanceName}}Repository.{{{naturalIdsRepoMethodCallSignature _entity}}};
+    if({{_entity.instanceName}}.isPresent()) {
+    {{_entity.instanceName}}Repository.delete({{_entity.instanceName}}.get());
+    {{~> (partial '../withEvents')}}
+    }
 {{~/if}}
 

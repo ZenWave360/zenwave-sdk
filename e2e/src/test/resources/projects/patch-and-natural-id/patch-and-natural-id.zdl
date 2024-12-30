@@ -1,0 +1,73 @@
+/**
+ * Sample ZenWave Model Definition.
+ * Use zenwave-scripts.zdl to generate your code from this model definition.
+ */
+config {}
+
+/**
+* Customer entity
+*/
+@aggregate
+@auditing // adds auditing fields to the entity
+entity Customer {
+    @naturalId
+    customerId Long required
+    @naturalId
+    anotherId String required
+
+    name String required maxlength(254) /** Customer name */
+    email String required maxlength(254)
+    /** Customer Addresses can be stored in a JSON column in the database. */
+    @json addresses Address[] minlength(1) maxlength(5) {
+        street String required maxlength(254)
+        city String required maxlength(254)
+    }
+}
+
+@auditing
+entity PaymentMethod {
+    type PaymentMethodType required
+    cardNumber String required
+}
+
+enum PaymentMethodType { VISA(1), MASTERCARD(2) }
+
+relationship OneToMany {
+    @eager
+    Customer{paymentMethods required maxlength(3)} to PaymentMethod{customer required}
+}
+
+// you can create 'inputs' as dtos for your service methods, or use entities directly
+input CustomerSearchCriteria {
+    name String
+    email String
+    city String
+    state String
+}
+
+@rest("/customers")
+service CustomerService for (Customer) {
+    @post
+    createCustomer(Customer) Customer withEvents CustomerEvent
+
+    @get("/{customerId}/{anotherId}") @naturalId(Customer)
+    getCustomer(id) Customer?
+    @put("/{customerId}/{anotherId}") @naturalId(Customer)
+    updateCustomer(id, Customer) Customer? withEvents CustomerEvent
+    @patch("/{customerId}/{anotherId}") @naturalId(Customer)
+    patchCustomer(id, Customer) Customer? withEvents CustomerEvent
+    @delete("/{customerId}/{anotherId}") @naturalId(Customer)
+    deleteCustomer(id) withEvents CustomerEvent
+
+    @get("/search") @paginated
+    searchCustomers(CustomerSearchCriteria) Customer[]
+}
+
+@copy(Customer)
+@asyncapi({ channel: "CustomersChannel", topic: "customers" })
+event CustomerEvent {
+    id Long
+    version Integer
+    // all fields from Customer are copied here, but not relationships
+    paymentMethods PaymentMethod[]
+}

@@ -109,6 +109,10 @@ public class CustomHandlebarsHelpers {
         return StringUtils.equals(String.valueOf(first), String.valueOf(second));
     }
 
+    public static boolean neq(Object first, Options options) throws IOException {
+        return !eq(first, options);
+    }
+
     public static boolean startsWith(String first, Options options) throws IOException {
         String second = options.param(0);
         return StringUtils.startsWith(first, second);
@@ -152,6 +156,14 @@ public class CustomHandlebarsHelpers {
         return isTruthy(first) && Stream.of(options.params).allMatch(CustomHandlebarsHelpers::isTruthy);
     }
 
+    public static boolean isTruthy(Object value, Options options) throws IOException {
+        return isTruthy(value);
+    }
+
+    public static boolean isFalsy(Object value, Options options) throws IOException {
+        return !isTruthy(value);
+    }
+
     private static boolean isTruthy(Object value) {
         if (value == null) {
             return false;
@@ -174,15 +186,20 @@ public class CustomHandlebarsHelpers {
     }
 
     public static Object assign(final String variableName, final Options options) throws IOException {
+        var context = options.context;
+        while(context.parent() != null && context.parent().model() instanceof Map) {
+            context = context.parent();
+        }
+        var model = (Map) context.model();
         if (options.params.length == 1) {
             if (options.param(0) != null) {
-                options.context.combine(Map.of(variableName, options.param(0)));
+                model.put(variableName, options.param(0));
             } else {
 
             }
         } else {
             CharSequence finalValue = options.apply(options.fn);
-            options.context.combine(Map.of(variableName, finalValue.toString().trim()));
+            model.put(variableName, finalValue.toString().trim());
         }
         return null;
     }

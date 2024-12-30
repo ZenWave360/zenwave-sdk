@@ -1,72 +1,86 @@
-{{~assign "entity" aggregateCommandsForMethod.entity}}
+{{~assign "_entity" aggregateCommandsForMethod.entity}}
 {{~assign "returnEntity" (methodReturnEntity method)}}
-    {{{logMethodCall method}}}
+{{{logMethodCall method}}}
 {{!-- @Async --}}
 {{~#if method.options.async}}
     {{#if method.returnType}}return CompletableFuture.completedFuture({{/if}} {{method.name}}Sync({{methodParametersCallSignature method}}){{#if method.returnType}}){{/if}};
 {{!-- list search --}}
-{{~else if (and entity method.returnType method.returnTypeIsArray)}}
-    {{~#if (eq entity.name returnEntity)}}
-    return {{entity.instanceName}}Repository.findAll({{#if method.options.paginated}}pageable{{/if}});
+{{~else if (and _entity method.returnType method.returnTypeIsArray)}}
+    {{~#if (eq _entity.name returnEntity)}}
+        return {{_entity.instanceName}}Repository.findAll({{#if method.options.paginated}}pageable{{/if}});
     {{~else}}
-    var {{entity.instanceNamePlural}} = {{entity.instanceName}}Repository.findAll({{#if method.options.paginated}}pageable{{/if}});
-    return {{wrapWithMapper entity}};
+        var {{_entity.instanceNamePlural}} = {{_entity.instanceName}}Repository.findAll({{#if method.options.paginated}}pageable{{/if}});
+        return {{wrapWithMapper _entity}};
     {{~/if}}
-{{!-- Optional<Entity> update(id, Entity) --}}
-{{~else if (and entity method.paramId method.parameter method.returnType method.returnTypeIsOptional)}}
-    var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).map(existing{{entity.className}} -> {
-        return {{asInstanceName service.name}}Mapper.update(existing{{entity.className}}, {{{mapperInputCallSignature method.parameter}}});
+{{!-- Optional<Entity> patch(id, Map) --}}
+{{~else if (and _entity method.options.patch method.paramId method.parameter method.returnType method.returnTypeIsOptional)}}
+    var {{_entity.instanceName}} = {{_entity.instanceName}}Repository.{{{findById method}}}.map(existing{{_entity.className}} -> {
+    return {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}});
     })
-    .map({{entity.instanceName}}Repository::save)
-    {{~#unless (eq entity.name method.returnType)}}
-    .map({{asInstanceName service.name}}Mapper::as{{returnType}})
+    .map({{_entity.instanceName}}Repository::save)
+    {{~#unless (eq _entity.name method.returnType)}}
+        .map({{asInstanceName service.name}}Mapper::as{{returnType}})
     {{~/unless}}
     ;
     {{~> (partial '../withEvents')}}
-    return {{entity.instanceName}};
+    return {{_entity.instanceName}};
+{{!-- Optional<Entity> update(id, Entity) --}}
+{{~else if (and _entity method.paramId method.parameter method.returnType method.returnTypeIsOptional)}}
+    var {{_entity.instanceName}} = {{_entity.instanceName}}Repository.{{{findById method}}}.map(existing{{_entity.className}} -> {
+    return {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}});
+    })
+    .map({{_entity.instanceName}}Repository::save)
+    {{~#unless (eq _entity.name method.returnType)}}
+        .map({{asInstanceName service.name}}Mapper::as{{returnType}})
+    {{~/unless}}
+    ;
+    {{~> (partial '../withEvents')}}
+    return {{_entity.instanceName}};
 {{!-- Entity update(id, Entity) --}}
-{{~else if (and entity method.paramId method.parameter method.returnType)}}
-    var {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).map(existing{{entity.className}} -> {
-        return {{asInstanceName service.name}}Mapper.update(existing{{entity.className}}, {{{mapperInputCallSignature method.parameter}}});
-    }).map({{entity.instanceName}}Repository::save).orElseThrow();
+{{~else if (and _entity method.paramId method.parameter method.returnType)}}
+    var {{_entity.instanceName}} = {{_entity.instanceName}}Repository.{{{findById method}}}.map(existing{{_entity.className}} -> {
+    return {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}});
+    })
+    .map({{_entity.instanceName}}Repository::save)
+    .orElseThrow();
     {{~> (partial '../withEvents')}}
-    return {{wrapWithMapper entity}};
+    return {{wrapWithMapper _entity}};
 {{!-- Optional<Entity> get(id) --}}
-{{~else if (and entity method.paramId method.returnType method.returnTypeIsOptional)}}
-    {{~assign 'needMapping' (not (eq entity.name method.returnType))}}
-    return {{entity.instanceName}}Repository.findById(id){{#if needMapping}}.map({{asInstanceName service.name}}Mapper::as{{method.returnType}}){{/if}};
+{{~else if (and _entity method.paramId method.returnType method.returnTypeIsOptional)}}
+    {{~assign 'needMapping' (not (eq _entity.name method.returnType))}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}{{#if needMapping}}.map({{asInstanceName service.name}}Mapper::as{{method.returnType}}){{/if}};
 {{!-- Entity get(id) --}}
-{{~else if (and entity method.paramId method.returnType)}}
-    return {{entity.instanceName}}Repository.findById(id);
+{{~else if (and _entity method.paramId method.returnType)}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}};
 {{!-- Optional<Entity> get(MyEntity) --}}
-{{~else if (and entity method.parameter method.returnType method.returnTypeIsOptional)}}
-    var {{entity.instanceName}} = {{asInstanceName service.name}}Mapper.update(new {{entity.className}}(), {{{mapperInputCallSignature method.parameter}}});
+{{~else if (and _entity method.parameter method.returnType method.returnTypeIsOptional)}}
+    var {{_entity.instanceName}} = {{asInstanceName service.name}}Mapper.update(new {{_entity.className}}(), {{{mapperInputCallSignature method.parameter}}});
     // TODO: implement this method
     {{~> (partial '../withEvents')}}
-    return Optional.ofNullable({{wrapWithMapper entity}});
+    return Optional.ofNullable({{wrapWithMapper _entity}});
 {{!-- Optional<Entity> get(MyEntity) --}}
-{{~else if (and entity method.parameter method.returnType)}}
-    var {{entity.instanceName}} = {{asInstanceName service.name}}Mapper.update(new {{entity.className}}(), {{{mapperInputCallSignature method.parameter}}});
+{{~else if (and _entity method.parameter method.returnType)}}
+    var {{_entity.instanceName}} = {{asInstanceName service.name}}Mapper.update(new {{_entity.className}}(), {{{mapperInputCallSignature method.parameter}}});
     // TODO: implement this method
     {{~> (partial '../withEvents')}}
-    return {{wrapWithMapper entity}};
+    return {{wrapWithMapper _entity}};
 {{!-- Optional<Entity> get() --}}
-{{~else if (and entity method.returnType)}}
-    var {{entity.instanceName}} = new {{entity.className}}();
+{{~else if (and _entity method.returnType)}}
+    var {{_entity.instanceName}} = new {{_entity.className}}();
     // TODO: implement this method
     {{~> (partial '../withEvents')}}
-    return {{wrapWithMapper entity}};
+    return {{wrapWithMapper _entity}};
 {{!-- void get() --}}
-{{~else if (and entity)}}
-    var {{entity.instanceName}} = new {{entity.className}}();
+{{~else if (and _entity)}}
+    var {{_entity.instanceName}} = new {{_entity.className}}();
     // TODO: implement this method
     {{~> (partial '../withEvents')}}
 
-{{!-- we know nothing (???) --}}
-{{~else~}}
+    {{!-- we know nothing (???) --}}
+    {{~else~}}
     // TODO: implement this method
     {{~> (partial '../withEvents')}}
-  {{~#if method.returnType}}
-    return null;
-  {{~/if}}
+    {{~#if method.returnType}}
+        return null;
+    {{~/if}}
 {{~/if}}

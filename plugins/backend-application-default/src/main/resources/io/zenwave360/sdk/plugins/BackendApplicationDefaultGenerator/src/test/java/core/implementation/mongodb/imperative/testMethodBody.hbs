@@ -9,28 +9,28 @@
         assertNotNull({{entity.instanceName}}.getId());
         assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}));
     {{~else if (isCrudMethod 'update' method=method entity=entity )}}
-        var id = "1"; // TODO fill id
+        {{{idFieldInitialization method}}}
         var input = new {{methodParameterType method}}();
         // TODO fill input data
         {{~#each entity.fields as |field|}}
         // input.set{{capitalize field.name}}({{{populateField field}}});
         {{~/each}}
-        assertTrue({{entity.instanceName}}Repository.containsKey(id));
-        var {{entity.instanceName}} = {{serviceInstance}}.update{{entity.className}}(id, input);
+        // assertTrue({{entity.instanceName}}Repository.containsKey(id));
+        var {{entity.instanceName}} = {{serviceInstance}}.update{{entity.className}}({{idParamsCallSignature method}}, input);
         assertTrue({{entity.instanceName}}.isPresent());
         assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}.get()));
     {{~else if (isCrudMethod 'list' method=method entity=entity) }}
         // var results = {{serviceInstance}}.list{{entity.classNamePlural}}(PageRequest.of(0, 10));
         // assertNotNull(results);
     {{~else if (isCrudMethod 'get' method=method entity=entity )}}
-        var id = "1"; // TODO fill id
-        var {{entity.instanceName}} = {{serviceInstance}}.get{{entity.className}}(id);
+        {{{idFieldInitialization method}}}
+        var {{entity.instanceName}} = {{serviceInstance}}.get{{entity.className}}({{idParamsCallSignature method}});
         assertTrue({{entity.instanceName}}.isPresent());
     {{~else if (isCrudMethod 'delete' method=method entity=entity )}}
-        var id = "1"; // TODO fill id
-        assertTrue({{entity.instanceName}}Repository.containsKey(id));
-        {{serviceInstance}}.delete{{entity.className}}(id);
-        assertFalse({{entity.instanceName}}Repository.containsKey(id));
+        {{{idFieldInitialization method}}}
+        // assertTrue({{entity.instanceName}}Repository.containsKey(id));
+        {{serviceInstance}}.delete{{entity.className}}({{idParamsCallSignature method}});
+        // assertFalse({{entity.instanceName}}Repository.containsKey(id));
     {{~else~}}
     // TODO: implement this test
     {{~/if}}

@@ -1,0 +1,26 @@
+@aggregate
+entity Customer {
+    @naturalId
+    customerId Long required
+    @naturalId
+    anotherId String required
+
+    name String required maxlength(254) /** Customer name */
+
+}
+
+output CustomerProfile {
+    name String required maxlength(254)
+}
+
+@rest("/customers")
+service CustomerService for (Customer) {
+
+    @get("/{customerId}/{anotherId}")
+    getCustomer(@natural id) Customer?
+
+    @put("/{customerId}/{anotherId}")
+    updateCustomer(@natural id, Customer) CustomerProfile?
+
+}
+

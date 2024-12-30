@@ -79,6 +79,9 @@ public class JsonSchemaToJsonFaker {
 
     protected Object generateValue(String propertyName, Map<String, Object> schemaNode) {
         String type = (String) schemaNode.get("type");
+        if ((type == null)) {
+            return null;
+        }
 
         return switch (type) {
             case "string" -> generateString(propertyName, schemaNode);

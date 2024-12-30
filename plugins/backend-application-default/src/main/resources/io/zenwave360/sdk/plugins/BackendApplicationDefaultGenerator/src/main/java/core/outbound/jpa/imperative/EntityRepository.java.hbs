@@ -9,4 +9,13 @@ import org.springframework.stereotype.Repository;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface {{entity.className}}Repository extends JpaRepository<{{entity.className}}, {{idJavaType}}> {}
+public interface {{entity.className}}Repository extends JpaRepository<{{entity.className}}, {{idJavaType}}> {
+
+{{~#if aggregate}}
+    default Optional<{{aggregate}}> find{{aggregate}}ById({{idJavaType}} id) {
+    return findById(id).map({{aggregate}}::new);
+    }
+{{~/if}}
+
+{{~#if (naturalIdFields entity)}}{{{naturalIdsRepoMethodSignature entity}}};{{/if}}
+}

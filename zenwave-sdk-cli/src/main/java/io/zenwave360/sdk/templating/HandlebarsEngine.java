@@ -47,12 +47,14 @@ public class HandlebarsEngine implements TemplateEngine {
 
     @Override
     public List<TemplateOutput> processTemplates(String modelPrefix, Map<String, Object> apiModel, List<TemplateInput> templateInputs) {
-        Context context = Context.newBuilder(this.context).build();
-        if (modelPrefix != null) {
-            context.combine(modelPrefix, apiModel);
-        } else {
-            context.combine(apiModel);
-        }
+        var currentModel = new HashMap((Map)context.model());
+        ((Map) context.model()).putAll(apiModel);
+//        Context context = Context.newBuilder(this.context).build();
+//        if (modelPrefix != null) {
+//            context.combine(modelPrefix, apiModel);
+//        } else {
+//            context.combine(apiModel);
+//        }
         List<TemplateOutput> templateOutputList = new ArrayList<>();
         templateInputs.forEach(templateInput -> {
             if (templateInput.getSkip() == null || !Boolean.TRUE.equals(templateInput.getSkip().apply(apiModel))) {
@@ -66,6 +68,8 @@ public class HandlebarsEngine implements TemplateEngine {
                 }
             }
         });
+        ((Map<?, ?>) context.model()).clear();
+        ((Map) context.model()).putAll(currentModel);
         return templateOutputList;
     }
 }

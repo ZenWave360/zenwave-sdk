@@ -14,6 +14,11 @@ jsonPath {{jsonPath entities "entity1.name"}}
 ifTruthy true: {{ifTruthy "true" "true" "false"}}
 ifTruthy false: {{ifTruthy "false" "true" "false"}}
 
+isTruthy true: {{isTruthy "true" "true" "false"}}
+isTruthy false: {{isTruthy "false" "true" "false"}}
+isFalsy false: {{isFalsy "true" "true" "false"}}
+isFalsy true: {{isFalsy "false" "true" "false"}}
+
 and true: {{and "true" "true" "true"}}
 and false: {{and "true" "false" "true"}}
 or true: {{or "true" "true" "true"}}
@@ -33,6 +38,10 @@ or false: {{or "false" "false" "false"}}
     Inside if 2
 {{else}}
     Inside else 2
+{{/if}}
+
+{{#if (neq var "not equals")}}
+    Inside if 3
 {{/if}}
 
 path: '{{path 'api' 'v1' 'users'}}'
