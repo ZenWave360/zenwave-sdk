@@ -37,7 +37,7 @@ public class AbstractZDLProjectGeneratorTest {
             templates.eventEnumTemplates.add(new TemplateInput("event enum {{enum.name}}", ""));
             //                templates.allEntitiesTemplates.add(new TemplateInput("entities {{size entities}}", ""));
             //                templates.allEnumsTemplates.add(new TemplateInput("enums {{size enums}}", ""));
-            //                templates.allEventsTemplates.add(new TemplateInput("events {{size events}}", ""));
+            templates.allEventsTemplates.add(new TemplateInput("events {{size events}}", ""));
             //                templates.allInputsTemplates.add(new TemplateInput("inputs {{size inputs}}", ""));
             //                templates.allOutputsTemplates.add(new TemplateInput("outputs {{size outputs}}", ""));
             templates.allServicesTemplates.add(new TemplateInput("services {{size services}}", ""));
@@ -64,7 +64,7 @@ public class AbstractZDLProjectGeneratorTest {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/customer-address-local-events.zdl");
         var outputList = zdlProjectGenerator.generate(model);
         outputList.stream().map(TemplateOutput::getContent).forEach(System.out::println);
-        Assertions.assertEquals(11, outputList.size());
+        Assertions.assertEquals(12, outputList.size());
     }
 
 }

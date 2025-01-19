@@ -14,7 +14,9 @@ import {{outboundEventsPackage}}.*;
     {{#if (includeDomainEvents service)}}
 import {{domainEventsPackage}}.*;
     {{/if}}
-import org.springframework.context.ApplicationEventPublisher;
+    {{~#if (needsEventBus service)}}
+import {{infrastructureEventsPackage}}.*;
+    {{~/if}}
 {{/if}}
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,12 +36,9 @@ public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
     {{~#if (needsEventsProducer service)}}
     protected final EventsProducerInMemoryContext eventsProducerInMemoryContext = new EventsProducerInMemoryContext();
     {{~/if}}
-    private ApplicationEventPublisher applicationEventPublisher = new ApplicationEventPublisher() {
-        @Override
-        public void publishEvent(Object event) {
-            publishedEvents.add(event);
-        }
-    };
+    {{~#if (needsEventBus service)}}
+    private InMemoryEventPublisher eventPublisher = new InMemoryEventPublisher();
+    {{~/if}}
 {{/if}}
 
 {{~#each services as |service|}}
@@ -49,7 +48,7 @@ public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
         {{~/joinWithTemplate~}}
         {{#if (includeEmitEventsImplementation service)}}
             {{~#if (needsEventsProducer service)}}, eventsProducerInMemoryContext.{{eventsProducerInstance service.name}}(){{/if~}}
-            , applicationEventPublisher
+            {{~#if (needsEventBus service)}}, eventPublisher{{/if~}}
         {{/if}}
         );
 {{~/each}}
@@ -72,6 +71,9 @@ public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
 		{{entity.instanceName}}Repository().deleteAll();
 		{{entity.instanceName}}Repository().saveAll({{entity.instanceNamePlural}});
 		{{~/each}}
+        {{~#if (needsEventBus service)}}
+        eventPublisher.getEvents().clear();
+        {{~/if}}
 	}
 
 {{~#if (includeEmitEventsImplementation service)}}
@@ -80,11 +82,11 @@ public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
         return eventsProducerInMemoryContext;
     }
     {{~/if}}
-
-    private List<Object> publishedEvents = new ArrayList<>();
-
-    public List<Object> getPublishedEvents() {
-        return publishedEvents;
+    {{~#if (needsEventBus service)}}
+    @Bean
+    public InMemoryEventPublisher  eventPublisher() {
+        return eventPublisher;
     }
+    {{~/if}}
 {{~/if}}
 }

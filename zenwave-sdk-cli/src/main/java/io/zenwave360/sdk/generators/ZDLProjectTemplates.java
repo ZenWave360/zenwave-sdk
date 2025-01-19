@@ -29,7 +29,7 @@ public class ZDLProjectTemplates {
     public List<TemplateInput> eventEnumTemplates = new ArrayList<>();
     public List<TemplateInput> outputTemplates = new ArrayList<>();
     public List<TemplateInput> serviceTemplates = new ArrayList<>();
-//    public List<TemplateInput> eventTemplates = new ArrayList<>();
+    public List<TemplateInput> eventTemplates = new ArrayList<>();
 
     public List<TemplateInput> allEntitiesTemplates = new ArrayList<>();
     public List<TemplateInput> allEnumsTemplates = new ArrayList<>();

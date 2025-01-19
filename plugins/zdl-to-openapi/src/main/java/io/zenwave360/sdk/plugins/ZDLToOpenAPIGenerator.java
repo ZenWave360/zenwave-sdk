@@ -44,6 +44,9 @@ public class ZDLToOpenAPIGenerator implements Generator {
     @DocumentedOption(description = "JsonSchema type format for id fields and parameters.")
     public String idTypeFormat = null;
 
+    @DocumentedOption(description = "Base OpenAPI file to merge with generated OpenAPI file")
+    public String baseOpenAPIFile = null;
+
     @DocumentedOption(description = "Operation IDs to include. If empty, all operations will be included. (Supports Ant-style wildcards)")
     public List<String> operationIdsToInclude;
 

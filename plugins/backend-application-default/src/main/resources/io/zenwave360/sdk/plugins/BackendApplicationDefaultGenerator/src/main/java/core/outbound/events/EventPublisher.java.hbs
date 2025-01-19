@@ -1,0 +1,11 @@
+package {{outboundEventsPackage}};
+
+import {{domainEventsPackage}}.*;
+import {{entitiesPackage}}.*;
+
+public interface EventPublisher {
+
+{{#each events as |event|}}
+    void on{{event.className}}({{event.className}} event);
+{{/each}}
+}
