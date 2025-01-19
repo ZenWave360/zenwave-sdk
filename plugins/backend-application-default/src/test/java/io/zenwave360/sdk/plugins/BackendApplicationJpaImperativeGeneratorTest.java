@@ -40,6 +40,7 @@ public class BackendApplicationJpaImperativeGeneratorTest {
                 .withOption("persistence", PersistenceType.jpa)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("projectName", "customer-address")
+                .withOption("includeEmitEventsImplementation", false)
                 .withOption("forceOverwrite", true)
                 .withOption("haltOnFailFormatting", false);
 
@@ -63,6 +64,7 @@ public class BackendApplicationJpaImperativeGeneratorTest {
                 .withOption("persistence", PersistenceType.jpa)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("projectName", "customer-address")
+                .withOption("includeEmitEventsImplementation", false)
                 .withOption("forceOverwrite", true)
                 .withOption("haltOnFailFormatting", false);
 

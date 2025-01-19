@@ -1,0 +1,20 @@
+package {{infrastructureEventsPackage}};
+
+import {{domainEventsPackage}}.*;
+import {{entitiesPackage}}.*;
+import {{outboundEventsPackage}}.EventPublisher;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Component;
+
+@Component
+@lombok.RequiredArgsConstructor
+public class DefaultEventPublisher implements EventPublisher {
+
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+{{#each events as |event|}}
+    public void on{{event.className}}({{event.className}} event) {
+        applicationEventPublisher.publishEvent(event);
+    }
+{{/each}}
+}

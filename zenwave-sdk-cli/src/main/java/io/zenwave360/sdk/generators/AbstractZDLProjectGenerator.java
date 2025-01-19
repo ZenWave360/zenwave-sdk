@@ -108,6 +108,29 @@ public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
             }
         }
 
+        // include all internal root events (skip @asyncapi events)
+        var eventNames = new HashSet(JSONPath.get(apiModel, "$.services[*].methods[*].withEvents[*]", List.of()));
+        var flatEventNames = new ArrayList<String>();
+        for (var eventName : eventNames) {
+            if (eventName instanceof List eventNamesList) {
+                flatEventNames.addAll(eventNamesList);
+            } else {
+                flatEventNames.add((String) eventName);
+            }
+        }
+        var allEvents = new ArrayList<Map<String, Object>>();
+        for (Object eventName : flatEventNames) {
+            var event = JSONPath.get(apiModel, "$.events." + eventName);
+            if(event != null && JSONPath.get(event, "$.options.asyncapi") == null) {
+                allEvents.add((Map<String, Object>) event);
+            }
+        }
+        if(!allEvents.isEmpty()) {
+            for (TemplateInput template : templates.allEventsTemplates) {
+                templateOutputList.addAll(generateTemplateOutput(contextModel, template, Map.of("events", allEvents)));
+            }
+        }
+
         Map<String, Map<String, Object>> services = JSONPath.get(apiModel, "$.options.options.service", Collections.emptyMap());
         List<Map<String, Object>> servicesList = new ArrayList<>();
         for (Map<String, Object> service : services.values()) {

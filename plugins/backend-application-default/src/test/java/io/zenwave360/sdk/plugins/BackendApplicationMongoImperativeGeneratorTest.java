@@ -65,6 +65,7 @@ public class BackendApplicationMongoImperativeGeneratorTest {
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("projectName", "customer-address")
                 .withOption("simpleDomainPackaging", true)
+                .withOption("includeEmitEventsImplementation", false)
                 .withOption("forceOverwrite", true)
                 .withOption("haltOnFailFormatting", false);
 
@@ -110,7 +111,7 @@ public class BackendApplicationMongoImperativeGeneratorTest {
                 .withOption("persistence", PersistenceType.mongodb)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("forceOverwrite", true)
-//                .withOption("includeEmitEventsImplementation", true)
+                .withOption("includeEmitEventsImplementation", false)
                 .withOption("haltOnFailFormatting", false);
 
         new MainGenerator().generate(plugin);

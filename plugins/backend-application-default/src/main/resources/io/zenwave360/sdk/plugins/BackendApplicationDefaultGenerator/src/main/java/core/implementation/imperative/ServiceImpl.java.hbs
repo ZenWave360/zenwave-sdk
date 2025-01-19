@@ -8,6 +8,9 @@ import {{outboundRepositoryPackage}}.*;
 {{~#if (and includeEmitEventsImplementation (needsEventsProducer service))}}
 import {{outboundEventsPackage}}.*;
 {{~/if}}
+{{~#if (and includeEmitEventsImplementation (needsEventBus service))}}
+import {{outboundEventsPackage}}.*;
+{{~/if}}
 {{~#if (includeDomainEvents service)}}
 import {{domainEventsPackage}}.*;
 {{~/if}}
@@ -23,9 +26,6 @@ import org.springframework.data.domain.Pageable;
 {{~#if (jsonPath service 'methods[*][?(@.options.async)]')}}
 import java.util.concurrent.CompletableFuture;
 import org.springframework.scheduling.annotation.Async;
-{{~/if}}
-{{~#if (includeEmitEventsImplementation service)}}
-import org.springframework.context.ApplicationEventPublisher;
 {{~/if}}
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,7 +55,9 @@ public class {{service.name}}Impl implements {{service.name}} {
     {{~#if (needsEventsProducer service)}}
     private final {{eventsProducerInterface service.name}} eventsProducer;
     {{~/if}}
-	private final ApplicationEventPublisher applicationEventPublisher;
+    {{~#if (needsEventBus service)}}
+	private final EventPublisher eventPublisher;
+    {{~/if}}
 {{/if}}
 
 {{#unless useLombok~}}
@@ -65,15 +67,15 @@ public class {{service.name}}Impl implements {{service.name}} {
     public {{service.name}}Impl({{#joinWithTemplate service.entities delimiter=", "}}{{#unless (skipEntityRepository this)}}{{className}}Repository {{instanceName}}Repository{{/unless}}{{/joinWithTemplate}}
                                 {{~#if (includeEmitEventsImplementation service)}}
                                     {{~#if (needsEventsProducer service)}}, {{eventsProducerInterface service.name}} eventsProducer{{/if~}}
-                                    , ApplicationEventPublisher applicationEventPublisher
+                                    {{~#if (needsEventBus service)}}, EventPublisher eventPublisher{{/if~}}
                                 {{~/if~}}
                                 ) {
         {{~#joinWithTemplate service.entities ~}}
             {{#unless (skipEntityRepository this)}}this.{{instanceName}}Repository = {{instanceName}}Repository;{{/unless}}
         {{~/joinWithTemplate~}}
         {{~#if (includeEmitEventsImplementation service)}}
-        this.eventsProducer = eventsProducer;
-        this.applicationEventPublisher = applicationEventPublisher;
+            {{~#if (needsEventsProducer service)}}this.eventsProducer = eventsProducer;{{/if}}
+            {{~#if (needsEventBus service)}}this.eventPublisher = eventPublisher;{{/if}}
         {{~/if}}
     }
 {{/unless~}}
@@ -99,7 +101,7 @@ public class {{service.name}}Impl implements {{service.name}} {
                 // eventsProducer.{{operationNameForEvent event.name}}(eventsMapper.as{{event.name}}(({{event.className}}) event));
                 {{~/if}}
             {{~else}}
-                applicationEventPublisher.publishEvent(event);
+                eventPublisher.on{{event.className}}(({{event.className}}) event);
             {{~/if}}
             }
 		{{/each}}

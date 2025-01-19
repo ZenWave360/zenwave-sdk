@@ -50,7 +50,6 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
 
     public String configPackage = "{{basePackage}}.config";
     public String entitiesPackage = "{{basePackage}}.core.domain";
-    public String domainEventsPackage = "{{basePackage}}.core.domain.events";
     public String inboundPackage = "{{basePackage}}.core.inbound";
     public String inboundDtosPackage = "{{basePackage}}.core.inbound.dtos";
     public String outboundPackage = "{{basePackage}}.core.outbound";
@@ -60,8 +59,12 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
     public String infrastructureRepositoryPackage = "{{basePackage}}.infrastructure.{{persistence}}";
     public String adaptersPackage = "{{basePackage}}.adapters";
 
-    public String outboundEventsModelPackage = "{{basePackage}}.core.outbound.events.dtos";
+    // domain events
+    public String domainEventsPackage = "{{basePackage}}.core.domain.events";
     public String outboundEventsPackage = "{{basePackage}}.core.outbound.events";
+    public String infrastructureEventsPackage = "{{basePackage}}.infrastructure.events";
+    // asyncapi events
+    public String outboundEventsModelPackage = "{{basePackage}}.core.outbound.events.dtos";
 
 
     @DocumentedOption(description = "Entities to generate code for")
@@ -79,8 +82,8 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
     @DocumentedOption(description = "Use @Getter and @Setter annotations from Lombok")
     public boolean useLombok = false;
 
-    @DocumentedOption(description = "Whether to add IEntityEventProducer interfaces as service dependencies. Depends on the naming convention of zenwave-asyncapi plugin to work.")
-    public boolean includeEmitEventsImplementation = false;
+    @DocumentedOption(description = "Whether to add AsyncAPI/ApplicationEventPublisher as service dependencies. Depends on the naming convention of zenwave-asyncapi plugin to work.")
+    public boolean includeEmitEventsImplementation = true;
 
     @DocumentedOption(description = "Controls whether to add a read/write relationship by id when mapping relationships between aggregate (not recommended) keeping the relationship by object readonly.")
     public boolean addRelationshipsById = false;
@@ -109,6 +112,7 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
     protected Function<Map<String, Object>, Boolean> skipEntityInput = (model) -> inputDTOSuffix == null || inputDTOSuffix.isEmpty();
 
     protected Function<Map<String, Object>, Boolean> skipEvents = (model) -> !includeEmitEventsImplementation;
+    protected Function<Map<String, Object>, Boolean> skipEventsBus = (model) -> ((Collection) model.get("events")).isEmpty();
     protected Function<Map<String, Object>, Boolean> skipInput = (model) -> is(model, "inline");
     @Override
     protected ZDLProjectTemplates configureProjectTemplates() {
@@ -165,6 +169,13 @@ public class BackendDefaultApplicationGenerator extends AbstractZDLProjectGenera
                 "{{asPackageFolder configPackage}}/RepositoriesInMemoryConfig.java", JAVA, null, true);
         ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/ServicesInMemoryConfig.java",
                 "{{asPackageFolder configPackage}}/ServicesInMemoryConfig.java", JAVA, null, true);
+
+        ts.addTemplate(ts.allEventsTemplates, "src/main/java", "core/outbound/events/EventPublisher.java",
+                "{{asPackageFolder outboundEventsPackage}}/EventPublisher.java", JAVA, skipEventsBus, false);
+        ts.addTemplate(ts.allEventsTemplates, "src/main/java", "infrastructure/events/DefaultEventPublisher.java",
+                "{{asPackageFolder infrastructureEventsPackage}}/DefaultEventPublisher.java", JAVA, skipEventsBus, false);
+        ts.addTemplate(ts.allEventsTemplates, "src/test/java", "infrastructure/events/InMemoryEventPublisher.java",
+                "{{asPackageFolder infrastructureEventsPackage}}/InMemoryEventPublisher.java", JAVA, skipEventsBus, false);
 
         ts.addTemplate(ts.singleTemplates, "src/test/java", "config/TestDataLoader-{{persistence}}.java",
                 "{{asPackageFolder configPackage}}/TestDataLoader.java", JAVA, null, true);

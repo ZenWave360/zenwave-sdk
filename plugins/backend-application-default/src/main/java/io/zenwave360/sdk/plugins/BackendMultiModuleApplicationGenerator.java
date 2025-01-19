@@ -63,6 +63,13 @@ public class BackendMultiModuleApplicationGenerator extends BackendDefaultApplic
         ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/ServicesInMemoryConfig.java", "{{mavenModulesPrefix}}-core-impl",
                 "{{asPackageFolder configPackage}}/ServicesInMemoryConfig.java", JAVA, null, true);
 
+        ts.addTemplate(ts.allEventsTemplates, "src/main/java", "core/outbound/events/EventPublisher.java", "{{mavenModulesPrefix}}-core-impl",
+                "{{asPackageFolder outboundEventsPackage}}/EventPublisher.java", JAVA, skipEventsBus, false);
+        ts.addTemplate(ts.allEventsTemplates, "src/main/java", "infrastructure/events/DefaultEventPublisher.java", "{{mavenModulesPrefix}}-core-impl",
+                "{{asPackageFolder infrastructureEventsPackage}}/DefaultEventPublisher.java", JAVA, skipEventsBus, false);
+        ts.addTemplate(ts.allEventsTemplates, "src/test/java", "infrastructure/events/InMemoryEventPublisher.java", "{{mavenModulesPrefix}}-core-impl",
+                "{{asPackageFolder infrastructureEventsPackage}}/InMemoryEventPublisher.java", JAVA, skipEventsBus, false);
+
         ts.addTemplate(ts.singleTemplates, "src/test/java", "config/TestDataLoader-{{persistence}}.java", "{{mavenModulesPrefix}}-core-impl",
                 "{{asPackageFolder configPackage}}/TestDataLoader.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/test/java", "config/DockerComposeInitializer-{{persistence}}.java", "{{mavenModulesPrefix}}-core-impl",

@@ -39,7 +39,6 @@ public class BackendSimpleDomainPackagingApplicationGenerator extends BackendDef
     {
         configPackage = "{{basePackage}}.config";
         entitiesPackage = "{{basePackage}}.model";
-        domainEventsPackage = "{{basePackage}}.events";
         inboundPackage = "{{basePackage}}";
         inboundDtosPackage = "{{basePackage}}.dtos";
         outboundPackage = "{{basePackage}}";
@@ -49,8 +48,12 @@ public class BackendSimpleDomainPackagingApplicationGenerator extends BackendDef
         infrastructureRepositoryPackage = "{{basePackage}}";
         adaptersPackage = "{{basePackage}}";
 
-        outboundEventsModelPackage = "{{basePackage}}.events.dtos";
+        // domain events
+        domainEventsPackage = "{{basePackage}}.events";
         outboundEventsPackage = "{{basePackage}}.events";
+        infrastructureEventsPackage = "{{basePackage}}.events";
+        // asyncapi events
+        outboundEventsModelPackage = "{{basePackage}}.events.dtos";
     }
 
     @Override
@@ -108,6 +111,14 @@ public class BackendSimpleDomainPackagingApplicationGenerator extends BackendDef
                 "{{asPackageFolder configPackage}}/RepositoriesInMemoryConfig.java", JAVA, null, true);
         ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/ServicesInMemoryConfig.java",
                 "{{asPackageFolder configPackage}}/ServicesInMemoryConfig.java", JAVA, null, true);
+
+        ts.addTemplate(ts.allEventsTemplates, "src/main/java", "core/outbound/events/EventPublisher.java",
+                "{{asPackageFolder outboundEventsPackage}}/EventPublisher.java", JAVA, skipEventsBus, false);
+        ts.addTemplate(ts.allEventsTemplates, "src/main/java", "infrastructure/events/DefaultEventPublisher.java",
+                "{{asPackageFolder infrastructureEventsPackage}}/DefaultEventPublisher.java", JAVA, skipEventsBus, false);
+        ts.addTemplate(ts.allEventsTemplates, "src/test/java", "infrastructure/events/InMemoryEventPublisher.java",
+                "{{asPackageFolder infrastructureEventsPackage}}/InMemoryEventPublisher.java", JAVA, skipEventsBus, false);
+
 
         ts.addTemplate(ts.singleTemplates, "src/test/java", "config/TestDataLoader-{{persistence}}.java",
                 "{{asPackageFolder configPackage}}/TestDataLoader.java", JAVA, null, true);
