@@ -20,7 +20,7 @@
 {{> (partial 'entityClass.plantuml') stereotype='aggregate' }}
 
 {{~#each (entityAssociations entity) as |association|}}
-    {{../entity.name}} -down{{association.linkType}} {{association.entity.name}}
+    {{../entity.name}} {{association.linkType}}down- {{association.entity.name}}
     {{> (partial 'entityClass.plantuml') entity=association.entity }}
 {{~/each}}
 @enduml
