@@ -36,7 +36,7 @@ public class MainGenerator {
         Map<String, Object> model = new HashMap<>();
         List<TemplateOutput> templateOutputList = new ArrayList<>();
 
-//        ConfigurationProvider.processLayout(configuration);
+        ConfigurationProvider.processLayout(configuration);
 
         int chainIndex = 0;
         for (Class pluginClass : configuration.getChain()) {
