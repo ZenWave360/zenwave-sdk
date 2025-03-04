@@ -1,10 +1,10 @@
-package {{coreImplementationPackage}}.mappers;
+package {{layout.coreImplementationPackage}}.mappers;
 
-import {{entitiesPackage}}.*;
+import {{layout.entitiesPackage}}.*;
 {{~#if (includeDomainEvents zdl)}}
-import {{domainEventsPackage}}.*;
+import {{layout.domainEventsPackage}}.*;
 {{~/if}}
-import {{inboundDtosPackage}}.*;
+import {{layout.inboundDtosPackage}}.*;
 
 import java.util.List;
 import org.mapstruct.Mapper;
@@ -19,7 +19,7 @@ public interface EventsMapper {
     EventsMapper INSTANCE = Mappers.getMapper(EventsMapper.class);
 
 {{~#each (listOfPairEventEntity zdl) as |pair|}}
-    {{~assign 'eventPackage' (ifTruthy pair.isAsyncApi outboundEventsModelPackage domainEventsPackage) }}
+    {{~assign 'eventPackage' (ifTruthy pair.isAsyncApi layout.outboundEventsModelPackage layout.domainEventsPackage) }}
     {{~#if pair.entity}}
     {{eventPackage}}.{{pair.event.name}} as{{{pair.event.name}}}({{pair.entity.className}} {{asInstanceName pair.entity.name}});
     {{~else}}
@@ -28,6 +28,6 @@ public interface EventsMapper {
 {{~/each}}
 
 {{~#each (domainEventsWithAsyncapiAnnotation zdl) as |event|}}
-    {{outboundEventsModelPackage}}.{{event.name}} as{{{event.name}}}({{event.className}} event);
+    {{layout.outboundEventsModelPackage}}.{{event.name}} as{{{event.name}}}({{event.className}} event);
 {{~/each}}
 }

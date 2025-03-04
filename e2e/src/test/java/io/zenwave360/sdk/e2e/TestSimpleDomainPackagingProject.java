@@ -2,6 +2,7 @@ package io.zenwave360.sdk.e2e;
 
 import java.io.File;
 
+import io.zenwave360.sdk.zdl.layout.SimpleDomainProjectLayout;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
@@ -24,7 +25,7 @@ public class TestSimpleDomainPackagingProject {
     private String basePackage = "io.zenwave360.example.customer";
 
     @Test
-    public void testCustomerAddressPostgresJson() throws Exception {
+    public void testCustomerAddressSimpleDomainPackaging() throws Exception {
         String sourceFolder = "src/test/resources/projects/simple-domain-packaging/";
         String targetFolder = "target/projects/simple-domain-packaging";
         String zdlFile = targetFolder + "/customer-address-relational-one-to-many.zdl";
@@ -59,7 +60,9 @@ public class TestSimpleDomainPackagingProject {
                 .withZdlFile(zdlFile)
                 .withTargetFolder(targetFolder)
 
-                .withOption("simpleDomainPackaging", true)
+//                .withOption("layout", "SimpleDomainProjectLayout")
+//                .withOption("layout.outboundEventsPackage", "io.zenwave360.example.customer.events")
+//                .withOption("layout.outboundEventsModelPackage", "io.zenwave360.example.customer.events.dtos")
 
                 .withOption("basePackage", basePackage)
                 .withOption("persistence", PersistenceType.jpa)

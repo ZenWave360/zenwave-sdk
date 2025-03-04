@@ -6,6 +6,7 @@ import io.zenwave360.sdk.plugins.BackendApplicationDefaultPlugin;
 import io.zenwave360.sdk.plugins.OpenAPIControllersPlugin;
 import io.zenwave360.sdk.plugins.ZDLToAsyncAPIPlugin;
 import io.zenwave360.sdk.plugins.ZDLToOpenAPIPlugin;
+import io.zenwave360.sdk.zdl.layout.DefaultProjectLayout;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.*;
 
@@ -126,12 +127,11 @@ public class TestOnlineFoodDeliveryProject {
                 .withApiFile(moduleFolder + "/src/main/resources/apis/openapi.yml")
                 .withZdlFile(zdlFile)
                 .withOption("basePackage", modulePackage)
-                .withOption("controllersPackage", "{{basePackage}}.adapters.web")
-                .withOption("openApiApiPackage", "{{basePackage}}.adapters.web")
-                .withOption("openApiModelPackage", "{{basePackage}}.adapters.web.model")
+                .withOption("layout", "DefaultProjectLayout")
                 .withOption("openApiModelNameSuffix", "DTO")
                 // .withOption("operationIds", List.of("addPet", "updatePet"))
                 .withOption("style", ProgrammingStyle.imperative)
+                .withOption("haltOnFailFormatting", false)
                 .withTargetFolder(moduleFolder);
 
         new MainGenerator().generate(plugin);

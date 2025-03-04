@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class BackendApplicationDefaultHelpersTest {
 
-    private BackendDefaultApplicationGenerator generator = new BackendDefaultApplicationGenerator();
+    private BackendApplicationDefaultGenerator generator = new BackendApplicationDefaultGenerator();
     private BackendApplicationDefaultHelpers helpers = new BackendApplicationDefaultHelpers(generator);
 
     private Map<String, Object> loadZDLModelFromResource(String resource) throws Exception {

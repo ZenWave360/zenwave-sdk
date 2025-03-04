@@ -1,18 +1,18 @@
-package {{coreImplementationPackage}};
+package {{layout.coreImplementationPackage}};
 
-import {{entitiesPackage}}.*;
-import {{inboundPackage}}.*;
-import {{inboundDtosPackage}}.*;
-import {{coreImplementationPackage}}.mappers.*;
-import {{outboundRepositoryPackage}}.*;
+import {{layout.entitiesPackage}}.*;
+import {{layout.inboundPackage}}.*;
+import {{layout.inboundDtosPackage}}.*;
+import {{layout.coreImplementationPackage}}.mappers.*;
+import {{layout.outboundRepositoryPackage}}.*;
 {{~#if (and includeEmitEventsImplementation (needsEventsProducer service))}}
-import {{outboundEventsPackage}}.*;
+import {{layout.outboundEventsPackage}}.*;
 {{~/if}}
 {{~#if (and includeEmitEventsImplementation (needsEventBus service))}}
-import {{outboundEventsPackage}}.*;
+import {{layout.outboundEventsPackage}}.*;
 {{~/if}}
 {{~#if (includeDomainEvents service)}}
-import {{domainEventsPackage}}.*;
+import {{layout.domainEventsPackage}}.*;
 {{~/if}}
 
 import java.math.*;

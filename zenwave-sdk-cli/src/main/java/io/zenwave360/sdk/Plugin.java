@@ -126,7 +126,13 @@ public class Plugin {
                 nestedTempObject.put(paths[i], new HashMap<>());
             }
             if (i < paths.length - 1) {
-                nestedTempObject = (Map<String, Object>) nestedTempObject.get(lastPath);
+                if (nestedTempObject.get(lastPath) instanceof Map) {
+                    nestedTempObject = (Map<String, Object>) nestedTempObject.get(lastPath);
+                } else {
+                    nestedTempObject = options;
+                    lastPath = name;
+                    break;
+                }
             }
         }
         if(value instanceof String && ((String) value).contains(",")) {

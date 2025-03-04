@@ -159,7 +159,7 @@
 							<inputSpec>${project.basedir}/src/main/resources/apis/openapi.yml</inputSpec>
 							<generatorName>spring</generatorName>
 							<apiPackage>io.zenwave360.example.adapters.web</apiPackage>
-							<modelPackage>io.zenwave360.example.adapters.web.model</modelPackage>
+							<modelPackage>io.zenwave360.example.adapters.web.dtos</modelPackage>
 							<modelNameSuffix>DTO</modelNameSuffix>
 							<addCompileSourceRoot>true</addCompileSourceRoot>
 							<generateSupportingFiles>false</generateSupportingFiles>

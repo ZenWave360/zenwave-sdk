@@ -87,7 +87,7 @@ public class TestCustomerAddressRelationalProject {
 
         plugin = new OpenAPIControllersPlugin()
                 .withApiFile(targetFolder + "/src/main/resources/apis/openapi.yml")
-                .withOption("zdlFile", zdlFile)
+                .withZdlFile(zdlFile)
                 .withOption("basePackage", basePackage)
                 .withOption("controllersPackage", "{{basePackage}}.adapters.web")
                 .withOption("openApiApiPackage", "{{basePackage}}.adapters.web")

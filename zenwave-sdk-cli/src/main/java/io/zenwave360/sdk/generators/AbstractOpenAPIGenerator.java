@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.zenwave360.sdk.plugins.ConfigurationProvider;
+import io.zenwave360.sdk.zdl.layout.DefaultProjectLayout;
+import io.zenwave360.sdk.zdl.layout.ProjectLayout;
 import org.apache.commons.lang3.ObjectUtils;
 
 import com.jayway.jsonpath.JsonPath;
@@ -31,6 +34,9 @@ public abstract class AbstractOpenAPIGenerator implements Generator {
     @DocumentedOption(description = "The package to used by OpenAPI-Generator for generated model objects/classes")
     public String openApiModelPackage = "{{openApiApiPackage}}";
 
+    @DocumentedOption(description = "Project layout")
+    public ProjectLayout layout;
+
     @DocumentedOption(description = "Sets the prefix for model enums and classes used by OpenAPI-Generator")
     public String openApiModelNamePrefix = "";
 
@@ -42,6 +48,26 @@ public abstract class AbstractOpenAPIGenerator implements Generator {
 
     @DocumentedOption(description = "Status codes to generate code for")
     public List<String> statusCodes = List.of("200", "201", "202", "400");
+
+    @Override
+    public void onPropertiesSet() {
+        if (openApiApiPackage != null && layout == null) {
+            layout = new DefaultProjectLayout();
+            ConfigurationProvider.processLayoutPlaceHolders(layout, this.asConfigurationMap());
+        }
+        if (layout != null) {
+            if (basePackage == null) {
+                basePackage = layout.basePackage;
+            }
+            if (this.openApiApiPackage == null) {
+                this.openApiApiPackage = layout.openApiApiPackage;
+            }
+            if (this.openApiModelPackage == null) {
+                this.openApiModelPackage = layout.openApiModelPackage;
+            }
+        }
+    }
+
 
     public String getApiPackageFolder() {
         return this.openApiApiPackage.replaceAll("\\.", "/");

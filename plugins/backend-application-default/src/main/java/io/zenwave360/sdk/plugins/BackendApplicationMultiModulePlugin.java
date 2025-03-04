@@ -7,12 +7,12 @@ import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 
-@DocumentedPlugin(value = "Generates a full backend application using the provided 'layout' property", shortCode = "backend-application-default", description = "")
-public class BackendApplicationDefaultPlugin extends Plugin {
+@DocumentedPlugin(value = "Generates a full backend application using a multiple maven modules", description = "")
+public class BackendApplicationMultiModulePlugin extends Plugin {
 
-    public BackendApplicationDefaultPlugin() {
+    public BackendApplicationMultiModulePlugin() {
         super();
-        withChain(ZDLParser.class, ZDLProcessor.class, BackendApplicationDefaultGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
+        withChain(ZDLParser.class, ZDLProcessor.class, BackendApplicationMultiModuleGenerator.class, JavaFormatter.class, TemplateFileWriter.class);
     }
 
     @Override

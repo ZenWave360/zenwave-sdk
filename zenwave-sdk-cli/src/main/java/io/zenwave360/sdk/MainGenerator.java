@@ -12,6 +12,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 import io.zenwave360.sdk.plugins.ConfigurationProvider;
 import io.zenwave360.sdk.utils.CommaSeparatedCollectionDeserializationHandler;
+import io.zenwave360.sdk.zdl.layout.ProjectLayout;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +35,8 @@ public class MainGenerator {
         log.debug("Processors chain is {}", configuration.getChain().stream().map(c -> c.getName()).collect(Collectors.toList()));
         Map<String, Object> model = new HashMap<>();
         List<TemplateOutput> templateOutputList = new ArrayList<>();
+
+//        ConfigurationProvider.processLayout(configuration);
 
         int chainIndex = 0;
         for (Class pluginClass : configuration.getChain()) {
@@ -89,4 +93,5 @@ public class MainGenerator {
             // ignore
         }
     }
+
 }

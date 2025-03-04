@@ -15,6 +15,8 @@ import io.zenwave360.sdk.utils.NamingUtils;
 import io.zenwave360.sdk.zdl.ZDLFindUtils;
 import io.zenwave360.sdk.zdl.ZDLHttpUtils;
 import io.zenwave360.sdk.zdl.ZDLJavaSignatureUtils;
+import io.zenwave360.sdk.zdl.layout.DefaultProjectLayout;
+import io.zenwave360.sdk.zdl.layout.ProjectLayout;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -33,18 +35,6 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     public String apiProperty = "api";
     public String zdlProperty = "zdl";
 
-    @DocumentedOption(description = "The package to generate REST Controllers")
-    public String controllersPackage = "{{basePackage}}.adapters.web";
-
-    @DocumentedOption(description = "Package where your domain entities are")
-    public String entitiesPackage = "{{basePackage}}.core.domain";
-
-    @DocumentedOption(description = "Package where your inbound dtos are")
-    public String inboundDtosPackage = "{{basePackage}}.core.inbound.dtos";
-
-    @DocumentedOption(description = "Package where your domain services/usecases interfaces are")
-    public String servicesPackage = "{{basePackage}}.core.inbound";
-
     @DocumentedOption(description = "Should use same value configured in BackendApplicationDefaultPlugin. Whether to use an input DTO for entities used as command parameter.")
     public String inputDTOSuffix = "";
 
@@ -52,7 +42,6 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     public ProgrammingStyle style = ProgrammingStyle.imperative;
 
     public boolean useOptional = false;
-    public boolean simpleDomainPackaging = false;
 
     @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. User '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
     public List<String> paginatedDtoItemsJsonPath = List.of("$.items", "$.properties.content.items");
@@ -62,10 +51,10 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     protected String templatesFolder = "io/zenwave360/sdk/plugins/OpenAPIControllersGenerator/";
 
     List<Object[]> templates = List.of(
-            new Object[] {"src/main/java", "web/mappers/BaseMapper.java", "mappers/BaseMapper.java", JAVA},
-            new Object[] {"src/main/java", "web/mappers/ServiceDTOsMapper.java", "mappers/{{serviceName}}DTOsMapper.java", JAVA},
-            new Object[] {"src/main/java", "web/{{webFlavor}}/ServiceApiController.java", "{{serviceName}}ApiController.java", JAVA},
-            new Object[] {"src/test/java", "web/{{webFlavor}}/ServiceApiControllerTest.java", "{{serviceName}}ApiControllerTest.java", JAVA});
+            new Object[] {"src/main/java", "web/mappers/BaseMapper.java", "/{{asPackageFolder layout.adaptersWebMappersPackage}}/BaseMapper.java", JAVA},
+            new Object[] {"src/main/java", "web/mappers/ServiceDTOsMapper.java", "/{{asPackageFolder layout.adaptersWebMappersPackage}}/{{serviceName}}DTOsMapper.java", JAVA},
+            new Object[] {"src/main/java", "web/{{webFlavor}}/ServiceApiController.java", "/{{asPackageFolder layout.adaptersWebPackage}}/{{serviceName}}ApiController.java", JAVA},
+            new Object[] {"src/test/java", "web/{{webFlavor}}/ServiceApiControllerTest.java", "/{{asPackageFolder layout.adaptersWebPackage}}/{{serviceName}}ApiControllerTest.java", JAVA});
 
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;
@@ -75,19 +64,9 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         Function<Map<String, Object>, Boolean> skip = templateNames.length > 4 ? (Function) templateNames[4] : null;
         return new TemplateInput()
                 .withTemplateLocation(templatesFolder + templateNames[0] + "/" + templateNames[1])
-                .withTargetFile(templateNames[0] + "/{{asPackageFolder controllersPackage}}/" + templateNames[2])
+                .withTargetFile(templateNames[0].toString() + templateNames[2])
                 .withMimeType((OutputFormatType) templateNames[3])
                 .withSkip(skip);
-    }
-
-    @Override
-    public void onPropertiesSet() {
-        if (simpleDomainPackaging) {
-            controllersPackage = "{{basePackage}}";
-            entitiesPackage = "{{basePackage}}.model";
-            inboundDtosPackage = "{{basePackage}}.dtos";
-            servicesPackage = "{{basePackage}}";
-        }
     }
 
     protected Map<String, Object> getZDLModel(Map<String, Object> contextModel) {

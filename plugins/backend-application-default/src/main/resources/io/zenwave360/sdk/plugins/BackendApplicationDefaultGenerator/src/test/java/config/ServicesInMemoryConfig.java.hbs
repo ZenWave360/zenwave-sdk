@@ -1,21 +1,21 @@
-package {{basePackage}}.config;
+package {{layout.basePackage}}.config;
 
 {{#if entities}}
-import {{entitiesPackage}}.*;
+import {{layout.entitiesPackage}}.*;
 {{/if}}
 {{#if services}}
-import {{inboundPackage}}.*;
-import {{coreImplementationPackage}}.*;
+import {{layout.inboundPackage}}.*;
+import {{layout.coreImplementationPackage}}.*;
 {{/if}}
 {{#if includeEmitEventsImplementation}}
     {{~#if (needsEventsProducer service)}}
-import {{outboundEventsPackage}}.*;
+import {{layout.outboundEventsPackage}}.*;
     {{~/if}}
     {{#if (includeDomainEvents service)}}
-import {{domainEventsPackage}}.*;
+import {{layout.domainEventsPackage}}.*;
     {{/if}}
     {{~#if (needsEventBus service)}}
-import {{infrastructureEventsPackage}}.*;
+import {{layout.infrastructureEventsPackage}}.*;
     {{~/if}}
 {{/if}}
 import org.springframework.context.annotation.Bean;

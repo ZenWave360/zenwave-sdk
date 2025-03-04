@@ -8,6 +8,10 @@ config {
     databaseType mariadb
 //    haltOnFailFormatting false
 
+    layout SimpleDomainProjectLayout
+    layout.outboundEventsPackage io.zenwave360.example.customer.events
+    layout.outboundEventsModelPackage io.zenwave360.example.customer.events.dtos
+
     plugins {
 
         ZDLToOpenAPIPlugin {

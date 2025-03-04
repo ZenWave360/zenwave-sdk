@@ -146,7 +146,7 @@
 									<inputSpec>${project.basedir}/src/main/resources/apis/openapi.yml</inputSpec>
 									<generatorName>spring</generatorName>
 									<apiPackage>${basePackage}.adapters.web</apiPackage>
-									<modelPackage>${basePackage}.adapters.web.model</modelPackage>
+									<modelPackage>${basePackage}.adapters.web.dtos</modelPackage>
 									<modelNameSuffix>DTO</modelNameSuffix>
 									<addCompileSourceRoot>true</addCompileSourceRoot>
 									<generateSupportingFiles>false</generateSupportingFiles>

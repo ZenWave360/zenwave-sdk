@@ -26,7 +26,7 @@ public class TestCustomerAddressPostgresJsonProject {
     @Test
     public void testCustomerAddressPostgresJson() throws Exception {
         String sourceFolder = "src/test/resources/projects/customer-address-postgres-json/";
-        String targetFolder = "target/customer-address-postgres-json/";
+        String targetFolder = "target/projects/customer-address-postgres-json/";
         String zdlFile = targetFolder + "/customer-address-postgres-json.zdl";
 
         // copy whole dir from sourceFolder to targetFolder

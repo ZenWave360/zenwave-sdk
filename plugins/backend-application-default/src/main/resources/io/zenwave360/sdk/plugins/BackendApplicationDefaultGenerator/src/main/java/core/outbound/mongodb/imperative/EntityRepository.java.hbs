@@ -1,9 +1,9 @@
-package {{outboundRepositoryPackage}};
+package {{layout.outboundRepositoryPackage}};
 {{~assign 'aggregate' (findEntityAggregate entity.name)}}
 
-import {{entitiesPackage}}.{{entity.className}};
+import {{layout.entitiesPackage}}.{{entity.className}};
 {{~#if aggregate}}
-import {{entitiesPackage}}.{{aggregate}};
+import {{layout.entitiesPackage}}.{{aggregate}};
 {{~/if}}
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;

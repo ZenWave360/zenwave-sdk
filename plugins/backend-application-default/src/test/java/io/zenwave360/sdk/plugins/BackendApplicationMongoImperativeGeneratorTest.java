@@ -2,6 +2,7 @@ package io.zenwave360.sdk.plugins;
 
 import java.util.List;
 
+import io.zenwave360.sdk.zdl.layout.SimpleDomainProjectLayout;
 import org.junit.jupiter.api.*;
 
 import io.zenwave360.sdk.MainGenerator;
@@ -31,16 +32,15 @@ public class BackendApplicationMongoImperativeGeneratorTest {
     }
 
     @Test
-    public void test_generator_hexagonal_mongodb_customer_address() throws Exception {
-        String targetFolder = "target/zdl/test_generator_hexagonal_mongodb_customer_address_multimodule";
-        Plugin plugin = new BackendApplicationDefaultPlugin()
+    public void test_generator_mongodb_customer_address_multimodule() throws Exception {
+        String targetFolder = "target/zdl/test_generator_mongodb_customer_address_multimodule";
+        Plugin plugin = new BackendApplicationMultiModulePlugin()
                 .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
                 .withTargetFolder(targetFolder)
                 .withOption("basePackage", "io.zenwave360.example")
                 .withOption("persistence", PersistenceType.mongodb)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("mavenModulesPrefix", "customer-address")
-                .withOption("multiModule", true)
                 .withOption("forceOverwrite", true)
                 .withOption("haltOnFailFormatting", false);
 
@@ -64,7 +64,7 @@ public class BackendApplicationMongoImperativeGeneratorTest {
                 .withOption("persistence", PersistenceType.mongodb)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("projectName", "customer-address")
-                .withOption("simpleDomainPackaging", true)
+                .withOption("layout", "SimpleDomainProjectLayout")
                 .withOption("includeEmitEventsImplementation", false)
                 .withOption("forceOverwrite", true)
                 .withOption("haltOnFailFormatting", false);

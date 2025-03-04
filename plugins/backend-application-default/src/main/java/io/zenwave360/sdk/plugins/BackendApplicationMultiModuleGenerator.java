@@ -4,7 +4,7 @@ import io.zenwave360.sdk.generators.ZDLProjectTemplates;
 
 import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
 
-public class BackendMultiModuleApplicationGenerator extends BackendDefaultApplicationGenerator {
+public class BackendApplicationMultiModuleGenerator extends BackendApplicationDefaultGenerator {
 
     public String mavenModulesPrefix;
     @Override
@@ -12,79 +12,79 @@ public class BackendMultiModuleApplicationGenerator extends BackendDefaultApplic
         var ts = new ZDLProjectTemplates("io/zenwave360/sdk/plugins/BackendApplicationDefaultGenerator");
 
         ts.addTemplate(ts.aggregateTemplates, "src/main/java","core/domain/common/Aggregate.java","{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder entitiesPackage}}/{{aggregate.name}}.java", JAVA, null, true);
+                "{{asPackageFolder layout.entitiesPackage}}/{{aggregate.name}}.java", JAVA, null, true);
         ts.addTemplate(ts.domainEventsTemplates, "src/main/java","core/domain/common/DomainEvent.java","{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder domainEventsPackage}}/{{event.name}}.java", JAVA, null, true);
+                "{{asPackageFolder layout.domainEventsPackage}}/{{event.name}}.java", JAVA, null, true);
 
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/domain/{{persistence}}/Entity.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder entitiesPackage}}/{{entity.name}}.java", JAVA, skipEntity, false);
+                "{{asPackageFolder layout.entitiesPackage}}/{{entity.name}}.java", JAVA, skipEntity, false);
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/outbound/{{persistence}}/{{style}}/EntityRepository.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder outboundRepositoryPackage}}/{{entity.className}}Repository.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder layout.outboundRepositoryPackage}}/{{entity.className}}Repository.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/main/java","core/inbound/dtos/EntityInput.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}{{inputDTOSuffix entity}}.java", JAVA, skipEntityInput, false);
+                "{{asPackageFolder layout.inboundDtosPackage}}/{{entity.className}}{{inputDTOSuffix entity}}.java", JAVA, skipEntityInput, false);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/BaseRepositoryIntegrationTest.java", "{{mavenModulesPrefix}}-infra",
-                "{{asPackageFolder infrastructureRepositoryPackage}}/BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder layout.infrastructureRepositoryPackage}}/BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/EntityRepositoryIntegrationTest.java", "{{mavenModulesPrefix}}-infra",
-                "{{asPackageFolder infrastructureRepositoryPackage}}/{{entity.className}}RepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder layout.infrastructureRepositoryPackage}}/{{entity.className}}RepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", "{{mavenModulesPrefix}}-core-impl",
-                "{{asPackageFolder infrastructureRepositoryPackage}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder layout.infrastructureRepositoryPackage}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/inmemory/EntityRepositoryInMemory.java", "{{mavenModulesPrefix}}-core-impl",
-                "{{asPackageFolder infrastructureRepositoryPackage}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder layout.infrastructureRepositoryPackage}}/inmemory/{{entity.className}}RepositoryInMemory.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java","infrastructure/{{persistence}}/{{style}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", "{{mavenModulesPrefix}}-core-impl",
-                "{{asPackageFolder infrastructureRepositoryPackage}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true);
+                "{{asPackageFolder layout.infrastructureRepositoryPackage}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true);
 
         ts.addTemplate(ts.enumTemplates, "src/main/java", "core/domain/common/DomainEnum.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder entitiesPackage}}/{{enum.name}}.java", JAVA, null, false);
+                "{{asPackageFolder layout.entitiesPackage}}/{{enum.name}}.java", JAVA, null, false);
         ts.addTemplate(ts.inputEnumTemplates, "src/main/java", "core/domain/common/InputEnum.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder inboundDtosPackage}}/{{enum.name}}.java", JAVA, null, false);
+                "{{asPackageFolder layout.inboundDtosPackage}}/{{enum.name}}.java", JAVA, null, false);
         ts.addTemplate(ts.eventEnumTemplates, "src/main/java", "core/domain/common/EventEnum.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder domainEventsPackage}}/{{enum.name}}.java", JAVA, skipInput, false);
+                "{{asPackageFolder layout.domainEventsPackage}}/{{enum.name}}.java", JAVA, skipInput, false);
 
         ts.addTemplate(ts.inputTemplates, "src/main/java", "core/inbound/dtos/InputOrOutput.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}.java", JAVA, skipInput, false);
+                "{{asPackageFolder layout.inboundDtosPackage}}/{{entity.className}}.java", JAVA, skipInput, false);
         ts.addTemplate(ts.outputTemplates, "src/main/java", "core/inbound/dtos/InputOrOutput.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder inboundDtosPackage}}/{{entity.className}}.java", JAVA, null, false);
+                "{{asPackageFolder layout.inboundDtosPackage}}/{{entity.className}}.java", JAVA, null, false);
 
         ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/inbound/Service.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder inboundPackage}}/{{service.name}}.java", JAVA, null, false);
+                "{{asPackageFolder layout.inboundPackage}}/{{service.name}}.java", JAVA, null, false);
         ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/implementation/{{style}}/ServiceImpl.java", "{{mavenModulesPrefix}}-core-impl",
-                "{{asPackageFolder coreImplementationPackage}}/{{service.name}}Impl.java", JAVA, null, true);
+                "{{asPackageFolder layout.coreImplementationPackage}}/{{service.name}}Impl.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/main/java", "core/implementation/mappers/BaseMapper.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder coreImplementationPackage}}/mappers/BaseMapper.java", JAVA, null, true);
+                "{{asPackageFolder layout.coreImplementationMappersPackage}}/BaseMapper.java", JAVA, null, true);
         ts.addTemplate(ts.serviceTemplates, "src/main/java","core/implementation/mappers/ServiceMapper.java", "{{mavenModulesPrefix}}-core-impl",
-                "{{asPackageFolder coreImplementationPackage}}/mappers/{{service.name}}Mapper.java", JAVA, null, true);
+                "{{asPackageFolder layout.coreImplementationMappersPackage}}/{{service.name}}Mapper.java", JAVA, null, true);
         ts.addTemplate(ts.serviceTemplates, "src/test/java", "core/implementation/{{persistence}}/{{style}}/ServiceTest.java", "{{mavenModulesPrefix}}-core-impl",
-                "{{asPackageFolder coreImplementationPackage}}/{{service.name}}Test.java", JAVA, null, true);
+                "{{asPackageFolder layout.coreImplementationPackage}}/{{service.name}}Test.java", JAVA, null, true);
 
         ts.addTemplate(ts.allServicesTemplates, "src/main/java", "core/implementation/mappers/EventsMapper.java","{{mavenModulesPrefix}}-core-impl",
-                "{{asPackageFolder coreImplementationPackage}}/mappers/EventsMapper.java", JAVA, skipEvents, true);
+                "{{asPackageFolder layout.coreImplementationMappersPackage}}/EventsMapper.java", JAVA, skipEvents, true);
         ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/RepositoriesInMemoryConfig.java", "{{mavenModulesPrefix}}-core-impl",
-                "{{asPackageFolder configPackage}}/RepositoriesInMemoryConfig.java", JAVA, null, true);
+                "{{asPackageFolder layout.configPackage}}/RepositoriesInMemoryConfig.java", JAVA, null, true);
         ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/ServicesInMemoryConfig.java", "{{mavenModulesPrefix}}-core-impl",
-                "{{asPackageFolder configPackage}}/ServicesInMemoryConfig.java", JAVA, null, true);
+                "{{asPackageFolder layout.configPackage}}/ServicesInMemoryConfig.java", JAVA, null, true);
 
         ts.addTemplate(ts.allEventsTemplates, "src/main/java", "core/outbound/events/EventPublisher.java", "{{mavenModulesPrefix}}-core-impl",
-                "{{asPackageFolder outboundEventsPackage}}/EventPublisher.java", JAVA, skipEventsBus, false);
+                "{{asPackageFolder layout.outboundEventsPackage}}/EventPublisher.java", JAVA, skipEventsBus, false);
         ts.addTemplate(ts.allEventsTemplates, "src/main/java", "infrastructure/events/DefaultEventPublisher.java", "{{mavenModulesPrefix}}-core-impl",
-                "{{asPackageFolder infrastructureEventsPackage}}/DefaultEventPublisher.java", JAVA, skipEventsBus, false);
+                "{{asPackageFolder layout.infrastructureEventsPackage}}/DefaultEventPublisher.java", JAVA, skipEventsBus, false);
         ts.addTemplate(ts.allEventsTemplates, "src/test/java", "infrastructure/events/InMemoryEventPublisher.java", "{{mavenModulesPrefix}}-core-impl",
-                "{{asPackageFolder infrastructureEventsPackage}}/InMemoryEventPublisher.java", JAVA, skipEventsBus, false);
+                "{{asPackageFolder layout.infrastructureEventsPackage}}/InMemoryEventPublisher.java", JAVA, skipEventsBus, false);
 
         ts.addTemplate(ts.singleTemplates, "src/test/java", "config/TestDataLoader-{{persistence}}.java", "{{mavenModulesPrefix}}-core-impl",
-                "{{asPackageFolder configPackage}}/TestDataLoader.java", JAVA, null, true);
+                "{{asPackageFolder layout.configPackage}}/TestDataLoader.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/test/java", "config/DockerComposeInitializer-{{persistence}}.java", "{{mavenModulesPrefix}}-core-impl",
-                "{{asPackageFolder configPackage}}/DockerComposeInitializer.java", JAVA, null, true);
+                "{{asPackageFolder layout.configPackage}}/DockerComposeInitializer.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/test/java", "config/TestDataLoader-{{persistence}}.java", "{{mavenModulesPrefix}}-infra",
-                "{{asPackageFolder configPackage}}/TestDataLoader.java", JAVA, null, true);
+                "{{asPackageFolder layout.configPackage}}/TestDataLoader.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/test/java", "config/DockerComposeInitializer-{{persistence}}.java", "{{mavenModulesPrefix}}-infra",
-                "{{asPackageFolder configPackage}}/DockerComposeInitializer.java", JAVA, null, true);
+                "{{asPackageFolder layout.configPackage}}/DockerComposeInitializer.java", JAVA, null, true);
 
         ts.addTemplate(ts.singleTemplates, "src/main/java", "core/inbound/dtos/package-info.java", "{{mavenModulesPrefix}}-domain",
-                "{{asPackageFolder inboundDtosPackage}}/package-info.java", JAVA, null, true);
+                "{{asPackageFolder layout.inboundDtosPackage}}/package-info.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/main/java", "infrastructure/package-info.java", "{{mavenModulesPrefix}}-infra",
-                "{{asPackageFolder infrastructurePackage}}/package-info.java", JAVA, null, true);
+                "{{asPackageFolder layout.infrastructurePackage}}/package-info.java", JAVA, null, true);
 //        ts.addTemplate(ts.singleTemplates, "src/test/java", "ArchitectureTest.java",
-//                "{{asPackageFolder basePackage}}/ArchitectureTest.java", JAVA, null, true);
+//                "{{asPackageFolder layout.basePackage}}/ArchitectureTest.java", JAVA, null, true);
 
         return ts;
     }

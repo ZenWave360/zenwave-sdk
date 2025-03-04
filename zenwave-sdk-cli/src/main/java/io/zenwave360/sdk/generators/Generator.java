@@ -12,6 +12,7 @@ import java.util.Map;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.TemplateEngine;
 import io.zenwave360.sdk.templating.TemplateOutput;
+import io.zenwave360.sdk.zdl.layout.ProjectLayout;
 
 public interface Generator {
 
@@ -29,7 +30,12 @@ public interface Generator {
         for (Field field : fields) {
             try {
                 if (!isStatic(field.getModifiers()) && field.canAccess(object) && !field.getName().startsWith("this$")) {
-                    config.put(field.getName(), field.get(object));
+                    var value = field.get(object);
+                    if (value instanceof ProjectLayout layout) {
+                        config.put("layout", layout.asMap());
+                    } else {
+                        config.put(field.getName(), field.get(object));
+                    }
                 }
             } catch (IllegalAccessException e) {
                 config.put(field.getName(), e.getMessage());

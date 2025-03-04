@@ -31,9 +31,7 @@ public class OpenAPIKarateGenerator extends AbstractOpenAPIGenerator {
     public String apiProperty = "api";
 
     @DocumentedOption(description = "Package name for generated Karate tests")
-    public String testsPackage = "{{basePackage}}.adapters.web";
-
-    public boolean simpleDomainPackaging = false;
+    public String testsPackage;
 
     @DocumentedOption(description = "Generate features grouped by", required = true)
     public GroupByType groupBy = GroupByType.service;
@@ -55,11 +53,11 @@ public class OpenAPIKarateGenerator extends AbstractOpenAPIGenerator {
 
     @Override
     public void onPropertiesSet() {
-        if(basePackage == null) {
-            basePackage = testsPackage;
-        }
-        if (simpleDomainPackaging) {
-            testsPackage = "{{basePackage}}";
+        super.onPropertiesSet();
+        if (layout != null) {
+            if (this.testsPackage == null) {
+                this.testsPackage = layout.adaptersWebPackage;
+            }
         }
     }
 

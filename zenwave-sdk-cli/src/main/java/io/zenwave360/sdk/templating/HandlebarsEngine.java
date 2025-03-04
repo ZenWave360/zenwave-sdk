@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.context.FieldValueResolver;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.context.MapValueResolver;
 import com.github.jknack.handlebars.helper.StringHelpers;
@@ -20,7 +21,16 @@ public class HandlebarsEngine implements TemplateEngine {
     public HandlebarsEngine() {
         context = Context
                 .newBuilder(new HashMap<>())
-                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE)
+                .resolver(MapValueResolver.INSTANCE, JavaBeanValueResolver.INSTANCE, new FieldValueResolver() {
+                    @Override
+                    protected Object invokeMember(FieldWrapper field, Object context) {
+                        try {
+                            return super.invokeMember(field, context);
+                        } catch (Exception e) {
+                            return null;
+                        }
+                    }
+                })
                 .build();
         handlebars.registerHelpers(CustomHandlebarsHelpers.class);
         handlebars.registerHelpers(StringHelpers.class);

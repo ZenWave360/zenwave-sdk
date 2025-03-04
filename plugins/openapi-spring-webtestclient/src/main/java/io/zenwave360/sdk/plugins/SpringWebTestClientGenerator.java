@@ -31,31 +31,15 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
 
     public String apiProperty = "api";
 
-    @DocumentedOption(description = "The package to generate REST Controllers")
-    public String controllersPackage = "{{basePackage}}.adapters.web";
-
-    public String configPackage = "{{basePackage}}.config";
-
-    @DocumentedOption(description = "Package where your domain entities are")
-    public String entitiesPackage = "{{basePackage}}.core.domain";
-
-    @DocumentedOption(description = "Package where your inbound dtos are")
-    public String inboundDtosPackage = "{{basePackage}}.core.inbound.dtos";
-
-    @DocumentedOption(description = "Package where your domain services/usecases interfaces are")
-    public String servicesPackage = "{{basePackage}}.core.inbound";
-
     @DocumentedOption(description = "Package name for generated tests")
-    public String testsPackage = "{{basePackage}}.adapters.web";
+    public String testsPackage;
+    public String baseTestClassName = "BaseWebTestClientTest";
+    public String baseTestClassPackage;
 
     @DocumentedOption(description = "Generate test classes grouped by", required = true)
     public GroupByType groupBy = GroupByType.service;
 
     public WebFlavorType webFlavor = WebFlavorType.mvc;
-
-    public String baseTestClassName = "BaseWebTestClientTest";
-
-    public String baseTestClassPackage = "{{testsPackage}}";
 
     @DocumentedOption(description = "Class name suffix for generated test classes")
     public String testSuffix = "IntegrationTest";
@@ -90,17 +74,14 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
 
     @Override
     public void onPropertiesSet() {
-        if(basePackage == null) {
-            basePackage = testsPackage;
-            configPackage = basePackage + ".config";
+        super.onPropertiesSet();
+        if (layout != null) {
+            if (this.testsPackage == null) {
+                this.testsPackage = layout.adaptersWebPackage;
+            }
         }
-        if (simpleDomainPackaging) {
-            testsPackage = "{{basePackage}}";
-            baseTestClassPackage = "{{basePackage}}.base";
-            controllersPackage = "{{basePackage}}";
-            entitiesPackage = "{{basePackage}}.model";
-            inboundDtosPackage = "{{basePackage}}.dtos";
-            servicesPackage = "{{basePackage}}";
+        if (this.baseTestClassPackage == null) {
+            this.baseTestClassPackage = testsPackage;
         }
     }
 

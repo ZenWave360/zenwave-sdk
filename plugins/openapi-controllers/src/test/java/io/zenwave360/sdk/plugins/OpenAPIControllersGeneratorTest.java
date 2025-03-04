@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.zenwave360.sdk.Plugin;
 import io.zenwave360.sdk.options.ProgrammingStyle;
+import io.zenwave360.sdk.zdl.layout.SimpleDomainProjectLayout;
 import org.junit.jupiter.api.*;
 
 import io.zenwave360.sdk.MainGenerator;
@@ -75,7 +76,7 @@ public class OpenAPIControllersGeneratorTest {
                 .withApiFile("classpath:io/zenwave360/sdk/resources/openapi/customer-address-openapi.yml")
                 .withOption("zdlFile", "classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
                 .withOption("basePackage", "io.zenwave360.example")
-                .withOption("simpleDomainPackaging", true)
+                .withOption("layout", "SimpleDomainProjectLayout")
                 .withOption("openApiApiPackage", "io.zenwave360.example.web.api")
                 .withOption("openApiModelPackage", "io.zenwave360.example.web.api.model")
                 .withOption("openApiModelNameSuffix", "DTO")

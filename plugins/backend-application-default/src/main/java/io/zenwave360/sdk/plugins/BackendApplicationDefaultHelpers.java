@@ -20,9 +20,9 @@ import static java.lang.String.join;
 
 public class BackendApplicationDefaultHelpers {
 
-    private final BackendDefaultApplicationGenerator generator;
+    private final BackendApplicationDefaultGenerator generator;
 
-    BackendApplicationDefaultHelpers(BackendDefaultApplicationGenerator generator) {
+    BackendApplicationDefaultHelpers(BackendApplicationDefaultGenerator generator) {
         this.generator = generator;
     }
 

@@ -123,7 +123,7 @@
                             <generatorName>spring</generatorName>
                             <library>spring-http-interface</library>
                             <apiPackage>${basePackage}.customers.client</apiPackage>
-                            <modelPackage>${basePackage}.customers.client.model</modelPackage>
+                            <modelPackage>${basePackage}.customers.client.dtos</modelPackage>
                             <modelNameSuffix>DTO</modelNameSuffix>
                             <addCompileSourceRoot>true</addCompileSourceRoot>
                             <typeMappings>
@@ -148,7 +148,7 @@
                             <generatorName>spring</generatorName>
                             <library>spring-http-interface</library>
                             <apiPackage>${basePackage}.restaurants.client</apiPackage>
-                            <modelPackage>${basePackage}.restaurants.client.model</modelPackage>
+                            <modelPackage>${basePackage}.restaurants.client.dtos</modelPackage>
                             <modelNameSuffix>DTO</modelNameSuffix>
                             <addCompileSourceRoot>true</addCompileSourceRoot>
                             <typeMappings>
