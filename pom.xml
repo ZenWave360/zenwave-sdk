@@ -72,15 +72,24 @@
         <json-schema-ref-parser-jvm.version>0.8.7</json-schema-ref-parser-jvm.version>
         <zdl-jvm.version>1.2.3</zdl-jvm.version>
         <graphql-java.version>19.2</graphql-java.version>
-        <google-java-format.version>1.7</google-java-format.version>
-        <palantir-java-format.version>2.38.0</palantir-java-format.version>
+        <google-java-format.version>1.25.2</google-java-format.version>
+        <palantir-java-format.version>2.55.0</palantir-java-format.version>
         <spring-javaformat.version>0.0.39</spring-javaformat.version>
         <junit.version>5.10.1</junit.version>
         <spring-boot-dependencies.version>2.6.7</spring-boot-dependencies.version>
         <reflections.version>0.10.2</reflections.version>
         <junit.version>5.8.2</junit.version>
         <logcaptor.version>2.7.10</logcaptor.version>
+
+        <surefire.argLine>
+            --add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED
+            --add-exports jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED
+            --add-exports jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED
+            --add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED
+            --add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED
+        </surefire.argLine>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -112,6 +121,25 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.0</version>
+                <configuration>
+                    <compilerArgs>
+                        <arg>--add-exports</arg>
+                        <arg>jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+                        <arg>--add-exports</arg>
+                        <arg>jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+                        <arg>--add-exports</arg>
+                        <arg>jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
+                        <arg>--add-exports</arg>
+                        <arg>jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+                        <arg>--add-exports</arg>
+                        <arg>jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
@@ -194,11 +222,12 @@
                 <configuration>
                     <excludes>
                         <exclude>com/intuit/karate/core/**</exclude>
-                        <exclude>com/google/googlejavaformat/java/**</exclude>
                     </excludes>
+                    <propertyName>jacoco.argLine</propertyName>
                 </configuration>
                 <executions>
                     <execution>
+                        <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
@@ -241,15 +270,16 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.0</version>
+                    <version>3.14.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.1</version>
+                    <version>3.5.2</version>
                     <configuration>
                         <systemPropertyVariables>
                             <maven.home>${maven.home}</maven.home>
                         </systemPropertyVariables>
+                        <argLine>${jacoco.argLine} ${surefire.argLine}</argLine>
                     </configuration>
                 </plugin>
                 <plugin>
