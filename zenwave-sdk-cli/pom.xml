@@ -76,7 +76,6 @@
       <groupId>com.palantir.javaformat</groupId>
       <artifactId>palantir-java-format</artifactId>
       <version>${palantir-java-format.version}</version>
-      <optional>true</optional>
     </dependency>
 
     <dependency>

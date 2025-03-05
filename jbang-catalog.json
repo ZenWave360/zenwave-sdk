@@ -16,7 +16,14 @@
         "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-markdown:RELEASE",
         "io.github.zenwave360.zenwave-sdk.plugins:openapi-controllers:RELEASE"
       ],
-      "main": "io.zenwave360.sdk.Main"
+      "main": "io.zenwave360.sdk.Main",
+      "java-options": [
+        "--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+        "--add-exports", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
+        "--add-exports", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+        "--add-exports", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+        "--add-exports", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
+      ]
     },
     "snapshots": {
       "script-ref": "io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli:1.8.0-SNAPSHOT",
@@ -37,7 +44,14 @@
         "mavencentral",
         "snapshots\u003dhttps://s01.oss.sonatype.org/content/repositories/snapshots"
       ],
-      "main": "io.zenwave360.sdk.Main"
+      "main": "io.zenwave360.sdk.Main",
+      "java-options": [
+        "--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+        "--add-exports", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
+        "--add-exports", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+        "--add-exports", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+        "--add-exports", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
+      ]
     }
   },
   "templates": {}

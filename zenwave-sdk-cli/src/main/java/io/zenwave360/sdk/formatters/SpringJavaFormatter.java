@@ -1,11 +1,7 @@
 package io.zenwave360.sdk.formatters;
 
-
-
-import com.google.googlejavaformat.java.CustomFormatter;
-import com.google.googlejavaformat.java.FormatterException;
-import com.google.googlejavaformat.java.ImportOrderer;
-import com.google.googlejavaformat.java.RemoveUnusedImports;
+import com.palantir.javaformat.java.FormatterException;
+import com.palantir.javaformat.java.JavaFormatterOptions;
 import io.spring.javaformat.config.JavaFormatConfig;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.templating.OutputFormatType;
@@ -20,7 +16,7 @@ import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SpringJavaFormatter implements Formatter {
+public class SpringJavaFormatter implements io.zenwave360.sdk.formatters.Formatter {
     private static Logger log = LoggerFactory.getLogger(SpringJavaFormatter.class);
 
     @DocumentedOption(description = "Skip java sources output formatting")
@@ -37,8 +33,8 @@ public class SpringJavaFormatter implements Formatter {
     private final io.spring.javaformat.formatter.Formatter formatter =
             new io.spring.javaformat.formatter.Formatter(JavaFormatConfig.findFrom(new File(".")));
 
-    private final CustomFormatter googleCustomFormatter = new CustomFormatter();
-
+    private final com.palantir.javaformat.java.Formatter palantirFormatter =
+            com.palantir.javaformat.java.Formatter.createFormatter(JavaFormatterOptions.builder().style(JavaFormatterOptions.Style.PALANTIR).build());
 
     public List<TemplateOutput> format(List<TemplateOutput> templateOutputList) {
         return templateOutputList.stream().map(t -> format(t)).collect(Collectors.toList());
@@ -55,7 +51,7 @@ public class SpringJavaFormatter implements Formatter {
                 return templateOutput;
             }
             try {
-                String formattedSource = googleCustomFormatter.formatSourceAndFixImports(templateOutput.getContent()); // removes empty lines and formats imports
+                String formattedSource = palantirFormatter.formatSourceAndFixImports(templateOutput.getContent()); // removes empty lines and formats imports
                 formattedSource = formatSourceWithSpringJavaFormat(formattedSource); // re-formats the rest of the code
                 return new TemplateOutput(templateOutput.getTargetFile(), formattedSource, templateOutput.getMimeType(), templateOutput.isSkipOverwrite());
             } catch (FormatterException e) {
@@ -90,11 +86,5 @@ public class SpringJavaFormatter implements Formatter {
         IDocument document = new Document(source);
         edit.apply(document);
         return document.get();
-    }
-
-    public String fixImports(String input) throws FormatterException {
-        input = ImportOrderer.reorderImports(input);
-        input = RemoveUnusedImports.removeUnusedImports(input);
-        return input;
     }
 }
