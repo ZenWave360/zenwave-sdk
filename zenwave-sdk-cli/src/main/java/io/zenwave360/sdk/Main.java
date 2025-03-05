@@ -68,10 +68,12 @@ public class Main implements Callable<Integer> {
         if(forceOverwrite) {
             options.put("forceOverwrite", true);
         }
+        var layout = (String) options.get("layout");
         var specFile = (String) options.get("specFile");
         var apiFile = isApi(specFile) ? specFile : null;
         var zdlFile = specFile != null && specFile.endsWith(".zdl") ? specFile : null;
         Plugin plugin = Plugin.of(this.pluginClass)
+                .withLayout(layout)
                 .withApiFile(apiFile)
                 .withZdlFile(zdlFile)
                 .withApiFiles(split(options.get("apiFiles")))

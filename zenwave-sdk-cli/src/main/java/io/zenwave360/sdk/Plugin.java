@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import io.zenwave360.sdk.zdl.layout.DefaultProjectLayout;
+import io.zenwave360.sdk.zdl.layout.ProjectLayout;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.reflections.Reflections;
 
@@ -15,6 +18,9 @@ import io.zenwave360.sdk.doc.DocumentedPlugin;
 import io.zenwave360.sdk.utils.NamingUtils;
 
 public class Plugin {
+
+    @DocumentedOption(description = "Project layout")
+    public ProjectLayout layout = new DefaultProjectLayout();
 
     @DocumentedOption(description = "API Spec file to parse", required = true)
     public String apiFile;
@@ -64,6 +70,37 @@ public class Plugin {
 
     public <T extends Plugin> T processOptions() {
         return (T) this;
+    }
+
+    public Plugin withLayout(String layoutName) {
+        if (layoutName != null) {
+            Class layoutClass = null;
+            try {
+                layoutClass = ClassUtils.getClass((String) layoutName);
+            } catch (ClassNotFoundException e) {
+                try {
+                    layoutClass = ClassUtils.getClass(ProjectLayout.class.getPackageName() + "." + layoutName);
+                } catch (ClassNotFoundException ex) {
+                    // ignore
+                }
+            }
+            if (ProjectLayout.class.isAssignableFrom(layoutClass)) {
+                try {
+                    this.layout = (ProjectLayout) layoutClass.getDeclaredConstructor().newInstance();
+                    this.options.put("layout", this.layout);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return this;
+    }
+
+    public void processLayout() {
+        if (layout != null) {
+            layout.processLayoutPlaceHolders(getOptions());
+            getOptions().put("layout", layout);
+        }
     }
 
     public Plugin withApiFile(String apiFile) {
@@ -144,7 +181,9 @@ public class Plugin {
         nestedTempObject.put(lastPath, value);
 
         try {
-            if(field != null) {
+            if ("layout".equals(name) && value instanceof String) {
+                withLayout((String) value);
+            } else if(field != null) {
                 FieldUtils.writeField(this, name, value);
             }
         } catch (IllegalAccessException e) {

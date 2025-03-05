@@ -39,16 +39,35 @@ public class MainGeneratorTest {
     public void testGenerator() throws Exception {
         // File file = new File(getClass().getClassLoader().getResource("io/zenwave360/sdk/parsers/asyncapi-circular-refs.yml").toURI());
         Plugin plugin = new Plugin()
+                .withLayout("LayeredProjectLayout")
                 .withApiFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-circular-refs.yml")
                 .withTargetFolder("target/zenwave630/out")
-                .withOption("layout", "LayeredProjectLayout")
                 .withChain(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class)
+                .withOption("basePackage", "io.zenwave360.sdk")
                 .withOption("forceOverwrite", true);
 
         new MainGenerator().generate(plugin);
 
         logCaptor.getLogs();
     }
+
+    @Test
+    public void testGeneratorWithConfigurationProvider() throws Exception {
+        // File file = new File(getClass().getClassLoader().getResource("io/zenwave360/sdk/parsers/asyncapi-circular-refs.yml").toURI());
+        Plugin plugin = new Plugin()
+                .withLayout("LayeredProjectLayout")
+                .withApiFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-circular-refs.yml")
+                .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
+                .withTargetFolder("target/zenwave630/out")
+                .withChain(DefaultYamlParser.class, AsyncApiProcessor.class, ZDLParser.class, NoOpGenerator.class, TemplateFileWriter.class)
+                .withOption("basePackage", "io.zenwave360.sdk")
+                .withOption("forceOverwrite", true);
+
+        new MainGenerator().generate(plugin);
+
+        logCaptor.getLogs();
+    }
+
 
     @Test
     public void testGeneratorWithStdout() throws Exception {

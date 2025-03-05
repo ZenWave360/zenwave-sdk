@@ -50,8 +50,7 @@ import org.apache.commons.lang3.ObjectUtils;
  */
 public class BackendApplicationDefaultGenerator extends AbstractZDLProjectGenerator {
 
-    @DocumentedOption(description = "Project layout")
-    public ProjectLayout layout = new DefaultProjectLayout();
+    public ProjectLayout layout;
 
     @DocumentedOption(description = "Entities to generate code for")
     public List<String> entities = new ArrayList<>();

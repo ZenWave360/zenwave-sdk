@@ -59,11 +59,6 @@ public class TestSimpleDomainPackagingProject {
         plugin = new BackendApplicationDefaultPlugin()
                 .withZdlFile(zdlFile)
                 .withTargetFolder(targetFolder)
-
-//                .withOption("layout", "SimpleDomainProjectLayout")
-//                .withOption("layout.outboundEventsPackage", "io.zenwave360.example.customer.events")
-//                .withOption("layout.outboundEventsModelPackage", "io.zenwave360.example.customer.events.dtos")
-
                 .withOption("basePackage", basePackage)
                 .withOption("persistence", PersistenceType.jpa)
                 .withOption("databaseType", DatabaseType.postgresql)

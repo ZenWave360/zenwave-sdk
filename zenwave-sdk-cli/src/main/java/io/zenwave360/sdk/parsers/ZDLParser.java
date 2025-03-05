@@ -102,11 +102,9 @@ public class ZDLParser implements Parser, ConfigurationProvider {
                 configuration.withOption(entry.getKey(), entry.getValue());
             }
         }
-
-        try {
-            ConfigurationProvider.processLayout(configuration);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if(config.containsKey("layout")) {
+            configuration.withLayout((String) config.get("layout"));
+            configuration.processLayout();
         }
     }
 }
