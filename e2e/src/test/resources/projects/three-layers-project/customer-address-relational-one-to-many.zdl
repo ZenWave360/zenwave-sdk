@@ -8,7 +8,7 @@ config {
     databaseType postgresql
 //    haltOnFailFormatting false
 
-    layout SimpleDomainProjectLayout
+    layout LayeredProjectLayout
     layout.outboundEventsPackage io.zenwave360.example.customer.events
     layout.outboundEventsModelPackage io.zenwave360.example.customer.events.dtos
 
@@ -110,17 +110,17 @@ service CustomerService for (Customer) {
 
 // == Events =============================
 
-@skip // skip generating this domain enum, it will genereate by asyncapi code generator.
+//@skip // skip generating this domain enum, it will genereate by asyncapi code generator.
 enum EventType {  CREATED(1) /** created description */,  UPDATED(1) /** updated description */,  DELETED(1) /** deleted description */ }
 
-@asyncapi({channel: "CustomerEventsChannel", topic: "customer.events"})
+//@asyncapi({channel: "CustomerEventsChannel", topic: "customer.events"})
 event CustomerEvent {
   customerId String
   eventType EventType
   customer Customer
 }
 
-@asyncapi({channel: "CustomerAddressEventsChannel", topic: "customer.address-events"})
+//@asyncapi({channel: "CustomerAddressEventsChannel", topic: "customer.address-events"})
 event CustomerAddressUpdated {
   customerId String
   addressDescription String

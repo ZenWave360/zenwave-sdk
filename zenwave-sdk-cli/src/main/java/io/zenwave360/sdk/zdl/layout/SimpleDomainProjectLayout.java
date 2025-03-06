@@ -1,5 +1,21 @@
 package io.zenwave360.sdk.zdl.layout;
 
+/**
+ * Simple domain project layout.
+ *
+ * <pre>
+ * 📦 {{basePackage}}
+ *    └─ 📦 config
+ *    └─ 📦 model (entities and aggregates)
+ *    └─ 📦 dtos
+ *    └─ 📦 events
+ *    ├─ 📦 mappers
+ *    ├─ *EventListeners (spring-cloud-streams)
+ *    ├─ *RestControllers (spring mvc)
+ *    ├─ ServiceImplementation
+ *    └─ *RepositoryInterface
+ * </pre>
+ */
 public class SimpleDomainProjectLayout extends ProjectLayout {
 
     {
@@ -23,8 +39,9 @@ public class SimpleDomainProjectLayout extends ProjectLayout {
         // outbound / secondary ports
         outboundPackage = "{{moduleBasePackage}}";
         outboundRepositoryPackage = "{{moduleBasePackage}}";
-        // outbound / secondary ports for events
+        // outbound / secondary ports for events (internal and asyncapi)
         outboundEventsPackage = "{{moduleBasePackage}}";
+        // asyncapi events dtos
         outboundEventsModelPackage = "{{moduleBasePackage}}.domain.events";
 
         // core implementation / inner ring

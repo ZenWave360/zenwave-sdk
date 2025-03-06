@@ -1,13 +1,5 @@
 package io.zenwave360.sdk.e2e;
 
-import java.io.File;
-
-import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-
 import io.zenwave360.sdk.MainGenerator;
 import io.zenwave360.sdk.Plugin;
 import io.zenwave360.sdk.options.DatabaseType;
@@ -18,16 +10,23 @@ import io.zenwave360.sdk.plugins.OpenAPIControllersPlugin;
 import io.zenwave360.sdk.plugins.ZDLToAsyncAPIPlugin;
 import io.zenwave360.sdk.plugins.ZDLToOpenAPIPlugin;
 import io.zenwave360.sdk.testutils.MavenCompiler;
+import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+
+import java.io.File;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class TestCustomerAddressPostgresJsonProject {
-    private String basePackage = "io.zenwave360.example";
+public class TestThreeLayersPackagingProject {
+    private String basePackage = "io.zenwave360.example.customer";
 
     @Test
-    public void testCustomerAddressPostgresJson() throws Exception {
-        String sourceFolder = "src/test/resources/projects/customer-address-postgres-json/";
-        String targetFolder = "target/projects/layouts/customer-address-postgres-json/";
-        String zdlFile = targetFolder + "/customer-address-postgres-json.zdl";
+    public void testCustomerAddressThreeLayersPackaging() throws Exception {
+        String sourceFolder = "src/test/resources/projects/three-layers-project/";
+        String targetFolder = "target/projects/layouts/three-layers-project";
+        String zdlFile = targetFolder + "/customer-address-relational-one-to-many.zdl";
 
         // copy whole dir from sourceFolder to targetFolder
         FileUtils.deleteDirectory(new File(targetFolder));
@@ -58,10 +57,10 @@ public class TestCustomerAddressPostgresJsonProject {
         plugin = new BackendApplicationDefaultPlugin()
                 .withZdlFile(zdlFile)
                 .withTargetFolder(targetFolder)
-                .withOption("basePackage", basePackage)
-                .withOption("persistence", PersistenceType.jpa)
-                .withOption("databaseType", DatabaseType.postgresql)
-                .withOption("style", ProgrammingStyle.imperative)
+//                .withOption("basePackage", basePackage)
+//                .withOption("persistence", PersistenceType.jpa)
+//                .withOption("databaseType", DatabaseType.postgresql)
+//                .withOption("style", ProgrammingStyle.imperative)
                 .withOption("useLombok", true)
                 .withOption("includeEmitEventsImplementation", true)
                 .withOption("forceOverwrite", true)
@@ -69,35 +68,22 @@ public class TestCustomerAddressPostgresJsonProject {
 
         new MainGenerator().generate(plugin);
 
-        TextUtils.replaceInFile(new File(targetFolder + "/src/main/java/io/zenwave360/example/core/implementation/mappers/EventsMapper.java"),
-                "io.zenwave360.example.core.outbound.events.dtos.Customer asCustomer\\(Customer customer\\);",
-                """
-                        	@org.mapstruct.Mapping(target = "extraProperties", ignore = true)
-                        	io.zenwave360.example.core.outbound.events.dtos.Customer asCustomer(Customer customer);
-                        """);
-
         exitCode = MavenCompiler.compile(new File(targetFolder));
         Assertions.assertEquals(0, exitCode);
 
         plugin = new OpenAPIControllersPlugin()
                 .withApiFile(targetFolder + "/src/main/resources/apis/openapi.yml")
                 .withOption("zdlFile", zdlFile)
-                .withOption("basePackage", basePackage)
-                .withOption("controllersPackage", "{{basePackage}}.adapters.web")
-                .withOption("openApiApiPackage", "{{basePackage}}.adapters.web")
-                .withOption("openApiModelPackage", "{{basePackage}}.adapters.web.model")
+//                .withOption("basePackage", basePackage)
+//                .withOption("controllersPackage", "{{basePackage}}")
+//                .withOption("openApiApiPackage", "{{basePackage}}")
+//                .withOption("openApiModelPackage", "{{basePackage}}.dtos")
                 .withOption("openApiModelNameSuffix", "DTO")
-                // .withOption("operationIds", List.of("addPet", "updatePet"))
-                .withOption("style", ProgrammingStyle.imperative)
+//                .withOption("entitiesPackage", "{{basePackage}}.model")
+//                .withOption("inboundDtosPackage", "{{basePackage}}.dtos")
+//                .withOption("servicesPackage", "{{basePackage}}")
                 .withTargetFolder(targetFolder);
         new MainGenerator().generate(plugin);
-
-        TextUtils.replaceInFile(new File(targetFolder + "/src/main/java/io/zenwave360/example/adapters/web/mappers/CustomerDTOsMapper.java"),
-                "// request mappings",
-                """
-                        	// request mappings
-                        	default Map map(Object value) { return new HashMap();}
-                        """);
 
         exitCode = MavenCompiler.compile(new File(targetFolder));
         Assertions.assertEquals(0, exitCode);

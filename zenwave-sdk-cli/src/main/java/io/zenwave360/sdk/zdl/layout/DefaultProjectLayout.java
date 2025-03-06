@@ -1,5 +1,36 @@
 package io.zenwave360.sdk.zdl.layout;
 
+/**
+ * Default project layout. Hexagonal sprinkled with Clean Architecture.
+ *
+ * <pre>
+ * 📦 {{basePackage}}
+ *    📦 adapters
+ *        └─ web
+ *        |  └─ RestControllers (spring mvc)
+ *        └─ events
+ *           └─ *EventListeners (spring-cloud-streams)
+ *    📦 core
+ *        ├─ 📦 domain
+ *        |     └─ (entities and aggregates)
+ *        ├─ 📦 inbound
+ *        |     ├─ dtos/
+ *        |     └─ ServiceInterface (inbound service interface)
+ *        ├─ 📦 outbound
+ *        |     ├─ mongodb
+ *        |     |  └─ *RepositoryInterface (spring-data interface)
+ *        |     └─ jpa
+ *        |        └─ *RepositoryInterface (spring-data interface)
+ *        └─ 📦 implementation
+ *              ├─ mappers/
+ *              └─ ServiceImplementation (inbound service implementation)
+ *    📦 infrastructure
+ *      ├─ mongodb
+ *      |  └─ CustomRepositoryImpl (spring-data custom implementation)
+ *      └─ jpa
+ *         └─ CustomRepositoryImpl (spring-data custom implementation)
+ * </pre>
+ */
 public class DefaultProjectLayout extends ProjectLayout {
 
     {
@@ -23,8 +54,9 @@ public class DefaultProjectLayout extends ProjectLayout {
         // outbound / secondary ports
         outboundPackage = "{{moduleBasePackage}}.core.outbound";
         outboundRepositoryPackage = "{{moduleBasePackage}}.core.outbound.{{persistence}}";
-        // outbound / secondary ports for events
+        // outbound / secondary ports for events (internal and asyncapi)
         outboundEventsPackage = "{{moduleBasePackage}}.core.outbound.events";
+        // asyncapi events dtos
         outboundEventsModelPackage = "{{moduleBasePackage}}.core.outbound.events.dtos";
 
         // core implementation / inner ring

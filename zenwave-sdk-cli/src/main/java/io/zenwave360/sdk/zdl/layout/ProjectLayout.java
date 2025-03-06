@@ -34,8 +34,9 @@ public class ProjectLayout {
     // outbound / secondary ports
     public String outboundPackage = "{{moduleBasePackage}}.core.outbound";
     public String outboundRepositoryPackage = "{{moduleBasePackage}}.core.outbound.{{persistence}}";
-    // outbound / secondary ports for events
+    // outbound / secondary ports for events (internal and asyncapi)
     public String outboundEventsPackage = "{{moduleBasePackage}}.core.outbound.events";
+    // asyncapi events dtos
     public String outboundEventsModelPackage = "{{moduleBasePackage}}.core.outbound.events.dtos";
 
     // core implementation / inner ring

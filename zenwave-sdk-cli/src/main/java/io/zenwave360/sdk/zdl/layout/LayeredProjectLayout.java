@@ -23,8 +23,9 @@ public class LayeredProjectLayout extends ProjectLayout {
         // outbound / secondary ports
         outboundPackage = "{{moduleBasePackage}}.repository";
         outboundRepositoryPackage = "{{moduleBasePackage}}.repository.{{persistence}}";
-        // outbound / secondary ports for events
+        // outbound / secondary ports for events (internal and asyncapi)
         outboundEventsPackage = "{{moduleBasePackage}}.events";
+        // asyncapi events dtos
         outboundEventsModelPackage = "{{moduleBasePackage}}.events.dtos";
 
         // core implementation / inner ring
@@ -35,7 +36,7 @@ public class LayeredProjectLayout extends ProjectLayout {
         infrastructurePackage = "{{moduleBasePackage}}.repository";
         infrastructureRepositoryPackage = "{{moduleBasePackage}}.repository.{{persistence}}";
         // infrastructure / secondary adapters for events
-        infrastructureEventsPackage = "{{moduleBasePackage}}.repository.events";
+        infrastructureEventsPackage = "{{moduleBasePackage}}.events";
 
         // primary adapters (web, events, commands)
         adaptersPackage = "{{moduleBasePackage}}";

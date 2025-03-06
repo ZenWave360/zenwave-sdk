@@ -27,7 +27,7 @@ public class TestSimpleDomainPackagingProject {
     @Test
     public void testCustomerAddressSimpleDomainPackaging() throws Exception {
         String sourceFolder = "src/test/resources/projects/simple-domain-packaging/";
-        String targetFolder = "target/projects/simple-domain-packaging";
+        String targetFolder = "target/projects/layouts/simple-domain-packaging";
         String zdlFile = targetFolder + "/customer-address-relational-one-to-many.zdl";
 
         // copy whole dir from sourceFolder to targetFolder
