@@ -42,7 +42,7 @@ public class AbstractZDLProjectGeneratorTest {
             //                templates.allOutputsTemplates.add(new TemplateInput("outputs {{size outputs}}", ""));
             templates.allServicesTemplates.add(new TemplateInput("services {{size services}}", ""));
             templates.singleTemplates.add(new TemplateInput("singleTemplate", ""));
-            templates.addTemplate(templates.singleTemplates, "src/main/java", "singleTemplate", "singleTemplate.java", null, null, false);
+            templates.addTemplate(templates.singleTemplates, "src/main/java", "singleTemplate", "basePackage", "singleTemplate.java", null, null, false);
             return templates;
         }
 

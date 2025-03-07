@@ -34,6 +34,7 @@ package io.zenwave360.sdk.zdl.layout;
 public class DefaultProjectLayout extends ProjectLayout {
 
     {
+        basePackage = "{{basePackage}}";
         // in case of modular project
         configPackage = "{{basePackage}}.config";
         commonPackage = "{{basePackage}}.common";
@@ -77,6 +78,10 @@ public class DefaultProjectLayout extends ProjectLayout {
         adaptersCommandsMappersPackage = "{{moduleBasePackage}}.adapters.commands.mappers";
         adaptersEventsPackage = "{{moduleBasePackage}}.adapters.events";
         adaptersEventsMappersPackage = "{{moduleBasePackage}}.adapters.events.mappers";
+
+        // openapi generated packages
+        openApiApiPackage = "{{adaptersWebPackage}}";
+        openApiModelPackage = "{{adaptersWebPackage}}.dtos";
     }
 
 }

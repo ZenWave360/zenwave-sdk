@@ -39,14 +39,15 @@ public class ZDLProjectTemplates {
     public List<TemplateInput> allEventsTemplates = new ArrayList<>();
     public List<TemplateInput> singleTemplates = new ArrayList<>();
 
-    public void addTemplate(List<TemplateInput> templates, String sourceFolder, String templateLocation, String targetFile, OutputFormatType mimeType, Function<Map<String, Object>, Boolean> skip, boolean skipOverwrite) {
-        addTemplate(templates, sourceFolder, templateLocation, null, targetFile, mimeType, skip, skipOverwrite);
+    public void addTemplate(List<TemplateInput> templates, String sourceFolder, String templateLocation, String targetPackagePlaceholder, String targetFile, OutputFormatType mimeType, Function<Map<String, Object>, Boolean> skip, boolean skipOverwrite) {
+        addTemplate(templates, sourceFolder, templateLocation, null, targetPackagePlaceholder, targetFile, mimeType, skip, skipOverwrite);
     }
 
-    public void addTemplate(List<TemplateInput> templates, String sourceFolder, String templateLocation, String targetModule, String targetFile, OutputFormatType mimeType, Function<Map<String, Object>, Boolean> skip, boolean skipOverwrite) {
+    public void addTemplate(List<TemplateInput> templates, String sourceFolder, String templateLocation, String targetModule, String targetPackagePlaceholder, String targetFile, OutputFormatType mimeType, Function<Map<String, Object>, Boolean> skip, boolean skipOverwrite) {
+        var targetPackage = "{{asPackageFolder layout." + targetPackagePlaceholder + "}}";
         var template = new TemplateInput()
                 .withTemplateLocation(joinPath(templatesFolder, sourceFolder, templateLocation))
-                .withTargetFile(joinPath(targetModule, sourceFolder, targetFile))
+                .withTargetFile(joinPath(targetModule, sourceFolder, targetPackage, targetFile))
                 .withMimeType(mimeType)
                 .withSkipOverwrite(skipOverwrite)
                 .withSkip(skip);

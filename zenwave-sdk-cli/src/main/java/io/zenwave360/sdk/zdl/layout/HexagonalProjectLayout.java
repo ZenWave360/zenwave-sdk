@@ -36,6 +36,7 @@ package io.zenwave360.sdk.zdl.layout;
 public class HexagonalProjectLayout extends ProjectLayout {
 
     {
+        basePackage = "{{basePackage}}";
         // in case of modular project
         configPackage = "{{basePackage}}.config";
         commonPackage = "{{basePackage}}.common";

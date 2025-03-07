@@ -12,55 +12,55 @@ import java.util.Map;
 
 public class ProjectLayout {
 
-    public String basePackage = "{{basePackage}}";
+    public String basePackage = "basePackage";
 
     // in case of modular project
-    public String configPackage = "{{basePackage}}.config";
-    public String commonPackage = "{{basePackage}}.common";
-    public String modulesPackage = "{{basePackage}}.modules";
+    public String configPackage = "configPackage";
+    public String commonPackage = "commonPackage";
+    public String modulesPackage = "modulesPackage";
 
     // module specific
-    public String moduleBasePackage = "{{basePackage}}";
-    public String moduleConfigPackage = "{{moduleBasePackage}}.config";
+    public String moduleBasePackage = "moduleBasePackage";
+    public String moduleConfigPackage = "moduleConfigPackage";
 
     // domain entities and events
-    public String entitiesPackage = "{{moduleBasePackage}}.core.domain";
-    public String domainEventsPackage = "{{moduleBasePackage}}.core.domain.events";
+    public String entitiesPackage = "entitiesPackage";
+    public String domainEventsPackage = "domainEventsPackage";
 
     // inbound services / primary ports
-    public String inboundPackage = "{{moduleBasePackage}}.core.inbound";
-    public String inboundDtosPackage = "{{moduleBasePackage}}.core.inbound.dtos";
+    public String inboundPackage = "inboundPackage";
+    public String inboundDtosPackage = "inboundDtosPackage";
 
     // outbound / secondary ports
-    public String outboundPackage = "{{moduleBasePackage}}.core.outbound";
-    public String outboundRepositoryPackage = "{{moduleBasePackage}}.core.outbound.{{persistence}}";
+    public String outboundPackage = "outboundPackage";
+    public String outboundRepositoryPackage = "outboundRepositoryPackage";
     // outbound / secondary ports for events (internal and asyncapi)
-    public String outboundEventsPackage = "{{moduleBasePackage}}.core.outbound.events";
+    public String outboundEventsPackage = "outboundEventsPackage";
     // asyncapi events dtos
-    public String outboundEventsModelPackage = "{{moduleBasePackage}}.core.outbound.events.dtos";
+    public String outboundEventsModelPackage = "outboundEventsModelPackage";
 
     // core implementation / inner ring
-    public String coreImplementationPackage = "{{moduleBasePackage}}.core.implementation";
-    public String coreImplementationMappersPackage = "{{moduleBasePackage}}.core.implementation.mappers";
+    public String coreImplementationPackage = "coreImplementationPackage";
+    public String coreImplementationMappersPackage = "coreImplementationMappersPackage";
 
     // infrastructure / secondary adapters
-    public String infrastructurePackage = "{{moduleBasePackage}}.infrastructure";
-    public String infrastructureRepositoryPackage = "{{moduleBasePackage}}.infrastructure.{{persistence}}";
+    public String infrastructurePackage = "infrastructurePackage";
+    public String infrastructureRepositoryPackage = "infrastructureRepositoryPackage";
     // infrastructure / secondary adapters for events
-    public String infrastructureEventsPackage = "{{moduleBasePackage}}.infrastructure.events";
+    public String infrastructureEventsPackage = "infrastructureEventsPackage";
 
     // primary adapters (web, events, commands)
-    public String adaptersPackage = "{{moduleBasePackage}}.adapters";
-    public String adaptersWebPackage = "{{moduleBasePackage}}.adapters.web";
-    public String adaptersWebMappersPackage = "{{moduleBasePackage}}.adapters.web.mappers";
-    public String adaptersCommandsPackage = "{{moduleBasePackage}}.adapters.commands";
-    public String adaptersCommandsMappersPackage = "{{moduleBasePackage}}.adapters.commands.mappers";
-    public String adaptersEventsPackage = "{{moduleBasePackage}}.adapters.events";
-    public String adaptersEventsMappersPackage = "{{moduleBasePackage}}.adapters.events.mappers";
+    public String adaptersPackage = "adaptersPackage";
+    public String adaptersWebPackage = "adaptersWebPackage";
+    public String adaptersWebMappersPackage = "adaptersWebMappersPackage";
+    public String adaptersCommandsPackage = "adaptersCommandsPackage";
+    public String adaptersCommandsMappersPackage = "adaptersCommandsMappersPackage";
+    public String adaptersEventsPackage = "adaptersEventsPackage";
+    public String adaptersEventsMappersPackage = "adaptersEventsMappersPackage";
 
     // openapi generated packages
-    public String openApiApiPackage = "{{adaptersWebPackage}}";
-    public String openApiModelPackage = "{{adaptersWebPackage}}.dtos";
+    public String openApiApiPackage = "openApiApiPackage";
+    public String openApiModelPackage = "openApiModelPackage";
 
     @JsonAnySetter
     public Map<String, String> _additionalProperties;
