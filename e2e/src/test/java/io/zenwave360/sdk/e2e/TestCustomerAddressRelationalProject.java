@@ -91,7 +91,7 @@ public class TestCustomerAddressRelationalProject {
                 .withOption("basePackage", basePackage)
                 .withOption("controllersPackage", "{{basePackage}}.adapters.web")
                 .withOption("openApiApiPackage", "{{basePackage}}.adapters.web")
-                .withOption("openApiModelPackage", "{{basePackage}}.adapters.web.model")
+                .withOption("openApiModelPackage", "{{basePackage}}.adapters.web.dtos")
                 .withOption("openApiModelNameSuffix", "DTO")
                 // .withOption("operationIds", List.of("addPet", "updatePet"))
                 .withOption("style", ProgrammingStyle.imperative)

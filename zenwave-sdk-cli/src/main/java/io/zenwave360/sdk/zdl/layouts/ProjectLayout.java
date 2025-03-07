@@ -61,6 +61,10 @@ public class ProjectLayout {
     // openapi generated packages
     public String openApiApiPackage = "openApiApiPackage";
     public String openApiModelPackage = "openApiModelPackage";
+    // asyncapi generated packages (not in use yet)
+    public String asyncApiModelPackage = "asyncApiModelPackage"; // right now is outboundEventsModelPackage
+    public String asyncApiProducerApiPackage = "asyncApiProducerApiPackage"; // right now is outboundEventsPackage
+    public String asyncApiConsumerApiPackage = "asyncApiConsumerApiPackage"; // right now is adaptersCommandsPackage
 
     @JsonAnySetter
     public Map<String, String> _additionalProperties;

@@ -50,7 +50,7 @@ public abstract class AbstractOpenAPIGenerator implements Generator {
 
     @Override
     public void onPropertiesSet() {
-        if (openApiApiPackage != null && layout == null) {
+        if (layout == null) {
             layout = new DefaultProjectLayout();
             layout.processLayoutPlaceHolders(this.asConfigurationMap());
         }
@@ -58,11 +58,14 @@ public abstract class AbstractOpenAPIGenerator implements Generator {
             if (basePackage == null) {
                 basePackage = layout.basePackage;
             }
-            if (this.openApiApiPackage == null) {
-                this.openApiApiPackage = layout.openApiApiPackage;
+            if (openApiApiPackage == null) {
+                openApiApiPackage = layout.openApiApiPackage;
             }
-            if (this.openApiModelPackage == null) {
-                this.openApiModelPackage = layout.openApiModelPackage;
+            if (openApiModelPackage == null) {
+                openApiModelPackage = openApiApiPackage;
+            }
+            if ("{{openApiApiPackage}}".equals(openApiModelPackage)) {
+                openApiModelPackage = layout.openApiModelPackage;
             }
         }
     }
