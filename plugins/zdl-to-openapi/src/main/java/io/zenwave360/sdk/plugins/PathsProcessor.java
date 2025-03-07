@@ -6,8 +6,8 @@ import io.zenwave360.sdk.processors.Processor;
 import io.zenwave360.sdk.utils.AntStyleMatcher;
 import io.zenwave360.sdk.utils.FluentMap;
 import io.zenwave360.sdk.utils.JSONPath;
-import io.zenwave360.sdk.zdl.ZDLFindUtils;
-import io.zenwave360.sdk.zdl.ZDLHttpUtils;
+import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.utils.ZDLHttpUtils;
 
 import java.util.HashMap;
 import java.util.List;

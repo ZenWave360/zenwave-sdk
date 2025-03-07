@@ -1,7 +1,7 @@
 package io.zenwave360.sdk.plugins;
 
-import io.zenwave360.sdk.generators.ZDLProjectTemplates;
-import io.zenwave360.sdk.zdl.layout.ProjectLayout;
+import io.zenwave360.sdk.zdl.ProjectTemplates;
+import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 
 import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
 
@@ -9,8 +9,8 @@ public class BackendApplicationMultiModuleGenerator extends BackendApplicationDe
 
     public String mavenModulesPrefix;
     @Override
-    protected ZDLProjectTemplates configureProjectTemplates() {
-        var ts = new ZDLProjectTemplates("io/zenwave360/sdk/plugins/BackendApplicationDefaultGenerator");
+    protected ProjectTemplates configureProjectTemplates() {
+        var ts = new ProjectTemplates("io/zenwave360/sdk/plugins/BackendApplicationDefaultGenerator");
 
         var layout = new ProjectLayout(); // layoutNames
 

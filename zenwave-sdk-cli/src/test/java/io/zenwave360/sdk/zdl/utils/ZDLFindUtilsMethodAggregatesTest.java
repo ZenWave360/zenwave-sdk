@@ -1,4 +1,4 @@
-package io.zenwave360.sdk.zdl;
+package io.zenwave360.sdk.zdl.utils;
 
 import io.zenwave360.sdk.utils.JSONPath;
 import org.junit.jupiter.api.Assertions;
@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static io.zenwave360.sdk.zdl.ZDLFindUtilsTest.loadZDL;
+import static io.zenwave360.sdk.zdl.utils.ZDLFindUtilsTest.loadZDL;
 
 public class ZDLFindUtilsMethodAggregatesTest {
 

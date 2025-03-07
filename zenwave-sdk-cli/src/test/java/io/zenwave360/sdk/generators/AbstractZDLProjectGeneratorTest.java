@@ -5,6 +5,7 @@ import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
+import io.zenwave360.sdk.zdl.ProjectTemplates;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -25,8 +26,8 @@ public class AbstractZDLProjectGeneratorTest {
         }
 
         @Override
-        protected ZDLProjectTemplates configureProjectTemplates() {
-            var templates = new ZDLProjectTemplates("");
+        protected ProjectTemplates configureProjectTemplates() {
+            var templates = new ProjectTemplates("");
             templates.entityTemplates.add(new TemplateInput("entity {{entity.name}}", ""));
             templates.enumTemplates.add(new TemplateInput("enum {{enum.name}}", ""));
             templates.inputTemplates.add(new TemplateInput("input {{entity.name}}", ""));

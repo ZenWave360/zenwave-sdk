@@ -1,4 +1,4 @@
-package io.zenwave360.sdk.zdl;
+package io.zenwave360.sdk.zdl.utils;
 
 import java.io.IOException;
 import java.util.Collections;

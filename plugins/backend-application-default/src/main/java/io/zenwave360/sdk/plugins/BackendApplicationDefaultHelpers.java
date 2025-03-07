@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.zenwave360.sdk.utils.NamingUtils;
-import io.zenwave360.sdk.zdl.ZDLFindUtils;
-import io.zenwave360.sdk.zdl.ZDLJavaSignatureUtils;
+import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.utils.ZDLJavaSignatureUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.jknack.handlebars.Options;

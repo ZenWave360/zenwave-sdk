@@ -4,19 +4,15 @@ import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-import java.rmi.Naming;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.github.jknack.handlebars.Options;
 import io.zenwave360.sdk.options.ProgrammingStyle;
 import io.zenwave360.sdk.utils.NamingUtils;
-import io.zenwave360.sdk.zdl.ZDLFindUtils;
-import io.zenwave360.sdk.zdl.ZDLHttpUtils;
-import io.zenwave360.sdk.zdl.ZDLJavaSignatureUtils;
-import io.zenwave360.sdk.zdl.layout.DefaultProjectLayout;
-import io.zenwave360.sdk.zdl.layout.ProjectLayout;
+import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.utils.ZDLHttpUtils;
+import io.zenwave360.sdk.zdl.utils.ZDLJavaSignatureUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 

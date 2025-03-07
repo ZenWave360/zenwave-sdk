@@ -1,4 +1,4 @@
-package io.zenwave360.sdk.zdl.layout;
+package io.zenwave360.sdk.zdl.layouts;
 
 /**
  * CleanArchitectureProjectLayout project layout.

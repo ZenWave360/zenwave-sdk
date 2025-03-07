@@ -6,9 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.zenwave360.sdk.plugins.ConfigurationProvider;
-import io.zenwave360.sdk.zdl.layout.DefaultProjectLayout;
-import io.zenwave360.sdk.zdl.layout.ProjectLayout;
+import io.zenwave360.sdk.zdl.layouts.DefaultProjectLayout;
+import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 import org.apache.commons.lang3.ObjectUtils;
 
 import com.jayway.jsonpath.JsonPath;

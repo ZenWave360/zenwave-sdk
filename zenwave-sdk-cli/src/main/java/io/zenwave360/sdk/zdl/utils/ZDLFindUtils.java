@@ -1,4 +1,4 @@
-package io.zenwave360.sdk.zdl;
+package io.zenwave360.sdk.zdl.utils;
 
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;

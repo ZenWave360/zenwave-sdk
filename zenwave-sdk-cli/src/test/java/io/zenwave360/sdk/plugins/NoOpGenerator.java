@@ -7,8 +7,8 @@ import java.util.Map;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.templating.TemplateOutput;
-import io.zenwave360.sdk.zdl.layout.DefaultProjectLayout;
-import io.zenwave360.sdk.zdl.layout.ProjectLayout;
+import io.zenwave360.sdk.zdl.layouts.DefaultProjectLayout;
+import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 
 public class NoOpGenerator implements Generator {
 

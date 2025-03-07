@@ -1,4 +1,4 @@
-package io.zenwave360.sdk.zdl.layout;
+package io.zenwave360.sdk.zdl.layouts;
 
 /**
  * Default project layout. Hexagonal sprinkled with Clean Architecture.

@@ -5,7 +5,8 @@ import java.util.stream.Collectors;
 
 import io.zenwave360.sdk.templating.*;
 import io.zenwave360.sdk.utils.JSONPath;
-import io.zenwave360.sdk.zdl.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.ProjectTemplates;
+import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 
 public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
 
@@ -17,7 +18,7 @@ public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
         return handlebarsEngine;
     }
 
-    protected abstract ZDLProjectTemplates configureProjectTemplates();
+    protected abstract ProjectTemplates configureProjectTemplates();
 
     protected abstract boolean isGenerateEntity(Map<String, Object> entity);
 
@@ -27,7 +28,7 @@ public abstract class AbstractZDLProjectGenerator extends AbstractZDLGenerator {
 
     @Override
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {
-        ZDLProjectTemplates templates = configureProjectTemplates();
+        ProjectTemplates templates = configureProjectTemplates();
 
         var templateOutputList = new ArrayList<TemplateOutput>();
         var apiModel = getZDLModel(contextModel);

@@ -1,7 +1,6 @@
-package io.zenwave360.sdk.zdl;
+package io.zenwave360.sdk.zdl.utils;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import io.zenwave360.sdk.utils.JSONPath;

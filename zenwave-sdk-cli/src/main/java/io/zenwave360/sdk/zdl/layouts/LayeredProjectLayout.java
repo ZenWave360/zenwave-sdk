@@ -1,5 +1,36 @@
-package io.zenwave360.sdk.zdl.layout;
+package io.zenwave360.sdk.zdl.layouts;
 
+/**
+ * Simple domain project layout.
+ *
+ * <pre>
+ * 📦 {{basePackage}}                            # Root package
+ *    📦 config                                  # Spring Boot configuration, security, etc.
+ *    📦 domain                                  # Domain Layer (Business Entities and Events)
+ *        ├─ *Entities
+ *        └─ events/
+ *           └─ *DomainEvents
+ *    📦 repository                              # Repository Layer (Persistence and Data Access)
+ *        ├─ {{persistence}}/
+ *        |   ├─ *RepositoryInterface            # Persistence interface (Spring Data, etc.)
+ *        |   └─ *RepositoryImpl                 # Repository implementation
+ *    📦 events                                  # Events Layer (Internal and Async API Events)
+ *        ├─ *EventListeners                     # Event listeners
+ *    📦 commands                                # Command Layer (Command Handlers)
+ *        ├─ *CommandHandlers                   # Command handlers (e.g., CQRS commands)
+ *    📦 service                                 # Service Layer (Business Logic and DTOs)
+ *        ├─ dtos/
+ *        |   └─ *DTOs                           # Data Transfer Objects
+ *        ├─ impl/
+ *        |   └─ *ServiceImplementation          # Service implementations
+ *        └─ impl/mappers/
+ *            └─ *Mappers                        # Object mappers for transformations
+ *    📦 web                                     # Web Layer (Controllers and API)
+ *        ├─ *RestControllers                   # REST controllers (Spring MVC, etc.)
+ *        └─ mappers/
+ *           └─ *WebMappers                     # Mappers for web layer transformations
+ * </pre>
+ */
 public class LayeredProjectLayout extends ProjectLayout {
 
     {

@@ -8,13 +8,13 @@ import java.util.stream.Collectors;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractZDLProjectGenerator;
-import io.zenwave360.sdk.generators.ZDLProjectTemplates;
+import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.options.DatabaseType;
 import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.options.ProgrammingStyle;
 import io.zenwave360.sdk.utils.JSONPath;
-import io.zenwave360.sdk.zdl.ZDLFindUtils;
-import io.zenwave360.sdk.zdl.layout.ProjectLayout;
+import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 import org.apache.commons.lang3.ObjectUtils;
 
 /**
@@ -99,8 +99,8 @@ public class BackendApplicationDefaultGenerator extends AbstractZDLProjectGenera
     protected Function<Map<String, Object>, Boolean> skipEventsBus = (model) -> ((Collection) model.get("events")).isEmpty();
     protected Function<Map<String, Object>, Boolean> skipInput = (model) -> is(model, "inline");
     @Override
-    protected ZDLProjectTemplates configureProjectTemplates() {
-        var ts = new ZDLProjectTemplates("io/zenwave360/sdk/plugins/BackendApplicationDefaultGenerator");
+    protected ProjectTemplates configureProjectTemplates() {
+        var ts = new ProjectTemplates("io/zenwave360/sdk/plugins/BackendApplicationDefaultGenerator");
 
         var layout = new ProjectLayout(); // layoutNames
 

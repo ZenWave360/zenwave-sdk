@@ -6,7 +6,6 @@ import io.zenwave360.sdk.plugins.BackendApplicationDefaultPlugin;
 import io.zenwave360.sdk.plugins.OpenAPIControllersPlugin;
 import io.zenwave360.sdk.plugins.ZDLToAsyncAPIPlugin;
 import io.zenwave360.sdk.plugins.ZDLToOpenAPIPlugin;
-import io.zenwave360.sdk.zdl.layout.DefaultProjectLayout;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.*;
 

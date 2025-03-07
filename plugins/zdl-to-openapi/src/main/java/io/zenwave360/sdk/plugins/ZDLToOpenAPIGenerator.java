@@ -8,11 +8,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
-import io.zenwave360.sdk.generators.AbstractZDLGenerator;
 import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.utils.AntStyleMatcher;
-import io.zenwave360.sdk.zdl.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateInput;
@@ -20,8 +19,6 @@ import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
 import org.apache.commons.lang3.StringUtils;
-
-import static java.util.Collections.emptyList;
 
 public class ZDLToOpenAPIGenerator implements Generator {
 

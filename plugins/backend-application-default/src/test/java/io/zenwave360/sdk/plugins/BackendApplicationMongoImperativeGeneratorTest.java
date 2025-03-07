@@ -2,7 +2,6 @@ package io.zenwave360.sdk.plugins;
 
 import java.util.List;
 
-import io.zenwave360.sdk.zdl.layout.SimpleDomainProjectLayout;
 import org.junit.jupiter.api.*;
 
 import io.zenwave360.sdk.MainGenerator;

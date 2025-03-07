@@ -1,19 +1,31 @@
-package io.zenwave360.sdk.generators;
+package io.zenwave360.sdk.zdl;
+
+import io.zenwave360.sdk.templating.OutputFormatType;
+import io.zenwave360.sdk.templating.TemplateInput;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import io.zenwave360.sdk.templating.OutputFormatType;
-import io.zenwave360.sdk.templating.TemplateInput;
-
-
-public class ZDLProjectTemplates {
+/**
+ * This file will hold all the project templates for a ZDL project generator.
+ *
+ * <p>
+ * Each variable holds the templates for a specific section of the ZDL model.
+ * For instance:
+ * </p>
+ * <ul>
+ *   <li>'entityTemplates' holds the templates to be applied for each entity in the ZDL model</li>
+ *   <li>'allEntitiesTemplates' holds the templates to be applied **once** passing all entities as context for the template engine</li>
+ *   <li>'singleTemplates' holds the templates to be applied **once** for the entire ZDL model</li>
+ * </ul>
+ */
+public class ProjectTemplates {
 
     public final String templatesFolder;
 
-    public ZDLProjectTemplates(String templatesFolder) {
+    public ProjectTemplates(String templatesFolder) {
         this.templatesFolder = templatesFolder;
     }
 
@@ -44,6 +56,7 @@ public class ZDLProjectTemplates {
     }
 
     public void addTemplate(List<TemplateInput> templates, String sourceFolder, String templateLocation, String targetModule, String targetPackagePlaceholder, String targetFile, OutputFormatType mimeType, Function<Map<String, Object>, Boolean> skip, boolean skipOverwrite) {
+        // let the template engine resolve the target package at runtime
         var targetPackage = "{{asPackageFolder layout." + targetPackagePlaceholder + "}}";
         var template = new TemplateInput()
                 .withTemplateLocation(joinPath(templatesFolder, sourceFolder, templateLocation))
@@ -54,12 +67,10 @@ public class ZDLProjectTemplates {
         templates.add(template);
     }
 
-
-
     protected String joinPath(String... paths) {
         var tokens = new ArrayList<>();
         for (String path : paths) {
-            if(path != null) {
+            if (path != null) {
                 tokens.add(path);
             }
         }

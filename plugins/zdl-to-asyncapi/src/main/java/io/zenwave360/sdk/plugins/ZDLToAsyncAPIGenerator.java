@@ -18,7 +18,7 @@ import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
-import io.zenwave360.sdk.zdl.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 
 import static io.zenwave360.sdk.utils.NamingUtils.asJavaTypeName;
 import static org.apache.commons.lang3.StringUtils.trimToNull;

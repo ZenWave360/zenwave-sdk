@@ -4,7 +4,6 @@ import java.util.List;
 
 import io.zenwave360.sdk.Plugin;
 import io.zenwave360.sdk.options.ProgrammingStyle;
-import io.zenwave360.sdk.zdl.layout.SimpleDomainProjectLayout;
 import org.junit.jupiter.api.*;
 
 import io.zenwave360.sdk.MainGenerator;

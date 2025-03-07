@@ -12,8 +12,6 @@ import io.zenwave360.sdk.testutils.MavenCompiler;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 import io.zenwave360.sdk.writers.TemplateWriter;
-import io.zenwave360.sdk.zdl.layout.DefaultProjectLayout;
-import io.zenwave360.sdk.zdl.layout.SimpleDomainProjectLayout;
 import org.junit.jupiter.api.Assertions;
 
 import io.zenwave360.sdk.parsers.DefaultYamlParser;

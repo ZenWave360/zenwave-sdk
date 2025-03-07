@@ -12,7 +12,7 @@ import java.util.Map;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.TemplateEngine;
 import io.zenwave360.sdk.templating.TemplateOutput;
-import io.zenwave360.sdk.zdl.layout.ProjectLayout;
+import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 
 public interface Generator {
 
