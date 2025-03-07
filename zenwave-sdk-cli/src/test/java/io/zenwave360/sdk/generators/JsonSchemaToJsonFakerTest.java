@@ -31,7 +31,7 @@ public class JsonSchemaToJsonFakerTest {
         Map<String, Map<String, Object>> schemas = JSONPath.get(model, "$.api.components.schemas");
         for (var keyValue : schemas.entrySet()) {
             String jsonExample = jsonSchemaToJsonFaker.generateExampleAsJson(keyValue.getValue());
-            System.out.println(keyValue.getKey() + " = " + jsonExample);
+            // System.out.println(keyValue.getKey() + " = " + jsonExample);
         }
     }
 

@@ -1,4 +1,10 @@
 
+@auditing
+entity BaseEntity {
+
+}
+
+@extends(BaseEntity)
 entity Entity {
     localDate LocalDate /** LocalDate.now() */
     zoneDateTime ZonedDateTime /** ZonedDateTime.now() */
@@ -14,6 +20,8 @@ entity Entity {
     blob Blob /** null */
     someEnum SomeEnum /** SomeEnum.values()[0] */
     string String minlength(0) maxlength(100) pattern(/.*/) /** "" */
+    otherProperties Map /** new java.util.HashMap() */
+    withInitialValue String = "42" /** "42" */
 }
 
 enum SomeEnum {

@@ -139,10 +139,10 @@ public class EntitiesToSchemasConverter {
                     }
                 }
                 Map<String, Object> property = new LinkedHashMap<>();
-                if (relationship.get("comment") != null || isAddRelationshipById) {
-                    var readOnlyWarning = isAddRelationshipById ? "(read-only) " : "";
-                    // TODO desc+$ref: property.put("description", readOnlyWarning + relationship.getOrDefault("comment", ""));
-                }
+//                if (relationship.get("comment") != null || isAddRelationshipById) {
+//                    var readOnlyWarning = isAddRelationshipById ? "(read-only) " : "";
+//                    // TODO desc+$ref: property.put("description", readOnlyWarning + relationship.getOrDefault("comment", ""));
+//                }
                 property.put("$ref", "#/components/schemas/" + relationship.get("otherEntityName"));
                 if (isCollection) {
                     property = Maps.of("type", "array", "items", property);
@@ -162,8 +162,8 @@ public class EntitiesToSchemasConverter {
         var property = new LinkedHashMap<String, Object>();
         if ("String".equals(entityType) || "TextBlob".equals(entityType)) {
             property.put("type", "string");
-        } else if ("Enum".equals(entityType)) {
-            property.put("type", "string");
+//        } else if ("Enum".equals(entityType)) {
+//            property.put("type", "string");
         } else if ("LocalDate".equals(entityType)) {
             property.put("type", "string");
             property.put("format", "date");

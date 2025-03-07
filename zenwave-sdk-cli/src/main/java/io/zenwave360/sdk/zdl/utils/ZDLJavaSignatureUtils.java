@@ -179,6 +179,9 @@ public class ZDLJavaSignatureUtils {
 
     public static String fieldTypeInitializer(Map field) {
         if (field.get("initialValue") != null) {
+            if ("String".equals(field.get("type")) || "TextBlob".equals(field.get("type"))) {
+                return "= \"" + field.get("initialValue") + "\"";
+            }
             return "= " + field.get("initialValue");
         }
         if (field.get("isArray") == Boolean.TRUE) {
@@ -192,6 +195,12 @@ public class ZDLJavaSignatureUtils {
 
     public static String populateField(Map field) {
         String value;
+        if(field.get("initialValue") != null) {
+            if ("String".equals(field.get("type")) || "TextBlob".equals(field.get("type"))) {
+                return "\"" + field.get("initialValue") + "\"";
+            }
+            return (String) field.get("initialValue");
+        }
         if ("String".equals(field.get("type")) || "TextBlob".equals(field.get("type"))) {
             int min = Integer.valueOf(JSONPath.get(field, "validations.minlength.value", "0"));
             int max = Integer.valueOf(JSONPath.get(field, "validations.minlength.value", "0"));

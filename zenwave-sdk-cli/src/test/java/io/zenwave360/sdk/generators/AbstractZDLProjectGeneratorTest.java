@@ -57,15 +57,24 @@ public class AbstractZDLProjectGeneratorTest {
     void testAbstractZDLProjectGenerator() throws IOException {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
         var outputList = zdlProjectGenerator.generate(model);
-        Assertions.assertEquals(12, outputList.size());
+        Assertions.assertEquals(14, outputList.size());
     }
 
     @Test
     void testAbstractZDLProjectGeneratorLocalEvents() throws IOException {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/customer-address-local-events.zdl");
         var outputList = zdlProjectGenerator.generate(model);
-        outputList.stream().map(TemplateOutput::getContent).forEach(System.out::println);
+//        outputList.stream().map(TemplateOutput::getContent).forEach(System.out::println);
         Assertions.assertEquals(12, outputList.size());
     }
+
+    @Test
+    void testAbstractZDLProjectGeneratorWithAggregates() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/orders-with-aggregate.zdl");
+        var outputList = zdlProjectGenerator.generate(model);
+//        outputList.stream().map(TemplateOutput::getContent).forEach(System.out::println);
+        Assertions.assertEquals(22, outputList.size());
+    }
+
 
 }
