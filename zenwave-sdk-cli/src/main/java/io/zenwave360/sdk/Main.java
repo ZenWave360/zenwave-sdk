@@ -69,6 +69,7 @@ public class Main implements Callable<Integer> {
             options.put("forceOverwrite", true);
         }
         var layout = (String) options.get("layout");
+        options.remove("layout");
         var specFile = (String) options.get("specFile");
         var apiFile = isApi(specFile) ? specFile : null;
         var zdlFile = specFile != null && specFile.endsWith(".zdl") ? specFile : null;

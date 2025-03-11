@@ -162,7 +162,7 @@ public class SpringWebTestClientGeneratorTest {
                 .withTargetFolder(targetFolder)
                 .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.service)
                 .withOption("transactional", false)
-                .withOption("layout", "SimpleDomainProjectLayout")
+                .withLayout("SimpleDomainProjectLayout")
                 .withOption("basePackage", "io.example")
                 .withOption("openApiApiPackage", "io.example.api")
                 .withOption("openApiModelPackage",  "io.example.api.model")

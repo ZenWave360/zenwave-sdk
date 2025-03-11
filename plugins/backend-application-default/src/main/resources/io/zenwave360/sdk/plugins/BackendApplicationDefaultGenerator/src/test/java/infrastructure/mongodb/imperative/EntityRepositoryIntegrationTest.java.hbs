@@ -1,7 +1,15 @@
 package {{layout.infrastructureRepositoryPackage}};
 
+import {{layout.infrastructureRepositoryCommonPackage}}.BaseRepositoryIntegrationTest;
+
 import {{layout.entitiesPackage}}.*;
 import {{layout.outboundRepositoryPackage}}.{{entity.className}}Repository;
+
+import java.util.HashSet;
+import java.util.HashMap;
+import java.util.List;
+import java.time.*;
+import java.math.BigDecimal;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

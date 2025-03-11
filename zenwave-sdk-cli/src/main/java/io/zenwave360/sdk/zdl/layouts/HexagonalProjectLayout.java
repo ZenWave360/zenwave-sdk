@@ -83,6 +83,20 @@ public class HexagonalProjectLayout extends ProjectLayout {
         // openapi generated packages
         openApiApiPackage = "{{adaptersWebPackage}}";
         openApiModelPackage = "{{adaptersWebPackage}}.dtos";
+
+        // common packages (for base classes in monolithic projects)
+        entitiesCommonPackage = "{{commonPackage}}.domain";
+        domainEventsCommonPackage = "{{commonPackage}}.domain.events";
+        coreImplementationCommonPackage = "{{commonPackage}}.application";
+        coreImplementationMappersCommonPackage = "{{commonPackage}}.application.mappers";
+        infrastructureRepositoryCommonPackage = "{{commonPackage}}.infrastructure.{{persistence}}";
+        infrastructureEventsCommonPackage = "{{commonPackage}}.infrastructure.events";
+        adaptersWebCommonPackage = "{{commonPackage}}.adapters.web";
+        adaptersWebMappersCommonPackage = "{{commonPackage}}.adapters.web.mappers";
+        adaptersCommandsCommonPackage = "{{commonPackage}}.adapters.commands";
+        adaptersCommandsMappersCommonPackage = "{{commonPackage}}.adapters.commands.mappers";
+        adaptersEventsCommonPackage = "{{commonPackage}}.adapters.events";
+        adaptersEventsMappersCommonPackage = "{{commonPackage}}.adapters.events.mappers";
     }
 
 }

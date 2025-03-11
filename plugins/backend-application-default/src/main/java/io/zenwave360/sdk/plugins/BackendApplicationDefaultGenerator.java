@@ -116,7 +116,7 @@ public class BackendApplicationDefaultGenerator extends AbstractZDLProjectGenera
         ts.addTemplate(ts.entityTemplates, "src/main/java", "core/inbound/dtos/EntityInput.java",
                 layout.inboundDtosPackage, "{{entity.className}}{{inputDTOSuffix entity}}.java", JAVA, skipEntityInput, false);
         ts.addTemplate(ts.entityTemplates, "src/test/java", "infrastructure/{{persistence}}/{{style}}/BaseRepositoryIntegrationTest.java",
-                layout.infrastructureRepositoryPackage, "BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
+                layout.infrastructureRepositoryCommonPackage, "BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java", "infrastructure/{{persistence}}/{{style}}/EntityRepositoryIntegrationTest.java",
                 layout.infrastructureRepositoryPackage, "{{entity.className}}RepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java", "infrastructure/{{persistence}}/{{style}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java",
@@ -143,7 +143,7 @@ public class BackendApplicationDefaultGenerator extends AbstractZDLProjectGenera
         ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/implementation/{{style}}/ServiceImpl.java",
                 layout.coreImplementationPackage, "{{service.name}}Impl.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/main/java", "core/implementation/mappers/BaseMapper.java",
-                layout.coreImplementationMappersPackage, "BaseMapper.java", JAVA, null, true);
+                layout.coreImplementationMappersCommonPackage, "BaseMapper.java", JAVA, null, true);
         ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/implementation/mappers/ServiceMapper.java",
                 layout.coreImplementationMappersPackage, "{{service.name}}Mapper.java", JAVA, null, true);
         ts.addTemplate(ts.serviceTemplates, "src/test/java", "core/implementation/{{persistence}}/{{style}}/ServiceTest.java",
@@ -173,7 +173,7 @@ public class BackendApplicationDefaultGenerator extends AbstractZDLProjectGenera
         ts.addTemplate(ts.singleTemplates, "src/main/java", "infrastructure/package-info.java",
                 layout.infrastructurePackage, "package-info.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/test/java", "ArchitectureTest.java",
-                layout.basePackage, "ArchitectureTest.java", JAVA, null, true);
+                layout.moduleBasePackage, "ArchitectureTest.java", JAVA, null, true);
 
         return ts;
     }

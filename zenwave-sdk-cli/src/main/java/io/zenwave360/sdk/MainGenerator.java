@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.*;
 import io.zenwave360.sdk.plugins.ConfigurationProvider;
 import io.zenwave360.sdk.utils.CommaSeparatedCollectionDeserializationHandler;
+import io.zenwave360.sdk.utils.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +31,6 @@ public class MainGenerator {
         log.debug("Processors chain is {}", configuration.getChain().stream().map(c -> c.getName()).collect(Collectors.toList()));
         Map<String, Object> model = new HashMap<>();
         List<TemplateOutput> templateOutputList = new ArrayList<>();
-
-        configuration.processLayout();
 
         int chainIndex = 0;
         for (Class pluginClass : configuration.getChain()) {
@@ -66,6 +65,8 @@ public class MainGenerator {
         Object processorFullClassOptions = options.get(plugin.getClass().getName());
         Object processorSimpleClassOptions = options.get(plugin.getClass().getSimpleName());
         Object chainIndexOptions = options.get(String.valueOf(chainIndex));
+        var layout = configuration.getProcessedLayout();
+        Object layoutOptions = layout != null ? Map.of("layout", layout) : null;
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -80,6 +81,9 @@ public class MainGenerator {
         }
         if (chainIndexOptions != null) {
             mapper.updateValue(plugin, chainIndexOptions);
+        }
+        if (layoutOptions != null) {
+            mapper.updateValue(plugin, layoutOptions);
         }
 
         try {

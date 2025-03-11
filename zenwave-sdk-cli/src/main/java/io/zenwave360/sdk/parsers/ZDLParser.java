@@ -97,14 +97,16 @@ public class ZDLParser implements Parser, ConfigurationProvider {
         var zdl = model.get(targetProperty);
         var config = JSONPath.get(zdl, "$.config", Map.<String, Object>of());
 
-        for (var entry : config.entrySet()) {
-            if(!configuration.getOptions().containsKey(entry.getKey())) {
-                configuration.withOption(entry.getKey(), entry.getValue());
+        if (config != null) {
+            for (var entry : config.entrySet()) {
+                if(!configuration.getOptions().containsKey(entry.getKey())) {
+                    configuration.withOption(entry.getKey(), entry.getValue());
+                }
             }
-        }
-        if(config.containsKey("layout")) {
-            configuration.withLayout((String) config.get("layout"));
-            configuration.processLayout();
+//            if(config.containsKey("layout")) {
+//                configuration.withLayout((String) config.get("layout"));
+//                configuration.processLayout();
+//            }
         }
     }
 }

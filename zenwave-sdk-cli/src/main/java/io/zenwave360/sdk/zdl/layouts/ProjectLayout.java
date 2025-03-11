@@ -66,6 +66,20 @@ public class ProjectLayout {
     public String asyncApiProducerApiPackage = "asyncApiProducerApiPackage"; // right now is outboundEventsPackage
     public String asyncApiConsumerApiPackage = "asyncApiConsumerApiPackage"; // right now is adaptersCommandsPackage
 
+    // common packages (for base classes in monolithic projects)
+    public String entitiesCommonPackage = "entitiesCommonPackage";
+    public String domainEventsCommonPackage = "domainEventsCommonPackage";
+    public String coreImplementationCommonPackage = "coreImplementationCommonPackage";
+    public String coreImplementationMappersCommonPackage = "coreImplementationMappersCommonPackage";
+    public String infrastructureRepositoryCommonPackage = "infrastructureRepositoryCommonPackage";
+    public String infrastructureEventsCommonPackage = "infrastructureEventsCommonPackage";
+    public String adaptersWebCommonPackage = "adaptersWebCommonPackage";
+    public String adaptersWebMappersCommonPackage = "adaptersWebMappersCommonPackage";
+    public String adaptersCommandsCommonPackage = "adaptersCommandsCommonPackage";
+    public String adaptersCommandsMappersCommonPackage = "adaptersCommandsMappersCommonPackage";
+    public String adaptersEventsCommonPackage = "adaptersEventsCommonPackage";
+    public String adaptersEventsMappersCommonPackage = "adaptersEventsMappersCommonPackage";
+
     @JsonAnySetter
     public Map<String, String> _additionalProperties;
 
@@ -86,6 +100,17 @@ public class ProjectLayout {
             }
         }
         return map;
+    }
+
+    public <T extends ProjectLayout> T processedLayout(Map<String, Object> options) {
+        try {
+            ProjectLayout layout = this.getClass().getDeclaredConstructor().newInstance();
+            layout.processLayoutPlaceHolders(options);
+            return (T) layout;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public void processLayoutPlaceHolders(Map<String, Object> options) {

@@ -82,6 +82,20 @@ public class LayeredProjectLayout extends ProjectLayout {
         // openapi generated packages
         openApiApiPackage = "{{adaptersWebPackage}}";
         openApiModelPackage = "{{adaptersWebPackage}}.dtos";
+
+        // common packages (for base classes in monolithic projects)
+        entitiesCommonPackage = "{{commonPackage}}.domain";
+        domainEventsCommonPackage = "{{commonPackage}}.domain.events";
+        coreImplementationCommonPackage = "{{commonPackage}}.service.impl";
+        coreImplementationMappersCommonPackage = "{{commonPackage}}.service.impl.mappers";
+        infrastructureRepositoryCommonPackage = "{{commonPackage}}.repository.{{persistence}}";
+        infrastructureEventsCommonPackage = "{{commonPackage}}.events";
+        adaptersWebCommonPackage = "{{commonPackage}}.web";
+        adaptersWebMappersCommonPackage = "{{commonPackage}}.web.mappers";
+        adaptersCommandsCommonPackage = "{{commonPackage}}.commands";
+        adaptersCommandsMappersCommonPackage = "{{commonPackage}}.commands.mappers";
+        adaptersEventsCommonPackage = "{{commonPackage}}.events";
+        adaptersEventsMappersCommonPackage = "{{commonPackage}}.events.mappers";
     }
 
 }

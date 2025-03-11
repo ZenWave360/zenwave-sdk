@@ -56,8 +56,6 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
     @DocumentedOption(description = "Whether to use a JSON string or instantiate a java DTO as request payload")
     public RequestPayloadType requestPayloadType = RequestPayloadType.json;
 
-    public boolean simpleDomainPackaging = false;
-
     private final HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
     private final JsonSchemaToJsonFaker jsonSchemaToJsonFaker = new JsonSchemaToJsonFaker();
@@ -79,9 +77,11 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
             if (this.testsPackage == null) {
                 this.testsPackage = layout.adaptersWebPackage;
             }
-        }
-        if (this.baseTestClassPackage == null) {
-            this.baseTestClassPackage = testsPackage;
+            if(layout.adaptersWebCommonPackage != null && !layout.adaptersWebCommonPackage.contains("{{")) {
+                this.baseTestClassPackage = layout.adaptersWebCommonPackage;
+            } else {
+                this.baseTestClassPackage = testsPackage;
+            }
         }
     }
 

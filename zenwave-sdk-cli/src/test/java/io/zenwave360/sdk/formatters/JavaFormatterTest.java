@@ -35,7 +35,7 @@ public class JavaFormatterTest {
                 """;
 
         String formattedContent = formatter.format(List.of(new TemplateOutput("test.java", source, OutputFormatType.JAVA.toString(), false))).get(0).getContent();
-        System.out.println(formattedContent);
+//        System.out.println(formattedContent);
     }
 
     @Test
@@ -64,7 +64,7 @@ public class JavaFormatterTest {
                 """;
 
         String formattedContent = formatter.format(List.of(new TemplateOutput("test.java", source, OutputFormatType.JAVA.toString(), false))).get(0).getContent();
-        System.out.println(formattedContent);
+//        System.out.println(formattedContent);
 
         // This code is raw palantir formatter usage
 //        var formatter = com.palantir.javaformat.java.Formatter.create();

@@ -28,7 +28,7 @@ public class BackendApplicationMultiModuleGenerator extends BackendApplicationDe
         ts.addTemplate(ts.entityTemplates, "src/main/java", "core/inbound/dtos/EntityInput.java", "{{mavenModulesPrefix}}-domain",
                 layout.inboundDtosPackage, "{{entity.className}}{{inputDTOSuffix entity}}.java", JAVA, skipEntityInput, false);
         ts.addTemplate(ts.entityTemplates, "src/test/java", "infrastructure/{{persistence}}/{{style}}/BaseRepositoryIntegrationTest.java", "{{mavenModulesPrefix}}-infra",
-                layout.infrastructureRepositoryPackage, "BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
+                layout.infrastructureRepositoryCommonPackage, "BaseRepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java", "infrastructure/{{persistence}}/{{style}}/EntityRepositoryIntegrationTest.java", "{{mavenModulesPrefix}}-infra",
                 layout.infrastructureRepositoryPackage, "{{entity.className}}RepositoryIntegrationTest.java", JAVA, skipEntityRepository, true);
         ts.addTemplate(ts.entityTemplates, "src/test/java", "infrastructure/{{persistence}}/{{style}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", "{{mavenModulesPrefix}}-core-impl",
@@ -55,7 +55,7 @@ public class BackendApplicationMultiModuleGenerator extends BackendApplicationDe
         ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/implementation/{{style}}/ServiceImpl.java", "{{mavenModulesPrefix}}-core-impl",
                 layout.coreImplementationPackage, "{{service.name}}Impl.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/main/java", "core/implementation/mappers/BaseMapper.java", "{{mavenModulesPrefix}}-domain",
-                layout.coreImplementationMappersPackage, "BaseMapper.java", JAVA, null, true);
+                layout.coreImplementationMappersCommonPackage, "BaseMapper.java", JAVA, null, true);
         ts.addTemplate(ts.serviceTemplates, "src/main/java", "core/implementation/mappers/ServiceMapper.java", "{{mavenModulesPrefix}}-core-impl",
                 layout.coreImplementationMappersPackage, "{{service.name}}Mapper.java", JAVA, null, true);
         ts.addTemplate(ts.serviceTemplates, "src/test/java", "core/implementation/{{persistence}}/{{style}}/ServiceTest.java", "{{mavenModulesPrefix}}-core-impl",

@@ -84,10 +84,10 @@ public class Plugin {
                     // ignore
                 }
             }
-            if (ProjectLayout.class.isAssignableFrom(layoutClass)) {
+            if (layoutClass != null && ProjectLayout.class.isAssignableFrom(layoutClass)) {
                 try {
                     this.layout = (ProjectLayout) layoutClass.getDeclaredConstructor().newInstance();
-                    this.options.put("layout", this.layout);
+//                    this.options.put("layout", this.layout);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -96,11 +96,11 @@ public class Plugin {
         return this;
     }
 
-    public void processLayout() {
+    public ProjectLayout getProcessedLayout() {
         if (layout != null) {
-            layout.processLayoutPlaceHolders(getOptions());
-            getOptions().put("layout", layout);
+            return layout.processedLayout(options);
         }
+        return null;
     }
 
     public Plugin withApiFile(String apiFile) {
@@ -183,6 +183,7 @@ public class Plugin {
         try {
             if ("layout".equals(name) && value instanceof String) {
                 withLayout((String) value);
+                options.remove("layout");
             } else if(field != null) {
                 FieldUtils.writeField(this, name, value);
             }

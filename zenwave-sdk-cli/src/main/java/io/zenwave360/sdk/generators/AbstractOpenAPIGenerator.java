@@ -50,10 +50,6 @@ public abstract class AbstractOpenAPIGenerator implements Generator {
 
     @Override
     public void onPropertiesSet() {
-        if (layout == null) {
-            layout = new DefaultProjectLayout();
-            layout.processLayoutPlaceHolders(this.asConfigurationMap());
-        }
         if (layout != null) {
             if (basePackage == null) {
                 basePackage = layout.basePackage;

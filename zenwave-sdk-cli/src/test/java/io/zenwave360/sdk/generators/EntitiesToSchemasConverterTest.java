@@ -38,8 +38,8 @@ public class EntitiesToSchemasConverterTest {
             schemas.add(result);
         }
 
-        ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writeValueAsString(schemas));
+//        ObjectMapper mapper = new ObjectMapper();
+//        System.out.println(mapper.writeValueAsString(schemas));
     }
 
     @Test
@@ -60,8 +60,8 @@ public class EntitiesToSchemasConverterTest {
             schemas.add(result);
         }
 
-        ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writeValueAsString(schemas));
+//        ObjectMapper mapper = new ObjectMapper();
+//        System.out.println(mapper.writeValueAsString(schemas));
     }
 
     @Test
@@ -82,7 +82,7 @@ public class EntitiesToSchemasConverterTest {
             schemas.add(result);
         }
 
-        ObjectMapper mapper = new ObjectMapper();
-        System.out.println(mapper.writeValueAsString(schemas));
+//        ObjectMapper mapper = new ObjectMapper();
+//        System.out.println(mapper.writeValueAsString(schemas));
     }
 }

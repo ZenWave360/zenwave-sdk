@@ -41,9 +41,9 @@ public class SimpleDomainProjectLayout extends ProjectLayout {
         outboundPackage = "{{moduleBasePackage}}";
         outboundRepositoryPackage = "{{moduleBasePackage}}";
         // outbound / secondary ports for events (internal and asyncapi)
-        outboundEventsPackage = "{{moduleBasePackage}}";
+        outboundEventsPackage = "{{moduleBasePackage}}.events";
         // asyncapi events dtos
-        outboundEventsModelPackage = "{{moduleBasePackage}}.domain.events";
+        outboundEventsModelPackage = "{{moduleBasePackage}}.events.dtos";
 
         // core implementation / inner ring
         coreImplementationPackage = "{{moduleBasePackage}}";
@@ -67,6 +67,20 @@ public class SimpleDomainProjectLayout extends ProjectLayout {
         // openapi generated packages
         openApiApiPackage = "{{adaptersWebPackage}}";
         openApiModelPackage = "{{adaptersWebPackage}}.dtos";
+
+        // common packages (for base classes in monolithic projects)
+        entitiesCommonPackage = "{{commonPackage}}.domain";
+        domainEventsCommonPackage = "{{commonPackage}}.domain.events";
+        coreImplementationCommonPackage = "{{commonPackage}}";
+        coreImplementationMappersCommonPackage = "{{commonPackage}}.mappers";
+        infrastructureRepositoryCommonPackage = "{{commonPackage}}";
+        infrastructureEventsCommonPackage = "{{commonPackage}}";
+        adaptersWebCommonPackage = "{{commonPackage}}";
+        adaptersWebMappersCommonPackage = "{{commonPackage}}.mappers";
+        adaptersCommandsCommonPackage = "{{commonPackage}}.commands";
+        adaptersCommandsMappersCommonPackage = "{{commonPackage}}.commands.mappers";
+        adaptersEventsCommonPackage = "{{commonPackage}}.events";
+        adaptersEventsMappersCommonPackage = "{{commonPackage}}.events.mappers";
     }
 
 }

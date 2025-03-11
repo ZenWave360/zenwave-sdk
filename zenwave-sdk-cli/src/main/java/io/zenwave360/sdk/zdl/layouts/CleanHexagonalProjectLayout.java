@@ -1,35 +1,37 @@
 package io.zenwave360.sdk.zdl.layouts;
 
 /**
- * CleanArchitectureProjectLayout project layout.
+ * Hexagonal Architecture (also called Ports and Adapters) with a Clean separation of concerns, following Domain-Driven Design (DDD) and Event-Driven Architecture (EDA) principles.
  *
  * <pre>
  * 📦 {{basePackage}}
- *    📦 domain                        # Core business entities and aggregates (Domain Layer)
- *        └─ *Entities
- *
- *    📦 application                   # Application layer (Use Cases)
- *        ├─ services/
- *        |   └─ *UseCase (service interfaces with input/output models)
- *        └─ dtos/
- *
- *    📦 adapters                      # Interface Adapters
- *        ├─ web                      # Web Adapter (Controllers)
- *        |   └─ RestControllers
- *        ├─ events                   # Event-driven Adapter
- *        |   └─ *EventListeners
- *        └─ persistence              # Persistence Adapter
- *            ├─ mongodb/
- *            |   ├─ MongoRepositoryInterface
- *            |   └─ MongoRepositoryImpl
- *            └─ jpa/
- *                ├─ JpaRepositoryInterface
- *                └─ JpaRepositoryImpl
- *
- *    📦 config                  # Spring Boot configuration, security, etc.
+ *    📦 adapters
+ *        └─ web
+ *        |  └─ RestControllers (spring mvc)
+ *        └─ events
+ *           └─ *EventListeners (spring-cloud-streams)
+ *    📦 core
+ *        ├─ 📦 domain
+ *        |     └─ (entities and aggregates)
+ *        ├─ 📦 inbound
+ *        |     ├─ dtos/
+ *        |     └─ ServiceInterface (inbound service interface)
+ *        ├─ 📦 outbound
+ *        |     ├─ mongodb
+ *        |     |  └─ *RepositoryInterface (spring-data interface)
+ *        |     └─ jpa
+ *        |        └─ *RepositoryInterface (spring-data interface)
+ *        └─ 📦 implementation
+ *              ├─ mappers/
+ *              └─ ServiceImplementation (inbound service implementation)
+ *    📦 infrastructure
+ *      ├─ mongodb
+ *      |  └─ CustomRepositoryImpl (spring-data custom implementation)
+ *      └─ jpa
+ *         └─ CustomRepositoryImpl (spring-data custom implementation)
  * </pre>
  */
-public class CleanArchitectureProjectLayout extends ProjectLayout {
+public class CleanHexagonalProjectLayout extends ProjectLayout {
 
     {
         basePackage = "{{basePackage}}";
@@ -43,24 +45,24 @@ public class CleanArchitectureProjectLayout extends ProjectLayout {
         moduleConfigPackage = "{{moduleBasePackage}}.config";
 
         // domain entities and events
-        entitiesPackage = "{{moduleBasePackage}}.domain.entities";
-        domainEventsPackage = "{{moduleBasePackage}}.domain.events";
+        entitiesPackage =  "{{moduleBasePackage}}.core.domain";
+        domainEventsPackage = "{{moduleBasePackage}}.core.domain.events";
 
-        // inbound services / primary ports (use cases)
-        inboundPackage = "{{moduleBasePackage}}.application.usecases";
-        inboundDtosPackage = "{{moduleBasePackage}}.application.usecases.dtos";
+        // inbound services / primary ports
+        inboundPackage = "{{moduleBasePackage}}.core.inbound";
+        inboundDtosPackage = "{{moduleBasePackage}}.core.inbound.dtos";
 
-        // outbound / secondary ports (interfaces)
-        outboundPackage = "{{moduleBasePackage}}.application.ports";
-        outboundRepositoryPackage = "{{moduleBasePackage}}.application.ports.{{persistence}}";
+        // outbound / secondary ports
+        outboundPackage = "{{moduleBasePackage}}.core.outbound";
+        outboundRepositoryPackage = "{{moduleBasePackage}}.core.outbound.{{persistence}}";
         // outbound / secondary ports for events (internal and asyncapi)
-        outboundEventsPackage = "{{moduleBasePackage}}.application.ports.events";
+        outboundEventsPackage = "{{moduleBasePackage}}.core.outbound.events";
         // asyncapi events dtos
-        outboundEventsModelPackage = "{{moduleBasePackage}}.application.ports.events.dtos";
+        outboundEventsModelPackage = "{{moduleBasePackage}}.core.outbound.events.dtos";
 
-        // core implementation (use case implementations)
-        coreImplementationPackage = "{{moduleBasePackage}}.application.services";
-        coreImplementationMappersPackage = "{{moduleBasePackage}}.application.mappers";
+        // core implementation / inner ring
+        coreImplementationPackage = "{{moduleBasePackage}}.core.implementation";
+        coreImplementationMappersPackage = "{{moduleBasePackage}}.core.implementation.mappers";
 
         // infrastructure / secondary adapters
         infrastructurePackage = "{{moduleBasePackage}}.infrastructure";
@@ -82,10 +84,10 @@ public class CleanArchitectureProjectLayout extends ProjectLayout {
         openApiModelPackage = "{{adaptersWebPackage}}.dtos";
 
         // common packages (for base classes in monolithic projects)
-        entitiesCommonPackage = "{{commonPackage}}.domain.entities";
-        domainEventsCommonPackage = "{{commonPackage}}.domain.events";
-        coreImplementationCommonPackage = "{{commonPackage}}.application.services";
-        coreImplementationMappersCommonPackage = "{{commonPackage}}.application.mappers";
+        entitiesCommonPackage = "{{commonPackage}}.core.domain";
+        domainEventsCommonPackage = "{{commonPackage}}.core.domain.events";
+        coreImplementationCommonPackage = "{{commonPackage}}.core.implementation";
+        coreImplementationMappersCommonPackage = "{{commonPackage}}.core.implementation.mappers";
         infrastructureRepositoryCommonPackage = "{{commonPackage}}.infrastructure.{{persistence}}";
         infrastructureEventsCommonPackage = "{{commonPackage}}.infrastructure.events";
         adaptersWebCommonPackage = "{{commonPackage}}.adapters.web";
