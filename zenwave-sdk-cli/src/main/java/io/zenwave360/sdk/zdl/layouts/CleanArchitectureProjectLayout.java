@@ -80,6 +80,10 @@ public class CleanArchitectureProjectLayout extends ProjectLayout {
         // openapi generated packages
         openApiApiPackage = "{{adaptersWebPackage}}";
         openApiModelPackage = "{{adaptersWebPackage}}.dtos";
+        // asyncapi generated packages (not in use yet)
+        asyncApiModelPackage = "{{moduleBasePackage}}.application.ports.events.dtos"; // right now is outboundEventsModelPackage
+        asyncApiProducerApiPackage = "{{moduleBasePackage}}.application.ports.events"; // right now is outboundEventsPackage
+        asyncApiConsumerApiPackage = "{{moduleBasePackage}}.adapters.commands"; // right now is adaptersCommandsPackage
 
         // common packages (for base classes in monolithic projects)
         entitiesCommonPackage = "{{commonPackage}}.domain.entities";

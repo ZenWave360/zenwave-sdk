@@ -104,7 +104,7 @@ public class ProjectLayout {
 
     public <T extends ProjectLayout> T processedLayout(Map<String, Object> options) {
         try {
-            ProjectLayout layout = this.getClass().getDeclaredConstructor().newInstance();
+            ProjectLayout layout = this.getClass().getConstructor().newInstance();
             layout.processLayoutPlaceHolders(options);
             return (T) layout;
         } catch (Exception e) {
@@ -143,7 +143,8 @@ public class ProjectLayout {
         if (options == null) {
             return new HashMap<>();
         }
-        Map<String, Object> layoutOptions = new HashMap<>();
+        Object optionsLayout = options.get("layout");
+        Map<String, Object> layoutOptions = optionsLayout instanceof Map ? (Map) optionsLayout : new HashMap<>();
         String prefix = "layout.";
         options.forEach((key, value) -> {
             if (key.startsWith(prefix)) {

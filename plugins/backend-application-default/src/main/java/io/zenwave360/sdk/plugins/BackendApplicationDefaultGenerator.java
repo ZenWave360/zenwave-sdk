@@ -13,6 +13,7 @@ import io.zenwave360.sdk.options.DatabaseType;
 import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.options.ProgrammingStyle;
 import io.zenwave360.sdk.utils.JSONPath;
+import io.zenwave360.sdk.zdl.layouts.CleanArchitectureProjectLayout;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 import org.apache.commons.lang3.ObjectUtils;
@@ -98,6 +99,7 @@ public class BackendApplicationDefaultGenerator extends AbstractZDLProjectGenera
     protected Function<Map<String, Object>, Boolean> skipEvents = (model) -> !includeEmitEventsImplementation;
     protected Function<Map<String, Object>, Boolean> skipEventsBus = (model) -> ((Collection) model.get("events")).isEmpty();
     protected Function<Map<String, Object>, Boolean> skipInput = (model) -> is(model, "inline");
+
     @Override
     protected ProjectTemplates configureProjectTemplates() {
         var ts = new ProjectTemplates("io/zenwave360/sdk/plugins/BackendApplicationDefaultGenerator");
@@ -172,8 +174,11 @@ public class BackendApplicationDefaultGenerator extends AbstractZDLProjectGenera
                 layout.inboundDtosPackage, "package-info.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/main/java", "infrastructure/package-info.java",
                 layout.infrastructurePackage, "package-info.java", JAVA, null, true);
-        ts.addTemplate(ts.singleTemplates, "src/test/java", "ArchitectureTest.java",
-                layout.moduleBasePackage, "ArchitectureTest.java", JAVA, null, true);
+
+        if(this.layout instanceof CleanArchitectureProjectLayout) {
+            ts.addTemplate(ts.singleTemplates, "src/test/java", "ArchitectureTest.java",
+                    layout.moduleBasePackage, "ArchitectureTest.java", JAVA, null, true);
+        }
 
         return ts;
     }
