@@ -1,0 +1,161 @@
+openapi: 3.0.1
+info:
+  title: "Clinical Tool - Mobile API"
+  version: 0.0.1
+  description: "Clinical Tool - Mobile API"
+  contact:
+    email: email@domain.com
+servers:
+  - description: localhost
+    url: http://localhost:8080/api
+  - description: custom
+    url: "{protocol}://{server}/{path}"
+    variables:
+      protocol:
+        enum: ['http', 'https']
+        default: 'http'
+      server:
+        default: 'localhost:8080'
+      path:
+        default: 'api'
+tags:
+  - name: "Default"
+  - name: "Hospital"
+  - name: "Patients"
+
+
+paths:
+  /patients/{id}/profile:
+    get:
+      operationId: getPatientProfileById
+      description: "Load a patient profile by id to mobile app."
+      tags: [Patients]
+      parameters:
+        - name: "id"
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientProfile"
+  /patients/{id}/opt-out:
+    post:
+      operationId: requestOptOut
+      description: "requestOptOut"
+      tags: [Patients]
+      parameters:
+        - name: "id"
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: "OK"
+
+components:
+  schemas:
+    PatientProfile:
+      type: "object"
+      x-business-entity: "PatientProfile"
+      required:
+      - "name"
+      - "surname"
+      - "birthDate"
+      - "gender"
+      - "phoneNumber"
+      properties:
+        name:
+          type: "string"
+          maxLength: 100
+        surname:
+          type: "string"
+          maxLength: 100
+        surname2:
+          type: "string"
+          maxLength: 100
+        birthDate:
+          type: "string"
+          format: "date"
+        gender:
+          $ref: "#/components/schemas/GenderType"
+        phoneNumber:
+          type: "string"
+          maxLength: 20
+    GenderType:
+      type: "string"
+      x-business-entity: "GenderType"
+      enum:
+      - "MALE"
+      - "FEMALE"
+      - "OTHER"
+
+    Page:
+      type: object
+      required:
+        - "content"
+        - "totalElements"
+        - "totalPages"
+        - "size"
+        - "number"
+      properties:
+        number:
+          type: integer
+          minimum: 0
+        numberOfElements:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 0
+          maximum: 200
+          multipleOf: 25
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+  parameters:
+    page:
+      name: page
+      in: query
+      description: The number of results page
+      schema:
+        type: integer
+        format: int32
+        default: 0
+    limit:
+      name: limit
+      in: query
+      description: The number of results in a single page
+      schema:
+        type: integer
+        format: int32
+        default: 20
+    sort:
+      name: sort
+      in: query
+      description: The number of results page
+      schema:
+        type: array
+        items:
+          type: string
+
+  securitySchemes:
+    basicAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: basic
+    bearerAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+security:
+  - basicAuth: []  # <-- use the same name here
+  - bearerAuth: []  # <-- use the same name here

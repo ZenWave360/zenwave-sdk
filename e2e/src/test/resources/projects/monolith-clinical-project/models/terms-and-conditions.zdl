@@ -1,0 +1,50 @@
+config {
+    title "Clinical Terms And Conditions Backend"
+    moduleBasePackage "com.example.clinical.modules.termsandconditions"
+    // you can choose: DefaultProjectLayout, CleanHexagonalProjectLayout, LayeredProjectLayout, SimpleDomainProjectLayout, HexagonalProjectLayout, CleanArchitectureProjectLayout
+    layout SimpleDomainProjectLayout
+
+}
+
+
+@aggregate
+entity AcceptedTermsAndConditions {
+    @naturalId
+    userId Long required
+    termsAndConditionsId Long required
+    acceptedDate Instant required
+}
+
+@aggregate
+entity TermsAndConditions {
+    content TextBlob required
+    lang String required maxlength(3) /** language code */
+    contentVersion String unique required /** Arbitrary version string */
+    startDate LocalDate unique required /** Date when the terms and conditions are valid (inclusive) */
+}
+
+@inline
+input Lang {
+    lang String required maxlength(3) /** language code */
+}
+
+input AcceptedTermsAndConditionsInput {
+    termsAndConditionsId Long required
+}
+
+@rest("/terms-and-conditions")
+service TermsAndConditionsService for (AcceptedTermsAndConditions, TermsAndConditions) {
+    @get
+    listTermsAndConditions() TermsAndConditions[]
+    @get("/{id}")
+    getTermsAndConditions(id) TermsAndConditions?
+    @post
+    createTermsAndConditions(TermsAndConditions) TermsAndConditions
+    @put("/{id}")
+    updateTermsAndConditions(id, TermsAndConditions) TermsAndConditions?
+
+    @get("/latest/{lang}")
+    getCurrentTermsAndConditions(Lang) TermsAndConditions?
+    @post({ path: "/accept", status: 200 })
+    acceptTermsAndConditions(AcceptedTermsAndConditionsInput)
+}

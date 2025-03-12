@@ -1,0 +1,14 @@
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.springframework.transaction: DEBUG
+    org.apache.kafka.clients.producer.ProducerConfig: OFF
+    org.apache.kafka.clients.consumer.ConsumerConfig: OFF
+    org.apache.kafka.clients.admin.AdminClientConfig: OFF
+    org.apache.kafka.common.config.AbstractConfig: OFF
+
+spring.jpa.hibernate.ddl-auto: update
+
+DATASOURCE_URL: jdbc:postgresql://localhost:5432/app
+DATASOURCE_USERNAME: postgres
+DATASOURCE_PASSWORD: admin123

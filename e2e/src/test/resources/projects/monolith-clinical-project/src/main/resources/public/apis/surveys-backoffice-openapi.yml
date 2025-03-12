@@ -1,0 +1,548 @@
+openapi: 3.0.1
+info:
+  title: "Surveys - Backoffice API"
+  version: 0.0.1
+  description: "Surveys - Backoffice API"
+  contact:
+    email: email@domain.com
+servers:
+  - description: localhost
+    url: http://localhost:8080/api
+  - description: custom
+    url: "{protocol}://{server}/{path}"
+    variables:
+      protocol:
+        enum: ['http', 'https']
+        default: 'http'
+      server:
+        default: 'localhost:8080'
+      path:
+        default: 'api'
+tags:
+  - name: "Default"
+  - name: "SurveysBackoffice"
+  - name: "Surveys"
+
+
+paths:
+  /backoffice/surveys:
+    get:
+      operationId: listSurveys
+      description: "listSurveys"
+      tags: [SurveysBackoffice]
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SurveyList"
+    post:
+      operationId: createSurvey
+      description: "createSurvey"
+      tags: [SurveysBackoffice]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Survey"
+      responses:
+        "201":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Survey"
+  /backoffice/surveys/{id}:
+    get:
+      operationId: getSurvey
+      description: "getSurvey"
+      tags: [SurveysBackoffice]
+      parameters:
+        - name: "id"
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Survey"
+    put:
+      operationId: updateSurvey
+      description: "updateSurvey"
+      tags: [SurveysBackoffice]
+      parameters:
+        - name: "id"
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Survey"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Survey"
+    delete:
+      operationId: deleteSurvey
+      description: "deleteSurvey"
+      tags: [SurveysBackoffice]
+      parameters:
+        - name: "id"
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: "OK"
+  /backoffice/surveys/questions:
+    get:
+      operationId: listQuestions
+      description: "listQuestions"
+      tags: [SurveysBackoffice]
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestionList"
+    post:
+      operationId: createQuestion
+      description: "createQuestion"
+      tags: [SurveysBackoffice]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Question"
+      responses:
+        "201":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+  /backoffice/surveys/questions/{id}:
+    get:
+      operationId: getQuestion
+      description: "getQuestion"
+      tags: [SurveysBackoffice]
+      parameters:
+        - name: "id"
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+    put:
+      operationId: updateQuestion
+      description: "updateQuestion"
+      tags: [SurveysBackoffice]
+      parameters:
+        - name: "id"
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Question"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+    delete:
+      operationId: deleteQuestion
+      description: "deleteQuestion"
+      tags: [SurveysBackoffice]
+      parameters:
+        - name: "id"
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: "OK"
+  /public/surveys/{name}/hospital/{hospitalId}/questions:
+    get:
+      operationId: getSurveyAndQuestionsForHospital
+      description: "getSurveyAndQuestionsForHospital"
+      tags: [Surveys]
+      parameters:
+        - name: "name"
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: "hospitalId"
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: "lang"
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SurveyAndQuestions"
+
+components:
+  schemas:
+    Survey:
+      type: "object"
+      x-business-entity: "Survey"
+      required:
+      - "name"
+      - "hospitalId"
+      - "title"
+      - "lang"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        version:
+          type: "integer"
+        name:
+          type: "string"
+          maxLength: 254
+          description: "Unique identifier for the survey"
+        hospitalId:
+          type: "integer"
+          format: "int64"
+        title:
+          type: "string"
+          maxLength: 254
+          description: "Public title for the survey"
+        lang:
+          type: "string"
+          maxLength: 3
+          description: "Default language for this survey"
+        sections:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/SurveySection"
+    SurveyList:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/Survey"
+    Question:
+      type: "object"
+      x-business-entity: "Question"
+      required:
+      - "name"
+      - "questionType"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        version:
+          type: "integer"
+        name:
+          type: "string"
+          maxLength: 254
+          description: "Unique identifier for the question"
+        questionType:
+          $ref: "#/components/schemas/QuestionType"
+        required:
+          type: "boolean"
+        rangeStart:
+          type: "integer"
+          format: "int32"
+        rangeEnd:
+          type: "integer"
+          format: "int32"
+        translations:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/QuestionTranslation"
+        options:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Option"
+        includeOther:
+          type: "boolean"
+    QuestionList:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/Question"
+    SurveyAndQuestions:
+      type: "object"
+      x-business-entity: "SurveyAndQuestions"
+      required:
+      - "surveyId"
+      - "name"
+      - "title"
+      - "hospitalId"
+      - "lang"
+      properties:
+        surveyId:
+          type: "integer"
+          format: "int64"
+          description: "Persistence identifier for the survey"
+        name:
+          type: "string"
+          maxLength: 254
+          description: "Unique identifier for the survey across all environments"
+        title:
+          type: "string"
+          maxLength: 254
+          description: "Public title for the survey"
+        hospitalId:
+          type: "integer"
+          format: "int64"
+        lang:
+          type: "string"
+          maxLength: 3
+          description: "Default language for this survey"
+        sections:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/SurveySectionOutput"
+    OptionTranslation:
+      type: "object"
+      x-business-entity: "OptionTranslation"
+      required:
+      - "lang"
+      - "text"
+      properties:
+        lang:
+          type: "string"
+        text:
+          type: "string"
+    QuestionTranslationOutput:
+      type: "object"
+      x-business-entity: "QuestionTranslationOutput"
+      required:
+      - "questionId"
+      - "text"
+      - "questionType"
+      properties:
+        questionId:
+          type: "integer"
+          format: "int64"
+        required:
+          type: "boolean"
+        rangeStart:
+          type: "integer"
+          format: "int32"
+        rangeEnd:
+          type: "integer"
+          format: "int32"
+        text:
+          type: "string"
+          maxLength: 254
+          description: "Translated text for the question"
+        questionType:
+          $ref: "#/components/schemas/QuestionType"
+        options:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/OptionTranslationOutput"
+        includeOther:
+          type: "boolean"
+    QuestionTranslation:
+      type: "object"
+      x-business-entity: "QuestionTranslation"
+      required:
+      - "lang"
+      - "text"
+      properties:
+        lang:
+          type: "string"
+        text:
+          type: "string"
+    SurveySection:
+      type: "object"
+      x-business-entity: "SurveySection"
+      required:
+      - "name"
+      properties:
+        name:
+          type: "string"
+          maxLength: 254
+          description: "Unique identifier for the section"
+        translations:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/SectionTranslation"
+        questionIds:
+          type: "array"
+          items:
+            type: "integer"
+            format: "int64"
+            description: "Sorted List of Questions for this section"
+    OptionTranslationOutput:
+      type: "object"
+      x-business-entity: "OptionTranslationOutput"
+      required:
+      - "name"
+      - "text"
+      properties:
+        name:
+          type: "string"
+          maxLength: 254
+          description: "Internal name for the option"
+        text:
+          type: "string"
+          description: "Translated text for the option"
+    QuestionType:
+      type: "string"
+      x-business-entity: "QuestionType"
+      enum:
+      - "YES_NO"
+      - "MULTIPLE_SELECTION"
+      - "SINGLE_SELECTION"
+      - "TEXT"
+      - "NUMBER"
+      - "DECIMAL"
+      - "RANGE"
+    SectionTranslation:
+      type: "object"
+      x-business-entity: "SectionTranslation"
+      required:
+      - "lang"
+      - "title"
+      properties:
+        lang:
+          type: "string"
+        title:
+          type: "string"
+        summary:
+          type: "string"
+    Option:
+      type: "object"
+      x-business-entity: "Option"
+      required:
+      - "name"
+      properties:
+        name:
+          type: "string"
+          maxLength: 254
+        translations:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/OptionTranslation"
+    SurveySectionOutput:
+      type: "object"
+      x-business-entity: "SurveySectionOutput"
+      required:
+      - "name"
+      - "title"
+      properties:
+        name:
+          type: "string"
+          maxLength: 254
+          description: "Unique identifier for the section"
+        title:
+          type: "string"
+          maxLength: 254
+          description: "Public title for the section"
+        summary:
+          type: "string"
+        questions:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/QuestionTranslationOutput"
+
+    Page:
+      type: object
+      required:
+        - "content"
+        - "totalElements"
+        - "totalPages"
+        - "size"
+        - "number"
+      properties:
+        number:
+          type: integer
+          minimum: 0
+        numberOfElements:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 0
+          maximum: 200
+          multipleOf: 25
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+  parameters:
+    page:
+      name: page
+      in: query
+      description: The number of results page
+      schema:
+        type: integer
+        format: int32
+        default: 0
+    limit:
+      name: limit
+      in: query
+      description: The number of results in a single page
+      schema:
+        type: integer
+        format: int32
+        default: 20
+    sort:
+      name: sort
+      in: query
+      description: The number of results page
+      schema:
+        type: array
+        items:
+          type: string
+
+  securitySchemes:
+    basicAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: basic
+    bearerAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+security:
+  - basicAuth: []  # <-- use the same name here
+  - bearerAuth: []  # <-- use the same name here

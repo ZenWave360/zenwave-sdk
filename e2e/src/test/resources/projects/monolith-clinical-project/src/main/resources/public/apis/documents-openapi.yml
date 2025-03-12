@@ -1,0 +1,237 @@
+openapi: 3.0.1
+info:
+  title: "Documents API"
+  version: 0.0.1
+  description: "Documents API"
+  contact:
+    email: email@domain.com
+servers:
+  - description: localhost
+    url: http://localhost:8080/api
+  - description: custom
+    url: "{protocol}://{server}/{path}"
+    variables:
+      protocol:
+        enum: ['http', 'https']
+        default: 'http'
+      server:
+        default: 'localhost:8080'
+      path:
+        default: 'api'
+tags:
+  - name: "Default"
+  - name: "Document"
+
+
+paths:
+  /documents/:
+    get:
+      operationId: listDocumentInfo
+      description: "listDocumentInfo"
+      tags: [Document]
+      parameters:
+        - name: "documentIds"
+          in: query
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentInfoList"
+  /documents/{id}:
+    get:
+      operationId: downloadDocument
+      description: "downloadDocument"
+      tags: [Document]
+      parameters:
+        - name: "id"
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: "download"
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentInfo"
+    delete:
+      operationId: deleteDocumentInfo
+      description: "deleteDocumentInfo"
+      tags: [Document]
+      parameters:
+        - name: "id"
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: "OK"
+  /documents/upload:
+    post:
+      operationId: uploadDocument
+      description: "uploadDocument"
+      tags: [Document]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentInfo"
+      responses:
+        "201":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentInfo"
+  /documents/certificate:
+    post:
+      operationId: uploadDocumentAndCertificate
+      description: "uploadDocumentAndCertificate"
+      tags: [Document]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentInfo"
+      responses:
+        "201":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentInfo"
+
+components:
+  schemas:
+    DocumentInfo:
+      type: "object"
+      x-business-entity: "DocumentInfo"
+      required:
+      - "fileName"
+      - "documentType"
+      - "contentType"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        version:
+          type: "integer"
+        uuid:
+          type: "string"
+          description: "certivera uuid"
+        fileName:
+          type: "string"
+        documentType:
+          $ref: "#/components/schemas/DocumentType"
+        contentType:
+          type: "string"
+        documentData:
+          $ref: "#/components/schemas/DocumentData"
+    DocumentInfoList:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/DocumentInfo"
+    DocumentData:
+      type: "object"
+      x-business-entity: "DocumentData"
+      required:
+      - "data"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        version:
+          type: "integer"
+        data:
+          type: "string"
+          format: "binary"
+    DocumentType:
+      type: "string"
+      x-business-entity: "DocumentType"
+      enum:
+      - "PROFILE_PICTURE"
+      - "GENERAL_INFORMATION"
+      - "HEALTH_INSURANCE_CARD"
+      - "INFORMED_CONSENT_TEMPLATE"
+      - "INFORMED_CONSENT_SIGNED"
+      - "LOAN_AGREEMENT_TEMPLATE"
+      - "LOAN_AGREEMENT_SIGNED"
+      - "OTHER"
+
+    Page:
+      type: object
+      required:
+        - "content"
+        - "totalElements"
+        - "totalPages"
+        - "size"
+        - "number"
+      properties:
+        number:
+          type: integer
+          minimum: 0
+        numberOfElements:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 0
+          maximum: 200
+          multipleOf: 25
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+  parameters:
+    page:
+      name: page
+      in: query
+      description: The number of results page
+      schema:
+        type: integer
+        format: int32
+        default: 0
+    limit:
+      name: limit
+      in: query
+      description: The number of results in a single page
+      schema:
+        type: integer
+        format: int32
+        default: 20
+    sort:
+      name: sort
+      in: query
+      description: The number of results page
+      schema:
+        type: array
+        items:
+          type: string
+
+  securitySchemes:
+    basicAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: basic
+    bearerAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+security:
+  - basicAuth: []  # <-- use the same name here
+  - bearerAuth: []  # <-- use the same name here
