@@ -86,6 +86,9 @@ public class ZDLJavaSignatureUtils {
     }
 
     public static String mapperInputSignature(String inputType, Map zdl, String inputDTOSuffix) {
+        if("Map".equals(inputType) || "java.util.Map".equals(inputType)) {
+            return "java.util.Map input";
+        }
         return StringUtils.join(inputSignature(inputType, null, zdl, inputDTOSuffix), ", ");
     }
 
