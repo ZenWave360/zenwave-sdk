@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.zenwave360.sdk.utils.Maps;
 import io.zenwave360.sdk.utils.NamingUtils;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 import io.zenwave360.sdk.zdl.utils.ZDLJavaSignatureUtils;
@@ -174,35 +175,49 @@ public class BackendApplicationDefaultHelpers {
         return "id";
     }
 
-
-    public Collection<String> findServiceInputs(Map service, Options options) {
-        var zdl = options.get("zdl");
+    public Map<String, Object> serviceParameterEntityPairs(Map service, Options options) {
+        var zdl = (Map) options.get("zdl");
         var inputDTOSuffix = (String) options.get("inputDTOSuffix");
-        Set<String> inputs = new HashSet<String>();
-        inputs.addAll(JSONPath.get(service, "$.methods[*].parameter"));
-        if(JSONPath.get(service, "$.methods[*][?(@.options.patch)]", List.of()).size() > 0) {
-            inputs.add("java.util.Map");
+        var map = new HashMap<String, Object>();
+        for (Map method : JSONPath.get(service, "methods[*]", List.<Map>of())) {
+            var input = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("parameter"));
+            var entity = (Map)JSONPath.get(zdl, "$.entities." + method.get("entity"));
+            var isInput = input != null && "inputs".equals(input.get("type"));
+            var isPatch = JSONPath.get(method, "options.patch") != null;
+
+            if (entity != null) {
+                if (isPatch) {
+                    var key = "java.util.Map-" + entity.get("className");
+                    map.put(key, Maps.of("input", Map.of("className","Map"), "entity", entity, "method", method));
+                } else if (input != null) {
+                    var key = input.get("className") + (isInput? inputDTOSuffix : "") + "-" + entity.get("className");
+                    map.put(key, Maps.of("input", input, "entity", entity, "method", method));
+                }
+            }
+
         }
-        // inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregateName + "' in @.aggregates)].methods[*].returnType"));
-        // inputs.add(aggregateName + inputDTOSuffix);
-        inputs = inputs.stream().filter(Objects::nonNull).collect(Collectors.toSet());
-
-        var entities = JSONPath.get(zdl, "$.entities", Collections.emptyMap());
-
-        inputs = inputs.stream().map(input -> entities.get(input) != null? input + inputDTOSuffix : input).collect(Collectors.toSet());
-
-        return inputs;
+        return map;
     }
 
-    public Collection<String> findServiceOutputs(Map service, Options options) {
-        var zdl = options.get("zdl");
-        var serviceAggregates = (List<String>) service.get("aggregates");
-        var aggregatesAndEntities = new HashSet<>(serviceAggregates);
-        serviceAggregates.stream().map(aggregate -> (String) JSONPath.get(zdl, "$.aggregates." + aggregate + ".aggregateRoot")).filter(Objects::nonNull).forEach(aggregatesAndEntities::add);
-        Set<String> outputs = new HashSet<String>();
-        outputs.addAll(JSONPath.get(service, "$.methods[*].returnType"));
-        outputs = outputs.stream().filter(input -> input != null && !aggregatesAndEntities.contains(input)).collect(Collectors.toSet());
-        return outputs;
+    public Map<String, Object> serviceEntityReturnTypePairs(Map service, Options options) {
+        var zdl = (Map) options.get("zdl");
+        var map = new HashMap<String, Object>();
+        for (Map method : JSONPath.get(service, "methods[*]", List.<Map>of())) {
+            var entity = (Map)JSONPath.get(zdl, "$.entities." + method.get("entity"));
+            var output = (Map)JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("returnType"));
+            var isArray = Boolean.TRUE.equals(method.get("returnTypeIsArray"));
+            var isOptional = Boolean.TRUE.equals(method.get("returnTypeIsOptional"));
+            var isPaginated = JSONPath.get(method, "options.paginated", false);
+
+            if (entity != null && output != null) {
+                if (entity.get("name").equals(output.get("name"))) {
+                    continue;
+                }
+                var key = entity.get("className") + "-" + output.get("className");
+                map.put(key, Maps.of("entity", entity, "output", output, "method", method, "isArray", isArray, "isOptional", isOptional, "isPaginated", isPaginated));
+            }
+        }
+        return map;
     }
 
     public String methodParameterType(Map<String, Object> method, Options options) {
