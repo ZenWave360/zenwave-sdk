@@ -2,6 +2,9 @@ package {{layout.outboundRepositoryPackage}};
 {{~assign 'aggregate' (findEntityAggregate entity.name)}}
 
 import {{layout.entitiesPackage}}.{{entity.className}};
+import java.math.*;
+import java.time.*;
+import java.util.*;
 {{~#if aggregate}}
 import {{layout.entitiesPackage}}.{{aggregate}};
 {{~/if}}

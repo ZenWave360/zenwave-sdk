@@ -202,7 +202,7 @@ public class ZDLJavaSignatureUtils {
             if ("String".equals(field.get("type")) || "TextBlob".equals(field.get("type"))) {
                 return "\"" + field.get("initialValue") + "\"";
             }
-            return (String) field.get("initialValue");
+            return String.valueOf(field.get("initialValue"));
         }
         if ("String".equals(field.get("type")) || "TextBlob".equals(field.get("type"))) {
             int min = Integer.valueOf(JSONPath.get(field, "validations.minlength.value", "0"));

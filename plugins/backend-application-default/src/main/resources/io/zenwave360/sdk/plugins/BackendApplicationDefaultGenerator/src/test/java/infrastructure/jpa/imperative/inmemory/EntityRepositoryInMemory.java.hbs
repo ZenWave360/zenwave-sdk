@@ -2,6 +2,9 @@ package {{layout.infrastructureRepositoryPackage}}.inmemory;
 
 import {{layout.entitiesPackage}}.*;
 import {{layout.outboundRepositoryPackage}}.{{entity.className}}Repository;
+import java.math.*;
+import java.time.*;
+import java.util.*;
 
 public class {{entity.className}}RepositoryInMemory extends InMemoryJpaRepository<{{entity.className}}> implements {{entity.className}}Repository {
 

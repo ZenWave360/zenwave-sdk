@@ -64,9 +64,9 @@ public class BackendApplicationMultiModuleGenerator extends BackendApplicationDe
         ts.addTemplate(ts.allServicesTemplates, "src/main/java", "core/implementation/mappers/EventsMapper.java", "{{mavenModulesPrefix}}-core-impl",
                 layout.coreImplementationMappersPackage, "EventsMapper.java", JAVA, skipEvents, true);
         ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/RepositoriesInMemoryConfig.java", "{{mavenModulesPrefix}}-core-impl",
-                layout.configPackage, "RepositoriesInMemoryConfig.java", JAVA, null, true);
+                layout.moduleConfigPackage, "RepositoriesInMemoryConfig.java", JAVA, null, true);
         ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/ServicesInMemoryConfig.java", "{{mavenModulesPrefix}}-core-impl",
-                layout.configPackage, "ServicesInMemoryConfig.java", JAVA, null, true);
+                layout.moduleConfigPackage, "ServicesInMemoryConfig.java", JAVA, null, true);
 
         ts.addTemplate(ts.allEventsTemplates, "src/main/java", "core/outbound/events/EventPublisher.java", "{{mavenModulesPrefix}}-core-impl",
                 layout.outboundEventsPackage, "EventPublisher.java", JAVA, skipEventsBus, false);
@@ -76,11 +76,11 @@ public class BackendApplicationMultiModuleGenerator extends BackendApplicationDe
                 layout.infrastructureEventsPackage, "InMemoryEventPublisher.java", JAVA, skipEventsBus, false);
 
         ts.addTemplate(ts.singleTemplates, "src/test/java", "config/TestDataLoader-{{persistence}}.java", "{{mavenModulesPrefix}}-core-impl",
-                layout.configPackage, "TestDataLoader.java", JAVA, null, true);
+                layout.moduleConfigPackage, "TestDataLoader.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/test/java", "config/DockerComposeInitializer-{{persistence}}.java", "{{mavenModulesPrefix}}-core-impl",
                 layout.configPackage, "DockerComposeInitializer.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/test/java", "config/TestDataLoader-{{persistence}}.java", "{{mavenModulesPrefix}}-infra",
-                layout.configPackage, "TestDataLoader.java", JAVA, null, true);
+                layout.moduleConfigPackage, "TestDataLoader.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/test/java", "config/DockerComposeInitializer-{{persistence}}.java", "{{mavenModulesPrefix}}-infra",
                 layout.configPackage, "DockerComposeInitializer.java", JAVA, null, true);
 

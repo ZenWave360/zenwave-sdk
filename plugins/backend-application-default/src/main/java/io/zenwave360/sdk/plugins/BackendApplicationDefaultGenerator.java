@@ -154,9 +154,9 @@ public class BackendApplicationDefaultGenerator extends AbstractZDLProjectGenera
         ts.addTemplate(ts.allServicesTemplates, "src/main/java", "core/implementation/mappers/EventsMapper.java",
                 layout.coreImplementationMappersPackage, "EventsMapper.java", JAVA, skipEvents, true);
         ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/RepositoriesInMemoryConfig.java",
-                layout.configPackage, "RepositoriesInMemoryConfig.java", JAVA, null, true);
+                layout.moduleConfigPackage, "RepositoriesInMemoryConfig.java", JAVA, null, true);
         ts.addTemplate(ts.allServicesTemplates, "src/test/java", "config/ServicesInMemoryConfig.java",
-                layout.configPackage, "ServicesInMemoryConfig.java", JAVA, null, true);
+                layout.moduleConfigPackage, "ServicesInMemoryConfig.java", JAVA, null, true);
 
         ts.addTemplate(ts.allEventsTemplates, "src/main/java", "core/outbound/events/EventPublisher.java",
                 layout.outboundEventsPackage, "EventPublisher.java", JAVA, skipEventsBus, false);
@@ -166,7 +166,7 @@ public class BackendApplicationDefaultGenerator extends AbstractZDLProjectGenera
                 layout.infrastructureEventsPackage, "InMemoryEventPublisher.java", JAVA, skipEventsBus, false);
 
         ts.addTemplate(ts.singleTemplates, "src/test/java", "config/TestDataLoader-{{persistence}}.java",
-                layout.configPackage, "TestDataLoader.java", JAVA, null, true);
+                layout.moduleConfigPackage, "TestDataLoader.java", JAVA, null, true);
         ts.addTemplate(ts.singleTemplates, "src/test/java", "config/DockerComposeInitializer-{{persistence}}.java",
                 layout.configPackage, "DockerComposeInitializer.java", JAVA, null, true);
 

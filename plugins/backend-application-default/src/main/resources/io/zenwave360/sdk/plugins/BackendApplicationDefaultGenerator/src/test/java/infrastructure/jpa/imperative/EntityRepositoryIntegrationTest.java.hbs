@@ -114,7 +114,8 @@ class {{entity.className}}RepositoryIntegrationTest extends BaseRepositoryIntegr
 
         {{entity.instanceName}} = {{entity.instanceName}}Repository.save({{entity.instanceName}});
         {{~#each entity.fields as |field|}}
-        Assertions.assertEquals({{{populateField field}}}, {{entity.instanceName}}.get{{capitalize field.name}}());
+        {{~assign 'accessorPrefix' (ifTruthy (eq field.type 'boolean') 'is' 'get')}}
+        Assertions.assertEquals({{{populateField field}}}, {{entity.instanceName}}.{{accessorPrefix}}{{capitalize field.name}}());
         {{~/each}}
     }
 

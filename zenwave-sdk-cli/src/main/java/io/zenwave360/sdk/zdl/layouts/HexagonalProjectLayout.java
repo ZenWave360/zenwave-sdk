@@ -73,12 +73,12 @@ public class HexagonalProjectLayout extends ProjectLayout {
 
         // primary adapters (web, events, commands)
         adaptersPackage = "{{moduleBasePackage}}.adapters";
-        adaptersWebPackage = "{{moduleBasePackage}}.adapters.web";
-        adaptersWebMappersPackage = "{{moduleBasePackage}}.adapters.web.mappers";
-        adaptersCommandsPackage = "{{moduleBasePackage}}.adapters.commands";
-        adaptersCommandsMappersPackage = "{{moduleBasePackage}}.adapters.commands.mappers";
-        adaptersEventsPackage = "{{moduleBasePackage}}.adapters.events";
-        adaptersEventsMappersPackage = "{{moduleBasePackage}}.adapters.events.mappers";
+        adaptersWebPackage = "{{adaptersPackage}}.web";
+        adaptersWebMappersPackage = "{{adaptersWebPackage}}.mappers";
+        adaptersCommandsPackage = "{{adaptersPackage}}.commands";
+        adaptersCommandsMappersPackage = "{{adaptersCommandsPackage}}.mappers";
+        adaptersEventsPackage = "{{adaptersPackage}}.events";
+        adaptersEventsMappersPackage = "{{adaptersEventsPackage}}.mappers";
 
         // openapi generated packages
         openApiApiPackage = "{{adaptersWebPackage}}";

@@ -121,10 +121,9 @@ public class ProjectLayout {
             var model = new HashMap<String, Object>();
             model.putAll(layoutAsMap);
             model.putAll(options);
-            for (int i = 0; i < 3; i++) { // 3 iterations should be enough to resolve all placeholders
+            for (int i = 0; i < 5; i++) { // 5 iterations should be enough to resolve all placeholders
                 for (Map.Entry<String, Object> entry : layoutAsMap.entrySet()) {
-                    if (entry.getValue() instanceof String) {
-                        String value = (String) entry.getValue();
+                    if (entry.getValue() instanceof String value) {
                         String processedValue = engine.processInline(value, model);
                         layoutAsMap.put(entry.getKey(), processedValue);
                     }
@@ -138,20 +137,31 @@ public class ProjectLayout {
         }
     }
 
-    /* Filters layout options like "layout.outboundEventsPackage" and removes prefix */
+    /**
+     * Processes layout options and returns them as a map.
+     * Removes the 'layout.' prefix from expressions in config option values.
+     * This helps users by allowing them to use either format in their templates.
+     *
+     * This config:
+     * layout.outboundEventsPackage: "{{layout.outboundPackage}}.events"
+     * becomes this:
+     * layout.outboundEventsPackage: "{{outboundPackage}}.events"
+     */
     private Map<String, Object> filterLayoutOptions(Map<String, Object> options) {
         if (options == null) {
             return new HashMap<>();
         }
-        Object optionsLayout = options.get("layout");
-        Map<String, Object> layoutOptions = optionsLayout instanceof Map ? (Map) optionsLayout : new HashMap<>();
-        String prefix = "layout.";
-        options.forEach((key, value) -> {
-            if (key.startsWith(prefix)) {
-                String newKey = key.substring(prefix.length());
-                layoutOptions.put(newKey, value);
+        Object layout = options.get("layout");
+        Map<String, Object> layoutOptions = layout instanceof Map ? (Map) layout : new HashMap<>();
+        for (Map.Entry<String, Object> entry : layoutOptions.entrySet()) {
+            if (entry.getValue() instanceof String) {
+                String value = (String) entry.getValue();
+                if(value.contains("{{layout.")) {
+                    value = value.replaceAll("\\{\\{layout\\.", "{{");
+                    entry.setValue(value);
+                }
             }
-        });
+        }
         return layoutOptions;
     }
 }

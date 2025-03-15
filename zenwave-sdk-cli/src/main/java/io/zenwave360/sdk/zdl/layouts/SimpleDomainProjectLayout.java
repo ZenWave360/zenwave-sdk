@@ -57,12 +57,12 @@ public class SimpleDomainProjectLayout extends ProjectLayout {
 
         // primary adapters (web, events, commands)
         adaptersPackage = "{{moduleBasePackage}}";
-        adaptersWebPackage = "{{moduleBasePackage}}";
-        adaptersWebMappersPackage = "{{moduleBasePackage}}.mappers";
-        adaptersCommandsPackage = "{{moduleBasePackage}}.commands";
-        adaptersCommandsMappersPackage = "{{moduleBasePackage}}.commands.mappers";
-        adaptersEventsPackage = "{{moduleBasePackage}}.events";
-        adaptersEventsMappersPackage = "{{moduleBasePackage}}.events.mappers";
+        adaptersWebPackage = "{{adaptersPackage}}";
+        adaptersWebMappersPackage = "{{adaptersWebPackage}}.mappers";
+        adaptersCommandsPackage = "{{adaptersPackage}}";
+        adaptersCommandsMappersPackage = "{{adaptersCommandsPackage}}.mappers";
+        adaptersEventsPackage = "{{adaptersPackage}}";
+        adaptersEventsMappersPackage = "{{adaptersEventsPackage}}.mappers";
 
         // openapi generated packages
         openApiApiPackage = "{{adaptersWebPackage}}";

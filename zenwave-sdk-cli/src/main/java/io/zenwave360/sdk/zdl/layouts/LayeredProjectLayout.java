@@ -72,12 +72,12 @@ public class LayeredProjectLayout extends ProjectLayout {
 
         // primary adapters (web, events, commands)
         adaptersPackage = "{{moduleBasePackage}}";
-        adaptersWebPackage = "{{moduleBasePackage}}.web";
-        adaptersWebMappersPackage = "{{moduleBasePackage}}.web.mappers";
-        adaptersCommandsPackage = "{{moduleBasePackage}}.commands";
-        adaptersCommandsMappersPackage = "{{moduleBasePackage}}.commands.mappers";
-        adaptersEventsPackage = "{{moduleBasePackage}}.events";
-        adaptersEventsMappersPackage = "{{moduleBasePackage}}.events.mappers";
+        adaptersWebPackage = "{{adaptersPackage}}.web";
+        adaptersWebMappersPackage = "{{adaptersWebPackage}}.mappers";
+        adaptersCommandsPackage = "{{adaptersPackage}}.commands";
+        adaptersCommandsMappersPackage = "{{adaptersCommandsPackage}}.mappers";
+        adaptersEventsPackage = "{{adaptersPackage}}.events";
+        adaptersEventsMappersPackage = "{{adaptersEventsPackage}}.mappers";
 
         // openapi generated packages
         openApiApiPackage = "{{adaptersWebPackage}}";

@@ -1,6 +1,6 @@
 {{~#each entities as |entity|}}
     {{~#if (isCrudMethod 'create' method=method entity=entity )}}
-        var input = new {{methodParameterType method}}();
+        {{methodParameterType method}} input = null; // TODO
         // TODO fill input data
         {{~#each entity.fields as |field|}}
         // input.set{{capitalize field.name}}({{{populateField field}}});
@@ -10,7 +10,7 @@
         assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}));
     {{~else if (isCrudMethod 'update' method=method entity=entity )}}
         {{{idFieldInitialization method}}}
-        var input = new {{methodParameterType method}}();
+        {{methodParameterType method}} input = null; // TODO
         // TODO fill input data
         {{~#each entity.fields as |field|}}
         // input.set{{capitalize field.name}}({{{populateField field}}});
