@@ -14,10 +14,10 @@ import {{layout.outboundEventsPackage}}.*;
     {{#if (includeDomainEvents service)}}
 import {{layout.domainEventsPackage}}.*;
     {{/if}}
-    {{~#if (needsEventBus service)}}
-import {{layout.infrastructureEventsPackage}}.*;
-    {{~/if}}
 {{/if}}
+{{~#if (needsEventBus service)}}
+import {{layout.infrastructureEventsPackage}}.*;
+{{~/if}}
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -36,10 +36,10 @@ public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
     {{~#if (needsEventsProducer service)}}
     protected final EventsProducerInMemoryContext eventsProducerInMemoryContext = new EventsProducerInMemoryContext();
     {{~/if}}
-    {{~#if (needsEventBus service)}}
-    private InMemoryEventPublisher eventPublisher = new InMemoryEventPublisher();
-    {{~/if}}
 {{/if}}
+{{~#if (needsEventBus service)}}
+    private InMemoryEventPublisher eventPublisher = new InMemoryEventPublisher();
+{{~/if}}
 
 {{~#each services as |service|}}
     protected final {{service.name}}Impl {{asInstanceName service.name}} = new {{service.name}}Impl(
@@ -65,7 +65,8 @@ public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
 	static List<{{entity.className}}> _{{entity.instanceNamePlural}};
 {{~/each}}
 	public void reloadTestData() {
-		var testDataLoader = new TestDataLoader(List.of({{#joinWithTemplate entities delimiter=', ' as |entity|}}{{entity.className}}.class{{/joinWithTemplate}}));
+        {{assign "phisicalEntities" (jsonPath entities "$[?(@.options.skip != true)]")}}
+		var testDataLoader = new TestDataLoader(List.of({{#joinWithTemplate phisicalEntities delimiter=', ' as |entity|}}{{entity.className}}.class{{/joinWithTemplate}}));
         {{~#each aggregates as |entity|}}
 		var {{entity.instanceNamePlural}} = _{{entity.instanceNamePlural}} != null? _{{entity.instanceNamePlural}} : testDataLoader.loadCollectionTestDataAsObjects({{entity.className}}.class);
 		{{entity.instanceName}}Repository().deleteAll();
@@ -82,11 +83,11 @@ public class ServicesInMemoryConfig extends RepositoriesInMemoryConfig {
         return eventsProducerInMemoryContext;
     }
     {{~/if}}
-    {{~#if (needsEventBus service)}}
-    @Bean
-    public InMemoryEventPublisher  eventPublisher() {
+{{~/if}}
+{{~#if (needsEventBus service)}}
+        @Bean
+        public InMemoryEventPublisher  eventPublisher() {
         return eventPublisher;
-    }
-    {{~/if}}
+        }
 {{~/if}}
 }
