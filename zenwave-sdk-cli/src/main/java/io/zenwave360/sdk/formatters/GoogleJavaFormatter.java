@@ -43,7 +43,9 @@ public class GoogleJavaFormatter implements io.zenwave360.sdk.formatters.Formatt
                 return templateOutput;
             }
             try {
-                String formattedSource = new Formatter().formatSourceAndFixImports(templateOutput.getContent());
+                String formattedSource = templateOutput.getContent();
+                formattedSource = new Formatter().formatSource(formattedSource);
+                formattedSource = ImportsOrganizer.organizeImports(formattedSource);
                 return new TemplateOutput(templateOutput.getTargetFile(), formattedSource, templateOutput.getMimeType(), templateOutput.isSkipOverwrite());
             } catch (FormatterException e) {
                 if (e.diagnostics() != null && e.diagnostics().size() > 0) {

@@ -1,7 +1,7 @@
 package io.zenwave360.sdk.formatters;
 
+
 import com.palantir.javaformat.java.FormatterException;
-import com.palantir.javaformat.java.JavaFormatterOptions;
 import io.spring.javaformat.config.JavaFormatConfig;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.templating.OutputFormatType;
@@ -33,8 +33,8 @@ public class SpringJavaFormatter implements io.zenwave360.sdk.formatters.Formatt
     private final io.spring.javaformat.formatter.Formatter formatter =
             new io.spring.javaformat.formatter.Formatter(JavaFormatConfig.findFrom(new File(".")));
 
-    private final com.palantir.javaformat.java.Formatter palantirFormatter =
-            com.palantir.javaformat.java.Formatter.createFormatter(JavaFormatterOptions.builder().style(JavaFormatterOptions.Style.PALANTIR).build());
+//    private final com.palantir.javaformat.java.Formatter palantirFormatter =
+//            com.palantir.javaformat.java.Formatter.createFormatter(JavaFormatterOptions.builder().style(JavaFormatterOptions.Style.PALANTIR).build());
 
     public List<TemplateOutput> format(List<TemplateOutput> templateOutputList) {
         return templateOutputList.stream().map(t -> format(t)).collect(Collectors.toList());
@@ -46,12 +46,13 @@ public class SpringJavaFormatter implements io.zenwave360.sdk.formatters.Formatt
             return templateOutput;
         }
         if (templateOutput.getMimeType() != null && templateOutput.getMimeType().equals(OutputFormatType.JAVA.toString())) {
-            if(templateOutput.getContent().startsWith("// formatter:off")) {
+            if (templateOutput.getContent().startsWith("// formatter:off")) {
                 log.debug("Skipping java formatting for file {}", templateOutput.getTargetFile());
                 return templateOutput;
             }
             try {
-                String formattedSource = palantirFormatter.formatSourceAndFixImports(templateOutput.getContent()); // removes empty lines and formats imports
+                String formattedSource = templateOutput.getContent();
+                formattedSource = ImportsOrganizer.formatSourceAndOrganizeImports(formattedSource); // removes empty lines and fixes imports
                 formattedSource = formatSourceWithSpringJavaFormat(formattedSource); // re-formats the rest of the code
                 return new TemplateOutput(templateOutput.getTargetFile(), formattedSource, templateOutput.getMimeType(), templateOutput.isSkipOverwrite());
             } catch (FormatterException e) {
@@ -60,12 +61,12 @@ public class SpringJavaFormatter implements io.zenwave360.sdk.formatters.Formatt
                     String lineText = getLine(templateOutput.getContent(), line + 1);
                     log.error("Formatting error at {}:{} -> \"{}\"", templateOutput.getTargetFile(), line, lineText, e);
                 }
-                if(haltOnFailFormatting) {
+                if (haltOnFailFormatting) {
                     throw new RuntimeException(e);
                 }
             } catch (BadLocationException e) {
                 e.printStackTrace();
-                if(haltOnFailFormatting) {
+                if (haltOnFailFormatting) {
                     throw new RuntimeException(e);
                 }
             }
@@ -73,7 +74,7 @@ public class SpringJavaFormatter implements io.zenwave360.sdk.formatters.Formatt
         return templateOutput;
     }
 
-    public String getLine(String content, int line) {
+    String getLine(String content, int line) {
         try {
             return content.split("\\r?\\n")[line];
         } catch (Exception e) {

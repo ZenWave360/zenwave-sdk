@@ -19,6 +19,7 @@ import io.zenwave360.sdk.templating.TemplateOutput;
 public class PalantirJavaFormatter implements Formatter {
 
     private static Logger log = LoggerFactory.getLogger(PalantirJavaFormatter.class);
+    private static boolean warnFixImports = true;
 
     @DocumentedOption(description = "Skip java sources output formatting")
     public boolean skipFormatting = false;
@@ -49,7 +50,9 @@ public class PalantirJavaFormatter implements Formatter {
                 return templateOutput;
             }
             try {
-                String formattedSource = formatter.formatSourceAndFixImports(templateOutput.getContent());
+                String formattedSource = templateOutput.getContent();
+                formattedSource = formatter.formatSource(formattedSource);
+                formattedSource = ImportsOrganizer.organizeImports(formattedSource);
                 return new TemplateOutput(templateOutput.getTargetFile(), formattedSource, templateOutput.getMimeType(), templateOutput.isSkipOverwrite());
             } catch (FormatterException e) {
                 if (e.diagnostics() != null && e.diagnostics().size() > 0) {
