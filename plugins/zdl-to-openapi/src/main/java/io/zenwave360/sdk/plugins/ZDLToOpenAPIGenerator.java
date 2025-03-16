@@ -1,5 +1,7 @@
 package io.zenwave360.sdk.plugins;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -7,9 +9,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+import io.zenwave360.jsonrefparser.$RefParser;
+import io.zenwave360.jsonrefparser.parser.Parser;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.generators.Generator;
+import io.zenwave360.sdk.parsers.DefaultYamlParser;
+import io.zenwave360.sdk.processors.YamlOverlyMerger;
 import io.zenwave360.sdk.utils.AntStyleMatcher;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
@@ -35,29 +41,24 @@ public class ZDLToOpenAPIGenerator implements Generator {
     @DocumentedOption(description = "Target file")
     public String targetFile = "openapi.yml";
 
+    @DocumentedOption(description = "Overlay Spec file to apply on top of generated OpenAPI file")
+    public List<String> openapiOverlayFiles;
+
+    @DocumentedOption(description = "OpenAPI file to be merged on top of generated OpenAPI file")
+    public String openapiMergeFile;
+
     @DocumentedOption(description = "JsonSchema type for id fields and parameters.")
     public String idType = "string";
 
     @DocumentedOption(description = "JsonSchema type format for id fields and parameters.")
     public String idTypeFormat = null;
 
-    @DocumentedOption(description = "Base OpenAPI file to merge with generated OpenAPI file")
-    public String baseOpenAPIFile = null;
 
     @DocumentedOption(description = "Operation IDs to include. If empty, all operations will be included. (Supports Ant-style wildcards)")
     public List<String> operationIdsToInclude;
 
     @DocumentedOption(description = "Operation IDs to exclude. If not empty it will be applied to the processed operationIds to include. (Supports Ant-style wildcards)")
     public List<String> operationIdsToExclude;
-
-    //    @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas (default: x-business-entity)")
-    //    public String zdlBusinessEntityProperty = "x-business-entity";
-    //
-    //    @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas for paginated lists")
-    //    public String zdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
-
-    //    @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. Examples: '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
-    //    public List<String> paginatedDtoItemsJsonPath = List.of("$.items", "$.properties.content.items");
 
     protected Map<String, Integer> httpStatusCodes = Map.of(
         "get", 200,
@@ -173,7 +174,37 @@ public class ZDLToOpenAPIGenerator implements Generator {
         // remove first line
         openAPISchemasString = openAPISchemasString.substring(openAPISchemasString.indexOf("\n") + 1);
 
-        return List.of(generateTemplateOutput(contextModel, zdlToOpenAPITemplate, zdlModel, openAPISchemasString));
+        var template = generateTemplateOutput(contextModel, zdlToOpenAPITemplate, zdlModel, openAPISchemasString);
+        var templateContent = mergeAndOverlay(template.getContent());
+        template = new TemplateOutput(template.getTargetFile(), templateContent, template.getMimeType(), template.isSkipOverwrite());
+
+        return List.of(template);
+    }
+
+    private String mergeAndOverlay(String content) {
+        if(openapiMergeFile != null) {
+            try {
+                var openapiAsMap = (Map) Parser.parse(content).json();
+                var openapiMergeAsMap = (Map) Parser.parse(URI.create(openapiMergeFile)).json();
+                var merged = YamlOverlyMerger.merge(openapiAsMap, (Map<String, Object>) openapiMergeAsMap);
+                content = mapper.writeValueAsString(merged);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if (openapiOverlayFiles != null && !openapiOverlayFiles.isEmpty()) {
+            try {
+                var openapiAsMap = (Map) Parser.parse(content).json();
+                for (String openapiOverlayFile : openapiOverlayFiles) {
+                    var openapiOverlayAsMap = (Map) Parser.parse(URI.create(openapiOverlayFile)).json();
+                    openapiAsMap = YamlOverlyMerger.applyOverlay(openapiAsMap, (Map<String, Object>) openapiOverlayAsMap);
+                }
+                content = mapper.writeValueAsString(openapiAsMap);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return content;
     }
 
     protected List<Map> filterOperationsToInclude(List<Map> methods) {

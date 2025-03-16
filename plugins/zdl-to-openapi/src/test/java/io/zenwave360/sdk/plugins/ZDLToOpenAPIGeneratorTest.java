@@ -32,7 +32,7 @@ public class ZDLToOpenAPIGeneratorTest {
         List<TemplateOutput> outputTemplates = generator.generate(model);
         Assertions.assertEquals(1, outputTemplates.size());
 
-        System.out.println(outputTemplates.get(0).getContent());
+//        System.out.println(outputTemplates.get(0).getContent());
     }
 
     @Test
@@ -50,7 +50,7 @@ public class ZDLToOpenAPIGeneratorTest {
         Assertions.assertEquals(1, outputTemplates.size());
         var apiText = outputTemplates.get(0).getContent();
 
-        System.out.println(apiText);
+//        System.out.println(apiText);
 
         Assertions.assertTrue(apiText.contains("listCustomers"));
         Assertions.assertFalse(apiText.contains("getCustomer"));
@@ -65,7 +65,32 @@ public class ZDLToOpenAPIGeneratorTest {
         List<TemplateOutput> outputTemplates = generator.generate(model);
         Assertions.assertEquals(1, outputTemplates.size());
 
-        System.out.println(outputTemplates.get(0).getContent());
+//        System.out.println(outputTemplates.get(0).getContent());
     }
+
+    @Test
+    public void test_merge_customer_address_zdl_to_openapi() throws Exception {
+        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
+        ZDLToOpenAPIGenerator generator = new ZDLToOpenAPIGenerator();
+        generator.openapiMergeFile = "classpath:/io/zenwave360/sdk/resources/openapi/openapi-merger.yml";
+
+        List<TemplateOutput> outputTemplates = generator.generate(model);
+        Assertions.assertEquals(1, outputTemplates.size());
+
+//        System.out.println(outputTemplates.get(0).getContent());
+    }
+
+    @Test
+    public void test_overlay_customer_address_zdl_to_openapi() throws Exception {
+        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
+        ZDLToOpenAPIGenerator generator = new ZDLToOpenAPIGenerator();
+        generator.openapiOverlayFiles = List.of("classpath:/io/zenwave360/sdk/resources/openapi/openapi-overlay.yml");
+
+        List<TemplateOutput> outputTemplates = generator.generate(model);
+        Assertions.assertEquals(1, outputTemplates.size());
+
+//        System.out.println(outputTemplates.get(0).getContent());
+    }
+
 
 }
