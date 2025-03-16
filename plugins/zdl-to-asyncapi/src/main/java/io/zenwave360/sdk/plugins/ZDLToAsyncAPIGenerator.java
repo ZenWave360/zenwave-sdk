@@ -1,17 +1,21 @@
 package io.zenwave360.sdk.plugins;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.util.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+import io.zenwave360.jsonrefparser.parser.Parser;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractZDLGenerator;
 import io.zenwave360.sdk.generators.EntitiesToAvroConverter;
 import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
+import io.zenwave360.sdk.processors.YamlOverlyMerger;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateInput;
@@ -40,8 +44,12 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
     @DocumentedOption(description = "Target file")
     public String targetFile = "asyncapi.yml";
-    @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas (default: x-business-entity)")
-    public String zdlBusinessEntityProperty = "x-business-entity";
+
+    @DocumentedOption(description = "AsyncAPI file to be merged on top of generated AsyncAPI file")
+    public String asyncapiMergeFile;
+
+    @DocumentedOption(description = "Overlay Spec file to apply on top of generated AsyncAPI file")
+    public List<String> asyncapiOverlayFiles;
 
     @DocumentedOption(description = "Schema format for messages' payload")
     public SchemaFormat schemaFormat = SchemaFormat.schema;
@@ -134,7 +142,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
         for (Map<String, Object> schema : filterSchemasToInclude(model, methodsWithCommands)) {
             if (schemaFormat == SchemaFormat.schema) {
-                EntitiesToSchemasConverter toSchemasConverter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withZdlBusinessEntityProperty(zdlBusinessEntityProperty);
+                EntitiesToSchemasConverter toSchemasConverter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat);
                 toSchemasConverter.includeVersion = false;
                 String entityName = (String) schema.get("name");
                 Map<String, Object> asyncAPISchema = toSchemasConverter.convertToSchema(schema, model);
@@ -153,8 +161,37 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
             asyncAPISchemasString = asyncAPISchemasString.substring(asyncAPISchemasString.indexOf("components:") + 12);
         }
 
-        outputList.add(generateTemplateOutput(contextModel, zdlToAsyncAPITemplate, model, asyncAPISchemasString));
-        return outputList;
+        var template = generateTemplateOutput(contextModel, zdlToAsyncAPITemplate, model, asyncAPISchemasString);
+        var templateContent = mergeAndOverlay(template.getContent());
+        template = new TemplateOutput(template.getTargetFile(), templateContent, template.getMimeType(), template.isSkipOverwrite());
+
+        return List.of(template);
+    }
+
+    private String mergeAndOverlay(String content) {
+        if(asyncapiMergeFile != null) {
+            try {
+                var asyncapiAsMap = (Map) Parser.parse(content).json();
+                var asyncapiMergeAsMap = (Map) Parser.parse(URI.create(asyncapiMergeFile)).json();
+                var merged = YamlOverlyMerger.merge(asyncapiAsMap, (Map<String, Object>) asyncapiMergeAsMap);
+                content = yamlMapper.writeValueAsString(merged);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if (asyncapiOverlayFiles != null && !asyncapiOverlayFiles.isEmpty()) {
+            try {
+                var asyncapiAsMap = (Map) Parser.parse(content).json();
+                for (String asyncapiOverlayFile : asyncapiOverlayFiles) {
+                    var asyncapiOverlayAsMap = (Map) Parser.parse(URI.create(asyncapiOverlayFile)).json();
+                    asyncapiAsMap = YamlOverlyMerger.applyOverlay(asyncapiAsMap, (Map<String, Object>) asyncapiOverlayAsMap);
+                }
+                content = yamlMapper.writeValueAsString(asyncapiAsMap);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return content;
     }
 
     private void addAllEventsAsMessages(LinkedHashMap<Object, Object> allMessages, Map<String, Map> events) {

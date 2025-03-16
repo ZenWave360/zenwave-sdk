@@ -1,0 +1,20 @@
+overlay: 1.0.0
+info:
+  title: Add Common Headers Message Trait
+  version: 1.0.0
+
+actions:
+  - target: $.components.messageTraits
+    update:
+      CommonHeaders:
+        headers:
+          type: object
+          properties:
+            kafka_messageKey:
+              type: string
+              description: This header value will be populated automatically at runtime (from overlay file)
+              x-runtime-expression: $message.payload#/id
+            tracingId:
+              type: string
+              description: This header value will be populated automatically at runtime (from overlay file)
+              x-runtime-expression: $tracingIdSupplier
