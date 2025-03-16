@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import java.io.File;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TestPatchAndNaturalIdProject {
@@ -41,6 +43,8 @@ public class TestPatchAndNaturalIdProject {
                 .withZdlFile(zdlFile)
                 .withOption("idType", "integer")
                 .withOption("idTypeFormat", "int64")
+                .withOption("openapiMergeFile", prefixAndConcatenate(targetFolder, "src/main/resources/openapi-merger.yml"))
+                .withOption("openapiOverlayFiles", prefixAndConcatenate(targetFolder,"src/main/resources/openapi-overlay.yml", "src/main/resources/openapi-overlay.yml"))
                 .withOption("targetFile", "/src/main/resources/apis/openapi.yml")
                 .withTargetFolder(targetFolder);
         new MainGenerator().generate(plugin);
@@ -50,6 +54,8 @@ public class TestPatchAndNaturalIdProject {
                 .withOption("asyncapiVersion", "v3")
                 .withOption("idType", "integer")
                 .withOption("idTypeFormat", "int64")
+                .withOption("asyncapiMergeFile", prefixAndConcatenate(targetFolder,"src/main/resources/asyncapi-merger.yml"))
+                .withOption("asyncapiOverlayFiles", prefixAndConcatenate(targetFolder,"src/main/resources/asyncapi-overlay.yml", "src/main/resources/asyncapi-overlay.yml"))
                 .withOption("targetFile", "/src/main/resources/apis/asyncapi.yml")
                 .withTargetFolder(targetFolder);
         new MainGenerator().generate(plugin);
@@ -100,6 +106,10 @@ public class TestPatchAndNaturalIdProject {
 
         exitCode = MavenCompiler.compile(new File(targetFolder));
         Assertions.assertEquals(0, exitCode);
+    }
+
+    public String prefixAndConcatenate(String prefix, String... strings) {
+        return Stream.of(strings).map(s -> prefix + s).collect(Collectors.joining(","));
     }
 
 }

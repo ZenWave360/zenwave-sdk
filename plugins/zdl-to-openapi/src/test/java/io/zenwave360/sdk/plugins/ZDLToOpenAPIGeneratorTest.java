@@ -72,7 +72,7 @@ public class ZDLToOpenAPIGeneratorTest {
     public void test_merge_customer_address_zdl_to_openapi() throws Exception {
         Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
         ZDLToOpenAPIGenerator generator = new ZDLToOpenAPIGenerator();
-        generator.openapiMergeFile = "classpath:/io/zenwave360/sdk/resources/openapi/openapi-merger.yml";
+        generator.openapiMergeFile = "classpath:io/zenwave360/sdk/resources/openapi/openapi-merger.yml";
 
         List<TemplateOutput> outputTemplates = generator.generate(model);
         Assertions.assertEquals(1, outputTemplates.size());

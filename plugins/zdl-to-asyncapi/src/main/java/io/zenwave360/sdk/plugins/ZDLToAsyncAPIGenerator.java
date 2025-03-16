@@ -162,36 +162,10 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         }
 
         var template = generateTemplateOutput(contextModel, zdlToAsyncAPITemplate, model, asyncAPISchemasString);
-        var templateContent = mergeAndOverlay(template.getContent());
+        var templateContent = YamlOverlyMerger.mergeAndOverlay(template.getContent(), asyncapiMergeFile, asyncapiOverlayFiles);
         template = new TemplateOutput(template.getTargetFile(), templateContent, template.getMimeType(), template.isSkipOverwrite());
 
         return List.of(template);
-    }
-
-    private String mergeAndOverlay(String content) {
-        if(asyncapiMergeFile != null) {
-            try {
-                var asyncapiAsMap = (Map) Parser.parse(content).json();
-                var asyncapiMergeAsMap = (Map) Parser.parse(URI.create(asyncapiMergeFile)).json();
-                var merged = YamlOverlyMerger.merge(asyncapiAsMap, (Map<String, Object>) asyncapiMergeAsMap);
-                content = yamlMapper.writeValueAsString(merged);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        if (asyncapiOverlayFiles != null && !asyncapiOverlayFiles.isEmpty()) {
-            try {
-                var asyncapiAsMap = (Map) Parser.parse(content).json();
-                for (String asyncapiOverlayFile : asyncapiOverlayFiles) {
-                    var asyncapiOverlayAsMap = (Map) Parser.parse(URI.create(asyncapiOverlayFile)).json();
-                    asyncapiAsMap = YamlOverlyMerger.applyOverlay(asyncapiAsMap, (Map<String, Object>) asyncapiOverlayAsMap);
-                }
-                content = yamlMapper.writeValueAsString(asyncapiAsMap);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return content;
     }
 
     private void addAllEventsAsMessages(LinkedHashMap<Object, Object> allMessages, Map<String, Map> events) {

@@ -98,7 +98,7 @@ public class YamlOverlyMergerTest {
         // Then
         // Verify info section is updated
         Assertions.assertEquals(
-            "My Organization - WebApp API",
+            "My Organization (Overlayed) - WebApp API",
             JSONPath.get(result, "$.info.title"),
             "API title should be updated"
         );

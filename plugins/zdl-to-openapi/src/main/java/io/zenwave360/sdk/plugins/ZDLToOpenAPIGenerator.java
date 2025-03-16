@@ -1,5 +1,6 @@
 package io.zenwave360.sdk.plugins;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
@@ -175,36 +176,10 @@ public class ZDLToOpenAPIGenerator implements Generator {
         openAPISchemasString = openAPISchemasString.substring(openAPISchemasString.indexOf("\n") + 1);
 
         var template = generateTemplateOutput(contextModel, zdlToOpenAPITemplate, zdlModel, openAPISchemasString);
-        var templateContent = mergeAndOverlay(template.getContent());
+        var templateContent = YamlOverlyMerger.mergeAndOverlay(template.getContent(), openapiMergeFile, openapiOverlayFiles);
         template = new TemplateOutput(template.getTargetFile(), templateContent, template.getMimeType(), template.isSkipOverwrite());
 
         return List.of(template);
-    }
-
-    private String mergeAndOverlay(String content) {
-        if(openapiMergeFile != null) {
-            try {
-                var openapiAsMap = (Map) Parser.parse(content).json();
-                var openapiMergeAsMap = (Map) Parser.parse(URI.create(openapiMergeFile)).json();
-                var merged = YamlOverlyMerger.merge(openapiAsMap, (Map<String, Object>) openapiMergeAsMap);
-                content = mapper.writeValueAsString(merged);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        if (openapiOverlayFiles != null && !openapiOverlayFiles.isEmpty()) {
-            try {
-                var openapiAsMap = (Map) Parser.parse(content).json();
-                for (String openapiOverlayFile : openapiOverlayFiles) {
-                    var openapiOverlayAsMap = (Map) Parser.parse(URI.create(openapiOverlayFile)).json();
-                    openapiAsMap = YamlOverlyMerger.applyOverlay(openapiAsMap, (Map<String, Object>) openapiOverlayAsMap);
-                }
-                content = mapper.writeValueAsString(openapiAsMap);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return content;
     }
 
     protected List<Map> filterOperationsToInclude(List<Map> methods) {

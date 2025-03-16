@@ -1,0 +1,35 @@
+openapi: 3.0.1
+info:
+  title: "My Organization - WebApp API"
+  version: 1.0.0
+  description: "My Organization - WebApp API"
+  contact:
+    email: me@email.com
+servers:
+  - description: localhost
+    url: http://localhost:8080/api/webapp
+  - description: custom
+    url: "{protocol}://{server}/{path}"
+    variables:
+      protocol:
+        enum: ['http', 'https']
+        default: 'http'
+      server:
+        default: 'localhost:8080'
+      path:
+        default: 'api'
+
+components:
+  securitySchemes:
+    basicAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: basic
+    bearerAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+security:
+  - basicAuth: []  # <-- use the same name here
+  - bearerAuth: []  # <-- use the same name here
+
+
