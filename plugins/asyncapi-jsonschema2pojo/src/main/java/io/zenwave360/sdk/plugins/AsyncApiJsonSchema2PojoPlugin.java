@@ -7,7 +7,7 @@ import io.zenwave360.sdk.doc.DocumentedPlugin;
 import io.zenwave360.sdk.parsers.DefaultYamlParser;
 import io.zenwave360.sdk.processors.AsyncApiProcessor;
 
-@DocumentedPlugin(value = "Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files", shortCode = "jsonschema2pojo",
+@DocumentedPlugin(value = "Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files",
         hiddenOptions = {"apiPackage", "producerApiPackage", "consumerApiPackage", "role", "runtimeHeadersProperty", "sourceFolder"}
 )
 public class AsyncApiJsonSchema2PojoPlugin extends Plugin {

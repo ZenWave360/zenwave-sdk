@@ -19,7 +19,7 @@ public @interface DocumentedPlugin {
 
     String description() default "";
 
-    String shortCode() default "";
+    String[] mainOptions() default {};
 
     String[] hiddenOptions() default {};
 }

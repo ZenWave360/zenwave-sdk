@@ -52,6 +52,34 @@
         "--add-exports", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
         "--add-exports", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
       ]
+    },
+    "next": {
+      "script-ref": "io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli:2.0.0-SNAPSHOT",
+      "dependencies": [
+        "org.slf4j:slf4j-simple:1.7.36",
+        "io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3:2.0.0-SNAPSHOT",
+        "io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:2.0.0-SNAPSHOT",
+        "io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:2.0.0-SNAPSHOT",
+        "io.github.zenwave360.zenwave-sdk.plugins:openapi-karate:2.0.0-SNAPSHOT",
+        "io.github.zenwave360.zenwave-sdk.plugins:backend-application-default:2.0.0-SNAPSHOT",
+        "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi:2.0.0-SNAPSHOT",
+        "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-asyncapi:2.0.0-SNAPSHOT",
+        "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:2.0.0-SNAPSHOT",
+        "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-markdown:2.0.0-SNAPSHOT",
+        "io.github.zenwave360.zenwave-sdk.plugins:openapi-controllers:2.0.0-SNAPSHOT"
+      ],
+      "repositories": [
+        "mavencentral",
+        "snapshots\u003dhttps://s01.oss.sonatype.org/content/repositories/snapshots"
+      ],
+      "main": "io.zenwave360.sdk.Main",
+      "java-options": [
+        "--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+        "--add-exports", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
+        "--add-exports", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+        "--add-exports", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+        "--add-exports", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
+      ]
     }
   },
   "templates": {}

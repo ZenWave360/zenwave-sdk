@@ -14,7 +14,6 @@ public class ZDLParser implements Parser, ConfigurationProvider {
 
     public static final List blobTypes = List.of("Blob", "AnyBlob", "ImageBlob", "byte");
 
-    @DocumentedOption(description = "ZDL files to parse")
     public List<String> zdlFiles = List.of();
     private String content;
     public String targetProperty = "zdl";
@@ -26,24 +25,12 @@ public class ZDLParser implements Parser, ConfigurationProvider {
 
     private ClassLoader projectClassLoader;
 
-    @DocumentedOption(description = "ZDL file to parse (@deprecated use zdlFile)")
-    public void setSpecFile(String specFile) {
-        setZdlFile(specFile);
-    }
-
-    @DocumentedOption(description = "ZDL files to parse (@deprecated use zdlFiles)")
-    public void setSpecFiles(List<String> specFiles) {
-        setZdlFiles(specFiles);
-    }
-
-    @DocumentedOption(description = "ZDL file to parse")
     public void setZdlFile(String zdlFile) {
         if(zdlFile != null) {
             this.zdlFiles = List.of(zdlFile);
         }
     }
 
-    @DocumentedOption(description = "ZDL file to parse")
     public void setZdlFiles(List<String> zdlFiles) {
         this.zdlFiles = zdlFiles;
     }

@@ -7,7 +7,31 @@ import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 
-@DocumentedPlugin(value = "Generates a full backend application using the provided 'layout' property", shortCode = "backend-application-default", description = "")
+@DocumentedPlugin(value = "Generates a full backend application using the provided 'layout' property",
+        mainOptions = { "layout", "zdlFile", "zdlFiles", "persistence", "databaseType", "style", "useLombok", "addRelationshipsById", "idJavaType" },
+        description = """
+Sample configuration:
+
+```zdl
+config {
+    basePackage "com.example"
+    persistence jpa
+    databaseType postgresql
+    layout CleanHexagonalProjectLayout
+
+    // The IDE will automatically use the active .zdl file
+    // Alternatively, specify the path here to maintain separation between models and plugins
+    zdlFile "models/example.zdl"
+
+    plugins {
+        BackendApplicationDefaultPlugin {
+            useLombok true
+            --force // overwrite all files
+        }
+    }
+}
+```
+                """)
 public class BackendApplicationDefaultPlugin extends Plugin {
 
     public BackendApplicationDefaultPlugin() {

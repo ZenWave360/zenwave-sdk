@@ -5,13 +5,10 @@ import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import io.zenwave360.sdk.utils.NamingUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.reflections.Reflections;
 
@@ -41,9 +38,11 @@ public class Help {
         var undocumentedOptions = new LinkedHashMap<String, Map<String, Object>>();
         var pluginList = new LinkedHashMap<Class, Object>();
         model.put("configClassName", configuration.getClass().getName());
+        model.put("configClassSimpleName", configuration.getClass().getSimpleName());
+        model.put("configHumanReadableName", NamingUtils.humanReadable(configuration.getClass().getSimpleName()));
         DocumentedPlugin pluginDocumentation = (DocumentedPlugin) configuration.getClass().getAnnotation(DocumentedPlugin.class);
         if (pluginDocumentation != null) {
-            model.put("plugin", Maps.of("title", pluginDocumentation.value(), "description", pluginDocumentation.description(), "shortCode", pluginDocumentation.shortCode()));
+            model.put("plugin", Maps.of("title", pluginDocumentation.value(), "description", pluginDocumentation.description()));
         }
         model.put("version", getClass().getPackage().getImplementationVersion());
         model.put("config", configuration);
@@ -71,6 +70,8 @@ public class Help {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+            var fields = FieldUtils.getAllFields(pluginClass);
+            sortFields(fields, pluginDocumentation.mainOptions());
             for (Field field : FieldUtils.getAllFields(pluginClass)) {
                 DocumentedOption documentedOption = field.getAnnotation(DocumentedOption.class);
                 if (documentedOption != null && !hiddenOptions.contains(field.getName())) {
@@ -82,6 +83,34 @@ public class Help {
         }
 
         return model;
+    }
+
+    private void sortFields(Field[] fields, String[] mainOptions) {
+        if (mainOptions == null || mainOptions.length == 0) {
+            return;
+        }
+
+        // Create a map of field name to priority (index in mainOptions array)
+        Map<String, Integer> priorityMap = new HashMap<>();
+        for (int i = 0; i < mainOptions.length; i++) {
+            priorityMap.put(mainOptions[i], i);
+        }
+
+        // Sort the fields array in place
+        Arrays.sort(fields, (f1, f2) -> {
+            Integer p1 = priorityMap.get(f1.getName());
+            Integer p2 = priorityMap.get(f2.getName());
+
+            if (p1 != null && p2 != null) {
+                return p1.compareTo(p2);
+            } else if (p1 != null) {
+                return -1; // f1 is a main option, should come first
+            } else if (p2 != null) {
+                return 1;  // f2 is a main option, should come first
+            }
+            // For non-main options, maintain original order by comparing their positions in the original array
+            return Integer.compare(Arrays.asList(fields).indexOf(f1), Arrays.asList(fields).indexOf(f2));
+        });
     }
 
     protected Map<String, Object> discoverAvailablePlugins() {
@@ -102,6 +131,8 @@ public class Help {
         List values = new ArrayList();
         if (type.isEnum()) {
             values.addAll(Arrays.stream(type.getEnumConstants()).map(v -> v.toString()).collect(Collectors.toList()));
+        } else {
+            values.addAll(Arrays.asList(documentedOption.values()));
         }
         Object defaultValue = null;
         try {
@@ -113,7 +144,7 @@ public class Help {
         if (defaultValue.getClass().isArray()) {
             defaultValue = Arrays.asList((Object[]) defaultValue);
         }
-        return Map.of("description", documentedOption.description(), "type", type.getSimpleName(), "defaultValue", defaultValue, "values", values);
+        return Map.of("description", documentedOption.description(), "type", type.getSimpleName(), "defaultValue", defaultValue, "values", values, "docLink", documentedOption.docLink());
     }
 
     public String help(Plugin plugin, Format format) {

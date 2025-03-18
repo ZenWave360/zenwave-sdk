@@ -9,7 +9,7 @@ import {{layout.coreImplementationPackage}}.*;
 {{/if}}
 {{#if includeEmitEventsImplementation}}
     {{~#if (needsEventsProducer service)}}
-import {{layout.outboundEventsPackage}}.*;
+import {{layout.asyncApiProducerApiPackage}}.*;
     {{~/if}}
     {{#if (includeDomainEvents service)}}
 import {{layout.domainEventsPackage}}.*;

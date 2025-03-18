@@ -21,4 +21,8 @@ public @interface DocumentedOption {
     boolean required() default false;
 
     String defaultValue() default "";
+
+    String[] values() default {};
+
+    String docLink() default "";
 }

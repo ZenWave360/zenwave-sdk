@@ -10,7 +10,7 @@ import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 
-@DocumentedPlugin(value = "Generates a full AsyncAPI definitions for CRUD operations from JDL models", shortCode = "jdl-to-asyncapi")
+@DocumentedPlugin(value = "Generates a full AsyncAPI definitions for CRUD operations from JDL models")
 public class JDLToAsyncAPIPlugin extends Plugin {
 
     public JDLToAsyncAPIPlugin() {

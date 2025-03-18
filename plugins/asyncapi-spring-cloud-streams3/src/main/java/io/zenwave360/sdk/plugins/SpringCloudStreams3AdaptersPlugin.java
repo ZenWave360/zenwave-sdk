@@ -13,7 +13,7 @@ import io.zenwave360.sdk.parsers.DefaultYamlParser;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 
-@DocumentedPlugin(value = "Generates tests for Spring Cloud Streams Consumers.", shortCode = "spring-cloud-streams3-adapters")
+@DocumentedPlugin(value = "Generates tests for Spring Cloud Streams Consumers.")
 public class SpringCloudStreams3AdaptersPlugin extends Plugin {
 
     private Logger log = LoggerFactory.getLogger(getClass());

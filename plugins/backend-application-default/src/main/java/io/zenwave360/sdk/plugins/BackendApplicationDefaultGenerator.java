@@ -19,40 +19,13 @@ import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 import org.apache.commons.lang3.ObjectUtils;
 
 /**
- * Generates a backend application with the following structure:
- <pre>
-📦 basePackage
-   📦 adapters
-       └─ web
-       |  └─ RestControllers (spring mvc)
-       └─ events
-          └─ *EventListeners (spring-cloud-streams)
-   📦 core
-       └─ 📦 domain
-       |     └─ (entities and aggregates)
-       └─ 📦 inbound
-       |     ├─ dtos/
-       |     └─ ServiceInterface (inbound service interface)
-       ├─ 📦 outbound
-       |     ├─ mongodb
-       |     |  └─ *RepositoryInterface (spring-data interface)
-       |     └─ jpa
-       |        └─ *RepositoryInterface (spring-data interface)
-       ├─ 📦 implementation
-       |     ├─ mappers/
-       |     └─ ServiceImplementation (inbound service implementation)
-  📦 infrastructure
-     ├─ mongodb
-     |  └─ CustomRepositoryImpl (spring-data custom implementation)
-     └─ jpa
-        └─ CustomRepositoryImpl (spring-data custom implementation)
- </pre>
+ * Generates a backend application following configured project layout.
  */
 public class BackendApplicationDefaultGenerator extends AbstractZDLProjectGenerator {
 
     public ProjectLayout layout;
 
-    @DocumentedOption(description = "Entities to generate code for")
+//    @DocumentedOption(description = "Entities to generate code for")
     public List<String> entities = new ArrayList<>();
 
     @DocumentedOption(description = "Persistence")
@@ -77,7 +50,7 @@ public class BackendApplicationDefaultGenerator extends AbstractZDLProjectGenera
     public String idJavaType;
 
 
-    @DocumentedOption(description = "If not empty, it will generate (and use) an `input` DTO for each entity used as command parameter")
+//    @DocumentedOption(description = "If not empty, it will generate (and use) an `input` DTO for each entity used as command parameter")
     public String inputDTOSuffix = "";
 
     {

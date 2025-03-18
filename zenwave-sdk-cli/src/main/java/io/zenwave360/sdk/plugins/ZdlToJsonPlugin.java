@@ -11,7 +11,7 @@ import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.processors.Processor;
 import io.zenwave360.sdk.processors.ZDLProcessor;
 
-@DocumentedPlugin(value = "Prints to StdOut ZDL Model as JSON", shortCode = "zdl-to-json")
+@DocumentedPlugin(value = "Prints to StdOut ZDL Model as JSON")
 public class ZdlToJsonPlugin extends Plugin implements Processor {
 
     public ZdlToJsonPlugin() {

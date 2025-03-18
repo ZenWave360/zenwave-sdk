@@ -1,5 +1,6 @@
 package io.zenwave360.sdk;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,24 +20,27 @@ import io.zenwave360.sdk.utils.NamingUtils;
 
 public class Plugin {
 
-    @DocumentedOption(description = "Project layout")
+    @DocumentedOption(
+            description = "Project organization and package structure",
+            docLink = "https://github.com/zenwave360/zenwave-sdk/tree/main/plugins/backend-application-default#project-layout",
+            values = { "DefaultProjectLayout", "CleanHexagonalProjectLayout", "LayeredProjectLayout", "SimpleDomainProjectLayout", "HexagonalProjectLayout", "CleanArchitectureProjectLayout" })
     public ProjectLayout layout = new DefaultProjectLayout();
 
-    @DocumentedOption(description = "API Spec file to parse", required = true)
-    public String apiFile;
-
-    @DocumentedOption(description = "API Spec files to parse", required = true)
-    public List<String> apiFiles;
-
-
-    @DocumentedOption(description = "ZDL file to parse", required = true)
+    @DocumentedOption(description = "ZDL file to parse")
     public String zdlFile;
 
-    @DocumentedOption(description = "ZDL files to parse")
+    @DocumentedOption(description = "ZDL files to parse (comma separated)")
     public List<String> zdlFiles;
 
-    @DocumentedOption(description = "Target folder for generated output", required = false)
+    @DocumentedOption(description = "API Spec file to parse")
+    public String apiFile;
+
+    @DocumentedOption(description = "API Spec files to parse (comma separated)")
+    public List<String> apiFiles;
+
+    @DocumentedOption(description = "Target folder for generated output")
     public String targetFolder;
+
     private List<Class> chain;
 
     private boolean forceOverwrite = false;
@@ -50,22 +54,48 @@ public class Plugin {
             if (pluginConfigAsString.contains(".")) {
                 return (Plugin) Plugin.class.getClassLoader().loadClass(pluginConfigAsString).getDeclaredConstructor().newInstance();
             }
-            String simpleClassName = NamingUtils.asJavaTypeName(pluginConfigAsString);
-            var allConfigClasses = new Reflections("io.zenwave360.sdk.plugins").getSubTypesOf(Plugin.class);
-            Optional<Class<? extends Plugin>> pluginClass = allConfigClasses.stream().filter(c -> matchesClassName(c, pluginConfigAsString, simpleClassName)).findFirst();
-            if (pluginClass.isPresent()) {
-                return pluginClass.get().getDeclaredConstructor().newInstance();
+            Plugin plugin = getPluginFromDeprecatedShortCodes(pluginConfigAsString);
+            if (plugin != null) {
+                return plugin;
+            }
+            plugin = ofSimpleClassName(pluginConfigAsString);
+            if (plugin != null) {
+                return plugin;
+            }
+            plugin = ofSimpleClassName(NamingUtils.asJavaTypeName(pluginConfigAsString));
+            if (plugin != null) {
+                return plugin;
             }
         }
         return new Plugin();
     }
 
-    private static boolean matchesClassName(Class c, String pluginConfigAsString, String simpleClassName) {
-        DocumentedPlugin documentedPlugin = (DocumentedPlugin) c.getAnnotation(DocumentedPlugin.class);
-        if (documentedPlugin != null && pluginConfigAsString.contentEquals(documentedPlugin.shortCode())) {
-            return true;
+    private static Plugin ofSimpleClassName(String simpleClassName) {
+        var suffixes = Arrays.asList("", "Plugin", "Configuration");
+        for (String suffix : suffixes) {
+            try {
+                Class<? extends Plugin> pluginClass = (Class<? extends Plugin>) ClassUtils.getClass("io.zenwave360.sdk.plugins." + simpleClassName + suffix);
+                return pluginClass.getDeclaredConstructor().newInstance();
+            } catch (Exception ignored) {
+                // ignore
+            }
         }
-        return c.getSimpleName().matches(simpleClassName + "(Configuration){0,1}$");
+        return null;
+    }
+
+    private static Plugin getPluginFromDeprecatedShortCodes(String simpleClassName) {
+        var shortCodesBackwardsCompatibleMap = Map.of(
+                "jsonschema2pojo", "io.zenwave360.sdk.plugins.AsyncApiJsonSchema2PojoPlugin",
+                "spring-cloud-streams3", "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin");
+        if (shortCodesBackwardsCompatibleMap.containsKey(simpleClassName)) {
+            try {
+                Class<? extends Plugin> pluginClass = (Class<? extends Plugin>) ClassUtils.getClass(shortCodesBackwardsCompatibleMap.get(simpleClassName));
+                return pluginClass.getDeclaredConstructor().newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return null;
     }
 
     public <T extends Plugin> T processOptions() {
@@ -87,7 +117,7 @@ public class Plugin {
             if (layoutClass != null && ProjectLayout.class.isAssignableFrom(layoutClass)) {
                 try {
                     this.layout = (ProjectLayout) layoutClass.getDeclaredConstructor().newInstance();
-//                    this.options.put("layout", this.layout);
+                    //                    this.options.put("layout", this.layout);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -104,31 +134,31 @@ public class Plugin {
     }
 
     public Plugin withApiFile(String apiFile) {
-        this.apiFile = apiFile != null? apiFile.replaceAll("\\\\", "/") : apiFile;
+        this.apiFile = apiFile != null ? apiFile.replaceAll("\\\\", "/") : apiFile;
         this.options.put("apiFile", this.apiFile);
         return this;
     }
 
     public Plugin withApiFiles(List<String> apiFiles) {
-        if(apiFiles == null) {
+        if (apiFiles == null) {
             return this;
         }
-        this.apiFiles = apiFiles.stream().map(apiFile -> apiFile != null? apiFile.replaceAll("\\\\", "/") : apiFile).toList();
+        this.apiFiles = apiFiles.stream().map(apiFile -> apiFile != null ? apiFile.replaceAll("\\\\", "/") : apiFile).toList();
         this.options.put("zdlFiles", this.apiFiles);
         return this;
     }
 
     public Plugin withZdlFile(String zdlFile) {
-        this.zdlFile = zdlFile != null? zdlFile.replaceAll("\\\\", "/") : zdlFile;
+        this.zdlFile = zdlFile != null ? zdlFile.replaceAll("\\\\", "/") : zdlFile;
         this.options.put("zdlFile", this.zdlFile);
         return this;
     }
 
     public Plugin withZdlFiles(List<String> zdlFiles) {
-        if(zdlFiles == null) {
+        if (zdlFiles == null) {
             return this;
         }
-        this.zdlFiles = zdlFiles.stream().map(zdlFile -> zdlFile != null? zdlFile.replaceAll("\\\\", "/") : zdlFile).toList();
+        this.zdlFiles = zdlFiles.stream().map(zdlFile -> zdlFile != null ? zdlFile.replaceAll("\\\\", "/") : zdlFile).toList();
         this.options.put("zdlFiles", this.zdlFiles);
         return this;
     }
@@ -172,7 +202,7 @@ public class Plugin {
                 }
             }
         }
-        if(value instanceof String && ((String) value).contains(",")) {
+        if (value instanceof String && ((String) value).contains(",")) {
             value = Arrays.stream(((String) value).split(",")).map(String::trim).toList();
         }
         if (value instanceof String && field != null && List.class.isAssignableFrom(field.getType())) {
@@ -184,7 +214,7 @@ public class Plugin {
             if ("layout".equals(name) && value instanceof String) {
                 withLayout((String) value);
                 options.remove("layout");
-            } else if(field != null) {
+            } else if (field != null) {
                 FieldUtils.writeField(this, name, value);
             }
         } catch (IllegalAccessException e) {
@@ -240,7 +270,7 @@ public class Plugin {
     }
 
     public boolean hasOption(String name, Object value) {
-        if(name == null || options.get(name) == null || value == null) {
+        if (name == null || options.get(name) == null || value == null) {
             return false;
         }
         return options.get(name).toString().equals(value.toString());

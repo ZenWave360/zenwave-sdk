@@ -164,4 +164,8 @@ public class ProjectLayout {
         }
         return layoutOptions;
     }
+
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
 }

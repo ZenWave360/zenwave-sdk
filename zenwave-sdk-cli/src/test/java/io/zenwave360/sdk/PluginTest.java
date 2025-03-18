@@ -38,13 +38,6 @@ public class PluginTest {
     }
 
     @Test
-    public void testLoadConfigFromConfigId() throws Exception {
-        Plugin config = Plugin.of("no-op");
-        Assertions.assertNotNull(config);
-        Assertions.assertEquals(NoOpPluginConfiguration.class, config.getClass());
-    }
-
-    @Test
     public void testLoadConfigNotFound() throws Exception {
         Plugin config = Plugin.of("not-found");
         Assertions.assertNotNull(config);

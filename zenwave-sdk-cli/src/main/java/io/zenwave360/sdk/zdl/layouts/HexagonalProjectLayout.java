@@ -39,7 +39,7 @@ public class HexagonalProjectLayout extends ProjectLayout {
         basePackage = "{{basePackage}}";
         // in case of modular project
         configPackage = "{{basePackage}}.config";
-        commonPackage = "{{basePackage}}.common";
+        commonPackage = "{{basePackage}}"; // set to "{{basePackage}}.common" in modular projects
         modulesPackage = "{{basePackage}}.modules";
 
         // module specific

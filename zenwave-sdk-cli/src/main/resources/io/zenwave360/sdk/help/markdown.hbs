@@ -1,4 +1,4 @@
-# {{configClassName}}
+# {{configHumanReadableName}}
 
 {{{plugin.title}}}
 
@@ -9,7 +9,7 @@
 | **Option** | **Description** | **Type** | **Default** | **Values** |
 |------------|-----------------|----------|-------------|------------|
 {{~#each options as |option|}}
-| `{{@key}}` | {{{option.description}}} | {{{option.type}}} | {{{option.defaultValue}}} | {{join option.values ", " }}  |
+| `{{@key}}` | {{{option.description}}} {{#if option.docLink}}[doc]({{option.docLink}}){{/if}} | {{{option.type}}} | {{{option.defaultValue}}} | {{join option.values ", " }}  |
 {{~/each}}
 
 ## Getting Help
