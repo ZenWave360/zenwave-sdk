@@ -8,7 +8,7 @@ Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schem
 
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.AsyncApiJsonSchema2PojoPlugin \
-    specFile=src/main/resources/model/asyncapi.yml \
+    apiFile=src/main/resources/model/asyncapi.yml \
     modelPackage=io.zenwave360.example.core.domain.events \
     jsonschema2pojo.includeTypeInfo=true \
     targetFolder=.
@@ -16,15 +16,20 @@ jbang zw -p io.zenwave360.sdk.plugins.AsyncApiJsonSchema2PojoPlugin \
 
 ## Options
 
-| **Option**        | **Description**                                                                                                | **Type** | **Default** | **Values** |
-|-------------------|----------------------------------------------------------------------------------------------------------------|----------|-------------|------------|
-| `specFile`        | API Specification File                                                                                         | String   |             |            |
-| `targetFolder`    | Target folder to generate code to.                                                                             | File     |             |            |
-| `modelPackage`    | Java Models package name                                                                                       | String   |             |            |
-| `jsonschema2pojo` | JsonSchema2Pojo settings                                                                                       | Map      | {}          |            |
-| `messageNames`    | Message names to include in code generation (combined with operationIds). Generates code for ALL if left empty | List     | []          |            |
-| `bindingTypes`    | Binding names to include in code generation. Generates code for ALL bindings if left empty                     | List     |             |            |
-| `operationIds`    | Operation ids to include in code generation. Generates code for ALL if left empty                              | List     | []          |            |
+| **Option**            | **Description**                                                                                                | **Type** | **Default** | **Values** |
+|-----------------------|----------------------------------------------------------------------------------------------------------------|----------|-------------|------------|
+| `apiFile`             | API Specification File                                                                                         | URI      |             |            |
+| `apiFiles`            | API Spec files to parse (comma separated)                                                                      | List     |             |            |
+| `targetFolder`        | Target folder to generate code to.                                                                             | File     |             |            |
+| `modelPackage`        | Java Models package name                                                                                       | String   |             |            |
+| `jsonschema2pojo`     | JsonSchema2Pojo settings                                                                                       | Map      | {}          |            |
+| `modelNamePrefix`     | Sets the prefix for model classes and enums                                                                    | String   |             |            |
+| `modelNameSuffix`     | Sets the suffix for model classes and enums                                                                    | String   |             |            |
+| `messageNames`        | Message names to include in code generation (combined with operationIds). Generates code for ALL if left empty | List     | []          |            |
+| `bindingTypes`        | Binding names to include in code generation. Generates code for ALL bindings if left empty                     | List     |             |            |
+| `operationIds`        | Operation ids to include in code generation. Generates code for ALL if left empty                              | List     | []          |            |
+| `excludeOperationIds` | Operation ids to exclude in code generation. Skips code generation if is not included or is excluded.          | List     | []          |            |
+
 
 ## Getting Help
 

@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import io.zenwave360.sdk.utils.NamingUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.reflections.Reflections;
 
@@ -21,7 +22,6 @@ import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.utils.Maps;
-import picocli.CommandLine;
 
 public class Help {
 
@@ -42,7 +42,8 @@ public class Help {
         model.put("configHumanReadableName", NamingUtils.humanReadable(configuration.getClass().getSimpleName()));
         DocumentedPlugin pluginDocumentation = (DocumentedPlugin) configuration.getClass().getAnnotation(DocumentedPlugin.class);
         if (pluginDocumentation != null) {
-            model.put("plugin", Maps.of("title", pluginDocumentation.value(), "description", pluginDocumentation.description()));
+            var title = ObjectUtils.firstNonNull(pluginDocumentation.title(), NamingUtils.humanReadable(configuration.getClass().getSimpleName()));
+            model.put("plugin", Maps.of("title", title, "summary", pluginDocumentation.summary(), "description", pluginDocumentation.description()));
         }
         model.put("version", getClass().getPackage().getImplementationVersion());
         model.put("config", configuration);
@@ -50,42 +51,55 @@ public class Help {
         model.put("undocumentedOptions", undocumentedOptions);
         model.put("pluginChain", pluginList);
 
-        // adds options from config class
-        for (Field field : FieldUtils.getAllFields(configuration.getClass())) {
-            DocumentedOption documentedOption = field.getAnnotation(DocumentedOption.class);
-            if (documentedOption != null) {
-                options.put(field.getName(), asModel(configuration, field, documentedOption));
-            }
-        }
+        List<String> hiddenOptions = List.of(pluginDocumentation.hiddenOptions());
+        List<Field> fields = new ArrayList<>();
+        Map<Field, Object> fieldOwners = new HashMap<>();
+        List.of(FieldUtils.getAllFields(configuration.getClass())).forEach(f -> {
+            fields.add(f);
+            fieldOwners.put(f, configuration);
+        });
 
-        List<String> hiddenOptions = Arrays.asList(pluginDocumentation.hiddenOptions());
         // adds options from processors chain
         int chainIndex = 0;
         for (Class pluginClass : configuration.getChain()) {
             Object plugin;
             try {
-                plugin = pluginClass.getDeclaredConstructor().newInstance();
+                plugin = newInstance(pluginClass);
                 applyConfiguration(chainIndex++, plugin, configuration);
                 pluginList.put(pluginClass, Generator.asConfigurationMap(plugin));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            var fields = FieldUtils.getAllFields(pluginClass);
-            sortFields(fields, pluginDocumentation.mainOptions());
-            for (Field field : FieldUtils.getAllFields(pluginClass)) {
-                DocumentedOption documentedOption = field.getAnnotation(DocumentedOption.class);
-                if (documentedOption != null && !hiddenOptions.contains(field.getName())) {
-                    options.put(field.getName(), asModel(plugin, field, documentedOption));
-                } else if (isPublic(field.getModifiers()) && !isStatic(field.getModifiers())) {
-                    undocumentedOptions.put(field.getName(), Map.of("name", field.getName(), "ownerClass", pluginClass.getName(), "type", field.getType()));
-                }
+            List.of(FieldUtils.getAllFields(pluginClass)).forEach(f -> {
+                fields.add(f);
+                fieldOwners.put(f, plugin);
+            });
+        }
+
+        System.out.println("Hidden options: " + hiddenOptions);
+        sortFields(fields, pluginDocumentation.mainOptions());
+        for (Field field : fields) {
+            DocumentedOption documentedOption = field.getAnnotation(DocumentedOption.class);
+            if (documentedOption != null && !hiddenOptions.contains(field.getName())) {
+                Object plugin = fieldOwners.get(field);
+                options.put(field.getName(), asModel(plugin, field, documentedOption));
+            } else if (isPublic(field.getModifiers()) && !isStatic(field.getModifiers())) {
+                undocumentedOptions.put(field.getName(), Map.of("name", field.getName(), "ownerClass", field.getDeclaringClass().getName(), "type", field.getType()));
             }
         }
 
         return model;
     }
 
-    private void sortFields(Field[] fields, String[] mainOptions) {
+    private Object newInstance(Class pluginClass) {
+        try {
+            return pluginClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void sortFields(List<Field> fields, String[] mainOptions) {
         if (mainOptions == null || mainOptions.length == 0) {
             return;
         }
@@ -96,8 +110,8 @@ public class Help {
             priorityMap.put(mainOptions[i], i);
         }
 
-        // Sort the fields array in place
-        Arrays.sort(fields, (f1, f2) -> {
+        // Sort the list in place
+        Collections.sort(fields, (f1, f2) -> {
             Integer p1 = priorityMap.get(f1.getName());
             Integer p2 = priorityMap.get(f2.getName());
 
@@ -108,8 +122,8 @@ public class Help {
             } else if (p2 != null) {
                 return 1;  // f2 is a main option, should come first
             }
-            // For non-main options, maintain original order by comparing their positions in the original array
-            return Integer.compare(Arrays.asList(fields).indexOf(f1), Arrays.asList(fields).indexOf(f2));
+            // For non-main options, maintain original order by comparing their positions in the original list
+            return Integer.compare(fields.indexOf(f1), fields.indexOf(f2));
         });
     }
 

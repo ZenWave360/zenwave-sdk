@@ -7,7 +7,7 @@ import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 
-@DocumentedPlugin(value = "Generates a full backend application using a multiple maven modules", description = "")
+@DocumentedPlugin(summary = "Generates a full backend application using a multiple maven modules", description = "")
 public class BackendApplicationMultiModulePlugin extends Plugin {
 
     public BackendApplicationMultiModulePlugin() {

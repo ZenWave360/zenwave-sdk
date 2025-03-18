@@ -11,9 +11,8 @@ import io.zenwave360.sdk.doc.DocumentedPlugin;
 import io.zenwave360.sdk.formatters.JavaFormatter;
 import io.zenwave360.sdk.parsers.DefaultYamlParser;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
-import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 
-@DocumentedPlugin(value = "Generates tests for Spring Cloud Streams Consumers.")
+@DocumentedPlugin(summary = "Generates tests for Spring Cloud Streams Consumers.")
 public class SpringCloudStreams3AdaptersPlugin extends Plugin {
 
     private Logger log = LoggerFactory.getLogger(getClass());

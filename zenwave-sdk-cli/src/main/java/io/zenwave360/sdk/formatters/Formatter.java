@@ -7,7 +7,7 @@ import io.zenwave360.sdk.templating.TemplateOutput;
 public interface Formatter {
 
     enum Formatters {
-        google, palantir, spring, eclipse
+        palantir, spring, google
     }
     List<TemplateOutput> format(List<TemplateOutput> templateOutputList);
 }

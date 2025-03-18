@@ -1,12 +1,12 @@
-# JDL To AsyncAPI Generator
-> 👉 ZenWave360 Helps You Create Software Easy to Understand
+# JDL To AsyncAPI Generator (io.zenwave360.sdk.plugins.JDLToAsyncAPIPlugin)
+> ZenWave360 👉 Create Software Easy to Understand
 
-Generate AsyncAPI definition from JHipster Domain Language (JDL) entities:
+Generates a full AsyncAPI definitions for CRUD operations from JDL models
 
 - One channel for each entity update events
 - Messages and payloads for each entity:
-  - Supported Schema Formats: AVRO and AsyncAPI schema
-  - Supported Payload Styles: Entity and State Transfer (for Create/Update/Delete events)
+    - Supported Schema Formats: AVRO and AsyncAPI schema
+    - Supported Payload Styles: Entity and State Transfer (for Create/Update/Delete events)
 
 JDL Example:
 
@@ -35,34 +35,32 @@ jbang zw -p io.zenwave360.sdk.plugins.JDLToAsyncAPIPlugin \
 ```
 
 
-
 ## Options
 
-| **Option**                  | **Description**                                                                                       | **Type**            | **Default**             | **Values**    |
-|-----------------------------|-------------------------------------------------------------------------------------------------------|---------------------|-------------------------|---------------|
-| `specFile`                  | Spec file to parse                                                                                    | String              |                         |               |
-| `specFiles`                 | JDL files to parse                                                                                    | String[]            | []                      |               |
-| `basePackage`               | Java Models package name                                                                              | String              | io.example.domain.model |               |
-| `targetFolder`              | Target folder for generated output                                                                    | String              |                         |               |
-| `targetFile`                | Target file                                                                                           | String              | asyncapi.yml            |               |
-| `schemaFormat`              | Schema format for messages' payload                                                                   | SchemaFormat        | schema                  | schema, avro  |
-| `payloadStyle`              | Payload Style for messages' payload                                                                   | PayloadStyle        | entity                  | entity, event |
-| `idType`                    | JsonSchema type for id fields and parameters.                                                         | String              | string                  |               |
-| `idTypeFormat`              | JsonSchema type format for id fields and parameters.                                                  | String              |                         |               |
-| `asyncapiVersion`           | Target AsyncAPI version.                                                                              | AsyncapiVersionType | v2                      | v2, v3        |
-| `entities`                  | Entities to generate code for                                                                         | List                | []                      |               |
-| `skipEntities`              | Entities to skip code generation for                                                                  | List                | []                      |               |
-| `annotations`               | Annotations to generate code for (ex. aggregate)                                                      | List                | []                      |               |
-| `skipForAnnotations`        | Skip generating operations for entities annotated with these                                          | List                | [vo, embedded, skip]    |               |
-| `includeEvents`             | Include channels and messages to publish domain events                                                | boolean             | true                    |               |
-| `includeCommands`           | Include channels and messages to listen for async command requests                                    | boolean             | false                   |               |
-| `jdlBusinessEntityProperty` | Extension property referencing original jdl entity in components schemas (default: x-business-entity) | String              | x-business-entity       |               |
-| `avroPackage`               | Package name for generated Avro Schemas (.avsc)                                                       | String              | io.example.domain.model |               |
-| `skipFormatting`            | Skip java sources output formatting                                                                   | boolean             | false                   |               |
-| `haltOnFailFormatting`      | Halt on formatting errors                                                                             | boolean             | true                    |               |
+| **Option**           | **Description**                                                    | **Type**            | **Default**             | **Values**    |
+|----------------------|--------------------------------------------------------------------|---------------------|-------------------------|---------------|
+| `zdlFile`            | ZDL file to parse                                                  | String              |                         |               |
+| `zdlFiles`           | ZDL files to parse (comma separated)                               | List                |                         |               |
+| `basePackage`        | Java Models package name                                           | String              | io.example.domain.model |               |
+| `avroPackage`        | Package name for generated Avro Schemas (.avsc)                    | String              | io.example.domain.model |               |
+| `schemaFormat`       | Schema format for messages' payload                                | SchemaFormat        | schema                  | schema, avro  |
+| `includeEvents`      | Include channels and messages to publish domain events             | boolean             | true                    |               |
+| `includeCommands`    | Include channels and messages to listen for async command requests | boolean             | false                   |               |
+| `idType`             | JsonSchema type for id fields and parameters.                      | String              | string                  |               |
+| `idTypeFormat`       | JsonSchema type format for id fields and parameters.               | String              |                         |               |
+| `payloadStyle`       | Payload Style for messages' payload                                | PayloadStyle        | entity                  | entity, event |
+| `asyncapiVersion`    | Target AsyncAPI version.                                           | AsyncapiVersionType | v2                      | v2, v3        |
+| `targetFile`         | Target file                                                        | String              | asyncapi.yml            |               |
+| `targetFolder`       | Target folder for generated output                                 | String              |                         |               |
+| `continueOnZdlError` | Continue even when ZDL contains fatal errors                       | boolean             | true                    |               |
+| `entities`           | Entities to generate code for                                      | List                | []                      |               |
+| `skipEntities`       | Entities to skip code generation for                               | List                | []                      |               |
+| `annotations`        | Annotations to generate code for (ex. aggregate)                   | List                | []                      |               |
+| `skipForAnnotations` | Skip generating operations for entities annotated with these       | List                | [vo, embedded, skip]    |               |
 
 ## Getting Help
 
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.JDLToAsyncAPIPlugin --help
 ```
+

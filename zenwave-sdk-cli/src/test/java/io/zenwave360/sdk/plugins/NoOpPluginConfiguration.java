@@ -6,7 +6,7 @@ import io.zenwave360.sdk.doc.DocumentedPlugin;
 import io.zenwave360.sdk.generators.AbstractOpenAPIGenerator;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 
-@DocumentedPlugin(value = "'no operation' plugin description")
+@DocumentedPlugin(summary = "'no operation' plugin description")
 public class NoOpPluginConfiguration extends Plugin {
 
     @DocumentedOption(description = "Operation Type")

@@ -7,7 +7,7 @@ import io.zenwave360.sdk.processors.OpenApiProcessor;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 
-@DocumentedPlugin(value = "Generates JDL model from OpenAPI schemas")
+@DocumentedPlugin(summary = "Generates JDL model from OpenAPI schemas")
 public class OpenAPIToJDLPlugin extends Plugin {
 
     public OpenAPIToJDLPlugin() {

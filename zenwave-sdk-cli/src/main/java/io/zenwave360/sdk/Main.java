@@ -107,6 +107,7 @@ public class Main implements Callable<Integer> {
                         .withOptions(options);
             }
             String help = new Help().help(plugin, helpFormat);
+            System.setProperty("file.encoding", "UTF-8");
             System.out.println(help);
         } catch (Exception e) {
             e.printStackTrace();

@@ -7,7 +7,7 @@ import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 
-@DocumentedPlugin(value = "Generates a draft OpenAPI definitions from your ZDL entities and services.", hiddenOptions = {"apiFile, apiFiles"})
+@DocumentedPlugin(summary = "Generates a draft OpenAPI definitions from your ZDL entities and services.", hiddenOptions = {"apiFile, apiFiles"})
 public class ZDLToOpenAPIPlugin extends Plugin {
 
     public ZDLToOpenAPIPlugin() {

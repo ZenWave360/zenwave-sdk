@@ -2,10 +2,8 @@ package io.zenwave360.sdk.plugins;
 
 import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.processors.*;
-import org.apache.commons.lang3.StringUtils;
 
 import io.zenwave360.sdk.Plugin;
-import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.doc.DocumentedPlugin;
 import io.zenwave360.sdk.formatters.JavaFormatter;
 import io.zenwave360.sdk.parsers.DefaultYamlParser;
@@ -25,7 +23,7 @@ import io.zenwave360.sdk.writers.TemplateFileWriter;
  *     targetFolder=.
  * ```
  */
-@DocumentedPlugin(value = "Generates implementations based on ZDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.")
+@DocumentedPlugin(summary = "Generates implementations based on ZDL models and OpenAPI definitions SpringMVC generated OpenAPI interfaces.")
 public class OpenAPIControllersPlugin extends Plugin {
 
     public OpenAPIControllersPlugin() {

@@ -10,7 +10,7 @@ import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 
-@DocumentedPlugin(value = "Generates Markdown glossary from Zdl Models",
+@DocumentedPlugin(summary = "Generates Markdown glossary from Zdl Models",
         hiddenOptions = {"targetFolder", "basePackage"})
 public class ZdlToMarkdownPlugin extends Plugin {
 

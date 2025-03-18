@@ -8,7 +8,7 @@ import io.zenwave360.sdk.templating.TemplateOutput;
 public class JavaFormatter implements Formatter {
 
     @DocumentedOption(description = "Code formatter implementation")
-    public Formatters formatter = Formatters.spring;
+    public Formatters formatter = Formatters.palantir;
 
     @DocumentedOption(description = "Skip java sources output formatting")
     public boolean skipFormatting = false;

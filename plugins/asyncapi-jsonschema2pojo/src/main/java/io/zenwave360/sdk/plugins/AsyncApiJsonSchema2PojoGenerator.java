@@ -43,9 +43,6 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
     public String sourceProperty = "api";
 
-    @DocumentedOption(description = "API Specification File")
-    public String specFile;
-
     @DocumentedOption(description = "Message names to include in code generation (combined with operationIds). Generates code for ALL if left empty")
     public List<String> messageNames = new ArrayList<>();
 
