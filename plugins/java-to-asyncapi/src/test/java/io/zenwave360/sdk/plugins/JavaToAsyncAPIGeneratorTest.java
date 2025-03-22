@@ -12,8 +12,9 @@ public class JavaToAsyncAPIGeneratorTest {
                 .withEventProducerClass(EventProducer.class)
                 .withAsyncapiVersion(AsyncapiVersionType.v3)
                 .withTargetFile("target/out/asyncapi.yml")
+//                .withDebugZdl(true)
                 .generate();
-        System.out.println(asyncapi);
+//        System.out.println(asyncapi);
     }
 
     @Test
@@ -22,7 +23,8 @@ public class JavaToAsyncAPIGeneratorTest {
                 .withEventProducerClass(EventProducer.class)
                 .withTargetFile("target/out/asyncapi-avro.yml")
                 .withSchemaFormat(JavaToAsyncAPIGenerator.SchemaFormat.avro)
+//                .withDebugZdl(true)
                 .generate();
-        System.out.println(asyncapi);
+//        System.out.println(asyncapi);
     }
 }

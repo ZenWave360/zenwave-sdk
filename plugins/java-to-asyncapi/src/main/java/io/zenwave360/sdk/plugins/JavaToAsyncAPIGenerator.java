@@ -50,6 +50,8 @@ public class JavaToAsyncAPIGenerator {
     @DocumentedOption(description = "Overlay Spec file to apply on top of generated AsyncAPI file")
     public List<String> asyncapiOverlayFiles;
 
+    public boolean debugZdl = false;
+
     public JavaToAsyncAPIGenerator withEventProducerClass(Class eventProducerClass) {
         this.eventProducerClass = eventProducerClass;
         return this;
@@ -80,6 +82,11 @@ public class JavaToAsyncAPIGenerator {
         return this;
     }
 
+    public JavaToAsyncAPIGenerator withDebugZdl(boolean debugZdl) {
+        this.debugZdl = debugZdl;
+        return this;
+    }
+
     public String generate() throws IOException {
         StringBuilder zdl = new StringBuilder();
         var methods = eventProducerClass.getDeclaredMethods();
@@ -93,20 +100,17 @@ public class JavaToAsyncAPIGenerator {
                 }
             }
             zdl.append("}\n");
-            Set<Class> embeddedClasses = new HashSet<>();
+            Set<Class> visitedClasses = new HashSet<>();
             for (Method method : methods) {
                 if (method.getParameters().length > 0) {
                     var event = method.getParameters()[0].getType();
-                    embeddedClasses.addAll(generateEventsZdl(zdl, event, method.getName()));
+                    generateEventsZdl(zdl, event, method.getName(), visitedClasses);
                 }
             }
-            for (Class embeddedClass : embeddedClasses) {
-                if (embeddedClass.isEnum()) {
-                    generateEnumZdl(zdl, embeddedClass);
-                } else {
-                    generateEventsZdl(zdl, embeddedClass, null);
-                }
-            }
+        }
+
+        if (debugZdl) {
+            System.out.println(zdl);
         }
 
         Map<String, Object> model = new ZDLProcessor()
@@ -132,13 +136,18 @@ public class JavaToAsyncAPIGenerator {
         return templates.get(templates.size() - 1).getContent();
     }
 
-    protected Set<Class> generateEventsZdl(StringBuilder out, Class<?> entityClass, String operationName) {
-        Set<Class> embeddedClasses = new HashSet<>();
+    protected void generateEventsZdl(StringBuilder out, Class<?> entityClass, String operationName, Set<Class> visitedClasses) {
+        if(visitedClasses.contains(entityClass)) {
+            return;
+        }
+
+        Set<Class> nestedClasses = new HashSet<>();
         String entityClassName = entityClass.getSimpleName();
         if (operationName != null) {
             out.append("@asyncapi({ operation: " + operationName + ", channel: on" + NamingUtils.camelCase(entityClassName) + " })\n");
         }
-        out.append("event " + entityClassName + " {\n");
+        var eventOrEntity = operationName != null ? "event " : "entity ";
+        out.append(eventOrEntity + entityClassName + " {\n");
 
         Field[] declaredFields = FieldUtils.getAllFields(entityClass);
         for (Field f : declaredFields) {
@@ -153,7 +162,7 @@ public class JavaToAsyncAPIGenerator {
                 targetEntityClass = typeToClass(f.getGenericType());
             }
             if (!isBasicType(targetEntityClass)) {
-                embeddedClasses.add(targetEntityClass);
+                nestedClasses.add(targetEntityClass);
             }
 
             out.append("  ");
@@ -167,10 +176,19 @@ public class JavaToAsyncAPIGenerator {
         out.append("\n");
         out.append("}\n\n");
 
-        return embeddedClasses;
+        for (Class embeddedClass : nestedClasses) {
+            if (embeddedClass.isEnum()) {
+                generateEnumZdl(out, embeddedClass, visitedClasses);
+            } else {
+                generateEventsZdl(out, embeddedClass, null, visitedClasses);
+            }
+        }
     }
 
-    protected void generateEnumZdl(StringBuilder out, Class<?> e) {
+    protected void generateEnumZdl(StringBuilder out, Class<?> e, Set<Class> visitedClasses) {
+        if(visitedClasses.contains(e)) {
+            return;
+        }
         String entityClassName = e.getSimpleName();
         boolean firstField = true;
         out.append("enum " + entityClassName + " {\n");

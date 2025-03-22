@@ -326,13 +326,13 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
             <goals>
                 <goal>generate</goal>
             </goals>
-            <plugin>
+            <configuration>
                 <generatorName>spring-cloud-streams3</generatorName>
                 <inputSpec>classpath:model/asyncapi.yml</inputSpec>
                 <configOptions>
                     <!-- ... -->
                 </configOptions>
-            </plugin>
+            </configuration>
         </execution>
     </executions>
     
