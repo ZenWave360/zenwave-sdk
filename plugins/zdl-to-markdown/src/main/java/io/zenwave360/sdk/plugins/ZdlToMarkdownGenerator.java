@@ -22,23 +22,58 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
 
     public String sourceProperty = "zdl";
 
-    @DocumentedOption(description = "Target file")
-    public String targetFile = "zdl-model-glossary.md";
+    public enum OutputFormat {
+        glossary, task_list, aggregate
+    }
 
-    public ZdlToMarkdownGenerator withSourceProperty(String sourceProperty) {
-        this.sourceProperty = sourceProperty;
+    @DocumentedOption(description = "Template type")
+    public OutputFormat outputFormat = OutputFormat.glossary;
+
+    @DocumentedOption(description = "Aggregate name")
+    public String aggregateName;
+
+    @DocumentedOption(description = "Target file")
+    public String targetFile = "zdl-glossary.md";
+
+    private final HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
+
+    private final TemplateInput modelGlossaryTemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZdlToMarkdownGenerator/ZdlToMarkdownGenerator.md", "{{targetFile}}").withMimeType(OutputFormatType.MARKDOWN);
+    private final TemplateInput modelTaskListTemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZdlToMarkdownGenerator/ZdlToMarkdownTaskList.md", "{{targetFile}}").withMimeType(OutputFormatType.MARKDOWN);
+    private final TemplateInput modelAggregateTemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZdlToMarkdownGenerator/ZdlToMarkdownAggregate.md", "{{targetFile}}").withMimeType(OutputFormatType.MARKDOWN);
+
+    public ZdlToMarkdownGenerator withOutputFormat(OutputFormat outputFormat) {
+        this.outputFormat = outputFormat;
         return this;
     }
 
-    private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
-
-    private final TemplateInput template = new TemplateInput("io/zenwave360/sdk/plugins/ZdlToMarkdownGenerator/ZdlToMarkdownGenerator.md", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
+    public ZdlToMarkdownGenerator withAggregateName(String aggregateName) {
+        this.aggregateName = aggregateName;
+        return this;
+    }
 
     @Override
     public List<TemplateOutput> generate(Map<String, Object> contextModel) {
         Map<String, Object> zdlModel = (Map) contextModel.get(sourceProperty);
 
-        return List.of(generateTemplateOutput(contextModel, template, zdlModel));
+        if(outputFormat == OutputFormat.aggregate) {
+
+            targetFile = "zdl-aggregate-" + aggregateName + ".md";
+            var aggregate = (Map) JSONPath.get(zdlModel, "$.aggregates." + aggregateName);
+            var entity = (Map) JSONPath.get(zdlModel, "$.entities." + aggregateName);
+            if (entity == null) {
+                entity = (Map) JSONPath.get(zdlModel, "$.entities." + aggregate.get("aggregateRoot"));
+            }
+            zdlModel.put("aggregate", aggregate);
+            zdlModel.put("entity", entity);
+            return List.of(generateTemplateOutput(contextModel, modelAggregateTemplate, zdlModel));
+
+        } else {
+
+            var template = outputFormat == OutputFormat.glossary ? modelGlossaryTemplate : modelTaskListTemplate;
+            targetFile = outputFormat == OutputFormat.glossary ? "zdl-glossary.md" : "zdl-task-list.md";
+
+            return List.of(generateTemplateOutput(contextModel, template, zdlModel));
+        }
     }
 
     private final Map<String, String> inverseRelationshipTypes = Map.of("OneToMany", "ManyToOne","ManyToOne", "OneToMany","ManyToMany", "ManyToMany", "OneToOne", "OneToOne");

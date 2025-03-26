@@ -2,7 +2,13 @@ MAX_LENGTH=100
 /**
 * Global javadoc comment
 */
-config {}
+config {
+    title "ZenWave Playground Customer-Address MariaDB"
+    basePackage "io.zenwave360.example"
+    persistence jpa
+    databaseType mariadb
+    haltOnFailFormatting false
+}
 
 
 /**

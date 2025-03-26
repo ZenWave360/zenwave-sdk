@@ -68,6 +68,7 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
                         var queryParamsMap = ZDLHttpUtils.getQueryParamsAsObject(method, zdl);
                         var hasParams = !pathParams.isEmpty() || !queryParamsMap.isEmpty() || paginated != null;
                         paths.appendTo(path, (String) methodVerb, new FluentMap()
+                                .with("path", path)
                                 .with("operationId", operationId)
                                 .with("httpMethod", methodVerb)
                                 .with("tags", new String[]{(String) ((Map)service).get("name")})

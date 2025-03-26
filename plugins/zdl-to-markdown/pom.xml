@@ -11,4 +11,12 @@
     <artifactId>zdl-to-markdown</artifactId>
     <packaging>jar</packaging>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
+            <artifactId>zdl-to-openapi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
 </project>

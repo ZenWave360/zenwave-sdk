@@ -10,6 +10,9 @@ import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 
+import static io.zenwave360.sdk.plugins.ZdlToMarkdownGenerator.OutputFormat.aggregate;
+import static io.zenwave360.sdk.plugins.ZdlToMarkdownGenerator.OutputFormat.task_list;
+
 @DocumentedPlugin(summary = "Generates Markdown glossary from Zdl Models",
         hiddenOptions = {"targetFolder", "basePackage"})
 public class ZdlToMarkdownPlugin extends Plugin {
@@ -22,9 +25,31 @@ public class ZdlToMarkdownPlugin extends Plugin {
     public static String generateMarkdown(String zdlContent) throws IOException {
         Map<String, Object> model = new ZDLParser().withContent(zdlContent).parse();
         model = new ZDLProcessor().process(model);
+        model = new PathsProcessor().process(model);
         var out = new ZdlToMarkdownGenerator().generate(model);
         return out.get(0).getContent();
     }
+
+    public static String generateTaskList(String zdlContent) throws IOException {
+        Map<String, Object> model = new ZDLParser().withContent(zdlContent).parse();
+        model = new ZDLProcessor().process(model);
+        model = new PathsProcessor().process(model);
+        var out = new ZdlToMarkdownGenerator().withOutputFormat(task_list).generate(model);
+        return out.get(0).getContent();
+    }
+
+    public static String generateAggregateUML(String zdlContent, String aggregateName) throws IOException {
+        Map<String, Object> model = new ZDLParser().withContent(zdlContent).parse();
+        model = new ZDLProcessor().process(model);
+        model = new PathsProcessor().process(model);
+        var out = new ZdlToMarkdownGenerator()
+                .withOutputFormat(aggregate)
+                .withAggregateName(aggregateName)
+                .generate(model);
+        return out.get(0).getContent();
+    }
+
+
 
     @Override
     public <T extends Plugin> T processOptions() {
