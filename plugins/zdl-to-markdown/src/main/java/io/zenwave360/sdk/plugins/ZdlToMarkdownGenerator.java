@@ -32,6 +32,9 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
     @DocumentedOption(description = "Aggregate name")
     public String aggregateName;
 
+    @DocumentedOption(description = "Skip generating PlantUML diagrams")
+    public boolean skipDiagrams = false;
+
     @DocumentedOption(description = "Target file")
     public String targetFile = "zdl-glossary.md";
 
@@ -43,6 +46,11 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
 
     public ZdlToMarkdownGenerator withOutputFormat(OutputFormat outputFormat) {
         this.outputFormat = outputFormat;
+        return this;
+    }
+
+    public ZdlToMarkdownGenerator withSkipDiagrams(boolean skipDiagrams) {
+        this.skipDiagrams = skipDiagrams;
         return this;
     }
 
