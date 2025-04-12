@@ -41,6 +41,7 @@
         <module>openapi-controllers</module>
         <module>openapi-spring-webtestclient</module>
         <module>openapi-karate</module>
+        <module>zenwave-mcp-server</module>
 <!--        <module>openapi-pact-consumer</module>-->
     </modules>
 </project>
