@@ -21,7 +21,7 @@ Add the following configuration to your Claude Desktop settings:
         "command": "jbang",
         "args": [
             "--quiet",
-            "io.github.zenwave360.zenwave-sdk.plugins:zenwave-mcp-server:2.0.0-SNAPSHOT"
+            "io.zenwave360.sdk.plugins:zenwave-mcp-server:2.0.0-SNAPSHOT"
         ]
     }
   }
@@ -31,7 +31,7 @@ Add the following configuration to your Claude Desktop settings:
 Or this command line to Visual Studio Code `Add MCP Server` wizard:
 
 ```shell
-jbang --quiet io.github.zenwave360.zenwave-sdk.plugins:zenwave-mcp-server:2.0.0-SNAPSHOT
+jbang --quiet io.zenwave360.sdk.plugins:zenwave-mcp-server:2.0.0-SNAPSHOT
 ```
 
 ## Available MCPTools

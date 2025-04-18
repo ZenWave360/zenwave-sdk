@@ -7,9 +7,11 @@ Then you can use [AsyncAPI and Spring Cloud Stream 3](../asyncapi-spring-cloud-s
 
 Inspecting your Java classes requires access to your project classpath. Add this dependency to your pom.xml:
 
+> **Note**: Starting with version 2.0.0, the Maven `groupId` has changed to `io.zenwave360`. The code remains fully compatible.
+
 ```xml
 <dependency>
-    <groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
+    <groupId>io.zenwave360.sdk.plugins</groupId>
     <artifactId>java-to-asyncapi</artifactId>
     <version>${zenwave.version}</version>
     <scope>test</scope>

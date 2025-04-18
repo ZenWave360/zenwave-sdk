@@ -43,7 +43,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
     protected HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
-    protected String templatesFolder = "io/zenwave360/sdk/plugins/OpenAPIControllersGenerator/";
+    protected String templatesFolder = "io/zenwave360/sdk/plugins/OpenAPIControllersGenerator";
 
     public ProjectTemplates templates = new ProjectTemplates();
     {

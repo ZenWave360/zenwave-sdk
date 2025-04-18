@@ -7,13 +7,14 @@
 
 > 👉 ZenWave360 Helps You Create Software Easy to Understand
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360.zenwave-sdk/zenwave-sdk.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360.zenwave-sdk/zenwave-sdk)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/ZenWave360/zenwave-sdk?logo=GitHub)](https://github.com/ZenWave360/zenwave-sdk/releases)
+[![Maven Central](https://img.shields.io/maven-central/v/io.zenwave360.sdk/zenwave-sdk.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.zenwave360.sdk/zenwave-sdk)
 ![General Availability](https://img.shields.io/badge/lifecycle-GA-green)
-[![build](https://github.com/ZenWave360/zenwave-sdk/workflows/Build/badge.svg)](https://github.com/ZenWave360/zenwave-sdk/actions/workflows/build.yml)
+[![build](https://github.com/ZenWave360/zenwave-sdk/workflows/Build%20and%20Publish%20Maven%20Snapshots/badge.svg)](https://github.com/ZenWave360/zenwave-sdk/actions/workflows/publish-maven-snapshots.yml)
 [![coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/badges/jacoco.svg)](https://github.com/ZenWave360/zenwave-sdk/actions/workflows/publish-maven-central.yml)
 [![branches coverage](https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/badges/branches.svg)](https://github.com/ZenWave360/zenwave-sdk/actions/workflows/publish-maven-central.yml)
 [![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-sdk)](https://github.com/ZenWave360/zenwave-sdk/blob/main/LICENSE)
+
+> **Note**: Starting with version 2.0.0, the Maven `groupId` has changed to `io.zenwave360`. The code remains fully compatible.
 
 ZenWave SDK is a configurable and extensible toolkit for **Domain Driven Design (DDD)** and **API-First** that can generate code from a mix of different models including:
 
@@ -59,16 +60,16 @@ jbang alias add --name=zw  --force \
     --repos=mavencentral,snapshots=https://s01.oss.sonatype.org/content/repositories/snapshots \
     --deps=\
 org.slf4j:slf4j-simple:1.7.36,\
-io.github.zenwave360.zenwave-sdk.plugins:asyncapi-spring-cloud-streams3:1.7.1,\
-io.github.zenwave360.zenwave-sdk.plugins:asyncapi-jsonschema2pojo:1.7.1,\
-io.github.zenwave360.zenwave-sdk.plugins:openapi-spring-webtestclient:1.7.1,\
-io.github.zenwave360.zenwave-sdk.plugins:backend-application-default:1.7.1,\
-io.github.zenwave360.zenwave-sdk.plugins:zdl-to-openapi:1.7.1,\
-io.github.zenwave360.zenwave-sdk.plugins:zdl-to-asyncapi:1.7.1,\
-io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:1.7.1,\
-io.github.zenwave360.zenwave-sdk.plugins:zdl-to-markdown:1.7.1,\
-io.github.zenwave360.zenwave-sdk.plugins:openapi-controllers:1.7.1
-    io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli:1.7.1
+io.zenwave360.sdk.plugins:asyncapi-spring-cloud-streams3:1.7.1,\
+io.zenwave360.sdk.plugins:asyncapi-jsonschema2pojo:1.7.1,\
+io.zenwave360.sdk.plugins:openapi-spring-webtestclient:1.7.1,\
+io.zenwave360.sdk.plugins:backend-application-default:1.7.1,\
+io.zenwave360.sdk.plugins:zdl-to-openapi:1.7.1,\
+io.zenwave360.sdk.plugins:zdl-to-asyncapi:1.7.1,\
+io.zenwave360.sdk.plugins:jdl-to-asyncapi:1.7.1,\
+io.zenwave360.sdk.plugins:zdl-to-markdown:1.7.1,\
+io.zenwave360.sdk.plugins:openapi-controllers:1.7.1
+    io.zenwave360.sdk:zenwave-sdk-cli:1.7.1
 ```
 
 You can include any **custom plugin** jars in the `--deps` option.

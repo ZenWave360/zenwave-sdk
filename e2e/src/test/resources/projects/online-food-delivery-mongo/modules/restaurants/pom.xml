@@ -18,7 +18,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>io.github.zenwave360.zenwave-sdk</groupId>
+                <groupId>io.zenwave360.sdk</groupId>
                 <artifactId>zenwave-sdk-maven-plugin</artifactId>
 
                 <executions>

@@ -1,8 +1,10 @@
 # AsyncAPI and Spring Cloud Stream 3
 > 👉 ZenWave360 Helps You Create Software Easy to Understand
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.zenwave360.zenwave-sdk/zenwave-sdk.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.github.zenwave360.zenwave-sdk/zenwave-sdk)
+[![Maven Central](https://img.shields.io/maven-central/v/io.zenwave360.sdk/zenwave-sdk.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.zenwave360.sdk/zenwave-sdk)
 [![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-sdk)](https://github.com/ZenWave360/zenwave-sdk/blob/main/LICENSE)
+
+> **Note**: Starting with version 2.0.0, the Maven `groupId` has changed to `io.zenwave360`. The code remains fully compatible.
 
 ![AsyncAPI and Spring Cloud Streams 3](../../docs/ZenWave360-AsyncAPI-SpringCloudStreams.excalidraw.svg)
 
@@ -313,7 +315,7 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
 
 ```xml
 <plugin>
-    <groupId>io.github.zenwave360.zenwave-sdk</groupId>
+    <groupId>io.zenwave360.sdk</groupId>
     <artifactId>zenwave-sdk-maven-plugin</artifactId>
     <version>${zenwave.version}</version>
     <configuration>
@@ -341,12 +343,12 @@ You can use ZenWave Maven Plugin to generate code as part of your build process:
     <!-- add any sdk plugin (custom or standard) as dependency here -->
     <dependencies>
         <dependency>
-            <groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
+            <groupId>io.zenwave360.sdk.plugins</groupId>
             <artifactId>asyncapi-spring-cloud-streams3</artifactId>
             <version>${zenwave.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
+            <groupId>io.zenwave360.sdk.plugins</groupId>
             <artifactId>asyncapi-jsonschema2pojo</artifactId>
             <version>${zenwave.version}</version>
         </dependency>

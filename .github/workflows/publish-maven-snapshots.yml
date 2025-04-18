@@ -1,4 +1,4 @@
-name: Build
+name: Build and Publish Maven Snapshots
 
 on:
   push:
@@ -15,27 +15,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set up the Java JDK
+      - name: Set up Java for publishing to Maven Central Repository
         uses: actions/setup-java@v2
         with:
           java-version: '17'
-          distribution: 'adopt'
-          server-id: ossrh
+          distribution: 'temurin'
+          server-id: central
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
 
-      - name: Build and Publish SNAPSHOT to the Maven Central
-        if: ${{ github.event_name == 'push' }}
-        run: mvn -B verify deploy -DdeployAtEnd=true
+      - name: Enforce Snapshot Version
+        run: mvn enforcer:enforce@enforce-snapshot-version
+
+      - name: Publish to the Maven Central Repository
+        run: mvn --batch-mode deploy -DdeployAtEnd=true -Dmaven.javadoc.skip=false
         env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          MAVEN_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN }}
           SIGN_KEY: ${{ secrets.SIGN_KEY }}
           SIGN_KEY_PASS: ${{ secrets.SIGN_KEY_PASS }}
-
-#      - name: Build and Verify
-#        if: ${{ github.event_name == 'pull_request' }}
-#        run: mvn -B verify
 
       - name: Generate JaCoCo Badge
         id: jacoco
@@ -56,6 +54,7 @@ jobs:
             ./plugins/zdl-to-markdown/target/site/jacoco/jacoco.csv
             ./plugins/openapi-spring-webtestclient/target/site/jacoco/jacoco.csv
             ./plugins/openapi-karate/target/site/jacoco/jacoco.csv
+            ./plugins/zenwave-mcp-server/target/site/jacoco/jacoco.csv
             ./zenwave-sdk-cli/target/site/jacoco/jacoco.csv
 
       - name: Log coverage percentage
@@ -74,5 +73,5 @@ jobs:
           gh pr comment ${{github.event.pull_request.number}} -b "${BODY}"
         continue-on-error: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 

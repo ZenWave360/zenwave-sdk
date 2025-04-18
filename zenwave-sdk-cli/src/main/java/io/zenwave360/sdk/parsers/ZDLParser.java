@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import io.github.zenwave360.zdl.ZdlParser;
+import io.zenwave360.zdl.ZdlParser;
 import io.zenwave360.sdk.Plugin;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.plugins.ConfigurationProvider;

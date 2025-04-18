@@ -1,40 +1,28 @@
-name: Publish to Maven Central
-on:
-  release:
-    types: [created]
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Tag to check out'
-        required: true
-        default: 'main'
-jobs:
-  publish:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.inputs.tag || github.event.release.tag_name }}
+name: Verify Main and Publish Coverage
 
-      - name: Set up Java for publishing to Maven Central Repository
+on:
+  push:
+    branches: [ main ]
+#  pull_request:
+#    branches: [ '**' ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up the Java JDK
         uses: actions/setup-java@v2
         with:
           java-version: '17'
-          distribution: 'temurin'
-          server-id: central
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
+          distribution: 'adopt'
 
-#      - name: Enforce Release Version
-#        run: mvn enforcer:enforce@enforce-release-version
-
-      - name: Publish to the Maven Central Repository
-        run: mvn --batch-mode deploy -DdeployAtEnd=true -Dmaven.javadoc.skip=false
-        env:
-          MAVEN_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN }}
-          SIGN_KEY: ${{ secrets.SIGN_KEY }}
-          SIGN_KEY_PASS: ${{ secrets.SIGN_KEY_PASS }}
+      - name: Verify and Publish Coverage
+        run: mvn verify
 
       - name: Checkout badges branch to a badges directory nested inside first checkout
         uses: actions/checkout@v2
@@ -82,7 +70,6 @@ jobs:
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           echo $(ls -l)
-          TAG_NAME=${{ github.event.release.tag_name || github.run_id }}
           cd badges
           if [[ `git status --porcelain` ]]; then
             git config --global user.name 'github-agit pctions'
@@ -90,6 +77,5 @@ jobs:
             git add *.svg *.json jacoco-report.csv jacoco/*
             git commit -m "coverage = ${{ steps.jacoco.outputs.coverage }} branches = ${{ steps.jacoco.outputs.branches }}" *.svg *.json jacoco-report.csv jacoco/*
             git push
-            git tag coverage_badges_${TAG_NAME}
-            git push --tags
           fi
+
