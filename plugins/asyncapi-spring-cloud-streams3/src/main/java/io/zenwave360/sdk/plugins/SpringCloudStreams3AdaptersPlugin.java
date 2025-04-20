@@ -14,7 +14,7 @@ import io.zenwave360.sdk.writers.TemplateFileWriter;
 
 @DocumentedPlugin(
         title = "Spring Cloud Streams Adapters",
-        summary = "Generates tests for Spring Cloud Streams Consumers for your commands and 3rd party events.",
+        summary = "Generates Spring Cloud Streams Consumers from AsyncAPI definitions.",
         mainOptions = { "apiFile", "apiFiles", "modelPackage", "consumerApiPackage", "role", "style", "basePackage", "adaptersPackage", "inboundDtosPackage", "outboundDtosPackage", "runtimeHeadersProperty", "sourceFolder" },
         hiddenOptions = { "layout", "zdlFile", "zdlFiles" }
 )

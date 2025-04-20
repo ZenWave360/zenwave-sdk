@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import static io.zenwave360.sdk.plugins.OpenAPIKarateGenerator.GroupByType.businessFlow;
 
-@DocumentedPlugin(summary = "Generates test for SpringMVC or Spring WebFlux using WebTestClient based on OpenAPI specification.")
+@DocumentedPlugin(summary = "Generates test for KarateDSL based on OpenAPI specification.")
 public class OpenAPIKaratePlugin extends Plugin {
 
     private Logger log = LoggerFactory.getLogger(getClass());
