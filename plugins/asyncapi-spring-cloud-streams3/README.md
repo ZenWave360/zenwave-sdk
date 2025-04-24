@@ -11,27 +11,24 @@
 <!-- TOC -->
 * [AsyncAPI and Spring Cloud Stream 3](#asyncapi-and-spring-cloud-stream-3)
   * [Generating Consumer & Producer APIs](#generating-consumer--producer-apis)
-    * [Getting Help](#getting-help)
-    * [Options](#options)
+  * [Maven Plugin Configuration (API-First)](#maven-plugin-configuration-api-first)
+    * [Maven Plugin Base Configuration](#maven-plugin-base-configuration)
+    * [Generate Model DTOs using `jsonschema2pojo`](#generate-model-dtos-using-jsonschema2pojo)
+    * [Generate Spring Cloud Streams Provider Implementation with `spring-cloud-streams3`](#generate-spring-cloud-streams-provider-implementation-with-spring-cloud-streams3)
+    * [Reverse Code Generation using `Client` role.](#reverse-code-generation-using-client-role)
+  * [Getting Help](#getting-help)
+    * [SpringCloudStreams3Plugin Options](#springcloudstreams3plugin-options)
+  * [Advanced Features](#advanced-features)
+  * [Transactional Outbox Pattern](#transactional-outbox-pattern)
     * [Populating Headers at Runtime Automatically](#populating-headers-at-runtime-automatically)
-    * [Producer Event-Captors for Tests (Mocks)](#producer-event-captors-for-tests-mocks)
+    * [InMemory Events Producer for Tests (Mocks)](#inmemory-events-producer-for-tests-mocks)
+    * [Routing Business Exceptions to Dead Letter Queues with Configuration](#routing-business-exceptions-to-dead-letter-queues-with-configuration)
   * [Generating Consumer Adapters (Skeletons)](#generating-consumer-adapters-skeletons)
     * [Consumer Adapters API Tests](#consumer-adapters-api-tests)
     * [Options for Consumer Adapters](#options-for-consumer-adapters)
-  * [Enterprise Integration Patterns](#enterprise-integration-patterns)
-  * [Maven Plugin Configuration (API-First)](#maven-plugin-configuration-api-first)
-    * [Provider Imperative style without Transactional Outbox](#provider-imperative-style-without-transactional-outbox)
-    * [Provider Imperative style with Mongodb Transactional Outbox](#provider-imperative-style-with-mongodb-transactional-outbox)
-    * [Provider Imperative style with JDBC Transactional Outbox](#provider-imperative-style-with-jdbc-transactional-outbox)
-    * [Model DTOs using `jsonschema2pojo` generator](#model-dtos-using-jsonschema2pojo-generator)
-    * [Provider with AVRO schema payloads.](#provider-with-avro-schema-payloads)
-    * [Client Imperative style.](#client-imperative-style)
-    * [Client Reactive style.](#client-reactive-style)
 <!-- TOC -->
 
 ## Generating Consumer & Producer APIs
-
-> Jump to [Maven Plugin Section](#maven-plugin-configuration-api-first) for maven plugin configuration.
 
 With ZenWave's `spring-cloud-streams3` and `jsonschema2pojo` generator plugins you can generate:
 - Strongly typed **business interfaces**
@@ -45,6 +42,141 @@ And because everything is hidden behind interfaces we can encapsulate many Enter
 - Transactional Outbox: with Spring Modulith, MongoDB ChangeStreams, Plain SQL or a custom solution
 - Business DeadLetter Queues: allowing you to route different business Exceptions to different DeadLetter queues for non-retrayable errors.
 - Enterprise Envelope: when your organization uses a common Envelope for messages, you can still express your AsyncAPI definition in terms of your business payload.
+
+It supports AsyncAPI v2 (publish/subscribe) and AsyncAPI v3 (send/receive) styles. 
+
+It also lets you reverse how the API is generated using the `client` role, so you don't need to define a new API definition just to consume an existing API.
+
+## Maven Plugin Configuration (API-First)
+
+Configure ZenWave Maven Plugin to generate code during your build process:
+
+1. Add generator dependencies to `zenwave-sdk-maven-plugin`
+2. Configure `<execution>` blocks for each generator (`jsonschema2pojo`, `spring-cloud-streams3`, etc)
+3. Reference AsyncAPI files from dependencies using `classpath:` prefix
+4. Set generator options using `<configOptions>` (see [SpringCloudStreams3Plugin Options](#springcloudstreams3plugin-options) )
+
+### Maven Plugin Base Configuration
+
+Use this as base configuration:
+
+```xml
+<plugin>
+    <groupId>io.zenwave360.sdk</groupId>
+    <artifactId>zenwave-sdk-maven-plugin</artifactId>
+    <version>${zenwave.version}</version>
+    <configuration>
+        <addCompileSourceRoot>true</addCompileSourceRoot><!-- default is true -->
+        <addTestCompileSourceRoot>true</addTestCompileSourceRoot><!-- default is true -->
+    </configuration>
+    <executions>
+        <!-- Add executions for each generation here: -->
+        <execution>
+            <id>generate-asyncapi-xxx</id>
+            <phase>generate-sources</phase>
+            <goals>
+                <goal>generate</goal>
+            </goals>
+            <configuration>
+                <generatorName>spring-cloud-streams3</generatorName>
+                <inputSpec>classpath:model/asyncapi.yml</inputSpec>
+                <configOptions>
+                    <!-- ... -->
+                </configOptions>
+            </configuration>
+        </execution>
+    </executions>
+    
+    <!-- add any sdk plugin (custom or standard) as dependency here -->
+    <dependencies>
+        <dependency><!-- optional dependency containing AsyncAPI definition files -->
+            <groupId>com.example.apis</groupId>
+            <artifactId>asyncapis</artifactId>
+            <version>${apis.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zenwave360.sdk.plugins</groupId>
+            <artifactId>asyncapi-spring-cloud-streams3</artifactId>
+            <version>${zenwave.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zenwave360.sdk.plugins</groupId>
+            <artifactId>asyncapi-jsonschema2pojo</artifactId>
+            <version>${zenwave.version}</version>
+        </dependency>
+    </dependencies>
+</plugin>
+```
+### Generate Model DTOs using `jsonschema2pojo`
+
+Add this execution to generate model DTOs from AsyncAPI definitions:
+
+```xml
+<execution>
+    <id>generate-asyncapi-producer-dtos</id>
+    <phase>generate-sources</phase>
+    <goals>
+        <goal>generate</goal>
+    </goals>
+    <configuration>
+        <generatorName>jsonschema2pojo</generatorName>
+        <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
+        <configOptions>
+            <modelPackage>io.zenwave360.example.api.events.model</modelPackage>
+        </configOptions>
+    </configuration>
+</execution>
+```
+
+### Generate Spring Cloud Streams Provider Implementation with `spring-cloud-streams3`
+
+Add this execution to generate Spring Cloud Streams producer/consumer classes from AsyncAPI definitions:
+
+```xml
+<execution>
+    <id>generate-asyncapi-producer</id>
+    <phase>generate-sources</phase>
+    <goals>
+        <goal>generate</goal>
+    </goals>
+    <configuration>
+        <generatorName>spring-cloud-streams3</generatorName>
+        <inputSpec>classpath:model/asyncapi.yml</inputSpec>
+        <configOptions>
+            <role>provider</role><!-- use `client` to reverse code generation -->
+            <transactionalOutbox>none</transactionalOutbox> <!-- `modulith` (preferred), `mongodb`, `jdbc` or `none` -->
+            <modelPackage>io.zenwave360.example.api.events.model</modelPackage>
+            <apiPackage>io.zenwave360.example.api.events</apiPackage>
+            <!-- use <producerApiPackage></producerApiPackage> if you want to differentiate producer/consumer packages, it overrides apiPackage -->
+            <!-- use <consumerApiPackage></consumerApiPackage> if you want to differentiate producer/consumer packages, it overrides apiPackage -->
+        </configOptions>
+    </configuration>
+</execution>
+```
+
+### Reverse Code Generation using `Client` role.
+
+If you want to generate the consumer side of an existing API, you can use the `client` role to reverse how the API is generated:
+
+```xml
+<execution>
+    <id>generate-asyncapi-client-imperative</id>
+    <phase>generate-sources</phase>
+    <goals>
+        <goal>generate</goal>
+    </goals>
+    <configuration>
+        <generatorName>spring-cloud-streams3</generatorName>
+        <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
+        <configOptions>
+            <role>client</role>
+            <modelPackage>io.zenwave360.example.api.events.model</modelPackage>
+            <apiPackage>io.zenwave360.example.api.events</apiPackage>
+        </configOptions>
+    </configuration>
+</execution>
+```
+
 
 Because APIs mediated by a broker are inherently **reciprocal** it's difficult to establish the roles of client/server: what represents a `publish` operation from one side will be a `subscribe` operation seen from the other side. Also, a given service can act as a publisher and subscriber on the same API.
 
@@ -67,13 +199,13 @@ Use the table to understand which section of AsyncAPI (publish or subscribe) to 
 | Client                       | Consumes (subscribe)  | Produces (publish)      |
 | OperationId Suggested Prefix | **on**&lt;Event Name> | **do**&lt;Command Name> |
 
-### Getting Help
+## Getting Help
 
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin --help
 ```
 
-## Options
+### SpringCloudStreams3Plugin Options
 
 | **Option**                        | **Description**                                                                                                                                                                                                            | **Type**                | **Default**          | **Values**                    |
 |-----------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------|----------------------|-------------------------------|
@@ -112,13 +244,22 @@ jbang zw -p io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin --help
 | `haltOnFailFormatting`            | Halt on formatting errors                                                                                                                                                                                                  | boolean                 | true                 |                               |
 
 
+## Advanced Features
 
+### Transactional Outbox Pattern
+
+ZenWave SDK supports sending messages transactionaly using the [Transactional Outbox Pattern](https://microservices.io/patterns/data/transactional-outbox.html).
+
+![Transactional Outbox with AsyncAPI and Spring Modulith](../../docs/TransactionalOutBoxWithAsyncAPIAndSpringModulith-light.png)
+
+See [Implementing a Transactional OutBox With AsyncAPI, SpringModulith and ZenWaveSDK](https://www.zenwave360.io/posts/TransactionalOutBoxWithAsyncAPIAndSpringModulith/) for complete details.
 
 ### Populating Headers at Runtime Automatically
 
 ZenWave SDK provides `x-runtime-expression` for automatic header population at runtime. Values for this extension property are:
 
 - `$message.payload#/<json pointer fragment>`: follows the same format as AsyncAPI [Correlation ID](https://www.asyncapi.com/docs/reference/specification/v2.5.0#correlationIdObject) object.
+- `$message.payload#{ <SpEL expression> }`: will use the SpEL expression to populate the header value.
 - `$supplierBeanName`: will use a bean named `supplierBeanName` (you can use any other name) of type `java.function.Supplier` configured in your Spring context.
 
 ```yaml
@@ -136,13 +277,39 @@ ZenWave SDK provides `x-runtime-expression` for automatic header population at r
             type: string
             description: This one will be populated automatically at runtime
             x-runtime-expression: $supplierBeanName
+          # CloudEvents Attributes: 
+          # these examples showcase how you can use SpEL expressions to populate runtime headers
+          ce-id:
+            type: string
+            description: Unique identifier for the event
+            x-runtime-expression: $message.payload#{#this.id}
+          ce-source:
+            type: string
+            description: URI identifying the context where event happened
+            x-runtime-expression: $message.payload#{"CustomersService"}
+          ce-specversion:
+            type: string
+            description: CloudEvents specification version
+            x-runtime-expression: $message.payload#{"1.0"}
+          ce-type:
+            type: string
+            description: Event type
+            x-runtime-expression: $message.payload#{#this.getClass().getSimpleName()}
+          ce-time:
+            type: string
+            description: Timestamp of when the event happened
+            x-runtime-expression: $message.payload#{T(java.time.Instant).now().toString()}
 ```
+
+You can also override the `runtimeHeadersProperty` extension property name (in the rare case you need to):
 
 ```xml
 <configOption>
     <runtimeHeadersProperty>x-custom-runtime-expression</runtimeHeadersProperty><!-- you can also override this extension property name -->
 </configOption>
 ```
+
+And provide a bean of type `java.function.Supplier` in your Spring context:
 
 ```java
     @Bean("supplierBeanName")
@@ -151,11 +318,11 @@ ZenWave SDK provides `x-runtime-expression` for automatic header population at r
     }
 ```
 
-### Producer Event-Captors for Tests (Mocks)
+### InMemory Events Producer for Tests (Mocks)
 
 ```java
-// autogenerate in: target/generated-sources/zenwave/src/test/java/.../CustomerOrderEventsProducerCaptor.java
-public class CustomerOrderEventsProducerCaptor implements ICustomerOrderEventsProducer {
+// autogenerate in: target/generated-sources/zenwave/src/test/java/.../InMemoryCustomerOrderEventsProducer.java
+public class InMemoryCustomerOrderEventsProducer implements ICustomerOrderEventsProducer {
     
     protected Map<String, List<Message>> capturedMessages = new HashMap<>();
     public Map<String, List<Message>> getCapturedMessages() {
@@ -188,6 +355,30 @@ public class ProducerInMemoryContext {
         return (T) customerEventsProducerCaptor;
     }
 }
+```
+
+### Routing Business Exceptions to Dead Letter Queues with Configuration
+
+When consuming Events you can route different business exceptions to different Dead Letter Queues bindings using the `dead-letter-queue-error-map`. 
+
+This mechanism is useful when you know an exception is not retrayable, and you want to route it to a different DLQ.
+
+When no matching exception is found in `dead-letter-queue-error-map`, the exception will propagate up the call stack, allowing standard retry and error handling mechanisms to take effect.
+
+```yaml
+# application.yml
+spring:
+  cloud:
+    stream:
+      bindings:
+        do-create-customer-in-0:
+          destination: customer.requests
+          content-type: application/json
+          dead-letter-queue-error-map: >
+            {
+              'jakarta.validation.ValidationException': 'do-create-customer-validation-error-out-0',
+              'java.lang.Exception': 'do-create-customer-error-out-0'
+            }
 ```
 
 ## Generating Consumer Adapters (Skeletons)
@@ -294,217 +485,3 @@ public class DoCustomerRequestConsumerServiceIT extends BaseConsumerTest {
 | `formatter`                    | Code formatter implementation                                                                                                                                                           | Formatters                  | spring                                                   | google, palantir, spring, eclipse |
 | `skipFormatting`               | Skip java sources output formatting                                                                                                                                                     | boolean                     | false                                                    |                                   |
 | `haltOnFailFormatting`         | Halt on formatting errors                                                                                                                                                               | boolean                     | true                                                     |                                   |
-
-
-
-## Enterprise Integration Patterns
-
-Because access to the underlying broker is encapsulated behind the generated interfaces, it's possible to implement many Enterprise Integration Patterns (EIP) on top of them.
-
-- [Transactional Outbox: for mongodb and jdbc](/Event-Driven-Architectures/Enterprise-Integration-Patterns/Transactional-Outbox)
-- [Business DeadLetter Queue](/Event-Driven-Architectures/Enterprise-Integration-Patterns/Business-Dead-Letter-Queue)
-- [Enterprise Envelope](/Event-Driven-Architectures/Enterprise-Integration-Patterns/Enterprise-Envelop)
-- [Async Request/Response](/Event-Driven-Architectures/Enterprise-Integration-Patterns/Async-Request-Response) (coming soon)
-
-## Maven Plugin Configuration (API-First)
-
-You can use ZenWave Maven Plugin to generate code as part of your build process:
-
-- Adding this generator jar as dependency to zenwave maven plugin.
-- Passing plugin specific plugin as &lt;configOptions>.
-
-```xml
-<plugin>
-    <groupId>io.zenwave360.sdk</groupId>
-    <artifactId>zenwave-sdk-maven-plugin</artifactId>
-    <version>${zenwave.version}</version>
-    <configuration>
-        <addCompileSourceRoot>true</addCompileSourceRoot><!-- default is true -->
-        <addTestCompileSourceRoot>true</addTestCompileSourceRoot><!-- default is true -->
-    </configuration>
-    <executions>
-        <!-- Add executions for each generation here: -->
-        <execution>
-            <id>generate-asyncapi-xxx</id>
-            <phase>generate-sources</phase>
-            <goals>
-                <goal>generate</goal>
-            </goals>
-            <configuration>
-                <generatorName>spring-cloud-streams3</generatorName>
-                <inputSpec>classpath:model/asyncapi.yml</inputSpec>
-                <configOptions>
-                    <!-- ... -->
-                </configOptions>
-            </configuration>
-        </execution>
-    </executions>
-    
-    <!-- add any sdk plugin (custom or standard) as dependency here -->
-    <dependencies>
-        <dependency>
-            <groupId>io.zenwave360.sdk.plugins</groupId>
-            <artifactId>asyncapi-spring-cloud-streams3</artifactId>
-            <version>${zenwave.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.zenwave360.sdk.plugins</groupId>
-            <artifactId>asyncapi-jsonschema2pojo</artifactId>
-            <version>${zenwave.version}</version>
-        </dependency>
-    </dependencies>
-</plugin>
-```
-
-### Provider Imperative style without Transactional Outbox
-
-```xml
-<execution>
-    <id>generate-asyncapi-producer</id>
-    <phase>generate-sources</phase>
-    <goals>
-        <goal>generate</goal>
-    </goals>
-    <configuration>
-        <generatorName>spring-cloud-streams3</generatorName>
-        <inputSpec>classpath:model/asyncapi.yml</inputSpec>
-        <configOptions>
-            <role>provider</role>
-            <style>imperative</style>
-            <apiPackage>io.zenwave360.example.core.events.outbound.outbox.none</apiPackage>
-            <modelPackage>io.zenwave360.example.core.events.model</modelPackage>
-        </configOptions>
-    </configuration>
-</execution>
-```
-
-### Provider Imperative style with Mongodb Transactional Outbox
-
-```xml
-<execution>
-    <id>generate-asyncapi-producer-outbox-mongodb</id>
-    <phase>generate-sources</phase>
-    <goals>
-        <goal>generate</goal>
-    </goals>
-    <configuration>
-        <generatorName>spring-cloud-streams3</generatorName>
-        <inputSpec>classpath:model/asyncapi.yml</inputSpec>
-        <configOptions>
-            <role>provider</role>
-            <style>imperative</style>
-            <transactionalOutbox>mongodb</transactionalOutbox>
-            <apiPackage>io.zenwave360.example.core.events.outbound.outbox.mongodb</apiPackage>
-            <modelPackage>io.zenwave360.example.core.events.model</modelPackage>
-        </configOptions>
-    </configuration>
-</execution>
-```
-
-### Provider Imperative style with JDBC Transactional Outbox
-
-```xml
-<execution>
-    <id>generate-asyncapi-producer-outbox-jdbc</id>
-    <phase>generate-sources</phase>
-    <goals>
-        <goal>generate</goal>
-    </goals>
-    <configuration>
-        <generatorName>spring-cloud-streams3</generatorName>
-        <inputSpec>classpath:model/asyncapi.yml</inputSpec>
-        <configOptions>
-            <role>provider</role>
-            <style>imperative</style>
-            <transactionalOutbox>jdbc</transactionalOutbox>
-            <apiPackage>io.zenwave360.example.core.events.outbound.outbox.jdbc</apiPackage>
-            <modelPackage>io.zenwave360.example.core.events.model</modelPackage>
-        </configOptions>
-    </configuration>
-</execution>
-```
-
-### Model DTOs using `jsonschema2pojo` generator
-
-```xml
-<execution>
-    <id>generate-asyncapi-producer-dtos</id>
-    <phase>generate-sources</phase>
-    <goals>
-        <goal>generate</goal>
-    </goals>
-    <configuration>
-        <generatorName>jsonschema2pojo</generatorName>
-        <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
-        <configOptions>
-            <modelPackage>io.zenwave360.example.core.events.model</modelPackage>
-        </configOptions>
-    </configuration>
-</execution>
-```
-
-### Provider with AVRO schema payloads.
-
-```xml
-<execution>
-    <id>generate-asyncapi-producer-avro</id>
-    <phase>generate-sources</phase>
-    <goals>
-        <goal>generate</goal>
-    </goals>
-    <configuration>
-        <generatorName>spring-cloud-streams3</generatorName>
-        <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi-avro.yml</inputSpec>
-        <configOptions>
-            <role>provider</role>
-            <style>imperative</style>
-            <apiPackage>io.zenwave360.example.core.events.outbound.avro</apiPackage>
-        </configOptions>
-    </configuration>
-</execution>
-
-```
-
-### Client Imperative style.
-
-```xml
-<execution>
-    <id>generate-asyncapi-client-imperative</id>
-    <phase>generate-sources</phase>
-    <goals>
-        <goal>generate</goal>
-    </goals>
-    <configuration>
-        <generatorName>spring-cloud-streams3</generatorName>
-        <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
-        <configOptions>
-            <role>client</role>
-            <style>imperative</style>
-            <apiPackage>io.zenwave360.example.core.events.inbound.imperative</apiPackage>
-            <modelPackage>io.zenwave360.example.core.events.model</modelPackage>
-        </configOptions>
-    </configuration>
-</execution>
-```
-
-### Client Reactive style.
-
-```xml
-<execution>
-    <id>generate-asyncapi-client-reactive</id>
-    <phase>generate-sources</phase>
-    <goals>
-        <goal>generate</goal>
-    </goals>
-    <configuration>
-        <generatorName>spring-cloud-streams3</generatorName>
-        <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
-        <configOptions>
-            <role>client</role>
-            <style>reactive</style>
-            <apiPackage>io.zenwave360.example.core.events.inbound.reactive</apiPackage>
-            <modelPackage>io.zenwave360.example.core.events.model</modelPackage>
-        </configOptions>
-    </configuration>
-</execution>
-```
