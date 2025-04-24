@@ -42,7 +42,7 @@
       ],
       "repositories": [
         "mavencentral",
-        "snapshots\u003dhttps://s01.oss.sonatype.org/content/repositories/snapshots"
+        "snapshots\u003dhttps://central.sonatype.com/repository/maven-snapshots"
       ],
       "main": "io.zenwave360.sdk.Main",
       "java-options": [
@@ -53,7 +53,7 @@
         "--add-exports", "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
       ]
     },
-    "v1.7.1": {
+    "v1_7_1": {
       "script-ref": "io.github.zenwave360.zenwave-sdk:zenwave-sdk-cli:1.7.1",
       "dependencies": [
         "org.slf4j:slf4j-simple:1.7.36",
@@ -67,10 +67,6 @@
         "io.github.zenwave360.zenwave-sdk.plugins:jdl-to-asyncapi:1.7.1",
         "io.github.zenwave360.zenwave-sdk.plugins:zdl-to-markdown:1.7.1",
         "io.github.zenwave360.zenwave-sdk.plugins:openapi-controllers:1.7.1"
-      ],
-      "repositories": [
-        "mavencentral",
-        "snapshots\u003dhttps://s01.oss.sonatype.org/content/repositories/snapshots"
       ],
       "main": "io.zenwave360.sdk.Main",
       "java-options": [
