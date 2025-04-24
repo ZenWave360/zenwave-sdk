@@ -15,7 +15,7 @@
 
 	<properties>
 		<spring-boot.version>3.4.4</spring-boot.version>
-		<spring-ai.version>1.0.0-SNAPSHOT</spring-ai.version>
+		<spring-ai.version>1.0.0-M7</spring-ai.version>
 	</properties>
 
     <repositories>
