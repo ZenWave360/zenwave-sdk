@@ -1,3 +1,4 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-io.github.zenwave360.zenwave-sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownPlugin,36,25,2,0,6,4,3,1,2,1
-io.github.zenwave360.zenwave-sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownGenerator,5,549,1,31,2,87,2,33,1,18
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownPlugin,70,104,2,0,14,24,4,3,3,3
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownGenerator,0,672,1,39,0,111,1,40,0,21
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownGenerator.OutputFormat,0,21,0,0,0,2,0,1,0,1

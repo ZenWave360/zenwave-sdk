@@ -1,4 +1,4 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-io.github.zenwave360.zenwave-sdk.plugins:openapi-controllers,io.zenwave360.sdk.plugins,OpenAPIControllersPlugin,0,67,0,2,0,8,0,3,0,2
-io.github.zenwave360.zenwave-sdk.plugins:openapi-controllers,io.zenwave360.sdk.plugins,OpenAPIControllersGenerator,152,1463,42,98,24,230,34,71,0,35
-io.github.zenwave360.zenwave-sdk.plugins:openapi-controllers,io.zenwave360.sdk.plugins,DummyDataFromSchemasProcessor,0,281,0,4,0,50,0,9,0,7
+io.zenwave360.sdk.plugins:openapi-controllers,io.zenwave360.sdk.plugins,OpenAPIControllersPlugin,0,67,0,2,0,8,0,3,0,2
+io.zenwave360.sdk.plugins:openapi-controllers,io.zenwave360.sdk.plugins,OpenAPIControllersGenerator,152,1394,44,106,24,220,35,72,0,32
+io.zenwave360.sdk.plugins:openapi-controllers,io.zenwave360.sdk.plugins,DummyDataFromSchemasProcessor,0,281,0,4,0,50,0,9,0,7
