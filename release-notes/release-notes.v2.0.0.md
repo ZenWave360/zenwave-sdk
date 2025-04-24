@@ -10,6 +10,12 @@ This release includes a major refactoring of code generation for advanced custom
 
 These changes are transparent for users and it will help build tools around ZenWaveSDK and customize the experience for advanced usage.
 
+Users that need to rely on previous version with jbang can use the following command:
+
+```shell
+jbang alias add --fresh --force --name=zw v1.7.1@zenwave360/zenwave-sdk
+```
+
 This release also includes several bugfixes and new features:
 
 - Support for `@naturalId` in entities and service commands
