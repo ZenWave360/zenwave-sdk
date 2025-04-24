@@ -15,6 +15,7 @@
 [![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-sdk)](https://github.com/ZenWave360/zenwave-sdk/blob/main/LICENSE)
 
 > **Note**: Starting with version 2.0.0, the Maven `groupId` has changed to `io.zenwave360`. The code remains fully compatible.
+> You can find [Previous Releases Documentation](https://github.com/ZenWave360/zenwave-sdk/tree/1.7.x?tab=readme-ov-file#available-plugins) here.
 
 ZenWave SDK is a configurable and extensible toolkit for **Domain Driven Design (DDD)** and **API-First** that can generate code from a mix of different models including:
 
