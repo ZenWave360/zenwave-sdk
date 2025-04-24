@@ -4,24 +4,24 @@ import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-import java.rmi.Naming;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.github.jknack.handlebars.Options;
 import io.zenwave360.sdk.options.ProgrammingStyle;
+import io.zenwave360.sdk.utils.Lists;
 import io.zenwave360.sdk.utils.NamingUtils;
-import io.zenwave360.sdk.zdl.ZDLFindUtils;
-import io.zenwave360.sdk.zdl.ZDLHttpUtils;
-import io.zenwave360.sdk.zdl.ZDLJavaSignatureUtils;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
+import io.zenwave360.sdk.zdl.ProjectTemplates;
+import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
+import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.utils.ZDLHttpUtils;
+import io.zenwave360.sdk.zdl.utils.ZDLJavaSignatureUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractOpenAPIGenerator;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
-import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateEngine;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
@@ -33,61 +33,40 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     public String apiProperty = "api";
     public String zdlProperty = "zdl";
 
-    @DocumentedOption(description = "The package to generate REST Controllers")
-    public String controllersPackage = "{{basePackage}}.adapters.web";
-
-    @DocumentedOption(description = "Package where your domain entities are")
-    public String entitiesPackage = "{{basePackage}}.core.domain";
-
-    @DocumentedOption(description = "Package where your inbound dtos are")
-    public String inboundDtosPackage = "{{basePackage}}.core.inbound.dtos";
-
-    @DocumentedOption(description = "Package where your domain services/usecases interfaces are")
-    public String servicesPackage = "{{basePackage}}.core.inbound";
-
-    @DocumentedOption(description = "Should use same value configured in BackendApplicationDefaultPlugin. Whether to use an input DTO for entities used as command parameter.")
-    public String inputDTOSuffix = "";
-
     @DocumentedOption(description = "Programming Style")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
 
     public boolean useOptional = false;
-    public boolean simpleDomainPackaging = false;
 
     @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. User '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
     public List<String> paginatedDtoItemsJsonPath = List.of("$.items", "$.properties.content.items");
 
     protected HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
-    protected String templatesFolder = "io/zenwave360/sdk/plugins/OpenAPIControllersGenerator/";
+    protected String templatesFolder = "io/zenwave360/sdk/plugins/OpenAPIControllersGenerator";
 
-    List<Object[]> templates = List.of(
-            new Object[] {"src/main/java", "web/mappers/BaseMapper.java", "mappers/BaseMapper.java", JAVA},
-            new Object[] {"src/main/java", "web/mappers/ServiceDTOsMapper.java", "mappers/{{serviceName}}DTOsMapper.java", JAVA},
-            new Object[] {"src/main/java", "web/{{webFlavor}}/ServiceApiController.java", "{{serviceName}}ApiController.java", JAVA},
-            new Object[] {"src/test/java", "web/{{webFlavor}}/ServiceApiControllerTest.java", "{{serviceName}}ApiControllerTest.java", JAVA});
-
-    public TemplateEngine getTemplateEngine() {
-        return handlebarsEngine;
-    }
-
-    protected TemplateInput asTemplateInput(Object[] templateNames) {
-        Function<Map<String, Object>, Boolean> skip = templateNames.length > 4 ? (Function) templateNames[4] : null;
-        return new TemplateInput()
-                .withTemplateLocation(templatesFolder + templateNames[0] + "/" + templateNames[1])
-                .withTargetFile(templateNames[0] + "/{{asPackageFolder controllersPackage}}/" + templateNames[2])
-                .withMimeType((OutputFormatType) templateNames[3])
-                .withSkip(skip);
+    public ProjectTemplates templates = new ProjectTemplates();
+    {
+        templates.setTemplatesFolder(templatesFolder);
+        var layoutNames = new ProjectLayout(); // layoutNames
+        templates.addTemplate(templates.singleTemplates, "src/main/java", "web/mappers/BaseMapper.java",
+                layoutNames.adaptersWebMappersCommonPackage, "/BaseMapper.java", JAVA, null, false);
+        templates.addTemplate(templates.serviceTemplates, "src/main/java", "web/mappers/ServiceDTOsMapper.java",
+                layoutNames.adaptersWebMappersPackage, "{{serviceName}}DTOsMapper.java", JAVA, null, true);
+        templates.addTemplate(templates.serviceTemplates, "src/main/java", "web/{{webFlavor}}/ServiceApiController.java",
+                layoutNames.adaptersWebPackage, "{{serviceName}}ApiController.java", JAVA, null, false);
+        templates.addTemplate(templates.serviceTemplates, "src/test/java", "web/{{webFlavor}}/ServiceApiControllerTest.java",
+                layoutNames.adaptersWebPackage, "{{serviceName}}ApiControllerTest.java", JAVA, null, true);
     }
 
     @Override
     public void onPropertiesSet() {
-        if (simpleDomainPackaging) {
-            controllersPackage = "{{basePackage}}";
-            entitiesPackage = "{{basePackage}}.model";
-            inboundDtosPackage = "{{basePackage}}.dtos";
-            servicesPackage = "{{basePackage}}";
-        }
+        super.onPropertiesSet();
+        templates.setLayout(layout);
+    }
+
+    public TemplateEngine getTemplateEngine() {
+        return handlebarsEngine;
     }
 
     protected Map<String, Object> getZDLModel(Map<String, Object> contextModel) {
@@ -99,8 +78,8 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
-        var templateOutputList = new ArrayList<TemplateOutput>();
+    public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
+        var generatedProjectFiles = new GeneratedProjectFiles();
         var openApiModel = getOpenAPIModel(contextModel);
         var zdlModel = getZDLModel(contextModel);
 
@@ -132,6 +111,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                 String outputType = JSONPath.get(method, "$.returnType");
                 boolean isResponseArray = method != null? JSONPath.get(method, "$.returnTypeIsArray", false) : false;
                 boolean isResponsePaginated = method != null? JSONPath.get(method, "$.options.paginated", false) : false;
+                boolean isBinaryDownload = JSONPath.get(method, "$.options.filedownload") != null;
                 if (isResponseArray) {
                     var innerArrayDTO = innerArrayDTO(JSONPath.get(operation, "$.x--response.x--response-schema"));
                     responseDtoName = innerArrayDTO != null ? openApiModelNamePrefix + innerArrayDTO + openApiModelNameSuffix : responseDtoName;
@@ -159,12 +139,14 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                         "responseSchemaName", responseSchemaName,
                         "responseDtoName", responseDtoName,
                         "responseEntityName", responseEntityName,
-                        "responseEntityExpression", responseEntityExpression(responseEntityName, responseDtoName, isResponseArray, isResponsePaginated),
+                        "responseEntityExpression", responseEntityExpression(responseEntityName, responseDtoName, isResponseArray, isResponsePaginated, isBinaryDownload),
                         "methodReturnType", outputType,
                         "methodReturnTypeInstance", NamingUtils.asInstanceName(outputType),
                         "returnTypeIsOptional", JSONPath.get(method, "$.returnTypeIsOptional", false),
                         "isResponseArray", isResponseArray,
-                        "isResponsePaginated", isResponsePaginated
+                        "isResponsePaginated", isResponsePaginated,
+                        "isBinaryDownload", isBinaryDownload,
+                        "isMultiPart", JSONPath.get(operation, "requestBody.content['multipart/form-data']") != null
                 ));
 
                 if ("patch".equals(httpVerb)) {
@@ -193,15 +175,19 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                     "mapperResponseDtoEntity", mapperResponseDtoEntity,
                     "entitiesServices", entitiesServices);
 
-            for (Object[] template : templates) {
-                templateOutputList.addAll(generateTemplateOutput(contextModel, asTemplateInput(template), serviceModel));
+            var templates = Lists.concat(this.templates.singleTemplates, this.templates.serviceTemplates);
+            for (var template : templates) {
+                generatedProjectFiles.services.addAll(operationByServiceEntry.getKey(), generateTemplateOutput(contextModel, template, serviceModel));
             }
         }
 
-        return templateOutputList;
+        return generatedProjectFiles;
     }
 
-    private static String responseEntityExpression(String responseEntityName, String responseDtoName, boolean isResponseArray, boolean isResponsePaginated) {
+    private static String responseEntityExpression(String responseEntityName, String responseDtoName, boolean isResponseArray, boolean isResponsePaginated, boolean isBinaryDownload) {
+        if(isBinaryDownload) {
+            return "Resource";
+        }
         if(isResponsePaginated) {
             return responseEntityName;
         }
@@ -213,6 +199,12 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
     private String methodParameters(Map operation) {
         List<Map<String, Object>> params = (List) operation.getOrDefault("parameters", Collections.emptyList());
+        if(JSONPath.get(operation, "requestBody.content['multipart/form-data']") instanceof Map) {
+            params = JSONPath.get(operation, "requestBody.content['multipart/form-data'].schema.properties", Map.of())
+                    .entrySet().stream().map(entry -> {
+                        return Map.of("name", entry.getKey(), "schema", entry.getValue());
+                    }).toList();
+        };
         List methodParams = params.stream()
                 .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
                 .map(param -> {
@@ -257,7 +249,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         var parameterType = JSONPath.get(serviceMethod, "parameter");
         var isInline = JSONPath.get(zdl, "$.inputs." + parameterType + ".options.inline", false);
         if(isInline) {
-            var paramSignature = ZDLJavaSignatureUtils.inputSignature((String) parameterType, (Map) serviceMethod, zdl, inputDTOSuffix);
+            var paramSignature = ZDLJavaSignatureUtils.inputSignature((String) parameterType, (Map) serviceMethod, zdl);
             var  methodParametersCallSignature = paramSignature.get(paramSignature.size() - 1).split(" ")[1];
             var params = methodParametersCallSignature.split(", ");
             var reqBody = "";
@@ -282,7 +274,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         if (isInline) {
             var fields = JSONPath.get(parameterEntity, "$.fields", Map.<String, Map>of());
             for (Map field : fields.values()) {
-                if (JSONPath.get(field, "$.isComplexType", false)) {
+                if (JSONPath.get(field, "$.isComplexType", false) && !JSONPath.get(field, "$.isEnum", false)) {
                     return JSONPath.get(field, "$.type");
                 }
             }
@@ -316,8 +308,8 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
             return format("%s(%s)", operationId, "input");
         }
         var methodName = JSONPath.get(serviceMethod, "name");
-        var methodParametersCallSignature = ZDLJavaSignatureUtils.methodParametersCallSignature((Map) serviceMethod, zdl, inputDTOSuffix);
-        var paramId = ObjectUtils.firstNonNull(ZDLHttpUtils.getFirstPathParamsFromMethod((Map) serviceMethod), "id");
+        var methodParametersCallSignature = ZDLJavaSignatureUtils.methodParametersCallSignature((Map) serviceMethod, zdl);
+        var paramId = serviceMethod.get("paramId") != null? ObjectUtils.firstNonNull(ZDLHttpUtils.getFirstPathParamsFromMethod((Map) serviceMethod), "id") : null;
 
         if(operation.get("x--request-schema") != null) {
             // find the last parameter name, that is not the pagination: that is the reqBody variable name
@@ -331,7 +323,9 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
             methodParametersCallSignature = methodParametersCallSignature.replaceFirst(reqBody, "input");
         }
 
-        methodParametersCallSignature = methodParametersCallSignature.replaceFirst("^id$", paramId);
+        if(paramId != null) {
+            methodParametersCallSignature = methodParametersCallSignature.replaceFirst("id", paramId);
+        }
         methodParametersCallSignature = methodParametersCallSignature.replaceFirst("^id, ", paramId + ", ");
         methodParametersCallSignature = methodParametersCallSignature.replaceAll("pageable", "pageOf(page, limit, sort)");
 
@@ -363,45 +357,24 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     }
 
     {
-        handlebarsEngine.getHandlebars().registerHelper("asMethodParametersInitializer", (context, options) -> {
-            if (context instanceof Map) {
-                Map operation = (Map) context;
-                List<Map<String, Object>> params = (List) operation.getOrDefault("parameters", Collections.emptyList());
-                List methodParams = params.stream()
-                        .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
-                        .map(param -> {
-                            String javaType = getJavaTypeOrOptional(param);
-                            String name = JSONPath.get(param, "$.name");
-                            return javaType + " " + name + " = null;";
-                        }).collect(Collectors.toList());
-                if (operation.containsKey("x--request-dto")) {
-                    if("patch".equals(operation.get("x--httpVerb"))) {
-                        methodParams.add("Map reqBody = null;");
-                    } else {
-                        methodParams.add(format("%s%s%s %s = null;", openApiModelNamePrefix, operation.get("x--request-dto"), openApiModelNameSuffix, "reqBody"));
-                    }
+        handlebarsEngine.getHandlebars().registerHelper("asMethodParametersInitializer", (operation, options) -> {
+            if (operation instanceof Map) {
+                var methodParams = methodParameters((Map) operation).trim();
+                if(methodParams.isEmpty()) {
+                    return "";
                 }
-                return StringUtils.join(methodParams, "\n");
+                return Arrays.stream(methodParams.split(", "))
+                        .map(param -> param + " = null;")
+                        .collect(Collectors.joining("\n"));
             }
-            return options.fn(context);
+            return options.fn(operation);
         });
 
-        handlebarsEngine.getHandlebars().registerHelper("asMethodParameterValues", (context, options) -> {
-            if (context instanceof Map) {
-                Map operation = (Map) context;
-                List<Map<String, Object>> params = (List) operation.getOrDefault("parameters", Collections.emptyList());
-                List methodParams = params.stream()
-                        .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
-                        .map(param -> {
-                            String name = JSONPath.get(param, "$.name");
-                            return name;
-                        }).collect(Collectors.toList());
-                if (operation.containsKey("x--request-dto")) {
-                    methodParams.add("reqBody");
-                }
-                return StringUtils.join(methodParams, ", ");
+        handlebarsEngine.getHandlebars().registerHelper("asMethodParameterValues", (operation, options) -> {
+            if (operation instanceof Map) {
+                return methodParameterInstances((Map) operation);
             }
-            return options.fn(context);
+            return options.fn(operation);
         });
 
     }
@@ -423,6 +396,11 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     protected String getJavaType(Map<String, Object> param) {
         String type = JSONPath.get(param, "$.schema.type");
         String format = JSONPath.get(param, "$.schema.format");
+        String schemaName = JSONPath.get(param, "$.schema.x--schema-name");
+
+        if("binary".equals(format)) {
+            return "org.springframework.web.multipart.MultipartFile";
+        }
         if ("date".equals(format)) {
             return "LocalDate";
         }
@@ -443,6 +421,9 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
         }
         if ("array".equals(type)) {
             return "List<String>";
+        }
+        if(schemaName != null) {
+            return openApiModelNamePrefix + schemaName + openApiModelNameSuffix;
         }
 
         return "String";

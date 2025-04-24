@@ -1,14 +1,15 @@
 package {{producerApiPackage}};
 
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
+{{~#if generatedAnnotationClass}}@{{generatedAnnotationClass}}{{~/if}}
 public class EventsProducerInMemoryContext {
 
 {{#each services as |service|}}
-    {{~assign 'apiClassName' (apiClassName @key service.operationRoleType)}}
-    private {{apiClassName}}Captor {{asInstanceName apiClassName}}Captor = new {{apiClassName}}Captor();
+    {{~assign 'producerInMemory' (producerInMemoryName @key service.operationRoleType)}}
+    private {{producerInMemory}} {{asInstanceName producerInMemory}} = new {{producerInMemory}}();
 
-    public {{apiClassName}}Captor {{asInstanceName apiClassName}}() {
-        return {{asInstanceName apiClassName}}Captor;
+    public {{producerInMemory}} {{asInstanceName (producerInterfaceName @key service.operationRoleType)}}() {
+        return {{asInstanceName producerInMemory}};
     }
 {{/each}}
 }

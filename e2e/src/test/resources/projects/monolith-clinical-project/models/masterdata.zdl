@@ -1,0 +1,55 @@
+config {
+    title "Master Data"
+    moduleBasePackage "com.example.clinical.modules.masterdata"
+    // you can choose: DefaultProjectLayout, CleanHexagonalProjectLayout, LayeredProjectLayout, SimpleDomainProjectLayout, HexagonalProjectLayout, CleanArchitectureProjectLayout
+    layout SimpleDomainProjectLayout
+}
+
+@aggregate
+entity MasterData {
+    @naturalId
+    type MasterDataType required
+    @naturalId
+    key String required maxlength(254)
+    value String required maxlength(254)
+    @jsonb translations MasterDataTranslation[] {
+        lang String required
+        text String required
+    }
+}
+
+enum MasterDataType {
+    GENDER(1)
+    ID_DOCUMENT_TYPE(2)
+    COUNTRY(3)
+    INSURANCE_COMPANY(4)
+    MEDICAL_AREA(5)
+}
+
+output MasterDataKeyValue {
+    key String
+    value String
+}
+
+@inline
+input MasterDataFilter {
+    type MasterDataType
+    lang String
+}
+
+@rest("/masterdata")
+service MasterDataService for (MasterData) {
+    @post
+    createMasterData(MasterData) MasterData
+    @get("/{id}")
+    getMasterData(id) MasterData?
+    @put("/{id}")
+    updateMasterData(id, MasterData) MasterData?
+    @get @paginated
+    listMasterData() MasterData[]
+    @delete("/{id}")
+    deleteMasterData(id)
+
+    @get("/type/{type}/{lang}")
+    listMasterDataOfType(MasterDataFilter) MasterDataKeyValue[]
+}

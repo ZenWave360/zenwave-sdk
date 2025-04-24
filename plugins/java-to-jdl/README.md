@@ -5,9 +5,11 @@ If starting with legacy project, you can reverse engineer JDL from Java entity c
 
 Inspecting your java classes requires access to your project classpath. Add this dependency to your pom.xml:
 
+> **Note**: Starting with version 2.0.0, the Maven `groupId` has changed to `io.zenwave360`. The code remains fully compatible.
+
 ```xml
 <dependency>
-    <groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
+    <groupId>io.zenwave360.sdk.plugins</groupId>
     <artifactId>java-to-jdl</artifactId>
     <version>${zenwave.version}</version>
 </dependency>

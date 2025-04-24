@@ -11,9 +11,13 @@ import io.zenwave360.sdk.doc.DocumentedPlugin;
 import io.zenwave360.sdk.formatters.JavaFormatter;
 import io.zenwave360.sdk.parsers.DefaultYamlParser;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
-import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 
-@DocumentedPlugin(value = "Generates tests for Spring Cloud Streams Consumers.", shortCode = "spring-cloud-streams3-adapters")
+@DocumentedPlugin(
+        title = "Spring Cloud Streams Adapters",
+        summary = "Generates Spring Cloud Streams Consumers from AsyncAPI definitions.",
+        mainOptions = { "apiFile", "apiFiles", "modelPackage", "consumerApiPackage", "role", "style", "basePackage", "adaptersPackage", "inboundDtosPackage", "outboundDtosPackage", "runtimeHeadersProperty", "sourceFolder" },
+        hiddenOptions = { "layout", "zdlFile", "zdlFiles" }
+)
 public class SpringCloudStreams3AdaptersPlugin extends Plugin {
 
     private Logger log = LoggerFactory.getLogger(getClass());

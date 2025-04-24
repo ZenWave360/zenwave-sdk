@@ -1,27 +1,24 @@
 package io.zenwave360.sdk;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.*;
-import io.zenwave360.sdk.plugins.ConfigurationProvider;
-import io.zenwave360.sdk.utils.CommaSeparatedCollectionDeserializationHandler;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.zenwave360.sdk.formatters.Formatter;
 import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.parsers.Parser;
+import io.zenwave360.sdk.plugins.ConfigurationProvider;
 import io.zenwave360.sdk.processors.Processor;
-import io.zenwave360.sdk.templating.TemplateOutput;
+import io.zenwave360.sdk.utils.CommaSeparatedCollectionDeserializationHandler;
+import io.zenwave360.sdk.utils.ObjectInstantiatorDeserializationHandler;
 import io.zenwave360.sdk.writers.TemplateWriter;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class MainGenerator {
 
@@ -32,7 +29,7 @@ public class MainGenerator {
         log.debug("Processed Options {}", configuration.processOptions());
         log.debug("Processors chain is {}", configuration.getChain().stream().map(c -> c.getName()).collect(Collectors.toList()));
         Map<String, Object> model = new HashMap<>();
-        List<TemplateOutput> templateOutputList = new ArrayList<>();
+        GeneratedProjectFiles generatedProjectFiles = new GeneratedProjectFiles();
 
         int chainIndex = 0;
         for (Class pluginClass : configuration.getChain()) {
@@ -51,13 +48,13 @@ public class MainGenerator {
                 model = ((Processor) plugin).process(model);
             }
             if (plugin instanceof Generator) {
-                templateOutputList.addAll(((Generator) plugin).generate(model));
+                generatedProjectFiles.addAll(((Generator) plugin).generate(model));
             }
             if (plugin instanceof Formatter) {
-                templateOutputList = ((Formatter) plugin).format(templateOutputList);
+                ((Formatter) plugin).format(generatedProjectFiles);
             }
             if (plugin instanceof TemplateWriter) {
-                ((TemplateWriter) plugin).write(templateOutputList);
+                ((TemplateWriter) plugin).write(generatedProjectFiles.getAllTemplateOutputs());
             }
         }
     }
@@ -67,10 +64,7 @@ public class MainGenerator {
         Object processorFullClassOptions = options.get(plugin.getClass().getName());
         Object processorSimpleClassOptions = options.get(plugin.getClass().getSimpleName());
         Object chainIndexOptions = options.get(String.valueOf(chainIndex));
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.addHandler(new CommaSeparatedCollectionDeserializationHandler());
+        var layout = configuration.getProcessedLayout();
 
         mapper.updateValue(plugin, options);
         if (processorSimpleClassOptions != null) {
@@ -82,6 +76,9 @@ public class MainGenerator {
         if (chainIndexOptions != null) {
             mapper.updateValue(plugin, chainIndexOptions);
         }
+        if (layout != null && FieldUtils.getField(plugin.getClass(), "layout") != null) {
+            FieldUtils.writeField(plugin, "layout", layout);
+        }
 
         try {
             plugin.getClass().getMethod("onPropertiesSet").invoke(plugin);
@@ -89,4 +86,12 @@ public class MainGenerator {
             // ignore
         }
     }
+
+    private static final ObjectMapper mapper = new ObjectMapper();
+    static {
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.addHandler(new ObjectInstantiatorDeserializationHandler());
+        mapper.addHandler(new CommaSeparatedCollectionDeserializationHandler());
+    }
+
 }

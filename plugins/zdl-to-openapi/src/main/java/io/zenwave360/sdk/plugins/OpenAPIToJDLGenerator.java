@@ -15,6 +15,7 @@ import io.zenwave360.sdk.templating.TemplateEngine;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 
 public class OpenAPIToJDLGenerator extends AbstractZDLGenerator {
 
@@ -43,8 +44,7 @@ public class OpenAPIToJDLGenerator extends AbstractZDLGenerator {
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
-        List<TemplateOutput> templateOutputList = new ArrayList<>();
+    public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
         Map<String, Object> openAPIModel = getOpenAPIModel(contextModel);
 
         Map<String, Object> zdlModel = new HashMap<>();
@@ -97,7 +97,9 @@ public class OpenAPIToJDLGenerator extends AbstractZDLGenerator {
         relationships.put("manyToOne", manyToOne);
         zdlModel.put("relationships", relationships);
 
-        return List.of(generateTemplateOutput(contextModel, openAPIToJDLTemplate, zdlModel));
+        var generatedProjectFiles = new GeneratedProjectFiles();
+        generatedProjectFiles.singleFiles.add(generateTemplateOutput(contextModel, openAPIToJDLTemplate, zdlModel));
+        return generatedProjectFiles;
     }
 
     private Map<String, Map<String, Object>> inlineEnums = new HashMap<>();
@@ -160,7 +162,7 @@ public class OpenAPIToJDLGenerator extends AbstractZDLGenerator {
         model.putAll(this.asConfigurationMap());
         model.put("context", contextModel);
         model.put("zdlModel", zdlModel);
-        return getTemplateEngine().processTemplate(model, template).get(0);
+        return getTemplateEngine().processTemplate(model, template);
     }
 
     protected TemplateEngine getTemplateEngine() {

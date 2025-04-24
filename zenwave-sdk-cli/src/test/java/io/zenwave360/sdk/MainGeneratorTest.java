@@ -2,7 +2,11 @@ package io.zenwave360.sdk;
 
 import java.util.Map;
 
+import io.zenwave360.sdk.generators.ZDLProjectGenerator;
+import io.zenwave360.sdk.processors.ZDLProcessor;
+import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
+import io.zenwave360.sdk.zdl.ProjectTemplates;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -39,15 +43,35 @@ public class MainGeneratorTest {
     public void testGenerator() throws Exception {
         // File file = new File(getClass().getClassLoader().getResource("io/zenwave360/sdk/parsers/asyncapi-circular-refs.yml").toURI());
         Plugin plugin = new Plugin()
+                .withLayout("LayeredProjectLayout")
                 .withApiFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-circular-refs.yml")
                 .withTargetFolder("target/zenwave630/out")
                 .withChain(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class)
+                .withOption("basePackage", "io.zenwave360.sdk")
                 .withOption("forceOverwrite", true);
 
         new MainGenerator().generate(plugin);
 
         logCaptor.getLogs();
     }
+
+    @Test
+    public void testGeneratorWithConfigurationProvider() throws Exception {
+        // File file = new File(getClass().getClassLoader().getResource("io/zenwave360/sdk/parsers/asyncapi-circular-refs.yml").toURI());
+        Plugin plugin = new Plugin()
+                .withLayout("LayeredProjectLayout")
+                .withApiFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-circular-refs.yml")
+                .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
+                .withTargetFolder("target/zenwave630/out")
+                .withChain(DefaultYamlParser.class, AsyncApiProcessor.class, ZDLParser.class, NoOpGenerator.class, TemplateFileWriter.class)
+                .withOption("basePackage", "io.zenwave360.sdk")
+                .withOption("forceOverwrite", true);
+
+        new MainGenerator().generate(plugin);
+
+        logCaptor.getLogs();
+    }
+
 
     @Test
     public void testGeneratorWithStdout() throws Exception {
@@ -85,4 +109,44 @@ public class MainGeneratorTest {
         logCaptor.getLogs();
     }
 
+
+    @Test
+    public void testZdlProjectGenerator() throws Exception {
+        // File file = new File(getClass().getClassLoader().getResource("io/zenwave360/sdk/parsers/asyncapi-circular-refs.yml").toURI());
+        Plugin plugin = new Plugin()
+                .withLayout("LayeredProjectLayout")
+                .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
+                .withTargetFolder("target/zenwave630/out/customer-address")
+                .withChain(ZDLParser.class, ZDLProcessor.class, ZDLProjectGenerator.class)
+                .withOption("basePackage", "io.zenwave360.sdk")
+                .withOption("style", "imperative")
+                .withOption("persistence", "mongodb")
+                .withOption("includeEmitEventsImplementation", false)
+                .withOption("templates", new ProjectTemplates())
+                .withOption("forceOverwrite", true);
+
+        new MainGenerator().generate(plugin);
+
+        logCaptor.getLogs();
+    }
+
+
+    @Test
+    public void testCustomJacksonDeserializers() throws Exception {
+        // File file = new File(getClass().getClassLoader().getResource("io/zenwave360/sdk/parsers/asyncapi-circular-refs.yml").toURI());
+        Plugin plugin = new Plugin()
+                .withLayout("LayeredProjectLayout")
+                .withApiFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-circular-refs.yml")
+                .withTargetFolder("target/zenwave630/out")
+                .withChain(DefaultYamlParser.class, AsyncApiProcessor.class, NoOpGenerator.class, TemplateFileWriter.class)
+                .withOption("basePackage", "io.zenwave360.sdk")
+                .withOption("forceOverwrite", true)
+                .withOption("array", "el1,el2")
+                .withOption("templates", "new " + ProjectTemplates.class.getName())
+                ;
+
+        new MainGenerator().generate(plugin);
+
+        logCaptor.getLogs();
+    }
 }

@@ -6,8 +6,8 @@ import io.zenwave360.sdk.processors.Processor;
 import io.zenwave360.sdk.utils.AntStyleMatcher;
 import io.zenwave360.sdk.utils.FluentMap;
 import io.zenwave360.sdk.utils.JSONPath;
-import io.zenwave360.sdk.zdl.ZDLFindUtils;
-import io.zenwave360.sdk.zdl.ZDLHttpUtils;
+import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.utils.ZDLHttpUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,8 +45,7 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
                     var paginated = JSONPath.get(method, "$.options.paginated");
                     var httpOption = ZDLHttpUtils.getHttpOption((Map) method);
                     if(httpOption != null) {
-                        var methodEntityName = JSONPath.get(method, "$.options.entity");
-                        var methodEntity = (Map) JSONPath.get(zdl, "$.entities." + methodEntityName);
+                        var methodEntity = ZDLFindUtils.methodEntity(method, zdl);
                         List<Map> naturalIdFields = ZDLFindUtils.naturalIdFields(methodEntity);
                         Map naturalIdTypes = new HashMap();
                         if(naturalIdFields != null) {
@@ -64,10 +63,11 @@ public class PathsProcessor extends AbstractBaseProcessor implements Processor {
                         var path = basePath + methodPath;
 //                        var params = httpOption.get("params");
                         var pathParams = ZDLHttpUtils.getPathParams(path);
-                        var pathParamsMap = ZDLHttpUtils.getPathParamsAsObject(method, naturalIdTypes, idType, idTypeFormat);
+                        var pathParamsMap = ZDLHttpUtils.getPathParamsAsObject(zdl, method, naturalIdTypes, idType, idTypeFormat);
                         var queryParamsMap = ZDLHttpUtils.getQueryParamsAsObject(method, zdl);
                         var hasParams = !pathParams.isEmpty() || !queryParamsMap.isEmpty() || paginated != null;
                         paths.appendTo(path, (String) methodVerb, new FluentMap()
+                                .with("path", path)
                                 .with("operationId", operationId)
                                 .with("httpMethod", methodVerb)
                                 .with("tags", new String[]{(String) ((Map)service).get("name")})

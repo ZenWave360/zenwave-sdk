@@ -126,6 +126,35 @@ public class SpringWebTestClientGeneratorTest {
             "openapi-petstore.yml, addPet, 'PetApiIntegrationTest'",
             "openapi-orders.yml, createCustomer, 'CustomerApiIntegrationTest'"
     })
+    public void test_output_by_one_service_with_layout(String openapi, String operationId, String controllers) throws Exception {
+        String targetFolder = "target/test_output_by_one_service_with_layout_" + openapi.replaceAll("\\.", "_");
+        Plugin plugin = new SpringWebTestClientPlugin()
+                .withApiFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
+                .withTargetFolder(targetFolder)
+                .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.service)
+                .withOption("transactional", false)
+                .withOption("layout", "DefaultProjectLayout")
+                .withOption("basePackage", "io.example")
+                .withOption("openApiModelNameSuffix", "DTO")
+                .withOption("operationIds",  List.of(operationId));
+
+        new MainGenerator().generate(plugin);
+
+        Arrays.stream(controllers.split(",")).forEach(controller -> {
+            File file = new File(targetFolder + "/src/test/java/io/example/adapters/web/" + controller + ".java");
+            Assertions.assertTrue(file.exists(), "File " + file.getAbsolutePath() + " does not exist");
+        });
+
+//        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
+//        Assertions.assertEquals(0, exitCode);
+    }
+
+
+    @ParameterizedTest(name = "[{index}] {displayName} {0}")
+    @CsvSource({
+            "openapi-petstore.yml, addPet, 'PetApiIntegrationTest'",
+            "openapi-orders.yml, createCustomer, 'CustomerApiIntegrationTest'"
+    })
     public void test_output_by_one_service_simple_domain_packaging(String openapi, String operationId, String controllers) throws Exception {
         String targetFolder = "target/test_output_by_one_service_simple_domain_packaging_" + openapi.replaceAll("\\.", "_");
         Plugin plugin = new SpringWebTestClientPlugin()
@@ -133,7 +162,7 @@ public class SpringWebTestClientGeneratorTest {
                 .withTargetFolder(targetFolder)
                 .withOption("groupBy", SpringWebTestClientGenerator.GroupByType.service)
                 .withOption("transactional", false)
-                .withOption("simpleDomainPackaging", true)
+                .withLayout("SimpleDomainProjectLayout")
                 .withOption("basePackage", "io.example")
                 .withOption("openApiApiPackage", "io.example.api")
                 .withOption("openApiModelPackage",  "io.example.api.model")

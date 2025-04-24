@@ -14,13 +14,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.jsonschema2pojo.AnnotationStyle;
-import org.jsonschema2pojo.Annotator;
-import org.jsonschema2pojo.GenerationConfig;
-import org.jsonschema2pojo.InclusionLevel;
-import org.jsonschema2pojo.NoopAnnotator;
-import org.jsonschema2pojo.SourceSortOrder;
-import org.jsonschema2pojo.SourceType;
+import org.jsonschema2pojo.*;
 import org.jsonschema2pojo.rules.RuleFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +57,7 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
     private String[] toStringExcludes = new String[] {};
     private boolean useTitleAsClassname = true;
     private InclusionLevel inclusionLevel = InclusionLevel.NON_NULL;
-    private Class<? extends Annotator> customAnnotator = NoopAnnotator.class;
+    private Class<? extends Annotator> customAnnotator = Jackson2Annotator.class;
     private Class<? extends RuleFactory> customRuleFactory = RuleFactory.class;
     private boolean useOptionalForGetters = false;
     private SourceType sourceType = SourceType.JSONSCHEMA;
@@ -150,7 +144,7 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
 
     /**
      * Splits entry in the format key1=value1,key2=value2
-     * 
+     *
      * @param key
      * @return
      */

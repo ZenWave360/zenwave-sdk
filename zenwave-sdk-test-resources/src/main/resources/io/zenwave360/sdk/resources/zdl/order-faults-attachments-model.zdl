@@ -13,11 +13,13 @@ entity PurchaseOrder { // Order is a reserved word
   orderDate LocalDate
   section String
   status OrderStatus
+  otherProperties Map
+  andArray String[]
 
   attachments AttachmentFile[]  {
     documentManagerId String
     filename String
-    mimetype String
+    mimetype String = "text/plain"
     url String
     orderLineIds String[]
     @transient contents byte[]

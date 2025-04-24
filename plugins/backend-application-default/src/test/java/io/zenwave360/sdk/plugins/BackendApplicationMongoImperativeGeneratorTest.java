@@ -31,8 +31,8 @@ public class BackendApplicationMongoImperativeGeneratorTest {
     }
 
     @Test
-    public void test_generator_hexagonal_mongodb_customer_address() throws Exception {
-        String targetFolder = "target/zdl/test_generator_hexagonal_mongodb_customer_address_multimodule";
+    public void test_generator_mongodb_customer_address_multimodule() throws Exception {
+        String targetFolder = "target/zdl/test_generator_mongodb_customer_address_multimodule";
         Plugin plugin = new BackendApplicationDefaultPlugin()
                 .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
                 .withTargetFolder(targetFolder)
@@ -40,7 +40,7 @@ public class BackendApplicationMongoImperativeGeneratorTest {
                 .withOption("persistence", PersistenceType.mongodb)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("mavenModulesPrefix", "customer-address")
-                .withOption("multiModule", true)
+                .withOption("includeEmitEventsImplementation", false)
                 .withOption("forceOverwrite", true)
                 .withOption("haltOnFailFormatting", false);
 
@@ -64,7 +64,7 @@ public class BackendApplicationMongoImperativeGeneratorTest {
                 .withOption("persistence", PersistenceType.mongodb)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("projectName", "customer-address")
-                .withOption("simpleDomainPackaging", true)
+                .withOption("layout", "SimpleDomainProjectLayout")
                 .withOption("includeEmitEventsImplementation", false)
                 .withOption("forceOverwrite", true)
                 .withOption("haltOnFailFormatting", false);

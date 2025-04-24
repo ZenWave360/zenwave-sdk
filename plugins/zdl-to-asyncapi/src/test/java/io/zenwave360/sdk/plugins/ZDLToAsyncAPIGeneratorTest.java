@@ -35,10 +35,10 @@ public class ZDLToAsyncAPIGeneratorTest {
         generator.idType = "integer";
         generator.idTypeFormat = "int64";
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
-        System.out.println(outputTemplates.get(0).getContent());
+//        System.out.println(outputTemplates.get(0).getContent());
 
         var tmpFile = new File("target/customer-address.yml");
         FileUtils.writeStringToFile(tmpFile, outputTemplates.get(0).getContent(), "UTF-8");
@@ -56,10 +56,10 @@ public class ZDLToAsyncAPIGeneratorTest {
         generator.idType = "integer";
         generator.idTypeFormat = "int64";
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
-        System.out.println(outputTemplates.get(0).getContent());
+//        System.out.println(outputTemplates.get(0).getContent());
 
         var tmpFile = new File("target/customer-address.yml");
         FileUtils.writeStringToFile(tmpFile, outputTemplates.get(0).getContent(), "UTF-8");
@@ -76,10 +76,10 @@ public class ZDLToAsyncAPIGeneratorTest {
         generator.idType = "integer";
         generator.idTypeFormat = "int64";
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
-        System.out.println(outputTemplates.get(0).getContent());
+//        System.out.println(outputTemplates.get(0).getContent());
 
         var tmpFile = new File("target/customer-address.yml");
         FileUtils.writeStringToFile(tmpFile, outputTemplates.get(0).getContent(), "UTF-8");
@@ -87,5 +87,35 @@ public class ZDLToAsyncAPIGeneratorTest {
 
         Map<String, Object> oasSchema = mapper.readValue(outputTemplates.get(0).getContent(), Map.class);
         Assertions.assertTrue(((List) JSONPath.get(oasSchema, "$.components.schemas.Customer.required")).contains("username"));
+    }
+
+    @Test
+    public void test_merge_customer_address_zdl_to_asyncapi() throws Exception {
+        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address-relational.zdl");
+        ZDLToAsyncAPIGenerator generator = new ZDLToAsyncAPIGenerator();
+        generator.idType = "integer";
+        generator.idTypeFormat = "int64";
+        generator.asyncapiMergeFile = "classpath:/io/zenwave360/sdk/resources/asyncapi/asyncapi-merger.yml";
+        generator.asyncapiOverlayFiles = List.of("classpath:/io/zenwave360/sdk/resources/asyncapi/asyncapi-overlay.yml");
+
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
+        Assertions.assertEquals(1, outputTemplates.size());
+
+        System.out.println(outputTemplates.get(0).getContent());
+    }
+
+    @Test
+    public void test_merge_customer_address_zdl_to_asyncapi_avro() throws Exception {
+        Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address-relational.zdl");
+        ZDLToAsyncAPIGenerator generator = new ZDLToAsyncAPIGenerator();
+        generator.idType = "integer";
+        generator.idTypeFormat = "int64";
+        generator.targetFile = "target/out/customer-address.avro.yml";
+        generator.schemaFormat = ZDLToAsyncAPIGenerator.SchemaFormat.avro;
+
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
+        Assertions.assertEquals(11, outputTemplates.size());
+
+        System.out.println(outputTemplates.get(0).getContent());
     }
 }

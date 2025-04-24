@@ -2,28 +2,39 @@ name: Publish to Maven Central
 on:
   release:
     types: [created]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to check out'
+        required: true
+        default: 'main'
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.tag || github.event.release.tag_name }}
+
       - name: Set up Java for publishing to Maven Central Repository
         uses: actions/setup-java@v2
         with:
           java-version: '17'
-          distribution: 'adopt'
-          server-id: ossrh
+          distribution: 'temurin'
+          server-id: central
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
+
+#      - name: Enforce Release Version
+#        run: mvn enforcer:enforce@enforce-release-version
+
       - name: Publish to the Maven Central Repository
-        run: mvn --batch-mode deploy -DdeployAtEnd=true
+        run: mvn --batch-mode deploy -DdeployAtEnd=true -Dmaven.javadoc.skip=false
         env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          MAVEN_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN }}
           SIGN_KEY: ${{ secrets.SIGN_KEY }}
           SIGN_KEY_PASS: ${{ secrets.SIGN_KEY_PASS }}
-
-
 
       - name: Checkout badges branch to a badges directory nested inside first checkout
         uses: actions/checkout@v2
@@ -41,6 +52,7 @@ jobs:
           jacoco-csv-file: >
             ./plugins/asyncapi-spring-cloud-streams3/target/site/jacoco/jacoco.csv
             ./plugins/java-to-jdl/target/site/jacoco/jacoco.csv
+            ./plugins/java-to-asyncapi/target/site/jacoco/jacoco.csv
             ./plugins/backend-application-default/target/site/jacoco/jacoco.csv
             ./plugins/openapi-controllers/target/site/jacoco/jacoco.csv
             ./plugins/zdl-to-openapi/target/site/jacoco/jacoco.csv
@@ -49,6 +61,7 @@ jobs:
             ./plugins/zdl-to-markdown/target/site/jacoco/jacoco.csv
             ./plugins/openapi-spring-webtestclient/target/site/jacoco/jacoco.csv
             ./plugins/openapi-karate/target/site/jacoco/jacoco.csv
+            ./plugins/zenwave-mcp-server/target/site/jacoco/jacoco.csv
             ./zenwave-sdk-cli/target/site/jacoco/jacoco.csv
 
       - name: Log coverage percentage
@@ -69,6 +82,7 @@ jobs:
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           echo $(ls -l)
+          TAG_NAME=${{ github.event.release.tag_name || github.run_id }}
           cd badges
           if [[ `git status --porcelain` ]]; then
             git config --global user.name 'github-agit pctions'
@@ -76,6 +90,6 @@ jobs:
             git add *.svg *.json jacoco-report.csv jacoco/*
             git commit -m "coverage = ${{ steps.jacoco.outputs.coverage }} branches = ${{ steps.jacoco.outputs.branches }}" *.svg *.json jacoco-report.csv jacoco/*
             git push
-            git tag coverage_badges_${{github.event.release.tag_name}}
+            git tag coverage_badges_${TAG_NAME}
             git push --tags
           fi

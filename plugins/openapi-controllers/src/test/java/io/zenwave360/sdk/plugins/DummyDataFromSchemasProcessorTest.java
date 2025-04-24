@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.zenwave360.sdk.processors.OpenApiProcessor;
-import io.zenwave360.sdk.zdl.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

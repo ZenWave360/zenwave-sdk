@@ -12,7 +12,8 @@ import {{modelPackage}}.*;
 {{/if}}
 
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
-public interface {{serviceInterfaceName operation.x--operationIdCamelCase}} {
+{{~#if generatedAnnotationClass}}@{{generatedAnnotationClass}}{{~/if}}
+public interface {{consumerServiceInterfaceName operation.x--operationIdCamelCase}} {
 
 {{#each operation.x--messages as |message|}}
     {{~#if exposeMessage}}

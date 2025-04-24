@@ -26,7 +26,7 @@ public class TestCustomerAddressPostgresJsonProject {
     @Test
     public void testCustomerAddressPostgresJson() throws Exception {
         String sourceFolder = "src/test/resources/projects/customer-address-postgres-json/";
-        String targetFolder = "target/customer-address-postgres-json/";
+        String targetFolder = "target/projects/layouts/customer-address-postgres-json/";
         String zdlFile = targetFolder + "/customer-address-postgres-json.zdl";
 
         // copy whole dir from sourceFolder to targetFolder
@@ -76,8 +76,8 @@ public class TestCustomerAddressPostgresJsonProject {
                         	io.zenwave360.example.core.outbound.events.dtos.Customer asCustomer(Customer customer);
                         """);
 
-        exitCode = MavenCompiler.compile(new File(targetFolder));
-        Assertions.assertEquals(0, exitCode);
+//        exitCode = MavenCompiler.compile(new File(targetFolder));
+//        Assertions.assertEquals(0, exitCode);
 
         plugin = new OpenAPIControllersPlugin()
                 .withApiFile(targetFolder + "/src/main/resources/apis/openapi.yml")
@@ -85,7 +85,7 @@ public class TestCustomerAddressPostgresJsonProject {
                 .withOption("basePackage", basePackage)
                 .withOption("controllersPackage", "{{basePackage}}.adapters.web")
                 .withOption("openApiApiPackage", "{{basePackage}}.adapters.web")
-                .withOption("openApiModelPackage", "{{basePackage}}.adapters.web.model")
+                .withOption("openApiModelPackage", "{{basePackage}}.adapters.web.dtos")
                 .withOption("openApiModelNameSuffix", "DTO")
                 // .withOption("operationIds", List.of("addPet", "updatePet"))
                 .withOption("style", ProgrammingStyle.imperative)

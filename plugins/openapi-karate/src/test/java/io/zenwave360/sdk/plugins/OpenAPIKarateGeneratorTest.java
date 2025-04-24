@@ -1,19 +1,18 @@
 package io.zenwave360.sdk.plugins;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-
 import io.zenwave360.sdk.MainGenerator;
 import io.zenwave360.sdk.Plugin;
+import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 import io.zenwave360.sdk.writers.TemplateWriter;
 import org.junit.jupiter.api.Assertions;
-
-import io.zenwave360.sdk.templating.TemplateOutput;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 import static io.zenwave360.sdk.utils.NamingUtils.camelCase;
 
@@ -81,7 +80,7 @@ public class OpenAPIKarateGeneratorTest {
                 .withApiFile("classpath:io/zenwave360/sdk/resources/openapi/" + openapi)
                 .withTargetFolder(targetFolder)
                 .withOption("groupBy", OpenAPIKarateGenerator.GroupByType.service)
-                .withOption("simpleDomainPackaging", true)
+                .withOption("layout", "SimpleDomainProjectLayout")
                 .withOption("basePackage", "io.example")
                 .withOption("operationIds",  List.of(operationId));
 

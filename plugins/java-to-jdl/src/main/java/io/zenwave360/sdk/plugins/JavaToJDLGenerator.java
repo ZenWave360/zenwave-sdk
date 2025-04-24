@@ -9,12 +9,13 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
-import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -55,11 +56,11 @@ public class JavaToJDLGenerator implements Generator {
     }
 
     public String generate() {
-        return generate(null).get(0).getContent();
+        return generate(null).singleFiles.get(0).getContent();
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
+    public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
         Class entityAnnotationClass = persistenceType == PersistenceType.JPA ? Entity.class : Document.class;
         Set<Class> entitySubClasses = getAnnotatedEntities(entityAnnotationClass);
 
@@ -87,7 +88,9 @@ public class JavaToJDLGenerator implements Generator {
         // ** generate **
         generateClasses(entitySubClasses, jdl);
 
-        return List.of(new TemplateOutput("", jdl.toString(), "text/jdl"));
+        var generatedProjectFiles = new GeneratedProjectFiles();
+        generatedProjectFiles.singleFiles.add(new TemplateOutput("", jdl.toString(), "text/jdl"));
+        return generatedProjectFiles;
     }
 
     protected void generateClasses(Collection<Class> entityClasses, StringBuilder jdl) {
@@ -140,9 +143,9 @@ public class JavaToJDLGenerator implements Generator {
             // Annotation[] fieldAnnotations = f.getDeclaredAnnotations();
 
             Id idAnnotation = f.getDeclaredAnnotation(Id.class);
-            javax.persistence.Id jpaIdAnnotation = f.getDeclaredAnnotation(javax.persistence.Id.class);
+            jakarta.persistence.Id jpaIdAnnotation = f.getDeclaredAnnotation(jakarta.persistence.Id.class);
             Version versionAnnotation = f.getDeclaredAnnotation(Version.class);
-            javax.persistence.Version jpaVersionAnnotation = f.getDeclaredAnnotation(javax.persistence.Version.class);
+            jakarta.persistence.Version jpaVersionAnnotation = f.getDeclaredAnnotation(jakarta.persistence.Version.class);
             if(idAnnotation != null || versionAnnotation != null || jpaIdAnnotation != null || jpaVersionAnnotation != null) {
                 continue;
             }

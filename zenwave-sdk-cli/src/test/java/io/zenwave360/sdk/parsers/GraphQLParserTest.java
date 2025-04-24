@@ -14,7 +14,7 @@ public class GraphQLParserTest {
         GraphQLParser parser = new GraphQLParser();
         parser.specFile = URI.create("classpath:io/zenwave360/sdk/resources/graphql/user-crud.graphql");
         var graphql = parser.parse();
-        System.out.println(graphql);
+//        System.out.println(graphql);
 //        Assertions.assertNotNull(JSONPath.get(graphql, "$.graphql.types.Student"));
     }
 }

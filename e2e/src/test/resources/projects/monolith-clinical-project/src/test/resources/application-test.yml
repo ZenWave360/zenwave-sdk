@@ -1,0 +1,19 @@
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.springframework.transaction: DEBUG
+    org.apache.kafka.clients.producer.ProducerConfig: OFF
+    org.apache.kafka.clients.consumer.ConsumerConfig: OFF
+    org.apache.kafka.clients.admin.AdminClientConfig: OFF
+    org.apache.kafka.common.config.AbstractConfig: OFF
+
+spring.jpa.hibernate.ddl-auto: create
+spring.jpa.defer-datasource-initialization: true
+spring.sql.init.mode: always
+
+DATASOURCE_URL: jdbc:postgresql://localhost:5432/app
+DATASOURCE_USERNAME: postgres
+DATASOURCE_PASSWORD: admin123
+ELASTICSEARCH_URL: http://localhost:9200
+
+management.zipkin.tracing.endpoint: http://localhost:9411/api/v2/spans

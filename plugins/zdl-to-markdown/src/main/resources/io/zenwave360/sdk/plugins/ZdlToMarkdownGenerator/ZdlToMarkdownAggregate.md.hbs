@@ -1,0 +1,10 @@
+```plantuml
+@startuml
+{{> (partial 'entityClass.plantuml') stereotype='aggregate' entity=zdlModel.entity }}
+
+{{~#each (entityAssociations zdlModel.entity) as |association|}}
+    {{zdlModel.entity.name}} {{association.linkType}}down- {{association.entity.name}}
+    {{> (partial 'entityClass.plantuml') entity=association.entity }}
+{{~/each}}
+@enduml
+```

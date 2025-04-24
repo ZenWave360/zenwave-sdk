@@ -1,7 +1,8 @@
-package {{coreImplementationPackage}}.mappers;
+package {{layout.coreImplementationMappersPackage}};
 
-import {{entitiesPackage}}.*;
-import {{inboundDtosPackage}}.*;
+import {{layout.coreImplementationMappersCommonPackage}}.BaseMapper;
+import {{layout.entitiesPackage}}.*;
+import {{layout.inboundDtosPackage}}.*;
 
 import org.mapstruct.AfterMapping;
 import java.util.List;
@@ -15,26 +16,32 @@ import org.springframework.data.domain.Page;
 public interface {{service.name}}Mapper {
 
     {{service.name}}Mapper INSTANCE = Mappers.getMapper({{service.name}}Mapper.class);
+
+// input mappings
+{{~#each (serviceParameterEntityPairs service) as |entry|}}
+    // {{@key}} {{method.name}}
+    {{~#if (not (eq entity.className input))}}
+        {{entity.className}} as{{entity.className}}({{mapperInputSignature input.className}});
+    {{~/if}}
+    {{#unless (skipEntityId entity)~}}@Mapping(target = "id", ignore = true){{/unless~}}
+    {{entity.className}} update(@MappingTarget {{entity.className}} entity, {{mapperInputSignature input.className}});
+{{~/each}}
+// output mappings
+{{~#each (serviceEntityReturnTypePairs service) as |entry|}}
+    // {{@key}} {{method.name}}
+    {{output.className}} as{{output.className}}({{entity.className}} entity);
+    {{~#if entry.isArray}}
+        List<{{output.className}}> as{{output.className}}List(List<{{entity.className}}> entity);
+    {{~/if}}
+    {{~#if entry.isPaginated}}
+        default Page<{{output.className}}> as{{output.className}}Page(Page<{{entity.className}}> page) {
+        return page.map(this::as{{output.className}});
+        }
+    {{~/if}}
+{{~/each}}
+
 {{~#each service.aggregates as |entityName|}}
     {{~assign "entity" (findEntity entityName)}}
-
-  {{~#each (findServiceInputs service) as |input|}}
-    {{~#if (not (eq entity.className input))}}
-    // {{entity.className}} as{{entity.className}}({{mapperInputSignature input}});
-    {{~/if}}
-
-    {{#unless (skipEntityId entity)~}}@Mapping(target = "id", ignore = true){{/unless~}}
-    {{entity.className}} update(@MappingTarget {{entity.className}} entity, {{mapperInputSignature input}});
-  {{~/each}}
-
-  {{~#each (findServiceOutputs service) as |output|}}
-    {{output}} as{{output}}({{entity.className}} entity);
-    List<{{output}}> as{{output}}List(List<{{entity.className}}> entity);
-    default Page<{{output}}> as{{output}}Page(Page<{{entity.className}}> page) {
-      return page.map(this::as{{output}});
-    }
-  {{~/each}}
-
     {{~assign 'relationships' (findOwnedOneToManyRelationships entity)}}
     {{~#if relationships}}
     @AfterMapping
@@ -46,6 +53,5 @@ public interface {{service.name}}Mapper {
         {{~/each}}
     }
     {{~/if}}
-
 {{~/each}}
 }

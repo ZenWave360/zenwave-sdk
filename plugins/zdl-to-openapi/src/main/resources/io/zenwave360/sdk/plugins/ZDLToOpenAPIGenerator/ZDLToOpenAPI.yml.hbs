@@ -43,6 +43,9 @@ paths:
         - name: "{{pathParam.name}}"
           in: path
           required: true
+          {{~#if pathParam.description}}
+          description: "{{pathParam.description}}"
+          {{~/if}}
           schema:
             type: {{pathParam.type}}
             {{~#if pathParam.format}}
@@ -52,6 +55,9 @@ paths:
         {{~#each operation.queryParamsMap as |queryParam|}}
         - name: "{{queryParam.name}}"
           in: query
+          {{~#if queryParam.description}}
+          description: "{{queryParam.description}}"
+          {{~/if}}
           schema:
             type: {{queryParam.type}}
             {{~#if queryParam.format}}
@@ -64,7 +70,22 @@ paths:
         - $ref: "#/components/parameters/sort"
         {{~/if}}
       {{~/if}}
-      {{~#if (and operation.requestBody (or (eq operation.httpMethod 'post') (eq operation.httpMethod 'put') (eq operation.httpMethod 'patch') ))}}
+      {{~#if operation.serviceMethod.options.fileupload}}
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    {{operation.serviceMethod.options.fileupload}}:
+                      type: string
+                      format: binary
+                {{~#if operation.requestBody}}
+                - $ref: "#/components/schemas/{{operation.requestBody}}{{ifTruthy (eq operation.httpMethod 'patch') dtoPatchSuffix ""}}"
+                {{/if}}
+      {{~else if (and operation.requestBody (or (eq operation.httpMethod 'post') (eq operation.httpMethod 'put') (eq operation.httpMethod 'patch') ))}}
       requestBody:
         required: true
         content:
@@ -75,12 +96,23 @@ paths:
       responses:
         "{{httpResponseStatus operation}}":
           description: "OK"
-        {{~#if operation.responseBody}}
+          {{~#if operation.serviceMethod.options.filedownload}}
+          headers:
+            Content-Disposition:
+              description: "Controls file download behavior. Values: 'inline' (display in browser) or 'attachment; filename=example.pdf' (download file)"
+              schema:
+                type: string
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: binary
+          {{~else if operation.responseBody}}
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/{{operation.responseBody}}{{responseBodyCollectionSuffix operation}}"
-        {{~/if}}
+          {{~/if}}
     {{~/each}}
   {{~/each}}
   {{~/if}}

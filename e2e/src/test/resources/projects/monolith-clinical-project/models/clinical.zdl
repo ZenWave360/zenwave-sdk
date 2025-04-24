@@ -1,0 +1,263 @@
+config {
+    title "Clinical Tool Backend"
+    moduleBasePackage "com.example.clinical.modules.clinical"
+    // you can choose: DefaultProjectLayout, CleanHexagonalProjectLayout, LayeredProjectLayout, SimpleDomainProjectLayout, HexagonalProjectLayout, CleanArchitectureProjectLayout
+    layout CleanHexagonalProjectLayout
+}
+
+@aggregate
+entity Hospital {
+    name String required unique maxlength(254)
+    lang String required maxlength(3) /** Primary language of the hospital */
+    timezone String required maxlength(3) /** ECT (Europe/Madrid)  */
+}
+
+@aggregate
+@auditing
+entity Doctor {
+    userId Long
+    profilePictureId Long
+    hospitalId Long required
+    name String required maxlength(100)
+    surname String required maxlength(100)
+    surname2 String maxlength(100)
+    email String maxlength(100) pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/)
+    phoneNumber String maxlength(20)
+    lang String maxlength(3) /** Primary language of the doctor */
+}
+
+@aggregate
+@auditing
+entity Patient {
+    userId Long
+    spikeUUID String /** se modifica directamente via Spike webhook en WearableDataRepository */
+    hospitalId Long required
+    profilePictureId Long
+
+    @naturalId
+    phoneNumber String required maxlength(20)
+    @naturalId
+    hisNumber String required maxlength(100)
+
+    email String required maxlength(100) pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/)
+
+    generalInfo GeneralInfo {
+        name String required maxlength(100)
+        surname String required maxlength(100)
+        surname2 String maxlength(100)
+        identityDocumentType IdentityDocumentType required
+        identityDocumentNumber String required maxlength(20)
+        birthDate LocalDate required
+        gender GenderType required
+        lang String maxlength(3) /** Primary language of the patient */
+    }
+
+    healthInsuranceInfo HealthInsuranceInfo {
+        insuranceCompanyId String required maxlength(100)
+        insuranceCardNumber String required maxlength(20)
+    }
+
+    @json documentIds Long[]
+}
+
+relationship OneToMany {
+    Patient{medicalContacts required } to MedicalContact{patient required}
+    Patient{personalContacts required } to PersonalContact{patient required}
+    Patient{patientAddresses required } to PatientAddress{patient required}
+    Patient{hospitalAddresses required } to HospitalAddress{patient required}
+    Patient{patientWearables required } to PatientWearable{patient required}
+}
+
+@aggregate
+entity ProvisionalPatient {
+    @naturalId
+    phoneNumber String required maxlength(20)
+    @naturalId
+    hisNumber String required maxlength(100)
+    @json patient Patient
+}
+
+@skip
+entity Address {
+   street String required maxlength(100)
+   city String required maxlength(100)
+   postalCode String required maxlength(10)
+   countryCode String required maxlength(3)
+   additionalInfo String maxlength(254)
+}
+
+@copy(Address)
+entity PatientAddress {
+   current Boolean required
+}
+
+@copy(Address)
+entity HospitalAddress {
+}
+
+enum IdentityDocumentType {
+    DNI(1), NIE(2), PASSPORT(3)
+}
+
+enum GenderType {
+    MALE(1), FEMALE(2), OTHER(3)
+}
+
+
+entity PatientWearable {
+    wearableType String required
+    serialNumber String maxlength(20)
+}
+
+
+entity MedicalContact {
+    name String required maxlength(100)
+    surname String required maxlength(100)
+    surname2 String maxlength(100)
+    hospital String maxlength(254)
+    area String maxlength(100)
+    jobPosition String maxlength(100)
+    phoneNumber String required maxlength(20)
+    email String required maxlength(100) pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/)
+}
+
+entity PersonalContact {
+    name String required maxlength(100)
+    surname String required maxlength(100)
+    surname2 String maxlength(100)
+    phoneNumber String required maxlength(20)
+    email String required maxlength(100) pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/)
+    patientRelationshipType PatientRelationshipType
+    emergencyContact Boolean required
+}
+
+enum PatientRelationshipType {
+    SON_DAUGTHER(1), CARE_GIVER(2), OTHER(3)
+}
+
+@inline
+input HospitalId {
+    hospitalId Long required
+}
+
+@inline
+input CriterioPatient {
+    hisNumber String required maxlength(100)
+    phoneNumber String required maxlength(20)
+}
+
+output PatientHospital {
+    patientId Long
+    hospitalId Long
+    hisNumber String
+    fullName String
+    gender GenderType
+    dni String
+    birthDate LocalDate
+    phone String
+    email String
+    insuranceCardNumber String
+    address String
+}
+
+@rest
+service HospitalService for (Hospital, Doctor) {
+    @get("/hospitals/{id}")
+    getHospital(id) Hospital?
+    @post("/hospitals")
+    createHospital(Hospital) Hospital
+    @put("/hospitals/{id}")
+    updateHospital(id, Hospital) Hospital?
+    @get("/hospitals")
+    listHospitals() Hospital[]
+
+    @post("/doctors")
+    createDoctor(Doctor) Doctor withEvents DoctorCreated
+    @put("/doctors/{id}")
+    updateDoctor(id, Doctor) Doctor?
+    @get("/doctors/{id}")
+    getDoctor(id) Doctor?
+    @get("/doctors")
+    listDoctors() Doctor[]
+
+    @get("/hospital/{hospitalId}/doctors")
+    @entityForId(Hospital)
+    listHospitalDoctors(HospitalId) Doctor[]
+
+    @get("/hospital/{hospitalId}/patients")
+    @entityForId(Hospital)
+    listHospitalPatients(HospitalId) PatientHospital[]
+}
+
+input DocumentSignatureRequestedInput {
+    documentInfoId Long required
+    patientId Long required
+}
+
+@rest
+service PatientsService for (Patient, ProvisionalPatient) {
+    /**
+    * Loads a saved temporal patient or new one if not found.
+    */
+    @get("/patients/{hisNumber}/{phoneNumber}")
+    loadPatient(@natural id) Patient
+
+//    @entityForId(Patient)
+//    loadTemporaryPatient(@natural id) ProvisionalPatient
+
+    /**
+    * Persist a temporal patient in the database.
+    */
+    @patch("/patients/{hisNumber}/{phoneNumber}")
+    partialPatientUpdate(@natural id, Patient) Patient
+
+    /**
+    * Persite a patient in the database and deletes any temporal data.
+    */
+    @post("/patients")
+    createPatient(Patient) Patient withEvents PatientCreated
+
+    /**
+    * Updates a patient in the database.
+    */
+    @put("/patients/{id}")
+    updatePatient(id, Patient) Patient?
+
+    /**
+    * Load a patient by id
+    */
+    @get("/patients/{id}")
+    getPatient(id) Patient?
+
+    /**
+    * Load a patient profile by id to mobile app.
+    */
+    @get("/patients/{id}/profile")
+    @policies(isMobile)
+    @entityForId(Patient)
+    getPatientProfileById(id) PatientProfile
+
+    @post({ path: "/patients/{id}/opt-out", status: 200 })
+    @entityForId(Patient)
+    requestOptOut(id)
+
+    @listener({model: "models/documents.zdl", event: DocumentSignatureRequested})
+    associateDocumentWithPatient(DocumentSignatureRequestedInput)
+}
+
+output PatientProfile {
+    name String required maxlength(100)
+    surname String required maxlength(100)
+    surname2 String maxlength(100)
+    birthDate LocalDate required
+    gender GenderType required
+    phoneNumber String required maxlength(20)
+}
+
+event DoctorCreated {
+    doctor Doctor
+}
+
+event PatientCreated {
+    patient Patient
+}

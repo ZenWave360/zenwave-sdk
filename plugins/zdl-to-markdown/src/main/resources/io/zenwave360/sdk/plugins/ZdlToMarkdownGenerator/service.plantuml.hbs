@@ -1,0 +1,48 @@
+```plantuml
+@startuml
+{{#each service.aggregates as |aggregates|}}
+    {{~assign "entity" (lookup zdlModel.entities this)}}
+    {{service.name}} -up-> {{entity.name}}
+    {{> (partial 'entityClass.plantuml') stereotype='aggregate' }}
+{{/each}}
+
+class {{service.name}}  << service >> {
+{{~#each service.methods as |method|}}
+    {{method.name}}({{methodParamsSignature method}}): {{methodReturnType method}} withEvents {{methodEvents method}}
+{{~/each}}
+}
+
+{{assign "inputs" (serviceInputs service)}}
+{{#if inputs}}
+    {{service.name}} -left-> inputs
+    namespace inputs #DDDDDD {
+    {{~#each inputs as |entity|}}
+        {{> (partial 'entityClass.plantuml') stereotype=entity.type }}
+    {{~/each}}
+    }
+{{/if}}
+
+{{assign "outputs" (serviceOutputs service)}}
+{{#if outputs}}
+    {{service.name}} -right-> outputs
+    namespace outputs #DDDDDD {
+    {{~#each outputs as |entity|}}
+        {{> (partial 'entityClass.plantuml') stereotype=entity.type }}
+    {{~/each}}
+    }
+{{/if}}
+
+{{assign "events" (serviceEvents service)}}
+{{#if events}}
+    {{service.name}} -down-> events
+    namespace events #DDDDDD {
+    {{~#each events as |event|}}
+        class {{event.name}} << event >> {
+
+        }
+    {{~/each}}
+    }
+{{/if}}
+@enduml
+
+```

@@ -59,12 +59,12 @@ public class SpringCloudStreams3GeneratorV3Test {
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/IDoCustomerRequestConsumerService.java"));
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/DoCustomerOrderRequestConsumer.java"));
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/IDoCustomerOrderRequestConsumerService.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/ICustomerEventsProducer.java"));
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/CustomerEventsProducer.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/test/java/io/example/integration/test/api/provider_for_events/CustomerEventsProducerCaptor.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/ICustomerOrderEventsProducer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/DefaultCustomerEventsProducer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/test/java/io/example/integration/test/api/provider_for_events/InMemoryCustomerEventsProducer.java"));
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/CustomerOrderEventsProducer.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/test/java/io/example/integration/test/api/provider_for_events/CustomerOrderEventsProducerCaptor.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/DefaultCustomerOrderEventsProducer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/test/java/io/example/integration/test/api/provider_for_events/InMemoryCustomerOrderEventsProducer.java"));
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/test/java/io/example/integration/test/api/provider_for_events/EventsProducerInMemoryContext.java"));
     }
 
@@ -86,12 +86,12 @@ public class SpringCloudStreams3GeneratorV3Test {
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/IDoCustomerRequestConsumerService.java"));
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/DoCustomerOrderRequestConsumer.java"));
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/IDoCustomerOrderRequestConsumerService.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/ICustomerEventsProducer.java"));
-        Assertions.assertFalse(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/CustomerEventsProducer.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/test/java/io/example/integration/test/api/provider_for_events/CustomerEventsProducerCaptor.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/ICustomerOrderEventsProducer.java"));
-        Assertions.assertFalse(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/CustomerOrderEventsProducer.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/test/java/io/example/integration/test/api/provider_for_events/CustomerOrderEventsProducerCaptor.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/CustomerEventsProducer.java"));
+        Assertions.assertFalse(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/DefaultCustomerEventsProducer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/test/java/io/example/integration/test/api/provider_for_events/InMemoryCustomerEventsProducer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/CustomerOrderEventsProducer.java"));
+        Assertions.assertFalse(logs.contains("Writing template with targetFile: src/main/java/io/example/integration/test/api/provider_for_events/DefaultCustomerOrderEventsProducer.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: src/test/java/io/example/integration/test/api/provider_for_events/InMemoryCustomerOrderEventsProducer.java"));
         Assertions.assertTrue(logs.contains("Writing template with targetFile: src/test/java/io/example/integration/test/api/provider_for_events/EventsProducerInMemoryContext.java"));
     }
 

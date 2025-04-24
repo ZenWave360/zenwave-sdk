@@ -1,0 +1,59 @@
+# {{{zdlModel.config.title}}}
+
+{{{zdlModel.javadoc}}}
+
+## <a name="services"></a> Services
+{{~#each zdlModel.services as |service|}}
+
+### <a name="service_{{service.name}}"></a> {{service.name}}
+- Task: Create `{{service.name}}` Service Interface
+- Task: Create `{{service.name}}` Service Implementation
+- Task: Create `{{service.name}}` Mappers between Entities and DTOs
+
+#### {{service.name}} Aggregates/Entities
+{{#each service.aggregates as |aggregates|}}
+    {{~assign "entity" (lookup zdlModel.entities this)}}
+##### <a name="aggregate_{{aggregates}}"></a> {{aggregates}}
+```plantuml
+@startuml
+{{> (partial 'entityClass.plantuml') stereotype='aggregate' }}
+
+{{~#each (entityAssociations entity) as |association|}}
+    {{../entity.name}} {{association.linkType}}down- {{association.entity.name}}
+    {{> (partial 'entityClass.plantuml') entity=association.entity }}
+{{~/each}}
+@enduml
+```
+- Task: Create `{{entity.name}}` Entity with {{zdlModel.config.persistence}} mappings
+- Task: Create {{entity.name}} Repository (SpringData {{zdlModel.config.persistence}})
+- Task: Create {{entity.name}} Repository IntegrationTest (SpringBootTest with Testcontainers)
+
+###### Relationships for {{entity.name}}
+    {{~#each (entityAssociations entity) as |association|}}
+- Task: Create {{association.entity.name}} Entity with {{zdlModel.config.persistence}} mappings
+- Task: Create {{association.entity.name}} Repository IntegrationTest (SpringBootTest with Testcontainers)
+    {{~/each}}
+{{/each}}
+
+##### <a name="service_{{service.name}}_endpoints"></a> {{service.name}} Endpoints
+{{~#each service.paths as |path|}}
+  {{~#each path as |endpoint|}}
+- {{endpoint.operationId}}: `[{{endpoint.httpMethod}}] {{endpoint.path}} : {{endpoint.requestBody}} | {{endpoint.responseBody}}`
+    - Task: Create `{{endpoint.operationId}}` in RestController
+    - Task: Create IntegrationTest with SpringWebTestClient
+    - Task: Create `{{serviceMethod.name}}({{methodParamsSignature serviceMethod}}): {{methodReturnType serviceMethod}}` Service Method
+  {{~/each}}
+{{~/each}}
+
+{{assign "events" (serviceEvents service)}}
+{{#if events}}
+##### <a name="service_{{service.name}}_endpoints"></a> {{service.name}} Events
+- Task: Create `EventProducer` and `EventMapper`
+{{~#each events as |event|}}
+- Task: Create `{{event.name}}` and emit Event
+{{~/each}}
+{{~/if}}
+
+
+{{> (partial 'service.plantuml')}}
+{{/each~}}

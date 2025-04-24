@@ -1,0 +1,33 @@
+services:
+  postgresql:
+    image: postgres:16.8
+    # volumes:
+    #   - ~/volumes/pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5432:5432"
+
+#  elasticsearch:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.2
+#    ports:
+#      - "9200:9200"
+#      - "9300:9300"
+#    environment:
+#      - 'ES_JAVA_OPTS=-Xms256m -Xmx256m'
+#      - 'discovery.type=single-node'
+#      - 'xpack.security.enabled=false'
+#    healthcheck:
+#      test: ['CMD', 'curl', '-f', 'http://localhost:9200/_cluster/health?wait_for_status=green&timeout=10s']
+#      interval: 5s
+#      timeout: 10s
+#      retries: 10
+
+

@@ -2,63 +2,35 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.github.zenwave360.zenwave-sdk</groupId>
+        <groupId>io.zenwave360.sdk</groupId>
         <artifactId>zenwave-sdk</artifactId>
-        <version>1.8.0-SNAPSHOT</version>
+        <version>2.0.0-SNAPSHOT</version>
     </parent>
     <name>${project.groupId}:${project.artifactId}</name>
     <artifactId>plugins-parent</artifactId>
     <packaging>pom</packaging>
 
     <properties>
-        <zenwave-sdk.version>1.8.0-SNAPSHOT</zenwave-sdk.version>
+        <zenwave-sdk.version>2.0.0-SNAPSHOT</zenwave-sdk.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>io.github.zenwave360.zenwave-sdk</groupId>
+            <groupId>io.zenwave360.sdk</groupId>
             <artifactId>zenwave-sdk-cli</artifactId>
             <version>${zenwave-sdk.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.zenwave360.zenwave-sdk</groupId>
+            <groupId>io.zenwave360.sdk</groupId>
             <artifactId>zenwave-sdk-test-resources</artifactId>
             <version>${zenwave-sdk.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <annotationProcessors>
-                        <annotationProcessor>
-                            io.zenwave360.sdk.doc.PluginAnnotationProcessor
-                        </annotationProcessor>
-                    </annotationProcessors>
-                    <fork>true</fork>
-                    <compilerArgs>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.jvm=ALL-UNNAMED</arg>
-                    </compilerArgs>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
     <modules>
         <module>java-to-jdl</module>
+        <module>java-to-asyncapi</module>
         <module>zdl-to-openapi</module>
         <module>jdl-to-asyncapi</module>
         <module>zdl-to-asyncapi</module>
@@ -69,6 +41,7 @@
         <module>openapi-controllers</module>
         <module>openapi-spring-webtestclient</module>
         <module>openapi-karate</module>
+        <module>zenwave-mcp-server</module>
 <!--        <module>openapi-pact-consumer</module>-->
     </modules>
 </project>

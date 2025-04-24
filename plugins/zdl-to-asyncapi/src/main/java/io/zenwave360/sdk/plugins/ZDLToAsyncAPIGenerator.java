@@ -12,13 +12,15 @@ import io.zenwave360.sdk.generators.AbstractZDLGenerator;
 import io.zenwave360.sdk.generators.EntitiesToAvroConverter;
 import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
+import io.zenwave360.sdk.processors.YamlOverlyMerger;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
-import io.zenwave360.sdk.zdl.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
+import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 
 import static io.zenwave360.sdk.utils.NamingUtils.asJavaTypeName;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
@@ -29,7 +31,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
     ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
     ObjectMapper jsonMapper = new ObjectMapper();
 
-    enum SchemaFormat {
+    public enum SchemaFormat {
         schema, avro
     }
 
@@ -39,9 +41,13 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
     public AsyncapiVersionType asyncapiVersion = AsyncapiVersionType.v3;
 
     @DocumentedOption(description = "Target file")
-    public String targetFile = "asyncapi.yml";
-    @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas (default: x-business-entity)")
-    public String zdlBusinessEntityProperty = "x-business-entity";
+    public String targetFile;
+
+    @DocumentedOption(description = "AsyncAPI file to be merged on top of generated AsyncAPI file")
+    public String asyncapiMergeFile;
+
+    @DocumentedOption(description = "Overlay Spec file to apply on top of generated AsyncAPI file")
+    public List<String> asyncapiOverlayFiles;
 
     @DocumentedOption(description = "Schema format for messages' payload")
     public SchemaFormat schemaFormat = SchemaFormat.schema;
@@ -60,6 +66,9 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
     @DocumentedOption(description = "Include Kafka common headers (kafka_messageKey)")
     public boolean includeKafkaCommonHeaders = false;
+
+    @DocumentedOption(description = "Include CloudEvents headers (ce-*)")
+    public boolean includeCloudEventsHeaders = false;
 
 
     private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
@@ -81,8 +90,8 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
 
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
-        List<TemplateOutput> outputList = new ArrayList<>();
+    public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
+        GeneratedProjectFiles generatedProjectFiles = new GeneratedProjectFiles();
         Map<String, Object> model = getModel(contextModel);
         List<String> serviceNames = JSONPath.get(model, "$.services[*].name");
         model.put("serviceNames", serviceNames);
@@ -134,7 +143,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
         for (Map<String, Object> schema : filterSchemasToInclude(model, methodsWithCommands)) {
             if (schemaFormat == SchemaFormat.schema) {
-                EntitiesToSchemasConverter toSchemasConverter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withZdlBusinessEntityProperty(zdlBusinessEntityProperty);
+                EntitiesToSchemasConverter toSchemasConverter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat);
                 toSchemasConverter.includeVersion = false;
                 String entityName = (String) schema.get("name");
                 Map<String, Object> asyncAPISchema = toSchemasConverter.convertToSchema(schema, model);
@@ -142,7 +151,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
             }
             if (schemaFormat == SchemaFormat.avro) {
                 EntitiesToAvroConverter toAvroConverter = new EntitiesToAvroConverter().withIdType(idType).withNamespace(avroPackage);
-                outputList.addAll(convertToAvro(toAvroConverter, schema, model));
+                generatedProjectFiles.singleFiles.addAll(convertToAvro(toAvroConverter, schema, model));
             }
         }
 
@@ -153,8 +162,12 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
             asyncAPISchemasString = asyncAPISchemasString.substring(asyncAPISchemasString.indexOf("components:") + 12);
         }
 
-        outputList.add(generateTemplateOutput(contextModel, zdlToAsyncAPITemplate, model, asyncAPISchemasString));
-        return outputList;
+        var template = generateTemplateOutput(contextModel, zdlToAsyncAPITemplate, model, asyncAPISchemasString);
+        var templateContent = YamlOverlyMerger.mergeAndOverlay(template.getContent(), asyncapiMergeFile, asyncapiOverlayFiles);
+        template = new TemplateOutput(template.getTargetFile(), templateContent, template.getMimeType(), template.isSkipOverwrite());
+        generatedProjectFiles.singleFiles.add(template);
+
+        return generatedProjectFiles;
     }
 
     private void addAllEventsAsMessages(LinkedHashMap<Object, Object> allMessages, Map<String, Map> events) {
@@ -355,7 +368,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         model.put("isDefaultSchemaFormat", schemaFormat == SchemaFormat.schema);
         model.put("schemaFormatString", schemaFormat == SchemaFormat.schema ? defaultSchemaFormat : avroSchemaFormat);
         model.put("schemasAsString", schemasAsString);
-        return handlebarsEngine.processTemplate(model, template).get(0);
+        return handlebarsEngine.processTemplate(model, template);
     }
 
     {

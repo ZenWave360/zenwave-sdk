@@ -7,7 +7,7 @@ import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 
-@DocumentedPlugin(value = "Generates a draft AsyncAPI file with events from your ZDL services.", shortCode = "zdl-to-asyncapi")
+@DocumentedPlugin(summary = "Generates a draft AsyncAPI file with events from your ZDL services.")
 public class ZDLToAsyncAPIPlugin extends Plugin {
 
     public ZDLToAsyncAPIPlugin() {

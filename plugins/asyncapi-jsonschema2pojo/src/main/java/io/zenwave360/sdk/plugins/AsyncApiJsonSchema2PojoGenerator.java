@@ -13,6 +13,7 @@ import java.net.URL;
 import java.util.*;
 
 import io.zenwave360.sdk.utils.AsyncAPIUtils;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +33,6 @@ import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractAsyncapiGenerator;
 import io.zenwave360.sdk.parsers.Model;
 import io.zenwave360.sdk.processors.AsyncApiProcessor;
-import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.NamingUtils;
 import io.zenwave360.jsonrefparser.$Ref;
@@ -43,14 +43,14 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
     public String sourceProperty = "api";
 
-    @DocumentedOption(description = "API Specification File")
-    public String specFile;
-
     @DocumentedOption(description = "Message names to include in code generation (combined with operationIds). Generates code for ALL if left empty")
     public List<String> messageNames = new ArrayList<>();
 
     @DocumentedOption(description = "JsonSchema2Pojo settings")
     public Map<String, String> jsonschema2pojo = new HashMap<>();
+
+    @DocumentedOption(description = "Annotation class to mark generated code (e.g. `org.springframework.aot.generate.Generated`). When retained at runtime, this prevents code coverage tools like Jacoco from including generated classes in coverage reports.")
+    public String generatedAnnotationClass;
 
     @DocumentedOption(description = "Target folder to generate code to.")
     public File targetFolder;
@@ -62,11 +62,6 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
     public String originalRefProperty = "x--original-\\$ref";
 
-    public AsyncApiJsonSchema2PojoGenerator withSourceProperty(String sourceProperty) {
-        this.sourceProperty = sourceProperty;
-        return this;
-    }
-
     public Model getApiModel(Map<String, Object> contextModel) {
         return (Model) contextModel.get(sourceProperty);
     }
@@ -77,7 +72,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
+    public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
         Model apiModel = getApiModel(contextModel);
 
         List<Map<String, Object>> allMessages = new ArrayList<>();
@@ -111,7 +106,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             throw new RuntimeException(e);
         }
 
-        return Collections.emptyList();
+        return new GeneratedProjectFiles();
     }
 
     public void generate(Model apiModel, List<Map<String, Object>> messages) throws IOException, URISyntaxException {
@@ -157,7 +152,14 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     public void generateFromNativeFormat(JsonSchema2PojoConfiguration config, Map<String, Object> payload, String packageName, String className) throws IOException {
         var json = this.convertToJson(payload, packageName);
 
-        var ruleFactory = new RuleFactory(config, new Jackson2Annotator(config), new SchemaStore());
+        List<Annotator> annotators = new ArrayList<>();
+        Class<? extends Annotator> customAnnotatorClass = config.getCustomAnnotator();
+        annotators.add(instantiate(customAnnotatorClass, config));
+        if(generatedAnnotationClass != null) {
+            annotators.add(new CustomAnnotator(config, generatedAnnotationClass, Map.of()));
+        }
+
+        var ruleFactory = new RuleFactory(config, new CompositeAnnotator(annotators.toArray(Annotator[]::new)), new SchemaStore());
         ruleFactory.setLogger(ruleLogger);
         SchemaMapper mapper = new SchemaMapper(ruleFactory, new SchemaGenerator());
         var sourcesWriter = new FileCodeWriterWithEncoding(targetSourceFolder, config.getOutputEncoding());
@@ -177,6 +179,18 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
         yml = RegExUtils.replaceAll(yml, "ref: \".*#/components/schemas/", "javaType: \"" + packageName + ".");
         Object jsonObject = this.yamlMapper.readTree(yml);
         return this.jsonMapper.writeValueAsString(jsonObject);
+    }
+
+    private Annotator instantiate(Class<? extends Annotator> annotatorClass, GenerationConfig config) {
+        try {
+            return annotatorClass.getDeclaredConstructor(GenerationConfig.class).newInstance(config);
+        } catch (Exception e) {
+            try {
+                return annotatorClass.getDeclaredConstructor().newInstance();
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }
     }
 
     private RuleLogger ruleLogger = new AbstractRuleLogger() {

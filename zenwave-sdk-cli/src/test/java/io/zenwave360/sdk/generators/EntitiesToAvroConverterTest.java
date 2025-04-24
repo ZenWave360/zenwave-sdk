@@ -38,12 +38,12 @@ public class EntitiesToAvroConverterTest {
             avros.add(result);
         }
 
-        ObjectMapper mapper = new ObjectMapper();
-        for (Map avro : avros) {
-            String className = String.format("%s.%s", converter.namespace, avro.get("name"));
-            System.out.println("------- " + className + " ----------");
-            System.out.println(mapper.writeValueAsString(avro));
-        }
+//        ObjectMapper mapper = new ObjectMapper();
+//        for (Map avro : avros) {
+//            String className = String.format("%s.%s", converter.namespace, avro.get("name"));
+//            System.out.println("------- " + className + " ----------");
+//            System.out.println(mapper.writeValueAsString(avro));
+//        }
     }
 
     @Test
@@ -64,12 +64,12 @@ public class EntitiesToAvroConverterTest {
             avros.add(result);
         }
 
-        ObjectMapper mapper = new ObjectMapper();
-        for (Map avro : avros) {
-            String className = String.format("%s.%s", converter.namespace, avro.get("name"));
-            System.out.println("------- " + className + " ----------");
-            System.out.println(mapper.writeValueAsString(avro));
-        }
+//        ObjectMapper mapper = new ObjectMapper();
+//        for (Map avro : avros) {
+//            String className = String.format("%s.%s", converter.namespace, avro.get("name"));
+//            System.out.println("------- " + className + " ----------");
+//            System.out.println(mapper.writeValueAsString(avro));
+//        }
     }
 
     @Test
@@ -90,11 +90,11 @@ public class EntitiesToAvroConverterTest {
             avros.add(result);
         }
 
-        ObjectMapper mapper = new ObjectMapper();
-        for (Map avro : avros) {
-            String className = String.format("%s.%s", converter.namespace, avro.get("name"));
-            System.out.println("------- " + className + " ----------");
-            System.out.println(mapper.writeValueAsString(avro));
-        }
+//        ObjectMapper mapper = new ObjectMapper();
+//        for (Map avro : avros) {
+//            String className = String.format("%s.%s", converter.namespace, avro.get("name"));
+//            System.out.println("------- " + className + " ----------");
+//            System.out.println(mapper.writeValueAsString(avro));
+//        }
     }
 }

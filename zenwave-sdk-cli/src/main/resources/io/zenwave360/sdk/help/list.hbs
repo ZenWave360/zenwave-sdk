@@ -3,7 +3,7 @@ ZW> SDK ({{version}})
 Available plugins:
 
 {{#each plugins as |plugin| ~}}
-{{ljust plugin.plugin.shortCode size=30 pad=" "}} {{{plugin.configClassName}}}: {{{plugin.plugin.title}}} ({{plugin.version}})
+{{{plugin.configClassName}}}: {{{plugin.plugin.summary}}} ({{plugin.version}})
 {{/each}}
 
 Use: "jbang zw -p <plugin | short-code> -h" to get help on a specific plugin

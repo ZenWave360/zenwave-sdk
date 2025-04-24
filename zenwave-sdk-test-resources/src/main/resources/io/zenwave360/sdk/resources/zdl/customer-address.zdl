@@ -58,13 +58,18 @@ input CustomerInput {
   }
 }
 
+@input
+enum EnumInput {
+  A, B, C
+}
+
 @copy(Address)
 input AddressInputCopy {
 }
 
 @inline
 input CustomerAddressId {
-  customerId String
+  customerId String /** customer id javadoc comment */
   address Address
 }
 
@@ -73,6 +78,11 @@ input CustomerSearchCriteria {
   email String
   city String
   state String
+}
+
+@copy(Customer)
+output CustomerOutput {
+
 }
 
 /**
@@ -101,10 +111,10 @@ service CustomerService for (Customer) {
   getCustomer(id) Customer?
 
   @get({path: "/customers", params: {search: String}}) @paginated
-  listCustomers() Customer[]
+  listCustomers() CustomerOutput[]
 
   @get({path: "/customers/search"}) @paginated
-  searchCustomers(CustomerSearchCriteria) Customer[]
+  searchCustomers(CustomerSearchCriteria) CustomerOutput[]
 
   @post("/customers/{customerId}/address")
   addCustomerAddress(CustomerAddressId) Customer?

@@ -4,9 +4,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.zenwave360.sdk.utils.Maps;
 import io.zenwave360.sdk.utils.NamingUtils;
-import io.zenwave360.sdk.zdl.ZDLFindUtils;
-import io.zenwave360.sdk.zdl.ZDLJavaSignatureUtils;
+import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.utils.ZDLJavaSignatureUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.jknack.handlebars.Options;
@@ -15,21 +16,22 @@ import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.utils.JSONPath;
 
 import static io.zenwave360.sdk.utils.NamingUtils.asJavaTypeName;
+import static io.zenwave360.sdk.zdl.utils.ZDLFindUtils.is;
 import static java.lang.String.format;
 import static java.lang.String.join;
 
 public class BackendApplicationDefaultHelpers {
 
-    private final BackendDefaultApplicationGenerator generator;
+    private final BackendApplicationDefaultGenerator generator;
 
-    BackendApplicationDefaultHelpers(BackendDefaultApplicationGenerator generator) {
+    BackendApplicationDefaultHelpers(BackendApplicationDefaultGenerator generator) {
         this.generator = generator;
     }
 
     public String logMethodCall(Map method, Options options) {
         var zdl = options.get("zdl");
         var methodName = (String) method.get("name");
-        var parameters = ZDLJavaSignatureUtils.methodParametersCallSignature(method, (Map) zdl, generator.inputDTOSuffix);
+        var parameters = ZDLJavaSignatureUtils.methodParametersCallSignature(method, (Map) zdl);
         var parameterPlaceHolders = Arrays.stream(parameters.split(", ")).map(p -> "{}").collect(Collectors.joining(" "));
         if(parameters.isEmpty()) {
             return String.format("log.debug(\"Request %s\");", methodName);
@@ -174,50 +176,64 @@ public class BackendApplicationDefaultHelpers {
         return "id";
     }
 
-
-    public Collection<String> findServiceInputs(Map service, Options options) {
-        var zdl = options.get("zdl");
+    public Map<String, Object> serviceParameterEntityPairs(Map service, Options options) {
+        var zdl = (Map) options.get("zdl");
         var inputDTOSuffix = (String) options.get("inputDTOSuffix");
-        Set<String> inputs = new HashSet<String>();
-        inputs.addAll(JSONPath.get(service, "$.methods[*].parameter"));
-        if(JSONPath.get(service, "$.methods[*][?(@.options.patch)]", List.of()).size() > 0) {
-            inputs.add("java.util.Map");
+        var map = new HashMap<String, Object>();
+        for (Map method : JSONPath.get(service, "methods[*]", List.<Map>of())) {
+            var input = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("parameter"));
+            var entity = (Map)JSONPath.get(zdl, "$.entities." + method.get("entity"));
+            var isInput = input != null && "inputs".equals(input.get("type"));
+            var isPatch = JSONPath.get(method, "options.patch") != null;
+
+            if (entity != null) {
+                if (isPatch) {
+                    var key = "java.util.Map-" + entity.get("className");
+                    map.put(key, Maps.of("input", Map.of("className","Map"), "entity", entity, "method", method));
+                } else if (input != null) {
+                    var key = input.get("className") + (isInput? inputDTOSuffix : "") + "-" + entity.get("className");
+                    map.put(key, Maps.of("input", input, "entity", entity, "method", method));
+                }
+            }
+
         }
-        // inputs.addAll(JSONPath.get(zdl, "$.services[*][?('" + aggregateName + "' in @.aggregates)].methods[*].returnType"));
-        // inputs.add(aggregateName + inputDTOSuffix);
-        inputs = inputs.stream().filter(Objects::nonNull).collect(Collectors.toSet());
-
-        var entities = JSONPath.get(zdl, "$.entities", Collections.emptyMap());
-
-        inputs = inputs.stream().map(input -> entities.get(input) != null? input + inputDTOSuffix : input).collect(Collectors.toSet());
-
-        return inputs;
+        return map;
     }
 
-    public Collection<String> findServiceOutputs(Map service, Options options) {
-        var zdl = options.get("zdl");
-        var serviceAggregates = (List<String>) service.get("aggregates");
-        var aggregatesAndEntities = new HashSet<>(serviceAggregates);
-        serviceAggregates.stream().map(aggregate -> (String) JSONPath.get(zdl, "$.aggregates." + aggregate + ".aggregateRoot")).filter(Objects::nonNull).forEach(aggregatesAndEntities::add);
-        Set<String> outputs = new HashSet<String>();
-        outputs.addAll(JSONPath.get(service, "$.methods[*].returnType"));
-        outputs = outputs.stream().filter(input -> input != null && !aggregatesAndEntities.contains(input)).collect(Collectors.toSet());
-        return outputs;
+    public Map<String, Object> serviceEntityReturnTypePairs(Map service, Options options) {
+        var zdl = (Map) options.get("zdl");
+        var map = new HashMap<String, Object>();
+        for (Map method : JSONPath.get(service, "methods[*]", List.<Map>of())) {
+            var entity = (Map)JSONPath.get(zdl, "$.entities." + method.get("entity"));
+            var output = (Map)JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("returnType"));
+            var isArray = Boolean.TRUE.equals(method.get("returnTypeIsArray"));
+            var isOptional = Boolean.TRUE.equals(method.get("returnTypeIsOptional"));
+            var isPaginated = JSONPath.get(method, "options.paginated", false);
+
+            if (entity != null && output != null) {
+                if (entity.get("name").equals(output.get("name"))) {
+                    continue;
+                }
+                var key = entity.get("className") + "-" + output.get("className");
+                map.put(key, Maps.of("entity", entity, "output", output, "method", method, "isArray", isArray, "isOptional", isOptional, "isPaginated", isPaginated));
+            }
+        }
+        return map;
     }
 
     public String methodParameterType(Map<String, Object> method, Options options) {
         var zdl = (Map) options.get("zdl");
-        return ZDLJavaSignatureUtils.methodParameterType(method, zdl, generator.inputDTOSuffix);
+        return ZDLJavaSignatureUtils.methodParameterType(method, zdl);
     }
 
     public String methodParametersSignature(Map<String, Object> method, Options options) {
         var zdl = (Map) options.get("zdl");
-        return ZDLJavaSignatureUtils.methodParametersSignature(generator.getIdJavaType(), method, zdl, generator.inputDTOSuffix);
+        return ZDLJavaSignatureUtils.methodParametersSignature(generator.getIdJavaType(), method, zdl);
     }
 
     public String methodParametersCallSignature(Map<String, Object> method, Options options) {
         var zdl = (Map) options.get("zdl");
-        return ZDLJavaSignatureUtils.methodParametersCallSignature(method, zdl, generator.inputDTOSuffix);
+        return ZDLJavaSignatureUtils.methodParametersCallSignature(method, zdl);
     }
 
     public boolean includeEmitEventsImplementation(Map service, Options options) {
@@ -255,7 +271,7 @@ public class BackendApplicationDefaultHelpers {
             for (Map<String, Object> event : methodEvents) {
                 var isAsyncApi = JSONPath.get(event, "options.asyncapi") != null;
                 if (entity == null) {
-                    var key = JSONPath.get(event, "name") + "-method-" + ZDLJavaSignatureUtils.methodParametersCallSignature(method, zdl, generator.inputDTOSuffix);
+                    var key = JSONPath.get(event, "name") + "-method-" + ZDLJavaSignatureUtils.methodParametersCallSignature(method, zdl);
                     result.put(key, Map.of("event", event, "method", method, "isAsyncApi", isAsyncApi));
                 } else {
                     var key = JSONPath.get(event, "name") + "-" + entity.get("name");
@@ -294,7 +310,7 @@ public class BackendApplicationDefaultHelpers {
 
     public String mapperInputSignature(String inputType, Options options) {
         var zdl = (Map) options.get("zdl");
-        return ZDLJavaSignatureUtils.mapperInputSignature(inputType, zdl, generator.inputDTOSuffix);
+        return ZDLJavaSignatureUtils.mapperInputSignature(inputType, zdl);
     }
 
     public String mapperInputCallSignature(String inputType, Options options) {
@@ -304,18 +320,12 @@ public class BackendApplicationDefaultHelpers {
 
     public String inputFieldInitializer(String inputType, Options options) {
         var zdl = (Map) options.get("zdl");
-        return ZDLJavaSignatureUtils.inputFieldInitializer(inputType, zdl, generator.inputDTOSuffix);
+        return ZDLJavaSignatureUtils.inputFieldInitializer(inputType, zdl);
     }
 
     public Map<String, Object> methodEntity(Map<String, Object> method, Options options) {
-        var returnType = (String) method.get("returnType");
         var zdl = options.get("zdl");
-        var service = JSONPath.get(zdl, "$.services." + method.get("serviceName"));
-        var aggregates = JSONPath.get(service, "aggregates", Collections.emptyList());
-        if(aggregates.size() == 1 && StringUtils.equals(returnType, aggregates.get(0).toString())) {
-            return JSONPath.get(zdl, "$.entities." + returnType);
-        }
-        return null;
+        return ZDLFindUtils.methodEntity(method, (Map) zdl);
     }
 
     public Map<String, Object> methodReturnEntity(Map<String, Object> method, Options options) {
@@ -379,11 +389,6 @@ public class BackendApplicationDefaultHelpers {
             return findEntity(JSONPath.get(entity, "$.aggregateRoot"), options);
         }
         return null;
-    }
-
-    public String inputDTOSuffix(Object entity, Options options) {
-        var isInput = JSONPath.get(entity, "options.input.value", false);
-        return isInput? "" : generator.inputDTOSuffix;
     }
 
     public String populateField(Map field, Options options) {
@@ -465,12 +470,12 @@ public class BackendApplicationDefaultHelpers {
 
     public Object skipEntityRepository(Map entity, Options options) {
         var zdl = options.get("zdl");
-        return generator.skipEntityRepository.apply(Map.of("zdl", zdl, "entity", entity));
+        return is(Map.of("zdl", zdl, "entity", entity), "persistence");
     };
 
     public Object skipEntityId(Map entity, Options options) {
         var zdl = options.get("zdl");
-        return generator.skipEntityId.apply(Map.of("zdl", zdl, "entity", entity));
+        return is(Map.of("zdl", zdl, "entity", entity), "vo", "input");
     };
 
     public Object addExtends(Object entity, Options options) {
@@ -508,7 +513,7 @@ public class BackendApplicationDefaultHelpers {
     }
 
     public Object eventsProducerInterface(String serviceName, Options options) {
-        return String.format("I%sEventsProducer", serviceName.replaceAll("(Service|UseCases)", ""));
+        return String.format("%sEventsProducer", serviceName.replaceAll("(Service|UseCases)", ""));
     }
 
     public Object eventsProducerInstance(String serviceName, Options options) {

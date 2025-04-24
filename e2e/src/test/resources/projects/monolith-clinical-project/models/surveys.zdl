@@ -1,0 +1,173 @@
+config {
+    title "Clinical Surveys Backend"
+    moduleBasePackage "com.example.clinical.modules.surveys"
+    layout LayeredProjectLayout
+}
+
+apis {
+    openapi(provider) BackOfficeAPI {
+        url "src/main/resources/public/apis/surveys-backoffice-openapi.yml"
+    }
+    openapi(provider) PublicAPI {
+        url "src/main/resources/public/apis/surveys-public-openapi.yml"
+    }
+}
+
+@aggregate
+@auditing
+entity Survey {
+    @naturalId
+    name String required maxlength(254) /** Unique identifier for the survey */
+    @naturalId
+    hospitalId Long required
+    title String required maxlength(254) /** Public title for the survey */
+    lang String required maxlength(3) /** Default language for this survey */
+    @jsonb sections SurveySection[] {
+        name String required maxlength(254) /** Unique identifier for the section */
+        translations SectionTranslation[] {
+            lang String required
+            title String required
+            summary String
+        }
+        questionIds Long[] /** Sorted List of Questions for this section */
+    }
+}
+
+@aggregate
+@auditing
+entity Question {
+    name String required unique maxlength(254) /** Unique identifier for the question */
+    questionType QuestionType required
+    required boolean = true
+    rangeStart Integer
+    rangeEnd Integer
+    @jsonb translations QuestionTranslation[] {
+        lang String required
+        text String required
+    }
+    @jsonb options Option[] { // mas facil mantener el orden que con OneToMany
+        name String required maxlength(254)
+        translations OptionTranslation[] {
+            lang String required
+            text String required
+        }
+    }
+    includeOther Boolean = false
+}
+
+enum QuestionType {
+    YES_NO(1), MULTIPLE_SELECTION(2), SINGLE_SELECTION(3), TEXT(4), NUMBER(5), DECIMAL(6), RANGE(7),
+}
+
+@aggregate
+@auditing
+entity SurveyAnswers {
+    @naturalId
+    surveyId Long required
+    @naturalId
+    patientId Long required
+    @naturalId
+    date LocalDate required
+    lang String required
+    @jsonb answers Answer[] {
+        questionId Long required
+        value String
+        values String[]
+        otherValue String
+    }
+}
+
+
+input SurveysByHospital {
+    hospitalId Long required
+    lang String maxlength(3)
+}
+
+/**
+* Service for managing surveys and questions in the backoffice.
+*/
+@apis(BackOfficeAPI)
+@rest("/backoffice/surveys")
+service SurveysBackofficeService for (Survey, Question) {
+    @get
+    listSurveys() Survey[]
+    @get("/{id}")
+    getSurvey(id) Survey?
+    @post
+    createSurvey(Survey) Survey
+    @put("/{id}")
+    updateSurvey(id, Survey) Survey?
+    @delete("/{id}")
+    @entityForId(Survey)
+    deleteSurvey(id)
+
+    @get("/questions")
+    listQuestions() Question[]
+    @get("/questions/{id}")
+    getQuestion(id) Question?
+    @post("/questions")
+    createQuestion(Question) Question
+    @put("/questions/{id}")
+    updateQuestion(id, Question) Question?
+    @entityForId(Question)
+    @delete("/questions/{id}")
+    deleteQuestion(id)
+}
+
+/**
+* This object represent a full survey with all the questions and options translated to the patient language.
+*/
+output SurveyAndQuestions {
+    surveyId Long required /** Persistence identifier for the survey */
+    name String required maxlength(254) /** Unique identifier for the survey across all environments */
+    title String required maxlength(254) /** Public title for the survey */
+    hospitalId Long required
+    lang String required maxlength(3) /** Default language for this survey */
+    sections SurveySectionOutput[] {
+        name String required maxlength(254) /** Unique identifier for the section */
+        title String required maxlength(254) /** Public title for the section */
+        summary String
+        questions QuestionTranslationOutput[] {
+            questionId Long required
+            required boolean = true
+            rangeStart Integer
+            rangeEnd Integer
+            text String required maxlength(254) /** Translated text for the question */
+            questionType QuestionType required
+            options OptionTranslationOutput[] {
+                name String required maxlength(254) /** Internal name for the option */
+                text String required /** Translated text for the option */
+            }
+            includeOther boolean = false
+        }
+    }
+}
+
+@inline
+input SurveyByNameAndPatient {
+    name String required maxlength(254)
+    patientId Long required
+    lang String maxlength(3)
+}
+
+/**
+* Public service to get Surveys and Questions for a patient and to answer the survey.
+*/
+@apis(PublicAPI)
+@rest("/public/surveys")
+service SurveysService for (SurveyAnswers) {
+
+    @get({ path: "/{name}/patient/{patientId}/questions", params: { lang: String } })
+    getSurveyAndQuestionsForPatient(SurveyByNameAndPatient) SurveyAndQuestions
+
+    @post("/{surveyId}/patient/{patientId}/answers/{date}")
+    answerSurvey(@natural id, SurveyAnswers) SurveyAnswers
+
+    @patch({ path: "/{surveyId}/patient/{patientId}/answers/{date}", params: { surveryId: Long } })
+    updateSurveyAnswers(@natural id, SurveyAnswers) SurveyAnswers?
+
+    @get("/{surveyId}/patient/{patientId}/answers/{date}")
+    getSurveyAnswers(@natural id) SurveyAnswers?
+
+}
+

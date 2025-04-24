@@ -1,6 +1,7 @@
-# {{configClassName}}
+# {{{plugin.title}}} ({{configClassName}})
+> 👉 ZenWave360 Helps You Create Software Easy to Understand
 
-{{{plugin.title}}}
+{{{plugin.summary}}}
 
 {{{plugin.description}}}
 
@@ -9,7 +10,7 @@
 | **Option** | **Description** | **Type** | **Default** | **Values** |
 |------------|-----------------|----------|-------------|------------|
 {{~#each options as |option|}}
-| `{{@key}}` | {{{option.description}}} | {{{option.type}}} | {{{option.defaultValue}}} | {{join option.values ", " }}  |
+| `{{@key}}` | {{{option.description}}} {{#if option.docLink}}[(documentation)]({{option.docLink}}){{/if}} | {{{option.type}}} | {{{option.defaultValue}}} | {{join option.values ", " }}  |
 {{~/each}}
 
 ## Getting Help

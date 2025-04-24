@@ -20,7 +20,7 @@
 		<spring-cloud.version>2022.0.4</spring-cloud.version>
 		<spring-modulith-bom.version>1.1.1</spring-modulith-bom.version>
 
-		<zenwave.version>1.7.0-SNAPSHOT</zenwave.version>
+		<zenwave.version>2.0.0-SNAPSHOT</zenwave.version>
 
 		<jakarta.validation-api.version>3.0.2</jakarta.validation-api.version>
 		<mapstruct.version>1.5.3.Final</mapstruct.version>
@@ -59,7 +59,7 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
-					<groupId>io.github.zenwave360.zenwave-sdk</groupId>
+					<groupId>io.zenwave360.sdk</groupId>
 					<artifactId>zenwave-sdk-maven-plugin</artifactId>
 					<version>${zenwave.version}</version>
 					<configuration>
@@ -83,6 +83,7 @@
 									<modelPackage>${basePackage}.core.outbound.events.dtos</modelPackage>
 									<jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
 									<jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
+                                    <generatedAnnotationClass>org.springframework.aot.generate.Generated</generatedAnnotationClass>
 								</configOptions>
 							</configuration>
 						</execution>
@@ -100,18 +101,19 @@
 									<modelPackage>${basePackage}.core.outbound.events.dtos</modelPackage>
 									<producerApiPackage>${basePackage}.core.outbound.events</producerApiPackage>
 									<consumerApiPackage>${basePackage}.adapters.commands</consumerApiPackage>
+                                    <generatedAnnotationClass>org.springframework.aot.generate.Generated</generatedAnnotationClass>
 								</configOptions>
 							</configuration>
 						</execution>
 					</executions>
 					<dependencies>
 						<dependency>
-							<groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
+							<groupId>io.zenwave360.sdk.plugins</groupId>
 							<artifactId>asyncapi-spring-cloud-streams3</artifactId>
 							<version>${zenwave.version}</version>
 						</dependency>
 						<dependency>
-							<groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
+							<groupId>io.zenwave360.sdk.plugins</groupId>
 							<artifactId>asyncapi-jsonschema2pojo</artifactId>
 							<version>${zenwave.version}</version>
 						</dependency>
@@ -146,7 +148,7 @@
 									<inputSpec>${project.basedir}/src/main/resources/apis/openapi.yml</inputSpec>
 									<generatorName>spring</generatorName>
 									<apiPackage>${basePackage}.adapters.web</apiPackage>
-									<modelPackage>${basePackage}.adapters.web.model</modelPackage>
+									<modelPackage>${basePackage}.adapters.web.dtos</modelPackage>
 									<modelNameSuffix>DTO</modelNameSuffix>
 									<addCompileSourceRoot>true</addCompileSourceRoot>
 									<generateSupportingFiles>false</generateSupportingFiles>

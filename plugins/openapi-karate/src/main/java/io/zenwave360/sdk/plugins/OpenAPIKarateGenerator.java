@@ -4,11 +4,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import io.zenwave360.sdk.generators.JsonSchemaToJsonFaker;
-import io.zenwave360.sdk.options.WebFlavorType;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.NamingUtils;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractOpenAPIGenerator;
@@ -19,7 +17,6 @@ import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 
 import static io.zenwave360.sdk.templating.OutputFormatType.GERKIN;
-import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 public class OpenAPIKarateGenerator extends AbstractOpenAPIGenerator {
@@ -31,9 +28,7 @@ public class OpenAPIKarateGenerator extends AbstractOpenAPIGenerator {
     public String apiProperty = "api";
 
     @DocumentedOption(description = "Package name for generated Karate tests")
-    public String testsPackage = "{{basePackage}}.adapters.web";
-
-    public boolean simpleDomainPackaging = false;
+    public String testsPackage;
 
     @DocumentedOption(description = "Generate features grouped by", required = true)
     public GroupByType groupBy = GroupByType.service;
@@ -55,11 +50,11 @@ public class OpenAPIKarateGenerator extends AbstractOpenAPIGenerator {
 
     @Override
     public void onPropertiesSet() {
-        if(basePackage == null) {
-            basePackage = testsPackage;
-        }
-        if (simpleDomainPackaging) {
-            testsPackage = "{{basePackage}}";
+        super.onPropertiesSet();
+        if (layout != null) {
+            if (this.testsPackage == null) {
+                this.testsPackage = layout.adaptersWebPackage;
+            }
         }
     }
 
@@ -72,14 +67,14 @@ public class OpenAPIKarateGenerator extends AbstractOpenAPIGenerator {
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
-        List<TemplateOutput> templateOutputList = new ArrayList<>();
+    public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
+        GeneratedProjectFiles generatedProjectFiles = new GeneratedProjectFiles();
         Model apiModel = getApiModel(contextModel);
         Map<String, List<Map<String, Object>>> operationsByTag = getOperationsGroupedByTag(apiModel);
 
         if (groupBy == GroupByType.businessFlow) {
             List<Map<String, Object>> operations = getOperationsByOperationIds(apiModel, operationIds);
-            templateOutputList.add(generateTemplateOutput(contextModel, businessFlowTestTemplate, null, operations));
+            generatedProjectFiles.singleFiles.add(generateTemplateOutput(contextModel, businessFlowTestTemplate, null, operations));
         }
 
         if (groupBy == GroupByType.service || groupBy == GroupByType.operation) {
@@ -91,20 +86,20 @@ public class OpenAPIKarateGenerator extends AbstractOpenAPIGenerator {
                 String serviceName = apiServiceName(entry.getKey());
                 if(groupBy == GroupByType.service) {
                     includedTestNames.add(serviceName);
-                    templateOutputList.add(generateTemplateOutput(contextModel, serviceTestTemplate, serviceName, entry.getValue()));
+                    generatedProjectFiles.services.addAll(serviceName, List.of(generateTemplateOutput(contextModel, serviceTestTemplate, serviceName, entry.getValue())));
                 } else {
                     List<Map<String, Object>> operations = entry.getValue();
                     includedTestNames.addAll(operations.stream().map(o -> NamingUtils.asJavaTypeName((String) o.get("operationId"))).collect(Collectors.toList()));
                     includedImports.add(serviceName);
                     for (Map<String, Object> operation : operations) {
-                        templateOutputList.add(generateTemplateOutput(contextModel, operationTestTemplate, serviceName, List.of(operation)));
+                        generatedProjectFiles.services.addAll(serviceName, List.of(generateTemplateOutput(contextModel, operationTestTemplate, serviceName, List.of(operation))));
                     }
                 }
             }
 
         }
 
-        return templateOutputList;
+        return generatedProjectFiles;
     }
 
     {
@@ -148,6 +143,6 @@ public class OpenAPIKarateGenerator extends AbstractOpenAPIGenerator {
             model.put("operationId", operations.get(0).get("operationId"));
             model.put("operation", operations.get(0));
         }
-        return getTemplateEngine().processTemplate(model, template).get(0);
+        return getTemplateEngine().processTemplate(model, template);
     }
 }

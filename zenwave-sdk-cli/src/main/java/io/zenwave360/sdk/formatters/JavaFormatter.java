@@ -1,32 +1,19 @@
 package io.zenwave360.sdk.formatters;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.google.googlejavaformat.java.CustomFormatter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.googlejavaformat.java.FormatterException;
-
 import io.zenwave360.sdk.doc.DocumentedOption;
-import io.zenwave360.sdk.templating.OutputFormatType;
-import io.zenwave360.sdk.templating.TemplateOutput;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 
 public class JavaFormatter implements Formatter {
 
     @DocumentedOption(description = "Code formatter implementation")
-    public Formatters formatter = Formatters.spring;
+    public Formatters formatter = Formatters.palantir;
 
     @DocumentedOption(description = "Skip java sources output formatting")
     public boolean skipFormatting = false;
 
     @DocumentedOption(description = "Halt on formatting errors")
     public boolean haltOnFailFormatting = true;
-    private Formatter delegate;
-    {
-        onPropertiesSet();
-    }
+    private Formatter delegate = new SpringJavaFormatter(skipFormatting, haltOnFailFormatting);
 
     public void onPropertiesSet() {
         switch (formatter) {
@@ -45,7 +32,7 @@ public class JavaFormatter implements Formatter {
     }
 
     @Override
-    public List<TemplateOutput> format(List<TemplateOutput> templateOutputList) {
-        return delegate.format(templateOutputList);
+    public void format(GeneratedProjectFiles generatedProjectFiles) {
+        delegate.format(generatedProjectFiles);
     }
 }

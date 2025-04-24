@@ -19,13 +19,14 @@ import {{modelPackage}}.*;
 
 @Component("{{bindingPrefix}}{{operation.x--operationIdKebabCase}}")
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin", date = "{{date}}")
+{{~#if generatedAnnotationClass}}@{{generatedAnnotationClass}}{{~/if}}
 public class {{consumerName operation.x--operationIdCamelCase}} implements Consumer<Flux<Message<{{messageType operation}}>>> {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    protected {{serviceInterfaceName operation.x--operationIdCamelCase}} service;
+    protected {{consumerServiceInterfaceName operation.x--operationIdCamelCase}} service;
 
-    public {{consumerName operation.x--operationIdCamelCase}}({{serviceInterfaceName operation.x--operationIdCamelCase}} service) {
+    public {{consumerName operation.x--operationIdCamelCase}}({{consumerServiceInterfaceName operation.x--operationIdCamelCase}} service) {
         this.service = service;
     }
 

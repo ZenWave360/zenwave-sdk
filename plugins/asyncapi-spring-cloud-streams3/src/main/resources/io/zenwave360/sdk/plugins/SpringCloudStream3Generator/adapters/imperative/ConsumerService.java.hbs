@@ -6,7 +6,7 @@ import {{modelPackage}}.*;
 {{#if consumerApiPackage~}}
 import {{consumerApiPackage}}.*;
 {{~#each operation.x--messages as |message|}}
-import {{consumerApiPackage}}.{{serviceInterfaceName operation.x--operationIdCamelCase}}.{{message.x--javaType}}Headers;
+import {{consumerApiPackage}}.{{consumerServiceInterfaceName operation.x--operationIdCamelCase}}.{{message.x--javaType}}Headers;
 {{~/each}}
 {{~/if}}
 
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Component
-public class {{serviceName operation.x--operationIdCamelCase}} implements {{serviceInterfaceName operation.x--operationIdCamelCase}} {
+public class {{consumerServiceName operation.x--operationIdCamelCase}} implements {{consumerServiceInterfaceName operation.x--operationIdCamelCase}} {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 

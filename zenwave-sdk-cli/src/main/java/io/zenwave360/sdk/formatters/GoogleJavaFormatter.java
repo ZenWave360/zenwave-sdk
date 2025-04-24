@@ -1,19 +1,19 @@
 package io.zenwave360.sdk.formatters;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.googlejavaformat.java.CustomFormatter;
+import com.google.googlejavaformat.java.Formatter;
 import com.google.googlejavaformat.java.FormatterException;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateOutput;
 
-public class GoogleJavaFormatter implements Formatter {
+public class GoogleJavaFormatter implements io.zenwave360.sdk.formatters.Formatter {
 
     private static Logger log = LoggerFactory.getLogger(GoogleJavaFormatter.class);
 
@@ -28,8 +28,9 @@ public class GoogleJavaFormatter implements Formatter {
         this.haltOnFailFormatting = haltOnFailFormatting;
     }
 
-    public List<TemplateOutput> format(List<TemplateOutput> templateOutputList) {
-        return templateOutputList.stream().map(t -> format(t)).collect(Collectors.toList());
+    public void format(GeneratedProjectFiles generatedProjectFiles) {
+        generatedProjectFiles.getAllTemplateOutputs().stream()
+                .map(t -> format(t)).collect(Collectors.toList());
     }
 
     public TemplateOutput format(TemplateOutput templateOutput) {
@@ -43,7 +44,9 @@ public class GoogleJavaFormatter implements Formatter {
                 return templateOutput;
             }
             try {
-                String formattedSource = new CustomFormatter().formatSourceAndFixImports(templateOutput.getContent());
+                String formattedSource = templateOutput.getContent();
+                formattedSource = new Formatter().formatSource(formattedSource);
+                formattedSource = ImportsOrganizer.organizeImports(formattedSource);
                 return new TemplateOutput(templateOutput.getTargetFile(), formattedSource, templateOutput.getMimeType(), templateOutput.isSkipOverwrite());
             } catch (FormatterException e) {
                 if (e.diagnostics() != null && e.diagnostics().size() > 0) {

@@ -32,7 +32,7 @@ public class JDLToAsyncAPIGeneratorTest {
         generator.idType = "integer";
         generator.idTypeFormat = "int64";
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
         System.out.println(outputTemplates.get(0).getContent());
@@ -55,7 +55,7 @@ public class JDLToAsyncAPIGeneratorTest {
         generator.schemaFormat = JDLToAsyncAPIGenerator.SchemaFormat.avro;
         generator.includeCommands = true;
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
 
         System.out.println(outputTemplates.get(outputTemplates.size() - 1).getContent());
 
@@ -72,7 +72,7 @@ public class JDLToAsyncAPIGeneratorTest {
         generator.payloadStyle = JDLToAsyncAPIGenerator.PayloadStyle.event;
         generator.annotations = List.of("aggregate");
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
         System.out.println(outputTemplates.get(0).getContent());
@@ -96,7 +96,7 @@ public class JDLToAsyncAPIGeneratorTest {
         generator.includeCommands = true;
         generator.payloadStyle = JDLToAsyncAPIGenerator.PayloadStyle.event;
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
 
         System.out.println(outputTemplates.get(outputTemplates.size() - 1).getContent());
 

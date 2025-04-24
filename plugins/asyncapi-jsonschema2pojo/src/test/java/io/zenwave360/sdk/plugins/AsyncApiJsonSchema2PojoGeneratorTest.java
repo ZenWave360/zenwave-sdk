@@ -24,6 +24,7 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
         Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
                 .withApiFile("classpath:asyncapi-v3.yml")
                 .withTargetFolder("target/zenwave630")
+                .withOption("generatedAnnotationClass", "org.springframework.aot.generate.Generated")
                 .withOption("modelPackage", "io.example.v3.domain.events");
 
         new MainGenerator().generate(plugin);

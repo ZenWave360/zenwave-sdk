@@ -730,15 +730,24 @@ components:
         lastName:
           type: string
           example: James
+        fullName:
+          type: string
         email:
           type: string
-          example: john@email.com
+#          example: john@email.com
         password:
           type: string
           example: '12345'
-        phone:
+        phoneNumber:
           type: string
-          example: '12345'
+#          example: '123456'
+          minLength: 6
+        country:
+          type: string
+        company:
+          type: string
+        job:
+          type: string
         userStatus:
           type: integer
           description: User Status
@@ -770,7 +779,7 @@ components:
           example: 10
         name:
           type: string
-          example: doggie
+          pattern: '^[a-zA-Z0-9_]+$'
         category:
           "$ref": "#/components/schemas/Category"
         photoUrls:

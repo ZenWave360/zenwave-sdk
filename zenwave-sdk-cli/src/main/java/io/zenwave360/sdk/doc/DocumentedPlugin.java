@@ -15,11 +15,13 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 public @interface DocumentedPlugin {
 
-    String value();
+    String title() default "";
+
+    String summary() default "";
 
     String description() default "";
 
-    String shortCode() default "";
+    String[] mainOptions() default {};
 
     String[] hiddenOptions() default {};
 }

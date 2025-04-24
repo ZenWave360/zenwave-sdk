@@ -8,11 +8,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
-import io.zenwave360.sdk.generators.AbstractZDLGenerator;
 import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.generators.Generator;
+import io.zenwave360.sdk.processors.YamlOverlyMerger;
 import io.zenwave360.sdk.utils.AntStyleMatcher;
-import io.zenwave360.sdk.zdl.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
+import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateInput;
@@ -20,8 +21,6 @@ import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
 import org.apache.commons.lang3.StringUtils;
-
-import static java.util.Collections.emptyList;
 
 public class ZDLToOpenAPIGenerator implements Generator {
 
@@ -38,29 +37,24 @@ public class ZDLToOpenAPIGenerator implements Generator {
     @DocumentedOption(description = "Target file")
     public String targetFile = "openapi.yml";
 
+    @DocumentedOption(description = "Overlay Spec file to apply on top of generated OpenAPI file")
+    public List<String> openapiOverlayFiles;
+
+    @DocumentedOption(description = "OpenAPI file to be merged on top of generated OpenAPI file")
+    public String openapiMergeFile;
+
     @DocumentedOption(description = "JsonSchema type for id fields and parameters.")
     public String idType = "string";
 
     @DocumentedOption(description = "JsonSchema type format for id fields and parameters.")
     public String idTypeFormat = null;
 
-    @DocumentedOption(description = "Base OpenAPI file to merge with generated OpenAPI file")
-    public String baseOpenAPIFile = null;
 
     @DocumentedOption(description = "Operation IDs to include. If empty, all operations will be included. (Supports Ant-style wildcards)")
     public List<String> operationIdsToInclude;
 
     @DocumentedOption(description = "Operation IDs to exclude. If not empty it will be applied to the processed operationIds to include. (Supports Ant-style wildcards)")
     public List<String> operationIdsToExclude;
-
-    //    @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas (default: x-business-entity)")
-    //    public String zdlBusinessEntityProperty = "x-business-entity";
-    //
-    //    @DocumentedOption(description = "Extension property referencing original zdl entity in components schemas for paginated lists")
-    //    public String zdlBusinessEntityPaginatedProperty = "x-business-entity-paginated";
-
-    //    @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. Examples: '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
-    //    public List<String> paginatedDtoItemsJsonPath = List.of("$.items", "$.properties.content.items");
 
     protected Map<String, Integer> httpStatusCodes = Map.of(
         "get", 200,
@@ -114,7 +108,7 @@ public class ZDLToOpenAPIGenerator implements Generator {
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
+    public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
         Map<String, Object> zdlModel = getZDLModel(contextModel);
         List<String> serviceNames = JSONPath.get(zdlModel, "$.options.options.service[*].value");
         ((Map) zdlModel).put("serviceNames", serviceNames);
@@ -176,7 +170,13 @@ public class ZDLToOpenAPIGenerator implements Generator {
         // remove first line
         openAPISchemasString = openAPISchemasString.substring(openAPISchemasString.indexOf("\n") + 1);
 
-        return List.of(generateTemplateOutput(contextModel, zdlToOpenAPITemplate, zdlModel, openAPISchemasString));
+        var template = generateTemplateOutput(contextModel, zdlToOpenAPITemplate, zdlModel, openAPISchemasString);
+        var templateContent = YamlOverlyMerger.mergeAndOverlay(template.getContent(), openapiMergeFile, openapiOverlayFiles);
+        template = new TemplateOutput(template.getTargetFile(), templateContent, template.getMimeType(), template.isSkipOverwrite());
+
+        var generatedProjectFiles = new GeneratedProjectFiles();
+        generatedProjectFiles.singleFiles.add(template);
+        return generatedProjectFiles;
     }
 
     protected List<Map> filterOperationsToInclude(List<Map> methods) {
@@ -276,6 +276,6 @@ public class ZDLToOpenAPIGenerator implements Generator {
         model.put("context", contextModel);
         model.put("zdlModel", zdlModel);
         model.put("schemasAsString", schemasAsString);
-        return handlebarsEngine.processTemplate(model, template).get(0);
+        return handlebarsEngine.processTemplate(model, template);
     }
 }

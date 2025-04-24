@@ -1,12 +1,12 @@
-package {{coreImplementationPackage}};
+package {{layout.coreImplementationPackage}};
 
-import {{configPackage}}.*;
-import {{entitiesPackage}}.*;
-import {{inboundPackage}}.*;
-import {{inboundDtosPackage}}.*;
-import {{coreImplementationPackage}}.mappers.*;
-import {{outboundRepositoryPackage}}.*;
-import {{infrastructureRepositoryPackage}}.inmemory.*;
+import {{layout.moduleConfigPackage}}.*;
+import {{layout.entitiesPackage}}.*;
+import {{layout.inboundPackage}}.*;
+import {{layout.inboundDtosPackage}}.*;
+import {{layout.coreImplementationMappersPackage}}.*;
+import {{layout.outboundRepositoryPackage}}.*;
+import {{layout.infrastructureRepositoryPackage}}.inmemory.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.Map;
 import java.util.Optional;
 import java.time.*;
 import java.math.BigDecimal;

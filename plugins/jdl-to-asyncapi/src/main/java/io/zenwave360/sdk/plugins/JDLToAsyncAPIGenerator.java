@@ -23,6 +23,7 @@ import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 
 public class JDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
@@ -62,8 +63,6 @@ public class JDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
     @DocumentedOption(description = "Target file")
     public String targetFile = "asyncapi.yml";
-    @DocumentedOption(description = "Extension property referencing original jdl entity in components schemas (default: x-business-entity)")
-    public String jdlBusinessEntityProperty = "x-business-entity";
 
     @DocumentedOption(description = "Schema format for messages' payload")
     public SchemaFormat schemaFormat = SchemaFormat.schema;
@@ -105,8 +104,8 @@ public class JDLToAsyncAPIGenerator extends AbstractZDLGenerator {
     }
 
     @Override
-    public List<TemplateOutput> generate(Map<String, Object> contextModel) {
-        List<TemplateOutput> outputList = new ArrayList<>();
+    public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
+        GeneratedProjectFiles outputList = new GeneratedProjectFiles();
         Map<String, Object> zdlModel = getJDLModel(contextModel);
         List<String> serviceNames = JSONPath.get(zdlModel, "$.options.options.service[*].value");
         ((Map) zdlModel).put("serviceNames", serviceNames);
@@ -116,7 +115,7 @@ public class JDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         JSONPath.set(oasSchemas, "components.schemas", schemas);
 
         EntitiesToAvroConverter toAvroConverter = new EntitiesToAvroConverter().withIdType(idType).withNamespace(avroPackage);
-        EntitiesToSchemasConverter toSchemasConverter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat).withZdlBusinessEntityProperty(jdlBusinessEntityProperty);
+        EntitiesToSchemasConverter toSchemasConverter = new EntitiesToSchemasConverter().withIdType(idType, idTypeFormat);
         toSchemasConverter.includeVersion = false;
 
         List<Map<String, Object>> entities = (List) JSONPath.get(zdlModel, "$.entities[*]");
@@ -129,14 +128,14 @@ public class JDLToAsyncAPIGenerator extends AbstractZDLGenerator {
             if (!isGenerateSchemaEntity(entity)) {
                 continue;
             }
+            String entityName = (String) entity.get("name");
             if (schemaFormat == SchemaFormat.schema) {
-                String entityName = (String) entity.get("name");
                 Map<String, Object> asyncAPISchema = toSchemasConverter.convertToSchema(entity, zdlModel);
                 schemas.put(entityName, asyncAPISchema);
             }
             if (schemaFormat == SchemaFormat.avro) {
-                outputList.addAll(createAvroRequestAndEventTypeEnums(toAvroConverter));
-                outputList.addAll(convertToAvro(toAvroConverter, entity, zdlModel));
+                outputList.entities.addAll(entityName, createAvroRequestAndEventTypeEnums(toAvroConverter));
+                outputList.entities.addAll(entityName, convertToAvro(toAvroConverter, entity, zdlModel));
             }
         }
 
@@ -147,7 +146,7 @@ public class JDLToAsyncAPIGenerator extends AbstractZDLGenerator {
             asyncAPISchemasString = asyncAPISchemasString.substring(asyncAPISchemasString.indexOf("components:") + 12);
         }
 
-        outputList.add(generateTemplateOutput(contextModel, jdlToAsyncAPITemplate, zdlModel, asyncAPISchemasString));
+        outputList.singleFiles.add(generateTemplateOutput(contextModel, jdlToAsyncAPITemplate, zdlModel, asyncAPISchemasString));
         return outputList;
     }
 
@@ -226,7 +225,7 @@ public class JDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         model.put("zdlModel", zdlModel);
         model.put("schemaFormatString", schemaFormat == SchemaFormat.schema ? (asyncapiVersion == AsyncapiVersionType.v3? defaultSchemaFormatV3 : defaultSchemaFormatV2) : avroSchemaFormat);
         model.put("schemasAsString", schemasAsString);
-        return handlebarsEngine.processTemplate(model, template).get(0);
+        return handlebarsEngine.processTemplate(model, template);
     }
 
     protected boolean skipOperations(Map entity) {

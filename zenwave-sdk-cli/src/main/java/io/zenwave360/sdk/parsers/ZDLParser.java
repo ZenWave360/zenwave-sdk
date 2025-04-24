@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import io.github.zenwave360.zdl.ZdlParser;
+import io.zenwave360.zdl.ZdlParser;
 import io.zenwave360.sdk.Plugin;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.plugins.ConfigurationProvider;
@@ -14,7 +14,6 @@ public class ZDLParser implements Parser, ConfigurationProvider {
 
     public static final List blobTypes = List.of("Blob", "AnyBlob", "ImageBlob", "byte");
 
-    @DocumentedOption(description = "ZDL files to parse")
     public List<String> zdlFiles = List.of();
     private String content;
     public String targetProperty = "zdl";
@@ -26,24 +25,12 @@ public class ZDLParser implements Parser, ConfigurationProvider {
 
     private ClassLoader projectClassLoader;
 
-    @DocumentedOption(description = "ZDL file to parse (@deprecated use zdlFile)")
-    public void setSpecFile(String specFile) {
-        setZdlFile(specFile);
-    }
-
-    @DocumentedOption(description = "ZDL files to parse (@deprecated use zdlFiles)")
-    public void setSpecFiles(List<String> specFiles) {
-        setZdlFiles(specFiles);
-    }
-
-    @DocumentedOption(description = "ZDL file to parse")
     public void setZdlFile(String zdlFile) {
         if(zdlFile != null) {
             this.zdlFiles = List.of(zdlFile);
         }
     }
 
-    @DocumentedOption(description = "ZDL file to parse")
     public void setZdlFiles(List<String> zdlFiles) {
         this.zdlFiles = zdlFiles;
     }
@@ -96,10 +83,17 @@ public class ZDLParser implements Parser, ConfigurationProvider {
     public void updateConfiguration(Plugin configuration, Map<String, Object> model) {
         var zdl = model.get(targetProperty);
         var config = JSONPath.get(zdl, "$.config", Map.<String, Object>of());
-        for (var entry : config.entrySet()) {
-            if(!configuration.getOptions().containsKey(entry.getKey())) {
-                configuration.withOption(entry.getKey(), entry.getValue());
+
+        if (config != null) {
+            for (var entry : config.entrySet()) {
+                if(!configuration.getOptions().containsKey(entry.getKey())) {
+                    configuration.withOption(entry.getKey(), entry.getValue());
+                }
             }
+//            if(config.containsKey("layout")) {
+//                configuration.withLayout((String) config.get("layout"));
+//                configuration.processLayout();
+//            }
         }
     }
 }

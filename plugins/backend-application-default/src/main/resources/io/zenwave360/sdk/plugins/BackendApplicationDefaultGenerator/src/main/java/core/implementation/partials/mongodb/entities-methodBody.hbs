@@ -4,6 +4,10 @@
 {{!-- @Async --}}
 {{~#if method.options.async}}
     {{#if method.returnType}}return CompletableFuture.completedFuture({{/if}} {{method.name}}Sync({{methodParametersCallSignature method}}){{#if method.returnType}}){{/if}};
+{{!-- @delete --}}
+{{~else if (and _entity method.options.delete method.paramId)}}
+    log.debug("Request to delete {{_entity.className}} : {}", id);
+    {{_entity.instanceName}}Repository.deleteById(id);
 {{!-- list search --}}
 {{~else if (and _entity method.returnType method.returnTypeIsArray)}}
     {{~#if (eq _entity.name returnEntity)}}
@@ -51,7 +55,8 @@
     return {{_entity.instanceName}}Repository.{{{findById method}}}{{#if needMapping}}.map({{asInstanceName service.name}}Mapper::as{{method.returnType}}){{/if}};
 {{!-- Entity get(id) --}}
 {{~else if (and _entity method.paramId method.returnType)}}
-    return {{_entity.instanceName}}Repository.{{{findById method}}};
+    {{~assign 'needMapping' (not (eq _entity.name method.returnType))}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}{{#if needMapping}}.map({{asInstanceName service.name}}Mapper::as{{method.returnType}}){{/if}}.orElseThrow();
 {{!-- Optional<Entity> get(MyEntity) --}}
 {{~else if (and _entity method.parameter method.returnType method.returnTypeIsOptional)}}
     var {{_entity.instanceName}} = {{asInstanceName service.name}}Mapper.update(new {{_entity.className}}(), {{{mapperInputCallSignature method.parameter}}});

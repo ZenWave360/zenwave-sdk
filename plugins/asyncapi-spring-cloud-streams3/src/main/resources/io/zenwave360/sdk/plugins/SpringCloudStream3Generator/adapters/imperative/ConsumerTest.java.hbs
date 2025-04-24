@@ -7,7 +7,7 @@ import {{modelPackage}}.*;
 import {{consumerApiPackage}}.*;
 {{~/if}}
 {{~#each operation.x--messages as |message|}}
-import {{consumerApiPackage}}.{{serviceInterfaceName operation.x--operationIdCamelCase}}.{{message.x--javaType}}Headers;
+import {{consumerApiPackage}}.{{consumerServiceInterfaceName operation.x--operationIdCamelCase}}.{{message.x--javaType}}Headers;
 {{~/each}}
 import {{baseTestClassPackage}}.{{baseTestClassName}};
 
@@ -15,12 +15,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
-* Integration tests for {@link {{serviceInterfaceName operation.x--operationIdCamelCase~}} }.
+* Integration tests for {@link {{consumerServiceInterfaceName operation.x--operationIdCamelCase~}} }.
 */
-public class {{serviceName operation.x--operationIdCamelCase}}{{testSuffix}} extends {{baseTestClassName}} {
+public class {{consumerServiceName operation.x--operationIdCamelCase}}{{testSuffix}} extends {{baseTestClassName}} {
 
     @Autowired
-    public {{serviceInterfaceName operation.x--operationIdCamelCase}} consumerService;
+    public {{consumerServiceInterfaceName operation.x--operationIdCamelCase}} consumerService;
 
     {{#each operation.x--messages as |message|}}
     /**

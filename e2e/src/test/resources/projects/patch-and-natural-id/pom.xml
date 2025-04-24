@@ -18,7 +18,7 @@
 		<spring-boot.version>${project.parent.version}</spring-boot.version>
 		<spring-cloud.version>2022.0.4</spring-cloud.version>
 
-		<zenwave.version>1.7.0-SNAPSHOT</zenwave.version>
+		<zenwave.version>2.0.0-SNAPSHOT</zenwave.version>
 
 		<jakarta.validation-api.version>3.0.2</jakarta.validation-api.version>
 		<mapstruct.version>1.6.3</mapstruct.version>
@@ -155,7 +155,7 @@
 							<inputSpec>${project.basedir}/src/main/resources/apis/openapi.yml</inputSpec>
 							<generatorName>spring</generatorName>
 							<apiPackage>io.zenwave360.example.adapters.web</apiPackage>
-							<modelPackage>io.zenwave360.example.adapters.web.model</modelPackage>
+							<modelPackage>io.zenwave360.example.adapters.web.dtos</modelPackage>
 							<modelNameSuffix>DTO</modelNameSuffix>
 							<addCompileSourceRoot>true</addCompileSourceRoot>
 							<generateSupportingFiles>false</generateSupportingFiles>
@@ -181,7 +181,7 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>io.github.zenwave360.zenwave-sdk</groupId>
+				<groupId>io.zenwave360.sdk</groupId>
 				<artifactId>zenwave-sdk-maven-plugin</artifactId>
 				<version>${zenwave.version}</version>
 				<configuration>
@@ -230,12 +230,12 @@
 				</executions>
 				<dependencies>
 					<dependency>
-						<groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
+						<groupId>io.zenwave360.sdk.plugins</groupId>
 						<artifactId>asyncapi-spring-cloud-streams3</artifactId>
 						<version>${zenwave.version}</version>
 					</dependency>
 					<dependency>
-						<groupId>io.github.zenwave360.zenwave-sdk.plugins</groupId>
+						<groupId>io.zenwave360.sdk.plugins</groupId>
 						<artifactId>asyncapi-jsonschema2pojo</artifactId>
 						<version>${zenwave.version}</version>
 					</dependency>

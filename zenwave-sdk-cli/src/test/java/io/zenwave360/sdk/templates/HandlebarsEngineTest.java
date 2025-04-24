@@ -41,7 +41,7 @@ public class HandlebarsEngineTest {
 }
         """;
         model.put("json", json);
-        TemplateOutput templateOutput = handlebarsEngine.processTemplate(model, new TemplateInput("io/zenwave360/sdk/templating/handlebars-test", "").withSkipOverwrite(true)).get(0);
+        TemplateOutput templateOutput = handlebarsEngine.processTemplate(model, new TemplateInput("io/zenwave360/sdk/templating/handlebars-test", "").withSkipOverwrite(true));
         System.out.println(templateOutput.getContent());
 
         Assertions.assertTrue(templateOutput.getContent().contains("This is the assigned value"));

@@ -14,16 +14,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-#        with:
-#          token: ${{ github.token }}
+
       - name: Set up Java for publishing to Maven Central Repository
         uses: actions/setup-java@v2
         with:
           java-version: '17'
-          distribution: 'adopt'
-          server-id: ossrh
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
+          distribution: 'temurin'
 
       - name: Configure Git User
         run: |
@@ -31,20 +27,27 @@ jobs:
           git config user.name ${{ github.actor }}
 
       - name: Prepare Release
-        run: mvn -B release:prepare -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
+        run: |
+          mvn -B release:prepare -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
+          mvn -B release:clean
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ github.token }}
 
-      - name: Push Release
-        run: |
-          git push
-          git push --tags
+      - name: Create Pull Request (Main)
+        id: cpr
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: 'Release ${{ github.event.inputs.releaseVersion }}'
+          branch: release/${{ github.event.inputs.releaseVersion }}
+          title: 'Release ${{ github.event.inputs.releaseVersion }}'
+          body: 'Release ${{ github.event.inputs.releaseVersion }}'
+          labels: 'release'
 
-      - name: Build and Publish SNAPSHOT to the Maven Central
-        run: mvn -B clean install deploy -DskipTests -DdeployAtEnd=true
+      - name: Enable Pull Request Automerge (Main)
+        run: gh pr merge --merge --auto --delete-branch "${{ steps.cpr.outputs.pull-request-number }}"
         env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
-          SIGN_KEY: ${{ secrets.SIGN_KEY }}
-          SIGN_KEY_PASS: ${{ secrets.SIGN_KEY_PASS }}
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Push Release Tag
+        run: git push --tags

@@ -34,7 +34,7 @@ public class JDLToAsyncAPIGeneratorV3Test {
         generator.idTypeFormat = "int64";
         generator.asyncapiVersion = AsyncapiVersionType.v3;
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
         System.out.println(outputTemplates.get(0).getContent());

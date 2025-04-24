@@ -30,7 +30,7 @@ public class JDLToOpenAPIGeneratorTest {
         Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/jdl/orders-model.jdl");
         ZDLToOpenAPIGenerator generator = new ZDLToOpenAPIGenerator();
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
         System.out.println(outputTemplates.get(0).getContent());
@@ -49,7 +49,7 @@ public class JDLToOpenAPIGeneratorTest {
         generator.idType = "integer";
         generator.idTypeFormat = "int64";
 
-        List<TemplateOutput> outputTemplates = generator.generate(model);
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
         System.out.println(outputTemplates.get(0).getContent());

@@ -33,6 +33,7 @@ public class EntitiesToSchemasConverter {
         if (this.idTypeFormat != null) {
             idType.put("format", this.idTypeFormat);
         }
+        idType.put("readOnly", true);
         return idType;
     }
 
@@ -73,7 +74,9 @@ public class EntitiesToSchemasConverter {
         if (includeIdAndVersion(entity)) {
             properties.put("id", idTypeMap());
             if (includeVersion) {
-                properties.put("version", Maps.of("type", "integer"));
+                properties.put("version", Maps.of(
+                        "type", "integer",
+                        "description", "Version of the document (required in PUT for concurrency control, should be null in POSTs)."));
             }
         }
 
@@ -139,10 +142,10 @@ public class EntitiesToSchemasConverter {
                     }
                 }
                 Map<String, Object> property = new LinkedHashMap<>();
-                if (relationship.get("comment") != null || isAddRelationshipById) {
-                    var readOnlyWarning = isAddRelationshipById ? "(read-only) " : "";
-                    // TODO desc+$ref: property.put("description", readOnlyWarning + relationship.getOrDefault("comment", ""));
-                }
+//                if (relationship.get("comment") != null || isAddRelationshipById) {
+//                    var readOnlyWarning = isAddRelationshipById ? "(read-only) " : "";
+//                    // TODO desc+$ref: property.put("description", readOnlyWarning + relationship.getOrDefault("comment", ""));
+//                }
                 property.put("$ref", "#/components/schemas/" + relationship.get("otherEntityName"));
                 if (isCollection) {
                     property = Maps.of("type", "array", "items", property);
@@ -162,8 +165,8 @@ public class EntitiesToSchemasConverter {
         var property = new LinkedHashMap<String, Object>();
         if ("String".equals(entityType) || "TextBlob".equals(entityType)) {
             property.put("type", "string");
-        } else if ("Enum".equals(entityType)) {
-            property.put("type", "string");
+//        } else if ("Enum".equals(entityType)) {
+//            property.put("type", "string");
         } else if ("LocalDate".equals(entityType)) {
             property.put("type", "string");
             property.put("format", "date");

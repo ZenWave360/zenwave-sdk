@@ -3,10 +3,14 @@
  */
 config {
     title "ZenWave Playground Customer-Address MariaDB"
-    basePackage "io.zenwave360.example"
+    basePackage "io.zenwave360.example.customer"
     persistence jpa
-    databaseType mariadb
+    databaseType postgresql
 //    haltOnFailFormatting false
+
+    layout SimpleDomainProjectLayout
+    layout.outboundEventsPackage io.zenwave360.example.customer.events
+    layout.outboundEventsModelPackage io.zenwave360.example.customer.events.dtos
 
     plugins {
 

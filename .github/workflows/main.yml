@@ -1,0 +1,81 @@
+name: Verify Main and Publish Coverage
+
+on:
+  push:
+    branches: [ main ]
+#  pull_request:
+#    branches: [ '**' ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up the Java JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+
+      - name: Verify and Publish Coverage
+        run: mvn verify
+
+      - name: Checkout badges branch to a badges directory nested inside first checkout
+        uses: actions/checkout@v2
+        with:
+          ref: badges
+          path: badges
+
+      - name: Generate JaCoCo Badge
+        id: jacoco
+        uses: cicirello/jacoco-badge-generator@v2
+        with:
+          badges-directory: badges
+          generate-branches-badge: true
+          generate-summary: true
+          jacoco-csv-file: >
+            ./plugins/asyncapi-spring-cloud-streams3/target/site/jacoco/jacoco.csv
+            ./plugins/java-to-jdl/target/site/jacoco/jacoco.csv
+            ./plugins/java-to-asyncapi/target/site/jacoco/jacoco.csv
+            ./plugins/backend-application-default/target/site/jacoco/jacoco.csv
+            ./plugins/openapi-controllers/target/site/jacoco/jacoco.csv
+            ./plugins/zdl-to-openapi/target/site/jacoco/jacoco.csv
+            ./plugins/jdl-to-asyncapi/target/site/jacoco/jacoco.csv
+            ./plugins/zdl-to-asyncapi/target/site/jacoco/jacoco.csv
+            ./plugins/zdl-to-markdown/target/site/jacoco/jacoco.csv
+            ./plugins/openapi-spring-webtestclient/target/site/jacoco/jacoco.csv
+            ./plugins/openapi-karate/target/site/jacoco/jacoco.csv
+            ./plugins/zenwave-mcp-server/target/site/jacoco/jacoco.csv
+            ./zenwave-sdk-cli/target/site/jacoco/jacoco.csv
+
+      - name: Log coverage percentage
+        run: |
+          echo "coverage = ${{ steps.jacoco.outputs.coverage }}"
+          echo "branch coverage = ${{ steps.jacoco.outputs.branches }}"
+
+      - name: Packs Jacoco Reports
+        run: |
+          rm -rf badges/jacoco
+          mkdir -p badges/jacoco
+          echo "GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED" > badges/jacoco-report.csv
+          find -name 'jacoco.csv' -exec sed '1d' {} \; >> badges/jacoco-report.csv
+          tar -c `find -name jacoco.csv` `find -name jacoco.exec` `find -name jacoco.xml` | tar -C badges/jacoco -x
+
+
+      - name: Commit and push the coverage badges and summary file
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          echo $(ls -l)
+          cd badges
+          if [[ `git status --porcelain` ]]; then
+            git config --global user.name 'github-agit pctions'
+            git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add *.svg *.json jacoco-report.csv jacoco/*
+            git commit -m "coverage = ${{ steps.jacoco.outputs.coverage }} branches = ${{ steps.jacoco.outputs.branches }}" *.svg *.json jacoco-report.csv jacoco/*
+            git push
+          fi
+
