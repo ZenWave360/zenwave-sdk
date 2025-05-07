@@ -11,6 +11,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.zenwave360.sdk.utils.AsyncAPIUtils;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
@@ -175,8 +177,25 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     protected String convertToJson(final Map<String, Object> payload, final String packageName) throws JsonProcessingException {
         this.yamlMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         String yml = this.yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(payload);
-        yml = RegExUtils.replaceAll(yml, originalRefProperty + ": \".*#/components/schemas/", "javaType: \"" + packageName + ".");
-        yml = RegExUtils.replaceAll(yml, "ref: \".*#/components/schemas/", "javaType: \"" + packageName + ".");
+
+        List<String> regexPatterns = List.of(
+                originalRefProperty + ": \".*#/components/schemas/([^\"]+)\"",
+                "ref: \".*#/components/schemas/([^\"]+)\""
+        );
+
+        for (String regex : regexPatterns) {
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(yml);
+            StringBuilder result = new StringBuilder();
+
+            while (matcher.find()) {
+                String matchedGroup = matcher.group(1);
+                String className = NamingUtils.asJavaTypeName(matchedGroup);
+                matcher.appendReplacement(result, "javaType: \"" + packageName + "." + className + "\"");
+            }
+            yml = matcher.appendTail(result).toString();
+        }
+
         Object jsonObject = this.yamlMapper.readTree(yml);
         return this.jsonMapper.writeValueAsString(jsonObject);
     }
