@@ -24,9 +24,19 @@ components:
           backupEmail:
             description: something else
             $ref: "#/components/schemas/Email"
+          department:
+            description: department where user works
+            $ref: "#/components/schemas/Department-v1"
   schemas:
     Email:
       type: string
       enum:
         - Google
         - Yahoo
+    Department-v1:
+      type: object
+      properties:
+        identifier:
+          type: string
+        name:
+          type: string
