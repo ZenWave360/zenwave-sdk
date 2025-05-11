@@ -3,5 +3,5 @@ io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,
 io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultJpaHelpers,86,58,15,5,9,13,9,5,0,4
 io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationMultiModuleProjectTemplates,0,436,0,0,0,35,0,1,0,1
 io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultHelpers,197,1577,25,137,25,253,34,115,11,57
-io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultGenerator,0,91,1,5,0,20,1,6,0,4
 io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationProjectTemplates,34,469,2,8,1,42,3,9,1,6
+io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultGenerator,0,91,1,5,0,20,1,6,0,4
