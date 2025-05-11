@@ -33,6 +33,18 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
     }
 
     @Test
+    public void test_generator_for_asyncapi_schemas_with_delimiters() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:asyncapi.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.integration.test.with_schemas.model");
+
+        new MainGenerator().generate(plugin);
+
+        Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/integration/test/with_schemas/model/DepartmentV1.java").exists());
+    }
+
+    @Test
     public void test_generator_for_asyncapi_v3_filter_messages() throws Exception {
         Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
                 .withApiFile("classpath:asyncapi-v3.yml")
