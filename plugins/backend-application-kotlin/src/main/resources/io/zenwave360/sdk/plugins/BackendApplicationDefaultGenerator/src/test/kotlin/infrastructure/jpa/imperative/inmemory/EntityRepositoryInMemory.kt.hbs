@@ -1,0 +1,18 @@
+package {{layout.infrastructureRepositoryPackage}}.inmemory
+
+import {{layout.entitiesPackage}}.*
+import {{layout.outboundRepositoryPackage}}.{{entity.className}}Repository
+import java.math.*
+import java.time.*
+import java.util.*
+
+class {{entity.className}}RepositoryInMemory : InMemoryJpaRepository<{{entity.className}}>(), {{entity.className}}Repository {
+
+{{~#if (naturalIdFields entity)}}
+    override fun {{{naturalIdsRepoMethodSignature entity}}} {
+        return getEntities().values.stream().filter { e ->
+            {{#joinWithTemplate (naturalIdFields entity) delimiter='&&'}} isSameValue({{name}}, readField(e, "{{name}}")) {{/joinWithTemplate}}
+        }.findFirst()
+    }
+{{~/if}}
+}

@@ -1,0 +1,35 @@
+package {{layout.coreImplementationMappersPackage}}
+
+import {{layout.coreImplementationMappersCommonPackage}}.BaseMapper
+import {{layout.entitiesPackage}}.*
+{{~#if (includeDomainEvents zdl)}}
+import {{layout.domainEventsPackage}}.*
+{{~/if}}
+import {{layout.inboundDtosPackage}}.*
+
+import org.mapstruct.Mapper
+import org.mapstruct.Mapping
+import org.mapstruct.MappingTarget
+import org.mapstruct.factory.Mappers
+
+
+@Mapper(uses = [BaseMapper::class])
+interface EventsMapper {
+
+    companion object {
+        val INSTANCE: EventsMapper = Mappers.getMapper(EventsMapper::class.java)
+    }
+
+{{~#each (listOfPairEventEntity zdl) as |pair|}}
+    {{~assign 'eventPackage' (ifTruthy pair.isAsyncApi layout.asyncApiModelPackage layout.domainEventsPackage) }}
+    {{~#if pair.entity}}
+    fun as{{{pair.event.name}}}({{asInstanceName pair.entity.name}}: {{pair.entity.className}}): {{eventPackage}}.{{pair.event.name}}
+    {{~else}}
+    fun as{{{pair.event.name}}}({{{methodParametersSignature method}}}): {{eventPackage}}.{{pair.event.name}}
+    {{~/if}}
+{{~/each}}
+
+{{~#each (domainEventsWithAsyncapiAnnotation zdl) as |event|}}
+    fun as{{{event.name}}}(event: {{event.className}}): {{layout.asyncApiModelPackage}}.{{event.name}}
+{{~/each}}
+}

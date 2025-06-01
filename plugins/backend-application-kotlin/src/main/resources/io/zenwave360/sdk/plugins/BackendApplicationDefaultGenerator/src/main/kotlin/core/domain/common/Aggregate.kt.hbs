@@ -1,0 +1,56 @@
+package {{layout.entitiesPackage}}
+
+import {{layout.domainEventsPackage}}.*
+import {{layout.inboundDtosPackage}}.*
+
+import org.mapstruct.MappingTarget
+import org.mapstruct.factory.Mappers
+
+class {{aggregate.name}} {
+    companion object {
+        private val mapper = Mappers.getMapper(Mapper::class.java)
+    }
+
+    private val rootEntity: {{aggregate.aggregateRoot}}
+    private val events = mutableListOf<Any>()
+
+    constructor() : this({{aggregate.aggregateRoot}}())
+
+    constructor(rootEntity: {{aggregate.aggregateRoot}}) {
+        this.rootEntity = rootEntity
+    }
+
+    fun getId(): String {
+        return rootEntity.id
+    }
+
+    fun getRootEntity(): {{aggregate.aggregateRoot}} {
+        return rootEntity
+    }
+
+    fun getEvents(): List<*> {
+        return events.toList()
+    }
+
+{{#each aggregate.commands as |method|}}
+    {{~> (partial '../../implementation/partials/serviceMethodJavadoc')}}
+    fun {{method.name}}(input: {{method.parameter}}) {
+        // TODO: implement this command
+        mapper.update(rootEntity, input)
+        {{~#each (methodEvents method) as |event|}}
+        events.add(mapper.as{{event.name}}(rootEntity))
+        {{~/each}}
+    }
+{{/each}}
+
+    @org.mapstruct.Mapper
+    interface Mapper {
+        {{~#each (findAggregateInputs aggregate) as |input|}}
+        fun update(@MappingTarget entity: {{aggregate.aggregateRoot}}, input: {{input}}): {{aggregate.aggregateRoot}}
+        {{~/each}}
+
+        {{~#each (aggregateEvents aggregate) as |event|}}
+        fun as{{event.name}}(entity: {{aggregate.aggregateRoot}}): {{event.className}}
+        {{~/each}}
+    }
+}

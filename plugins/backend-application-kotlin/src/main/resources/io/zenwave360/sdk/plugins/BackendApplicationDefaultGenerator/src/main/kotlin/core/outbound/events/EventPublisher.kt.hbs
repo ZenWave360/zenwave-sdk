@@ -1,0 +1,11 @@
+package {{layout.outboundEventsPackage}}
+
+import {{layout.domainEventsPackage}}.*
+import {{layout.entitiesPackage}}.*
+
+interface EventPublisher {
+
+{{#each events as |event|}}
+    fun on{{event.className}}(event: {{event.className}})
+{{/each}}
+}

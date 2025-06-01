@@ -1,12 +1,15 @@
 package io.zenwave360.sdk.plugins;
 
+import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.CleanArchitectureProjectLayout;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -26,6 +29,14 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
     protected Function<Map<String, Object>, Boolean> skipEvents = (model) -> !includeEmitEventsImplementation;
     protected Function<Map<String, Object>, Boolean> skipEventsBus = (model) -> ((Collection) model.get("events")).isEmpty();
     protected Function<Map<String, Object>, Boolean> skipInput = (model) -> is(model, "inline");
+
+    @Override
+    public List<Object> getTemplateHelpers(Generator generator) {
+        var helpers = new ArrayList<>(super.getTemplateHelpers(generator));
+        helpers.add(new BackendApplicationDefaultHelpers((BackendApplicationDefaultGenerator) generator));
+        helpers.add(new BackendApplicationDefaultJpaHelpers((BackendApplicationDefaultGenerator) generator));
+        return helpers;
+    }
 
     public BackendApplicationProjectTemplates() {
         setTemplatesFolder("io/zenwave360/sdk/plugins/BackendApplicationDefaultGenerator");

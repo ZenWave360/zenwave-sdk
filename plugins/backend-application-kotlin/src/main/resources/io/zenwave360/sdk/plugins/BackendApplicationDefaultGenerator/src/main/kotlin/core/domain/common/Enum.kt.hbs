@@ -1,0 +1,35 @@
+{{~#if (eq persistence 'jpa')}}
+    import jakarta.persistence.AttributeConverter
+    import jakarta.persistence.Converter
+{{~/if}}
+
+/**
+* Enum for {{defaultIfEmpty enum.description enum.name}}.
+*/
+enum class {{ enum.name }}{{#if enum.hasValue}}(val value: Int){{/if}} {
+{{#each enum.values }}
+    {{ this.name }}{{#if this.value}}({{this.value}}){{/if}}{{#unless @last}},{{/unless}}
+{{~/each}}
+;
+
+{{~#if enum.hasValue}}
+    companion object {
+    fun fromValue(value: Int): {{ enum.name }}? {
+    return values().find { it.value == value }
+    }
+    }
+
+    {{~#if (eq persistence 'jpa')}}
+        @Converter
+        class {{ enum.name }}Converter : AttributeConverter<{{ enum.name }}, Int> {
+        override fun convertToDatabaseColumn(attribute: {{ enum.name }}?): Int? {
+        return attribute?.value
+        }
+
+        override fun convertToEntityAttribute(dbData: Int?): {{ enum.name }}? {
+        return if (dbData == null) null else {{ enum.name }}.fromValue(dbData)
+        }
+        }
+    {{~/if}}
+{{~/if}}
+}

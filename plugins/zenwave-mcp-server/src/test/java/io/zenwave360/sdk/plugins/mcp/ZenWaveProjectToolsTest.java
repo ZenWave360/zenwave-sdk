@@ -31,6 +31,24 @@ public class ZenWaveProjectToolsTest {
     }
 
     @Test
+    public void testGetProjectTaskList_WithFileNameInsteadOfContents() throws Exception {
+        // Given
+        String zdlContent = "classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl";
+
+        // When
+        String taskList = zenWaveProjectTools.getProjectTaskList(zdlContent);
+
+        // Then
+        assertNotNull(taskList);
+        assertTrue(taskList.contains("Please provide the contents of the ZDL model"));
+
+        // Verify it matches the output from ZdlToMarkdownPlugin
+        String expectedTaskList = ZdlToMarkdownPlugin.generateTaskList(zdlContent);
+        assertEquals(expectedTaskList, taskList);
+    }
+
+
+    @Test
     public void testGetAggregateUML() throws Exception {
         // Given
         String zdlContent = parser.loadSpecFile("classpath:io/zenwave360/sdk/resources/zdl/orders-with-aggregate.zdl");

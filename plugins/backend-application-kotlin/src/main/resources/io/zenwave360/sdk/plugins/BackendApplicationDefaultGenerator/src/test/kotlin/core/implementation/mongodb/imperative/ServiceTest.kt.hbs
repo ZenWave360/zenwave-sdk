@@ -1,0 +1,53 @@
+package {{layout.coreImplementationPackage}}
+
+import {{layout.moduleConfigPackage}}.*
+import {{layout.entitiesPackage}}.*
+import {{layout.inboundPackage}}.*
+import {{layout.inboundDtosPackage}}.*
+import {{layout.coreImplementationMappersPackage}}.*
+import {{layout.outboundRepositoryPackage}}.*
+import {{layout.infrastructureRepositoryPackage}}.inmemory.*
+
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.mapstruct.factory.Mappers
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.PageRequest
+
+import java.util.Map
+import java.util.Optional
+
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.mockito.Mockito.*
+
+/**
+* Acceptance Test for {{service.name}}.
+*/
+class {{service.name}}Test {
+
+private val log: Logger = LoggerFactory.getLogger(javaClass)
+
+val context = ServicesInMemoryConfig()
+{{~#assign "serviceInstance"}}{{asInstanceName service.name}}{{/assign}}
+val {{serviceInstance}}: {{service.name}}Impl = context.{{serviceInstance}}()
+{{#each entities as |entity|}}
+    val {{entity.instanceName}}Repository: {{entity.className}}RepositoryInMemory = context.{{entity.instanceName}}Repository()
+{{/each}}
+
+@BeforeEach
+fun setUp() {
+context.reloadTestData()
+}
+
+{{#each service.methods as |method|}}
+    @Test
+    fun {{method.name}}Test() {
+    {{~> (partial 'testMethodBody')~}}
+    }
+{{/each}}
+}

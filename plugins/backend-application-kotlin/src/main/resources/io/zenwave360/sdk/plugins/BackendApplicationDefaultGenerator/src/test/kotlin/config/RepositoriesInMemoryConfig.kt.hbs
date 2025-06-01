@@ -1,0 +1,24 @@
+package {{layout.moduleConfigPackage}}
+
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Primary
+
+import {{layout.outboundRepositoryPackage}}.*
+import {{layout.infrastructureRepositoryPackage}}.inmemory.*
+
+
+//@Configuration
+open class RepositoriesInMemoryConfig {
+
+{{assign "aggregates" (findAggregates entities)}}
+{{~#each aggregates as |entity|}}
+    protected val {{entity.instanceName}}Repository: {{entity.className}}Repository = {{entity.className}}RepositoryInMemory()
+    
+    @Bean 
+    @Primary
+    fun {{entity.instanceName}}Repository(): {{entity.className}}Repository {
+        return {{entity.instanceName}}Repository
+    }
+{{~/each}}
+
+}

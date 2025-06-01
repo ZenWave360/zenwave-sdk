@@ -47,6 +47,8 @@ public class ZDLProjectGenerator extends AbstractZDLGenerator {
                 throw new RuntimeException(e);
             }
             templates.setLayout(layout);
+            templates.getTemplateHelpers(this)
+                    .forEach(helper -> getTemplateEngine().getHandlebars().registerHelpers(helper));
         }
     }
 

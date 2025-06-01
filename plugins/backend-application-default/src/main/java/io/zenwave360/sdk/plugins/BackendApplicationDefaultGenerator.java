@@ -44,11 +44,6 @@ public class BackendApplicationDefaultGenerator extends ZDLProjectGenerator {
 
     public String mavenModulesPrefix;
 
-    {
-        getTemplateEngine().getHandlebars().registerHelpers(new BackendApplicationDefaultHelpers(this));
-        getTemplateEngine().getHandlebars().registerHelpers(new BackendApplicationDefaultJpaHelpers(this));
-    }
-
     @Override
     public void onPropertiesSet() {
         if (templates == null) {

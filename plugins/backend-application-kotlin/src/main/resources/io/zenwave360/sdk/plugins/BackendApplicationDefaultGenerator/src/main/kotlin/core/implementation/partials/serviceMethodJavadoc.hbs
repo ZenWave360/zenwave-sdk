@@ -1,0 +1,10 @@
+     /**
+      * {{{method.javadoc}}}
+      *
+{{~#if (methodPolicies method)}}
+      * <ul>{{#joinWithTemplate (methodPolicies method) as |policy| }}<li><b>{{policy.name}}</b>: {{policy.value}}</li>{{/joinWithTemplate}}</ul>
+{{~/if}}
+{{~#if method.withEvents}}
+      * With Events: {{{method.withEvents}}}.
+{{/if}}
+      */

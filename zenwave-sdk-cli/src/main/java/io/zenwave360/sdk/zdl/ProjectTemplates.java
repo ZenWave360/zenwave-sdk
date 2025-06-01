@@ -1,5 +1,6 @@
 package io.zenwave360.sdk.zdl;
 
+import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
@@ -41,6 +42,10 @@ public class ProjectTemplates {
 
     public void setLayout(ProjectLayout layout) {
         this.layout = layout;
+    }
+
+    public List<Object> getTemplateHelpers(Generator generator) {
+        return List.of();
     }
 
     public List<TemplateInput> aggregateTemplates = new ArrayList<>();

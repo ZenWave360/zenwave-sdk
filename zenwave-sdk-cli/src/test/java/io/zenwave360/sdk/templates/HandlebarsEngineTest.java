@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.github.jknack.handlebars.Options;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -17,6 +18,8 @@ public class HandlebarsEngineTest {
     @Test
     public void testHandlebarsEngine() throws IOException {
         HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
+        handlebarsEngine.getHandlebars().registerHelpers(FirstHelper.class);
+        handlebarsEngine.getHandlebars().registerHelpers(SecondHelper.class);
 
         Map<String, Object> model = new HashMap<>();
         model.put("list", List.of(1, 2, 3));
@@ -51,6 +54,7 @@ public class HandlebarsEngineTest {
         Assertions.assertTrue(templateOutput.getContent().contains("asJavaTypeName TratraTratra"));
         Assertions.assertTrue(templateOutput.getContent().contains("kebabCase some-camel-case-with-spaces"));
         Assertions.assertTrue(templateOutput.getContent().contains("asPackageFolder io/zenwave360/sdk/templating"));
+        Assertions.assertTrue(templateOutput.getContent().contains("helperFunction: second"));
         Assertions.assertTrue(templateOutput.getContent().contains("jsonPath entity1"));
         Assertions.assertTrue(templateOutput.getContent().contains("Prefix2Suffix"));
         Assertions.assertTrue(templateOutput.getContent().contains("ifTruthy true: true"));
@@ -70,5 +74,17 @@ public class HandlebarsEngineTest {
         Assertions.assertTrue(templateOutput.getContent().contains("or true: true"));
         Assertions.assertTrue(templateOutput.getContent().contains("or false: false"));
         Assertions.assertTrue(templateOutput.getContent().contains("    {\n      \"id\" : 60,"));
+    }
+
+    public static class FirstHelper {
+        public static String helperFunction(String property, Options options) {
+            return "first";
+        }
+    }
+    public static class SecondHelper {
+        public static String helperFunction(String property, Options options) {
+            return "second";
+        }
+
     }
 }

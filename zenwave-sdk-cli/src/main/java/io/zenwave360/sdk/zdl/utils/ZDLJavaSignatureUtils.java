@@ -80,6 +80,16 @@ public class ZDLJavaSignatureUtils {
         return StringUtils.join(params, ", ");
     }
 
+    public static String kotlinMethodParametersSignature(String idJavaType, Map method, Map zdl) {
+        var signature = methodParametersSignature(idJavaType, method, zdl);
+        var params = signature.split(", ");
+        for (int i = 0; i < params.length; i++) {
+            var param = params[i].split(" ");
+            params[i] = param[1] + ": " + param[0];
+        }
+        return StringUtils.join(params, ", ");
+    }
+
     public static String methodParametersCallSignature(Map method, Map zdl) {
         return Arrays.stream(methodParametersSignature("not-used", method, zdl).split(", "))
                 .map(p -> p.contains(" ")? p.split(" ")[1] : "")

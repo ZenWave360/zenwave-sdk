@@ -1,0 +1,58 @@
+package {{layout.coreImplementationMappersPackage}}
+
+import {{layout.coreImplementationMappersCommonPackage}}.BaseMapper
+import {{layout.entitiesPackage}}.*
+import {{layout.inboundDtosPackage}}.*
+
+import org.mapstruct.AfterMapping
+import org.mapstruct.Mapper
+import org.mapstruct.Mapping
+import org.mapstruct.MappingTarget
+import org.mapstruct.factory.Mappers
+import org.springframework.data.domain.Page
+
+@Mapper(uses = [BaseMapper::class])
+interface {{service.name}}Mapper {
+
+    companion object {
+        val INSTANCE: {{service.name}}Mapper = Mappers.getMapper({{service.name}}Mapper::class.java)
+    }
+
+// input mappings
+{{~#each (serviceParameterEntityPairs service) as |entry|}}
+    // {{@key}} {{method.name}}
+    {{~#if (not (eq entity.className input))}}
+    fun as{{entity.className}}({{mapperInputSignature input.className}}): {{entity.className}}
+    {{~/if}}
+    {{#unless (skipEntityId entity)~}}@Mapping(target = "id", ignore = true){{/unless~}}
+    fun update(entity: {{entity.className}}, {{mapperInputSignature input.className}}): {{entity.className}}
+{{~/each}}
+// output mappings
+{{~#each (serviceEntityReturnTypePairs service) as |entry|}}
+    // {{@key}} {{method.name}}
+    fun as{{output.className}}(entity: {{entity.className}}): {{output.className}}
+    {{~#if entry.isArray}}
+    fun as{{output.className}}List(entity: List<{{entity.className}}>): List<{{output.className}}>
+    {{~/if}}
+    {{~#if entry.isPaginated}}
+    fun as{{output.className}}Page(page: Page<{{entity.className}}>): Page<{{output.className}}> {
+        return page.map { as{{output.className}}(it) }
+    }
+    {{~/if}}
+{{~/each}}
+
+{{~#each service.aggregates as |entityName|}}
+    {{~assign "entity" (findEntity entityName)}}
+    {{~assign 'relationships' (findOwnedOneToManyRelationships entity)}}
+    {{~#if relationships}}
+    @AfterMapping
+    fun manageRelationships(entity: {{entity.className}}) {
+        {{~#each relationships as |relationship|}}
+        entity.get{{capitalize relationship.fieldName}}()?.forEach { {{relationship.fieldName}} ->
+            {{relationship.fieldName}}.set{{capitalize relationship.otherEntityFieldName}}(entity)
+        }
+        {{~/each}}
+    }
+    {{~/if}}
+{{~/each}}
+}
