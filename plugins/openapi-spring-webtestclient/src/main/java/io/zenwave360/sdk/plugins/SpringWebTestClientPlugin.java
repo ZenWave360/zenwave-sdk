@@ -3,7 +3,9 @@ package io.zenwave360.sdk.plugins;
 import io.zenwave360.sdk.Plugin;
 import io.zenwave360.sdk.doc.DocumentedPlugin;
 import io.zenwave360.sdk.parsers.DefaultYamlParser;
+import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.processors.OpenApiProcessor;
+
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 import org.apache.commons.lang3.StringUtils;
@@ -19,7 +21,7 @@ public class SpringWebTestClientPlugin extends Plugin {
     private Logger log = LoggerFactory.getLogger(getClass());
     public SpringWebTestClientPlugin() {
         super();
-        withChain(DefaultYamlParser.class, OpenApiProcessor.class, SpringWebTestClientGenerator.class, /* JavaFormatter.class, */ TemplateFileWriter.class);
+        withChain(ZDLParser.class, DefaultYamlParser.class, OpenApiProcessor.class, SpringWebTestClientGenerator.class, /* JavaFormatter.class, */ TemplateFileWriter.class);
     }
 
     @Override

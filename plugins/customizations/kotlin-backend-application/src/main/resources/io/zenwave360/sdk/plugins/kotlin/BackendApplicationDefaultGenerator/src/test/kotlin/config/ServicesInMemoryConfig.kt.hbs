@@ -52,7 +52,7 @@ open class ServicesInMemoryConfig : RepositoriesInMemoryConfig() {
 
 {{~#each services as |service|}}
     @Bean
-    fun <T : {{service.name}}> {{asInstanceName service.name}}(): T {
+    open fun <T : {{service.name}}> {{asInstanceName service.name}}(): T {
         return {{asInstanceName service.name}} as T
     }
 {{~/each}}
@@ -79,9 +79,9 @@ open class ServicesInMemoryConfig : RepositoriesInMemoryConfig() {
 
 {{~#if (includeEmitEventsImplementation service)}}
     {{~#if (needsEventsProducer service)}}
-    fun getEventsProducerInMemoryContext(): EventsProducerInMemoryContext {
-        return eventsProducerInMemoryContext
-    }
+    // fun getEventsProducerInMemoryContext(): EventsProducerInMemoryContext {
+    //     return eventsProducerInMemoryContext
+    // }
     {{~/if}}
 {{~/if}}
 {{~#if (needsEventBus service)}}

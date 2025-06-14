@@ -46,7 +46,7 @@ interface {{service.name}}Mapper {
     {{~assign 'relationships' (findOwnedOneToManyRelationships entity)}}
     {{~#if relationships}}
     @AfterMapping
-    fun manageRelationships(entity: {{entity.className}}) {
+    fun manageRelationships(@MappingTarget entity: {{entity.className}}) {
         {{~#each relationships as |relationship|}}
         entity.{{relationship.fieldName}}?.forEach { {{relationship.fieldName}} ->
             {{relationship.fieldName}}.{{relationship.otherEntityFieldName}} = entity

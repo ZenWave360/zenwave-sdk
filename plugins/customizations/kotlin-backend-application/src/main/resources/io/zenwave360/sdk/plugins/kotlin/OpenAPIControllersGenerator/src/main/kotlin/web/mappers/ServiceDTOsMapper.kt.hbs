@@ -6,6 +6,7 @@ import {{layout.inboundDtosPackage}}.*
 import {{openApiModelPackage}}.*
 
 import org.mapstruct.Mapper
+import org.mapstruct.Mapping
 import org.mapstruct.factory.Mappers
 import java.math.*
 import java.time.*
@@ -33,6 +34,7 @@ interface {{serviceName}}DTOsMapper {
 {{~#each mapperResponseDtoEntity as |entry|}}
     {{#if isResponsePaginated}}
     fun as{{responseDto}}List(entityList: List<{{outputType}}>): List<{{responseDto}}>
+    @Mapping(target = "content", source = "content", conditionExpression = "java(page.getContent() != null)")
     fun as{{responseEntityName}}(page: Page<{{outputType}}>): {{responseEntityName}}
     fun as{{responseDto}}Page(page: Page<{{outputType}}>): Page<{{responseDto}}> {
         return page.map { this.as{{responseDto}}(it) }

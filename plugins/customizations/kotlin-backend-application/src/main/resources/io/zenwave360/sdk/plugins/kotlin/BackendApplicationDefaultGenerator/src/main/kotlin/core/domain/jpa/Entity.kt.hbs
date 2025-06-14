@@ -166,6 +166,10 @@ data class {{entity.className}}(
 {{/each}}
 
 {{#unless (skipEntityId entity)~}}
+    override fun toString(): String {
+        return this::class.java.name + "#" + id
+    }
+
     /* https://vladmihalcea.com/the-best-way-to-implement-equals-hashcode-and-tostring-with-jpa-and-hibernate/ */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -175,6 +179,10 @@ data class {{entity.className}}(
 
     override fun hashCode(): Int {
         return javaClass.hashCode()
+    }
+{{else}}
+    override fun toString(): String {
+        return this::class.java.name + "@" + Integer.toHexString(hashCode())
     }
 {{~/unless}}
 }

@@ -76,7 +76,9 @@ public class EntitiesToSchemasConverter {
             if (includeVersion) {
                 properties.put("version", Maps.of(
                         "type", "integer",
-                        "description", "Version of the document (required in PUT for concurrency control, should be null in POSTs)."));
+                        "default", "null",
+                        "description", "Version of the document (required in PUT for concurrency control, should be null in POSTs).")
+                );
             }
         }
 
