@@ -11,6 +11,9 @@ import {{layout.entitiesPackage}}.*
 /**
  * {{event.comment}}
  */
+{{~#if useSpringModulith}}
+@org.springframework.modulith.NamedInterface("events.{{event.className}}")
+{{~/if}}
 {{abstractClass event}} data class {{event.className}} {{addExtends event}} (
 {{#each event.fields as |field|}}
     {{{fieldValidationAnnotations field}}}

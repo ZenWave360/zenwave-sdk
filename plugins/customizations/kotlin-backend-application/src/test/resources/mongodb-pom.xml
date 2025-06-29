@@ -21,8 +21,8 @@
         <archunit-junit5.version>1.0.1</archunit-junit5.version>
         <mapstruct.version>1.5.1.Final</mapstruct.version>
         <spring-cloud.version>2025.0.0</spring-cloud.version>
+        <spring-modulith.version>1.4.1</spring-modulith.version>
         <avro.version>1.11.1</avro.version>
-        <testcontainers.version>1.17.2</testcontainers.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <jakarta-annotation.version>2.1.1</jakarta-annotation.version>
         <validation-api.version>3.0.2</validation-api.version>
@@ -52,6 +52,13 @@
                 <artifactId>archunit-junit5-api</artifactId>
                 <version>${archunit-junit5.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.modulith</groupId>
+                <artifactId>spring-modulith-bom</artifactId>
+                <version>${spring-modulith.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -191,6 +198,12 @@
             <artifactId>spring-cloud-stream-schema</artifactId>
             <version>2.2.1.RELEASE</version>
         </dependency>
+        <!-- Spring Modulith dependencies -->
+        <dependency>
+            <groupId>org.springframework.modulith</groupId>
+            <artifactId>spring-modulith-starter-core</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
@@ -254,6 +267,13 @@
         <dependency>
             <groupId>com.tngtech.archunit</groupId>
             <artifactId>archunit-junit5-api</artifactId>
+        </dependency>
+
+        <!-- For testing modules -->
+        <dependency>
+            <groupId>org.springframework.modulith</groupId>
+            <artifactId>spring-modulith-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

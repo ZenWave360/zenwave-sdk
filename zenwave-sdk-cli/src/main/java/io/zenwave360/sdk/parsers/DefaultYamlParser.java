@@ -22,6 +22,8 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
     @DocumentedOption(description = "API Specification File")
     public URI apiFile;
     public String targetProperty = "api";
+    @DocumentedOption(description = "a")
+    public String apiKeyAUthencitation = "apiKey";
 
     private ClassLoader projectClassLoader;
 

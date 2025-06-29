@@ -8,6 +8,7 @@ import io.zenwave360.sdk.plugins.BackendApplicationDefaultJpaHelpers;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.CleanArchitectureProjectLayout;
+import io.zenwave360.sdk.zdl.layouts.CleanHexagonalProjectLayout;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 
@@ -22,6 +23,9 @@ import static io.zenwave360.sdk.zdl.utils.ZDLFindUtils.is;
 
 public class BackendApplicationKotlinTemplates extends ProjectTemplates {
 
+    @DocumentedOption(description = "Whether to use Spring Modulith annotations and features")
+    public boolean useSpringModulith = false;
+
     @DocumentedOption(description = "Whether to add AsyncAPI/ApplicationEventPublisher as service dependencies. Depends on the naming convention of zenwave-asyncapi plugin to work.")
     public boolean includeEmitEventsImplementation = true;
 
@@ -34,6 +38,13 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
     protected Function<Map<String, Object>, Boolean> skipEvents = (model) -> !includeEmitEventsImplementation;
     protected Function<Map<String, Object>, Boolean> skipEventsBus = (model) -> ((Collection) model.get("events")).isEmpty();
     protected Function<Map<String, Object>, Boolean> skipInput = (model) -> is(model, "inline");
+
+    protected Function<Map<String, Object>,Boolean> skipModulith = (model) -> !useSpringModulith;
+    protected Function<Map<String, Object>,Boolean> skipModulithCommonModule = (model) ->
+            !useSpringModulith || layout.commonPackage.equals(layout.moduleBasePackage);
+
+    protected Function<Map<String, Object>,Boolean> skipCleanArchitecture = (model) -> !(layout instanceof CleanHexagonalProjectLayout);
+
 
     @Override
     public List<Object> getTemplateHelpers(Generator generator) {
@@ -118,9 +129,12 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
         this.addTemplate(this.singleTemplates, "src/main/kotlin", "infrastructure/package-info.kt",
                 layoutNames.infrastructurePackage, "package-info.kt", KOTLIN, null, true);
 
-        if(this.layout instanceof CleanArchitectureProjectLayout) {
-            this.addTemplate(this.singleTemplates, "src/test/kotlin", "ArchitectureTest.kt",
-                    layoutNames.moduleBasePackage, "ArchitectureTest.kt", KOTLIN, null, true);
-        }
+        this.addTemplate(this.singleTemplates, "src/main/kotlin", "CommonModuleMetadata.kt",
+                layoutNames.commonPackage, "ModuleMetadata.kt", KOTLIN, skipModulithCommonModule, true);
+        this.addTemplate(this.singleTemplates, "src/main/kotlin", "ModuleMetadata.kt",
+                layoutNames.moduleBasePackage, "ModuleMetadata.kt", KOTLIN, skipModulith, true);
+
+        this.addTemplate(this.singleTemplates, "src/test/kotlin", "ArchitectureTest.kt",
+                layoutNames.moduleBasePackage, "ArchitectureTest.kt", KOTLIN, skipCleanArchitecture, true);
     }
 }

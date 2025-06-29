@@ -14,6 +14,9 @@ import {{layout.entitiesPackage}}.*;
 {{~#if useLombok}}
 @lombok.Getter @lombok.Setter
 {{~/if}}
+{{~#if useSpringModulith}}
+@org.springframework.modulith.NamedInterface("events.{{event.className}}")
+{{~/if}}
 public {{abstractClass event}} class {{event.className}} {{addExtends event}} implements Serializable {
 
     @java.io.Serial
