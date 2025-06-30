@@ -45,6 +45,9 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
 
     protected Function<Map<String, Object>,Boolean> skipCleanArchitecture = (model) -> !(layout instanceof CleanHexagonalProjectLayout);
 
+    protected Function<Map<String, Object>,Boolean> skipInfrastructurePackageInfo = (model) ->
+            layout.moduleBasePackage.equals(layout.infrastructurePackage);
+
 
     @Override
     public List<Object> getTemplateHelpers(Generator generator) {
@@ -127,7 +130,7 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
         this.addTemplate(this.singleTemplates, "src/main/kotlin", "core/inbound/dtos/package-info.kt",
                 layoutNames.inboundDtosPackage, "package-info.kt", KOTLIN, null, true);
         this.addTemplate(this.singleTemplates, "src/main/kotlin", "infrastructure/package-info.kt",
-                layoutNames.infrastructurePackage, "package-info.kt", KOTLIN, null, true);
+                layoutNames.infrastructurePackage, "package-info.kt", KOTLIN, skipInfrastructurePackageInfo, true);
 
         this.addTemplate(this.singleTemplates, "src/main/kotlin", "CommonModuleMetadata.kt",
                 layoutNames.commonPackage, "ModuleMetadata.kt", KOTLIN, skipModulithCommonModule, true);

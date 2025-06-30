@@ -219,7 +219,7 @@ public class ZDLJavaSignatureUtils {
             return String.format("List<%s%s%s>", prefix, type, suffix);
         }
         if ("Map".equals(type)) {
-            return "Map<String, Object>";
+            return "Map<String,Object>";
         }
         return String.format("%s%s%s", prefix, type, suffix);
     };

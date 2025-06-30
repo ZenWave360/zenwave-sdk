@@ -41,6 +41,9 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
 
     protected Function<Map<String, Object>,Boolean> skipCleanArchitecture = (model) -> !(layout instanceof CleanHexagonalProjectLayout);
 
+    protected Function<Map<String, Object>,Boolean> skipInfrastructurePackageInfo = (model) ->
+            layout.moduleBasePackage.equals(layout.infrastructurePackage);
+
     @Override
     public List<Object> getTemplateHelpers(Generator generator) {
         var helpers = new ArrayList<>(super.getTemplateHelpers(generator));
@@ -121,7 +124,7 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
         this.addTemplate(this.singleTemplates, "src/main/java", "core/inbound/dtos/package-info.java",
                 layoutNames.inboundDtosPackage, "package-info.java", JAVA, null, true);
         this.addTemplate(this.singleTemplates, "src/main/java", "infrastructure/package-info.java",
-                layoutNames.infrastructurePackage, "package-info.java", JAVA, null, true);
+                layoutNames.infrastructurePackage, "package-info.java", JAVA, skipInfrastructurePackageInfo, true);
 
         this.addTemplate(this.singleTemplates, "src/main/java", "common-package-info.java",
                 layoutNames.commonPackage, "package-info.java", JAVA, skipModulithCommonModule, true);
