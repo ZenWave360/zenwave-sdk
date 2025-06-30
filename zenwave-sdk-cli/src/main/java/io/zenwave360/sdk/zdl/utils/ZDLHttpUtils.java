@@ -137,9 +137,10 @@ public class ZDLHttpUtils {
                 .filter(entry -> !pathParams.contains(entry.getKey()))
                 .map(entry -> {
                     var type = entry.getValue();
+                    var isArray = JSONPath.get(zdl, "$.allEntitiesAndEnums." + methodParameterType + ".fields." + entry.getKey() + ".isArray", false);
                     var typeAndFormat = EntitiesToSchemasConverter.schemaTypeAndFormat((String) type);
                     var description = JSONPath.get(zdl, "$.allEntitiesAndEnums." + methodParameterType + ".fields." + entry.getKey() + ".javadoc");
-                    return Maps.of("name", entry.getKey(), "type", typeAndFormat.get("type"), "format", typeAndFormat.get("format"), "description", description);
+                    return Maps.of("name", entry.getKey(), "type", typeAndFormat.get("type"), "format", typeAndFormat.get("format"), "description", description, "isArray", isArray);
                 })
                 .toList();
     }

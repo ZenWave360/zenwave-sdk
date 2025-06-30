@@ -120,7 +120,7 @@ data class {{entity.className}}(
     {{~#if (eq relationship.type 'OneToOne')}}
     fun set{{capitalize relationship.fieldName}}({{relationship.fieldName}}: {{{relationshipFieldType relationship}}}?): {{entity.className}} {
         this.{{relationship.fieldName}} = {{relationship.fieldName}}
-        {{relationship.fieldName}}?.set{{capitalize relationship.otherEntityFieldName}}(this)
+        {{relationship.fieldName}}?.{{relationship.otherEntityFieldName}} = this
         return this
     }
     {{~/if}}

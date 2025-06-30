@@ -76,6 +76,15 @@ public class ZDLJavaSignatureUtils {
         return String.format("java.util.Optional<%s> findBy%s(%s)", entity.get("name"), StringUtils.join(fieldNames, "And"), params);
     }
 
+    public static String naturalIdsKotlinRepoMethodSignature(Map entity) {
+        List<Map> fields = ZDLFindUtils.naturalIdFields(entity);
+        var params = fieldsParamsSignature(fields);
+        params = toKotlinMethodSignature(params);
+        var fieldNames = fields.stream().map(f -> NamingUtils.camelCase((String) f.get("name"))).toList();
+        return String.format("fun findBy%s(%s): java.util.Optional<%s>", StringUtils.join(fieldNames, "And"), params, entity.get("name"));
+    }
+
+
     public static String naturalIdsRepoMethodCallSignature(Map entity) {
         List<Map> fields = ZDLFindUtils.naturalIdFields(entity);
         var params = fieldsParamsCallSignature(fields);
@@ -111,6 +120,9 @@ public class ZDLJavaSignatureUtils {
     }
 
     public static String toKotlinMethodSignature(String signature) {
+        if(signature == null || signature.isEmpty()) {
+            return "";
+        }
         var params = signature.split(", ");
         for (int i = 0; i < params.length; i++) {
             var param = params[i].split(" ");
@@ -155,7 +167,12 @@ public class ZDLJavaSignatureUtils {
             var fields = (Map<String, Map>) JSONPath.get(zdl, "$.inputs." + inputType + ".fields");
             if (isInline && fields != null && !fields.isEmpty()) {
                 for (var field : fields.entrySet()) {
-                    params.add(String.format("%s %s", field.getValue().get("type"), field.getKey()));
+                    var isArray = JSONPath.get(field.getValue(), "$.isArray", false);
+                    if(isArray) {
+                        params.add(String.format("List<%s> %s", field.getValue().get("type"), field.getKey()));
+                    } else {
+                        params.add(String.format("%s %s", field.getValue().get("type"), field.getKey()));
+                    }
                 }
             } else {
                 var methodParameterType = method != null? methodParameterType(method, zdl) : inputType;

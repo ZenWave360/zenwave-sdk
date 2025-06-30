@@ -59,10 +59,19 @@ paths:
           description: "{{queryParam.description}}"
           {{~/if}}
           schema:
+          {{~#if queryParam.isArray}}
+            type: array
+            items:
+              type: {{queryParam.type}}
+              {{~#if queryParam.format}}
+              format: {{queryParam.format}}
+              {{~/if}}
+          {{~else}}
             type: {{queryParam.type}}
             {{~#if queryParam.format}}
             format: {{queryParam.format}}
             {{~/if}}
+          {{~/if}}
         {{~/each}}
         {{~#if operation.paginated}}
         - $ref: "#/components/parameters/page"

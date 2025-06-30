@@ -17,6 +17,14 @@ public class BackendApplicationKotlinHelpers {
         this.generator = generator;
     }
 
+    public String javaType(Map field, Options options) {
+        return ZDLJavaSignatureUtils.javaType(field).replace("byte[]", "ByteArray");
+    }
+
+    public String naturalIdsRepoMethodSignature(Map entity, Options options) {
+        return ZDLJavaSignatureUtils.naturalIdsKotlinRepoMethodSignature(entity);
+    }
+
     public String methodParametersSignature(Map<String, Object> method, Options options) {
         var zdl = (Map) options.get("zdl");
         return ZDLJavaSignatureUtils.kotlinMethodParametersSignature(generator.getIdJavaType(), method, zdl);
@@ -96,6 +104,7 @@ public class BackendApplicationKotlinHelpers {
 
     private String fixKotlinCollectionTypes(String type) {
         return type
+                .replaceAll("byte\\[]", "ByteArray")
                 .replaceAll("Set<", "MutableSet<")
                 .replaceAll("List<", "MutableList<")
                 .replaceAll("Map<", "MutableMap<");

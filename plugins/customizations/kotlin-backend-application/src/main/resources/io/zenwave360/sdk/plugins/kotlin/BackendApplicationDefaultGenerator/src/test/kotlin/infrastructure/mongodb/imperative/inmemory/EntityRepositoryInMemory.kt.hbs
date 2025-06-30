@@ -9,7 +9,7 @@ import java.util.*
 class {{entity.className}}RepositoryInMemory : InMemoryMongodbRepository<{{entity.className}}>(), {{entity.className}}Repository {
 
 {{~#if (naturalIdFields entity)}}
-    override fun {{{naturalIdsRepoMethodSignature entity}}} {
+    override {{{naturalIdsRepoMethodSignature entity}}} {
         return getEntities().values.stream().filter { e ->
             {{#joinWithTemplate (naturalIdFields entity) delimiter='&&'}} isSameValue({{name}}, readField(e, "{{name}}")) {{/joinWithTemplate}}
         }.findFirst()

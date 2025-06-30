@@ -1,5 +1,6 @@
 package io.zenwave360.sdk.plugins.kotlin;
 
+import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.plugins.OpenAPIControllersGenerator;
 import io.zenwave360.sdk.plugins.OpenAPIControllersHelpers;
@@ -7,10 +8,18 @@ import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 import static io.zenwave360.sdk.templating.OutputFormatType.KOTLIN;
 
 public class OpenAPIControllersKotlinTemplates extends ProjectTemplates {
+
+    @DocumentedOption(description = "Include Controller Unit tests (using ServicesInMemoryConfig)")
+    public boolean includeControllerTests = true;
+
+    public Function<Map<String, Object>, Boolean> skipControllerTests = (model) -> !includeControllerTests;
+
     public OpenAPIControllersKotlinTemplates() {
         setTemplatesFolder("io/zenwave360/sdk/plugins/kotlin/OpenAPIControllersGenerator");
 
@@ -22,7 +31,7 @@ public class OpenAPIControllersKotlinTemplates extends ProjectTemplates {
         this.addTemplate(this.serviceTemplates, "src/main/kotlin", "web/{{webFlavor}}/ServiceApiController.kt",
                 layoutNames.adaptersWebPackage, "{{serviceName}}ApiController.kt", KOTLIN, null, false);
         this.addTemplate(this.serviceTemplates, "src/test/kotlin", "web/{{webFlavor}}/ServiceApiControllerTest.kt",
-                layoutNames.adaptersWebPackage, "{{serviceName}}ApiControllerTest.kt", KOTLIN, null, true);
+                layoutNames.adaptersWebPackage, "{{serviceName}}ApiControllerTest.kt", KOTLIN, skipControllerTests, true);
 
     }
 
