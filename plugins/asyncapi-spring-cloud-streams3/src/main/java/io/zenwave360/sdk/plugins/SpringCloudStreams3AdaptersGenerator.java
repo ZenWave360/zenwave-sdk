@@ -1,12 +1,5 @@
 package io.zenwave360.sdk.plugins;
 
-import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.options.ProgrammingStyle;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiOperationType;
@@ -16,6 +9,13 @@ import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
 
 public class SpringCloudStreams3AdaptersGenerator extends SpringCloudStreams3Generator {
 

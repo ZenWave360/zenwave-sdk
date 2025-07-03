@@ -1,5 +1,5 @@
 // formatter:off
-package {{layout.basePackage}};
+package {{layout.moduleBasePackage}};
 
 import com.tngtech.archunit.core.importer.ImportOption.DoNotIncludeTests;
 import com.tngtech.archunit.junit.AnalyzeClasses;
@@ -11,7 +11,7 @@ import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPac
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 import static com.tngtech.archunit.library.Architectures.onionArchitecture;
 
-@AnalyzeClasses(packages = "{{basePackage}}", importOptions = DoNotIncludeTests.class)
+@AnalyzeClasses(packages = "{{moduleBasePackage}}", importOptions = DoNotIncludeTests.class)
 class ArchitectureTest {
 
     /**
@@ -27,7 +27,7 @@ class ArchitectureTest {
      */
     @ArchTest
     static final ArchRule respectsLayersForHexagonalArchitecture = layeredArchitecture()
-        .consideringOnlyDependenciesInAnyPackage("{{basePackage}}..")
+        .consideringOnlyDependenciesInAnyPackage("{{moduleBasePackage}}..")
         .layer("Any").definedBy("..")
         .layer("Config").definedBy("..config..")
         .layer("Core").definedBy("..core..")

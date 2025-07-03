@@ -33,6 +33,9 @@ public class BackendApplicationDefaultGenerator extends ZDLProjectGenerator {
     @DocumentedOption(description = "Use @Getter and @Setter annotations from Lombok")
     public boolean useLombok = false;
 
+    @DocumentedOption(description = "Whether to use Spring Modulith annotations and features")
+    public boolean useSpringModulith = false;
+
     @DocumentedOption(description = "Whether to add AsyncAPI/ApplicationEventPublisher as service dependencies. Depends on the naming convention of zenwave-asyncapi plugin to work.")
     public boolean includeEmitEventsImplementation = true;
 

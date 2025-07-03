@@ -14,6 +14,9 @@ import org.springframework.data.domain.Pageable;
 /**
  * Inbound Service Port for managing {{service.entityNames}}.
  */
+{{~#if useSpringModulith}}
+@org.springframework.modulith.NamedInterface("{{service.name}}")
+{{~/if}}
 public interface {{service.name}} {
 
 {{#each service.methods as |method|}}
