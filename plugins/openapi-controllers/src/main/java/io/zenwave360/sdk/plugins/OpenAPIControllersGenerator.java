@@ -37,7 +37,8 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     @DocumentedOption(description = "Programming Style")
     public ProgrammingStyle style = ProgrammingStyle.imperative;
 
-    public boolean useOptional = false;
+    @DocumentedOption(description = "Include Controller Unit tests (using ServicesInMemoryConfig)")
+    public boolean includeControllerTests = true;
 
     @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. User '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
     public List<String> paginatedDtoItemsJsonPath = List.of("$.items", "$.properties.content.items");
@@ -82,7 +83,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
 
 
             List<Map<String, Object>> serviceOperations = new ArrayList<>();
-            Map<String, Map<String, String>> mapperRequestDtoEntity = new HashMap<>();
+            Map<String, Map<String, Object>> mapperRequestDtoEntity = new HashMap<>();
             Map<String, Map<String, Object>> mapperResponseDtoEntity = new HashMap<>();
 
             for (Map operation : operationByServiceEntry.getValue()) {
@@ -141,7 +142,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                 } else if (requestDto != null && inputType != null) {
                     var requestKey = format("%s_%s", requestDtoName, inputType);
                     Maps.getOrCreateDefault(mapperRequestDtoEntity, requestKey, new HashMap<>())
-                            .putAll(Map.of("requestDto", requestDtoName, "inputType", inputType));
+                            .putAll(Map.of("requestDto", requestDtoName, "inputType", inputType, "operation", operation));
                 } else if (inputType != null && StringUtils.isNotBlank(serviceMethodParameter)) {
                     var requestKey = format("%s_%s", methodParameters, inputType);
                     Maps.getOrCreateDefault(mapperRequestDtoEntity, requestKey, new HashMap<>())

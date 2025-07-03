@@ -51,10 +51,10 @@ open class {{serviceName}}ApiController(
         return Optional.ofNullable(request)
     }
 
-{{#each serviceOperations}}
+{{#each serviceOperations as |operation|}}
     {{~#assign "TODO"}}{{#unless serviceMethod}}null // TODO: service{{/unless}}{{/assign}}
 
-    override fun {{operationId}}({{{kotlinMethodParametersSignature methodParameters}}}): ResponseEntity<{{{voidUnit responseEntityExpression}}}> {
+    override fun {{operationId}}({{{methodParameters operation}}}): ResponseEntity<{{{voidUnit responseEntityExpression}}}> {
         log.debug("REST request to {{operationId}}: {{methodParameterPlaceholders}}"{{#if methodParameters}}, {{methodParameterInstances}}{{/if}})
     {{~#if (eq httpMethod 'patch')}}
     {{~else if requestBodySchema}}

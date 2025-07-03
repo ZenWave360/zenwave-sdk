@@ -24,7 +24,15 @@ public class OpenAPIControllersKotlinHelpers {
 
     public String kotlinMethodParametersSignature(String methodParametersSignature, Options options) {
         return ZDLJavaSignatureUtils.toKotlinMethodSignature(methodParametersSignature)
-                .replaceAll(": Integer", ": Int");
+                .replaceAll(": Integer", ": Int")
+                .replaceAll(": Map", ": java.util.Map<String,Any?>");
+    }
+
+    public String methodParameters(Map operation, Options options) {
+        var requiredFields = JSONPath.get(operation, "x--request-schema.required", List.<String>of());
+        return ZDLHttpUtils.methodParameters(operation, openApiModelNamePrefix, openApiModelNameSuffix).stream().map(param -> {
+            return param.getKey() + " " + param.getValue() + (requiredFields.contains(param.getValue()) ? "" : "?");
+        }).collect(Collectors.joining(", "));
     }
 
     public String voidUnit(String returnType, Options options) {

@@ -58,11 +58,11 @@ open class ServicesInMemoryConfig : RepositoriesInMemoryConfig() {
 {{~/each}}
 
 {{assign "aggregates" (findAggregates entities)}}
-{{~#each aggregates as |entity|}}
 	companion object {
+{{~#each aggregates as |entity|}}
 		var _{{entity.instanceNamePlural}}: List<{{entity.className}}>? = null
-	}
 {{~/each}}
+    }
 
 	fun reloadTestData() {
         {{assign "phisicalEntities" (jsonPath entities "$[?(@.options.skip != true)]")}}
@@ -73,7 +73,7 @@ open class ServicesInMemoryConfig : RepositoriesInMemoryConfig() {
 		{{entity.instanceName}}Repository().saveAll({{entity.instanceNamePlural}})
 		{{~/each}}
         {{~#if (needsEventBus service)}}
-        eventPublisher.events.clear()
+        eventPublisher.getEvents().clear()
         {{~/if}}
 	}
 

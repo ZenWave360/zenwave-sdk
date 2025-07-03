@@ -4,15 +4,15 @@ import {{layout.domainEventsPackage}}.*
 import {{layout.entitiesPackage}}.*
 import {{layout.outboundEventsPackage}}.EventPublisher
 
-class InMemoryEventPublisher : EventPublisher {
+class InMemoryEventPublisher: EventPublisher {
 
     private val events = mutableListOf<Any>()
 
-    fun getEvents(): List<Any> {
+    fun getEvents(): MutableList<Any> {
         return events
     }
 {{~#each events as |event|}}
-    fun on{{event.className}}(event: {{event.className}}) {
+    override fun on{{event.className}}(event: {{event.className}}) {
         events.add(event)
     }
 {{~/each}}
