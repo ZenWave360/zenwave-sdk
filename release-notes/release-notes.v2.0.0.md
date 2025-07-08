@@ -13,7 +13,7 @@ These changes are transparent for users and it will help build tools around ZenW
 Users that need to rely on previous version with jbang can use the following command:
 
 ```shell
-jbang alias add --fresh --force --name=zw v1.7.1@zenwave360/zenwave-sdk
+jbang alias add --fresh --force --name=zw v1_7_1@zenwave360/zenwave-sdk
 ```
 
 This release also includes several bugfixes and new features:

@@ -13,6 +13,6 @@ aux_links:
 ga_tracking: G-PWPE0ZF877
 ga_tracking_anonymize_ip: true # Use GDPR compliant Google Analytics settings (true by default)
 
-exclude: e2e
+exclude: e2e,release-notes
 
 footer_content: "ZenWave360 &copy; 2022-2024 - Domain Driven Design (DDD) and API-First for Event Driven Microservices."
