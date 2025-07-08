@@ -1,5 +1,6 @@
 package io.zenwave360.sdk.generators;
 
+import static java.lang.reflect.Modifier.isPrivate;
 import static java.lang.reflect.Modifier.isStatic;
 import static org.apache.commons.lang3.reflect.FieldUtils.getAllFields;
 
@@ -39,7 +40,7 @@ public abstract class Generator {
         Field[] fields = getAllFields(object.getClass());
         for (Field field : fields) {
             try {
-                if (!isStatic(field.getModifiers()) && field.canAccess(object) && !field.getName().startsWith("this$")) {
+                if (!isStatic(field.getModifiers()) && !isPrivate(field.getModifiers()) && field.canAccess(object) && !field.getName().startsWith("this$")) {
                     var value = field.get(object);
                     if (value instanceof ProjectLayout layout) {
                         config.put("layout", layout.asMap());
