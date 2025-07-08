@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.TemplateEngine;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
@@ -15,8 +16,10 @@ import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 
 public abstract class Generator {
 
+    @JsonIgnore
     private final HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
+    @JsonIgnore
     public TemplateEngine getTemplateEngine() {
         return handlebarsEngine;
     }
