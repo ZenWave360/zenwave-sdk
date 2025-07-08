@@ -24,8 +24,10 @@ public class KotlinFormatter implements io.zenwave360.sdk.formatters.Formatter {
     private final FormattingOptions formattingOptions = new FormattingOptions(120, 4, 4, true, true, false);
 
     public void format(GeneratedProjectFiles generatedProjectFiles) {
-        generatedProjectFiles.getAllTemplateOutputs().stream().map(t -> format(t)).collect(Collectors.toList());
+        generatedProjectFiles.getAllTemplateOutputs()
+                .forEach(t -> t.merge(format(t)));
     }
+
 
     public TemplateOutput format(TemplateOutput templateOutput) {
         if (skipFormatting) {

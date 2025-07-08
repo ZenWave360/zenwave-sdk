@@ -29,8 +29,8 @@ public class GoogleJavaFormatter implements io.zenwave360.sdk.formatters.Formatt
     }
 
     public void format(GeneratedProjectFiles generatedProjectFiles) {
-        generatedProjectFiles.getAllTemplateOutputs().stream()
-                .map(t -> format(t)).collect(Collectors.toList());
+        generatedProjectFiles.getAllTemplateOutputs()
+                .forEach(t -> t.merge(format(t)));
     }
 
     public TemplateOutput format(TemplateOutput templateOutput) {
