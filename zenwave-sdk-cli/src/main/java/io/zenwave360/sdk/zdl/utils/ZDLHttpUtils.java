@@ -70,7 +70,9 @@ public class ZDLHttpUtils {
             return "Boolean";
         }
         if ("array".equals(type)) {
-            return "List<String>";
+            var itemsSchema = JSONPath.get(param, "$.schema.items");
+            var itemsType = getJavaType(Maps.of("schema", itemsSchema), openApiModelNamePrefix, openApiModelNameSuffix);
+            return "List<" + itemsType + ">";
         }
         if(schemaName != null) {
             return openApiModelNamePrefix + schemaName + openApiModelNameSuffix;
