@@ -475,7 +475,7 @@ public class BackendApplicationDefaultHelpers {
 
     public Object skipEntityId(Map entity, Options options) {
         var zdl = options.get("zdl");
-        return is(Map.of("zdl", zdl, "entity", entity), "vo", "input");
+        return is(Map.of("zdl", zdl, "entity", entity), "embedded", "vo", "input", "abstract");
     };
 
     public Object addExtends(Object entity, Options options) {
