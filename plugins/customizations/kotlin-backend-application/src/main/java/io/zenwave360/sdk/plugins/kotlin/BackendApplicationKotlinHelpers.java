@@ -32,9 +32,7 @@ public class BackendApplicationKotlinHelpers {
 
     public String mapperInputSignature(String inputType, Options options) {
         var zdl = (Map) options.get("zdl");
-        var signature = ZDLJavaSignatureUtils.mapperInputSignature(inputType, zdl);
-        signature = signature.replace("java.util.Map input", "java.util.Map<String,Any?> input");
-        return ZDLJavaSignatureUtils.toKotlinMethodSignature(signature);
+        return ZDLJavaSignatureUtils.kotlinMapperInputSignature(inputType, zdl);
     }
 
     public String returnType(Map<String, Object> method, Options options) {
@@ -46,6 +44,12 @@ public class BackendApplicationKotlinHelpers {
         String suffix = (String) options.hash.getOrDefault("suffix", "");
         return fixKotlinCollectionTypes(ZDLJavaSignatureUtils.fieldType(field, prefix, suffix));
     };
+
+    public boolean isRequired(Map field, Options options) {
+        var isRequired = JSONPath.get(field, "validations.required") != null;
+        var isArray = JSONPath.get(field, "isArray", false);
+        return isRequired && !isArray;
+    }
 
     public String relationshipFieldType(Map field, Options options) {
         String prefix = (String) options.hash.getOrDefault("prefix", "");

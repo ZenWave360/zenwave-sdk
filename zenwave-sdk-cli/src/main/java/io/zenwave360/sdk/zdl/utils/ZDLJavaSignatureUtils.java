@@ -116,7 +116,18 @@ public class ZDLJavaSignatureUtils {
     public static String kotlinMethodParametersSignature(String idJavaType, Map method, Map zdl) {
         var signature = methodParametersSignature(idJavaType, method, zdl);
         signature = signature.replace("java.util.Map", "java.util.Map<String,Any?>");
-        return toKotlinMethodSignature(signature);
+        var kotlinSignature = toKotlinMethodSignature(signature);
+        var isInlineParam = JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("parameter") + ".options.inline", false);
+        if(isInlineParam) {
+            var optionalParamFields = JSONPath.get(zdl, "$.inputs." + method.get("parameter") + ".fields[*][?(!@.validations.required)]", List.<Map>of());
+            for (var field : optionalParamFields) {
+                if(!JSONPath.get(field, "$.isArray", false)) {
+                    kotlinSignature = kotlinSignature.replace(field.get("name") + ": " + field.get("type"), field.get("name") + ": " + field.get("type") + "?");
+                }
+            }
+
+        }
+        return kotlinSignature;
     }
 
     public static String toKotlinMethodSignature(String signature) {
@@ -146,6 +157,23 @@ public class ZDLJavaSignatureUtils {
             return "java.util.Map input";
         }
         return StringUtils.join(inputSignature(inputType, null, zdl), ", ");
+    }
+
+    public static String kotlinMapperInputSignature(String inputType, Map zdl) {
+        if("Map".equals(inputType) || "java.util.Map".equals(inputType)) {
+            return "input: java.util.Map<String,Any?>";
+        }
+        var mapperInputSignature = StringUtils.join(inputSignature(inputType, null, zdl), ", ");
+        var kotlinSignature = toKotlinMethodSignature(mapperInputSignature);
+        if(JSONPath.get(zdl, "$.inputs." + inputType + ".options.inline", false)) {
+            var optionalParamFields = JSONPath.get(zdl, "$.inputs." + inputType + ".fields[*][?(!@.validations.required)]", List.<Map>of());
+            for (var field : optionalParamFields) {
+                if(!JSONPath.get(field, "$.isArray", false)) {
+                    kotlinSignature = kotlinSignature.replace(field.get("name") + ": " + field.get("type"), field.get("name") + ": " + field.get("type") + "?");
+                }
+            }
+        }
+        return kotlinSignature;
     }
 
     public static String mapperInputCallSignature(String inputType, Map zdl) {

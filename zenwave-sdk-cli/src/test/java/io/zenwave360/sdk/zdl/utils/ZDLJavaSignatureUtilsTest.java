@@ -68,6 +68,32 @@ public class ZDLJavaSignatureUtilsTest {
     }
 
     @Test
+    void methodParametersSignatureWithNaturalIdsAndParameter_kotlin() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/natural-ids.zdl");
+        var method = JSONPath.get(model, "$.services.CustomerService.methods.updateCustomer", Map.of());
+        var signature = ZDLJavaSignatureUtils.kotlinMethodParametersSignature("String", method, model);
+        Assertions.assertEquals("customerId: Long, anotherId: String, input: Customer", signature);
+    }
+
+    @Test
+    void methodParametersSignatureWithInlineParameter_kotlin() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
+        var method = JSONPath.get(model, "$.services.CustomerService.methods.addCustomerAddress", Map.of());
+        var signature = ZDLJavaSignatureUtils.kotlinMethodParametersSignature("String", method, model);
+        Assertions.assertEquals("customerId: String, address: Address?", signature);
+    }
+
+    @Test
+    void kotlinMapperInputSignatureWithInline_kotlin() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
+        var method = JSONPath.get(model, "$.services.CustomerService.methods.addCustomerAddress", Map.of());
+        var signature = ZDLJavaSignatureUtils.kotlinMapperInputSignature("CustomerAddressId", model);
+        Assertions.assertEquals("customerId: String, address: Address?", signature);
+    }
+
+
+
+    @Test
     void methodParametersCallSignature() throws IOException {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
         var method = JSONPath.get(model, "$.services.AttachmentService.methods.downloadAttachmentFile", Map.of());

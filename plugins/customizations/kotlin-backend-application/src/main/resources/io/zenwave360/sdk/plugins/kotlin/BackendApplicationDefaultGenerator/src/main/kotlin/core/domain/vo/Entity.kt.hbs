@@ -25,7 +25,7 @@ data class {{entity.className}}(
 {{#each entity.fields as |field|}}
     {{~#if field.isArray}}
     fun add{{capitalize field.name}}({{field.name}}: {{javaType field}}): {{entity.className}} {
-        this.{{field.name}}.add({{field.name}})
+        this.{{field.name}} += {{field.name}}
         return this
     }
     {{~/if}}
