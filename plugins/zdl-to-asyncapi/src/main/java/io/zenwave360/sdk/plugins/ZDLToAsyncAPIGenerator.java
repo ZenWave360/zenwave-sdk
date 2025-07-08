@@ -148,7 +148,8 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
                 schemas.put(entityName, asyncAPISchema);
             }
             if (schemaFormat == SchemaFormat.avro) {
-                EntitiesToAvroConverter toAvroConverter = new EntitiesToAvroConverter().withIdType(idType).withNamespace(avroPackage);
+                var avroIdType = "string".equals(idType) ? "string" : "long";
+                EntitiesToAvroConverter toAvroConverter = new EntitiesToAvroConverter().withIdType(avroIdType).withNamespace(avroPackage);
                 generatedProjectFiles.singleFiles.addAll(convertToAvro(toAvroConverter, schema, model));
             }
         }
