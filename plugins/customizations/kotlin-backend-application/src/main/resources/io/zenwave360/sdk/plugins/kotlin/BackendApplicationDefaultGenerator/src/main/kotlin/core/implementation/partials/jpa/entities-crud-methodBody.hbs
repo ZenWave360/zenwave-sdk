@@ -25,7 +25,7 @@
     return {{wrapWithMapper _entity}}
 {{~else if (and (isCrudMethod 'get' method=method entity=_entity ) notHasNaturalId)}}
     log.debug("[CRUD] Request to get {{_entity.className}} : {}", id)
-    val {{_entity.instanceName}} = {{_entity.instanceName}}Repository.findById(id)
+    val {{_entity.instanceName}} = {{_entity.instanceName}}Repository.findByIdOrNull(id)
     return {{wrapWithMapper _entity}}
 {{~else if (and (isCrudMethod 'get' method=method entity=_entity ) hasNaturalId)}}
     {{{logMethodCall method}}}
@@ -38,8 +38,7 @@
 {{~else if (and (isCrudMethod 'delete' method=method entity=_entity ) hasNaturalId)}}
     {{{logMethodCall method}}}
     val {{_entity.instanceName}} = {{_entity.instanceName}}Repository.{{{naturalIdsRepoMethodCallSignature _entity}}}
-    if({{_entity.instanceName}}.isPresent()) {
-        {{_entity.instanceName}}Repository.delete({{_entity.instanceName}}.get())
+        ?.let { {{_entity.instanceName}}Repository.delete(it))
         {{~> (partial '../withEvents')}}
     }
 {{~/if}}

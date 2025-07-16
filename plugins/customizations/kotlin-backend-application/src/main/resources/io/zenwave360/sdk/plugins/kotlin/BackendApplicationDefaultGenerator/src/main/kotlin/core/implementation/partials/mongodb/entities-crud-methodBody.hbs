@@ -3,9 +3,8 @@
 {{~assign 'notHasNaturalId' (isFalsy hasNaturalId) }}
 {{~#if (isCrudMethod 'create' method=method entity=_entity )}}
     log.debug("[CRUD] Request to save {{_entity.className}}: {}", input)
-    val {{_entity.instanceName}} = {{_entity.instanceName}}Repository.save(
-        {{asInstanceName service.name}}Mapper.update({{_entity.className}}(), {{{mapperInputCallSignature method.parameter}}})
-    )
+    var {{_entity.instanceName}} = {{asInstanceName service.name}}Mapper.update({{_entity.className}}(), {{{mapperInputCallSignature method.parameter}}})
+    {{_entity.instanceName}} = {{_entity.instanceName}}Repository.save({{_entity.instanceName}})
     // TODO: may need to reload the entity to fetch relationships 'mapped by id'
     {{~> (partial '../withEvents')}}
     return {{wrapWithMapper _entity}}
@@ -26,7 +25,7 @@
     return {{wrapWithMapper _entity}}
 {{~else if (and (isCrudMethod 'get' method=method entity=_entity ) notHasNaturalId)}}
     log.debug("[CRUD] Request to get {{_entity.className}} : {}", id)
-    val {{_entity.instanceName}} = {{_entity.instanceName}}Repository.findById(id)
+    val {{_entity.instanceName}} = {{_entity.instanceName}}Repository.findByIdOrNull(id)
     return {{wrapWithMapper _entity}}
 {{~else if (and (isCrudMethod 'get' method=method entity=_entity ) hasNaturalId)}}
     {{{logMethodCall method}}}
@@ -39,8 +38,7 @@
 {{~else if (and (isCrudMethod 'delete' method=method entity=_entity ) hasNaturalId)}}
     {{{logMethodCall method}}}
     val {{_entity.instanceName}} = {{_entity.instanceName}}Repository.{{{naturalIdsRepoMethodCallSignature _entity}}}
-    {{_entity.instanceName}}.ifPresent { entity ->
-        {{_entity.instanceName}}Repository.delete(entity)
+        ?.let { {{_entity.instanceName}}Repository.delete(it))
         {{~> (partial '../withEvents')}}
     }
 {{~/if}}

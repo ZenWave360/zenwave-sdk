@@ -47,10 +47,6 @@ open class {{serviceName}}ApiController(
 
     private val mapper = {{serviceName}}DTOsMapper.INSTANCE
 
-    fun getRequest(): Optional<NativeWebRequest> {
-        return Optional.ofNullable(request)
-    }
-
 {{#each serviceOperations as |operation|}}
     {{~#assign "TODO"}}{{#unless serviceMethod}}null // TODO: service{{/unless}}{{/assign}}
 
@@ -82,7 +78,7 @@ open class {{serviceName}}ApiController(
     {{~else if responseSchemaName }}
         val {{methodReturnTypeInstance}} = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}}
         {{~#if returnTypeIsOptional }}
-        return if ({{methodReturnTypeInstance}}.isPresent) {
+        return if ({{methodReturnTypeInstance}} != null) {
             val responseDTO = mapper.as{{responseDtoName}}({{methodReturnTypeInstance}}.get())
             ResponseEntity.status({{statusCode}}).body(responseDTO)
         } else {

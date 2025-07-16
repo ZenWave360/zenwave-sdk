@@ -25,6 +25,16 @@ public class BackendApplicationKotlinHelpers {
         return ZDLJavaSignatureUtils.naturalIdsKotlinRepoMethodSignature(entity);
     }
 
+    public String findById(Map method, Options options) {
+        var zdl = options.get("zdl");
+        var hasNaturalId = JSONPath.get(method, "$.naturalId", false);
+        if(hasNaturalId) {
+            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("entity"));
+            return ZDLJavaSignatureUtils.naturalIdsRepoMethodCallSignature(entity);
+        }
+        return "findByIdOrNull(id)";
+    }
+
     public String methodParametersSignature(Map<String, Object> method, Options options) {
         var zdl = (Map) options.get("zdl");
         return ZDLJavaSignatureUtils.kotlinMethodParametersSignature(generator.getIdJavaType(), method, zdl);
@@ -36,7 +46,9 @@ public class BackendApplicationKotlinHelpers {
     }
 
     public String returnType(Map<String, Object> method, Options options) {
-        return ZDLJavaSignatureUtils.methodReturnType(method).replace("void", "Unit");
+        return ZDLJavaSignatureUtils.methodReturnType(method)
+                .replace("void", "Unit")
+                .replaceAll("Optional<(.+)>", "$1?");
     }
 
     public String fieldType(Map field, Options options) {

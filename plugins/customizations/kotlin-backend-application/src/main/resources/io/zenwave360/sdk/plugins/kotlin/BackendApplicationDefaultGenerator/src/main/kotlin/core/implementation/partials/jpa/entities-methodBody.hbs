@@ -18,35 +18,47 @@
     {{~/if}}
 {{!-- Optional<Entity> patch(id, Map) --}}
 {{~else if (and _entity method.options.patch method.paramId method.parameter method.returnType method.returnTypeIsOptional)}}
-    val {{_entity.instanceName}} = {{_entity.instanceName}}Repository.{{{findById method}}}.map { existing{{_entity.className}} ->
-        {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
-    }
-    .map { {{_entity.instanceName}}Repository.save(it) }
-    {{~#unless (eq _entity.name method.returnType)}}
-        .map { {{asInstanceName service.name}}Mapper.as{{returnType}}(it) }
-    {{~/unless}}
-    {{~> (partial '../withEvents')}}
-    return {{_entity.instanceName}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}
+        ?.let { existing{{_entity.className}} ->
+            {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
+        }
+        ?.let { {{_entity.instanceName}}Repository.save(it) }
+        {{~#unless (eq _entity.name method.returnType)}}
+        ?.let { {{asInstanceName service.name}}Mapper.as{{returnType}}(it) }
+        {{~/unless}}
+        {{~#if method.withEvents}}
+        ?.also {
+            {{~> (partial '../withEvents')}}
+        }
+        {{~/if}}
 {{!-- Optional<Entity> update(id, Entity) --}}
 {{~else if (and _entity method.paramId method.parameter method.returnType method.returnTypeIsOptional)}}
-    val {{_entity.instanceName}} = {{_entity.instanceName}}Repository.{{{findById method}}}.map { existing{{_entity.className}} ->
-        {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
-    }
-    .map { {{_entity.instanceName}}Repository.save(it) }
-    {{~#unless (eq _entity.name method.returnType)}}
-    .map { {{asInstanceName service.name}}Mapper.as{{returnType}}(it) }
-    {{~/unless}}
-    {{~> (partial '../withEvents')}}
-    return {{_entity.instanceName}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}
+        ?.let { existing{{_entity.className}} ->
+            {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
+        }
+        ?.let { {{_entity.instanceName}}Repository.save(it) }
+        {{~#unless (eq _entity.name method.returnType)}}
+        ?.let { {{asInstanceName service.name}}Mapper.as{{returnType}}(it) }
+        {{~/unless}}
+        {{~#if method.withEvents}}
+        ?.also {
+            {{~> (partial '../withEvents')}}
+        }
+        {{~/if}}
 {{!-- Entity update(id, Entity) --}}
 {{~else if (and _entity method.paramId method.parameter method.returnType)}}
-    val {{_entity.instanceName}} = {{_entity.instanceName}}Repository.{{{findById method}}}.map { existing{{_entity.className}} ->
-        {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
-    }
-    .map { {{_entity.instanceName}}Repository.save(it) }
-    .orElseThrow()
-    {{~> (partial '../withEvents')}}
-    return {{wrapWithMapper _entity}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}
+        ?.let { existing{{_entity.className}} ->
+            {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
+        }
+        ?.let { {{_entity.instanceName}}Repository.save(it) }
+        {{~#if method.withEvents}}
+        ?.also {
+            {{~> (partial '../withEvents')}}
+        }
+        {{~/if}}
+        ?: throw NoSuchElementException("{{_entity.className}} not found with id: $id")
 {{!-- Optional<Entity> get(id) --}}
 {{~else if (and _entity method.paramId method.returnType method.returnTypeIsOptional)}}
     {{~assign 'needMapping' (not (eq _entity.name method.returnType))}}
@@ -60,7 +72,7 @@
     val {{_entity.instanceName}} = {{asInstanceName service.name}}Mapper.update({{_entity.className}}(), {{{mapperInputCallSignature method.parameter}}})
     // TODO: implement this method
     {{~> (partial '../withEvents')}}
-    return Optional.ofNullable({{wrapWithMapper _entity}})
+    return {{wrapWithMapper _entity}}
 {{!-- Optional<Entity> get(MyEntity) --}}
 {{~else if (and _entity method.parameter method.returnType)}}
     val {{_entity.instanceName}} = {{asInstanceName service.name}}Mapper.update({{_entity.className}}(), {{{mapperInputCallSignature method.parameter}}})

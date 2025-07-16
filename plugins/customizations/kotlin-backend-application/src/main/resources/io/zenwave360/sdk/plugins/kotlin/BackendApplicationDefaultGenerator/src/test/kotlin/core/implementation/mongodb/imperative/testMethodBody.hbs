@@ -17,15 +17,15 @@
         {{~/each}}
         // assertTrue({{entity.instanceName}}Repository.containsKey(id))
         val {{entity.instanceName}} = {{serviceInstance}}.update{{entity.className}}({{idParamsCallSignature method}}, input)
-        assertTrue({{entity.instanceName}}.isPresent)
-        assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}.get()))
+        assertNotNull({{entity.instanceName}})
+        assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}!!))
     {{~else if (isCrudMethod 'list' method=method entity=entity) }}
         // val results = {{serviceInstance}}.list{{entity.classNamePlural}}(PageRequest.of(0, 10))
         // assertNotNull(results)
     {{~else if (isCrudMethod 'get' method=method entity=entity )}}
         {{{idFieldInitialization method}}}
         val {{entity.instanceName}} = {{serviceInstance}}.get{{entity.className}}({{idParamsCallSignature method}})
-        assertTrue({{entity.instanceName}}.isPresent)
+        assertNotNull({{entity.instanceName}})
     {{~else if (isCrudMethod 'delete' method=method entity=entity )}}
         {{{idFieldInitialization method}}}
         // assertTrue({{entity.instanceName}}Repository.containsKey(id))

@@ -18,8 +18,8 @@ import org.springframework.stereotype.Repository
 interface {{entity.className}}Repository : MongoRepository<{{entity.className}}, String> {
 
 {{~#if aggregate}}
-   fun find{{aggregate}}ById(id: {{idJavaType}}): Optional<{{aggregate}}> {
-     return findById(id).map { {{aggregate}}(it) }
+   fun find{{aggregate}}ById(id: {{idJavaType}}): {{aggregate}}? {
+     return findById(id).orElse(null)?.let { {{aggregate}}(it) }
    }
 {{~/if}}
 

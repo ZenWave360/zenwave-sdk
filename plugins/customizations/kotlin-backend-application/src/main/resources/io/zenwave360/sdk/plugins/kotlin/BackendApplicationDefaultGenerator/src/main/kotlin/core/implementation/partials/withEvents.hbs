@@ -4,17 +4,16 @@
         // emit events
         {{~#each (methodEvents method) as |event|}}
             {{~#if (methodEntity method)}}
-            val {{asInstanceName event.name}} = eventsMapper.as{{event.name}}({{_entity.instanceName}}{{#if method.returnTypeIsOptional~}} .get() {{~/if}})
+                {{~#assign 'eventsMapperCall'}} eventsMapper.as{{event.name}}({{_entity.instanceName}}{{#if method.returnTypeIsOptional~}} .get() {{~/if}}){{/assign}}
             {{~else}}
-            val {{asInstanceName event.name}} = eventsMapper.as{{event.name}}({{{methodParametersCallSignature method}}})
+                {{~#assign 'eventsMapperCall'}} eventsMapper.as{{event.name}}({{{methodParametersCallSignature method}}}){{/assign}}
             {{~/if}}
             {{~#if event.options.asyncapi}}
-            eventsProducer.{{operationNameForEvent event.name}}({{asInstanceName event.name}})
+            eventsProducer.{{operationNameForEvent event.name}}({{{eventsMapperCall}}})
             {{~else}}
-            eventPublisher.on{{event.className}}({{asInstanceName event.name}})
+            eventPublisher.on{{event.className}}({{{eventsMapperCall}}})
             {{~/if}}
         {{~/each}}
-    {{~#if method.returnTypeIsOptional}} } {{~/if}}
 {{~else}}
 // TODO emit events: {{method.withEvents}}
 // set 'includeEmitEventsImplementation' to generate this
