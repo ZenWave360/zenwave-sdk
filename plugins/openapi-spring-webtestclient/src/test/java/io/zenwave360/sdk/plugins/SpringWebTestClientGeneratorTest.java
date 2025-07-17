@@ -8,6 +8,7 @@ import java.util.Map;
 
 import io.zenwave360.sdk.MainGenerator;
 import io.zenwave360.sdk.Plugin;
+import io.zenwave360.sdk.testutils.GitUtils;
 import io.zenwave360.sdk.testutils.MavenCompiler;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
@@ -29,6 +30,11 @@ public class SpringWebTestClientGeneratorTest {
 
     @AfterAll
     public static void testCompileAllTargetFolders() throws Exception {
+        var hasModuleChanged = GitUtils.hasModuleChangedSinceLastTag("plugins/openapi-spring-webtestclient");
+        if (!hasModuleChanged) {
+            return;
+        }
+
         String[] openapis = {
                 "openapi-petstore.yml",
                 "openapi-orders.yml",

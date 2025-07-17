@@ -7,6 +7,7 @@ import io.zenwave360.sdk.plugins.SpringWebTestClientGenerator;
 import io.zenwave360.sdk.plugins.SpringWebTestClientPlugin;
 import io.zenwave360.sdk.processors.OpenApiProcessor;
 import io.zenwave360.sdk.templating.TemplateOutput;
+import io.zenwave360.sdk.testutils.GitUtils;
 import io.zenwave360.sdk.testutils.MavenCompiler;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
@@ -30,6 +31,15 @@ public class SpringWebTestClientKotlinGeneratorTest {
 
     @AfterAll
     public static void testCompileAllTargetFolders() throws Exception {
+        var hasModuleChanged = GitUtils.hasModuleChangedSinceLastTag("plugins/customizations/kotlin-backend-application/src/main/resources/io/zenwave360/sdk/plugins/kotlin/SpringWebTestClientGenerator");
+        var hasHelpersChanged = GitUtils.hasModuleChangedSinceLastTag("plugins/customizations/kotlin-backend-application/src/main/java/io/zenwave360/sdk/plugins/kotlin/SpringWebTestClientKotlinHelpers.java");
+        var hasTemplatesChanged = GitUtils.hasModuleChangedSinceLastTag("plugins/customizations/kotlin-backend-application/src/main/resources/io/zenwave360/sdk/plugins/kotlin/SpringWebTestClientKotlinTemplates");
+        var hasTestsChanged = GitUtils.hasModuleChangedSinceLastTag("plugins/customizations/kotlin-backend-application/src/test/java/io/zenwave360/sdk/plugins/kotlin/SpringWebTestClientKotlinGeneratorTest.java");
+
+        if (!hasModuleChanged && !hasHelpersChanged && !hasTemplatesChanged && !hasTestsChanged) {
+            return;
+        }
+
         String[] openapis = {
                 "openapi-petstore.yml",
                 "openapi-orders.yml",
