@@ -2,7 +2,8 @@
 {{~#if (eq (size aggregateCommandsForMethod.aggregatesCommandsForMethod) 1)}}
     {{~assign 'aggregateCommand' aggregateCommandsForMethod.aggregatesCommandsForMethod.0}}
     {{~#if method.paramId}}
-    val {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.find{{aggregateCommand.aggregate.className}}ById({{method.paramId}}).orElseThrow()
+    val {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.find{{aggregateCommand.aggregate.className}}ById({{method.paramId}})
+    ?: throw NoSuchElementException("{{_entity.className}} not found with id: {{method.paramId}}")
     {{~else}}
     val {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.aggregate.className}}()
     {{~/if}}
@@ -20,7 +21,8 @@
 {{~else}}
 {{~#each aggregateCommandsForMethod.aggregatesCommandsForMethod as |aggregateCommand| }}
     {{~#if method.paramId}}
-    val {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.find{{aggregateCommand.aggregate.className}}ById({{method.paramId}}).orElseThrow()
+    val {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.find{{aggregateCommand.aggregate.className}}ById({{method.paramId}})
+    ?: throw NoSuchElementException("{{_entity.className}} not found with id: {{method.paramId}}")
     {{~else}}
     val {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.aggregate.className}}()
     {{~/if}}

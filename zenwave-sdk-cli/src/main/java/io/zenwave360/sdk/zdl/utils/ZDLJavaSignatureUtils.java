@@ -81,7 +81,7 @@ public class ZDLJavaSignatureUtils {
         var params = fieldsParamsSignature(fields);
         params = toKotlinMethodSignature(params);
         var fieldNames = fields.stream().map(f -> NamingUtils.camelCase((String) f.get("name"))).toList();
-        return String.format("fun findBy%s(%s): java.util.Optional<%s>", StringUtils.join(fieldNames, "And"), params, entity.get("name"));
+        return String.format("fun findBy%s(%s): %s?", StringUtils.join(fieldNames, "And"), params, entity.get("name"));
     }
 
 
@@ -121,7 +121,9 @@ public class ZDLJavaSignatureUtils {
         if(isInlineParam) {
             var optionalParamFields = JSONPath.get(zdl, "$.inputs." + method.get("parameter") + ".fields[*][?(!@.validations.required)]", List.<Map>of());
             for (var field : optionalParamFields) {
-                if(!JSONPath.get(field, "$.isArray", false)) {
+                if(JSONPath.get(field, "$.isArray", false)) {
+                    kotlinSignature = kotlinSignature.replace(field.get("name") + ": List<" + field.get("type") + ">", field.get("name") + ": List<" + field.get("type") + ">?");
+                } else {
                     kotlinSignature = kotlinSignature.replace(field.get("name") + ": " + field.get("type"), field.get("name") + ": " + field.get("type") + "?");
                 }
             }
@@ -180,6 +182,20 @@ public class ZDLJavaSignatureUtils {
         return inputSignature(inputType, null, zdl).stream()
                 .map(p -> p.split(" ")[1])
                 .collect(Collectors.joining(", "));
+    }
+
+    public static List<Map<String, String>> mapperInputAnnotations(String inputType, Map zdl) {
+        var annotations = new ArrayList<Map<String, String>>();
+        if(inputType != null) {
+            var isInline = JSONPath.get(zdl, "$.allEntitiesAndEnums." + inputType + ".options.inline", false);
+            var fields = (Map<String, Map>) JSONPath.get(zdl, "$.allEntitiesAndEnums." + inputType + ".fields");
+            if (isInline && fields != null && !fields.isEmpty()) {
+                for (var field : fields.entrySet()) {
+                    annotations.add(Map.of("source", field.getKey(), "target", (String) field.getValue().get("name")));
+                }
+            }
+        }
+        return annotations;
     }
 
     public static String inputFieldInitializer(String inputType, Map zdl) {

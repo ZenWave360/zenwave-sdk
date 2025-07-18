@@ -87,6 +87,8 @@ paths:
             schema:
               allOf:
                 - type: object
+                  required:
+                    - {{operation.serviceMethod.options.fileupload}}
                   properties:
                     {{operation.serviceMethod.options.fileupload}}:
                       type: string
@@ -174,7 +176,7 @@ paths:
     sort:
       name: sort
       in: query
-      description: The number of results page
+      description: Sort results by field name and direction (asc or desc)
       schema:
         type: array
         items:

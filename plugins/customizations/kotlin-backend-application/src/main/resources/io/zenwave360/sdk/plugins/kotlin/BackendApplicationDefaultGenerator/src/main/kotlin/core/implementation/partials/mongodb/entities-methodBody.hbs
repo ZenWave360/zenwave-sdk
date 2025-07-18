@@ -58,15 +58,16 @@
             {{~> (partial '../withEvents')}}
         }
         {{~/if}}
-        ?: throw NoSuchElementException("{{_entity.className}} not found with id: $id")
+        ?: throw NoSuchElementException("{{_entity.className}} not found with id: {{{idForStringInterpolation method}}}")
 {{!-- Optional<Entity> get(id) --}}
 {{~else if (and _entity method.paramId method.returnType method.returnTypeIsOptional)}}
     {{~assign 'needMapping' (not (eq _entity.name method.returnType))}}
-    return {{_entity.instanceName}}Repository.{{{findById method}}}{{#if needMapping}}.map { {{asInstanceName service.name}}Mapper.as{{method.returnType}}(it) }{{/if}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}{{#if needMapping}}?.let { {{asInstanceName service.name}}Mapper.as{{method.returnType}}(it) }{{/if}}
 {{!-- Entity get(id) --}}
 {{~else if (and _entity method.paramId method.returnType)}}
     {{~assign 'needMapping' (not (eq _entity.name method.returnType))}}
-    return {{_entity.instanceName}}Repository.{{{findById method}}}{{#if needMapping}}.map { {{asInstanceName service.name}}Mapper.as{{method.returnType}}(it) }{{/if}}.orElseThrow()
+    return {{_entity.instanceName}}Repository.{{{findById method}}}{{#if needMapping}}?.let { {{asInstanceName service.name}}Mapper.as{{method.returnType}}(it) }{{/if}}
+        ?: throw NoSuchElementException("{{_entity.className}} not found with id: {{{idForStringInterpolation method}}}")
 {{!-- Optional<Entity> get(MyEntity) --}}
 {{~else if (and _entity method.parameter method.returnType method.returnTypeIsOptional)}}
     val {{_entity.instanceName}} = {{asInstanceName service.name}}Mapper.update({{_entity.className}}(), {{{mapperInputCallSignature method.parameter}}})

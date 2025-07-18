@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 
@@ -22,17 +23,17 @@ public class OpenAPIControllersKotlinHelpers {
         this.openApiModelNameSuffix = openApiModelNameSuffix;
     }
 
-    public String kotlinMethodParametersSignature(String methodParametersSignature, Options options) {
-        return ZDLJavaSignatureUtils.toKotlinMethodSignature(methodParametersSignature)
-                .replaceAll(": Integer", ": Int")
-                .replaceAll(": Map", ": java.util.Map<String,Any?>");
-    }
-
     public String methodParameters(Map operation, Options options) {
-        var requiredFields = JSONPath.get(operation, "x--request-schema.required", List.<String>of());
+        var requiredFields = JSONPath.get(operation, "$.requestBody.content..schema.required[*]", List.<String>of());
+        var fieldsWitDefault = JSONPath.get(operation, "$.requestBody.content..schema.properties[*][?(@.default && !(@.default == 'null'))].x--property-name", List.of());
+        var requiredParams = JSONPath.get(operation, "parameters[?(@.required == true)].name", List.<String>of());
+        var paramsWithDefault = JSONPath.get(operation, "$.parameters[*][?(@.schema.default)].name", List.<String>of());
+        var required = Stream.of(requiredFields, fieldsWitDefault, requiredParams, paramsWithDefault, List.of("reqBody", "input")).flatMap(List::stream).distinct().toList();
         return ZDLHttpUtils.methodParameters(operation, openApiModelNamePrefix, openApiModelNameSuffix).stream().map(param -> {
-            return param.getKey() + " " + param.getValue() + (requiredFields.contains(param.getValue()) ? "" : "?");
-        }).collect(Collectors.joining(", "));
+            return param.getValue() + ": " + param.getKey() + (required.contains(param.getValue()) ? "" : "?");
+        }).collect(Collectors.joining(", "))
+                .replaceAll("Integer", "Int")
+                .replaceAll("Map", "PatchMap");
     }
 
     public String voidUnit(String returnType, Options options) {

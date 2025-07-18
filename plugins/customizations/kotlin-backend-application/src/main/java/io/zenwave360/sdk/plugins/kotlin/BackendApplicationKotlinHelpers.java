@@ -35,6 +35,21 @@ public class BackendApplicationKotlinHelpers {
         return "findByIdOrNull(id)";
     }
 
+    public String idForStringInterpolation(Map method, Options options) {
+        var zdl = options.get("zdl");
+        var hasNaturalId = JSONPath.get(method, "$.naturalId", false);
+        if(hasNaturalId) {
+            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("entity"));
+            var params = ZDLJavaSignatureUtils.naturalIdsRepoMethodCallSignature(entity)
+                    .replaceAll("findBy[^(]*\\(([^)]*)\\)", "$1");
+            return Arrays.stream(params.split(", "))
+                    .map(param -> param + "=$" + param)
+                    .collect(Collectors.joining(", "));
+        }
+        return "$id";
+    }
+
+
     public String methodParametersSignature(Map<String, Object> method, Options options) {
         var zdl = (Map) options.get("zdl");
         return ZDLJavaSignatureUtils.kotlinMethodParametersSignature(generator.getIdJavaType(), method, zdl);
@@ -43,6 +58,13 @@ public class BackendApplicationKotlinHelpers {
     public String mapperInputSignature(String inputType, Options options) {
         var zdl = (Map) options.get("zdl");
         return ZDLJavaSignatureUtils.kotlinMapperInputSignature(inputType, zdl);
+    }
+
+    public String mapperInputAnnotations(String inputType, Options options) {
+        return ZDLJavaSignatureUtils.mapperInputAnnotations(inputType, (Map) options.get("zdl"))
+                .stream()
+                .map(annotations -> String.format("@Mapping(source = \"%s\", target = \"%s\")", annotations.get("source"), annotations.get("target")))
+                .collect(Collectors.joining("\n"));
     }
 
     public String returnType(Map<String, Object> method, Options options) {

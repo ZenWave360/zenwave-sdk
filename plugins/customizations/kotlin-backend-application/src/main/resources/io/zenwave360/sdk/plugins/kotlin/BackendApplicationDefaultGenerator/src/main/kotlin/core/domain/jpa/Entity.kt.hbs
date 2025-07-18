@@ -77,20 +77,6 @@ data class {{entity.className}}(
     var {{field.name}}: {{{fieldType field}}} {{~#unless field.isArray~}} ? {{~/unless}} {{{fieldTypeInitializer field}}}{{#unless @last}},{{/unless}}
 {{/each}}
 
-{{#each entity.relationships as |relationship|}}
-    {{#if relationship.fieldName~}}
-        {{~#if @first}}{{#if ../entity.fields}},{{/if}}{{/if}}
-        {{~#assign 'fetchType' }}{{ifTruthy relationship.options.eager "EAGER" "LAZY"}}{{/assign}}
-        {{#if (addRelationshipById relationship entity=entity)}}
-    {{#if relationship.required}}@field:NotNull{{/if}}
-    @Column(name = "{{snakeCase relationship.fieldName}}_id")
-    var {{relationship.fieldName}}Id: {{idJavaType}}? = null,
-        {{~/if}}
-    {{{fieldValidationAnnotations relationship}}}
-    {{> (partial 'partials/' relationship.type)}}
-    var {{relationship.fieldName}}: {{{relationshipFieldType relationship}}} {{{relationshipFieldTypeInitializer relationship}}}{{#unless @last}},{{/unless}}
-    {{/if~}}
-{{/each}}
 ) {{addExtends entity}} : Serializable {
 
     companion object {
@@ -115,15 +101,34 @@ data class {{entity.className}}(
     var lastModifiedDate: LocalDateTime? = null
 {{~/if}}
 
+{{#each entity.relationships as |relationship|}}
+    {{#if relationship.fieldName~}}
+        {{~#assign 'fetchType' }}{{ifTruthy relationship.options.eager "EAGER" "LAZY"}}{{/assign}}
+        {{#if (addRelationshipById relationship entity=entity)}}
+            {{#if relationship.required}}@field:NotNull{{/if}}
+            @Column(name = "{{snakeCase relationship.fieldName}}_id")
+            var {{relationship.fieldName}}Id: {{idJavaType}}? = null
+        {{~/if}}
+        {{{fieldValidationAnnotations relationship}}}
+        {{> (partial 'partials/' relationship.type)}}
+        var {{relationship.fieldName}}: {{{relationshipFieldType relationship}}} {{{relationshipFieldTypeInitializer relationship}}}
+        {{~#if (and (eq relationship.type 'OneToOne') relationship.ownerSide)}}
+            set(value) {
+                field = value
+                value?.{{relationship.otherEntityFieldName}} = this
+            }
+        {{~/if}}
+        {{~#if (and (eq relationship.type 'ManyToOne') relationship.ownerSide)}}
+            set(value) {
+                field = value
+                value?.{{relationship.otherEntityFieldName}} += this
+            }
+        {{~/if}}
+    {{/if~}}
+{{/each}}
+
 {{~#each (jsonPath entity '$.relationships[*][?(@.ownerSide == true)]') as |relationship|}}
     // manage relationships
-    {{~#if (eq relationship.type 'OneToOne')}}
-    fun set{{capitalize relationship.fieldName}}({{relationship.fieldName}}: {{{relationshipFieldType relationship}}}?): {{entity.className}} {
-        this.{{relationship.fieldName}} = {{relationship.fieldName}}
-        {{relationship.fieldName}}?.{{relationship.otherEntityFieldName}} = this
-        return this
-    }
-    {{~/if}}
     {{~#if (eq relationship.type 'OneToMany')}}
     fun add{{capitalize relationship.fieldName}}({{relationship.fieldName}}: {{relationship.otherEntityName}}): {{entity.className}} {
         this.{{relationship.fieldName}} += {{relationship.fieldName}}
@@ -151,12 +156,6 @@ data class {{entity.className}}(
     }
     {{~/if}}
     {{~#if (and (eq relationship.type 'ManyToOne') relationship.otherEntityFieldName)}}
-    fun set{{capitalize relationship.fieldName}}({{relationship.fieldName}}: {{{relationshipFieldType relationship}}}?): {{entity.className}} {
-        this.{{relationship.fieldName}} = {{relationship.fieldName}}
-        {{relationship.fieldName}}?.{{relationship.otherEntityFieldName}} += this
-        return this
-    }
-
     fun remove{{capitalize relationship.fieldName}}({{relationship.fieldName}}: {{{relationshipFieldType relationship}}}?): {{entity.className}} {
         this.{{relationship.fieldName}} = {{relationship.fieldName}}
         {{relationship.fieldName}}?.{{relationship.otherEntityFieldName}} -= this

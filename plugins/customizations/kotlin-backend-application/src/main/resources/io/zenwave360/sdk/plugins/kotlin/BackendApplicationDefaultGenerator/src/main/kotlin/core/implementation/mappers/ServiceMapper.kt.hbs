@@ -21,11 +21,49 @@ interface {{service.name}}Mapper {
 // input mappings
 {{~#each (serviceParameterEntityPairs service) as |entry|}}
     // {{@key}} {{method.name}}
-    {{~#if (not (eq entity.className input))}}
-    fun as{{entity.className}}({{{mapperInputSignature input.className}}}): {{entity.className}}
+    {{~#if (jsonPath input 'options.inline')}}
+        fun as{{entity.className}}({{{mapperInputSignature input.className}}}): {{entity.className}} {
+            return {{entity.className}}().apply {
+                // TODO: implement this method
+                {{~#each input.fields as |field|}}
+                // this.{{field.name}} = {{field.name}}
+                {{~/each}}
+            }
+        }
+        fun update(entity: {{entity.className}}, {{{mapperInputSignature input.className}}}): {{entity.className}} {
+            return entity.apply {
+                // TODO: implement this method
+                {{~#each input.fields as |field|}}
+                // this.{{field.name}} = {{field.name}}
+                {{~/each}}
+            }
+        }
+    {{~else if (jsonPath method 'options.patch')}}
+        fun as{{entity.className}}({{{mapperInputSignature input.className}}}): {{entity.className}} {
+            return {{entity.className}}().apply {
+                // TODO: implement this method
+                {{~#each input.fields as |field|}}
+                // this.{{field.name}} = input["{{field.name}}"]
+                {{~/each}}
+            }
+        }
+        fun update(entity: {{entity.className}}, {{{mapperInputSignature input.className}}}): {{entity.className}} {
+            return entity.apply {
+                // TODO: implement this method
+                {{~#each input.fields as |field|}}
+                // this.{{field.name}} = input["{{field.name}}"]
+                {{~/each}}
+            }
+        }
+    {{~else}}
+        {{~#if (not (eq entity.className input))}}
+            {{{mapperInputAnnotations input.className}}}
+            fun as{{entity.className}}({{{mapperInputSignature input.className}}}): {{entity.className}}
+        {{~/if}}
+        {{#unless (skipEntityId entity)~}}@Mapping(target = "id", ignore = true){{/unless~}}
+        {{{mapperInputAnnotations input.className}}}
+        fun update(@MappingTarget entity: {{entity.className}}, {{{mapperInputSignature input.className}}}): {{entity.className}}
     {{~/if}}
-    {{#unless (skipEntityId entity)~}}@Mapping(target = "id", ignore = true){{/unless~}}
-    fun update(@MappingTarget entity: {{entity.className}}, {{{mapperInputSignature input.className}}}): {{entity.className}}
 {{~/each}}
 // output mappings
 {{~#each (serviceEntityReturnTypePairs service) as |entry|}}

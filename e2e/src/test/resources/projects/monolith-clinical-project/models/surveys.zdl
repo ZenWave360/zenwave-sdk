@@ -38,7 +38,7 @@ entity Survey {
 entity Question {
     name String required unique maxlength(254) /** Unique identifier for the question */
     questionType QuestionType required
-    required boolean = true
+    required Boolean = true
     rangeStart Integer
     rangeEnd Integer
     @jsonb translations QuestionTranslation[] {
@@ -129,7 +129,7 @@ output SurveyAndQuestions {
         summary String
         questions QuestionTranslationOutput[] {
             questionId Long required
-            required boolean = true
+            required Boolean = true
             rangeStart Integer
             rangeEnd Integer
             text String required maxlength(254) /** Translated text for the question */
@@ -138,7 +138,7 @@ output SurveyAndQuestions {
                 name String required maxlength(254) /** Internal name for the option */
                 text String required /** Translated text for the option */
             }
-            includeOther boolean = false
+            includeOther Boolean = false
         }
     }
 }

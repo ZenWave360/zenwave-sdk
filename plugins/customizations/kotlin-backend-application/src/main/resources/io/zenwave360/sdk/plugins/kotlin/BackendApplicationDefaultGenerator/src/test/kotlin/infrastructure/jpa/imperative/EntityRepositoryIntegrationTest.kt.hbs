@@ -33,7 +33,7 @@ class {{entity.className}}RepositoryIntegrationTest : BaseRepositoryIntegrationT
     @Test
     fun findByIdTest() {
         val id = 1L
-        val {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).orElseThrow()
+        val {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).?: throw NoSuchElementException("{{_entity.className}} not found with id: $id")
         Assertions.assertNotNull({{entity.instanceName}}.id)
         Assertions.assertNotNull({{entity.instanceName}}.version)
         {{~#if (or entity.options.auditing entity.options.extendsAuditing)}}
@@ -106,7 +106,7 @@ class {{entity.className}}RepositoryIntegrationTest : BaseRepositoryIntegrationT
     @Test
     fun updateTest() {
         val id = 1L
-        val {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id).orElseThrow()
+        val {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id)?: throw NoSuchElementException("{{_entity.className}} not found with id: $id")
         {{~#each entity.fields as |field|}}
         {{entity.instanceName}}.{{field.name}} = {{{populateField field}}}
         {{~/each}}

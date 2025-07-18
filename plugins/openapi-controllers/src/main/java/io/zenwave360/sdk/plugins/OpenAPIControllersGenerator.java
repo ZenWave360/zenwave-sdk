@@ -146,13 +146,19 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
                 } else if (inputType != null && StringUtils.isNotBlank(serviceMethodParameter)) {
                     var requestKey = format("%s_%s", methodParameters, inputType);
                     Maps.getOrCreateDefault(mapperRequestDtoEntity, requestKey, new HashMap<>())
-                            .putAll(Map.of("methodParameters", methodParameters, "inputType", serviceMethodParameter));
+                            .putAll(Map.of("methodParameters", methodParameters, "inputType", serviceMethodParameter, "operation", operation));
                 }
                 if (responseSchemaName != null && outputType != null) {
                     var responseKey = format("%s_%s_%s_%s", responseDtoName, outputType, isResponseArray, isResponsePaginated);
                     Maps.getOrCreateDefault(mapperResponseDtoEntity, responseKey, new HashMap<>())
                             .putAll(Map.of("responseDto", responseDtoName, "responseEntityName", responseEntityName, "outputType", outputType,
                                     "isResponseArray", isResponseArray, "isResponsePaginated", isResponsePaginated));
+                    if (isResponseArray || isResponsePaginated) { // include also a mapper for the single entity (needed for kotlin/kap mapstruct
+                        var dtoResponseKey = format("%s_%s_%s_%s", responseDtoName, outputType, false, false);
+                        Maps.getOrCreateDefault(mapperResponseDtoEntity, dtoResponseKey, new HashMap<>())
+                                .putAll(Map.of("responseDto", responseDtoName, "responseEntityName", responseEntityName, "outputType", outputType,
+                                        "isResponseArray", false, "isResponsePaginated", false));
+                    }
                 }
             }
 

@@ -17,7 +17,7 @@ import {{layout.entitiesPackage}}.*
 {{abstractClass event}} data class {{event.className}} {{addExtends event}} (
 {{#each event.fields as |field|}}
     {{{fieldValidationAnnotations field}}}
-    var {{field.name}}: {{{fieldType field}}}{{#if field.isArray}} = mutableListOf(){{else}} = null{{/if}}{{#unless @last}},{{/unless}}
+    var {{field.name}}: {{{fieldType field}}}?{{#if field.isArray}} = mutableListOf(){{else}} = null{{/if}}{{#unless @last}},{{/unless}}
 {{/each}}
 ) : Serializable {
 

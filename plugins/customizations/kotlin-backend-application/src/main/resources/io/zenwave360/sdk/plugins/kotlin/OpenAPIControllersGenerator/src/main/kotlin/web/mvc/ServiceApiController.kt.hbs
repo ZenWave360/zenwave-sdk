@@ -5,6 +5,7 @@ import {{layout.inboundPackage}}.*
 import {{layout.inboundDtosPackage}}.*
 import {{openApiApiPackage}}.*
 import {{openApiModelPackage}}.*
+import {{layout.adaptersWebCommonPackage}}.*
 import {{layout.adaptersWebMappersPackage}}.*
 
 import java.net.URI
@@ -30,7 +31,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.web.context.request.NativeWebRequest
 
-
 /**
  * REST controller for {{serviceName}}Api.
  */
@@ -50,7 +50,7 @@ open class {{serviceName}}ApiController(
 {{#each serviceOperations as |operation|}}
     {{~#assign "TODO"}}{{#unless serviceMethod}}null // TODO: service{{/unless}}{{/assign}}
 
-    override fun {{operationId}}({{{methodParameters operation}}}): ResponseEntity<{{{voidUnit responseEntityExpression}}}> {
+    override fun {{operationId}}({{{methodParameters operation.operation}}}): ResponseEntity<{{{voidUnit responseEntityExpression}}}> {
         log.debug("REST request to {{operationId}}: {{methodParameterPlaceholders}}"{{#if methodParameters}}, {{methodParameterInstances}}{{/if}})
     {{~#if (eq httpMethod 'patch')}}
     {{~else if requestBodySchema}}
@@ -79,7 +79,7 @@ open class {{serviceName}}ApiController(
         val {{methodReturnTypeInstance}} = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}}
         {{~#if returnTypeIsOptional }}
         return if ({{methodReturnTypeInstance}} != null) {
-            val responseDTO = mapper.as{{responseDtoName}}({{methodReturnTypeInstance}}.get())
+            val responseDTO = mapper.as{{responseDtoName}}({{methodReturnTypeInstance}})
             ResponseEntity.status({{statusCode}}).body(responseDTO)
         } else {
             ResponseEntity.notFound().build()

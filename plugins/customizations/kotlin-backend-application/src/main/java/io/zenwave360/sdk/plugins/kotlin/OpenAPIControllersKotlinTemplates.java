@@ -4,6 +4,7 @@ import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.plugins.OpenAPIControllersGenerator;
 import io.zenwave360.sdk.plugins.OpenAPIControllersHelpers;
+import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 
@@ -19,11 +20,16 @@ public class OpenAPIControllersKotlinTemplates extends ProjectTemplates {
     public boolean includeControllerTests = true;
 
     public Function<Map<String, Object>, Boolean> skipControllerTests = (model) -> !includeControllerTests;
+    public Function<Map<String, Object>, Boolean> skipPatchMap = (model) -> {
+        return JSONPath.get(model, "$.openapi.paths[*].patch", List.of()).isEmpty();
+    };
 
     public OpenAPIControllersKotlinTemplates() {
         setTemplatesFolder("io/zenwave360/sdk/plugins/kotlin/OpenAPIControllersGenerator");
 
         var layoutNames = new ProjectLayout(); // layoutNames
+        this.addTemplate(this.singleTemplates, "src/main/kotlin", "web/common/PatchMap.kt",
+                layoutNames.adaptersWebCommonPackage, "PatchMap.kt", KOTLIN, skipPatchMap, false);
         this.addTemplate(this.singleTemplates, "src/main/kotlin", "web/mappers/BaseMapper.kt",
                 layoutNames.adaptersWebMappersCommonPackage, "BaseMapper.kt", KOTLIN, null, false);
         this.addTemplate(this.serviceTemplates, "src/main/kotlin", "web/mappers/ServiceDTOsMapper.kt",
