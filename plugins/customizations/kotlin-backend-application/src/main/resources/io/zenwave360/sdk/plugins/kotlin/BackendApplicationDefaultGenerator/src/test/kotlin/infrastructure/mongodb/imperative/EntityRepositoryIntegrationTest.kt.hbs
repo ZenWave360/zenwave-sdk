@@ -13,6 +13,7 @@ import java.math.BigDecimal
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.repository.findByIdOrNull
 
 class {{entity.className}}RepositoryIntegrationTest : BaseRepositoryIntegrationTest() {
 
@@ -28,7 +29,7 @@ class {{entity.className}}RepositoryIntegrationTest : BaseRepositoryIntegrationT
     @Test
     fun findByIdTest() {
         val id = "1"
-        val {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id)?: throw NoSuchElementException("{{_entity.className}} not found with id: $id")
+        val {{entity.instanceName}} = {{entity.instanceName}}Repository.findByIdOrNull(id)?: throw NoSuchElementException("{{_entity.className}} not found with id: $id")
         Assertions.assertNotNull({{entity.instanceName}}.id)
         Assertions.assertNotNull({{entity.instanceName}}.version)
         {{~#if (or entity.options.auditing entity.options.extendsAuditing)}}
@@ -54,7 +55,7 @@ class {{entity.className}}RepositoryIntegrationTest : BaseRepositoryIntegrationT
     @Test
     fun updateTest() {
         val id = "1"
-        val {{entity.instanceName}} = {{entity.instanceName}}Repository.findById(id)?: throw NoSuchElementException("{{_entity.className}} not found with id: $id")
+        val {{entity.instanceName}} = {{entity.instanceName}}Repository.findByIdOrNull(id)?: throw NoSuchElementException("{{_entity.className}} not found with id: $id")
         {{~#each entity.fields as |field|}}
         // {{entity.instanceName}}.{{field.name}} = null
         {{~/each}}
@@ -69,7 +70,7 @@ class {{entity.className}}RepositoryIntegrationTest : BaseRepositoryIntegrationT
     fun deleteTest() {
         val id = "1"
         {{entity.instanceName}}Repository.deleteById(id)
-        val notFound = {{entity.instanceName}}Repository.findById(id)
-        Assertions.assertFalse(notFound.isPresent)
+        val notFound = {{entity.instanceName}}Repository.findByIdOrNull(id)
+        Assertions.assertNull(notFound)
     }
 }
