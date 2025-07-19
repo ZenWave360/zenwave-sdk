@@ -1,6 +1,12 @@
 package io.zenwave360.sdk.parsers;
 
-import static io.zenwave360.jsonrefparser.$RefParserOptions.OnCircular.SKIP;
+import io.zenwave360.jsonrefparser.$RefParser;
+import io.zenwave360.jsonrefparser.$RefParserOptions;
+import io.zenwave360.jsonrefparser.$RefParserOptions.OnMissing;
+import io.zenwave360.jsonrefparser.AuthenticationValue;
+import io.zenwave360.sdk.doc.DocumentedOption;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,12 +14,7 @@ import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import io.zenwave360.sdk.doc.DocumentedOption;
-import io.zenwave360.jsonrefparser.$RefParser;
-import io.zenwave360.jsonrefparser.$RefParserOptions;
-import io.zenwave360.jsonrefparser.$RefParserOptions.OnMissing;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static io.zenwave360.jsonrefparser.$RefParserOptions.OnCircular.SKIP;
 
 public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
 
@@ -22,6 +23,8 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
     @DocumentedOption(description = "API Specification File")
     public URI apiFile;
     public String targetProperty = "api";
+
+    public String auth;
 
     private ClassLoader projectClassLoader;
 
@@ -57,13 +60,21 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
         return this;
     }
 
+    public DefaultYamlParser withAuth (String auth) {
+        this.auth = auth;
+        return this;
+    }
+
     @Override
     public Map<String, Object> parse() throws IOException {
         Map<String, Object> model = new LinkedHashMap<>();
         if(apiFile != null) {
             $RefParser parser = new $RefParser(apiFile)
                     .withResourceClassLoader(this.projectClassLoader)
-                    .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing(OnMissing.SKIP));
+                    .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing(OnMissing.SKIP)
+                            ).withAuthentication(new AuthenticationValue()
+                            .withHeader("Bearer", "<token>")
+                            .withUrlMatcher(url -> url.getHost().equals("raw.githubusercontent.com")));
             model.put(targetProperty, new Model(apiFile, parser.parse().dereference().mergeAllOf().getRefs()));
         } else {
             log.error("No API Specification (apiFile) provided");

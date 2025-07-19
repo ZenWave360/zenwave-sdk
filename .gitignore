@@ -46,3 +46,6 @@ local.properties
 **/src/main/frontend/dist/**
 
 /_site/
+
+ .DS_Store
+ out/
