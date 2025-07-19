@@ -115,7 +115,7 @@ public class ZDLJavaSignatureUtils {
 
     public static String kotlinMethodParametersSignature(String idJavaType, Map method, Map zdl) {
         var signature = methodParametersSignature(idJavaType, method, zdl);
-        signature = signature.replace("java.util.Map", "java.util.Map<String,Any?>");
+        signature = signature.replace("java.util.Map", "Map<String,Any?>");
         var kotlinSignature = toKotlinMethodSignature(signature);
         var isInlineParam = JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("parameter") + ".options.inline", false);
         if(isInlineParam) {
@@ -163,7 +163,7 @@ public class ZDLJavaSignatureUtils {
 
     public static String kotlinMapperInputSignature(String inputType, Map zdl) {
         if("Map".equals(inputType) || "java.util.Map".equals(inputType)) {
-            return "input: java.util.Map<String,Any?>";
+            return "input: Map<String,Any?>";
         }
         var mapperInputSignature = StringUtils.join(inputSignature(inputType, null, zdl), ", ");
         var kotlinSignature = toKotlinMethodSignature(mapperInputSignature);

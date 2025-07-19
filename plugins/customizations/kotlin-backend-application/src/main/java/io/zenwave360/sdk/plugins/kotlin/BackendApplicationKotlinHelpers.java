@@ -121,7 +121,11 @@ public class BackendApplicationKotlinHelpers {
     }
 
     public String populateField(Map field, Options options) {
-        return ZDLJavaSignatureUtils.populateField(field).replace("new ", "");
+        var populate = ZDLJavaSignatureUtils.populateField(field).replace("new ", "");
+        if("Integer".equals(field.get("type"))) {
+            populate = populate.replace("0", "0 as Integer");
+        }
+        return populate;
     }
 
     private String idInitialization(String idJavaType) {

@@ -10,9 +10,11 @@ class {{entity.className}}RepositoryInMemory : InMemoryJpaRepository<{{entity.cl
 
 {{~#if (naturalIdFields entity)}}
     override {{{naturalIdsRepoMethodSignature entity}}} {
-        return getEntities().values.stream().filter { e ->
-            {{#joinWithTemplate (naturalIdFields entity) delimiter='&&'}} isSameValue({{name}}, readField(e, "{{name}}")) {{/joinWithTemplate}}
-        }.findFirst()
+        return getEntities()
+            .values
+            .firstOrNull { e ->
+                {{#joinWithTemplate (naturalIdFields entity) delimiter=' && '}} isSameValue({{name}}, readField(e, "{{name}}")) {{/joinWithTemplate}}
+            }
     }
 {{~/if}}
 }
