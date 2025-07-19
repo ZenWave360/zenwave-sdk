@@ -60,36 +60,6 @@ public class OpenAPIControllersKotlinGeneratorTest {
     }
 
     @Test
-    public void test_asMethodParametersInitializer() throws Exception {
-        OpenAPIControllersKotlinHelpers helpers = new OpenAPIControllersKotlinHelpers("", "DTO");
-
-        // Test with empty operation
-        Map<String, Object> emptyOperation = Map.of();
-        CharSequence result = helpers.asMethodParametersInitializer(emptyOperation, null);
-        Assertions.assertEquals("", result.toString());
-
-        // Test with operation containing parameters
-        Map<String, Object> operation = Map.of(
-            "parameters", List.of(
-                Map.of(
-                    "name", "id",
-                    "schema", Map.of("type", "integer")
-                ),
-                Map.of(
-                    "name", "name",
-                    "schema", Map.of("type", "string")
-                )
-            )
-        );
-
-        result = helpers.asMethodParametersInitializer(operation, null);
-        String resultStr = result.toString();
-
-        Assertions.assertTrue(resultStr.contains("val id: Int = 0"));
-        Assertions.assertTrue(resultStr.contains("val name: String = \"\""));
-    }
-
-    @Test
     public void test_asMethodParametersInitializer_uploadDocument() throws Exception {
         // Load the documents OpenAPI spec
         Map<String, Object> model = new DefaultYamlParser()

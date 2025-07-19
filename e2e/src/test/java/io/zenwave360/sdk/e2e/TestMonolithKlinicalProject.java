@@ -138,12 +138,13 @@ public class TestMonolithKlinicalProject {
                 "masterDataService.listMasterDataOfType\\(type, lang\\)",
                 "masterDataService.listMasterDataOfType(MasterDataType.valueOf(type), lang)");
 
-        TextUtils.replaceInFile(new File(targetFolder + "/src/main/kotlin/com/example/clinical/modules/documents/mappers/DocumentServiceMapper.kt"),
-                "DocumentInfo asDocumentInfo\\(List<Long> documentIds\\);",
-                "default DocumentInfo asDocumentInfo(List<Long> documentIds) { return new DocumentInfo(); }");
-        TextUtils.replaceInFile(new File(targetFolder + "/src/main/kotlin/com/example/clinical/modules/documents/mappers/DocumentServiceMapper.kt"),
-                "DocumentInfo update\\(@MappingTarget DocumentInfo entity, List<Long> documentIds\\);",
-                " default DocumentInfo update(@MappingTarget DocumentInfo entity, List<Long> documentIds) { return entity; }");
+        TextUtils.replaceInFile(new File(targetFolder + "/src/test/kotlin/com/example/clinical/adapters/web/documents/DocumentApiControllerTest.kt"),
+                "data = \"aaa\"",
+                "data = org.springframework.core.io.ByteArrayResource(\"test data\".toByteArray())");
+
+        TextUtils.replaceInFile(new File(targetFolder + "/src/test/kotlin/com/example/clinical/modules/surveys/service/impl/SurveysServiceTest.kt"),
+                "val input: java.util.Map = java.util.Map",
+                " val input = mutableMapOf<String, Any?>");
     }
 
     @Test
