@@ -1,0 +1,6 @@
+{
+  "type" : "enum",
+  "name" : "PaymentMethodType",
+  "namespace" : "io.zenwave360.example.core.outbound.events.dtos",
+  "symbols" : [ "VISA", "MASTERCARD" ]
+}
