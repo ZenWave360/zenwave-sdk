@@ -105,6 +105,7 @@ public class MainGenerator {
     private static final ObjectMapper mapper = new ObjectMapper();
     static {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
         mapper.addHandler(new ObjectInstantiatorDeserializationHandler());
         mapper.addHandler(new CommaSeparatedCollectionDeserializationHandler());
     }
