@@ -83,7 +83,7 @@ public class AvroSchemaGeneratorTest {
             return null;
         }
 
-        @Override
+//        @Override
         public String getTypeName() {
             return this.getClass().getName();
         }
@@ -96,7 +96,7 @@ public class AvroSchemaGeneratorTest {
             return null;
         }
 
-        @Override
+//        @Override
         public String getTypeName() {
             return this.getClass().getName();
         }

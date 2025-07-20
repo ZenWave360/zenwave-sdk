@@ -1,8 +1,11 @@
 package io.zenwave360.sdk.plugins;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractAsyncapiGenerator;
 import io.zenwave360.sdk.utils.AntStyleMatcher;
+import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
@@ -154,31 +157,124 @@ public class AvroSchemaGenerator extends AbstractAsyncapiGenerator {
             }
         }
 
-        return "[" + String.join(",", allSchemas) + "]";
+        var jsonArrayString =  "[" + String.join(",", allSchemas) + "]";
+        return sortSchemas(jsonArrayString);
+    }
+
+    public String sortSchemas(String jsonArrayString) throws JsonProcessingException {
+        if(isAvroVersionLater("1.12.0")) {
+            return jsonArrayString;
+        }
+        log.info("Avro version detected {} < 1.12.0. Sorting schemas...", AVRO_VERSION);
+        var objectMapper = new ObjectMapper();
+
+        List<Map<String, Object>> schemas = objectMapper.readValue(jsonArrayString, List.class);
+        var schemasToSort = JSONPath.get(schemas, "$.[?(@.type == 'record' || @.type == 'enum')]", List.<Map<String, Object>>of());
+
+        log.debug("Sorting schemas: {}", JSONPath.get(schemasToSort, "$.[*].name", List.of()));
+        schemasToSort.sort(createDependencyComparator());
+        log.debug("Sorted schemas: {}", JSONPath.get(schemasToSort, "$.[*].name", List.of()));
+
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(schemasToSort);
+    }
+
+    private Comparator<Map<String, Object>> createDependencyComparator() {
+        return (map1, map2) -> {
+            String name1 = (String) map1.get("name");
+            String name2 = (String) map2.get("name");
+            String type1 = (String) map1.get("type");
+            String type2 = (String) map2.get("type");
+
+            List<String> dependencies1 = extractDependencies(map1);
+            List<String> dependencies2 = extractDependencies(map2);
+
+            boolean map1IsEnum = "enum".equals(type1);
+            boolean map2IsEnum = "enum".equals(type2);
+            boolean map1HasNoDeps = dependencies1.isEmpty();
+            boolean map2HasNoDeps = dependencies2.isEmpty();
+
+            // Enums and maps with no dependencies go first
+            if ((map1IsEnum || map1HasNoDeps) && !(map2IsEnum || map2HasNoDeps)) {
+                return -1; // map1 comes before map2
+            } else if (!(map1IsEnum || map1HasNoDeps) && (map2IsEnum || map2HasNoDeps)) {
+                return 1; // map1 comes after map2
+            }
+
+            boolean map1DependsOnMap2 = dependencies1.contains(name2);
+            boolean map2DependsOnMap1 = dependencies2.contains(name1);
+
+            if (map1DependsOnMap2 && !map2DependsOnMap1) {
+                return 1; // map1 comes after map2
+            } else if (!map1DependsOnMap2 && map2DependsOnMap1) {
+                return -1; // map1 comes before map2
+            }
+            return 0; // no dependency relationship
+        };
+    }
+
+    private List<String> extractDependencies(Map<String, Object> schema) {
+        List<Object> fieldTypes = JSONPath.get(schema, "$.fields[*].type", List.of());
+        List<String> dependencies = new ArrayList<>();
+
+        for (Object fieldType : fieldTypes) {
+            if (fieldType instanceof String) {
+                dependencies.add((String) fieldType);
+            } else if (fieldType instanceof Map) {
+                Map<String, Object> typeMap = (Map<String, Object>) fieldType;
+                String items = JSONPath.get(typeMap, "$.items", null);
+                if (items != null) {
+                    dependencies.add(items);
+                }
+            }
+        }
+
+        return dependencies;
     }
 
     protected void setCompilerProperties(SpecificCompiler compiler, AvroCompilerProperties properties) {
         compiler.setTemplateDir(properties.templateDirectory);
         compiler.setStringType(GenericData.StringType.valueOf(properties.stringType));
         compiler.setFieldVisibility(SpecificCompiler.FieldVisibility.valueOf(properties.fieldVisibility.toUpperCase()));
+        compiler.setCreateSetters(properties.createSetters);
+        compiler.setOutputCharacterEncoding(properties.outputCharacterEncoding);
+
+        if (isAvroVersionLater("1.8.0")) {
+            setCompilerProperties_v1_8_0(compiler, properties);
+        }
+        if (isAvroVersionLater("1.8.2")) {
+            setCompilerProperties_v1_8_2(compiler, properties);
+        }
+        if (isAvroVersionLater("1.9.0")) {
+            setCompilerProperties_v1_9_0(compiler, properties);
+        }
+        if (isAvroVersionLater("1.11.0")) {
+            setCompilerProperties_v1_11_0(compiler, properties);
+        }
+        if (isAvroVersionLater("1.12.0")) {
+            setCompilerProperties_v1_12_0(compiler, properties);
+        }
+    }
+
+    protected void setCompilerProperties_v1_8_0(SpecificCompiler compiler, AvroCompilerProperties properties) {
+        compiler.setEnableDecimalLogicalType(properties.enableDecimalLogicalType);
+    }
+
+    protected void setCompilerProperties_v1_8_2(SpecificCompiler compiler, AvroCompilerProperties properties) {
         compiler.setCreateOptionalGetters(properties.createOptionalGetters);
         compiler.setGettersReturnOptional(properties.gettersReturnOptional);
-        compiler.setOptionalGettersForNullableFieldsOnly(properties.optionalGettersForNullableFieldsOnly);
-        compiler.setCreateSetters(properties.createSetters);
-//        compiler.setCreateNullSafeAnnotations(properties.createNullSafeAnnotations);
-//        compiler.setNullSafeAnnotationNullable(properties.nullSafeAnnotationNullable);
-//        compiler.setNullSafeAnnotationNotNull(properties.nullSafeAnnotationNotNull);
-        compiler.setEnableDecimalLogicalType(properties.enableDecimalLogicalType);
-        compiler.setOutputCharacterEncoding(properties.outputCharacterEncoding);
-        compiler.setAdditionalVelocityTools(properties.instantiateAdditionalVelocityTools());
-//        compiler.setRecordSpecificClass(properties.recordSpecificClass);
-//        compiler.setErrorSpecificClass(properties.errorSpecificClass);
-
         if (properties.customConversions != null) {
             for (var conversionClass : properties.customConversions) {
                 compiler.addCustomConversion(conversionClass);
             }
         }
+    }
+
+    protected void setCompilerProperties_v1_9_0(SpecificCompiler compiler, AvroCompilerProperties properties) {
+        compiler.setOptionalGettersForNullableFieldsOnly(properties.optionalGettersForNullableFieldsOnly);
+        compiler.setAdditionalVelocityTools(properties.instantiateAdditionalVelocityTools());
+    }
+
+    protected void setCompilerProperties_v1_11_0(SpecificCompiler compiler, AvroCompilerProperties properties) {
         if (properties.customLogicalTypeFactories != null) {
             for (var logicalTypeFactoryClass : properties.customLogicalTypeFactories) {
                 try {
@@ -189,8 +285,41 @@ public class AvroSchemaGenerator extends AbstractAsyncapiGenerator {
                     throw new RuntimeException("Failed to instantiate logical type factory " + logicalTypeFactoryClass, e);
                 }
             }
-
         }
     }
+
+    protected void setCompilerProperties_v1_12_0(SpecificCompiler compiler, AvroCompilerProperties properties) {
+        compiler.setCreateNullSafeAnnotations(properties.createNullSafeAnnotations);
+        compiler.setRecordSpecificClass(properties.recordSpecificClass);
+        compiler.setErrorSpecificClass(properties.errorSpecificClass);
+    }
+
+    protected void setCompilerProperties_v1_12_1(SpecificCompiler compiler, AvroCompilerProperties properties) {
+//        compiler.setNullSafeAnnotationNullable(properties.nullSafeAnnotationNullable);
+//        compiler.setNullSafeAnnotationNotNull(properties.nullSafeAnnotationNotNull);
+    }
+
+    private static final String AVRO_VERSION = _getAvroVersion();
+    private static String _getAvroVersion() {
+        Package avroPackage = Schema.class.getPackage();
+        if (avroPackage != null && avroPackage.getImplementationVersion() != null) {
+            return avroPackage.getImplementationVersion();
+        }
+        return "0.0.0";
+    }
+
+    private boolean isAvroVersionLater(String version) {
+        String[] currentVersionParts = AVRO_VERSION.split("\\.");
+        String[] targetVersionParts = version.split("\\.");
+
+        int currentMajor = Integer.parseInt(currentVersionParts[0]);
+        int currentMinor = Integer.parseInt(currentVersionParts[1]);
+        int targetMajor = Integer.parseInt(targetVersionParts[0]);
+        int targetMinor = Integer.parseInt(targetVersionParts[1]);
+
+        return currentMajor > targetMajor ||
+                (currentMajor == targetMajor && currentMinor >= targetMinor);
+    }
+
 
 }

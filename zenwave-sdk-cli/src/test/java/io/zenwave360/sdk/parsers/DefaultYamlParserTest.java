@@ -16,7 +16,6 @@ public class DefaultYamlParserTest {
         String targetProperty = "_api";
         String resource = "classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-circular-refs.yml";
         DefaultYamlParser parser = new DefaultYamlParser().withApiFile(URI.create(resource)).withTargetProperty(targetProperty);
-        parser.apiKeyAUthencitation = "apiKey";
         Model model = (Model) parser.parse().get(targetProperty);
         Assertions.assertNotNull(model);
         Assertions.assertNotNull(JSONPath.get(model, "$.channels.createProductNotification.subscribe.message"));
