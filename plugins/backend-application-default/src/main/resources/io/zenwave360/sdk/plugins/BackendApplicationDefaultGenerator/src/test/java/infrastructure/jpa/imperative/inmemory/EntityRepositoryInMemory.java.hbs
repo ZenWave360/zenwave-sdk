@@ -16,4 +16,18 @@ public class {{entity.className}}RepositoryInMemory extends InMemoryJpaRepositor
         ).findFirst();
     }
 {{~/if}}
+
+{{~assign 'relationships' (findOwnedOneToManyRelationships entity)}}
+{{~#if relationships}}
+    @Override
+    public <T extends {{entity.className}}> T save(T entity) {
+        var finalEntity = super.save(entity);
+    {{~#each relationships as |relationship|}}
+        if(finalEntity.get{{capitalize relationship.fieldName}}() != null) {
+            finalEntity.get{{capitalize relationship.fieldName}}().forEach({{relationship.fieldName}} -> {{relationship.fieldName}}.setId(firstNonNull({{relationship.fieldName}}.getId(), finalEntity.getId())));
+        }
+    {{~/each}}
+        return (T) finalEntity;
+    }
+{{~/if}}
 }

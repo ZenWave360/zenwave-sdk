@@ -17,4 +17,15 @@ class {{entity.className}}RepositoryInMemory : InMemoryJpaRepository<{{entity.cl
             }
     }
 {{~/if}}
+
+{{~assign 'relationships' (findOwnedOneToManyRelationships entity)}}
+{{~#if relationships}}
+    override fun <S : {{entity.className}}> save(entity: S): S {
+        super.save(entity)
+    {{~#each relationships as |relationship|}}
+        entity.{{relationship.fieldName}}.forEach { it.id = it.id ?: entity.id }
+    {{~/each}}
+        return entity;
+    }
+{{~/if}}
 }
