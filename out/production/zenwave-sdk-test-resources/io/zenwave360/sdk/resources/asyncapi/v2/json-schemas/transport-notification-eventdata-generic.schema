@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "#/TransportNotificationEventData",
+  "type": "object",
+  "javaType": "io.example.transport.schema.TransportNotificationEventData",
+  "title": "TransportNotificationEventData",
+  "description": "Object representation of event data",
+  "default": {},
+  "examples": [
+    {
+      "originAirport": "ZAZ",
+      "realTime": "2020-02-13T06:46:36.848Z",
+      "flightDate": "2020-01-28",
+      "transitType": "IMPORT / EXPORT",
+      "transportType": {
+        "id": 1,
+        "description": "TRANSPORTE POR CARRETERA"
+      }
+    }
+  ],
+  "additionalProperties": {}
+}

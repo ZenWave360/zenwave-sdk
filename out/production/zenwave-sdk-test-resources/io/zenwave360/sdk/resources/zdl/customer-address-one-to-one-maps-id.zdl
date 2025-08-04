@@ -1,0 +1,31 @@
+MAX_LENGTH=100
+/**
+* Global javadoc comment
+*/
+config {}
+
+/**
+* Customer javadoc comment
+*/
+@aggregate
+entity Customer {
+  username String required unique minlength(3) /** username javadoc comment */
+  email String required unique /** email javadoc comment */
+}
+
+enum AddressType {  HOME(1) /** home description */,  WORK(1) /** work description */ }
+
+@aggregate
+entity Address {
+  street String /** street javadoc comment */
+  city String /** city javadoc comment */
+  state String /** state javadoc comment */
+  zip String /** zip javadoc comment */
+  type AddressType /** address type is an enum */
+}
+
+relationship OneToOne {
+  Customer{address} to @Id Address{customer}
+}
+
+service Customer,Address with CustomerService

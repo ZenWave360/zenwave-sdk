@@ -1,0 +1,76 @@
+
+@aggregate
+@auditing
+entity PurchaseOrder { // Order is a reserved word
+  businessId OrderBusinessId {
+    businessUnit String required
+    orderId String required
+    orderFaultType OrderFaultType
+  } required unique
+
+  supplierId String /** supplier id */
+  supplierName String
+  orderDate LocalDate
+  section String
+  status OrderStatus
+  otherProperties Map
+  andArray String[]
+
+  attachments AttachmentFile[]  {
+    documentManagerId String
+    filename String
+    mimetype String = "text/plain"
+    url String
+    orderLineIds String[]
+    @transient contents byte[]
+  }
+}
+
+enum OrderStatus {  OPEN,  CLOSED }
+
+enum OrderFaultType { TIME, QUALITY }
+
+//========================================
+
+/**
+* Service for Order Attachments.
+*/
+@rest("/order-attachments")
+service AttachmentService for (PurchaseOrder) {
+
+  @async("asyncExecutor")
+  @post("/{businessUnit}/{orderId}")
+  uploadFile(PurchaseOrder) PurchaseOrder
+
+  @put("/{businessUnit}/{orderId}")
+  updateFile(id, PurchaseOrder) PurchaseOrder
+
+  @put("/{purchaseOrderId}")
+  updatePurchaseOrder(id, PurchaseOrder) PurchaseOrder?
+
+  @get("/{businessUnit}/{orderId}")
+  listAttachmentFiles(OrderBusinessId) AttachmentFile[]
+
+  @get("/{businessUnit}/{orderId}/paginated") @paginated
+  listAttachmentFilesPaginated(OrderBusinessId) AttachmentFile[]
+
+
+  @get("/{businessUnit}/{orderId}/{documentManagerId}")
+  downloadAttachmentFile(AttachmentFileId) AttachmentFileOutput
+
+  startBackgroundAdminProcess()
+}
+
+@inline
+input AttachmentFileId {
+  businessUnit String required
+  orderId String required
+  documentManagerId String required
+}
+
+output AttachmentFileOutput {
+    documentManagerId String
+    filename String
+    mimetype String
+    contents byte[]
+}

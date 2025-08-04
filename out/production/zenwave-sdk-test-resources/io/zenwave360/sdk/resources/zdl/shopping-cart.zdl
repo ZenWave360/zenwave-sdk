@@ -1,0 +1,37 @@
+@aggregate
+entity Customer {
+    username String required unique minlength(3) maxlength(20)
+    email String required unique
+}
+
+entity Address {
+    street String required
+    city String required
+    state String required
+    zip String required
+}
+
+relationship OneToMany {
+    Customer{addresses} to Address{customer}
+}
+
+/**
+ * The Customer Service
+ */
+service CustomerService for (Customer) {
+    /** create customer command */
+    createCustomer(CustomerInput) Customer withEvents CustomerCreated
+
+    /** update customer command */
+    updateCustomer(id, CustomerInput) Customer withEvents CustomerUpdated
+}
+
+input CustomerInput {
+    username String required minlength(3) maxlength(20)
+    email String required pattern(/^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/)
+}
+
+event CustomerCreated {
+    id Integer
+    username String
+}

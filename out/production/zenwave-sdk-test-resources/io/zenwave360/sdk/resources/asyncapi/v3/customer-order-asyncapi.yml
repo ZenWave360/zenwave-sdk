@@ -1,0 +1,277 @@
+asyncapi: 3.0.0
+info:
+  title: Zenwave 360 Generated API
+  version: 0.0.1
+
+defaultContentType: application/json
+
+tags:
+  - name: "Default"
+  - name: "Customer"
+  - name: "CustomerOrder"
+
+channels:
+  customer.requests:
+    address: customer.requests
+    summary: Customer Async Requests
+    messages:
+      - $ref: "#/components/messages/CustomerRequestMessage"
+  customer.events:
+    summary: Customer Domain Events
+    messages:
+      - $ref: "#/components/messages/CustomerEventMessage"
+
+  customer-order.requests:
+    address: customer-order.requests
+    summary: CustomerOrder Async Requests
+    messages:
+      - $ref: "#/components/messages/CustomerOrderRequestMessage"
+  customer-order.events:
+    summary: CustomerOrder Domain Events
+    messages:
+      - $ref: "#/components/messages/CustomerOrderEventMessage"
+
+
+operations:
+  doCustomerRequest:
+    action: receive
+    channel:
+      $ref: "#/channels/customer.requests"
+    tags:
+      - name: Customer
+  onCustomerEvent:
+    action: send
+    channel:
+      $ref: "#/channels/customer.events"
+    tags:
+      - name: Customer
+  doCustomerOrderRequest:
+    action: receive
+    channel:
+      $ref: "#/channels/customer-order.requests"
+    tags:
+      - name: CustomerOrder
+  onCustomerOrderEvent:
+    action: send
+    channel:
+      $ref: "#/channels/customer-order.requests"
+    tags:
+      - name: CustomerOrder
+
+components:
+  messages:
+    CustomerRequestMessage:
+      messageId: CustomerRequestMessage
+      name: CustomerRequestMessage
+      title: Async Command/Request for a Customer
+      summary: Async Command/Request for a Customer
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/Customer"
+    CustomerEventMessage:
+      name: CustomerEventMessage
+      messageId: CustomerEventMessage
+      title: Message for a Customer Event
+      summary: Message for a Customer Event
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/Customer"
+
+    CustomerOrderRequestMessage:
+      messageId: CustomerOrderRequestMessage
+      name: CustomerOrderRequestMessage
+      title: Async Command/Request for a CustomerOrder
+      summary: Async Command/Request for a CustomerOrder
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/CustomerOrder"
+    CustomerOrderEventMessage:
+      name: CustomerOrderEventMessage
+      messageId: CustomerOrderEventMessage
+      title: Message for a CustomerOrder Event
+      summary: Message for a CustomerOrder Event
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/CustomerOrder"
+
+
+  messageTraits:
+    CommonHeaders:
+      headers:
+        type: object
+        properties:
+          kafka_messageKey:
+            type: string
+            description: This header value will be populated automatically at runtime
+            x-runtime-expression: $message.payload#/id
+          tracingId:
+            type: string
+            description: This header value will be populated automatically at runtime
+            x-runtime-expression: $tracingIdSupplier
+
+  schemas:
+    BaseEntity:
+      type: "object"
+      x-business-entity: "BaseEntity"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+    Customer:
+      type: "object"
+      x-business-entity: "Customer"
+      required:
+        - "username"
+        - "password"
+        - "email"
+        - "firstName"
+        - "lastName"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        username:
+          type: "string"
+          minLength: 3
+          maxLength: 250
+        password:
+          type: "string"
+          minLength: 3
+          maxLength: 250
+        email:
+          type: "string"
+          minLength: 3
+          maxLength: 250
+        firstName:
+          type: "string"
+          minLength: 3
+          maxLength: 250
+        lastName:
+          type: "string"
+          minLength: 3
+          maxLength: 250
+    CustomerOrder:
+      type: "object"
+      x-business-entity: "CustomerOrder"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        date:
+          type: "string"
+          format: "date-time"
+        status:
+          $ref: "#/components/schemas/OrderStatus"
+        customer:
+          $ref: "#/components/schemas/Customer"
+        orderedItems:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/OrderedItem"
+        paymentDetails:
+          $ref: "#/components/schemas/PaymentDetails"
+        shippingDetails:
+          $ref: "#/components/schemas/ShippingDetails"
+    CustomerOrderSearchCriteria:
+      type: "object"
+      x-business-entity: "CustomerOrderSearchCriteria"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        status:
+          $ref: "#/components/schemas/OrderStatus"
+        dateFrom:
+          type: "string"
+          format: "date-time"
+        dateTo:
+          type: "string"
+          format: "date-time"
+    OrderedItem:
+      type: "object"
+      x-business-entity: "OrderedItem"
+      required:
+        - "name"
+        - "price"
+      properties:
+        catalogItemId:
+          type: "integer"
+          format: "int64"
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 250
+        price:
+          type: "number"
+          format: "double"
+        quantity:
+          type: "integer"
+          format: "int32"
+    PaymentDetails:
+      type: "object"
+      x-business-entity: "PaymentDetails"
+      properties:
+        creditCardNumber:
+          type: "string"
+    ShippingDetails:
+      type: "object"
+      x-business-entity: "ShippingDetails"
+      properties:
+        address:
+          type: "string"
+    CoreDomainInput:
+      type: "object"
+      x-business-entity: "CoreDomainInput"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        key:
+          type: "string"
+        type:
+          $ref: "#/components/schemas/InputType"
+    CustomerCriteria:
+      type: "object"
+      x-business-entity: "CustomerCriteria"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        firstName:
+          type: "string"
+        lastName:
+          type: "string"
+        password:
+          type: "string"
+        email:
+          type: "string"
+        username:
+          type: "string"
+    OrderStatus:
+      type: "string"
+      x-business-entity: "OrderStatus"
+      enum:
+        - "CONFIRMED"
+        - "SHIPPED"
+        - "DELIVERED"
+    InputType:
+      type: "string"
+      x-business-entity: "InputType"
+      description: "@input"
+      enum:
+        - "A"
+        - "B"
+        - "C"
+

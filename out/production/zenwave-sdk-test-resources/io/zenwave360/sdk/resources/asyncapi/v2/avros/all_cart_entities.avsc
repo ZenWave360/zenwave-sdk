@@ -1,0 +1,293 @@
+[
+  {
+    "name": "CartEntity",
+    "namespace": "org.asyncapi.tools.example.event.cart.v1",
+    "type": "record",
+    "fields": [
+      {
+        "name": "wcs_id",
+        "type": "long"
+      },
+      {
+        "name": "owner_id",
+        "type": "long"
+      },
+      {
+        "name": "wcs_store_id",
+        "type": "long"
+      },
+      {
+        "name": "lines",
+        "type": {
+          "type": "array",
+          "items": {
+            "name": "Line",
+            "type": "record",
+            "fields": [
+              {
+                "name": "wcs_item_id",
+                "type": "long"
+              },
+              {
+                "name": "quantity",
+                "type": "int"
+              },
+              {
+                "name": "type",
+                "type": "string"
+              },
+              {
+                "name": "brandGroupId",
+                "type": ["null", "long"],
+                "default": null
+              },
+              {
+                "name": "extended_info",
+                "type": [
+                  "null",
+                  "string"
+                ],
+                "default": null
+              },
+              {
+                "name": "creation_date_time",
+                "type": "string"
+              },
+              {
+                "name": "update_date_time",
+                "type": "string"
+              },
+              {
+                "name": "price",
+                "type": [
+                  "null",
+                  {
+                    "type": "record",
+                    "name": "Price",
+                    "fields": [
+                      {
+                        "name": "amount",
+                        "type": "long"
+                      },
+                      {
+                        "name": "currency",
+                        "type": "string"
+                      },
+                      {
+                        "name": "exponent",
+                        "type": ["null","int"],
+                        "default": null
+                      }
+                    ]
+                  }
+                ],
+                "default": null
+              },
+              {
+                "name": "reference",
+                "type": [
+                  "null",
+                  {
+                    "type": "record",
+                    "name": "Reference",
+                    "fields": [
+                      {
+                        "name": "id",
+                        "type": "long"
+                      },
+                      {
+                        "name": "part_number",
+                        "type": ["null", "string"],
+                        "default": null
+                      },
+                      {
+                        "name": "parent_id",
+                        "type": "long"
+                      }
+                    ]
+                  }
+                ],
+                "default": null
+              },
+              {
+                "name": "origins",
+                "type": {
+                  "type": "array",
+                  "items": {
+                    "name": "Origin",
+                    "type": "record",
+                    "fields": [
+                      {
+                        "name": "category_id",
+                        "type": ["null","long"],
+                        "default": null
+                      },
+                      {
+                        "name": "parent_id",
+                        "type": ["null","long"],
+                        "default": null
+                      },
+                      {
+                        "name": "quantity",
+                        "type": "long"
+                      },
+                      {
+                        "name": "last_update",
+                        "type": "string"
+                      },
+                      {
+                        "name": "device",
+                        "type": [
+                          "null",
+                          {
+                            "type": "record",
+                            "name": "Device",
+                            "fields": [
+                              {
+                                "name": "channel",
+                                "type": ["null", "string"],
+                                "default": null
+                              },
+                              {
+                                "name": "type",
+                                "type": ["null","string"],
+                                "default": null
+                              },
+                              {
+                                "name": "os",
+                                "type": ["null","string"],
+                                "default": null
+                              }
+                            ]
+                          }
+                        ],
+                        "default": null
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "name": "stock",
+                "type": [
+                  "null",
+                  {
+                    "type": "record",
+                    "name": "Stock",
+                    "fields": [
+                      {
+                        "name": "sub_lines",
+                        "type": {
+                          "type": "array",
+                          "items": {
+                            "name": "SubLine",
+                            "type": "record",
+                            "fields": [
+                              {
+                                "name": "ffm_id",
+                                "type": [
+                                  "null",
+                                  "long"
+                                ],
+                                "default": null
+                              },
+                              {
+                                "name": "ffm_operation_type_id",
+                                "type": [
+                                  "null",
+                                  "long"
+                                ],
+                                "default": null
+                              },
+                              {
+                                "name": "ffm_type_id",
+                                "type": [
+                                  "null",
+                                  "long"
+                                ],
+                                "default": null
+                              },
+                              {
+                                "name": "preference_customer",
+                                "type": [
+                                  "null",
+                                  "boolean"
+                                ],
+                                "default": null
+                              },
+                              {
+                                "name": "pre_sale_type",
+                                "type": [
+                                  "null",
+                                  "int"
+                                ],
+                                "default": null
+                              },
+                              {
+                                "name": "stock_source_code",
+                                "type": [
+                                  "null",
+                                  "string"
+                                ],
+                                "default": null
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "default": null
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "created_at",
+        "type": "string"
+      },
+      {
+        "name": "last_updated_at",
+        "type": "string"
+      }
+    ]
+  },
+
+  {
+    "name": "LinesAddedEvent",
+    "namespace": "org.asyncapi.tools.example.event.cart.v1",
+    "type": "record",
+    "subject": "ecommerce.purchase.cart.v1-value",
+    "fields": [
+      {
+        "name": "lines",
+        "type": {"type":"array","items":"long"}
+      },
+      {
+        "name": "cart",
+        "type": "CartEntity"
+      }
+    ]
+  },
+
+  {
+    "name": "LinesRemovedEvent",
+    "namespace": "org.asyncapi.tools.example.event.cart.v1",
+    "type": "record",
+    "subject": "ecommerce.purchase.cart.v1-value",
+    "fields": [
+      {
+        "name": "lines",
+        "type": {"type":"array","items":"long"}
+      },
+      {
+        "name": "cart",
+        "type": "CartEntity"
+      }
+    ]
+  }
+
+  
+]

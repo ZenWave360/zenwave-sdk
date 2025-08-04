@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://logistics.example.com/schemas/nds-agenda-p2p-message.json",
+  "javaType": "io.example.transport.schema.TransportNotificationEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "TransportNotificationEvent",
+  "description": "Message schema representing transport notification.",
+  "required": [
+    "metadata",
+    "data"
+  ],
+  "properties": {
+    "metadata": {
+      "$id": "#/properties/metadata",
+      "javaType": "io.example.transport.schema.TransportNotificationEventMetadata",
+      "type": "object",
+      "additionalProperties": false,
+      "title": "The Metadata Schema",
+      "description": "meta information about event",
+      "default": {},
+      "examples": [
+        {
+          "id": "f5384751-a379-46d2-b7bd-b12f61538822-1",
+          "type": "FLIGHT_DELAYED",
+          "origin": "HIT",
+          "creationTime": "2020-03-16T15:41:06.974152+05:30"
+        }
+      ],
+      "required": [
+        "id",
+        "origin",
+        "type",
+        "creationTime"
+      ],
+      "properties": {
+        "id": {
+          "$id": "#/properties/metadata/properties/id",
+          "type": "string",
+          "title": "The event identifier",
+          "description": "unique identifier to event",
+          "examples": [
+            "f5384751-a379-46d2-b7bd-b12f61538822-1"
+          ]
+        },
+        "origin": {
+          "$id": "#/properties/metadata/properties/origin",
+          "type": "string",
+          "title": "origin identifier",
+          "description": "identifier for the source system of event",
+          "default": "",
+          "examples": [
+            "HIT"
+          ]
+        },
+        "type": {
+          "$id": "#/properties/metadata/properties/type",
+          "type": "string",
+          "title": "Type of event",
+          "description": "Identifier to distinguish event type",
+          "default": "",
+          "examples": [
+            "FLIGHT_DELAYED"
+          ]
+        },
+        "creationTime": {
+          "$id": "#/properties/metadata/properties/creationTime",
+          "type": "string",
+          "title": "creationTime",
+          "format": "date-time",
+          "description": "Event generation timestamp as per ISO 8601 format",
+          "default": "",
+          "examples": [
+            "2020-03-16T15:41:06.974152Z"
+          ]
+        }
+      }
+    },
+    "data": {
+      "$id": "#/properties/data",
+      "oneOf": [
+        {
+          "$ref": "flight-delayed-event.schema"
+        },
+        {
+          "$ref": "truck-stop-delayed-event.schema"
+        }
+      ]
+    }
+  }
+}

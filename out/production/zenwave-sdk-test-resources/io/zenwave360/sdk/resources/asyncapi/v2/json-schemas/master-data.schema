@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://logistics.example.com/schemas/master-data.json",
+  "javaType": "io.example.transport.schema.MasterData",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "MasterData",
+  "description": "Schema representing a master data",
+  "required": [
+    "id"
+  ],
+  "properties": {
+    "id": {
+      "type": "integer",
+      "description": "Unique identifier to master type"
+    },
+    "description": {
+      "type": "string",
+      "description": "Generic description to master type"
+    }
+  }
+}

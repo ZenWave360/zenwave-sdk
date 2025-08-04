@@ -1,0 +1,438 @@
+openapi: 3.0.1
+info:
+  title: Zenwave 360 Generated API
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080/api/
+tags:
+  - name: "Default"
+  - name: "Customer"
+  - name: "CustomerOrder"
+
+paths:
+  /customers/search:
+    post:
+      summary: Search Customers
+      operationId: searchCustomers
+      tags: [Customer]
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerCriteria"
+      responses:
+        "200":
+          description: Customers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerPaginated"
+  /customers:
+    get:
+      summary: Find Customers
+      operationId: listCustomers
+      tags: [Customer]
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+      responses:
+        "200":
+          description: Customers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerPaginated"
+    post:
+      summary: Create Customer
+      operationId: createCustomer
+      tags: [Customer]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Customer"
+      responses:
+        "201":
+          description: Customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+
+  /customers/{id}:
+    parameters:
+    - name: id
+      in: path
+      description: Customer id
+      required: true
+      schema:
+        type: string
+    get:
+      summary: Get Customer by id
+      operationId: getCustomer
+      tags: [Customer]
+      responses:
+        "200":
+          description: Customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+    put:
+      summary: Update Customer
+      operationId: updateCustomer
+      tags: [Customer]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Customer"
+      responses:
+        "200":
+          description: Customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+  
+
+  /customer-orders/search:
+    post:
+      summary: Search CustomerOrders
+      operationId: searchCustomerOrders
+      tags: [CustomerOrder]
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerOrderSearchCriteria"
+      responses:
+        "200":
+          description: CustomerOrders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerOrderPaginated"
+  /customer-orders:
+    get:
+      summary: Find CustomerOrders
+      operationId: listCustomerOrders
+      tags: [CustomerOrder]
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+      responses:
+        "200":
+          description: CustomerOrders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerOrderPaginated"
+    post:
+      summary: Create CustomerOrder
+      operationId: createCustomerOrder
+      tags: [CustomerOrder]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerOrder"
+      responses:
+        "201":
+          description: CustomerOrder
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerOrder"
+
+  /customer-orders/{id}:
+    parameters:
+    - name: id
+      in: path
+      description: CustomerOrder id
+      required: true
+      schema:
+        type: string
+    get:
+      summary: Get CustomerOrder by id
+      operationId: getCustomerOrder
+      tags: [CustomerOrder]
+      responses:
+        "200":
+          description: CustomerOrder
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerOrder"
+    put:
+      summary: Update CustomerOrder
+      operationId: updateCustomerOrder
+      tags: [CustomerOrder]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerOrder"
+      responses:
+        "200":
+          description: CustomerOrder
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerOrder"
+  
+
+
+
+
+
+components:
+  schemas:
+    Customer:
+      type: "object"
+      x-business-entity: "Customer"
+      required:
+      - "firstName"
+      - "lastName"
+      - "password"
+      - "email"
+      - "username"
+      properties:
+        id:
+          type: "string"
+        firstName:
+          type: "string"
+          minLength: 3
+          maxLength: 250
+        lastName:
+          type: "string"
+          minLength: 3
+          maxLength: 250
+        password:
+          type: "string"
+          minLength: 3
+          maxLength: 250
+        email:
+          type: "string"
+          minLength: 3
+          maxLength: 250
+        username:
+          type: "string"
+          minLength: 3
+          maxLength: 250
+    CustomerPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "Customer"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/Customer"
+    CustomerOrder:
+      type: "object"
+      x-business-entity: "CustomerOrder"
+      properties:
+        id:
+          type: "string"
+        date:
+          type: "string"
+          format: "date-time"
+        shippingDetails:
+          $ref: "#/components/schemas/ShippingDetails"
+        orderedItems:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/OrderedItem"
+        paymentDetails:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/PaymentDetails"
+        status:
+          $ref: "#/components/schemas/OrderStatus"
+        customer:
+          $ref: "#/components/schemas/Customer"
+    CustomerOrderPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "CustomerOrder"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/CustomerOrder"
+    ShippingDetails:
+      type: "object"
+      x-business-entity: "ShippingDetails"
+      properties:
+        address:
+          type: "string"
+    ShippingDetailsPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "ShippingDetails"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/ShippingDetails"
+    CustomerOrderSearchCriteria:
+      type: "object"
+      x-business-entity: "CustomerOrderSearchCriteria"
+      properties:
+        id:
+          type: "string"
+        dateTo:
+          type: "string"
+          format: "date-time"
+        dateFrom:
+          type: "string"
+          format: "date-time"
+        status:
+          $ref: "#/components/schemas/OrderStatus"
+    CustomerOrderSearchCriteriaPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "CustomerOrderSearchCriteria"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/CustomerOrderSearchCriteria"
+    PaymentDetails:
+      type: "object"
+      x-business-entity: "PaymentDetails"
+      properties:
+        creditCardNumber:
+          type: "string"
+    PaymentDetailsPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "PaymentDetails"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/PaymentDetails"
+    OrderedItem:
+      type: "object"
+      x-business-entity: "OrderedItem"
+      required:
+      - "name"
+      - "price"
+      properties:
+        catalogItemId:
+          type: "integer"
+          format: "int64"
+        name:
+          type: "string"
+          minLength: 3
+          maxLength: 250
+        quantity:
+          type: "integer"
+          format: "int32"
+        price:
+          type: "number"
+          format: "double"
+    OrderedItemPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "OrderedItem"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/OrderedItem"
+    CustomerCriteria:
+      type: "object"
+      x-business-entity: "CustomerCriteria"
+      properties:
+        id:
+          type: "string"
+        firstName:
+          type: "string"
+        lastName:
+          type: "string"
+        password:
+          type: "string"
+        email:
+          type: "string"
+        username:
+          type: "string"
+    CustomerCriteriaPaginated:
+      allOf:
+      - $ref: "#/components/schemas/Page"
+      - x-business-entity-paginated: "CustomerCriteria"
+      - properties:
+          content:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/CustomerCriteria"
+    OrderStatus:
+      type: "string"
+      x-business-entity: "OrderStatus"
+      enum:
+      - "DELIVERED"
+      - "CONFIRMED"
+      - "SHIPPED"
+
+    Page:
+      type: object
+      required:
+        - "content"
+        - "totalElements"
+        - "totalPages"
+        - "size"
+        - "number"
+      properties:
+        number:
+          type: integer
+          minimum: 0
+        numberOfElements:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 0
+          maximum: 200
+          multipleOf: 25
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+  parameters:
+    page:
+      name: page
+      in: query
+      description: The number of results page
+      schema:
+        type: integer
+        format: int32
+        default: 0
+    limit:
+      name: limit
+      in: query
+      description: The number of results in a single page
+      schema:
+        type: integer
+        format: int32
+        default: 20
+    sort:
+      name: sort
+      in: query
+      description: The number of results page
+      schema:
+        type: array
+        items:
+          type: string

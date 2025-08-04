@@ -1,0 +1,79 @@
+entity Order {
+    petId Long 
+    quantity Integer 
+    shipDate Instant 
+    status OrderStatus 
+    complete Boolean 
+}
+
+entity Customer {
+    username String 
+}
+
+entity Address {
+    street String 
+    city String 
+    state String 
+    zip String 
+}
+
+entity Category {
+    name String 
+}
+
+entity User {
+    username String 
+    firstName String 
+    lastName String 
+    email String 
+    password String 
+    phone String 
+    userStatus Integer /** User Status */
+}
+
+entity Tag {
+    name String 
+}
+
+entity Pet {
+    name String 
+    status PetStatus /** pet status in the store */
+    photoUrls String[]
+}
+
+entity ApiResponse {
+    code Integer 
+    type String 
+    message String 
+}
+
+
+
+
+enum OrderStatus {
+    PLACED
+    APPROVED
+    DELIVERED
+}
+
+/**
+* pet status in the store
+*/
+enum PetStatus {
+    AVAILABLE
+    PENDING
+    SOLD
+}
+
+
+
+
+relationship OneToMany {
+    Customer{address} to Address
+    Pet{tags} to Tag
+}
+
+
+relationship ManyToOne {
+    Pet{category} to Category
+}

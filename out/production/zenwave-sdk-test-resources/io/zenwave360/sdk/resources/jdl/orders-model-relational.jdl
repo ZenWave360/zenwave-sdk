@@ -1,0 +1,89 @@
+@auditing
+entity BaseEntity {
+}
+
+/* Customers */
+@aggregate
+@search(elasticsearch)
+@searchCriteria
+@extends(BaseEntity)
+entity Customer {
+	username String required minlength(3) maxlength(250),
+	password String required minlength(3) maxlength(250),
+	email String required minlength(3) maxlength(250),
+	firstName String required minlength(3) maxlength(250),
+	lastName String required minlength(3) maxlength(250)
+}
+
+
+/* Orders */
+enum OrderStatus { CONFIRMED, SHIPPED, DELIVERED }
+
+@aggregate
+@searchCriteria(CustomerOrderSearchCriteria)
+entity CustomerOrder { // Order is a reserved word
+	date Instant,
+	status OrderStatus
+//	customer Customer
+//	orderedItems OrderedItem[]
+//	paymentDetails PaymentDetails[]
+	/** Shipping Details are stored embedded so they don't change if the original shipping address changes */
+	shippingDetails OrderShippingDetails
+}
+
+@skip
+entity CustomerOrderSearchCriteria {
+	status OrderStatus
+	dateFrom Instant
+	dateTo Instant
+}
+
+entity OrderedItem {
+	catalogItemId Long,
+	name String required minlength(3) maxlength(250),
+	price BigDecimal required,
+	quantity Integer
+}
+
+@aggregate
+entity PaymentDetails {
+	creditCardNumber String
+	cardHolderName String
+}
+
+@aggregate
+entity ShippingDetails {
+	address String
+	phone String
+}
+
+@embedded
+@copy(ShippingDetails)
+entity OrderShippingDetails { }
+
+@copy(ShippingDetails)
+entity OrderShippingDetails2 { }
+
+//relationship OneToMany {
+//	Customer{shipmentDetails} to ShippingDetails{customer}
+//	Customer{paymentDetails} to PaymentDetails{customer}
+//}
+
+relationship OneToOne {
+	CustomerOrder{shipmentDetails2} to OrderShippingDetails2{customerOrder}
+}
+
+relationship ManyToOne {
+	ShippingDetails{customer} to Customer{shipmentDetails}
+	PaymentDetails{customer} to Customer{paymentDetails}
+
+//	CustomerOrder{paymentDetails(creditCardNumber)} to PaymentDetails
+//	CustomerOrder{customer(username)} to Customer
+}
+
+relationship ManyToMany {
+	CustomerOrder{orderedItems(name)} to OrderedItem{customerOrders(username)}
+}
+
+service Customer,ShippingDetails,PaymentDetails with CustomerUseCases
+service CustomerOrder with CustomerOrderUseCases

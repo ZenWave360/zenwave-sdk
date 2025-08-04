@@ -1,0 +1,24 @@
+asyncapi: 3.0.0
+info:
+  title: Merged API
+  version: 0.0.1
+  contact:
+    email: me@email.com
+    name: My Organization
+
+defaultContentType: application/json
+
+components:
+  messageTraits:
+    CommonHeaders:
+      headers:
+        type: object
+        properties:
+          kafka_messageKey:
+            type: string
+            description: This header value will be populated automatically at runtime (from merger file)
+            x-runtime-expression: $message.payload#/id
+          tracingId:
+            type: string
+            description: This header value will be populated automatically at runtime (from merger file)
+            x-runtime-expression: $tracingIdSupplier

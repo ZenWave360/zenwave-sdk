@@ -1,0 +1,150 @@
+MAX_LENGTH=100
+/**
+* Global javadoc comment
+*/
+config {
+    basePackage "com.example.zenwave"
+    plugins {
+        ZDLToAsyncAPIPlugin {
+            targetFile "src/main/resources/public/apis/asyncapi.yml"
+        }
+    }
+}
+
+apis {
+    asyncapi(provider) CustomerAddressAPI {
+        uri ""
+    }
+    asyncapi(client) ThirdPartyAPI {
+        uri ""
+    }
+}
+
+/**
+* Customer javadoc comment
+*/
+@aggregate
+entity Customer {
+  username String required unique /** username javadoc comment */
+  email String required unique /** email javadoc comment */
+  tags String[] /** tags javadoc comment */
+  /**
+   * address is a nested entity
+   */
+  addresses Address[] min(1) max(5) {
+    street String /** street javadoc comment */
+    city String /** city javadoc comment */
+    state String /** state javadoc comment */
+    zip String /** zip javadoc comment */
+    type AddressType /** address type is an enum */
+  }
+}
+
+enum AddressType {  HOME(1) /** home description */,  WORK(1) /** work description */ }
+
+/**
+ * Customer input javadoc comment
+ */
+input CustomerInput {
+  username String required unique
+  tags String[]
+  email String required unique pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/)
+  /** address is a nested entity */
+  address AddressInput[] {
+    street String /** street javadoc comment */
+    city String /** city javadoc comment */
+    state String /** state javadoc comment */
+    zip String /** zip javadoc comment */
+  }
+}
+
+@input
+enum EnumInput {
+  A, B, C
+}
+
+@copy(Address)
+input AddressInputCopy {
+}
+
+@inline
+input CustomerAddressId {
+  customerId String /** customer id javadoc comment */
+  address Address
+}
+
+input CustomerSearchCriteria {
+  name String
+  email String
+  city String
+  state String
+}
+
+@copy(Customer)
+output CustomerOutput {
+
+}
+
+/**
+ Service javadoc comment
+ */
+@rest("/customers")
+service CustomerService for (Customer) {
+  /**
+   * Create customer javadoc comment
+   */
+  @post("/customers")
+  @asyncapi({operationId: "doCreateCustomer", channel: "customerCommandsChannel", topic: "customer-input-topic" })
+  createCustomer(CustomerInput) Customer withEvents CustomerEvent [CustomerCreated|CustomerCreatedFailed]
+
+  @put("/customers/{customerId}")
+  @asyncapi({ api: ThirdPartyAPI, operationId: "doUpdateCustomer"})
+  updateCustomer(id, CustomerInput) Customer? withEvents CustomerEvent CustomerUpdated /** update customer javadoc comment */
+
+  @patch("/customers/{customerId}")
+  patchCustomer(id, CustomerInput) Customer? withEvents CustomerEvent CustomerUpdated /** update customer javadoc comment */
+
+  @delete("/customers/{customerId}")
+  deleteCustomer(id) withEvents CustomerDeleted
+
+  @get("/customers/{customerId}")
+  getCustomer(id) Customer?
+
+  @get({path: "/customers", params: {search: String}}) @paginated
+  listCustomers() CustomerOutput[]
+
+  @get({path: "/customers/search"}) @paginated
+  searchCustomers(CustomerSearchCriteria) CustomerOutput[]
+
+  @post("/customers/{customerId}/address")
+  addCustomerAddress(CustomerAddressId) Customer?
+}
+
+@copy(Customer)
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerEvent {
+  customerId String
+}
+
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerCreated {
+  customerId String
+  customer Customer
+}
+
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerCreatedFailed {
+  customer Customer
+  error String
+}
+
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerUpdated {
+  customerId String
+  customer Customer
+}
+
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerDeleted {
+  customerId String
+}

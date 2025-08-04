@@ -1,0 +1,273 @@
+openapi: 3.0.1
+info:
+  title: Zenwave 360 Generated API
+  version: 0.0.1
+  description: "Zenwave 360 Generated API"
+  contact:
+    email: email@domain.com
+servers:
+  - url: http://localhost:8080/api
+tags:
+  - name: "Default"
+  - name: "Customer"
+
+
+paths:
+  /customers/customers:
+    post:
+      operationId: createCustomer
+      description: "/**
+   * Create customer javadoc comment
+   */"
+      tags: [Customer]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerInput"
+      responses:
+        "201":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+    get:
+      operationId: listCustomers
+      description: "listCustomers"
+      tags: [Customer]
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/sort"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerPaginated"
+  /customers/customers/{customerId}:
+    put:
+      operationId: updateCustomer
+      description: "/** update customer javadoc comment */"
+      tags: [Customer]
+      parameters:
+        - name: "customerId"
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerInput"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+    delete:
+      operationId: deleteCustomer
+      description: "deleteCustomer"
+      tags: [Customer]
+      parameters:
+        - name: "customerId"
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: "OK"
+    get:
+      operationId: getCustomer
+      description: "getCustomer"
+      tags: [Customer]
+      parameters:
+        - name: "customerId"
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+
+components:
+  schemas:
+    Address:
+      type: "object"
+      x-business-entity: "Address"
+      required:
+        - "street"
+        - "type"
+      properties:
+        street:
+          type: "string"
+          description: "street javadoc comment"
+        city:
+          type: "string"
+          description: "city javadoc comment"
+        state:
+          type: "string"
+          description: "state javadoc comment"
+        zip:
+          type: "string"
+          description: "zip javadoc comment"
+        type:
+          $ref: "#/components/schemas/AddressType"
+    AddressType:
+      type: "string"
+      x-business-entity: "AddressType"
+      enum:
+        - "HOME"
+        - "WORK"
+    Customer:
+      type: "object"
+      x-business-entity: "Customer"
+      required:
+        - "username"
+        - "email"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        version:
+          type: "integer"
+        username:
+          type: "string"
+          description: "username javadoc comment"
+        email:
+          type: "string"
+          description: "email javadoc comment"
+        tags:
+          type: "array"
+          items:
+            type: "string"
+            description: "tags javadoc comment"
+        addresses:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Address"
+    CustomerPaginated:
+      allOf:
+        - $ref: "#/components/schemas/Page"
+        - x-business-entity-paginated: "Customer"
+        - properties:
+            content:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/Customer"
+    CustomerInput:
+      type: "object"
+      x-business-entity: "CustomerInput"
+      required:
+        - "username"
+        - "email"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        version:
+          type: "integer"
+        username:
+          type: "string"
+        tags:
+          type: "array"
+          items:
+            type: "string"
+        email:
+          type: "string"
+          pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$"
+          description: ""
+        address:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/AddressInput"
+    AddressInput:
+      type: "object"
+      x-business-entity: "AddressInput"
+      properties:
+        street:
+          type: "string"
+          description: "street javadoc comment"
+        city:
+          type: "string"
+          description: "city javadoc comment"
+        state:
+          type: "string"
+          description: "state javadoc comment"
+        zip:
+          type: "string"
+          description: "zip javadoc comment"
+
+    Page:
+      type: object
+      required:
+        - "content"
+        - "totalElements"
+        - "totalPages"
+        - "size"
+        - "number"
+      properties:
+        number:
+          type: integer
+          minimum: 0
+        numberOfElements:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 0
+          maximum: 200
+          multipleOf: 25
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+  parameters:
+    page:
+      name: page
+      in: query
+      description: The number of results page
+      schema:
+        type: integer
+        format: int32
+        default: 0
+    limit:
+      name: limit
+      in: query
+      description: The number of results in a single page
+      schema:
+        type: integer
+        format: int32
+        default: 20
+    sort:
+      name: sort
+      in: query
+      description: The number of results page
+      schema:
+        type: array
+        items:
+          type: string
+
+  securitySchemes:
+    basicAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: basic
+    bearerAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+security:
+  - basicAuth: []  # <-- use the same name here
+  - bearerAuth: []  # <-- use the same name here

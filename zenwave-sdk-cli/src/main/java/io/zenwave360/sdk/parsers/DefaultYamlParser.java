@@ -5,6 +5,7 @@ import io.zenwave360.jsonrefparser.$RefParserOptions;
 import io.zenwave360.jsonrefparser.$RefParserOptions.OnMissing;
 import io.zenwave360.jsonrefparser.AuthenticationValue;
 import io.zenwave360.sdk.doc.DocumentedOption;
+import io.zenwave360.sdk.utils.MultiValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,7 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
     public URI apiFile;
     public String targetProperty = "api";
 
-    public String auth;
+    public MultiValueMap<String> auth;
 
     private ClassLoader projectClassLoader;
 
@@ -60,7 +61,7 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
         return this;
     }
 
-    public DefaultYamlParser withAuth (String auth) {
+    public DefaultYamlParser withAuth (MultiValueMap<String> auth) {
         this.auth = auth;
         return this;
     }
@@ -73,7 +74,6 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
                     .withResourceClassLoader(this.projectClassLoader)
                     .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing(OnMissing.SKIP)
                             ).withAuthentication(new AuthenticationValue()
-                            .withHeader("Bearer", "<token>")
                             .withUrlMatcher(url -> url.getHost().equals("raw.githubusercontent.com")));
             model.put(targetProperty, new Model(apiFile, parser.parse().dereference().mergeAllOf().getRefs()));
         } else {

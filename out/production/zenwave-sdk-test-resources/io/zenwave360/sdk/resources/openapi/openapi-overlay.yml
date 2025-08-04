@@ -1,0 +1,54 @@
+overlay: 1.0.0
+info:
+  title: Update WebApp API Configuration
+  version: 1.0.0
+  description: "My Organization - WebApp API"
+  contact:
+    email: me@email.com
+
+actions:
+  # Update info section
+  - target: $.info
+    update:
+      title: "My Organization (Overlayed) - WebApp API"
+      version: 1.0.0
+      description: "My Organization (Overlayed) - WebApp API"
+      contact:
+        email: me@email.com
+
+  # Update servers configuration
+  - target: $.servers
+    update:
+      - description: localhost
+        url: http://localhost:8080/api
+      - description: custom
+        url: "{protocol}://{server}/{path}"
+        variables:
+          protocol:
+            enum: ['http', 'https']
+            default: 'http'
+          server:
+            default: 'localhost:8080'
+          path:
+            default: 'api'
+
+  # Remove basicAuth from security schemes
+  - target: $.components.securitySchemes.basicAuth
+    remove: true
+
+  # Remove basicAuth from security array
+  - target: $.security[?(@.basicAuth)]
+    remove: true
+
+  # Update security schemes with only bearerAuth
+  - target: $.components.securitySchemes
+    update:
+      bearerAuth:
+        type: http
+        scheme: bearer
+        bearerFormat: JWT
+
+  # Update security requirements with only bearerAuth
+  - target: $.security
+    update:
+      - bearerAuth: []

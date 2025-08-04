@@ -1,0 +1,115 @@
+MAX_LENGTH=100
+/**
+* Global javadoc comment
+*/
+config {
+    title "ZenWave Playground Customer-Address MariaDB"
+    basePackage "io.zenwave360.example"
+    persistence jpa
+    databaseType mariadb
+    haltOnFailFormatting false
+}
+
+
+/**
+* Customer javadoc comment
+*/
+  @aggregate
+entity Customer {
+  username String required unique minlength(3) /** username javadoc comment */
+  email String required unique /** email javadoc comment */
+}
+
+enum AddressType {  HOME(1) /** home description */,  WORK(1) /** work description */ }
+
+entity Address {
+  street String /** street javadoc comment */
+  city String /** city javadoc comment */
+  state String /** state javadoc comment */
+  zip String /** zip javadoc comment */
+  type AddressType /** address type is an enum */
+}
+
+relationship OneToMany {
+  /** Customer to addresses relationship */
+  Customer{addresses} to
+  /** Address to customer relationship */
+  Address{customer}
+}
+
+
+/**
+ * Customer input javadoc comment
+ */
+input CustomerInput {
+  username String required unique
+  tags String[]
+  email String required unique pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/)
+  /** address is a nested entity */
+  address AddressInput[] {
+    street String /** street javadoc comment */
+    city String /** city javadoc comment */
+    state String /** state javadoc comment */
+    zip String /** zip javadoc comment */
+  }
+}
+
+@copy(Address)
+input AddressInputCopy {
+}
+
+/**
+ Service javadoc comment
+ */
+@rest("/customers")
+service CustomerService for (Customer) {
+  /**
+   * Create customer javadoc comment
+   */
+  @post("/customers")
+  @asyncapi({ api: "apiname", operationId: "createCustomer", channel: "customerCommandsChannel", topic: "customer-input-topic" })
+  createCustomer(CustomerInput) Customer withEvents CustomerEvent [CustomerCreated|CustomerCreatedFailed]
+
+  @put("/customers/{customerId}")
+  updateCustomer(id, CustomerInput) Customer? withEvents CustomerEvent CustomerUpdated /** update customer javadoc comment */
+
+  @delete("/customers/{customerId}")
+  deleteCustomer(id) withEvents CustomerDeleted
+
+  @get("/customers/{customerId}")
+  getCustomer(id) Customer?
+
+  @get({path: "/customers", params: {search: "string"}})
+  @paginated
+  listCustomers() Customer[]
+}
+
+@copy(Customer)
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerEvent {
+    id Long
+}
+
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerCreated {
+  customerId String
+  customer Customer
+}
+
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerCreatedFailed {
+  customerId String
+  customer Customer
+}
+
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerUpdated {
+  customerId String
+  customer Customer
+}
+
+@asyncapi({channel: "customerEventsChannel", topic: "customer-events-topic"})
+event CustomerDeleted {
+  customerId String
+}
+

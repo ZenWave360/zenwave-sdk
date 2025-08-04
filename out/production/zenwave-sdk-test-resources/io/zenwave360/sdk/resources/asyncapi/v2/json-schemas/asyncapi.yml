@@ -1,0 +1,56 @@
+asyncapi: '2.0.0'
+info:
+  title: logistics - NDS WMQ async api spec
+  version: '1.0.0'
+
+defaultContentType: application/json
+
+channels:
+  transportNotificationBatch:
+    subscribe:
+      operationId: onTransportNotificationBatch
+      x-transactional: true
+      message:
+        name: TransportNotificationEventBatchMessage
+        hedaer:
+          $ref: '#/components/schemas/logistics.wmq.header.v1'
+        schemaFormat: 'application/schema+json;version=draft-07'
+        payload:
+          $ref: 'transport-notification-batch-message-envelop.schema'
+  transportNotification:
+    publish:
+      operationId: onTransportNotificationEvent
+      message:
+        name:  TransportNotificationEventMessage
+        header:
+          $ref: '#/components/schemas/logistics.wmq.header.v1'
+        schemaFormat: 'application/schema+json;version=draft-07'
+        payload:
+          $ref: 'transport-notification-message-envelop.schema'
+  transportNotificationEventSubscriptions:
+    subscribe:
+      operationId: onNotificationEventSubscriptions
+      message:
+        name: NotificationEventSubscriptionsMessage
+        hedaer:
+          $ref: '#/components/schemas/logistics.wmq.header.v1'
+        schemaFormat: 'application/schema+json;version=draft-07'
+        payload:
+          $ref: 'transport-notification-batch-message-envelop.schema'
+components:
+  schemas:
+    logistics.wmq.header.v1:
+      type: object
+      required:
+        - fileName
+        - messageVersion
+      properties:
+        fileName:
+          type: string
+        messageVersion:
+          type: string
+        source:
+          type: string
+    FlightDelayedEvent:
+      $ref: 'flight-delayed-event.schema'
+

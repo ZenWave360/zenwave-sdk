@@ -1,0 +1,216 @@
+asyncapi: 3.0.0
+info:
+  title: Zenwave 360 Generated API
+  version: 0.0.1
+
+defaultContentType: application/json
+
+tags:
+  - name: "Default"
+  - name: "Customer"
+
+channels:
+  createCustomerChannel:
+    address: inputchannel
+    messages:
+      CreateCustomerMessage:
+        $ref: '#/components/messages/CreateCustomerMessage'
+
+  customerEventChannel:
+    address: compacted
+    messages:
+      CustomerEventMessage:
+        $ref: '#/components/messages/CustomerEventMessage'
+
+  customerEventsChannel:
+    address: tratra
+    messages:
+      CustomerDeletedMessage:
+        $ref: '#/components/messages/CustomerDeletedMessage'
+      CustomerUpdatedMessage:
+        $ref: '#/components/messages/CustomerUpdatedMessage'
+      CustomerCreatedMessage:
+        $ref: '#/components/messages/CustomerCreatedMessage'
+
+
+operations:
+  doCreateCustomer:
+    action: receive
+    channel:
+      $ref: '#/channels/createCustomerChannel'
+  onCreateCustomerCustomerEvent:
+    action: send
+    channel:
+      $ref: '#/channels/customerEventChannel'
+  onCreateCustomerCustomerCreated:
+    action: send
+    channel:
+      $ref: '#/channels/customerEventsChannel'
+  onCreateCustomerCustomerCreatedFailed:
+    action: send
+    channel:
+      $ref: '#/channels/customerEventChannel'
+  onUpdateCustomerCustomerEvent:
+    action: send
+    channel:
+      $ref: '#/channels/customerEventChannel'
+  onUpdateCustomerCustomerUpdated:
+    action: send
+    channel:
+      $ref: '#/channels/customerEventsChannel'
+  onDeleteCustomerCustomerDeleted:
+    action: send
+    channel:
+      $ref: '#/channels/customerEventsChannel'
+
+
+components:
+  messages:
+    CreateCustomerMessage:
+      messageId: CreateCustomerMessage
+      name: CreateCustomerMessage
+      title: CreateCustomerMessage
+      summary: CreateCustomerMessage
+      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        schema:
+          $ref: "#/components/schemas/Customer"
+    CustomerMessage:
+      messageId: CustomerMessage
+      name: CustomerMessage
+      title: Customer javadoc comment
+      summary: Customer javadoc comment
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        schema:
+          schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+          $ref: "#/components/schemas/Customer"
+    CustomerEventMessage:
+      messageId: CustomerEventMessage
+      name: CustomerEventMessage
+      title:
+      summary:
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        schema:
+          schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+          $ref: "#/components/schemas/CustomerEvent"
+    CustomerCreatedMessage:
+      messageId: CustomerCreatedMessage
+      name: CustomerCreatedMessage
+      title:
+      summary:
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        $ref: "#/components/schemas/CustomerCreated"
+    CustomerUpdatedMessage:
+      messageId: CustomerUpdatedMessage
+      name: CustomerUpdatedMessage
+      title:
+      summary:
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        schema:
+          schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+          $ref: "#/components/schemas/CustomerUpdated"
+    CustomerDeletedMessage:
+      messageId: CustomerDeletedMessage
+      name: CustomerDeletedMessage
+      title:
+      summary:
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        schema:
+          schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+          $ref: "#/components/schemas/CustomerDeleted"
+
+  messageTraits:
+    CommonHeaders:
+      headers:
+        type: object
+        properties:
+          kafka_messageKey:
+            type: string
+            description: This header value will be populated automatically at runtime
+            x-runtime-expression: $message.payload#/id
+          tracingId:
+            type: string
+            description: This header value will be populated automatically at runtime
+            x-runtime-expression: $tracingIdSupplier
+
+  schemas:
+    Customer:
+      type: "object"
+      x-business-entity: "Customer"
+      required:
+        - "username"
+        - "email"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        username:
+          type: "string"
+        email:
+          type: "string"
+        tags:
+          type: "array"
+          items:
+            type: "string"
+    CustomerEvent:
+      type: "object"
+      x-business-entity: "CustomerEvent"
+      required:
+        - "username"
+        - "email"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        username:
+          type: "string"
+        email:
+          type: "string"
+        tags:
+          type: "array"
+          items:
+            type: "string"
+    CustomerCreated:
+      type: "object"
+      x-business-entity: "CustomerCreated"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        customerId:
+          type: "string"
+        customer:
+          $ref: "#/components/schemas/Customer"
+    CustomerUpdated:
+      type: "object"
+      x-business-entity: "CustomerUpdated"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        customerId:
+          type: "string"
+        customer:
+          $ref: "#/components/schemas/Customer"
+    CustomerDeleted:
+      type: "object"
+      x-business-entity: "CustomerDeleted"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        customerId:
+          type: "string"
