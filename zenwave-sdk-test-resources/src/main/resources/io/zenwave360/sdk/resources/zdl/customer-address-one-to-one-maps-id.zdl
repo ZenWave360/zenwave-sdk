@@ -25,7 +25,7 @@ entity Address {
 }
 
 relationship OneToOne {
-  Customer{address} to @Id Address{customer}
+  Customer{address} to @MapsId Address{customer}
 }
 
 service Customer,Address with CustomerService

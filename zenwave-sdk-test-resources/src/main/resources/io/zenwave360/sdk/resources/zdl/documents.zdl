@@ -19,7 +19,7 @@ entity DocumentData {
 }
 
 relationship OneToOne {
-    DocumentInfo{documentData required } to @Id DocumentData{document required}
+    DocumentInfo{documentData required } to @MapsId DocumentData{document required}
 }
 
 @inline
