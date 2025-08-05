@@ -14,7 +14,7 @@ import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.testcontainers.DockerClientFactory
-import org.testcontainers.containers.DockerComposeContainer
+import org.testcontainers.containers.ComposeContainer
 import org.testcontainers.containers.wait.strategy.Wait
 
 class DockerComposeInitializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -39,7 +39,7 @@ class DockerComposeInitializer : ApplicationContextInitializer<ConfigurableAppli
         )
 
         val HOST: String = DockerClientFactory.instance().dockerHostIpAddress()
-        val container: DockerComposeContainer<*> = DockerComposeContainer(File(DOCKER_COMPOSE_FILE)).withEnv("HOST", HOST)
+        val container: ComposeContainer = ComposeContainer(File(DOCKER_COMPOSE_FILE)).withEnv("HOST", HOST)
 
         init {
             for (service in SERVICES) {
