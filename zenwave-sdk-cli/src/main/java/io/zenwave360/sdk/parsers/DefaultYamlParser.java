@@ -6,12 +6,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import io.zenwave360.jsonrefparser.AuthenticationValue;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.jsonrefparser.$RefParser;
 import io.zenwave360.jsonrefparser.$RefParserOptions;
 import io.zenwave360.jsonrefparser.$RefParserOptions.OnMissing;
+import io.zenwave360.sdk.utils.MultiValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +25,8 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
     @DocumentedOption(description = "API Specification File")
     public URI apiFile;
     public String targetProperty = "api";
+    @DocumentedOption(description = "TODO: API Keys by host to be added to the API specification")
+    public MultiValueMap<String> authApiKeysByHostMap = new MultiValueMap<>();
 
     private ClassLoader projectClassLoader;
 
@@ -64,6 +69,19 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
             $RefParser parser = new $RefParser(apiFile)
                     .withResourceClassLoader(this.projectClassLoader)
                     .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing(OnMissing.SKIP));
+
+            if(!authApiKeysByHostMap.isEmpty()) {
+                var auth = new AuthenticationValue();
+                for (var authEntry : authApiKeysByHostMap.entrySet()) {
+                    var hostPattern = authEntry.getKey();
+                    auth.withUrlMatcher(url -> url.getHost().matches(hostPattern));
+                    for (String header : authEntry.getValue()) {
+                        auth.withHeader(header);
+                    }
+                }
+                parser.withAuthentication(auth);
+            }
+
             model.put(targetProperty, new Model(apiFile, parser.parse().dereference().mergeAllOf().getRefs()));
         } else {
             log.error("No API Specification (apiFile) provided");

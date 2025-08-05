@@ -1,24 +1,29 @@
 package io.zenwave360.sdk;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.zenwave360.sdk.utils.MultiValueMap;
 import io.zenwave360.sdk.zdl.layouts.DefaultProjectLayout;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.reflections.Reflections;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
-import io.zenwave360.sdk.doc.DocumentedPlugin;
 import io.zenwave360.sdk.utils.NamingUtils;
 
 public class Plugin {
+
+    private static final ObjectMapper objectMapper = new ObjectMapper()
+            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
+            .configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
+            .configure(JsonParser.Feature.STRICT_DUPLICATE_DETECTION, false);
 
     @DocumentedOption(
             description = "Project organization and package structure",
@@ -202,7 +207,14 @@ public class Plugin {
                 }
             }
         }
-        if (value instanceof String && ((String) value).contains(",")) {
+        if (value instanceof String str && str.trim().startsWith("{") && str.trim().endsWith("}")) {
+            try {
+                value = objectMapper.readValue(str, MultiValueMap.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else if (value instanceof String str && str.contains(",")) {
             value = Arrays.stream(((String) value).split(",")).map(String::trim).toList();
         }
         if (value instanceof String && field != null && List.class.isAssignableFrom(field.getType())) {
