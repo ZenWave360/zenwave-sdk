@@ -1,0 +1,29 @@
+package {{producerApiPackage}};
+
+{{#if modelPackage}}
+import {{modelPackage}}.*;
+{{/if}}
+
+/**
+ * {{asyncapi.description}}
+ */
+@jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreamsWithDtosPlugin", date = "{{date}}")
+{{~#if generatedAnnotationClass}}@{{generatedAnnotationClass}}{{~/if}}
+public interface {{producerInterfaceName serviceName operationRoleType}} {
+
+{{#each operations as |operation|}}
+    {{#each operation.x--messages as |message|}}
+    /**
+     * {{{operation.summary}}}
+     */
+    boolean {{operation.operationId}}{{methodSuffix message operation producer=true}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers);
+    default boolean {{operation.operationId}}{{methodSuffix message operation producer=true}}({{message.x--javaType}} payload) {
+        return {{operation.operationId}}{{methodSuffix message operation producer=true}}(payload, null);
+    };
+    {{/each}}
+{{/each}}
+
+{{#each messages as |message|}}
+    {{~> (partial '../common/Headers') isProducer=true}}
+{{/each}}
+}

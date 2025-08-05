@@ -1,0 +1,38 @@
+package {{consumerApiPackage}};
+
+import java.util.function.Consumer;
+{{~#if exposeMessage}}
+import org.springframework.messaging.Message;
+{{~/if}}
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+{{#if modelPackage}}
+import {{modelPackage}}.*;
+{{/if}}
+
+@jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreamsWithDtosPlugin", date = "{{date}}")
+{{~#if generatedAnnotationClass}}@{{generatedAnnotationClass}}{{~/if}}
+public interface {{consumerServiceInterfaceName operation.x--operationIdCamelCase}} {
+
+{{#each operation.x--messages as |message|}}
+    {{~#if exposeMessage}}
+    void {{operation.operationId}}{{methodSuffix message operation}}(Flux<Message<{{message.x--javaType}}>> messageFlux);
+    {{~else}}
+    void {{operation.operationId}}{{methodSuffix message operation}}(Flux<{{message.x--javaType}}> messageFlux);
+    {{~/if}}
+{{/each}}
+
+    /**
+     * Default method for handling unknown messages or tombstone records (null record values).
+     */
+    {{~#if exposeMessage}}
+    default void defaultHandler(Flux<Message> messageFlux) {};
+    {{~else}}
+    default void defaultHandler(Flux<Object> messageFlux) {};
+    {{~/if}}
+
+{{#each messages as |message|}}
+    {{~> (partial '../../common/Headers') isProducer=false}}
+{{/each}}
+}

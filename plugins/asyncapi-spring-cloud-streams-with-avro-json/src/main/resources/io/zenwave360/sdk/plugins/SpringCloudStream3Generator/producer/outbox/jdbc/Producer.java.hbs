@@ -1,0 +1,126 @@
+package {{producerApiPackage}};
+
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.stereotype.Component;
+
+{{#if modelPackage}}
+import {{modelPackage}}.*;
+{{/if}}
+
+/**
+ * {{asyncapi.description}}
+ */
+@Component("{{bindingPrefix}}{{producerClassName serviceName operationRoleType}}")
+@jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.SpringCloudStreamsWithDtosPlugin", date = "{{date}}")
+{{~#if generatedAnnotationClass}}@{{generatedAnnotationClass}}{{~/if}}
+public class {{producerClassName serviceName operationRoleType}} implements {{producerInterfaceName serviceName operationRoleType}} {
+
+    private Logger log = LoggerFactory.getLogger(getClass());
+
+    public String sqlSaveMessageToOutbox = "INSERT INTO {tableName} (binding_name, type, payload, headers) VALUES (?, ?, ?, ?)";
+{{~#each operations as |operation|}}
+    public String {{operation.operationId}}BindingName = "{{bindingPrefix}}{{operation.x--operationIdKebabCase}}-out{{bindingSuffix}}";
+    public String {{operation.operationId}}OutboxTableName = "{{snakeCase operation.operationId}}_outbox";
+{{~/each}}
+
+    protected final StreamBridge streamBridge;
+    protected final ApplicationContext applicationContext;
+    protected JdbcTemplate jdbcTemplate;
+    protected ObjectMapper objectMapper = new ObjectMapper();
+
+    public {{producerClassName serviceName operationRoleType}}(StreamBridge streamBridge, ApplicationContext applicationContext, JdbcTemplate jdbcTemplate) {
+        this.streamBridge = streamBridge;
+        this.applicationContext = applicationContext;
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public void sendOutboxMessage(Map<String, Object> outboxTableRow) throws Exception {
+        String bindingName = (String) outboxTableRow.get("binding_name");
+        log.debug("Sending outbox message to stream {}", bindingName);
+
+        var type = (String) outboxTableRow.get("type");
+        var payload = fromColumnData(outboxTableRow.get("payload"), type);
+        var headers = fromHeadersColumn((String) outboxTableRow.get("headers"));
+        Message message = MessageBuilder.createMessage(wrapNullPayload(payload), new MessageHeaders(headers));
+        streamBridge.send(bindingName, message);
+    }
+
+    protected boolean saveMessageToOutbox(Message message, String tableName, String bindingName) {
+        log.debug("Saving message to outbox tableName {}", tableName);
+        String sql = sqlSaveMessageToOutbox.replace("{tableName}", tableName);
+        return jdbcTemplate.update(sql, bindingName, message.getPayload().getClass().getName(), toColumnData(message.getPayload()), toHeadersColumn(message.getHeaders())) == 1;
+    }
+
+
+{{~#each operations as |operation|}}
+    {{#each operation.x--messages as |message|}}
+    /**
+     * {{{operation.summary}}}
+     */
+    public boolean {{operation.operationId}}{{methodSuffix message operation producer=true}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers) {
+        log.debug("Sending message to stream {} via outbox", {{operation.operationId}}BindingName);
+        {{~#if (hasRuntimeHeaders message)}}
+        headers = headers != null ? headers : new {{message.x--javaTypeSimpleName}}Headers();
+        processRuntimeHeaders(payload, headers, {{message.x--javaTypeSimpleName}}Headers._runtimeheaders);
+        {{~/if}}
+        Message message = MessageBuilder.createMessage(wrapNullPayload(payload), new MessageHeaders(headers));
+        //return streamBridge.send({{operation.operationId}}BindingName, message);
+        return saveMessageToOutbox(message, {{operation.operationId}}OutboxTableName, {{operation.operationId}}BindingName);
+    }
+
+    {{/each}}
+{{/each}}
+
+    protected Map fromHeadersColumn(String value) throws Exception {
+        return objectMapper.readValue(value, Map.class);
+    }
+
+    protected String toHeadersColumn(Map headers) {
+        try {
+            return objectMapper.writeValueAsString(headers);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected Object fromColumnData(Object value, String type) throws Exception {
+        return objectMapper.readValue((String) value, Class.forName(type));
+    }
+
+    protected Object toColumnData(Object value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            objectMapper.addMixIn(Object.class, IgnoreAvroSchemaPropertyMixIn.class);
+            return objectMapper.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    abstract class IgnoreAvroSchemaPropertyMixIn {
+        @JsonIgnore
+        abstract void getSpecificData();
+        @JsonIgnore
+        abstract void getSchema();
+    }
+
+{{> (partial '../../partials/wrapNullPayload')}}
+{{> (partial '../../partials/runtime-headers')}}
+
+}

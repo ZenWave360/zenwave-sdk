@@ -99,11 +99,18 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             }
         }
 
+        var schemaFormatPath = AsyncAPIUtils.isV3(apiModel) ? "$.payload.schemaFormat" : "$.schemaFormat";
+        var jsonMessages = allMessages.stream().filter(message -> {
+            var schemaFormat = (String) JSONPath.get(message, schemaFormatPath);
+            var schemaFormatType = AsyncApiProcessor.SchemaFormatType.getFormat(schemaFormat);
+            return AsyncApiProcessor.SchemaFormatType.isSchemaFormat(schemaFormatType); // leave out avro
+        }).toList();
+
         targetSourceFolder = new File(targetFolder, sourceFolder);
 
         try {
             targetSourceFolder.mkdirs();
-            generate(apiModel, allMessages);
+            generate(apiModel, jsonMessages);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractAsyncapiGenerator;
+import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.utils.AntStyleMatcher;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
@@ -22,7 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class AvroSchemaGenerator extends AbstractAsyncapiGenerator {
+public class AvroSchemaGenerator extends Generator {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
@@ -35,10 +36,8 @@ public class AvroSchemaGenerator extends AbstractAsyncapiGenerator {
     @DocumentedOption(description = "Target folder to generate code to.")
     public File targetFolder = new File ("target/generated-sources/avro");
 
-    @Override
-    protected Templates configureTemplates() {
-        return null;
-    }
+    @DocumentedOption(description = "Source folder inside folder to generate code to.")
+    public String sourceFolder = "";
 
     @Override
     public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
@@ -61,10 +60,11 @@ public class AvroSchemaGenerator extends AbstractAsyncapiGenerator {
                 throw e;
             }
             try {
-                log.info("Generating avro classes to: {}", targetFolder);
+                var targetSourceFolder = new File(targetFolder, sourceFolder);
+                log.info("Generating avro classes to: {}", targetSourceFolder);
                 SpecificCompiler compiler = new SpecificCompiler(schema);
                 setCompilerProperties(compiler, avroCompilerProperties);
-                compiler.compileToDestination(avroCompilerProperties.sourceDirectory, targetFolder);
+                compiler.compileToDestination(avroCompilerProperties.sourceDirectory, targetSourceFolder);
             } catch (Exception e) {
                 log.error("Error generating avsc files", e);
                 throw e;
