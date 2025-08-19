@@ -2,5 +2,5 @@ package io.zenwave360.sdk.templating;
 
 public enum OutputFormatType {
 
-    JAVA, YAML, JDL, JSON, GERKIN, MARKDOWN
+    JAVA, KOTLIN, YAML, JDL, JSON, GERKIN, MARKDOWN
 }

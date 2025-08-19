@@ -9,6 +9,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
@@ -31,7 +32,7 @@ import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.templating.TemplateOutput;
 
-public class JavaToJDLGenerator implements Generator {
+public class JavaToJDLGenerator extends Generator {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 

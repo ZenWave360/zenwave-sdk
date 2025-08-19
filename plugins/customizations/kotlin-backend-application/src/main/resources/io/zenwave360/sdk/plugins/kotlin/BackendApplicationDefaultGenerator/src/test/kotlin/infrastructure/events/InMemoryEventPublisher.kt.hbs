@@ -1,0 +1,19 @@
+package {{layout.infrastructureEventsPackage}}
+
+import {{layout.domainEventsPackage}}.*
+import {{layout.entitiesPackage}}.*
+import {{layout.outboundEventsPackage}}.EventPublisher
+
+class InMemoryEventPublisher: EventPublisher {
+
+    private val events = mutableListOf<Any>()
+
+    fun getEvents(): MutableList<Any> {
+        return events
+    }
+{{~#each events as |event|}}
+    override fun on{{event.className}}(event: {{event.className}}) {
+        events.add(event)
+    }
+{{~/each}}
+}

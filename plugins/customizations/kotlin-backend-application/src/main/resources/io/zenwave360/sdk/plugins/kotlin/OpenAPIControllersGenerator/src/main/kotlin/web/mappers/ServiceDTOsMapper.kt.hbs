@@ -1,0 +1,49 @@
+package {{layout.adaptersWebMappersPackage}}
+
+import {{layout.adaptersWebMappersCommonPackage}}.*
+import {{layout.entitiesPackage}}.*
+import {{layout.inboundDtosPackage}}.*
+import {{openApiModelPackage}}.*
+
+import org.mapstruct.Mapper
+import org.mapstruct.Mapping
+import org.mapstruct.factory.Mappers
+import java.math.*
+import java.time.*
+import java.util.*
+import org.springframework.data.domain.Page
+
+@Mapper(uses = [BaseMapper::class])
+interface {{serviceName}}DTOsMapper {
+
+    companion object {
+        val INSTANCE: {{serviceName}}DTOsMapper = Mappers.getMapper({{serviceName}}DTOsMapper::class.java)
+    }
+
+    // request mappings
+{{~#each mapperRequestDtoEntity as |entry|}}
+    {{~#if requestDto}}
+    fun as{{inputType}}(dto: {{requestDto}}): {{inputType}}
+    {{~/if}}
+    {{~#if methodParameters}}
+    fun as{{inputType}}({{{methodParameters operation}}}): {{inputType}}
+    {{~/if}}
+{{~/each}}
+
+    // response mappings
+{{~#each mapperResponseDtoEntity as |entry|}}
+    {{#if isResponsePaginated}}
+    fun as{{responseDto}}List(entityList: List<{{outputType}}>): List<{{responseDto}}>
+    @Mapping(target = "content", source = "content", conditionExpression = "java(page.getContent() != null)")
+    fun as{{responseEntityName}}(page: Page<{{outputType}}>): {{responseEntityName}}
+    fun as{{responseDto}}Page(page: Page<{{outputType}}>): Page<{{responseDto}}> {
+        return page.map { this.as{{responseDto}}(it) }
+    }
+    {{~else if isResponseArray}}
+    fun as{{responseDto}}List(entityList: List<{{outputType}}>): List<{{responseDto}}>
+    {{~else}}
+    fun as{{responseDto}}(entity: {{outputType}}): {{responseDto}}
+    {{/if}}
+{{~/each}}
+
+}

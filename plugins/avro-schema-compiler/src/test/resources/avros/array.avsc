@@ -1,0 +1,100 @@
+[
+  {
+    "type": "record",
+    "name": "Address",
+    "namespace": "io.zenwave360.example.core.outbound.events.dtos",
+    "fields": [
+      {
+        "name": "street",
+        "type": "string"
+      },
+      {
+        "name": "city",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "type": "record",
+    "name": "PaymentMethod",
+    "namespace": "io.zenwave360.example.core.outbound.events.dtos",
+    "fields": [
+      {
+        "name": "id",
+        "type": "long"
+      },
+      {
+        "name": "type",
+        "type": "PaymentMethodType"
+      },
+      {
+        "name": "cardNumber",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "type": "record",
+    "name": "CustomerEvent",
+    "namespace": "io.zenwave360.example.core.outbound.events.dtos",
+    "fields": [
+      {
+        "name": "name",
+        "type": "string",
+        "doc": "Customer name"
+      },
+      {
+        "name": "email",
+        "type": "string",
+        "doc": ""
+      },
+      {
+        "name": "addresses",
+        "type": {
+          "type": "array",
+          "items": "Address",
+          "java-class": "java.util.List"
+        }
+      },
+      {
+        "name": "id",
+        "type": "long"
+      },
+      {
+        "name": "version",
+        "type": [
+          "null",
+          "int"
+        ]
+      },
+      {
+        "name": "paymentMethods",
+        "type": {
+          "type": "array",
+          "items": "PaymentMethod",
+          "java-class": "java.util.List"
+        }
+      }
+    ]
+  },
+  {
+    "type": "record",
+    "name": "CustomerDeletedEvent",
+    "namespace": "io.zenwave360.example.core.outbound.events.dtos",
+    "fields": [
+      {
+        "name": "id",
+        "type": "long"
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "name": "PaymentMethodType",
+    "namespace": "io.zenwave360.example.core.outbound.events.dtos",
+    "symbols": [
+      "VISA",
+      "MASTERCARD"
+    ]
+  }
+]

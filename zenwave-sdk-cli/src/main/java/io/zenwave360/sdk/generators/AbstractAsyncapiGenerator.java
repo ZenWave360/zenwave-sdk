@@ -19,7 +19,7 @@ import io.zenwave360.sdk.utils.JSONPath;
 
 import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
 
-public abstract class AbstractAsyncapiGenerator implements Generator {
+public abstract class AbstractAsyncapiGenerator extends Generator {
 
     public enum OperationRoleType {
         EVENT_PRODUCER("EventsProducer"), EVENT_CONSUMER("EventsConsumer"), COMMAND_PRODUCER("CommandsProducer"), COMMAND_CONSUMER("CommandsConsumer");
@@ -74,10 +74,6 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
 
     protected Model getApiModel(Map<String, Object> contextModel) {
         return (Model) contextModel.get(sourceProperty);
-    }
-
-    protected HandlebarsEngine getTemplateEngine() {
-        return handlebarsEngine;
     }
 
     protected abstract Templates configureTemplates();
@@ -260,6 +256,7 @@ public abstract class AbstractAsyncapiGenerator implements Generator {
         baseModel.putAll(this.asConfigurationMap());
         baseModel.put("context", contextModel);
         baseModel.put("asyncapi", getApiModel(contextModel));
+        // baseModel.putAll(this.templates.getDocumentedOptions());
 
         var templateOutputList = new ArrayList<TemplateOutput>();
         for (TemplateInput template : templates) {

@@ -1,0 +1,36 @@
+package {{layout.domainEventsPackage}}
+
+import java.io.Serializable
+import java.math.*
+import java.time.*
+import java.util.*
+import jakarta.validation.constraints.*
+
+import {{layout.entitiesPackage}}.*
+
+/**
+ * {{event.comment}}
+ */
+{{~#if useSpringModulith}}
+@org.springframework.modulith.NamedInterface("events.{{event.className}}")
+{{~/if}}
+{{abstractClass event}} data class {{event.className}} {{addExtends event}} (
+{{#each event.fields as |field|}}
+    {{{fieldValidationAnnotations field}}}
+    var {{field.name}}: {{{fieldType field}}}?{{#if field.isArray}} = mutableListOf(){{else}} = null{{/if}}{{#unless @last}},{{/unless}}
+{{/each}}
+) : Serializable {
+
+    companion object {
+        private const val serialVersionUID: Long = 1L
+    }
+
+{{#each event.fields as |field|}}
+    {{~#if field.isArray}}
+    fun add{{capitalize field.name}}({{field.name}}: {{javaType field}}): {{event.className}} {
+        this.{{field.name}}.add({{field.name}})
+        return this
+    }
+    {{~/if}}
+{{/each}}
+}

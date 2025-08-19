@@ -1,0 +1,128 @@
+package {{layout.infrastructureRepositoryPackage}}
+
+import {{layout.infrastructureRepositoryCommonPackage}}.BaseRepositoryIntegrationTest
+import {{layout.entitiesPackage}}.*
+import {{layout.outboundRepositoryPackage}}.{{entity.className}}Repository
+
+import java.util.HashSet
+import java.util.HashMap
+import java.util.List
+import java.time.*
+import java.math.BigDecimal
+
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.repository.findByIdOrNull
+
+import jakarta.persistence.EntityManager
+
+class {{entity.className}}RepositoryIntegrationTest : BaseRepositoryIntegrationTest() {
+
+    @Autowired
+    lateinit var entityManager: EntityManager
+
+    @Autowired
+    lateinit var {{entity.instanceName}}Repository: {{entity.className}}Repository
+
+    @Test
+    fun findAllTest() {
+        val results = {{entity.instanceName}}Repository.findAll()
+        Assertions.assertFalse(results.isEmpty())
+    }
+
+    @Test
+    fun findByIdTest() {
+        val id = 1L
+        val {{entity.instanceName}} = {{entity.instanceName}}Repository.findByIdOrNull(id) ?: throw NoSuchElementException("{{_entity.className}} not found with id: $id")
+        Assertions.assertNotNull({{entity.instanceName}}.id)
+        Assertions.assertNotNull({{entity.instanceName}}.version)
+        {{~#if (or entity.options.auditing entity.options.extendsAuditing)}}
+        Assertions.assertNotNull({{entity.instanceName}}.createdBy)
+        Assertions.assertNotNull({{entity.instanceName}}.createdDate)
+        {{~/if}}
+    }
+
+    @Test
+    fun saveTest() {
+        val {{entity.instanceName}} = {{entity.className}}()
+        {{~#each entity.fields as |field|}}
+        {{entity.instanceName}}.{{field.name}} = {{{populateField field}}}
+        {{~/each}}
+
+{{#each entity.relationships as |relationship|}}
+{{~#if relationship.fieldName}}
+        // {{relationship.type}} {{relationship.fieldName}} owner: {{relationship.ownerSide}}
+    {{~#if (or relationship.ownerSide (and (endsWith relationship.type 'OneToOne') (not relationship.ownerSide) entity.options.aggregate) )}}
+        {{~#if (and relationship.ownerSide (endsWith relationship.type 'ToOne'))}}
+        val {{relationship.fieldName}}Id = 1L
+        {{~/if}}
+        {{~#if (addRelationshipById relationship entity=entity)}}
+        {{entity.instanceName}}.{{relationship.fieldName}}Id = {{relationship.fieldName}}Id // using id to write relationship
+        {{~else}}
+        val {{relationship.fieldName}} = {{relationship.otherEntityName}}()
+        {{~assign 'otherEntity' (findEntity relationship.otherEntityName zdl)}}
+        {{~#each otherEntity.fields as |field|}}
+        {{relationship.fieldName}}.{{field.name}} = {{{populateField field}}}
+        {{~/each}}
+            {{~#if (endsWith relationship.type 'ToOne')}}
+        {{entity.instanceName}}.{{relationship.fieldName}} = {{relationship.fieldName}}
+            {{~else}}
+        {{entity.instanceName}}.{{relationship.fieldName}} = HashSet()
+        {{entity.instanceName}}.add{{capitalize relationship.fieldName}}({{relationship.fieldName}})
+            {{~/if}}
+        {{~/if}}
+    {{~/if}}
+{{/if~}}
+{{/each}}
+
+        // Persist aggregate root
+        val created = {{entity.instanceName}}Repository.save({{entity.instanceName}})
+
+        // reloading to get relationships persisted by id
+        entityManager.flush()
+        entityManager.refresh(created)
+        Assertions.assertNotNull(created.id)
+        Assertions.assertNotNull(created.version)
+        {{~#if (or entity.options.auditing entity.options.extendsAuditing)}}
+        Assertions.assertNotNull(created.createdBy)
+        Assertions.assertNotNull(created.createdDate)
+        {{~/if}}
+
+{{#each entity.relationships as |relationship|}}
+{{~#if relationship.fieldName}}
+    {{~#if relationship.ownerSide}}
+        {{~#if (endsWith relationship.type 'OneToOne')}}
+        Assertions.assertNotNull({{entity.instanceName}}.{{relationship.fieldName}}?.id != null)
+        {{~else if (endsWith relationship.type 'ToOne')}}
+        Assertions.assertTrue({{entity.instanceName}}.{{relationship.fieldName}}?.id == {{relationship.fieldName}}Id)
+        {{~else}}
+        Assertions.assertTrue({{entity.instanceName}}.{{relationship.fieldName}}?.stream()?.allMatch { item -> item.id != null } == true)
+        {{~/if}}
+    {{~/if}}
+{{~/if}}
+{{~/each}}
+    }
+
+    @Test
+    fun updateTest() {
+        val id = 1L
+        val {{entity.instanceName}} = {{entity.instanceName}}Repository.findByIdOrNull(id)?: throw NoSuchElementException("{{_entity.className}} not found with id: $id")
+        {{~#each entity.fields as |field|}}
+        {{entity.instanceName}}.{{field.name}} = {{{populateField field}}}
+        {{~/each}}
+
+        val updated = {{entity.instanceName}}Repository.save({{entity.instanceName}})
+        {{~#each entity.fields as |field|}}
+        Assertions.assertEquals({{{populateField field}}}, updated.{{field.name}})
+        {{~/each}}
+    }
+
+    @Test
+    fun deleteTest() {
+        val id = 1L
+        {{entity.instanceName}}Repository.deleteById(id)
+        val notFound = {{entity.instanceName}}Repository.findByIdOrNull(id)
+        Assertions.assertNull(notFound)
+    }
+}

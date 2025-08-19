@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+import com.github.jknack.handlebars.Handlebars;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.generators.Generator;
@@ -22,7 +23,7 @@ import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
 import org.apache.commons.lang3.StringUtils;
 
-public class ZDLToOpenAPIGenerator implements Generator {
+public class ZDLToOpenAPIGenerator extends Generator {
 
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
@@ -69,7 +70,9 @@ public class ZDLToOpenAPIGenerator implements Generator {
         return this;
     }
 
-    private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
+    private Handlebars getHandlebars() {
+        return ((HandlebarsEngine) super.getTemplateEngine()).getHandlebars();
+    }
 
     private final TemplateInput zdlToOpenAPITemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZDLToOpenAPIGenerator/ZDLToOpenAPI.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
 
@@ -78,19 +81,19 @@ public class ZDLToOpenAPIGenerator implements Generator {
     }
 
     {
-        handlebarsEngine.getHandlebars().registerHelper("serviceAggregates", (context, options) -> {
+        getHandlebars().registerHelper("serviceAggregates", (context, options) -> {
             Map service = options.hash("service", new HashMap<>());
             Map zdl = options.hash("zdl", new HashMap<>());
             List<String> aggregateNames = JSONPath.get(service, "$.aggregates", List.of());
             String aggregatesRegex = aggregateNames.isEmpty() ? "" : " =~ /(" + StringUtils.join(aggregateNames, "|") + ")/";
             return JSONPath.<List<Map<String, Object>>>get(zdl, "$.channels[*][*][?(@.operationId" + aggregatesRegex + ")]");
         });
-        handlebarsEngine.getHandlebars().registerHelper("httpResponseStatus", (context, options) -> {
+        getHandlebars().registerHelper("httpResponseStatus", (context, options) -> {
             Map operation = (Map) context;
             var defaultStatus = httpStatusCodes.get(operation.get("httpMethod"));
             return JSONPath.get(operation, "$.httpOptions.status", defaultStatus);
         });
-        handlebarsEngine.getHandlebars().registerHelper("responseBodyCollectionSuffix", (context, options) -> {
+        getHandlebars().registerHelper("responseBodyCollectionSuffix", (context, options) -> {
             Map operation = (Map) context;
             var isArray = JSONPath.get(operation, "$.isResponseBodyArray", false);
             var paginated = JSONPath.get(operation, "$.paginated", false);
@@ -99,7 +102,7 @@ public class ZDLToOpenAPIGenerator implements Generator {
             }
             return "";
         });
-        handlebarsEngine.getHandlebars().registerHelper("asTagName", (context, options) -> {
+        getHandlebars().registerHelper("asTagName", (context, options) -> {
             if (context instanceof String) {
                 return ((String) context).replaceAll("(Service|UseCases)", "");
             }
@@ -276,6 +279,6 @@ public class ZDLToOpenAPIGenerator implements Generator {
         model.put("context", contextModel);
         model.put("zdlModel", zdlModel);
         model.put("schemasAsString", schemasAsString);
-        return handlebarsEngine.processTemplate(model, template);
+        return getTemplateEngine().processTemplate(model, template);
     }
 }

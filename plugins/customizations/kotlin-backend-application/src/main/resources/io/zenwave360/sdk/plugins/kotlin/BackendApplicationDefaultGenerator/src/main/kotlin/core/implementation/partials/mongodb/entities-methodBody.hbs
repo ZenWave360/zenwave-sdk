@@ -1,0 +1,102 @@
+{{~assign "_entity" aggregateCommandsForMethod.entity}}
+{{~assign "returnEntity" (methodReturnEntity method)}}
+{{{logMethodCall method}}}
+{{!-- @Async --}}
+{{~#if method.options.async}}
+    {{#if method.returnType}}return CompletableFuture.completedFuture({{/if}} {{method.name}}Sync({{methodParametersCallSignature method}}){{#if method.returnType}}){{/if}}
+{{!-- @delete --}}
+{{~else if (and _entity method.options.delete method.paramId)}}
+    log.debug("Request to delete {{_entity.className}} : {}", id)
+    {{_entity.instanceName}}Repository.deleteById(id)
+{{!-- list search --}}
+{{~else if (and _entity method.returnType method.returnTypeIsArray)}}
+    {{~#if (eq _entity.name returnEntity)}}
+        return {{_entity.instanceName}}Repository.findAll({{#if method.options.paginated}}pageable{{/if}})
+    {{~else}}
+        val {{_entity.instanceNamePlural}} = {{_entity.instanceName}}Repository.findAll({{#if method.options.paginated}}pageable{{/if}})
+        return {{wrapWithMapper _entity}}
+    {{~/if}}
+{{!-- Optional<Entity> patch(id, Map) --}}
+{{~else if (and _entity method.options.patch method.paramId method.parameter method.returnType method.returnTypeIsOptional)}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}
+        ?.let { existing{{_entity.className}} ->
+            {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
+        }
+        ?.let { {{_entity.instanceName}}Repository.save(it) }
+        {{~#unless (eq _entity.name method.returnType)}}
+        ?.let { {{asInstanceName service.name}}Mapper.as{{returnType}}(it) }
+        {{~/unless}}
+        {{~#if method.withEvents}}
+        ?.also {
+            {{~> (partial '../withEvents')}}
+        }
+        {{~/if}}
+{{!-- Optional<Entity> update(id, Entity) --}}
+{{~else if (and _entity method.paramId method.parameter method.returnType method.returnTypeIsOptional)}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}
+        ?.let { existing{{_entity.className}} ->
+            {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
+        }
+        ?.let { {{_entity.instanceName}}Repository.save(it) }
+        {{~#unless (eq _entity.name method.returnType)}}
+        ?.let { {{asInstanceName service.name}}Mapper.as{{returnType}}(it) }
+        {{~/unless}}
+        {{~#if method.withEvents}}
+        ?.also {
+            {{~> (partial '../withEvents')}}
+        }
+        {{~/if}}
+{{!-- Entity update(id, Entity) --}}
+{{~else if (and _entity method.paramId method.parameter method.returnType)}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}
+        ?.let { existing{{_entity.className}} ->
+            {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
+        }
+        ?.let { {{_entity.instanceName}}Repository.save(it) }
+        {{~#if method.withEvents}}
+        ?.also {
+            {{~> (partial '../withEvents')}}
+        }
+        {{~/if}}
+        ?: throw NoSuchElementException("{{_entity.className}} not found with id: {{{idForStringInterpolation method}}}")
+{{!-- Optional<Entity> get(id) --}}
+{{~else if (and _entity method.paramId method.returnType method.returnTypeIsOptional)}}
+    {{~assign 'needMapping' (not (eq _entity.name method.returnType))}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}{{#if needMapping}}?.let { {{asInstanceName service.name}}Mapper.as{{method.returnType}}(it) }{{/if}}
+{{!-- Entity get(id) --}}
+{{~else if (and _entity method.paramId method.returnType)}}
+    {{~assign 'needMapping' (not (eq _entity.name method.returnType))}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}{{#if needMapping}}?.let { {{asInstanceName service.name}}Mapper.as{{method.returnType}}(it) }{{/if}}
+        ?: throw NoSuchElementException("{{_entity.className}} not found with id: {{{idForStringInterpolation method}}}")
+{{!-- Optional<Entity> get(MyEntity) --}}
+{{~else if (and _entity method.parameter method.returnType method.returnTypeIsOptional)}}
+    val {{_entity.instanceName}} = {{asInstanceName service.name}}Mapper.update({{_entity.className}}(), {{{mapperInputCallSignature method.parameter}}})
+    // TODO: implement this method
+    {{~> (partial '../withEvents')}}
+    return {{wrapWithMapper _entity}}
+{{!-- Optional<Entity> get(MyEntity) --}}
+{{~else if (and _entity method.parameter method.returnType)}}
+    val {{_entity.instanceName}} = {{asInstanceName service.name}}Mapper.update({{_entity.className}}(), {{{mapperInputCallSignature method.parameter}}})
+    // TODO: implement this method
+    {{~> (partial '../withEvents')}}
+    return {{wrapWithMapper _entity}}
+{{!-- Optional<Entity> get() --}}
+{{~else if (and _entity method.returnType)}}
+    val {{_entity.instanceName}} = {{_entity.className}}()
+    // TODO: implement this method
+    {{~> (partial '../withEvents')}}
+    return {{wrapWithMapper _entity}}
+{{!-- void get() --}}
+{{~else if (and _entity)}}
+    val {{_entity.instanceName}} = {{_entity.className}}()
+    // TODO: implement this method
+    {{~> (partial '../withEvents')}}
+
+    {{!-- we know nothing (???) --}}
+    {{~else~}}
+    // TODO: implement this method
+    {{~> (partial '../withEvents')}}
+    {{~#if method.returnType}}
+        return null
+    {{~/if}}
+{{~/if}}

@@ -1,13 +1,21 @@
 package io.zenwave360.sdk.zdl;
 
+import io.zenwave360.sdk.doc.DocumentedOption;
+import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
+import org.apache.commons.lang3.reflect.FieldUtils;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+
+import static java.lang.reflect.Modifier.isPublic;
+import static java.lang.reflect.Modifier.isStatic;
 
 /**
  * This file will hold all the project templates for a ZDL project generator.
@@ -41,6 +49,25 @@ public class ProjectTemplates {
 
     public void setLayout(ProjectLayout layout) {
         this.layout = layout;
+    }
+
+    public Map<String, Object> getDocumentedOptions() {
+        var options = new LinkedHashMap<String, Object>();
+        for (Field field : FieldUtils.getAllFields(getClass())) {
+            DocumentedOption documentedOption = field.getAnnotation(DocumentedOption.class);
+            if (documentedOption != null) {
+                try {
+                    options.put(field.getName(), FieldUtils.readField(field, this, true));
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return options;
+    }
+
+    public List<Object> getTemplateHelpers(Generator generator) {
+        return List.of();
     }
 
     public List<TemplateInput> aggregateTemplates = new ArrayList<>();

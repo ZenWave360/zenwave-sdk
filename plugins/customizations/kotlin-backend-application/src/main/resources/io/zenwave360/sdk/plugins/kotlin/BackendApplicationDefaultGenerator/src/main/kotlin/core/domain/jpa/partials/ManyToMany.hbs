@@ -1,0 +1,10 @@
+@ManyToMany{{#if relationship.ownerSide}}(cascade = [CascadeType.ALL]){{else}}(mappedBy = "{{relationship.otherEntityFieldName}}"){{/if}}
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+{{~#if relationship.ownerSide}}
+@JoinTable(name = "{{snakeCase (concat entity.name relationship.otherEntityName)}}",
+   joinColumns = @JoinColumn(name = "{{snakeCase (concat entity.name '_id')}}", referencedColumnName = "id"),
+   inverseJoinColumns = @JoinColumn(name = "{{snakeCase (concat relationship.otherEntityName '_id')}}", referencedColumnName = "id"))
+@com.fasterxml.jackson.annotation.JsonManagedReference
+{{~else}}
+@com.fasterxml.jackson.annotation.JsonBackReference
+{{/if~}}

@@ -36,7 +36,7 @@ public class OpenAPIKarateGenerator extends AbstractOpenAPIGenerator {
     @DocumentedOption(description = "Business Flow Feature name")
     public String businessFlowTestName;
 
-    private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
+    private HandlebarsEngine handlebarsEngine = (HandlebarsEngine) getTemplateEngine();
 
     private JsonSchemaToJsonFaker jsonSchemaToJsonFaker = new JsonSchemaToJsonFaker();
 
@@ -58,9 +58,7 @@ public class OpenAPIKarateGenerator extends AbstractOpenAPIGenerator {
         }
     }
 
-    public TemplateEngine getTemplateEngine() {
-        return handlebarsEngine;
-    }
+
 
     Model getApiModel(Map<String, Object> contextModel) {
         return (Model) contextModel.get(apiProperty);

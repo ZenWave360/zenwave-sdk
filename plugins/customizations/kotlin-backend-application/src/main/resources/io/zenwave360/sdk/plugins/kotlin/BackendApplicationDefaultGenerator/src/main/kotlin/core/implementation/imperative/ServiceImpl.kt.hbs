@@ -1,0 +1,92 @@
+package {{layout.coreImplementationPackage}}
+
+import {{layout.entitiesPackage}}.*
+import {{layout.inboundPackage}}.*
+import {{layout.inboundDtosPackage}}.*
+import {{layout.coreImplementationMappersPackage}}.*
+import {{layout.outboundRepositoryPackage}}.*
+{{~#if (and includeEmitEventsImplementation (needsEventsProducer service))}}
+// import {{layout.asyncApiModelPackage}}.*
+import {{layout.asyncApiProducerApiPackage}}.*
+{{~/if}}
+{{~#if (and includeEmitEventsImplementation (needsEventBus service))}}
+import {{layout.outboundEventsPackage}}.*
+{{~/if}}
+{{~#if (includeDomainEvents service)}}
+import {{layout.domainEventsPackage}}.*
+{{~/if}}
+
+import java.math.*
+import java.time.*
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.repository.findByIdOrNull
+{{~#if (jsonPath service 'methods[*][?(@.options.async)]')}}
+import java.util.concurrent.CompletableFuture
+import org.springframework.scheduling.annotation.Async
+{{~/if}}
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.util.Optional
+
+/**
+ * Service Implementation for managing {{service.entityNames}}.
+ */
+@Service
+@Transactional(readOnly = true)
+open class {{service.name}}Impl(
+{{#each entities as |entity|}}
+    {{~#unless (skipEntityRepository this)}}
+    private val {{entity.instanceName}}Repository: {{entity.className}}Repository{{#unless @last}},{{/unless}}
+    {{~/unless}}
+{{/each}}
+{{#if (includeEmitEventsImplementation service)}}
+    {{~#if (needsEventsProducer service)}}
+    , private val eventsProducer: {{eventsProducerInterface service.name}}
+    {{~/if}}
+    {{~#if (needsEventBus service)}}
+    , private val eventPublisher: EventPublisher
+    {{~/if}}
+{{/if}}
+) : {{service.name}} {
+
+    private val log: Logger = LoggerFactory.getLogger(javaClass)
+
+    private val {{asInstanceName service.name}}Mapper: {{service.name}}Mapper = {{service.name}}Mapper.INSTANCE
+
+{{#if (includeEmitEventsImplementation service)}}
+    private val eventsMapper: EventsMapper = EventsMapper.INSTANCE
+{{/if}}
+
+{{#each service.methods as |method|}}
+    {{~> (partial '../partials/' persistence '/methodAnnotations')~}}
+    {{~> (partial '../partials/serviceMethodSignature')}} {
+        {{~> (partial '../partials/' persistence '/methodBody')~}}
+    }
+{{/each}}
+
+{{#each (serviceAggregates service) as |aggregate|}}
+    private fun persistAndEmitEvents({{asInstanceName aggregate.name}}: {{aggregate.name}}): {{aggregate.name}} {
+        val {{asInstanceName aggregate.aggregateRoot}} = {{asInstanceName aggregate.aggregateRoot}}Repository.save({{asInstanceName aggregate.name}}.rootEntity)
+        {{asInstanceName aggregate.name}}.events.forEach { event ->
+        {{#each (aggregateEvents aggregate) as |event|}}
+            if (event is {{event.className}}) {
+            {{~#if event.options.asyncapi }}
+                {{~#if includeEmitEventsImplementation }}
+                eventsProducer.{{operationNameForEvent event.name}}(eventsMapper.as{{event.name}}(event))
+                {{~else}}
+                // TODO: set 'includeEmitEventsImplementation' to generate this
+                // eventsProducer.{{operationNameForEvent event.name}}(eventsMapper.as{{event.name}}(event))
+                {{~/if}}
+            {{~else}}
+                eventPublisher.on{{event.className}}(event)
+            {{~/if}}
+            }
+        {{/each}}
+        }
+        return {{asInstanceName aggregate.name}}
+    }
+{{/each}}
+}

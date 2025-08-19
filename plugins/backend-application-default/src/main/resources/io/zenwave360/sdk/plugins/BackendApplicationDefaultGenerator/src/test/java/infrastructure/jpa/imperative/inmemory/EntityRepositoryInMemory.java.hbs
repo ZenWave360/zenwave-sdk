@@ -6,6 +6,8 @@ import java.math.*;
 import java.time.*;
 import java.util.*;
 
+import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
+
 public class {{entity.className}}RepositoryInMemory extends InMemoryJpaRepository<{{entity.className}}> implements {{entity.className}}Repository {
 
 {{~#if (naturalIdFields entity)}}
@@ -14,6 +16,24 @@ public class {{entity.className}}RepositoryInMemory extends InMemoryJpaRepositor
         return getEntities().values().stream().filter(e ->
             {{#joinWithTemplate (naturalIdFields entity) delimiter='&&'}} isSameValue({{name}}, readField(e, "{{name}}")) {{/joinWithTemplate}}
         ).findFirst();
+    }
+{{~/if}}
+
+{{~assign 'relationships' (findOwnedOneToAnyRelationships entity)}}
+{{~#if relationships}}
+    @Override
+    public <T extends {{entity.className}}> T save(T entity) {
+        var finalEntity = super.save(entity);
+    {{~#each relationships as |relationship|}}
+        {{~#if (endsWith relationship.type 'ToMany')}}
+        if(finalEntity.get{{capitalize relationship.fieldName}}() != null) {
+            finalEntity.get{{capitalize relationship.fieldName}}().forEach({{relationship.fieldName}} -> {{relationship.fieldName}}.setId(firstNonNull({{relationship.fieldName}}.getId(), finalEntity.getId())));
+        }
+        {{~else if (endsWith relationship.type 'ToOne')}}
+        finalEntity.get{{capitalize relationship.fieldName}}().setId(firstNonNull(finalEntity.get{{capitalize relationship.fieldName}}().getId(), finalEntity.getId()));
+        {{~/if}}
+    {{~/each}}
+        return (T) finalEntity;
     }
 {{~/if}}
 }

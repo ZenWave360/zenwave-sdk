@@ -1,0 +1,93 @@
+package {{layout.moduleConfigPackage}}
+
+{{#if entities}}
+import {{layout.entitiesPackage}}.*
+{{/if}}
+{{#if services}}
+import {{layout.inboundPackage}}.*
+import {{layout.coreImplementationPackage}}.*
+{{/if}}
+{{#if includeEmitEventsImplementation}}
+    {{~#if (needsEventsProducer service)}}
+import {{layout.asyncApiProducerApiPackage}}.*
+    {{~/if}}
+    {{#if (includeDomainEvents service)}}
+import {{layout.domainEventsPackage}}.*
+    {{/if}}
+{{/if}}
+{{~#if (needsEventBus service)}}
+import {{layout.infrastructureEventsPackage}}.*
+{{~/if}}
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
+
+/**
+ * Services InMemory Config. It can be used standalone or with @SpringBootTest.
+ */
+@Configuration
+@Profile("in-memory")
+open class ServicesInMemoryConfig : RepositoriesInMemoryConfig() {
+
+{{#if (includeEmitEventsImplementation service)}}
+    {{~#if (needsEventsProducer service)}}
+    protected val eventsProducerInMemoryContext = EventsProducerInMemoryContext()
+    {{~/if}}
+{{/if}}
+{{~#if (needsEventBus service)}}
+    private val eventPublisher = InMemoryEventPublisher()
+{{~/if}}
+
+{{~#each services as |service|}}
+    protected val {{asInstanceName service.name}} = {{service.name}}Impl(
+        {{~#joinWithTemplate service.entities delimiter=", " as |entity| ~}}
+{{#unless (skipEntityRepository entity)}}{{entity.instanceName}}Repository(){{/unless}}
+        {{~/joinWithTemplate~}}
+        {{#if (includeEmitEventsImplementation service)}}
+            {{~#if (needsEventsProducer service)}}, eventsProducerInMemoryContext.{{eventsProducerInstance service.name}}(){{/if~}}
+            {{~#if (needsEventBus service)}}, eventPublisher{{/if~}}
+        {{/if}}
+        )
+{{~/each}}
+
+{{~#each services as |service|}}
+    @Bean
+    open fun <T : {{service.name}}> {{asInstanceName service.name}}(): T {
+        return {{asInstanceName service.name}} as T
+    }
+{{~/each}}
+
+{{assign "aggregates" (findAggregates entities)}}
+	companion object {
+{{~#each aggregates as |entity|}}
+		var _{{entity.instanceNamePlural}}: List<{{entity.className}}>? = null
+{{~/each}}
+    }
+
+	fun reloadTestData() {
+        {{assign "phisicalEntities" (jsonPath entities "$[?(@.options.skip != true)]")}}
+		val testDataLoader = TestDataLoader(listOf({{#joinWithTemplate phisicalEntities delimiter=', ' as |entity|}}{{entity.className}}::class.java{{/joinWithTemplate}}))
+        {{~#each aggregates as |entity|}}
+		val {{entity.instanceNamePlural}} = _{{entity.instanceNamePlural}} ?: testDataLoader.loadCollectionTestDataAsObjects({{entity.className}}::class.java)
+		{{entity.instanceName}}Repository().deleteAll()
+		{{entity.instanceName}}Repository().saveAll({{entity.instanceNamePlural}})
+		{{~/each}}
+        {{~#if (needsEventBus service)}}
+        eventPublisher.getEvents().clear()
+        {{~/if}}
+	}
+
+{{~#if (includeEmitEventsImplementation service)}}
+    {{~#if (needsEventsProducer service)}}
+    // fun getEventsProducerInMemoryContext(): EventsProducerInMemoryContext {
+    //     return eventsProducerInMemoryContext
+    // }
+    {{~/if}}
+{{~/if}}
+{{~#if (needsEventBus service)}}
+        @Bean
+        fun eventPublisher(): InMemoryEventPublisher {
+        return eventPublisher
+        }
+{{~/if}}
+}

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+import com.github.jknack.handlebars.Handlebars;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractZDLGenerator;
 import io.zenwave360.sdk.generators.EntitiesToAvroConverter;
@@ -70,11 +71,8 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
     @DocumentedOption(description = "Include CloudEvents headers (ce-*)")
     public boolean includeCloudEventsHeaders = false;
 
-
-    private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
-
     {
-        handlebarsEngine.getHandlebars().registerHelper("firstItem", (context, options) -> {
+        ((HandlebarsEngine) getTemplateEngine()).getHandlebars().registerHelper("firstItem", (context, options) -> {
             if (context instanceof List) {
                 return ((List) context).get(0);
             }
@@ -150,7 +148,8 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
                 schemas.put(entityName, asyncAPISchema);
             }
             if (schemaFormat == SchemaFormat.avro) {
-                EntitiesToAvroConverter toAvroConverter = new EntitiesToAvroConverter().withIdType(idType).withNamespace(avroPackage);
+                var avroIdType = "string".equals(idType) ? "string" : "long";
+                EntitiesToAvroConverter toAvroConverter = new EntitiesToAvroConverter().withIdType(avroIdType).withNamespace(avroPackage);
                 generatedProjectFiles.singleFiles.addAll(convertToAvro(toAvroConverter, schema, model));
             }
         }
@@ -368,18 +367,22 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         model.put("isDefaultSchemaFormat", schemaFormat == SchemaFormat.schema);
         model.put("schemaFormatString", schemaFormat == SchemaFormat.schema ? defaultSchemaFormat : avroSchemaFormat);
         model.put("schemasAsString", schemasAsString);
-        return handlebarsEngine.processTemplate(model, template);
+        return getTemplateEngine().processTemplate(model, template);
+    }
+
+    private Handlebars getHandlebars() {
+        return ((HandlebarsEngine) getTemplateEngine()).getHandlebars();
     }
 
     {
-        handlebarsEngine.getHandlebars().registerHelper("asTagName", (context, options) -> {
+        getHandlebars().registerHelper("asTagName", (context, options) -> {
             if (context instanceof String) {
                 return ((String) context).replaceAll("(Service|UseCases)", "");
             }
             return "Default";
         });
 
-        handlebarsEngine.getHandlebars().registerHelper("payloadRef", (context, options) -> {
+        getHandlebars().registerHelper("payloadRef", (context, options) -> {
             Map entity = (Map) context;
             if (schemaFormat == SchemaFormat.avro) {
                 return String.format("avro/%s.avsc", entity.get("name"));

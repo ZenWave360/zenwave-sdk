@@ -134,6 +134,13 @@ public class TestMonolithClinicalProject {
         TextUtils.replaceInFile(new File(targetFolder + "/src/main/java/com/example/clinical/adapters/web/masterdata/MasterDataApiController.java"),
                 "masterDataService.listMasterDataOfType\\(type, lang\\)",
                 "masterDataService.listMasterDataOfType(MasterDataType.valueOf(type), lang)");
+
+        TextUtils.replaceInFile(new File(targetFolder + "/src/main/java/com/example/clinical/modules/documents/mappers/DocumentServiceMapper.java"),
+                "DocumentInfo asDocumentInfo\\(List<Long> documentIds\\);",
+                "default DocumentInfo asDocumentInfo(List<Long> documentIds) { return new DocumentInfo(); }");
+        TextUtils.replaceInFile(new File(targetFolder + "/src/main/java/com/example/clinical/modules/documents/mappers/DocumentServiceMapper.java"),
+                "DocumentInfo update\\(@MappingTarget DocumentInfo entity, List<Long> documentIds\\);",
+                " default DocumentInfo update(@MappingTarget DocumentInfo entity, List<Long> documentIds) { return entity; }");
     }
 
     @Test

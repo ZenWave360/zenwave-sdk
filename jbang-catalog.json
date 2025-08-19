@@ -18,6 +18,7 @@
       ],
       "main": "io.zenwave360.sdk.Main",
       "java-options": [
+        "-Dfile.encoding=UTF-8",
         "--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
         "--add-exports", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
         "--add-exports", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
@@ -46,6 +47,7 @@
       ],
       "main": "io.zenwave360.sdk.Main",
       "java-options": [
+        "-Dfile.encoding=UTF-8",
         "--add-exports", "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
         "--add-exports", "jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
         "--add-exports", "jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",

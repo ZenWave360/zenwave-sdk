@@ -24,31 +24,8 @@ public class ZDLProjectGenerator extends AbstractZDLGenerator {
     public ProjectLayout layout;
     public ProjectTemplates templates;
 
-    private final HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
-
     @JsonAnySetter
     public Map<String, Object> options = new LinkedHashMap<>();
-
-
-    protected HandlebarsEngine getTemplateEngine() {
-        return handlebarsEngine;
-    }
-
-    @Override
-    public void onPropertiesSet() {
-        super.onPropertiesSet();
-        if(templates != null) {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            mapper.addHandler(new CommaSeparatedCollectionDeserializationHandler());
-            try {
-                mapper.updateValue(templates, asConfigurationMap());
-            } catch (JsonMappingException e) {
-                throw new RuntimeException(e);
-            }
-            templates.setLayout(layout);
-        }
-    }
 
     protected Map<String, Object> getZDLModel(Map<String, Object> contextModel) {
         return (Map) contextModel.get(sourceProperty);
@@ -244,6 +221,7 @@ public class ZDLProjectGenerator extends AbstractZDLGenerator {
         model.put("context", contextModel);
         model.put(sourceProperty, getZDLModel(contextModel));
         model.putAll(extModel);
+        model.putAll(templates.getDocumentedOptions());
         return getTemplateEngine().processTemplateNames(model, List.of(template));
     }
 }

@@ -1,0 +1,9 @@
+{{#if relationship.ownerSide}}
+@OneToMany({{#if relationship.otherEntityFieldName}}mappedBy = "{{relationship.otherEntityFieldName}}",{{/if}} fetch = FetchType.{{fetchType}}{{#if entity.options.aggregate}}, cascade = [CascadeType.ALL], orphanRemoval = true{{/if}})
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@com.fasterxml.jackson.annotation.JsonManagedReference
+{{else}}
+@ManyToOne(fetch = FetchType.{{fetchType}})
+@JoinColumn(name = "{{snakeCase relationship.fieldName}}_id")
+@com.fasterxml.jackson.annotation.JsonBackReference
+{{/if}}

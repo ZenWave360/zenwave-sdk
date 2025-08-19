@@ -6,6 +6,8 @@ import java.math.*;
 import java.time.*;
 import java.util.*;
 
+import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
+
 public class {{entity.className}}RepositoryInMemory extends InMemoryMongodbRepository<{{entity.className}}> implements {{entity.className}}Repository {
 
 {{~#if (naturalIdFields entity)}}

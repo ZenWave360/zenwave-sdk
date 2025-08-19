@@ -1,0 +1,34 @@
+{
+  "type" : "record",
+  "name" : "CustomerEvent",
+  "namespace" : "io.zenwave360.example.core.outbound.events.dtos",
+  "fields" : [ {
+    "name" : "name",
+    "type" : "string",
+    "doc" : "Customer name"
+  }, {
+    "name" : "email",
+    "type" : "string",
+    "doc" : ""
+  }, {
+    "name" : "addresses",
+    "type" : {
+      "type" : "array",
+      "items" : "Address",
+      "java-class" : "java.util.List"
+    }
+  }, {
+    "name" : "id",
+    "type" : "long"
+  }, {
+    "name" : "version",
+    "type" : [ "null", "int" ]
+  }, {
+    "name" : "paymentMethods",
+    "type" : {
+      "type" : "array",
+      "items" : "PaymentMethod",
+      "java-class" : "java.util.List"
+    }
+  } ]
+}

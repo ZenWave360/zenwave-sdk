@@ -1,0 +1,15 @@
+{
+  "type" : "record",
+  "name" : "PaymentMethod",
+  "namespace" : "io.zenwave360.example.core.outbound.events.dtos",
+  "fields" : [ {
+    "name" : "id",
+    "type" : "long"
+  }, {
+    "name" : "type",
+    "type" : "PaymentMethodType"
+  }, {
+    "name" : "cardNumber",
+    "type" : "string"
+  } ]
+}

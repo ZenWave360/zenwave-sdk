@@ -165,8 +165,6 @@ public class OpenAPIToJDLGenerator extends AbstractZDLGenerator {
         return getTemplateEngine().processTemplate(model, template);
     }
 
-    protected TemplateEngine getTemplateEngine() {
-        return handlebarsEngine;
-    }
+
 
 }

@@ -1,0 +1,5 @@
+{{#if (queryParams operation)~}}
+    { it.path("{{path '/api' operation.x--path}}"){{#each (queryParams operation) as |param|}}.queryParam("{{param.name}}", {{asInstanceName param.name}}{{i}}){{/each}}.build({{~#joinWithTemplate (queryParams operation) delimiter=', ' as |param|}}{{asInstanceName param.name}}{{i}}{{/joinWithTemplate}}) }
+    {{~else~}}
+    "{{path '/api' operation.x--path}}"{{#each (pathParams operation) as |param|}}, {{asInstanceName param.name}}{{i}}{{/each}}
+{{~/if~}}

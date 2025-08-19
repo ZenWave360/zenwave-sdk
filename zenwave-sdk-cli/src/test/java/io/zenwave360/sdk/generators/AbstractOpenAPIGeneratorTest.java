@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.zenwave360.sdk.TestUtils;
+import io.zenwave360.sdk.templating.TemplateEngine;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

@@ -30,10 +30,10 @@ public class {{businessFlowTestName}} extends {{baseTestClassName}} {
     {{~#each operations as |operation|}}
         // {{operation.operationId}}: {{operation.description}}
         {{~assign "i" @index}}
-        {{~#assign "requestDTOClassName"}}{{asDtoName operation.x--request-dto }}{{/assign~}}
-        {{~#assign "requestBodyVar"}}{{asInstanceName operation.x--request-dto }}RequestBody{{i}}{{/assign~}}
+        {{~#assign "requestDTOClassName"}}{{asDtoName operation.x--request-dto}}{{/assign~}}
+        {{~#assign "requestBodyVar"}}{{asInstanceName operation.x--request-dto}}RequestBody{{i}}{{/assign~}}
         {{~assign "response" operation.x--response~}}
-        {{~#assign "responseDTOClassName"}}{{asDtoName response.x--response-dto }}{{/assign~}}
+        {{~#assign "responseDTOClassName"}}{{asDtoName response.x--response-dto}}{{/assign~}}
         {{> (partial 'partials/requestSetup') }}
 
         {{#if response.x--response-schema}}var {{operation.operationId}}Response{{i}} = {{/if~}}

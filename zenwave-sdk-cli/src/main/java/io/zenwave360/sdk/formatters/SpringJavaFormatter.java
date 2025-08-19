@@ -37,8 +37,8 @@ public class SpringJavaFormatter implements io.zenwave360.sdk.formatters.Formatt
 //            com.palantir.javaformat.java.Formatter.createFormatter(JavaFormatterOptions.builder().style(JavaFormatterOptions.Style.PALANTIR).build());
 
     public void format(GeneratedProjectFiles generatedProjectFiles) {
-        generatedProjectFiles.getAllTemplateOutputs().stream()
-                .map(t -> format(t)).collect(Collectors.toList());
+        generatedProjectFiles.getAllTemplateOutputs()
+                .forEach(t -> t.merge(format(t)));
     }
 
     public TemplateOutput format(TemplateOutput templateOutput) {

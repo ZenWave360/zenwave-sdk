@@ -18,10 +18,7 @@ import io.zenwave360.sdk.generators.AbstractZDLGenerator;
 import io.zenwave360.sdk.generators.EntitiesToAvroConverter;
 import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
-import io.zenwave360.sdk.templating.HandlebarsEngine;
-import io.zenwave360.sdk.templating.OutputFormatType;
-import io.zenwave360.sdk.templating.TemplateInput;
-import io.zenwave360.sdk.templating.TemplateOutput;
+import io.zenwave360.sdk.templating.*;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 
@@ -87,8 +84,6 @@ public class JDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         this.sourceProperty = sourceProperty;
         return this;
     }
-
-    private HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
 
     private final TemplateInput jdlToAsyncAPITemplate = new TemplateInput("io/zenwave360/sdk/plugins/AsyncAPIToJDLGenerator/JDLToAsyncAPI{{asyncapiVersion}}.yml", "{{targetFile}}").withMimeType(OutputFormatType.YAML);
 
@@ -225,7 +220,7 @@ public class JDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         model.put("zdlModel", zdlModel);
         model.put("schemaFormatString", schemaFormat == SchemaFormat.schema ? (asyncapiVersion == AsyncapiVersionType.v3? defaultSchemaFormatV3 : defaultSchemaFormatV2) : avroSchemaFormat);
         model.put("schemasAsString", schemasAsString);
-        return handlebarsEngine.processTemplate(model, template);
+        return getTemplateEngine().processTemplate(model, template);
     }
 
     protected boolean skipOperations(Map entity) {
@@ -244,6 +239,8 @@ public class JDLToAsyncAPIGenerator extends AbstractZDLGenerator {
     }
 
     {
+        var handlebarsEngine = (HandlebarsEngine) getTemplateEngine();
+
         handlebarsEngine.getHandlebars().registerHelper("skipOperations", (context, options) -> {
             return skipOperations((Map) context);
         });

@@ -37,11 +37,12 @@
         <module>zdl-to-markdown</module>
         <module>asyncapi-spring-cloud-streams3</module>
         <module>asyncapi-jsonschema2pojo</module>
+        <module>avro-schema-compiler</module>
         <module>backend-application-default</module>
         <module>openapi-controllers</module>
         <module>openapi-spring-webtestclient</module>
         <module>openapi-karate</module>
         <module>zenwave-mcp-server</module>
-<!--        <module>openapi-pact-consumer</module>-->
+        <module>customizations</module>
     </modules>
 </project>

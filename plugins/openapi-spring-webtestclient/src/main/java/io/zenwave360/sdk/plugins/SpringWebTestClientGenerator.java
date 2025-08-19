@@ -8,6 +8,7 @@ import io.zenwave360.sdk.options.WebFlavorType;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.NamingUtils;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
+import io.zenwave360.sdk.zdl.ProjectTemplates;
 import org.apache.commons.lang3.StringUtils;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
@@ -22,11 +23,11 @@ import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
 
 public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
 
-    enum GroupByType {
+    public enum GroupByType {
         service, operation, partial, businessFlow
     }
 
-    enum RequestPayloadType {
+    public enum RequestPayloadType {
         json, dto
     }
 
@@ -61,15 +62,7 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
 
     private final JsonSchemaToJsonFaker jsonSchemaToJsonFaker = new JsonSchemaToJsonFaker();
 
-    private final String prefix = "io/zenwave360/sdk/plugins/SpringWebTestClientGenerator/";
-    private final TemplateInput partialTemplate = new TemplateInput(prefix + "partials/Operation.java", "src/test/java/{{asPackageFolder testsPackage}}/Operation.java");
-//    private final TemplateInput testSetTemplate = new TemplateInput(prefix + "ControllersTestSet.java", "{{asPackageFolder testsPackage}}/ControllersTestSet.java").withMimeType(JAVA);
-
-    private final TemplateInput baseTestClassTemplate = new TemplateInput(prefix + "BaseWebTestClientTest.java", "src/test/java/{{asPackageFolder baseTestClassPackage}}/{{baseTestClassName}}.java").withMimeType(JAVA).withSkipOverwrite(true);
-
-    private final TemplateInput businessFlowTestTemplate = new TemplateInput(prefix + "BusinessFlowTest.java", "src/test/java/{{asPackageFolder testsPackage}}/{{businessFlowTestName}}.java").withMimeType(JAVA);
-    private final TemplateInput serviceTestTemplate = new TemplateInput(prefix + "ServiceIT.java", "src/test/java/{{asPackageFolder testsPackage}}/{{serviceName}}{{testSuffix}}.java").withMimeType(JAVA);
-    private final TemplateInput operationTestTemplate = new TemplateInput(prefix + "OperationIT.java", "src/test/java/{{asPackageFolder testsPackage}}/{{serviceName}}/{{asJavaTypeName operationId}}{{testSuffix}}.java").withMimeType(JAVA);
+    public SpringWebTestClientTemplates templates = new SpringWebTestClientTemplates();
 
     @Override
     public void onPropertiesSet() {
@@ -84,11 +77,11 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
                 this.baseTestClassPackage = testsPackage;
             }
         }
+        templates.getTemplateHelpers(this)
+                .forEach(helper -> handlebarsEngine.getHandlebars().registerHelpers(helper));
     }
 
-    public TemplateEngine getTemplateEngine() {
-        return handlebarsEngine;
-    }
+
 
     Model getApiModel(Map<String, Object> contextModel) {
         return (Model) contextModel.get(apiProperty);
@@ -102,13 +95,13 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
 
         if (groupBy == GroupByType.partial) {
             List<Map<String, Object>> operations = getOperationsByOperationIds(apiModel, operationIds);
-            generatedProjectFiles.singleFiles.add(generateTemplateOutput(contextModel, partialTemplate, null, operations));
+            generatedProjectFiles.singleFiles.add(generateTemplateOutput(contextModel, templates.partialTemplate(), null, operations));
         }
 
         if (groupBy == GroupByType.businessFlow) {
             List<Map<String, Object>> operations = operationsByTag.values().stream().flatMap(List::stream).collect(Collectors.toList());
-            generatedProjectFiles.singleFiles.add(generateTemplateOutput(contextModel, businessFlowTestTemplate, null, operations));
-            generatedProjectFiles.singleFiles.add(generateTemplateOutput(contextModel, baseTestClassTemplate, null, null));
+            generatedProjectFiles.singleFiles.add(generateTemplateOutput(contextModel, templates.businessFlowTestTemplate(), null, operations));
+            generatedProjectFiles.singleFiles.add(generateTemplateOutput(contextModel, templates.baseTestClassTemplate(), null, null));
         }
 
         if (groupBy == GroupByType.service || groupBy == GroupByType.operation) {
@@ -120,49 +113,24 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
                 String serviceName = apiServiceName(entry.getKey());
                 if(groupBy == GroupByType.service) {
                     includedTestNames.add(serviceName);
-                    generatedProjectFiles.services.addAll(serviceName, List.of(generateTemplateOutput(contextModel, serviceTestTemplate, serviceName, entry.getValue())));
+                    generatedProjectFiles.services.addAll(serviceName, List.of(generateTemplateOutput(contextModel, templates.serviceTestTemplate(), serviceName, entry.getValue())));
                 } else {
                     List<Map<String, Object>> operations = entry.getValue();
                     includedTestNames.addAll(operations.stream().map(o -> NamingUtils.asJavaTypeName((String) o.get("operationId"))).collect(Collectors.toList()));
                     includedImports.add(serviceName);
                     for (Map<String, Object> operation : operations) {
-                        generatedProjectFiles.services.addAll(serviceName, List.of(generateTemplateOutput(contextModel, operationTestTemplate, serviceName, List.of(operation))));
+                        generatedProjectFiles.services.addAll(serviceName, List.of(generateTemplateOutput(contextModel, templates.operationTestTemplate(), serviceName, List.of(operation))));
                     }
                 }
             }
 
 //            templateOutputList.add(generateTestSet(contextModel, testSetTemplate, includedImports, includedTestNames));
-            generatedProjectFiles.singleFiles.add(generateTemplateOutput(contextModel, baseTestClassTemplate, null, null));
+            generatedProjectFiles.singleFiles.add(generateTemplateOutput(contextModel, templates.baseTestClassTemplate(), null, null));
         }
 
         return generatedProjectFiles;
     }
 
-    {
-        handlebarsEngine.getHandlebars().registerHelper("requestExample", (schema, options) -> {
-            return jsonSchemaToJsonFaker.generateExampleAsJson((Map) schema);
-        });
-        handlebarsEngine.getHandlebars().registerHelper("asDtoName", (context, options) -> {
-            return asDtoName((String) context);
-        });
-        handlebarsEngine.getHandlebars().registerHelper("newPropertyObject", (context, options) -> {
-            Map<String, Object> property = (Map<String, Object>) context;
-            boolean isObject = "object".equals(property.get("type"));
-            boolean isArray = "array".equals(property.get("type"));
-            String schemaName = (String) property.get("x--schema-name");
-            return isArray? "new java.util.ArrayList<>()" : isObject? String.format("new %s()", asDtoName(schemaName)) : "null";
-        });
-
-        handlebarsEngine.getHandlebars().registerHelper("queryParams", (operation, options)
-                -> JSONPath.get(operation, "parameters", Collections.<Map>emptyList()).stream().filter(p -> "query" .equals(p.get("in"))).collect(Collectors.toList()));
-
-        handlebarsEngine.getHandlebars().registerHelper("pathParams", (operation, options)
-                -> JSONPath.get(operation, "parameters", Collections.<Map>emptyList()).stream().filter(p -> "path" .equals(p.get("in"))).collect(Collectors.toList()));
-    }
-
-    private String asDtoName(String name) {
-        return StringUtils.isNotBlank(name) ? openApiModelNamePrefix + name + openApiModelNameSuffix : null;
-    }
     private String apiServiceName(String tag) {
         return NamingUtils.asJavaTypeName(tag) + "Api";
     }

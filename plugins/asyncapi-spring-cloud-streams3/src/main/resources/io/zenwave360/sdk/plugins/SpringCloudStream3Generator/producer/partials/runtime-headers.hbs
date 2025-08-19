@@ -28,8 +28,8 @@
                 }
                 continue;
             }
-            if (location.startsWith("/")) {
-                var expression = location.substring(1);
+            if (location.startsWith("#/")) {
+                var expression = location.substring(2);
                 try {
                     var parts = java.util.Arrays.asList(expression.split("/"));
                     var value = payload;

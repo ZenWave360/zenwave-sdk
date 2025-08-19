@@ -4,12 +4,89 @@ import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static java.lang.String.format;
 
 public class ZDLHttpUtils {
+
+    public static List<Pair<String, String>> methodParameters(Map operation, String openApiModelNamePrefix, String openApiModelNameSuffix) {
+        List<Map<String, Object>> params = (List) operation.getOrDefault("parameters", Collections.emptyList());
+        if(JSONPath.get(operation, "requestBody.content['multipart/form-data']") instanceof Map) {
+            params = JSONPath.get(operation, "requestBody.content['multipart/form-data'].schema.properties", Map.of())
+                    .entrySet().stream().map(entry -> {
+                        return Map.of("name", entry.getKey(), "schema", entry.getValue());
+                    }).toList();
+        };
+        List<Pair<String, String>> methodParams = params.stream()
+                .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
+                .map(param -> {
+                    String javaType = getJavaType(param, openApiModelNamePrefix, openApiModelNameSuffix);
+                    String name = JSONPath.get(param, "$.name");
+                    return Pair.of(javaType, name);
+                }).collect(Collectors.toList());
+        if (operation.containsKey("x--request-dto")) {
+            if("patch".equals(JSONPath.get(operation, "x--httpVerb"))) {
+                methodParams.add(Pair.of("Map", "input"));
+            } else {
+                var dto = (String) operation.get("x--request-dto");
+                methodParams.add(Pair.of(format("%s%s%s", openApiModelNamePrefix, dto, openApiModelNameSuffix), "reqBody"));
+
+            }
+        }
+        return methodParams;
+    }
+
+    public static String getJavaType(Map<String, Object> param, String openApiModelNamePrefix, String openApiModelNameSuffix) {
+        String type = JSONPath.get(param, "$.schema.type");
+        String format = JSONPath.get(param, "$.schema.format");
+        String schemaName = JSONPath.get(param, "$.schema.x--schema-name");
+
+        if("binary".equals(format)) {
+            return "org.springframework.web.multipart.MultipartFile";
+        }
+        if ("date".equals(format)) {
+            return "LocalDate";
+        }
+        if ("date-time".equals(format)) {
+            return "Instant";
+        }
+        if ("integer".equals(type) && "int64".equals(format)) {
+            return "Long";
+        }
+        if ("integer".equals(type)) {
+            return "Integer";
+        }
+        if ("number".equals(type)) {
+            return "BigDecimal";
+        }
+        if ("boolean".equals(type)) {
+            return "Boolean";
+        }
+        if ("array".equals(type)) {
+            var itemsSchema = JSONPath.get(param, "$.schema.items");
+            var itemsType = getJavaType(Maps.of("schema", itemsSchema), openApiModelNamePrefix, openApiModelNameSuffix);
+            return "List<" + itemsType + ">";
+        }
+        if(schemaName != null) {
+            return openApiModelNamePrefix + schemaName + openApiModelNameSuffix;
+        }
+
+        return "String";
+    }
+
+    public static int compareParamsByRequire(Map<String, Object> param1, Map<String, Object> param2) {
+        boolean required1 = JSONPath.get(param1, "required", false);
+        boolean required2 = JSONPath.get(param2, "required", false);
+        return (required1 && required2) || (!required1 && !required2) ? 0 : required1 ? -1 : 1;
+    }
+
 
     public static String getPathFromMethod(Map method) {
         var httpOption = getHttpOption(method);
@@ -62,9 +139,10 @@ public class ZDLHttpUtils {
                 .filter(entry -> !pathParams.contains(entry.getKey()))
                 .map(entry -> {
                     var type = entry.getValue();
+                    var isArray = JSONPath.get(zdl, "$.allEntitiesAndEnums." + methodParameterType + ".fields." + entry.getKey() + ".isArray", false);
                     var typeAndFormat = EntitiesToSchemasConverter.schemaTypeAndFormat((String) type);
                     var description = JSONPath.get(zdl, "$.allEntitiesAndEnums." + methodParameterType + ".fields." + entry.getKey() + ".javadoc");
-                    return Maps.of("name", entry.getKey(), "type", typeAndFormat.get("type"), "format", typeAndFormat.get("format"), "description", description);
+                    return Maps.of("name", entry.getKey(), "type", typeAndFormat.get("type"), "format", typeAndFormat.get("format"), "description", description, "isArray", isArray);
                 })
                 .toList();
     }

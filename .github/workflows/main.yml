@@ -39,6 +39,7 @@ jobs:
           generate-summary: true
           jacoco-csv-file: >
             ./plugins/asyncapi-spring-cloud-streams3/target/site/jacoco/jacoco.csv
+            ./plugins/avro-schema-compiler/target/site/jacoco/jacoco.csv
             ./plugins/java-to-jdl/target/site/jacoco/jacoco.csv
             ./plugins/java-to-asyncapi/target/site/jacoco/jacoco.csv
             ./plugins/backend-application-default/target/site/jacoco/jacoco.csv

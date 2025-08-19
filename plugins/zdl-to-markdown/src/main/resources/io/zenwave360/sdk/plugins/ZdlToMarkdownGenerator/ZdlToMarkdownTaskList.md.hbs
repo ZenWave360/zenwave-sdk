@@ -14,6 +14,8 @@
 {{#each service.aggregates as |aggregates|}}
     {{~assign "entity" (lookup zdlModel.entities this)}}
 ##### <a name="aggregate_{{aggregates}}"></a> {{aggregates}}
+
+    {{~#unless skipDiagrams}}
 ```plantuml
 @startuml
 {{> (partial 'entityClass.plantuml') stereotype='aggregate' }}
@@ -24,6 +26,8 @@
 {{~/each}}
 @enduml
 ```
+{{~/unless}}
+
 - Task: Create `{{entity.name}}` Entity with {{zdlModel.config.persistence}} mappings
 - Task: Create {{entity.name}} Repository (SpringData {{zdlModel.config.persistence}})
 - Task: Create {{entity.name}} Repository IntegrationTest (SpringBootTest with Testcontainers)
@@ -54,6 +58,8 @@
 {{~/each}}
 {{~/if}}
 
-
+{{~#unless skipDiagrams}}
 {{> (partial 'service.plantuml')}}
+{{~/unless}}
+
 {{/each~}}

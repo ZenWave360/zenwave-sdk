@@ -41,16 +41,9 @@ public class ZDLProjectGeneratorTest {
     };
 
     private ZDLProjectGenerator zdlProjectGenerator = new ZDLProjectGenerator() {
-
         {
             templates = projectTemplates;
         }
-
-        @Override
-        protected HandlebarsEngine getTemplateEngine() {
-            return new NOPHandlebarsEngine();
-        }
-
     };
 
     @Test

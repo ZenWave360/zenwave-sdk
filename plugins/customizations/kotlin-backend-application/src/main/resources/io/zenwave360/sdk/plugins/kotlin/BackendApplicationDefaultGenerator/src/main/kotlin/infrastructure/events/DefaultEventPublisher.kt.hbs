@@ -1,0 +1,19 @@
+package {{layout.infrastructureEventsPackage}}
+
+import {{layout.domainEventsPackage}}.*
+import {{layout.entitiesPackage}}.*
+import {{layout.outboundEventsPackage}}.EventPublisher
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.stereotype.Component
+
+@Component
+class DefaultEventPublisher(
+    private val applicationEventPublisher: ApplicationEventPublisher
+) : EventPublisher {
+
+{{#each events as |event|}}
+    override fun on{{event.className}}(event: {{event.className}}) {
+        applicationEventPublisher.publishEvent(event)
+    }
+{{/each}}
+}

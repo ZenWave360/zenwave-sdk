@@ -78,7 +78,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     @DocumentedOption(description = "Annotation class to mark generated code (e.g. `org.springframework.aot.generate.Generated`). When retained at runtime, this prevents code coverage tools like Jacoco from including generated classes in coverage reports.")
     public String generatedAnnotationClass;
 
-    private final HandlebarsEngine handlebarsEngine = getTemplateEngine();
+    private final HandlebarsEngine handlebarsEngine = (HandlebarsEngine) getTemplateEngine();
     {
         handlebarsEngine.getHandlebars().registerHelper("producerInterfaceName", (serviceName, options) -> {
             AbstractAsyncapiGenerator.OperationRoleType operationRoleType = options.param(0);

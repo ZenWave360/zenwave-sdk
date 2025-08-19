@@ -77,6 +77,11 @@
       <artifactId>palantir-java-format</artifactId>
       <version>${palantir-java-format.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.facebook</groupId>
+      <artifactId>ktfmt</artifactId>
+      <version>${ktfmt.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>com.github.javafaker</groupId>

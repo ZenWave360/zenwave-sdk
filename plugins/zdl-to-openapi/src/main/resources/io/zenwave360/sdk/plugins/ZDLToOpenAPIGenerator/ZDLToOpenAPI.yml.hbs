@@ -59,10 +59,19 @@ paths:
           description: "{{queryParam.description}}"
           {{~/if}}
           schema:
+          {{~#if queryParam.isArray}}
+            type: array
+            items:
+              type: {{queryParam.type}}
+              {{~#if queryParam.format}}
+              format: {{queryParam.format}}
+              {{~/if}}
+          {{~else}}
             type: {{queryParam.type}}
             {{~#if queryParam.format}}
             format: {{queryParam.format}}
             {{~/if}}
+          {{~/if}}
         {{~/each}}
         {{~#if operation.paginated}}
         - $ref: "#/components/parameters/page"
@@ -78,6 +87,8 @@ paths:
             schema:
               allOf:
                 - type: object
+                  required:
+                    - {{operation.serviceMethod.options.fileupload}}
                   properties:
                     {{operation.serviceMethod.options.fileupload}}:
                       type: string
@@ -165,7 +176,7 @@ paths:
     sort:
       name: sort
       in: query
-      description: The number of results page
+      description: Sort results by field name and direction (asc or desc)
       schema:
         type: array
         items:

@@ -27,7 +27,7 @@ public class AbstractAsyncapiGeneratorTest {
     private AbstractAsyncapiGenerator newAbstractAsyncapiGenerator() {
         return new AbstractAsyncapiGenerator() {
             @Override
-            protected HandlebarsEngine getTemplateEngine() {
+            public HandlebarsEngine getTemplateEngine() {
                 return new NOPHandlebarsEngine();
             }
 

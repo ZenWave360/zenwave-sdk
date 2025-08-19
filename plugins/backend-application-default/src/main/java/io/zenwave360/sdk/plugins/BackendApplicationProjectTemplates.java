@@ -1,12 +1,17 @@
 package io.zenwave360.sdk.plugins;
 
+import io.zenwave360.sdk.doc.DocumentedOption;
+import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.CleanArchitectureProjectLayout;
+import io.zenwave360.sdk.zdl.layouts.CleanHexagonalProjectLayout;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -15,17 +20,37 @@ import static io.zenwave360.sdk.zdl.utils.ZDLFindUtils.is;
 
 public class BackendApplicationProjectTemplates extends ProjectTemplates {
 
+    @DocumentedOption(description = "Whether to use Spring Modulith annotations and features")
+    public boolean useSpringModulith = false;
+
     public boolean includeEmitEventsImplementation = true;
 
     protected Function<Map<String, Object>, Boolean> skipEntityRepository = (model) -> is(model, "persistence") // if polyglot persistence -> skip
             || !(is(model, "aggregate") || ZDLFindUtils.isAggregateRoot(JSONPath.get(model, "zdl"), JSONPath.get(model, "$.entity.name")));
-    protected Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo", "input", "abstract");
+//    protected Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo", "input", "abstract");
     protected Function<Map<String, Object>, Boolean> skipEntity = (model) -> is(model, "vo", "input");
 //    protected Function<Map<String, Object>, Boolean> skipEntityInput = (model) -> inputDTOSuffix == null || inputDTOSuffix.isEmpty();
 
     protected Function<Map<String, Object>, Boolean> skipEvents = (model) -> !includeEmitEventsImplementation;
     protected Function<Map<String, Object>, Boolean> skipEventsBus = (model) -> ((Collection) model.get("events")).isEmpty();
     protected Function<Map<String, Object>, Boolean> skipInput = (model) -> is(model, "inline");
+
+    protected Function<Map<String, Object>,Boolean> skipModulith = (model) -> !useSpringModulith;
+    protected Function<Map<String, Object>,Boolean> skipModulithCommonModule = (model) ->
+        !useSpringModulith || layout.commonPackage.equals(layout.moduleBasePackage);
+
+    protected Function<Map<String, Object>,Boolean> skipCleanArchitecture = (model) -> !(layout instanceof CleanHexagonalProjectLayout);
+
+    protected Function<Map<String, Object>,Boolean> skipInfrastructurePackageInfo = (model) ->
+            layout.moduleBasePackage.equals(layout.infrastructurePackage);
+
+    @Override
+    public List<Object> getTemplateHelpers(Generator generator) {
+        var helpers = new ArrayList<>(super.getTemplateHelpers(generator));
+        helpers.add(new BackendApplicationDefaultHelpers((BackendApplicationDefaultGenerator) generator));
+        helpers.add(new BackendApplicationDefaultJpaHelpers((BackendApplicationDefaultGenerator) generator));
+        return helpers;
+    }
 
     public BackendApplicationProjectTemplates() {
         setTemplatesFolder("io/zenwave360/sdk/plugins/BackendApplicationDefaultGenerator");
@@ -99,11 +124,14 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
         this.addTemplate(this.singleTemplates, "src/main/java", "core/inbound/dtos/package-info.java",
                 layoutNames.inboundDtosPackage, "package-info.java", JAVA, null, true);
         this.addTemplate(this.singleTemplates, "src/main/java", "infrastructure/package-info.java",
-                layoutNames.infrastructurePackage, "package-info.java", JAVA, null, true);
+                layoutNames.infrastructurePackage, "package-info.java", JAVA, skipInfrastructurePackageInfo, true);
 
-        if(this.layout instanceof CleanArchitectureProjectLayout) {
-            this.addTemplate(this.singleTemplates, "src/test/java", "ArchitectureTest.java",
-                    layoutNames.moduleBasePackage, "ArchitectureTest.java", JAVA, null, true);
-        }
+        this.addTemplate(this.singleTemplates, "src/main/java", "common-package-info.java",
+                layoutNames.commonPackage, "package-info.java", JAVA, skipModulithCommonModule, true);
+        this.addTemplate(this.singleTemplates, "src/main/java", "package-info.java",
+                layoutNames.moduleBasePackage, "package-info.java", JAVA, skipModulith, true);
+
+        this.addTemplate(this.singleTemplates, "src/test/java", "ArchitectureTest.java",
+                layoutNames.moduleBasePackage, "ArchitectureTest.java", JAVA, skipCleanArchitecture, true);
     }
 }

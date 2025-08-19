@@ -1,0 +1,10 @@
+/** Inbound DTOs. */
+@file:JvmName("PackageInfo")
+package {{layout.inboundDtosPackage}}
+
+@Target(AnnotationTarget.FILE)
+@Retention(AnnotationRetention.SOURCE)
+annotation class Keep {
+    // keeps this package even when it's empty,
+    // allowing wildcard import "{{basePackage}}.core.inbound.dtos.*;"
+}

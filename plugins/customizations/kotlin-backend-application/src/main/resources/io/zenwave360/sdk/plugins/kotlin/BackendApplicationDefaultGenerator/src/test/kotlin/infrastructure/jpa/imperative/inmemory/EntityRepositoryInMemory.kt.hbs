@@ -1,0 +1,35 @@
+package {{layout.infrastructureRepositoryPackage}}.inmemory
+
+import {{layout.entitiesPackage}}.*
+import {{layout.outboundRepositoryPackage}}.{{entity.className}}Repository
+import java.math.*
+import java.time.*
+import java.util.*
+
+class {{entity.className}}RepositoryInMemory : InMemoryJpaRepository<{{entity.className}}, {{idJavaType}}>(), {{entity.className}}Repository {
+
+{{~#if (naturalIdFields entity)}}
+    override {{{naturalIdsRepoMethodSignature entity}}} {
+        return getEntities()
+            .values
+            .firstOrNull { e ->
+                {{#joinWithTemplate (naturalIdFields entity) delimiter=' && '}} isSameValue({{name}}, readField(e, "{{name}}")) {{/joinWithTemplate}}
+            }
+    }
+{{~/if}}
+
+{{~assign 'relationships' (findOwnedOneToAnyRelationships entity)}}
+{{~#if relationships}}
+    override fun <S : {{entity.className}}> save(entity: S): S {
+        super.save(entity)
+    {{~#each relationships as |relationship|}}
+        {{~#if (endsWith relationship.type 'ToMany')}}
+        entity.{{relationship.fieldName}}.forEach { it.id = it.id ?: entity.id }
+        {{~else if (endsWith relationship.type 'ToOne')}}
+        entity.{{relationship.fieldName}}.id = entity.{{relationship.fieldName}}.id ?: entity.id
+        {{~/if}}
+    {{~/each}}
+        return entity;
+    }
+{{~/if}}
+}

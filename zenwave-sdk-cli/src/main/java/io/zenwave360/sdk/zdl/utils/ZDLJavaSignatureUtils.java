@@ -24,10 +24,34 @@ public class ZDLJavaSignatureUtils {
     public static String methodParameterType(Map method, Map zdl) {
         var isPatch = JSONPath.get(method, "options.patch") != null;
         if(isPatch) {
-            return "Map";
+            return "java.util.Map";
         }
         return (String) method.get("parameter");
     }
+
+
+    public static String findServiceMethodMainParameter(Map<String, Object> method, Map<String, Object> zdlModel) {
+        if(method == null) {
+            return null;
+        }
+        var methodParameterType = (String) method.get("parameter");
+        var parameterEntity = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + methodParameterType);
+        if(parameterEntity == null) {
+            return null;
+        }
+        var isInline = JSONPath.get(parameterEntity, "$.options.inline", false);
+        if (isInline) {
+            var fields = JSONPath.get(parameterEntity, "$.fields", Map.<String, Map>of());
+            for (Map field : fields.values()) {
+                if (JSONPath.get(field, "$.isComplexType", false) && !JSONPath.get(field, "$.isEnum", false)) {
+                    return JSONPath.get(field, "$.type");
+                }
+            }
+            return null;
+        }
+        return methodParameterType;
+    }
+
 
     public static String fieldsParamsSignature(List<Map> fields) {
         if(fields == null) {
@@ -51,6 +75,15 @@ public class ZDLJavaSignatureUtils {
         var fieldNames = fields.stream().map(f -> NamingUtils.camelCase((String) f.get("name"))).toList();
         return String.format("java.util.Optional<%s> findBy%s(%s)", entity.get("name"), StringUtils.join(fieldNames, "And"), params);
     }
+
+    public static String naturalIdsKotlinRepoMethodSignature(Map entity) {
+        List<Map> fields = ZDLFindUtils.naturalIdFields(entity);
+        var params = fieldsParamsSignature(fields);
+        params = toKotlinMethodSignature(params);
+        var fieldNames = fields.stream().map(f -> NamingUtils.camelCase((String) f.get("name"))).toList();
+        return String.format("fun findBy%s(%s): %s?", StringUtils.join(fieldNames, "And"), params, entity.get("name"));
+    }
+
 
     public static String naturalIdsRepoMethodCallSignature(Map entity) {
         List<Map> fields = ZDLFindUtils.naturalIdFields(entity);
@@ -80,6 +113,37 @@ public class ZDLJavaSignatureUtils {
         return StringUtils.join(params, ", ");
     }
 
+    public static String kotlinMethodParametersSignature(String idJavaType, Map method, Map zdl) {
+        var signature = methodParametersSignature(idJavaType, method, zdl);
+        signature = signature.replace("java.util.Map", "Map<String,Any?>");
+        var kotlinSignature = toKotlinMethodSignature(signature);
+        var isInlineParam = JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("parameter") + ".options.inline", false);
+        if(isInlineParam) {
+            var optionalParamFields = JSONPath.get(zdl, "$.inputs." + method.get("parameter") + ".fields[*][?(!@.validations.required)]", List.<Map>of());
+            for (var field : optionalParamFields) {
+                if(JSONPath.get(field, "$.isArray", false)) {
+                    kotlinSignature = kotlinSignature.replace(field.get("name") + ": List<" + field.get("type") + ">", field.get("name") + ": List<" + field.get("type") + ">?");
+                } else {
+                    kotlinSignature = kotlinSignature.replace(field.get("name") + ": " + field.get("type"), field.get("name") + ": " + field.get("type") + "?");
+                }
+            }
+
+        }
+        return kotlinSignature;
+    }
+
+    public static String toKotlinMethodSignature(String signature) {
+        if(signature == null || signature.isEmpty()) {
+            return "";
+        }
+        var params = signature.split(", ");
+        for (int i = 0; i < params.length; i++) {
+            var param = params[i].split(" ");
+            params[i] = param[1] + ": " + param[0];
+        }
+        return StringUtils.join(params, ", ");
+    }
+
     public static String methodParametersCallSignature(Map method, Map zdl) {
         return Arrays.stream(methodParametersSignature("not-used", method, zdl).split(", "))
                 .map(p -> p.contains(" ")? p.split(" ")[1] : "")
@@ -97,10 +161,41 @@ public class ZDLJavaSignatureUtils {
         return StringUtils.join(inputSignature(inputType, null, zdl), ", ");
     }
 
+    public static String kotlinMapperInputSignature(String inputType, Map zdl) {
+        if("Map".equals(inputType) || "java.util.Map".equals(inputType)) {
+            return "input: Map<String,Any?>";
+        }
+        var mapperInputSignature = StringUtils.join(inputSignature(inputType, null, zdl), ", ");
+        var kotlinSignature = toKotlinMethodSignature(mapperInputSignature);
+        if(JSONPath.get(zdl, "$.inputs." + inputType + ".options.inline", false)) {
+            var optionalParamFields = JSONPath.get(zdl, "$.inputs." + inputType + ".fields[*][?(!@.validations.required)]", List.<Map>of());
+            for (var field : optionalParamFields) {
+                if(!JSONPath.get(field, "$.isArray", false)) {
+                    kotlinSignature = kotlinSignature.replace(field.get("name") + ": " + field.get("type"), field.get("name") + ": " + field.get("type") + "?");
+                }
+            }
+        }
+        return kotlinSignature;
+    }
+
     public static String mapperInputCallSignature(String inputType, Map zdl) {
         return inputSignature(inputType, null, zdl).stream()
                 .map(p -> p.split(" ")[1])
                 .collect(Collectors.joining(", "));
+    }
+
+    public static List<Map<String, String>> mapperInputAnnotations(String inputType, Map zdl) {
+        var annotations = new ArrayList<Map<String, String>>();
+        if(inputType != null) {
+            var isInline = JSONPath.get(zdl, "$.allEntitiesAndEnums." + inputType + ".options.inline", false);
+            var fields = (Map<String, Map>) JSONPath.get(zdl, "$.allEntitiesAndEnums." + inputType + ".fields");
+            if (isInline && fields != null && !fields.isEmpty()) {
+                for (var field : fields.entrySet()) {
+                    annotations.add(Map.of("source", field.getKey(), "target", (String) field.getValue().get("name")));
+                }
+            }
+        }
+        return annotations;
     }
 
     public static String inputFieldInitializer(String inputType, Map zdl) {
@@ -116,7 +211,12 @@ public class ZDLJavaSignatureUtils {
             var fields = (Map<String, Map>) JSONPath.get(zdl, "$.inputs." + inputType + ".fields");
             if (isInline && fields != null && !fields.isEmpty()) {
                 for (var field : fields.entrySet()) {
-                    params.add(String.format("%s %s", field.getValue().get("type"), field.getKey()));
+                    var isArray = JSONPath.get(field.getValue(), "$.isArray", false);
+                    if(isArray) {
+                        params.add(String.format("List<%s> %s", field.getValue().get("type"), field.getKey()));
+                    } else {
+                        params.add(String.format("%s %s", field.getValue().get("type"), field.getKey()));
+                    }
                 }
             } else {
                 var methodParameterType = method != null? methodParameterType(method, zdl) : inputType;
@@ -180,7 +280,7 @@ public class ZDLJavaSignatureUtils {
             return String.format("List<%s%s%s>", prefix, type, suffix);
         }
         if ("Map".equals(type)) {
-            return "Map<String, Object>";
+            return "Map<String,Object>";
         }
         return String.format("%s%s%s", prefix, type, suffix);
     };

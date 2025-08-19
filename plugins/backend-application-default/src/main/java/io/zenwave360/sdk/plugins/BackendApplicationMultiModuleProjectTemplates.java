@@ -1,11 +1,13 @@
 package io.zenwave360.sdk.plugins;
 
+import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 
 import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
 
 public class BackendApplicationMultiModuleProjectTemplates extends BackendApplicationProjectTemplates {
 
+    @DocumentedOption(description = "Prefix for Maven modules")
     public String mavenModulesPrefix;
 
     public BackendApplicationMultiModuleProjectTemplates() {

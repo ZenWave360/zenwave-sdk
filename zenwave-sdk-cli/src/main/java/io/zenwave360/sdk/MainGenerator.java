@@ -7,10 +7,12 @@ import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.parsers.Parser;
 import io.zenwave360.sdk.plugins.ConfigurationProvider;
 import io.zenwave360.sdk.processors.Processor;
+import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.utils.CommaSeparatedCollectionDeserializationHandler;
 import io.zenwave360.sdk.utils.ObjectInstantiatorDeserializationHandler;
 import io.zenwave360.sdk.writers.TemplateWriter;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
+import io.zenwave360.sdk.zdl.ProjectTemplates;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +82,19 @@ public class MainGenerator {
             FieldUtils.writeField(plugin, "layout", layout);
         }
 
+        var templatesField = FieldUtils.getField(plugin.getClass(), "templates");
+        if (templatesField != null) {
+            var templates = templatesField.get(plugin);
+            if(templates instanceof ProjectTemplates projectTemplates) {
+                mapper.updateValue(templates, options);
+                projectTemplates.setLayout(layout);
+                if (plugin instanceof Generator generator) {
+                    projectTemplates.getTemplateHelpers(generator)
+                            .forEach(helper -> generator.getTemplateEngine().registerHelpers(helper));
+                }
+            }
+        }
+
         try {
             plugin.getClass().getMethod("onPropertiesSet").invoke(plugin);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
@@ -90,6 +105,7 @@ public class MainGenerator {
     private static final ObjectMapper mapper = new ObjectMapper();
     static {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
         mapper.addHandler(new ObjectInstantiatorDeserializationHandler());
         mapper.addHandler(new CommaSeparatedCollectionDeserializationHandler());
     }

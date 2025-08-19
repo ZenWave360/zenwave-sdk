@@ -1,0 +1,22 @@
+{{~#if method.withEvents}}
+{{~#if includeEmitEventsImplementation}}
+    {{#if method.returnTypeIsOptional}} if({{_entity.instanceName}}.isPresent()) { {{~/if}}
+        // emit events
+        {{~#each (methodEvents method) as |event|}}
+            {{~#if (methodEntity method)}}
+                {{~#assign 'eventsMapperCall'}} eventsMapper.as{{event.name}}({{_entity.instanceName}}{{#if method.returnTypeIsOptional~}} .get() {{~/if}}){{/assign}}
+            {{~else}}
+                {{~#assign 'eventsMapperCall'}} eventsMapper.as{{event.name}}({{{methodParametersCallSignature method}}}){{/assign}}
+            {{~/if}}
+            {{~#if event.options.asyncapi}}
+            eventsProducer.{{operationNameForEvent event.name}}({{{eventsMapperCall}}})
+            {{~else}}
+            eventPublisher.on{{event.className}}({{{eventsMapperCall}}})
+            {{~/if}}
+        {{~/each}}
+{{~else}}
+// TODO emit events: {{method.withEvents}}
+// set 'includeEmitEventsImplementation' to generate this
+// set --force to overwrite existing files
+{{~/if}}
+{{~/if~}}

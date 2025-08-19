@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.context.FieldValueResolver;
@@ -42,6 +43,11 @@ public class HandlebarsEngine implements TemplateEngine {
 
     public Handlebars getHandlebars() {
         return handlebars;
+    }
+
+    @Override
+    public void registerHelpers(Object helper) {
+        handlebars.registerHelpers(helper);
     }
 
     @Override

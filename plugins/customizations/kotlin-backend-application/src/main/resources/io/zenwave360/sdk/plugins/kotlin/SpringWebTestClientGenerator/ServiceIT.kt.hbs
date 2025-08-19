@@ -1,0 +1,27 @@
+package {{testsPackage}}
+
+{{#if openApiApiPackage~}}
+import {{openApiApiPackage}}.*
+{{~/if}}
+{{#if openApiModelPackage~}}
+import {{openApiModelPackage}}.*
+{{~/if}}
+import {{baseTestClassPackage}}.{{baseTestClassName}}
+
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
+import org.springframework.test.web.reactive.server.WebTestClient
+
+import java.math.BigDecimal
+
+import org.springframework.http.HttpMethod.*
+
+/**
+ * Integration tests for the [{{serviceName}}] REST controller.
+ */
+open class {{serviceName}}{{testSuffix}} : {{baseTestClassName}}() {
+
+{{> (partial 'partials/Operation.kt')}}
+
+}

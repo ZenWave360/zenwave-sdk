@@ -1,0 +1,56 @@
+package {{testsPackage}}
+
+{{#if openApiApiPackage~}}
+import {{openApiApiPackage}}.*
+{{~/if}}
+{{#if openApiModelPackage~}}
+import {{openApiModelPackage}}.*
+{{~/if}}
+import {{baseTestClassPackage}}.{{baseTestClassName}}
+
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
+import org.springframework.test.web.reactive.server.WebTestClient
+
+import java.math.BigDecimal
+
+import org.springframework.http.HttpMethod.*
+
+/**
+ * Business Flow Test for: {{#joinWithTemplate operations delimiter=', ' as |operation|}}{{operation.operationId}}{{/joinWithTemplate}}.
+ */
+open class {{businessFlowTestName}} : {{baseTestClassName}}() {
+
+    /**
+     * Business Flow Test for: {{#joinWithTemplate operations delimiter=', ' as |operation|}}{{operation.operationId}}{{/joinWithTemplate}}.
+     */
+    @Test
+    fun test{{asJavaTypeName businessFlowTestName}}() {
+    {{~#each operations as |operation|}}
+        // {{operation.operationId}}: {{operation.description}}
+        {{~assign "i" @index}}
+        {{~#assign "requestDTOClassName"}}{{asDtoName operation.x--request-dto }}{{/assign~}}
+        {{~#assign "requestBodyVar"}}{{asInstanceName operation.x--request-dto }}RequestBody{{i}}{{/assign~}}
+        {{~assign "response" operation.x--response~}}
+        {{~#assign "responseDTOClassName"}}{{asDtoName response.x--response-dto }}{{/assign~}}
+        {{> (partial 'partials/requestSetup') }}
+
+        {{#if response.x--response-schema}}val {{operation.operationId}}Response{{i}} = {{/if~}}
+        webTestClient.method({{upper operation.x--httpVerb}}).uri({{> (partial 'partials/uriBuilder')}})
+            .accept(MediaType.APPLICATION_JSON)
+        {{~#if operation.x--request-dto}}
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue({{requestBodyVar}})
+        {{~/if}}
+            .exchange()
+            .expectStatus().isEqualTo({{operation.x--response.x--statusCode}})
+        {{~#if response.x--response-schema}}
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .returnResult({{responseDTOClassName}}::class.java)
+        {{~/if~}}
+
+    {{/each}}
+    }
+
+}

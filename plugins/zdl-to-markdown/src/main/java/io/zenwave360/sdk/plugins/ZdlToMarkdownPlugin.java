@@ -7,6 +7,7 @@ import io.zenwave360.sdk.Plugin;
 import io.zenwave360.sdk.doc.DocumentedPlugin;
 import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.processors.ZDLProcessor;
+import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 
@@ -36,6 +37,12 @@ public class ZdlToMarkdownPlugin extends Plugin {
         Map<String, Object> model = new ZDLParser().withContent(zdlContent).parse();
         model = new ZDLProcessor().process(model);
         model = new PathsProcessor().process(model);
+        if (JSONPath.get(model, "zdl.allEntitiesAndEnums", Map.of()).isEmpty()) {
+            if(zdlContent.endsWith(".zdl")) {
+                return "No entities or enums found in the ZDL model. This looks like a filename, rather than its contents. Please provide the contents of the ZDL model.";
+            }
+            return "No entities or enums found in the ZDL model.";
+        }
         var out = new ZdlToMarkdownGenerator()
                 .withOutputFormat(task_list)
                 .withSkipDiagrams(true)

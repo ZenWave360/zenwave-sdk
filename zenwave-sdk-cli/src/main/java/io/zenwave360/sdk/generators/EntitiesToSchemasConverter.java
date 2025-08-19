@@ -76,7 +76,9 @@ public class EntitiesToSchemasConverter {
             if (includeVersion) {
                 properties.put("version", Maps.of(
                         "type", "integer",
-                        "description", "Version of the document (required in PUT for concurrency control, should be null in POSTs)."));
+                        "default", "null",
+                        "description", "Version of the document (required in PUT for concurrency control, should be null in POSTs).")
+                );
             }
         }
 
@@ -201,7 +203,7 @@ public class EntitiesToSchemasConverter {
             property.put("format", "binary");
         } else if ("Map".equals(entityType)) {
             property.put("type", "object");
-            property.put("additionalProperties", false);
+            property.put("additionalProperties", Map.of("type", "string"));
         } else {
             property.put("type", "string");
         }

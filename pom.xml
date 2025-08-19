@@ -62,12 +62,14 @@
         <google-java-format.version>1.25.2</google-java-format.version>
         <palantir-java-format.version>2.55.0</palantir-java-format.version>
         <spring-javaformat.version>0.0.39</spring-javaformat.version>
+        <ktfmt.version>0.54</ktfmt.version>
         <junit.version>5.10.1</junit.version>
         <spring-boot-dependencies.version>3.4.3</spring-boot-dependencies.version>
         <reflections.version>0.10.2</reflections.version>
         <junit.version>5.8.2</junit.version>
         <logcaptor.version>2.7.10</logcaptor.version>
         <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
+        <mockito.version>5.8.0</mockito.version>
 
         <surefire.argLine>
             --add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED
@@ -95,6 +97,18 @@
             <groupId>io.github.hakky54</groupId>
             <artifactId>logcaptor</artifactId>
             <version>${logcaptor.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

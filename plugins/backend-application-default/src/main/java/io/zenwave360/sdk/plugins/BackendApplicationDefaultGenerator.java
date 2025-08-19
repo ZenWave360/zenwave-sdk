@@ -33,6 +33,9 @@ public class BackendApplicationDefaultGenerator extends ZDLProjectGenerator {
     @DocumentedOption(description = "Use @Getter and @Setter annotations from Lombok")
     public boolean useLombok = false;
 
+    @DocumentedOption(description = "Whether to use Spring Modulith annotations and features")
+    public boolean useSpringModulith = false;
+
     @DocumentedOption(description = "Whether to add AsyncAPI/ApplicationEventPublisher as service dependencies. Depends on the naming convention of zenwave-asyncapi plugin to work.")
     public boolean includeEmitEventsImplementation = true;
 
@@ -42,23 +45,8 @@ public class BackendApplicationDefaultGenerator extends ZDLProjectGenerator {
     @DocumentedOption(description = "Specifies the Java data type for the ID fields of entities. Defaults to Long for JPA and String for MongoDB if not explicitly set.")
     public String idJavaType;
 
-    public String mavenModulesPrefix;
-
     {
-        getTemplateEngine().getHandlebars().registerHelpers(new BackendApplicationDefaultHelpers(this));
-        getTemplateEngine().getHandlebars().registerHelpers(new BackendApplicationDefaultJpaHelpers(this));
-    }
-
-    @Override
-    public void onPropertiesSet() {
-        if (templates == null) {
-            if (StringUtils.isNotBlank(mavenModulesPrefix)) {
-                templates =new BackendApplicationMultiModuleProjectTemplates();
-            } else {
-                templates = new BackendApplicationProjectTemplates();
-            }
-        }
-        super.onPropertiesSet();
+        templates = new BackendApplicationProjectTemplates();
     }
 
     @Override

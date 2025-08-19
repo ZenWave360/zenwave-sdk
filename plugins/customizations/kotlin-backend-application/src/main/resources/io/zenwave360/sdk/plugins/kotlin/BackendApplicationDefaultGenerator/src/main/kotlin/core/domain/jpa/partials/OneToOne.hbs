@@ -1,0 +1,21 @@
+{{#if relationship.otherEntityFieldName ~}}
+    {{!-- bidirectional --}}
+    {{#if relationship.ownerSide }}
+    @OneToOne(mappedBy = "{{relationship.otherEntityFieldName}}", fetch = FetchType.{{fetchType}} {{#if entity.options.aggregate}}, cascade = [CascadeType.ALL], orphanRemoval = true{{/if}})
+    {{~else~}}
+        {{~#if relationship.mapsId}}
+    @MapsId
+    @JoinColumn(name = "id")
+        {{~else}}
+    @JoinColumn(unique = true)
+        {{/if~}}
+    @OneToOne(fetch = FetchType.{{fetchType}} {{#if entity.options.aggregate}}, cascade = [CascadeType.ALL], orphanRemoval = true{{/if}})
+    {{/if~}}
+{{~else~}}
+    {{!-- unidirectional --}}
+    {{#if relationship.ownerSide }}
+    @JoinColumn(unique = true)
+    @OneToOne(fetch = FetchType.{{fetchType}} {{#if entity.options.aggregate}}, cascade = [CascadeType.ALL], orphanRemoval = true{{/if}})
+    {{/if~}}
+{{~/if~}}
+

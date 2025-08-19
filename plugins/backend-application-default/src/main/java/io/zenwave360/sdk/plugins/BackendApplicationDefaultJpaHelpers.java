@@ -15,7 +15,7 @@ public class BackendApplicationDefaultJpaHelpers {
 
     private final BackendApplicationDefaultGenerator generator;
 
-    BackendApplicationDefaultJpaHelpers(BackendApplicationDefaultGenerator generator) {
+    public BackendApplicationDefaultJpaHelpers(BackendApplicationDefaultGenerator generator) {
         this.generator = generator;
     }
 
@@ -35,15 +35,24 @@ public class BackendApplicationDefaultJpaHelpers {
     }
 
     public List<Map> findOwnedOneToManyRelationships(Map entity, Options options) {
+        return findOwnedOneToOneRelationships(entity, "OneToMany");
+    }
+
+    public List<Map> findOwnedOneToAnyRelationships(Map entity, Options options) {
+        var oneToOne = findOwnedOneToOneRelationships(entity, "OneToOne");
+        var oneToMany = findOwnedOneToOneRelationships(entity, "OneToMany");
+        return oneToOne.stream().filter(relationship -> !oneToMany.contains(relationship)).collect(Collectors.toList());
+    }
+
+    private List<Map> findOwnedOneToOneRelationships(Map entity, String relationshipType) {
         var relationships = JSONPath.get(entity, "relationships", Collections.<Map>emptyList());
         return relationships.stream()
-            .filter(relationship -> {
-                String relationType = JSONPath.get(relationship, "type");
-                boolean isOwnerSide = JSONPath.get(relationship, "ownerSide", false);
-                String otherEntityFieldName = JSONPath.get(relationship, "otherEntityFieldName");
-                return relationType.endsWith("OneToMany") && isOwnerSide && StringUtils.isNotEmpty(otherEntityFieldName);
-            })
-            .collect(Collectors.toList());
+                .filter(relationship -> {
+                    String relationType = JSONPath.get(relationship, "type");
+                    boolean isOwnerSide = JSONPath.get(relationship, "ownerSide", false);
+                    String otherEntityFieldName = JSONPath.get(relationship, "otherEntityFieldName");
+                    return relationType.endsWith(relationshipType) && isOwnerSide && StringUtils.isNotEmpty(otherEntityFieldName);
+                }).toList();
     }
 
 }

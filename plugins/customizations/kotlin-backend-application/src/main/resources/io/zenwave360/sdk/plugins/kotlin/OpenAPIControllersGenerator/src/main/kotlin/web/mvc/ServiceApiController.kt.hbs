@@ -1,0 +1,113 @@
+package {{layout.adaptersWebPackage}}
+
+import {{layout.entitiesPackage}}.*
+import {{layout.inboundPackage}}.*
+import {{layout.inboundDtosPackage}}.*
+import {{openApiApiPackage}}.*
+import {{openApiModelPackage}}.*
+import {{layout.adaptersWebCommonPackage}}.*
+import {{layout.adaptersWebMappersPackage}}.*
+
+import java.net.URI
+import java.net.URISyntaxException
+import java.math.*
+import java.time.*
+import java.util.*
+import jakarta.validation.Valid
+import jakarta.validation.constraints.NotNull
+import org.mapstruct.factory.Mappers
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+import org.springframework.core.io.ByteArrayResource
+import org.springframework.core.io.Resource
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.web.context.request.NativeWebRequest
+
+/**
+ * REST controller for {{serviceName}}Api.
+ */
+@RestController
+@RequestMapping("/api")
+open class {{serviceName}}ApiController(
+    {{#joinWithTemplate entitiesServices delimiter=", "}}private val {{asInstanceName this}}: {{this}}{{/joinWithTemplate}}
+) : {{serviceName}}Api {
+
+    private val log: Logger = LoggerFactory.getLogger(javaClass)
+
+    @Autowired
+    private lateinit var request: NativeWebRequest
+
+    private val mapper = {{serviceName}}DTOsMapper.INSTANCE
+
+{{#each serviceOperations as |operation|}}
+    {{~#assign "TODO"}}{{#unless serviceMethod}}null // TODO: service{{/unless}}{{/assign}}
+
+    override fun {{operationId}}({{{methodParameters operation.operation}}}): ResponseEntity<{{{voidUnit responseEntityExpression}}}> {
+        log.debug("REST request to {{operationId}}: {{methodParameterPlaceholders}}"{{#if methodParameters}}, {{methodParameterInstances}}{{/if}})
+    {{~#if (eq httpMethod 'patch')}}
+    {{~else if requestBodySchema}}
+        val {{mappedInputVariable}} = mapper.as{{serviceMethodParameter}}({{reqBodyVariableName}})
+    {{~else if serviceMethodParameter}}
+        val {{mappedInputVariable}} = mapper.as{{serviceMethodParameter}}({{methodParameterInstances}})
+    {{~/if}}
+    {{~#if isBinaryDownload }}
+        val {{{asInstanceName methodReturnType}}} = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}}
+        val bytes: ByteArray? = null // TODO get bytes from {{{serviceMethod.options.filedownload}}}
+        val resource = ByteArrayResource(bytes ?: ByteArray(0))
+        return ResponseEntity
+            .status({{statusCode}})
+            .header("Content-Disposition", "inline") // or attachment; filename=example.pdf
+            .contentType(MediaType.APPLICATION_OCTET_STREAM) // TODO: set content type
+            .body(resource)
+    {{~else if isResponsePaginated }}
+        val {{{asInstanceName methodReturnType}}}Page = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}}
+        val responseDTO = mapper.as{{responseEntityName}}({{{asInstanceName methodReturnType}}}Page)
+        return ResponseEntity.status({{statusCode}}).body(responseDTO)
+    {{~else isResponseArray }}
+        val {{methodReturnTypeInstance}} = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}}
+        val responseDTO = mapper.as{{responseDtoName}}List({{methodReturnTypeInstance}})
+        return ResponseEntity.status({{statusCode}}).body(responseDTO)
+    {{~else if responseSchemaName }}
+        val {{methodReturnTypeInstance}} = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}}
+        {{~#if returnTypeIsOptional }}
+        return if ({{methodReturnTypeInstance}} != null) {
+            val responseDTO = mapper.as{{responseDtoName}}({{methodReturnTypeInstance}})
+            ResponseEntity.status({{statusCode}}).body(responseDTO)
+        } else {
+            ResponseEntity.notFound().build()
+        }
+        {{~else}}
+        val responseDTO = mapper.as{{responseDtoName}}({{methodReturnTypeInstance}})
+        return ResponseEntity.status({{statusCode}}).body(responseDTO)
+        {{~/if}}
+    {{~else if (and serviceMethod.serviceName serviceMethodCall)}}
+        {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}}
+        return ResponseEntity.status({{statusCode}}).build()
+    {{~else}}
+        // TODO: {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}}
+        return ResponseEntity.status({{statusCode}}).build()
+    {{~/if}}
+    }
+{{~/each}}
+
+
+    protected fun pageOf(page: Int?, limit: Int?, sort: List<String>?): Pageable {
+        val sortOrder = sort?.let {
+            Sort.by(it.map { sortParam ->
+                val parts = sortParam.split(":")
+                val property = parts[0]
+                val direction = if (parts.size > 1) Sort.Direction.fromString(parts[1]) else Sort.Direction.ASC
+                Sort.Order(direction, property)
+            })
+        } ?: Sort.unsorted()
+        return PageRequest.of(page ?: 0, limit ?: 10, sortOrder)
+    }
+}
