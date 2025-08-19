@@ -1,4 +1,4 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-io.zenwave360.sdk.plugins:openapi-karate,io.zenwave360.sdk.plugins,OpenAPIKarateGenerator,0,432,2,18,0,67,2,24,0,16
+io.zenwave360.sdk.plugins:openapi-karate,io.zenwave360.sdk.plugins,OpenAPIKarateGenerator,0,429,2,18,0,66,2,23,0,15
 io.zenwave360.sdk.plugins:openapi-karate,io.zenwave360.sdk.plugins,OpenAPIKarateGenerator.GroupByType,0,21,0,0,0,2,0,1,0,1
 io.zenwave360.sdk.plugins:openapi-karate,io.zenwave360.sdk.plugins,OpenAPIKaratePlugin,14,40,1,3,3,6,1,3,0,2
