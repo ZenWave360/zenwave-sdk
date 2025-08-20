@@ -1,6 +1,6 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.utils,ZDLHttpUtils,128,608,44,42,23,104,39,24,4,16
-io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.utils,ZDLJavaSignatureUtils,349,991,71,99,59,159,61,59,5,30
+io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.utils,ZDLHttpUtils,34,702,27,59,4,123,23,40,1,19
+io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.utils,ZDLJavaSignatureUtils,127,1221,39,133,18,201,37,84,1,34
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.utils,ZDLFindUtils,113,510,16,26,16,84,17,32,6,22
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,ZDL2JDLProcessor,1,179,1,17,0,34,1,10,0,2
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,YamlOverlyMerger,107,79,18,12,28,20,15,6,3,3
@@ -14,14 +14,14 @@ io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl,GeneratedProjectFiles,0,
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl,ProjectTemplates,27,274,1,7,6,53,3,13,2,10
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.writers,TemplateStdoutWriter,0,48,0,0,0,11,0,5,0,5
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.writers,TemplateFileWriter,15,103,2,8,4,21,3,10,1,7
-io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.formatters,PalantirJavaFormatter,77,79,10,4,15,20,8,5,1,5
+io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.formatters,PalantirJavaFormatter,13,143,5,9,3,32,5,8,0,6
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.formatters,PalantirImportsOrganizer,13,20,2,0,6,6,2,3,1,3
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.formatters,ImportsOrganizer,26,12,4,0,13,4,3,3,1,3
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.formatters,Formatter.Formatters,0,21,0,0,0,2,0,1,0,1
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.formatters,SpringJavaFormatter,89,96,12,4,20,23,9,6,1,6
-io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.formatters,KotlinFormatter,101,0,10,0,23,0,10,0,5,0
-io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.formatters,JavaFormatter,28,43,3,1,5,11,3,3,0,3
-io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.formatters,GoogleJavaFormatter,148,0,14,0,32,0,13,0,6,0
+io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.formatters,KotlinFormatter,0,101,0,10,0,23,0,10,0,5
+io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.formatters,JavaFormatter,8,63,1,3,1,15,1,5,0,3
+io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.formatters,GoogleJavaFormatter,77,71,10,4,15,17,8,5,1,5
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.options.asyncapi,AsyncapiVersionType,0,31,0,0,0,4,0,3,0,3
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.options.asyncapi,AsyncapiOperationType,0,53,1,11,0,6,1,7,0,2
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.options.asyncapi,AsyncapiRoleType,0,15,0,0,0,2,0,1,0,1
