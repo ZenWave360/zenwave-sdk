@@ -39,6 +39,33 @@ public class ZDLHttpUtilsTest {
     }
 
     @Test
+    void testFindMethodParamsMultipart() throws IOException {
+        var model = loadOpenAPI("classpath:io/zenwave360/sdk/resources/openapi/documents-openapi.yml");
+        var operation = (Map) JSONPath.get(model, "$.paths./documents/upload.post");
+
+        var parameters = ZDLHttpUtils.methodParameters(operation, "", "DTO");
+        Assertions.assertNotNull(parameters);
+        Assertions.assertEquals(9, parameters.size());
+        Assertions.assertEquals("org.springframework.web.multipart.MultipartFile", parameters.get(0).getKey());
+        Assertions.assertEquals("file", parameters.get(0).getValue());
+        Assertions.assertEquals("Long", parameters.get(1).getKey());
+        Assertions.assertEquals("id", parameters.get(1).getValue());
+    }
+
+    @Test
+    void testFindMethodParamsPatch() throws IOException {
+        var model = loadOpenAPI("classpath:io/zenwave360/sdk/resources/openapi/openapi-petstore.yml");
+        var operation = (Map) JSONPath.get(model, "$.paths./pet.patch");
+
+        var parameters = ZDLHttpUtils.methodParameters(operation, "", "DTO");
+        Assertions.assertNotNull(parameters);
+        Assertions.assertEquals(1, parameters.size());
+        Assertions.assertEquals("Map", parameters.get(0).getKey());
+        Assertions.assertEquals("input", parameters.get(0).getValue());
+    }
+
+
+    @Test
     void testFindPathParams() throws IOException {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
         var method = (Map) JSONPath.get(model, "$.services.CustomerService.methods.updateCustomer");
@@ -96,6 +123,50 @@ public class ZDLHttpUtilsTest {
 
         var pathParam = ZDLHttpUtils.getRequestBodyType(method, model);
         Assertions.assertEquals("Address", pathParam);
+    }
+
+    @Test
+    void testGetJavaType() {
+        // Test binary format
+        Map binaryParam = Map.of("schema", Map.of("type", "string", "format", "binary"));
+        Assertions.assertEquals("org.springframework.web.multipart.MultipartFile",
+            ZDLHttpUtils.getJavaType(binaryParam, "", ""));
+
+        // Test date format
+        Map dateParam = Map.of("schema", Map.of("type", "string", "format", "date"));
+        Assertions.assertEquals("LocalDate", ZDLHttpUtils.getJavaType(dateParam, "", ""));
+
+        // Test date-time format
+        Map dateTimeParam = Map.of("schema", Map.of("type", "string", "format", "date-time"));
+        Assertions.assertEquals("Instant", ZDLHttpUtils.getJavaType(dateTimeParam, "", ""));
+
+        // Test integer with int64 format
+        Map longParam = Map.of("schema", Map.of("type", "integer", "format", "int64"));
+        Assertions.assertEquals("Long", ZDLHttpUtils.getJavaType(longParam, "", ""));
+
+        // Test integer without format
+        Map intParam = Map.of("schema", Map.of("type", "integer"));
+        Assertions.assertEquals("Integer", ZDLHttpUtils.getJavaType(intParam, "", ""));
+
+        // Test number type
+        Map numberParam = Map.of("schema", Map.of("type", "number"));
+        Assertions.assertEquals("BigDecimal", ZDLHttpUtils.getJavaType(numberParam, "", ""));
+
+        // Test boolean type
+        Map booleanParam = Map.of("schema", Map.of("type", "boolean"));
+        Assertions.assertEquals("Boolean", ZDLHttpUtils.getJavaType(booleanParam, "", ""));
+
+        // Test array type
+        Map arrayParam = Map.of("schema", Map.of("type", "array", "items", Map.of("type", "string")));
+        Assertions.assertEquals("List<String>", ZDLHttpUtils.getJavaType(arrayParam, "", ""));
+
+        // Test schema name with prefixes/suffixes
+        Map schemaParam = Map.of("schema", Map.of("x--schema-name", "Customer"));
+        Assertions.assertEquals("CustomerDTO", ZDLHttpUtils.getJavaType(schemaParam, "", "DTO"));
+
+        // Test default string type
+        Map stringParam = Map.of("schema", Map.of("type", "string"));
+        Assertions.assertEquals("String", ZDLHttpUtils.getJavaType(stringParam, "", ""));
     }
 
 }

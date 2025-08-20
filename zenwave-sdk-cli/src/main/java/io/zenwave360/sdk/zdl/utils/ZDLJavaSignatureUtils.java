@@ -305,7 +305,9 @@ public class ZDLJavaSignatureUtils {
         String value;
         if(field.get("initialValue") != null) {
             if ("String".equals(field.get("type")) || "TextBlob".equals(field.get("type"))) {
-                return "\"" + field.get("initialValue") + "\"";
+                if(!JSONPath.get(field,"isArray", false)) {
+                    return "\"" + field.get("initialValue") + "\"";
+                }
             }
             return String.valueOf(field.get("initialValue"));
         }
