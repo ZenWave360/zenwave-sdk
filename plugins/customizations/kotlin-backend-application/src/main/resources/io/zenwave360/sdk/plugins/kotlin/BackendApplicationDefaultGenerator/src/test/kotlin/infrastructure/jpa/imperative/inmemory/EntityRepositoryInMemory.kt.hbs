@@ -26,7 +26,7 @@ class {{entity.className}}RepositoryInMemory : InMemoryJpaRepository<{{entity.cl
         {{~#if (endsWith relationship.type 'ToMany')}}
         entity.{{relationship.fieldName}}.forEach { it.id = it.id ?: entity.id }
         {{~else if (endsWith relationship.type 'ToOne')}}
-        entity.{{relationship.fieldName}}.id = entity.{{relationship.fieldName}}.id ?: entity.id
+        entity.{{relationship.fieldName}}?.id = entity.{{relationship.fieldName}}.id ?: entity.id
         {{~/if}}
     {{~/each}}
         return entity;
