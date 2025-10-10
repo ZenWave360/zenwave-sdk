@@ -1,7 +1,7 @@
 {
   "type" : "record",
   "name" : "Address",
-  "namespace" : "io.example.producer.api.avro",
+  "namespace" : "io.example.api.avro",
   "fields" : [ {
     "name" : "street",
     "type" : "string"

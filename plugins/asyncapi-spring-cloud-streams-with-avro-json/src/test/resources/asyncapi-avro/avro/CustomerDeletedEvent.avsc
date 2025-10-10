@@ -1,7 +1,7 @@
 {
   "type" : "record",
   "name" : "CustomerDeletedEvent",
-  "namespace" : "io.example.producer.api.avro",
+  "namespace" : "io.example.api.avro",
   "fields" : [ {
     "name" : "id",
     "type" : "long"

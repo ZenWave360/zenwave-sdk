@@ -1,6 +1,7 @@
 package io.zenwave360.sdk.plugins;
 
 import java.util.List;
+import java.io.File;
 
 import org.junit.jupiter.api.*;
 
@@ -33,44 +34,74 @@ public class SpringCloudStreamsWithJsonDtosGeneratorTest {
 
     @Test
     public void test_generate_asyncapi_json_from_classpath() throws Exception {
+        String targetFolder = "target/out/asyncapi_json_from_classpath";
         Plugin plugin = new SpringCloudStreamsWithDtosPlugin()
                 .withApiFile("classpath:asyncapi-v3.yml")
-                .withTargetFolder("target/out/asyncapi_json_from_classpath")
-                .withOption("modelPackage", "io.example.producer.api.model")
-                .withOption("producerApiPackage", "io.example.producer.api")
+                .withTargetFolder(targetFolder)
+                .withOption("modelPackage", "io.example.api.model")
+                .withOption("producerApiPackage", "io.example.api.producer")
+                .withOption("consumerApiPackage", "io.example.api.consumer")
                 .withOption("role", AsyncapiRoleType.provider)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("skipFormatting", false);
 
         new MainGenerator().generate(plugin);
+
+        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/model/CustomerEvent.java").exists());
     }
 
     @Test
     public void test_generate_asyncapi_json_from_file() throws Exception {
+        String targetFolder = "target/out/asyncapi_json_from_file";
         Plugin plugin = new SpringCloudStreamsWithDtosPlugin()
                 .withApiFile("src/test/resources/asyncapi-v3.yml")
-                .withTargetFolder("target/out/asyncapi_json_from_file")
-                .withOption("modelPackage", "io.example.producer.api.model")
-                .withOption("producerApiPackage", "io.example.producer.api")
+                .withTargetFolder(targetFolder)
+                .withOption("modelPackage", "io.example.api.model")
+                .withOption("producerApiPackage", "io.example.api.producer")
+                .withOption("consumerApiPackage", "io.example.api.consumer")
                 .withOption("role", AsyncapiRoleType.provider)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("skipFormatting", false);
 
         new MainGenerator().generate(plugin);
+
+        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/model/CustomerEvent.java").exists());
+    }
+
+    @Test
+    public void test_generate_asyncapi_v2_json_from_file() throws Exception {
+        String targetFolder = "target/out/asyncapi_v2_json_from_file";
+        Plugin plugin = new SpringCloudStreamsWithDtosPlugin()
+                .withApiFile("src/test/resources/asyncapi-v2.yml")
+                .withTargetFolder(targetFolder)
+                .withOption("modelPackage", "io.example.api.model")
+                .withOption("producerApiPackage", "io.example.api.producer")
+                .withOption("consumerApiPackage", "io.example.api.consumer")
+                .withOption("role", AsyncapiRoleType.provider)
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("skipFormatting", false);
+
+        new MainGenerator().generate(plugin);
+
+        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/model/CustomerEvent.java").exists());
     }
 
     @Test
     public void test_generate_asyncapi_json_from_http() throws Exception {
+        String targetFolder = "target/out/asyncapi_json_from_http";
         String baseUrl = "https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/refs/heads/feature/asyncapi-spring-cloud-stream-with-avro-json/plugins/asyncapi-spring-cloud-streams-with-avro-json/src/test/resources/";
         Plugin plugin = new SpringCloudStreamsWithDtosPlugin()
                 .withApiFile(baseUrl + "asyncapi-v3.yml")
-                .withTargetFolder("target/out/asyncapi_json_from_http")
-                 .withOption("modelPackage", "io.example.producer.api.model")
-                .withOption("producerApiPackage", "io.example.producer.api")
+                .withTargetFolder(targetFolder)
+                 .withOption("modelPackage", "io.example.api.model")
+                .withOption("producerApiPackage", "io.example.api.producer")
+                .withOption("consumerApiPackage", "io.example.api.consumer")
                 .withOption("role", AsyncapiRoleType.provider)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("skipFormatting", false);
 
         new MainGenerator().generate(plugin);
+
+        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/model/CustomerEvent.java").exists());
     }
 }

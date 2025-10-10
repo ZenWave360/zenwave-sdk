@@ -1,6 +1,6 @@
 {
   "type" : "enum",
   "name" : "PaymentMethodType",
-  "namespace" : "io.example.producer.api.avro",
+  "namespace" : "io.example.api.avro",
   "symbols" : [ "VISA", "MASTERCARD" ]
 }

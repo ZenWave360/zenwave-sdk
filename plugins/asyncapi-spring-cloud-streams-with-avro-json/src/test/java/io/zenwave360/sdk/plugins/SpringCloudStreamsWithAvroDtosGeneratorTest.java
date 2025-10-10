@@ -39,15 +39,15 @@ public class SpringCloudStreamsWithAvroDtosGeneratorTest {
                 .withApiFile("classpath:asyncapi-avro/asyncapi.yml")
                 .withTargetFolder(targetFolder)
                 .withOption("avroCompilerProperties.imports", "classpath:asyncapi-avro/avro")
-                .withOption("producerApiPackage", "io.example.producer.api")
+                .withOption("producerApiPackage", "io.example.api.producer")
                 .withOption("role", AsyncapiRoleType.provider)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("skipFormatting", false);
 
         new MainGenerator().generate(plugin);
 
-        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/producer/api/avro/CustomerEvent.java").exists());
-        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/producer/api/avro/Address.java").exists());
+        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/avro/CustomerEvent.java").exists());
+        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/avro/Address.java").exists());
     }
 
     @Test
@@ -58,15 +58,15 @@ public class SpringCloudStreamsWithAvroDtosGeneratorTest {
                 .withTargetFolder(targetFolder)
                 .withOption("avroCompilerProperties.imports", "classpath:asyncapi-avro/avro")
                 .withOption("avroCompilerProperties.excludes", List.of("**/*Event.avsc"))
-                .withOption("producerApiPackage", "io.example.producer.api")
+                .withOption("producerApiPackage", "io.example.api.producer")
                 .withOption("role", AsyncapiRoleType.provider)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("skipFormatting", false);
 
         new MainGenerator().generate(plugin);
 
-        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/producer/api/avro/CustomerEvent.java").exists());
-        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/producer/api/avro/Address.java").exists());
+        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/avro/CustomerEvent.java").exists());
+        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/avro/Address.java").exists());
     }
 
     @Test
@@ -77,7 +77,7 @@ public class SpringCloudStreamsWithAvroDtosGeneratorTest {
                 .withTargetFolder(targetFolder)
                 .withOption("avroCompilerProperties.imports", "classpath:asyncapi-avro/avro")
                 .withOption("avroCompilerProperties.excludes", List.of("**/Address.avsc"))
-                .withOption("producerApiPackage", "io.example.producer.api")
+                .withOption("producerApiPackage", "io.example.api.producer")
                 .withOption("role", AsyncapiRoleType.provider)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("skipFormatting", false);
@@ -87,7 +87,7 @@ public class SpringCloudStreamsWithAvroDtosGeneratorTest {
             fail();
         } catch (Exception e) {
             Assertions.assertTrue(e.getCause() instanceof org.apache.avro.AvroTypeException);
-            Assertions.assertTrue(e.getMessage().contains("Undefined schema: io.example.producer.api.avro.Address"));
+            Assertions.assertTrue(e.getMessage().contains("Undefined schema: io.example.api.avro.Address"));
         }
     }
 
@@ -100,15 +100,15 @@ public class SpringCloudStreamsWithAvroDtosGeneratorTest {
                 .withTargetFolder(targetFolder)
                 .withOption("avroCompilerProperties.imports", "src/test/resources/asyncapi-avro/avro")
                 // .withOption("modelPackage", "io.example.consumers.model")
-                .withOption("producerApiPackage", "io.example.producer.api")
+                .withOption("producerApiPackage", "io.example.api.producer")
                 .withOption("role", AsyncapiRoleType.provider)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("skipFormatting", false);
 
         new MainGenerator().generate(plugin);
 
-        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/producer/api/avro/CustomerEvent.java").exists());
-        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/producer/api/avro/Address.java").exists());
+        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/avro/CustomerEvent.java").exists());
+        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/avro/Address.java").exists());
     }
 
     @Test
@@ -122,15 +122,15 @@ public class SpringCloudStreamsWithAvroDtosGeneratorTest {
                         baseUrl + "asyncapi-avro/avro/Address.avsc",
                         baseUrl + "asyncapi-avro/avro/PaymentMethod.avsc",
                         baseUrl + "asyncapi-avro/avro/PaymentMethodType.avsc"))
-                .withOption("producerApiPackage", "io.example.producer.api")
+                .withOption("producerApiPackage", "io.example.api.producer")
                 .withOption("role", AsyncapiRoleType.provider)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("skipFormatting", false);
 
         new MainGenerator().generate(plugin);
 
-        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/producer/api/avro/CustomerEvent.java").exists());
-        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/producer/api/avro/Address.java").exists());
+        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/avro/CustomerEvent.java").exists());
+        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/avro/Address.java").exists());
     }
 
 
