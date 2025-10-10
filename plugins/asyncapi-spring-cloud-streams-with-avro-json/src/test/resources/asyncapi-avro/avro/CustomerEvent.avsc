@@ -1,7 +1,7 @@
 {
   "type" : "record",
   "name" : "CustomerEvent",
-  "namespace" : "io.zenwave360.example.core.outbound.events.dtos",
+  "namespace" : "io.example.producer.api.avro",
   "fields" : [ {
     "name" : "name",
     "type" : "string",

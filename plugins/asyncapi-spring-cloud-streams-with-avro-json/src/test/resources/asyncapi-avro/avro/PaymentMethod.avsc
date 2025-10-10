@@ -1,7 +1,7 @@
 {
   "type" : "record",
   "name" : "PaymentMethod",
-  "namespace" : "io.zenwave360.example.core.outbound.events.dtos",
+  "namespace" : "io.example.producer.api.avro",
   "fields" : [ {
     "name" : "id",
     "type" : "long"
