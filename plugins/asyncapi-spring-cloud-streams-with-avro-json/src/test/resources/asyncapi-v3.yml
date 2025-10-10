@@ -63,7 +63,6 @@ operations:
 components:
   messages:
     CustomerInputMessage:
-      messageId: CustomerInputMessage
       name: CustomerInputMessage
       title: Customer input javadoc comment
       summary: Customer input javadoc comment
@@ -74,10 +73,9 @@ components:
         schema:
           $ref: "#/components/schemas/CustomerInput"
     CustomerEventMessage:
-      messageId: CustomerEventMessage
       name: CustomerEventMessage
-      title: 
-      summary: 
+      title: ""
+      summary: "CustomerEvent"
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
@@ -85,45 +83,45 @@ components:
         schema:
           $ref: "#/components/schemas/CustomerEvent"
     CustomerCreatedMessage:
-      messageId: CustomerCreatedMessage
       name: CustomerCreatedMessage
-      title: 
-      summary: 
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+      title: CustomerCreated
+      summary: CustomerCreated
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/CustomerCreated"
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/CustomerCreated"
     CustomerCreatedFailedMessage:
-      messageId: CustomerCreatedFailedMessage
       name: CustomerCreatedFailedMessage
-      title: 
-      summary: 
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+      title: CustomerCreatedFailed
+      summary: CustomerCreatedFailed
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/CustomerCreatedFailed"
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/CustomerCreatedFailed"
     CustomerUpdatedMessage:
-      messageId: CustomerUpdatedMessage
       name: CustomerUpdatedMessage
-      title: 
-      summary: 
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+      title: CustomerUpdated
+      summary: CustomerUpdated
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/CustomerUpdated"
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/CustomerUpdated"
     CustomerDeletedMessage:
-      messageId: CustomerDeletedMessage
       name: CustomerDeletedMessage
-      title: 
-      summary: 
-      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+      title: CustomerDeleted
+      summary: CustomerDeleted
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
       payload:
-        $ref: "#/components/schemas/CustomerDeleted"
+        schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+        schema:
+          $ref: "#/components/schemas/CustomerDeleted"
 
   messageTraits:
     CommonHeaders:
@@ -141,16 +139,12 @@ components:
 
   schemas:
     CustomerEvent:
-      type: "object"
-      x-business-entity: "CustomerEvent"
       properties:
         id:
           type: "string"
         customerId:
           type: "string"
     CustomerCreated:
-      type: "object"
-      x-business-entity: "CustomerCreated"
       properties:
         id:
           type: "string"
@@ -159,8 +153,6 @@ components:
         customer:
           $ref: "#/components/schemas/Customer"
     CustomerCreatedFailed:
-      type: "object"
-      x-business-entity: "CustomerCreatedFailed"
       properties:
         id:
           type: "string"
@@ -169,8 +161,6 @@ components:
         error:
           type: "string"
     CustomerUpdated:
-      type: "object"
-      x-business-entity: "CustomerUpdated"
       properties:
         id:
           type: "string"
@@ -179,16 +169,12 @@ components:
         customer:
           $ref: "#/components/schemas/Customer"
     CustomerDeleted:
-      type: "object"
-      x-business-entity: "CustomerDeleted"
       properties:
         id:
           type: "string"
         customerId:
           type: "string"
     Address:
-      type: "object"
-      x-business-entity: "Address"
       required:
       - "street"
       - "type"
@@ -208,8 +194,6 @@ components:
         type:
           $ref: "#/components/schemas/AddressType"
     Customer:
-      type: "object"
-      x-business-entity: "Customer"
       required:
       - "username"
       - "email"
@@ -232,8 +216,6 @@ components:
           items:
             $ref: "#/components/schemas/Address"
     AddressInput:
-      type: "object"
-      x-business-entity: "AddressInput"
       properties:
         street:
           type: "string"
@@ -254,8 +236,6 @@ components:
       - "HOME"
       - "WORK"
     CustomerInput:
-      type: "object"
-      x-business-entity: "CustomerInput"
       required:
       - "username"
       - "email"

@@ -77,34 +77,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
         Model apiModel = getApiModel(contextModel);
 
-        List<Map<String, Object>> allMessages = new ArrayList<>();
-        if (AsyncAPIUtils.isV2(apiModel)) {
-            String operationIdsRegex = operationIds.isEmpty() ? "" : " =~ /(" + StringUtils.join(operationIds, "|") + ")/";
-            List<Map<String, Object>> operations = JSONPath.get(apiModel, "$.channels[*][*][?(@.operationId" + operationIdsRegex + ")]");
-
-            List<Map<String, Object>> messages = JSONPath.get(operations, "$[*].x--messages[*][?(@.name" + operationIdsRegex + ")]", Collections.emptyList());
-            List<Map<String, Object>> oneOfMessages = JSONPath.get(operations, "$[*].x--messages[*].oneOf[?(@.name" + operationIdsRegex + ")]", Collections.emptyList());
-            allMessages.addAll(messages);
-            allMessages.addAll(oneOfMessages);
-        }
-        if (AsyncAPIUtils.isV3(apiModel)) {
-            if (!messageNames.isEmpty()) {
-                String messageNamesRegex = messageNames.isEmpty() ? "" : " =~ /(" + StringUtils.join(messageNames, "|") + ")/";
-                Set<Map<String, Object>> messages = new HashSet<>(JSONPath.get(apiModel, "$.components.messages[*][?(@.name" + messageNamesRegex + ")]"));
-                allMessages.addAll(messages);
-            } else {
-                String operationIdsRegex = operationIds.isEmpty() ? "" : " =~ /(" + StringUtils.join(operationIds, "|") + ")/";
-                Set<Map<String, Object>> messages = new HashSet<>(JSONPath.get(apiModel, "$.operations." + operationIdsRegex + ".channel.messages[*]"));
-                allMessages.addAll(messages);
-            }
-        }
-
-        var schemaFormatPath = AsyncAPIUtils.isV3(apiModel) ? "$.payload.schemaFormat" : "$.schemaFormat";
-        var jsonMessages = allMessages.stream().filter(message -> {
-            var schemaFormat = (String) JSONPath.get(message, schemaFormatPath);
-            var schemaFormatType = AsyncApiProcessor.SchemaFormatType.getFormat(schemaFormat);
-            return AsyncApiProcessor.SchemaFormatType.isSchemaFormat(schemaFormatType); // leave out avro
-        }).toList();
+        var jsonMessages = AsyncAPIUtils.extractMessages(apiModel, AsyncApiProcessor.SchemaFormatType::isSchemaFormat, operationIds, messageNames);
 
         targetSourceFolder = new File(targetFolder, sourceFolder);
 

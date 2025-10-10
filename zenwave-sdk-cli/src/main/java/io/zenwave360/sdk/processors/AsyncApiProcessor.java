@@ -35,7 +35,7 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
         }
 
         public static boolean isSchemaFormat(SchemaFormatType formatType) {
-            return formatType == null || ASYNCAPI_ALL.contains(formatType) || OPENAPI_ALL.contains(formatType);
+            return formatType == null || ASYNCAPI_ALL.contains(formatType) || OPENAPI_ALL.contains(formatType) || JSONSCHEMA_ALL.contains(formatType);
         }
 
         public static boolean isJsonSchemaFormat(SchemaFormatType formatType) {
@@ -47,7 +47,7 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
         }
 
         public static boolean isNativeFormat(SchemaFormatType formatType) {
-            return isSchemaFormat(formatType);
+            return formatType == null || ASYNCAPI_ALL.contains(formatType) || OPENAPI_ALL.contains(formatType);
         }
 
         public static boolean isYamlFormat(SchemaFormatType formatType) {

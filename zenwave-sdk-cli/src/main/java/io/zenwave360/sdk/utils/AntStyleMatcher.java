@@ -9,6 +9,7 @@ public class AntStyleMatcher {
         String regex = pattern
                 .replace("**", ".*")
                 .replace("*", "[^/]*")
+                .replace(".[^/]*", ".*") // undo bad conversion of ".*" to ".[^/]*" in previous line
                 .replace("?", ".");
         return Pattern.matches(regex, filePath);
     }

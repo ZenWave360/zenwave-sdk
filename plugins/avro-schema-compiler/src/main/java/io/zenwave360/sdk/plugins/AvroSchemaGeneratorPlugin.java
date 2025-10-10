@@ -18,6 +18,6 @@ public class AvroSchemaGeneratorPlugin extends Plugin {
 
     public AvroSchemaGeneratorPlugin() {
         super();
-        withChain(AvroSchemaGenerator.class);
+        withChain(AvroSchemaLoader.class, AvroSchemaGenerator.class);
     }
 }

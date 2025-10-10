@@ -14,7 +14,6 @@ import io.zenwave360.sdk.writers.TemplateFileWriter;
                 "Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI with Avro and JSON DTOs",
         mainOptions = {
             "apiFile",
-            "apiFiles",
             "role",
             "style",
             "modelPackage",
@@ -35,7 +34,8 @@ public class SpringCloudStreamsWithDtosPlugin extends Plugin {
                 DefaultYamlParser.class,
                 AsyncApiProcessor.class,
                 AsyncApiJsonSchema2PojoGenerator.class,
-                AvroAsyncApiProcessor.class,
+                AvroSchemaLoader.class,
+                AsyncApiAvroGenerator.class,
                 SpringCloudStreams3Generator.class,
                 JavaFormatter.class,
                 TemplateFileWriter.class);
