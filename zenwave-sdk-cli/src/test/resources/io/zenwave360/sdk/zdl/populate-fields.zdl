@@ -22,6 +22,8 @@ entity Entity {
     string String minlength(0) maxlength(100) pattern(/.*/) /** "" */
     otherProperties Map /** new java.util.HashMap() */
     withInitialValue String = "42" /** "42" */
+    withArray String[] /** List.of("") */
+    withArrayInitValues String[] = "List.of(\"a\", \"b\", \"c\")" /** List.of("a", "b", "c") */
 }
 
 enum SomeEnum {

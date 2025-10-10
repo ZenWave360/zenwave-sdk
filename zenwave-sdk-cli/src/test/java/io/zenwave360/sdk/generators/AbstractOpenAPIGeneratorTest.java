@@ -31,7 +31,7 @@ public class AbstractOpenAPIGeneratorTest {
         Map<String, List<Map<String, Object>>> putOperations = openapiGenerator.getOperationsGroupedByTag(model, AbstractOpenAPIGenerator.OperationType.PUT);
         Map<String, List<Map<String, Object>>> headOperations = openapiGenerator.getOperationsGroupedByTag(model, AbstractOpenAPIGenerator.OperationType.HEAD);
         Map<String, List<Map<String, Object>>> parametersInPath = openapiGenerator.getOperationsGroupedByTag(model, AbstractOpenAPIGenerator.OperationType.HEAD);
-        Assertions.assertEquals(8, allOperations.get("Pet").size());
+        Assertions.assertEquals(9, allOperations.get("Pet").size());
         Assertions.assertEquals(3, getOperations.get("Pet").size());
         Assertions.assertEquals(1, putOperations.get("Pet").size());
         Assertions.assertEquals("findPetsByStatus", getOperations.get("Pet").get(0).get("operationId"));
