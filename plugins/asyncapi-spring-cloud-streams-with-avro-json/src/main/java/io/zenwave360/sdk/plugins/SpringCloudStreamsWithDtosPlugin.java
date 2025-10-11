@@ -23,9 +23,11 @@ import io.zenwave360.sdk.writers.TemplateFileWriter;
             "transactionalOutbox",
             "bindingPrefix",
             "bindingSuffix",
-            "generatedAnnotationClass"
+            "generatedAnnotationClass",
+            "jsonschema2pojo",
+            "avroCompilerProperties"
         },
-        hiddenOptions = {"layout", "zdlFile", "zdlFiles"})
+        hiddenOptions = {"layout", "apiFiles", "zdlFile", "zdlFiles"})
 public class SpringCloudStreamsWithDtosPlugin extends Plugin {
 
     public SpringCloudStreamsWithDtosPlugin() {

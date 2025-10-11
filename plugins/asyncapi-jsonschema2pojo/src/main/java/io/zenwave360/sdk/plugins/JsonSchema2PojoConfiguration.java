@@ -19,6 +19,10 @@ import org.jsonschema2pojo.rules.RuleFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Configuration properties for jsonschema2pojo library.
+ * See https://github.com/joelittlejohn/jsonschema2pojo/wiki/Reference
+ */
 public class JsonSchema2PojoConfiguration implements GenerationConfig {
 
     private static String API_PACKAGE = "apiPackage";
@@ -288,6 +292,10 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
     @Override
     public boolean isUseJakartaValidation() {
         return isUseJakartaValidation;
+    }
+
+    public void setUseJakartaValidation(boolean useJakartaValidation) {
+        this.isUseJakartaValidation = useJakartaValidation;
     }
 
     public void setFormatTypeMapping(Map<String, String> formatTypeMapping) {

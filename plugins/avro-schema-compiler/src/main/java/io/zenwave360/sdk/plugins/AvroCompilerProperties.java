@@ -8,6 +8,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+@DocumentedOption(description = "All Avro Compiler Properties to pass downstream to Avro Compiler", docLink = "https://github.com/ZenWave360/zenwave-sdk/blob/main/plugins/avro-schema-compiler/src/main/java/io/zenwave360/sdk/plugins/AvroCompilerProperties.java")
 public class AvroCompilerProperties {
 
     @DocumentedOption(description = "Avro schema file or folder containing avro schemas")

@@ -48,7 +48,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     @DocumentedOption(description = "Message names to include in code generation (combined with operationIds). Generates code for ALL if left empty")
     public List<String> messageNames = new ArrayList<>();
 
-    @DocumentedOption(description = "JsonSchema2Pojo settings")
+    @DocumentedOption(description = "JsonSchema2Pojo settings for downstream library", docLink = "https://github.com/ZenWave360/zenwave-sdk/blob/main/plugins/asyncapi-jsonschema2pojo/src/main/java/io/zenwave360/sdk/plugins/JsonSchema2PojoConfiguration.java")
     public Map<String, String> jsonschema2pojo = new HashMap<>();
 
     @DocumentedOption(description = "Annotation class to mark generated code (e.g. `org.springframework.aot.generate.Generated`). When retained at runtime, this prevents code coverage tools like Jacoco from including generated classes in coverage reports.")

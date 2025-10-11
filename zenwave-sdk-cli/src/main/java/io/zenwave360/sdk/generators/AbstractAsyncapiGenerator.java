@@ -51,7 +51,7 @@ public abstract class AbstractAsyncapiGenerator extends Generator {
 
     public String sourceProperty = "api";
 
-    @DocumentedOption(description = "Java API package name for producerApiPackage and consumerApiPackage if not specified.")
+    @DocumentedOption(description = "Java API package, if `producerApiPackage` and `consumerApiPackage` are not set.")
     public String apiPackage;
     @DocumentedOption(description = "Java API package name for outbound (producer) services. It can override apiPackage for producers.")
     public String producerApiPackage = "{{apiPackage}}";
