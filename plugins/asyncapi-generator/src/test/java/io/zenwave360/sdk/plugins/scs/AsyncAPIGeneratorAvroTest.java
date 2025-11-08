@@ -137,7 +137,7 @@ public class AsyncAPIGeneratorAvroTest {
     @Test
     public void test_generate_asyncapi_avro_from_http() throws Exception {
         String targetFolder = "target/out/asyncapi_avro_from_http";
-        String baseUrl = "https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/refs/heads/feature/asyncapi-generator/plugins/asyncapi-spring-cloud-streams-with-avro-json/src/test/resources/";
+        String baseUrl = "https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/refs/heads/feature/asyncapi-spring-cloud-stream-with-avro-json/plugins/asyncapi-generator/src/test/resources/";
         Plugin plugin = new AsyncAPIGeneratorPlugin()
                 .withApiFile(baseUrl + "asyncapi-avro/asyncapi.yml")
                 .withTargetFolder(targetFolder)

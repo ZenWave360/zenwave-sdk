@@ -160,7 +160,7 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
                 addOperationIdVariants(operationEntry.getValue());
                 addNormalizedTagName(operationEntry.getValue());
                 addChannelNameToOperation(operationEntry.getValue(), JSONPath.get(operationEntry.getValue(), "$.channel.x--channel"));
-                operationEntry.getValue().put("x--messages", JSONPath.get(operationEntry.getValue(), "$.channel.x--messages"));
+                operationEntry.getValue().put("x--messages", JSONPath.getFirst(operationEntry.getValue(), "$.messages", "$.channel.x--messages"));
             }
         }
 
