@@ -146,6 +146,7 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
                 }
             }
             if (isV3) {
+                ((Map) channel).put("x--channel", channelEntry.getKey());
                 // collect channel messages
                 var messages = JSONPath.get(channel, "$.messages[*]", Collections.emptyList());
                 ((Map) channel).put("x--messages", messages);
@@ -158,6 +159,7 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
                 operationEntry.getValue().put("operationId", operationEntry.getKey());
                 addOperationIdVariants(operationEntry.getValue());
                 addNormalizedTagName(operationEntry.getValue());
+                addChannelNameToOperation(operationEntry.getValue(), JSONPath.get(operationEntry.getValue(), "$.channel.x--channel"));
                 operationEntry.getValue().put("x--messages", JSONPath.get(operationEntry.getValue(), "$.channel.x--messages"));
             }
         }

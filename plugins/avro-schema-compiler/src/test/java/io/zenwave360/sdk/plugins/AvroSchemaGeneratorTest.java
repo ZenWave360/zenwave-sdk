@@ -13,12 +13,35 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public class AvroSchemaGeneratorTest {
 
     @BeforeEach
     public void setup() throws IOException {
         FileUtils.deleteDirectory(new File("target/zenwave630/avro-out"));
+    }
+
+    @Test
+    public void test_sort_schemas() throws Exception {
+        AvroSchemaLoader loader = new AvroSchemaLoader();
+        loader.avroFiles = List.of(
+                "src/test/resources/avros/shopping-cart/ShoppingCartCheckedOut.avsc",
+                "src/test/resources/avros/shopping-cart/ShoppingCartItemAdded.avsc",
+                "src/test/resources/avros/shopping-cart/ShoppingCartItemRemoved.avsc",
+                "src/test/resources/avros/shopping-cart/ShoppingCartItemUpdated.avsc",
+                "src/test/resources/avros/shopping-cart/ShoppingCartCreated.avsc",
+                "src/test/resources/avros/shopping-cart/ShoppingCart.avsc",
+                "src/test/resources/avros/shopping-cart/Item.avsc"
+        );
+        // Set AVRO_VERSION using reflection since it's private final
+        var avroVersionField = AvroSchemaGenerator.class.getDeclaredField("AVRO_VERSION");
+        avroVersionField.setAccessible(true);
+        avroVersionField.set(null, "1.11.0");
+        var schemas = loader.parse();
+        var sorted = new AvroSchemaGenerator().sortSchemas((List) schemas.get(AvroSchemaLoader.AVRO_SCHEMAS_LIST));
+        Assertions.assertEquals("Item", ((Map) sorted.get(1)).get("name"));
+        Assertions.assertEquals("ShoppingCart", ((Map) sorted.get(2)).get("name"));
     }
 
     @Test

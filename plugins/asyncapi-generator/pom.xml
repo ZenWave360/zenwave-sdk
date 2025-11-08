@@ -8,7 +8,7 @@
     </parent>
     <name>${project.groupId}:${project.artifactId}</name>
     <groupId>io.zenwave360.sdk.plugins</groupId>
-    <artifactId>avro-schema-compiler</artifactId>
+    <artifactId>asyncapi-generator</artifactId>
     <packaging>jar</packaging>
 
     <properties>
@@ -17,10 +17,21 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.zenwave360.sdk.plugins</groupId>
+            <artifactId>asyncapi-jsonschema2pojo</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zenwave360.sdk.plugins</groupId>
+            <artifactId>avro-schema-compiler</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.avro</groupId>
             <artifactId>avro-compiler</artifactId>
             <version>${avro-compiler.version}</version>
-            <scope>optional</scope>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

@@ -1,0 +1,125 @@
+package {{producerApiPackage}};
+
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.context.ApplicationContext;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.stereotype.Component;
+
+{{#if modelPackage}}
+import {{modelPackage}}.*;
+{{/if}}
+
+/**
+ * {{asyncapi.description}}
+ */
+@Component("{{bindingPrefix}}{{producerClassName serviceName operationRoleType}}")
+@jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.AsyncAPIGeneratorPlugin", date = "{{date}}")
+{{~#if generatedAnnotationClass}}@{{generatedAnnotationClass}}{{~/if}}
+public class {{producerClassName serviceName operationRoleType}} implements {{producerInterfaceName serviceName operationRoleType}} {
+
+    protected Logger log = LoggerFactory.getLogger(getClass());
+
+    protected final KafkaTemplate kafkaTemplate;
+    protected final ApplicationContext applicationContext;
+{{~#each (channelNames operations) as |channelName|}}
+    @Value("${app.kafka.topics.{{bindingPrefix}}{{kebabCase channelName}}.topic:{{bindingPrefix}}{{kebabCase channelName}}\\}")
+    public String {{asInstanceName channelName}}TopicName;
+    @Value("${app.kafka.topics.{{bindingPrefix}}{{kebabCase channelName}}.timeout:10}")
+    public int {{asInstanceName channelName}}Timeout = 10;
+{{~/each}}
+
+{{~#if useEnterpriseEnvelope}}
+    public EnvelopeWrapper envelopeWrapper;
+{{~/if}}
+
+    public {{producerClassName serviceName operationRoleType}}(KafkaTemplate kafkaTemplate, ApplicationContext applicationContext) {
+        this.kafkaTemplate = kafkaTemplate;
+        this.applicationContext = applicationContext;
+    }
+
+{{~#if useEnterpriseEnvelope}}
+    @Autowired(required = false)
+    public void setEnvelopeWrapper(EnvelopeWrapper envelopeWrapper) {
+        this.envelopeWrapper = envelopeWrapper;
+    }
+{{~/if}}
+
+{{~#each operations as |operation|}}
+    {{#each operation.x--messages as |message|}}
+    /**
+     * {{{operation.summary}}}
+     */
+    public boolean {{operation.operationId}}{{methodSuffix message operation producer=true}}({{message.x--javaType}} payload, {{message.x--javaTypeSimpleName}}Headers headers) {
+        log.debug("Sending message to topic: {}", {{asInstanceName operation.x--channel}}TopicName);
+        {{~#if (hasRuntimeHeaders message)}}
+        headers = headers != null ? headers : new {{message.x--javaTypeSimpleName}}Headers();
+        processRuntimeHeaders(payload, headers, {{message.x--javaTypeSimpleName}}Headers._runtimeheaders);
+        {{~/if}}
+        Message message = MessageBuilder.createMessage({{#if (hasEnterpriseEnvelope operation)}}wrap(wrapNullPayload(payload)){{else}}wrapNullPayload(payload){{/if}}, new MessageHeaders(headers));
+        return sendMessage({{asInstanceName operation.x--channel}}TopicName, message, {{asInstanceName operation.x--channel}}Timeout);
+    }
+
+    {{/each}}
+{{/each}}
+
+{{~#if useEnterpriseEnvelope}}
+    protected Object wrap(Object payload) {
+        if(envelopeWrapper != null) {
+            return envelopeWrapper.wrap(payload);
+        }
+        return payload;
+    }
+
+    public interface EnvelopeWrapper {
+        public Object wrap(Object payload);
+    }
+{{~/if}}
+
+    private boolean sendMessage(String topicName, Message message, int timeout) {
+        try {
+            Object key = message.getHeaders().get("kafka_messageKey");
+            var record = new ProducerRecord<>(topicName, key, message.getPayload());
+
+            // Add headers from Spring Message to Kafka headers
+            message.getHeaders().forEach((headerKey, headerValue) -> {
+                byte[] headerBytes;
+                if (headerValue == null) {
+                    headerBytes = new byte[0];
+                } else if (headerValue instanceof byte[]) {
+                    headerBytes = (byte[]) headerValue;
+                } else {
+                    headerBytes = headerValue.toString().getBytes(StandardCharsets.UTF_8);
+                }
+                record.headers().add(headerKey, headerBytes);
+            });
+
+            kafkaTemplate.send(record).get(timeout, TimeUnit.SECONDS);
+            return true;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // Restore interrupted status
+            log.error("Message sending interrupted for topic: {}", topicName, e);
+            return false;
+        } catch (TimeoutException | ExecutionException e) {
+            Throwable cause = (e instanceof ExecutionException) ? e.getCause() : e;
+            log.error("Failed to send message to topic {}: {}", topicName, cause.getMessage(), cause);
+            throw new RuntimeException("Failed to send message to topic: " + topicName, cause);
+        }
+    }
+
+{{> (partial '../../../../shared/producer/partials/wrapNullPayload')}}
+{{> (partial '../../../../shared/producer/partials/runtime-headers')}}
+
+}

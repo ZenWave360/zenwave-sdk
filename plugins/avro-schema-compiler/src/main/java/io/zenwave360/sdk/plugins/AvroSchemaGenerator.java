@@ -123,13 +123,29 @@ public class AvroSchemaGenerator extends Generator {
         List<Object> fieldTypes = JSONPath.get(schema, "$.fields[*].type", List.of());
         List<String> dependencies = new ArrayList<>();
 
+        // Set of primitive Avro types that should not be considered dependencies
+        Set<String> primitiveTypes = Set.of("null", "boolean", "int", "long", "float", "double", "bytes", "string");
+
         for (Object fieldType : fieldTypes) {
-            if (fieldType instanceof String) {
-                dependencies.add((String) fieldType);
+            if (fieldType instanceof String typeName) {
+                if (!primitiveTypes.contains(typeName)) {
+                    dependencies.add(typeName);
+                }
+            } else if (fieldType instanceof List) {
+                // Handle union types like ["null", "string"] or ["null", "MyCustomType"]
+                List<Object> unionTypes = (List<Object>) fieldType;
+                for (Object unionType : unionTypes) {
+                    if (unionType instanceof String) {
+                        String typeName = (String) unionType;
+                        if (!primitiveTypes.contains(typeName)) {
+                            dependencies.add(typeName);
+                        }
+                    }
+                }
             } else if (fieldType instanceof Map) {
                 Map<String, Object> typeMap = (Map<String, Object>) fieldType;
                 String items = JSONPath.get(typeMap, "$.items", null);
-                if (items != null) {
+                if (items != null && !primitiveTypes.contains(items)) {
                     dependencies.add(items);
                 }
             }
@@ -206,7 +222,7 @@ public class AvroSchemaGenerator extends Generator {
 //        compiler.setNullSafeAnnotationNotNull(properties.nullSafeAnnotationNotNull);
     }
 
-    private static final String AVRO_VERSION = _getAvroVersion();
+    private static String AVRO_VERSION = _getAvroVersion();
     private static String _getAvroVersion() {
         Package avroPackage = Schema.class.getPackage();
         if (avroPackage != null && avroPackage.getImplementationVersion() != null) {

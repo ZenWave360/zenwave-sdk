@@ -85,7 +85,7 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
 
     protected List<URI> collectAvscFiles(File sourceFolder, List<String> imports, List<String> includes, List<String> excludes) throws IOException {
         Set<File> avscFiles = new HashSet<>();
-        List<URI> remoteURIs = new ArrayList<>();
+        List<URI> importedURIs = new ArrayList<>();
 
         // Process sourceFolder if provided
         if (sourceFolder != null && sourceFolder.exists()) {
@@ -110,7 +110,7 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
                         // Handle classpath resources (files only, not directories)
                         log.trace("Processing classpath resource: {}", importPath);
                         if (importPath.endsWith(".avsc")) {
-                            remoteURIs.add(URI.create(importPath));
+                            importedURIs.add(URI.create(importPath));
                         } else {
                             // Scan for .avsc files within the package
                             String packagePath = importPath.replace("classpath:", "").replaceFirst("^/", "");
@@ -127,7 +127,7 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
                                     if (matchesIncludes(resource, includes) && !matchesExcludes(resource, excludes)) {
                                         String classpathUri = "classpath:" + resource;
                                         log.trace("Found classpath .avsc file: {}", classpathUri);
-                                        remoteURIs.add(URI.create(classpathUri));
+                                        importedURIs.add(URI.create(classpathUri));
                                     } else {
                                         log.trace("Classpath resource {} filtered out by include/exclude patterns", resource);
                                     }
@@ -145,7 +145,7 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
                         // Handle HTTPS resources
                         log.debug("Processing HTTPS resource: {}", importPath);
                         if (importPath.endsWith(".avsc")) {
-                            remoteURIs.add(URI.create(importPath));
+                            importedURIs.add(URI.create(importPath));
                         } else {
                             log.warn("HTTPS imports only support individual .avsc files: {}", importPath);
                         }
@@ -171,12 +171,13 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
                     throw new IOException("Failed to process import: " + importPath, e);
                 }
             }
+            log.info("Found {} avsc files in imports: {}", importedURIs.size(), importedURIs);
         }
 
         // Combine local file URIs with remote URIs
         List<URI> allURIs = new ArrayList<>();
         allURIs.addAll(avscFiles.stream().map(File::toURI).toList());
-        allURIs.addAll(remoteURIs);
+        allURIs.addAll(importedURIs);
 
         return allURIs;
     }

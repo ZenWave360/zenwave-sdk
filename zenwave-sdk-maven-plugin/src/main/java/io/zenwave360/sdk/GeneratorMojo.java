@@ -120,7 +120,7 @@ public class GeneratorMojo extends AbstractMojo {
                 projectClassLoader = new URLClassLoader(classpathFiles.toArray(new URL[0]), this.getClass().getClassLoader());
             }
 
-            String apiFile = inputSpec.startsWith("classpath:") ? inputSpec : new File(inputSpec).toURI().toString();
+            String apiFile = isRemoteOrClasspathResource(inputSpec) ? inputSpec : new File(inputSpec).toURI().toString();
             List<String> zdls = new ArrayList<>();
             if(zdlFile != null) {
                 zdls.add(zdlFile);
@@ -197,5 +197,9 @@ public class GeneratorMojo extends AbstractMojo {
                 throw new RuntimeException(e);
             }
         }).collect(Collectors.toList());
+    }
+
+    private boolean isRemoteOrClasspathResource(String spec) {
+        return spec.startsWith("classpath:") || spec.startsWith("http://") || spec.startsWith("https://");
     }
 }
