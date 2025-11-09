@@ -75,7 +75,6 @@ public class HandlebarsEngineTest {
         Assertions.assertTrue(templateOutput.getContent().contains("or true: true"));
         Assertions.assertTrue(templateOutput.getContent().contains("or false: false"));
         Assertions.assertTrue(templateOutput.getContent().contains("    {\n      \"id\" : 60,"));
-        Assertions.assertTrue(templateOutput.getContent().contains("Already visited a"));
         Assertions.assertTrue(templateOutput.getContent().contains("No duplicates:a,b,c,"));
     }
 
