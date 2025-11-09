@@ -22,8 +22,7 @@ public class SpringKafkaTemplates extends AbstractAsyncapiGenerator.Templates {
         }
         addTemplate(producerByServiceTemplates, "shared/producer/mocks/InMemoryEventsProducer.java", "src/test/java/{{asPackageFolder producerApiPackage}}/{{producerInMemoryName serviceName operationRoleType}}.java");
 
-        addTemplate(consumerByOperationTemplates, "kafka/consumer/{{style}}/Consumer.java", "src/main/java/{{asPackageFolder consumerApiPackage}}/{{consumerName operation.x--operationIdCamelCase}}.java");
-        addTemplate(consumerByOperationTemplates, "shared/consumer/{{style}}/IService.java", "src/main/java/{{asPackageFolder consumerApiPackage}}/{{consumerServiceInterfaceName operation.x--operationIdCamelCase}}.java");
-
+        addTemplate(consumerByChannelTemplates, "shared/consumer/{{style}}/IServiceByChannel.java", "src/main/java/{{asPackageFolder consumerApiPackage}}/{{consumerServiceInterfaceName (camelCase channelName)}}.java");
+        addTemplate(consumerByChannelTemplates, "kafka/consumer/{{style}}/Consumer.java", "src/main/java/{{asPackageFolder consumerApiPackage}}/{{consumerName (camelCase channelName)}}.java");
     }
 }

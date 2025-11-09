@@ -28,6 +28,7 @@ import org.reflections.scanners.ResourcesScanner;
 import org.reflections.util.ConfigurationBuilder;
 
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
     private Logger log = LoggerFactory.getLogger(getClass());
@@ -117,10 +118,15 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
                             log.trace("Scanning classpath package for .avsc files: {}", packagePath);
                             try {
                                 ConfigurationBuilder config = new ConfigurationBuilder()
-                                        .forPackages(packagePath.replace("/", "."))
+                                        .forPackage(packagePath.replace("/", "."))
                                         .setScanners(Scanners.Resources);
 
                                 Set<String> avscResources = new Reflections(config).getResources(Pattern.compile(".*\\.avsc"));
+
+                                // Apply package filtering as a safety net (handles current Reflections bug)
+                                avscResources = avscResources.stream()
+                                        .filter(resource -> resource.startsWith(packagePath))
+                                        .collect(Collectors.toSet());
 
                                 for (String resource : avscResources) {
                                     // Apply include/exclude filters to classpath resources

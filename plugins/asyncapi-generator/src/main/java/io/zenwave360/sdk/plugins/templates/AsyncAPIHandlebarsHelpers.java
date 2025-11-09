@@ -42,12 +42,12 @@ public class AsyncAPIHandlebarsHelpers {
         return String.format("%s%s%s", generator.consumerPrefix, context, generator.consumerSuffix);
     }
 
-    public Object messageType(Object operation, Options options) {
-        List<String> messageTypes = JSONPath.get(operation, "$.x--messages[*].x--javaType");
-        List<String> envelopTypes = JSONPath.get(operation, "$.x--messages[*]." + generator.envelopeJavaTypeExtensionName);
-        String operationEnvelop = JSONPath.get(operation, "$." + generator.envelopeJavaTypeExtensionName);
-        if(operationEnvelop != null) {
-            envelopTypes.add(operationEnvelop);
+    public Object messageType(List<Map<String, Object>> operations, Options options) {
+        List<String> messageTypes = JSONPath.get(operations, "$[*].x--messages[*].x--javaType");
+        List<String> envelopTypes = JSONPath.get(operations, "$[*].x--messages[*]." + generator.envelopeJavaTypeExtensionName);
+        List<String> operationEnvelop = JSONPath.get(operations, "$[*]." + generator.envelopeJavaTypeExtensionName);
+        if(operationEnvelop != null && !operationEnvelop.isEmpty()) {
+            envelopTypes.addAll(operationEnvelop);
         }
         if(generator.useEnterpriseEnvelope && !envelopTypes.isEmpty()) {
             return envelopTypes.size() == 1 ? envelopTypes.get(0) : "Object";
@@ -56,10 +56,14 @@ public class AsyncAPIHandlebarsHelpers {
     }
 
     public Object hasEnterpriseEnvelope(Object operation, Options options) {
-        List<String> envelopTypes = JSONPath.get(operation, "$.x--messages[*]." + generator.envelopeJavaTypeExtensionName);
-        String operationEnvelop = JSONPath.get(operation, "$." + generator.envelopeJavaTypeExtensionName);
-        if(operationEnvelop != null) {
-            envelopTypes.add(operationEnvelop);
+        var arrayPrefix = operation instanceof List? "$[*]." : "$.";
+        List<String> envelopTypes = JSONPath.get(operation, arrayPrefix + "x--messages[*]." + generator.envelopeJavaTypeExtensionName);
+        Object operationEnvelop = JSONPath.get(operation, arrayPrefix + generator.envelopeJavaTypeExtensionName);
+        if(operationEnvelop instanceof String) {
+            envelopTypes.add((String) operationEnvelop);
+        }
+        if(operationEnvelop instanceof List) {
+            envelopTypes.addAll((List) operationEnvelop);
         }
         return generator.useEnterpriseEnvelope && !envelopTypes.isEmpty();
     }

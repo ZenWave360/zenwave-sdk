@@ -65,9 +65,8 @@ public class AsyncAPIGeneratorAvroTest {
 
         new MainGenerator().generate(plugin);
 
-        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/consumer/OnCustomerEventConsumer.java").exists());
+        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/consumer/CustomersChannelConsumer.java").exists());
         Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/consumer/IOnCustomerEventConsumerService.java").exists());
-        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/consumer/OnCustomerDeletedEventConsumer.java").exists());
         Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/consumer/IOnCustomerDeletedEventConsumerService.java").exists());
         Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/avro/CustomerEvent.java").exists());
         Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/avro/Address.java").exists());

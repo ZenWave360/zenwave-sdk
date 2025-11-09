@@ -21,28 +21,26 @@ import org.springframework.stereotype.Component;
 import {{modelPackage}}.*;
 {{/if}}
 
-{{#assign "messageCount"}}{{size operation.x--messages}}{{/assign~}}
-
-@Component("{{bindingPrefix}}{{kebabCase operation.operationId}}")
+@Component("{{bindingPrefix}}{{kebabCase channelName}}")
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.AsyncAPIGeneratorPlugin", date = "{{date}}")
 {{~#if generatedAnnotationClass}}@{{generatedAnnotationClass}}{{~/if}}
-public class {{consumerName operation.x--operationIdCamelCase}} implements Consumer<Message<{{messageType operation}}>> {
+public class {{consumerName (camelCase channelName)}} implements Consumer<Message<{{messageType operations}}>> {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    protected {{consumerServiceInterfaceName operation.x--operationIdCamelCase}} service;
+    protected {{consumerServiceInterfaceName (camelCase channelName)}} service;
     protected StreamBridge streamBridge;
     protected Map<Class<? extends Exception>, String> errorQueueMap;
 {{~#if useEnterpriseEnvelope}}
     public EnvelopeUnWrapper envelopeUnWrapper;
 {{~/if}}
 
-    public {{consumerName operation.x--operationIdCamelCase}}({{consumerServiceInterfaceName operation.x--operationIdCamelCase}} service, @Autowired(required=false) StreamBridge streamBridge) {
+    public {{consumerName (camelCase channelName)}}({{consumerServiceInterfaceName (camelCase channelName)}} service, @Autowired(required=false) StreamBridge streamBridge) {
         this.service = service;
         this.streamBridge = streamBridge;
     }
 
-    @Value("#{${spring.cloud.stream.bindings.{{bindingPrefix}}{{kebabCase operation.operationId}}-in-0.dead-letter-queue-error-map:{:}}}")
+    @Value("#{${spring.cloud.stream.bindings.{{bindingPrefix}}{{kebabCase channelName}}-in-0.dead-letter-queue-error-map:{:}}}")
     public void setErrorQueueMap(Map<Class<? extends Exception>, String> errorQueueMap) {
         this.errorQueueMap = errorQueueMap;
     }
@@ -55,29 +53,34 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
 
 {{~#if includeApplicationEventListener}}
     @org.springframework.modulith.events.ApplicationModuleListener
-    public void on(Message<{{messageType operation}}> message) {
+    public void on(Message<{{messageType operations}}> message) {
         accept(message);
     }
 {{/if}}
 
     @Override
-    public void accept(Message<{{messageType operation}}> message) {
+    public void accept(Message<{{messageType operations}}> message) {
         log.debug("Received message: {}", message);
         AcknowledgmentCallback ackCallback = StaticMessageHeaderAccessor.getAcknowledgmentCallback(message);
         try {
-            Object payload = {{#if (hasEnterpriseEnvelope operation)}}unwrap(message.getPayload()){{else}}message.getPayload(){{/if}};
+            Object payload = {{#if (hasEnterpriseEnvelope operations)}}unwrap(message.getPayload()){{else}}message.getPayload(){{/if}};
+        {{~initVisited 'messageType'}}
+        {{~#each operations as |operation|}}
             {{~#each operation.x--messages as |message|}}
+            {{~#unless (isVisited 'messageType' message.x--javaType register=true)}}
             if(payload instanceof {{message.x--javaType}}) {
                 {{~#if exposeMessage}}
                 service.{{operation.operationId}}{{methodSuffix message operation}}(MessageBuilder.createMessage(({{message.x--javaType}}) payload, message.getHeaders()));
                 {{~else}}
-                var headers = new {{consumerServiceInterfaceName operation.x--operationIdCamelCase}}.{{message.x--javaTypeSimpleName}}Headers();
+                var headers = new {{consumerServiceInterfaceName (camelCase channelName)}}.{{message.x--javaTypeSimpleName}}Headers();
                 headers.putAll(message.getHeaders());
                 service.{{operation.operationId}}{{methodSuffix message operation}}(({{message.x--javaType}}) payload, headers);
                 {{~/if}}
                 return;
             }
+            {{~/unless}}
             {{~/each}}
+        {{~/each}}
             log.warn("Received message without any business handler: [payload: {}, message: {}]", payload.getClass().getName(), message);
             {{~#if exposeMessage}}
             service.defaultHandler(MessageBuilder.createMessage(payload, message.getHeaders()));

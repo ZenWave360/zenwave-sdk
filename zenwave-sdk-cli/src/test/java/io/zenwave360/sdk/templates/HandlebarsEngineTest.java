@@ -23,6 +23,7 @@ public class HandlebarsEngineTest {
 
         Map<String, Object> model = new HashMap<>();
         model.put("list", List.of(1, 2, 3));
+        model.put("listWithDuplicates", List.of("a", "b", "c", "a", "b", "c"));
         model.put("booleanValue", true);
         model.put("nullValue", null);
         model.put("name", "nameFromParent");
@@ -74,6 +75,8 @@ public class HandlebarsEngineTest {
         Assertions.assertTrue(templateOutput.getContent().contains("or true: true"));
         Assertions.assertTrue(templateOutput.getContent().contains("or false: false"));
         Assertions.assertTrue(templateOutput.getContent().contains("    {\n      \"id\" : 60,"));
+        Assertions.assertTrue(templateOutput.getContent().contains("Already visited a"));
+        Assertions.assertTrue(templateOutput.getContent().contains("No duplicates:a,b,c,"));
     }
 
     public static class FirstHelper {

@@ -28,14 +28,14 @@ public class AsyncAPIGenerator extends AbstractAsyncapiGenerator {
         none, modulith
     }
 
-    @DocumentedOption(description = "Programming style")
-    public ProgrammingStyle style = ProgrammingStyle.imperative;
+//    @DocumentedOption(description = "Programming style")
+    public final ProgrammingStyle style = ProgrammingStyle.imperative;
 
     @DocumentedOption(description = "Transactional outbox type for message producers.")
     public TransactionalOutboxType transactionalOutbox = TransactionalOutboxType.none;
 
-    @DocumentedOption(description = "Include ApplicationEvent listener for consuming messages within the modulith.")
-    public boolean includeApplicationEventListener = false;
+//    @DocumentedOption(description = "Include ApplicationEvent listener for consuming messages within the modulith.")
+//    public boolean includeApplicationEventListener = false;
 
     @DocumentedOption(description = "Generate only the producer interface and skip the implementation.")
     public boolean skipProducerImplementation = false;

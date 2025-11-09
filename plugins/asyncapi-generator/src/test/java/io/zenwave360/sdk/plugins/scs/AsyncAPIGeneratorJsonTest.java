@@ -71,10 +71,30 @@ public class AsyncAPIGeneratorJsonTest {
         Plugin plugin = new AsyncAPIGeneratorPlugin()
                 .withApiFile("src/test/resources/asyncapi-v2.yml")
                 .withTargetFolder(targetFolder)
+                .withOption("templates", "SpringKafka")
                 .withOption("modelPackage", "io.example.api.model")
                 .withOption("producerApiPackage", "io.example.api.producer")
                 .withOption("consumerApiPackage", "io.example.api.consumer")
                 .withOption("role", AsyncapiRoleType.provider)
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("skipFormatting", false);
+
+        new MainGenerator().generate(plugin);
+
+        Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/model/CustomerEvent.java").exists());
+    }
+
+    @Test
+    public void test_generate_asyncapi_v2_json_from_file_client() throws Exception {
+        String targetFolder = "target/out/asyncapi_v2_json_from_file";
+        Plugin plugin = new AsyncAPIGeneratorPlugin()
+                .withApiFile("src/test/resources/asyncapi-v2.yml")
+                .withTargetFolder(targetFolder)
+                .withOption("templates", "SpringKafka")
+                .withOption("modelPackage", "io.example.api.model")
+                .withOption("producerApiPackage", "io.example.api.producer")
+                .withOption("consumerApiPackage", "io.example.api.consumer")
+                .withOption("role", AsyncapiRoleType.client)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("skipFormatting", false);
 
