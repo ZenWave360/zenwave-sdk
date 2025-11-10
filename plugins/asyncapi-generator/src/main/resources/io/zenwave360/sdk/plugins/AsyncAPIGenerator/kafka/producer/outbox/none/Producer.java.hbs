@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.context.ApplicationContext;
+import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
@@ -90,22 +91,8 @@ public class {{producerClassName serviceName operationRoleType}} implements {{pr
 
     private boolean sendMessage(String topicName, Message message, int timeout) {
         try {
-            Object key = message.getHeaders().get("kafka_messageKey");
-            var record = new ProducerRecord<>(topicName, key, message.getPayload());
-
-            // Add headers from Spring Message to Kafka headers
-            message.getHeaders().forEach((headerKey, headerValue) -> {
-                byte[] headerBytes;
-                if (headerValue == null) {
-                    headerBytes = new byte[0];
-                } else if (headerValue instanceof byte[]) {
-                    headerBytes = (byte[]) headerValue;
-                } else {
-                    headerBytes = headerValue.toString().getBytes(StandardCharsets.UTF_8);
-                }
-                record.headers().add(headerKey, headerBytes);
-            });
-
+			Object key = message.getHeaders().get(KafkaHeaders.KEY);
+            var record = kafkaTemplate.getMessageConverter().fromMessage(message, topicName);
             kafkaTemplate.send(record).get(timeout, TimeUnit.SECONDS);
             return true;
         } catch (InterruptedException e) {

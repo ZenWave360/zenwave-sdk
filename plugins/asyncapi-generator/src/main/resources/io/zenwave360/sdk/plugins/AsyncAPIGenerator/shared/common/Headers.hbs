@@ -15,7 +15,7 @@
         }
         {{~else}}
         public {{propertyType header}} {{asInstanceName @key}}() {
-            return ({{propertyType header}}) get("{{@key}}");
+            return ({{propertyType header}}) get("{{ifTruthy (eq @key 'kafka_messageKey') 'kafka_receivedMessageKey' @key}}");
         }
         {{~/if}}
     {{~/each}}

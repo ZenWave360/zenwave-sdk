@@ -3,6 +3,7 @@ package {{consumerApiPackage}};
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,12 +66,12 @@ public class {{consumerName (camelCase channelName)}} {
             topics = "${app.kafka.topics.{{bindingPrefix}}{{kebabCase channelName}}.topic}",
             groupId = "${app.kafka.topics.{{bindingPrefix}}{{kebabCase channelName}}.groupId:}",
             containerFactory = "${app.kafka.topics.{{bindingPrefix}}{{kebabCase channelName}}.containerFactory:}")
-    public void listen(@Payload {{messageType operations}} payload,
-                      @Header Map<String, Object> headers,
+    public void listen(@Payload ConsumerRecord payload,
+                      org.springframework.messaging.MessageHeaders headers,
                       Acknowledgment acknowledgment) {
         log.debug("Received message: {}", payload);
         try {
-            Object unwrappedPayload = {{#if (hasEnterpriseEnvelope operations)}}unwrap(payload){{else}}payload{{/if}};
+            Object unwrappedPayload = {{#if (hasEnterpriseEnvelope operations)}}unwrap(payload.value()){{else}}payload.value(){{/if}};
         {{~initVisited 'messageType'}}
         {{~#each operations as |operation|}}
             {{~#each operation.x--messages as |message|}}
