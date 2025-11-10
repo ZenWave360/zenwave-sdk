@@ -4,14 +4,14 @@
     <parent>
         <groupId>io.zenwave360.sdk</groupId>
         <artifactId>zenwave-sdk</artifactId>
-        <version>2.1.0-SNAPSHOT</version>
+        <version>2.2.0-SNAPSHOT</version>
     </parent>
     <name>${project.groupId}:${project.artifactId}</name>
     <artifactId>plugins-parent</artifactId>
     <packaging>pom</packaging>
 
     <properties>
-        <zenwave-sdk.version>2.1.0-SNAPSHOT</zenwave-sdk.version>
+        <zenwave-sdk.version>2.2.0-SNAPSHOT</zenwave-sdk.version>
     </properties>
 
     <dependencies>
@@ -35,9 +35,10 @@
         <module>jdl-to-asyncapi</module>
         <module>zdl-to-asyncapi</module>
         <module>zdl-to-markdown</module>
-        <module>asyncapi-spring-cloud-streams3</module>
         <module>asyncapi-jsonschema2pojo</module>
         <module>avro-schema-compiler</module>
+        <module>asyncapi-spring-cloud-streams3</module>
+        <module>asyncapi-generator</module>
         <module>backend-application-default</module>
         <module>openapi-controllers</module>
         <module>openapi-spring-webtestclient</module>

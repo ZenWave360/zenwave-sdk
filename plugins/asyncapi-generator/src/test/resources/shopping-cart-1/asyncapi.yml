@@ -1,0 +1,154 @@
+asyncapi: 3.0.0
+info:
+  title: "AsyncAPI Shopping Cart Example (Provider)"
+  version: 0.0.1
+  tags:
+    - name: "Default"
+    - name: "ShoppingCart"
+
+defaultContentType: application/json
+
+channels:
+  ShoppingCartChannel:
+    address: "shopping-cart"
+    messages:
+      ShoppingCartItemUpdatedMessage:
+        $ref: '#/components/messages/ShoppingCartItemUpdatedMessage'
+      ShoppingCartCheckedOutMessage:
+        $ref: '#/components/messages/ShoppingCartCheckedOutMessage'
+      ShoppingCartItemAddedMessage:
+        $ref: '#/components/messages/ShoppingCartItemAddedMessage'
+      ShoppingCartCreatedMessage:
+        $ref: '#/components/messages/ShoppingCartCreatedMessage'
+      ShoppingCartItemRemovedMessage:
+        $ref: '#/components/messages/ShoppingCartItemRemovedMessage'
+
+operations:
+  onShoppingCartCreated:
+    action: send
+    tags:
+      - name: ShoppingCart
+    channel:
+      $ref: '#/channels/ShoppingCartChannel'
+    messages:
+      - $ref: '#/components/messages/ShoppingCartCreatedMessage'
+  onShoppingCartItemAdded:
+    action: send
+    tags:
+      - name: ShoppingCart
+    channel:
+      $ref: '#/channels/ShoppingCartChannel'
+    messages:
+      - $ref: '#/components/messages/ShoppingCartItemAddedMessage'
+  onShoppingCartItemRemoved:
+    action: send
+    tags:
+      - name: ShoppingCart
+    channel:
+      $ref: '#/channels/ShoppingCartChannel'
+    messages:
+      - $ref: '#/components/messages/ShoppingCartItemRemovedMessage'
+  onShoppingCartItemUpdated:
+    action: send
+    tags:
+      - name: ShoppingCart
+    channel:
+      $ref: '#/channels/ShoppingCartChannel'
+    messages:
+      - $ref: '#/components/messages/ShoppingCartItemUpdatedMessage'
+  onShoppingCartCheckedOut:
+    action: send
+    tags:
+      - name: ShoppingCart
+    channel:
+      $ref: '#/channels/ShoppingCartChannel'
+    messages:
+      - $ref: '#/components/messages/ShoppingCartCheckedOutMessage'
+
+
+components:
+  messages:
+    ShoppingCartCreatedMessage:
+      name: ShoppingCartCreatedMessage
+      title: ""
+      summary: ""
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+        schema:
+          $ref: "avro/ShoppingCartCreated.avsc"
+    ShoppingCartItemAddedMessage:
+      name: ShoppingCartItemAddedMessage
+      title: ""
+      summary: ""
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+        schema:
+          $ref: "avro/ShoppingCartItemAdded.avsc"
+    ShoppingCartItemRemovedMessage:
+      name: ShoppingCartItemRemovedMessage
+      title: ""
+      summary: ""
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+        schema:
+          $ref: "avro/ShoppingCartItemRemoved.avsc"
+    ShoppingCartItemUpdatedMessage:
+      name: ShoppingCartItemUpdatedMessage
+      title: ""
+      summary: ""
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+        schema:
+          $ref: "avro/ShoppingCartItemUpdated.avsc"
+    ShoppingCartCheckedOutMessage:
+      name: ShoppingCartCheckedOutMessage
+      title: ""
+      summary: ""
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+        schema:
+          $ref: "avro/ShoppingCartCheckedOut.avsc"
+
+  messageTraits:
+    CommonHeaders:
+      headers:
+        type: object
+        properties:
+          kafka_messageKey:
+            type: "integer"
+            format: "int64"
+            description: This header value will be populated automatically at runtime
+            x-runtime-expression: $message.payload#/customerId
+          # CloudEvents Attributes
+          ce-id:
+            type: string
+            description: Unique identifier for the event
+            x-runtime-expression: $message.payload#{#this.customerId}
+          ce-source:
+            type: string
+            description: URI identifying the context where event happened
+            x-runtime-expression: $message.payload#{"ShoppingCart"}
+          ce-specversion:
+            type: string
+            description: CloudEvents specification version
+            x-runtime-expression: $message.payload#{"1.0"}
+          ce-type:
+            type: string
+            description: Event type
+            x-runtime-expression: $message.payload#{#this.getClass().getSimpleName()}
+          ce-time:
+            type: string
+            description: Timestamp of when the event happened
+            x-runtime-expression: $message.payload#{T(java.time.Instant).now().toString()}
+
+

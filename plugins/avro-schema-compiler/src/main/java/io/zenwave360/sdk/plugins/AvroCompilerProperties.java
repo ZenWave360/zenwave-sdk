@@ -8,12 +8,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+@DocumentedOption(description = "All Avro Compiler Properties to pass downstream to Avro Compiler", docLink = "https://github.com/ZenWave360/zenwave-sdk/blob/main/plugins/avro-schema-compiler/src/main/java/io/zenwave360/sdk/plugins/AvroCompilerProperties.java")
 public class AvroCompilerProperties {
 
     @DocumentedOption(description = "Avro schema file or folder containing avro schemas")
     public File sourceDirectory;
 
-    @DocumentedOption(description = "Avro schema files or folders containing avro schemas")
+    @DocumentedOption(description = "Avro schema files or folders containing avro schemas. It supports local files/folders, `classpath:` files/folders or `https://` file resources.")
     public List<String> imports;
 
     @DocumentedOption(description = "A set of Ant-like inclusion patterns used to select files from the source tree that are to be processed. By default, the pattern **\\/*.avsc is used to include all avro schema files.")

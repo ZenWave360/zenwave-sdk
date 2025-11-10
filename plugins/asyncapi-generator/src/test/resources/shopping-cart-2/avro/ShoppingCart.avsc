@@ -1,0 +1,19 @@
+{
+  "type" : "record",
+  "name" : "ShoppingCart",
+  "namespace" : "io.example.asyncapi.shoppingcart.events.avro",
+  "fields" : [ {
+    "name" : "id",
+    "type" : "long"
+  }, {
+    "name" : "customerId",
+    "type" : "long"
+  }, {
+    "name" : "items",
+    "type" : {
+      "type" : "array",
+      "items" : "Item",
+      "java-class" : "java.util.List"
+    }
+  } ]
+}

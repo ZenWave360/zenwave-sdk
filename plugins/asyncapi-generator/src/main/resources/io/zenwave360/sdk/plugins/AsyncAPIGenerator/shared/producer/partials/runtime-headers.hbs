@@ -1,0 +1,71 @@
+{{~#if (hasRuntimeHeaders operations)}}
+    private final org.springframework.expression.ExpressionParser parser = new org.springframework.expression.spel.standard.SpelExpressionParser();
+    protected void processRuntimeHeaders(Object payload, Map<String, Object> headers,
+            Map<String, String> runtimeHeaders) {
+        if (runtimeHeaders == null || runtimeHeaders.isEmpty()) {
+            return;
+        }
+        if (headers == null) {
+            headers = new java.util.HashMap<>();
+        }
+
+        var context = new org.springframework.expression.spel.support.StandardEvaluationContext(payload);
+
+        for (Map.Entry<String, String> runtimeHeader : runtimeHeaders.entrySet()) {
+            String location = runtimeHeader.getValue().replace("$message.payload", "").trim();
+            if (location.startsWith("#{") && location.endsWith("}")) {
+                var expression = location.substring(2, location.length() - 1);
+                var value = parser.parseExpression(expression).getValue(context);
+                if (!headers.containsKey(runtimeHeader.getKey())) {
+                    headers.put(runtimeHeader.getKey(), value);
+                }
+                continue;
+            }
+            if (location.startsWith("$")) {
+                var suppliedValue = getSuppliedValue(location.substring(1));
+                if (suppliedValue != null) {
+                    headers.put(runtimeHeader.getKey(), suppliedValue.orElse(null));
+                }
+                continue;
+            }
+            if (location.startsWith("#/")) {
+                var expression = location.substring(2);
+                try {
+                    var parts = java.util.Arrays.asList(expression.split("/"));
+                    var value = payload;
+                    for (String part : parts) {
+                        if (value != null) {
+                            var pd = new java.beans.PropertyDescriptor(part, value.getClass());
+                            if (pd != null && pd.getReadMethod() != null) {
+                                value = pd.getReadMethod().invoke(value);
+                            }
+                            else {
+                                log.error("Unable to find property for: {} in class: {}", parts, payload.getClass());
+                            }
+                        }
+                    }
+                    if (!headers.containsKey(runtimeHeader.getKey())) {
+                        headers.put(runtimeHeader.getKey(), value);
+                    }
+                }
+                catch (java.beans.IntrospectionException | java.lang.reflect.InvocationTargetException
+                        | IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+
+	protected java.util.Optional<Object> getSuppliedValue(String supplierBeanKey) {
+		try {
+			var supplier = applicationContext.getBean(supplierBeanKey);
+			if (supplier instanceof java.util.function.Supplier) {
+				return java.util.Optional.ofNullable(((java.util.function.Supplier) supplier).get());
+			}
+		}
+		catch (org.springframework.beans.factory.NoSuchBeanDefinitionException e) {
+			log.warn("Unable to find supplier bean: {}", supplierBeanKey);
+		}
+		return null;
+	}
+{{~/if}}

@@ -1,0 +1,12 @@
+{
+  "type" : "record",
+  "name" : "Item",
+  "namespace" : "io.example.asyncapi.shoppingcart.events.avro",
+  "fields" : [ {
+    "name" : "name",
+    "type" : "string"
+  }, {
+    "name" : "quantity",
+    "type" : "int"
+  } ]
+}

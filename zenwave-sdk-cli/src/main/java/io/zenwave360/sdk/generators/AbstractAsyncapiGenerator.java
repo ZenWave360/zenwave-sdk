@@ -17,6 +17,8 @@ import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
 import io.zenwave360.sdk.parsers.Model;
 import io.zenwave360.sdk.utils.JSONPath;
 
+import javax.xml.transform.Templates;
+
 import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
 
 public abstract class AbstractAsyncapiGenerator extends Generator {
@@ -51,7 +53,7 @@ public abstract class AbstractAsyncapiGenerator extends Generator {
 
     public String sourceProperty = "api";
 
-    @DocumentedOption(description = "Java API package name for producerApiPackage and consumerApiPackage if not specified.")
+    @DocumentedOption(description = "Java API package, if `producerApiPackage` and `consumerApiPackage` are not set.")
     public String apiPackage;
     @DocumentedOption(description = "Java API package name for outbound (producer) services. It can override apiPackage for producers.")
     public String producerApiPackage = "{{apiPackage}}";
@@ -123,12 +125,25 @@ public abstract class AbstractAsyncapiGenerator extends Generator {
         templateOutputList.addAll(generateTemplateOutput(contextModel, isProducer? templates.producerByServiceTemplates : templates.consumerByServiceTemplates,
                 Map.of("serviceName", serviceName, "operations", operations, "messages", messages, "operationRoleType", operationRoleType)));
 
+        Map<String, List<Map<String, Object>>> operationsByChannel = new HashMap<>();
         for (Map<String, Object> operation : operations) {
             messages = new HashSet(JSONPath.get(operation, "$.x--messages[*]"));
             templateOutputList.addAll(generateTemplateOutput(contextModel, isProducer? templates.producerByOperationTemplates : templates.consumerByOperationTemplates,
                     Map.of("serviceName", serviceName, "operation", operation, "messages", messages, "operationRoleType", operationRoleType)));
 
+            String channelName = (String) JSONPath.get(operation, "$.x--channel");
+            operationsByChannel.computeIfAbsent(channelName, k -> new ArrayList<>()).add(operation);
         }
+
+        operationsByChannel.forEach((channelName, channelOperations) -> {
+            var channel = JSONPath.get(getApiModel(contextModel), "$.channels['" + channelName + "']");
+//            var messageList = JSONPath.getFirst(channel, "$[*].x--messages[*]", "$.x--messages[*]");
+            templateOutputList.addAll(generateTemplateOutput(contextModel, isProducer? templates.producerByChannelTemplates : templates.consumerByChannelTemplates,
+                    Map.of("serviceName", serviceName, "channelName", channelName, "channel", channel, "operations", channelOperations,"operationRoleType", operationRoleType)));
+
+        });
+
+
         return templateOutputList;
     }
 
@@ -275,15 +290,18 @@ public abstract class AbstractAsyncapiGenerator extends Generator {
             this.templatesFolder = templatesFolder;
         }
 
+
         public List<TemplateInput> commonTemplates = new ArrayList<>();
 
         public List<TemplateInput> producerTemplates = new ArrayList<>();
         public List<TemplateInput> producerByServiceTemplates = new ArrayList<>();
         public List<TemplateInput> producerByOperationTemplates = new ArrayList<>();
+        public List<TemplateInput> producerByChannelTemplates = new ArrayList<>();
 
         public List<TemplateInput> consumerTemplates = new ArrayList<>();
         public List<TemplateInput> consumerByServiceTemplates = new ArrayList<>();
         public List<TemplateInput> consumerByOperationTemplates = new ArrayList<>();
+        public List<TemplateInput> consumerByChannelTemplates = new ArrayList<>();
 
         public void addTemplate(List<TemplateInput> templates, String templateLocation, String targetFile) {
             addTemplate(templates, templateLocation, targetFile, JAVA, null, false);

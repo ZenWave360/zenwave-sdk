@@ -72,9 +72,6 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     @DocumentedOption(description = "AsyncAPI extension property name for runtime auto-configuration of headers.")
     public String runtimeHeadersProperty = "x-runtime-expression";
 
-    @DocumentedOption(description = "Include Kafka common headers 'kafka_messageKey' as x-runtime-header")
-    private boolean includeKafkaCommonHeaders = false;
-
     @DocumentedOption(description = "Annotation class to mark generated code (e.g. `org.springframework.aot.generate.Generated`). When retained at runtime, this prevents code coverage tools like Jacoco from including generated classes in coverage reports.")
     public String generatedAnnotationClass;
 

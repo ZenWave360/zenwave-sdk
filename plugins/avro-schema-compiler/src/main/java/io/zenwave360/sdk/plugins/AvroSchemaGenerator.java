@@ -3,8 +3,7 @@ package io.zenwave360.sdk.plugins;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.zenwave360.sdk.doc.DocumentedOption;
-import io.zenwave360.sdk.generators.AbstractAsyncapiGenerator;
-import io.zenwave360.sdk.utils.AntStyleMatcher;
+import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import org.apache.avro.LogicalTypes;
@@ -17,17 +16,12 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.URI;
 import java.util.*;
 
-public class AvroSchemaGenerator extends AbstractAsyncapiGenerator {
+public class AvroSchemaGenerator extends Generator {
 
     private Logger log = LoggerFactory.getLogger(getClass());
-
-    @DocumentedOption(description = "List of avro schema files to generate code for. It is alternative to sourceDirectory and imports.")
-    public List<File> avroFiles;
 
     @DocumentedOption(description = "Avro Compiler Properties")
     public AvroCompilerProperties avroCompilerProperties = new AvroCompilerProperties();
@@ -35,147 +29,60 @@ public class AvroSchemaGenerator extends AbstractAsyncapiGenerator {
     @DocumentedOption(description = "Target folder to generate code to.")
     public File targetFolder = new File ("target/generated-sources/avro");
 
-    @Override
-    protected Templates configureTemplates() {
-        return null;
-    }
+    @DocumentedOption(description = "Source folder inside folder to generate code to.")
+    public String sourceFolder = "";
 
     @Override
     public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
         try {
-            if(avroFiles != null && !avroFiles.isEmpty()) {
-                log.info("Using {} avro files: {}", avroFiles.size(), avroFiles);
-            }
-            else {
-                avroFiles = collectAvscFiles(avroCompilerProperties.sourceDirectory, avroCompilerProperties.imports, avroCompilerProperties.includes, avroCompilerProperties.excludes);
-                log.debug("Found {} avsc files: {}", avroFiles.size(), avroFiles);
-            }
-            String avscJson = asJsonArray(avroFiles);
-            Schema schema = null;
-            try {
-                log.debug("Parsing avsc files...");
-                Schema.Parser parser = new Schema.Parser();
-                schema = parser.parse(avscJson);
-            } catch (Exception e) {
-                log.error("Error parsing avsc files: {}", avscJson, e);
-                throw e;
-            }
-            try {
-                log.info("Generating avro classes to: {}", targetFolder);
-                SpecificCompiler compiler = new SpecificCompiler(schema);
-                setCompilerProperties(compiler, avroCompilerProperties);
-                compiler.compileToDestination(avroCompilerProperties.sourceDirectory, targetFolder);
-            } catch (Exception e) {
-                log.error("Error generating avsc files", e);
-                throw e;
-            }
+            List<Map<String, Object>> avroSchemas = (List) contextModel.get(AvroSchemaLoader.AVRO_SCHEMAS_LIST);
+            return generateJavaFromAvroSchemas(avroSchemas);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+
+
+    }
+
+    protected GeneratedProjectFiles generateJavaFromAvroSchemas(List<Map<String, Object>> avroSchemas) throws IOException {
+        avroSchemas = sortSchemas(avroSchemas);
+        ObjectMapper mapper = new ObjectMapper();
+        String avscJson = mapper.writeValueAsString(avroSchemas);
+
+        Schema schema = null;
+        try {
+            log.debug("Parsing avsc files...");
+            Schema.Parser parser = new Schema.Parser();
+            schema = parser.parse(avscJson);
+        } catch (Exception e) {
+            log.error("Error parsing avsc files: {}", avscJson, e);
+            throw e;
+        }
+        try {
+            var targetSourceFolder = new File(targetFolder, sourceFolder);
+            log.info("Generating avro classes to: {}", targetSourceFolder);
+            SpecificCompiler compiler = new SpecificCompiler(schema);
+            setCompilerProperties(compiler, avroCompilerProperties);
+            compiler.compileToDestination(avroCompilerProperties.sourceDirectory, targetSourceFolder);
+        } catch (Exception e) {
+            log.error("Error generating avsc files", e);
+            throw e;
         }
 
         return new GeneratedProjectFiles();
     }
 
-
-    private List<File> collectAvscFiles(File sourceFolder, List<String> imports, List<String> includes, List<String> excludes) throws IOException {
-        Set<File> avscFiles = new HashSet<>();
-
-        // Process sourceFolder if provided
-        if (sourceFolder != null && sourceFolder.exists()) {
-            if (sourceFolder.isDirectory()) {
-                log.info("Collecting avsc files from source folder: {}", sourceFolder);
-                avscFiles.addAll(Files.walk(sourceFolder.toPath())
-                        .filter(Files::isRegularFile)
-//                        .filter(p -> matchesIncludes(p, includes) && !matchesExcludes(p, excludes))
-                        .map(Path::toFile)
-                        .toList());
-            } else if (sourceFolder.isFile() && sourceFolder.getName().endsWith(".avsc")) {
-                avscFiles.add(sourceFolder);
-            }
-        }
-
-        // Process imports if provided
-        if (imports != null) {
-            log.info("Collecting avsc files from imports: {}", imports);
-            for (String importPath : imports) {
-                Path path = Paths.get(importPath);
-                if (Files.isDirectory(path)) {
-                    avscFiles.addAll(Files.walk(path)
-                            .filter(Files::isRegularFile)
-//                            .filter(p -> matchesIncludes(p, includes) && !matchesExcludes(p, excludes))
-                            .map(Path::toFile)
-                            .toList());
-                } else if (Files.isRegularFile(path) && importPath.endsWith(".avsc")) {
-                    avscFiles.add(path.toFile());
-                } else {
-                    log.warn("Skipping invalid import path: {}", importPath);
-                }
-            }
-        }
-
-        return avscFiles.stream().toList();
-    }
-
-    private boolean matchesIncludes(Path path, List<String> includes) {
-        if (includes == null || includes.isEmpty()) {
-            boolean matches = path.toString().endsWith(".avsc");
-            log.debug("File {} matches default include pattern: {}", path, matches);
-            return matches;
-        }
-        var pathString = path.toString().replace("\\", "/");
-        boolean matches = includes.stream().anyMatch(include -> AntStyleMatcher.match(include, pathString));
-        log.debug("File {} matches includes {}: {}", pathString, includes, matches);
-        return matches;
-    }
-
-    private boolean matchesExcludes(Path path, List<String> excludes) {
-        if (excludes == null || excludes.isEmpty()) {
-            log.debug("File {} has no excludes, not excluded", path);
-            return false;
-        }
-        var pathString = path.toString().replace("\\", "/");
-        boolean matches = excludes.stream().anyMatch(exclude -> AntStyleMatcher.match(exclude, pathString));
-        log.debug("File {} matches excludes {}: {}", pathString, excludes, matches);
-        return matches;
-    }
-
-    private String asJsonArray(Collection<File> avscFiles) throws IOException {
-        List<String> allSchemas = new ArrayList<>();
-
-        for (File file : avscFiles) {
-            String content = new String(Files.readAllBytes(file.toPath())).trim();
-
-            if (content.startsWith("[") && content.endsWith("]")) {
-                // File contains an array of schemas - remove outer brackets
-                String innerContent = content.substring(1, content.length() - 1).trim();
-                if (!innerContent.isEmpty()) {
-                    allSchemas.add(innerContent);
-                }
-            } else {
-                // File contains a single schema
-                allSchemas.add(content);
-            }
-        }
-
-        var jsonArrayString =  "[" + String.join(",", allSchemas) + "]";
-        return sortSchemas(jsonArrayString);
-    }
-
-    public String sortSchemas(String jsonArrayString) throws JsonProcessingException {
+    public List<Map<String, Object>> sortSchemas(List<Map<String, Object>> schemas) throws JsonProcessingException {
         if(isAvroVersionLater("1.12.0")) {
-            return jsonArrayString;
+            return schemas;
         }
         log.info("Avro version detected {} < 1.12.0. Sorting schemas...", AVRO_VERSION);
-        var objectMapper = new ObjectMapper();
 
-        List<Map<String, Object>> schemas = objectMapper.readValue(jsonArrayString, List.class);
-        var schemasToSort = JSONPath.get(schemas, "$.[?(@.type == 'record' || @.type == 'enum')]", List.<Map<String, Object>>of());
+        log.debug("Sorting schemas: {}", JSONPath.get(schemas, "$.[*].name", List.of()));
+        schemas.sort(createDependencyComparator());
+        log.debug("Sorted schemas: {}", JSONPath.get(schemas, "$.[*].name", List.of()));
 
-        log.debug("Sorting schemas: {}", JSONPath.get(schemasToSort, "$.[*].name", List.of()));
-        schemasToSort.sort(createDependencyComparator());
-        log.debug("Sorted schemas: {}", JSONPath.get(schemasToSort, "$.[*].name", List.of()));
-
-        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(schemasToSort);
+        return schemas;
     }
 
     private Comparator<Map<String, Object>> createDependencyComparator() {
@@ -216,13 +123,29 @@ public class AvroSchemaGenerator extends AbstractAsyncapiGenerator {
         List<Object> fieldTypes = JSONPath.get(schema, "$.fields[*].type", List.of());
         List<String> dependencies = new ArrayList<>();
 
+        // Set of primitive Avro types that should not be considered dependencies
+        Set<String> primitiveTypes = Set.of("null", "boolean", "int", "long", "float", "double", "bytes", "string");
+
         for (Object fieldType : fieldTypes) {
-            if (fieldType instanceof String) {
-                dependencies.add((String) fieldType);
+            if (fieldType instanceof String typeName) {
+                if (!primitiveTypes.contains(typeName)) {
+                    dependencies.add(typeName);
+                }
+            } else if (fieldType instanceof List) {
+                // Handle union types like ["null", "string"] or ["null", "MyCustomType"]
+                List<Object> unionTypes = (List<Object>) fieldType;
+                for (Object unionType : unionTypes) {
+                    if (unionType instanceof String) {
+                        String typeName = (String) unionType;
+                        if (!primitiveTypes.contains(typeName)) {
+                            dependencies.add(typeName);
+                        }
+                    }
+                }
             } else if (fieldType instanceof Map) {
                 Map<String, Object> typeMap = (Map<String, Object>) fieldType;
                 String items = JSONPath.get(typeMap, "$.items", null);
-                if (items != null) {
+                if (items != null && !primitiveTypes.contains(items)) {
                     dependencies.add(items);
                 }
             }
@@ -299,7 +222,7 @@ public class AvroSchemaGenerator extends AbstractAsyncapiGenerator {
 //        compiler.setNullSafeAnnotationNotNull(properties.nullSafeAnnotationNotNull);
     }
 
-    private static final String AVRO_VERSION = _getAvroVersion();
+    private static String AVRO_VERSION = _getAvroVersion();
     private static String _getAvroVersion() {
         Package avroPackage = Schema.class.getPackage();
         if (avroPackage != null && avroPackage.getImplementationVersion() != null) {

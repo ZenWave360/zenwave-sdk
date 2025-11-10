@@ -2,22 +2,32 @@ package io.zenwave360.sdk.plugins;
 
 import io.zenwave360.sdk.Plugin;
 import io.zenwave360.sdk.doc.DocumentedPlugin;
-import io.zenwave360.sdk.parsers.DefaultYamlParser;
-import io.zenwave360.sdk.processors.AsyncApiProcessor;
 
-import java.util.Map;
-
-@DocumentedPlugin(summary = "",
-        mainOptions = {},
-        hiddenOptions = {},
+@DocumentedPlugin(summary = "Generates Java classes from Avro schemas using Avro Compiler.",
+        mainOptions = {
+                "avroFiles",
+                "avroCompilerProperties",
+                "avroCompilerProperties.sourceDirectory",
+                "avroCompilerProperties.imports",
+                "avroCompilerProperties.includes",
+                "avroCompilerProperties.excludes",
+                "sourceFolder",
+                "targetFolder",
+        },
+        hiddenOptions = {
+                "layout","zdlFile","zdlFiles","apiFile", "apiFiles"
+        },
         description = """
-
+                Generates Java classes from Avro schemas using your provided Avro Compiler version. Compatible with Avro versions from 1.8.0 to 1.12.0.
                 """
 )
 public class AvroSchemaGeneratorPlugin extends Plugin {
 
     public AvroSchemaGeneratorPlugin() {
         super();
-        withChain(AvroSchemaGenerator.class);
+        withChain(AvroSchemaLoader.class, AvroSchemaGenerator.class);
     }
 }
+
+
+

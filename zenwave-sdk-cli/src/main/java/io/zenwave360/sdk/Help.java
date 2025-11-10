@@ -25,7 +25,7 @@ import io.zenwave360.sdk.utils.Maps;
 
 public class Help {
 
-    enum Format {
+    public enum Format {
         list, help, detailed, json, markdown, html;
     }
 
@@ -81,7 +81,21 @@ public class Help {
             DocumentedOption documentedOption = field.getAnnotation(DocumentedOption.class);
             if (documentedOption != null && !hiddenOptions.contains(field.getName())) {
                 Object plugin = fieldOwners.get(field);
+
+                // Always add the original field first
                 options.put(field.getName(), asModel(plugin, field, documentedOption));
+
+                // Check if field type is a custom object that might have nested @DocumentedOption fields
+                if (isCustomObjectType(field.getType())) {
+                    try {
+                        Object nestedObject = FieldUtils.readField(field, plugin, true);
+                        if (nestedObject != null) {
+                            addNestedOptions(options, field.getName(), nestedObject);
+                        }
+                    } catch (IllegalAccessException e) {
+                        // Nested options already handled above with the original field
+                    }
+                }
             } else if (isPublic(field.getModifiers()) && !isStatic(field.getModifiers())) {
                 undocumentedOptions.put(field.getName(), Map.of("name", field.getName(), "ownerClass", field.getDeclaringClass().getName(), "type", field.getType()));
             }
@@ -157,7 +171,33 @@ public class Help {
         if (defaultValue.getClass().isArray()) {
             defaultValue = Arrays.asList((Object[]) defaultValue);
         }
-        return Map.of("description", documentedOption.description(), "type", type.getSimpleName(), "defaultValue", defaultValue, "values", values, "docLink", documentedOption.docLink());
+
+        String description = documentedOption.description();
+
+        // Add field's own docLink to description if present
+        if (!documentedOption.docLink().isEmpty()) {
+            description += " [(docs)](" + documentedOption.docLink() + ")";
+        }
+
+        // Check if field is a custom object with @DocumentedOption and docLink
+        if (isCustomObjectType(type)) {
+            DocumentedOption typeDocumentation = (DocumentedOption) type.getAnnotation(DocumentedOption.class);
+            if (typeDocumentation != null && !typeDocumentation.docLink().isEmpty()) {
+                String className = type.getSimpleName();
+                String docLink = typeDocumentation.docLink();
+                defaultValue = String.format("See [%s](%s)", className, docLink);
+            }
+        }
+
+        return Map.of(
+            "name", field.getName(),
+            "description", description,
+            "type", type.getSimpleName(),
+            "required", documentedOption.required(),
+            "defaultValue", defaultValue,
+            "values", values,
+            "docLink", documentedOption.docLink()
+        );
     }
 
     public String help(Plugin plugin, Format format) {
@@ -190,6 +230,26 @@ public class Help {
             return clazz.getPackage().getImplementationVersion();
         } catch (Exception e) {
             return "UNKNOWN";
+        }
+    }
+
+    private boolean isCustomObjectType(Class<?> type) {
+        return !type.isPrimitive()
+            && !type.isEnum()
+            && !type.isArray()
+            && !type.getName().startsWith("java.")
+            && !type.getName().startsWith("javax.")
+            && !Collection.class.isAssignableFrom(type)
+            && !Map.class.isAssignableFrom(type);
+    }
+
+    private void addNestedOptions(Map<String, Object> options, String prefix, Object nestedObject) {
+        for (Field nestedField : FieldUtils.getAllFields(nestedObject.getClass())) {
+            DocumentedOption nestedDocumentedOption = nestedField.getAnnotation(DocumentedOption.class);
+            if (nestedDocumentedOption != null) {
+                String nestedFieldName = prefix + "." + nestedField.getName();
+                options.put(nestedFieldName, asModel(nestedObject, nestedField, nestedDocumentedOption));
+            }
         }
     }
 
