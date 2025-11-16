@@ -25,7 +25,6 @@ components:
             description: something else
             $ref: "#/components/schemas/Email"
           department:
-            description: department where user works
             $ref: "#/components/schemas/Department-v1"
   schemas:
     Email:

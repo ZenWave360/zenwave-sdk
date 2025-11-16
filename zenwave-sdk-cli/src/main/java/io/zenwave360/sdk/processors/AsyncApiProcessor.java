@@ -93,6 +93,12 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
             }
         });
 
+        apiModel.getRefs().getReplacedRefsList().forEach(pair -> {
+            if (pair.getValue() instanceof Map) {
+                ((Map) pair.getValue()).put("x--original-$ref", pair.getKey().getRef());
+            }
+        });
+
         List<Map<String, Map>> traitsParents = JSONPath.get(apiModel, "$..[?(@.traits)]");
         for (Map<String, Map> traitParent : traitsParents) {
             List<Map<String, Map>> traitsList = (List) traitParent.get("traits");
