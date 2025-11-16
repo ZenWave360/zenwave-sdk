@@ -38,6 +38,7 @@
         "io.zenwave360.sdk.plugins:asyncapi-jsonschema2pojo:2.2.0-SNAPSHOT",
         "io.zenwave360.sdk.plugins:avro-schema-compiler:2.2.0-SNAPSHOT",
         "org.apache.avro:avro-compiler:1.12.0",
+        "io.zenwave360.sdk.plugins:asyncapi-generator:2.2.0-SNAPSHOT",
         "io.zenwave360.sdk.plugins:openapi-spring-webtestclient:2.2.0-SNAPSHOT",
         "io.zenwave360.sdk.plugins:openapi-karate:2.2.0-SNAPSHOT",
         "io.zenwave360.sdk.plugins:backend-application-default:2.2.0-SNAPSHOT",
