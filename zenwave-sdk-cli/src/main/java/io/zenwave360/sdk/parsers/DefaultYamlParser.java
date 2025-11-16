@@ -6,8 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import io.zenwave360.jsonrefparser.AuthenticationValue;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.jsonrefparser.$RefParser;
 import io.zenwave360.jsonrefparser.$RefParserOptions;
@@ -22,6 +24,9 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
     @DocumentedOption(description = "API Specification File")
     public URI apiFile;
     public String targetProperty = "api";
+
+    @DocumentedOption(description = "Authentication configuration values for fetching remote resources.")
+    public List<AuthenticationValue> authentication = List.of();
 
     private ClassLoader projectClassLoader;
 
@@ -63,6 +68,7 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
         if(apiFile != null) {
             $RefParser parser = new $RefParser(apiFile)
                     .withResourceClassLoader(this.projectClassLoader)
+//                    .withAuthenticationValues(authentication)
                     .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing(OnMissing.SKIP));
             model.put(targetProperty, new Model(apiFile, parser.parse().dereference().mergeAllOf().getRefs()));
         } else {
