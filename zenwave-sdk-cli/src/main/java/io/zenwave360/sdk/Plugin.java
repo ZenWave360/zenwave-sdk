@@ -45,7 +45,7 @@ public class Plugin {
     @DocumentedOption(description = "Target folder for generated output")
     public String targetFolder;
 
-    private List<Class> chainXX;
+    private List<Class> chain;
 
     private boolean forceOverwrite = false;
 
