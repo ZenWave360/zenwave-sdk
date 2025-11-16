@@ -15,19 +15,22 @@ import io.zenwave360.sdk.writers.TemplateFileWriter;
         mainOptions = {
             "apiFile",
             "role",
-            "style",
+            "templates",
             "modelPackage",
             "producerApiPackage",
             "consumerApiPackage",
             "apiPackage",
+            "operationIds",
+            "excludeOperationIds",
             "transactionalOutbox",
+            "jsonschema2pojo",
+            "avroCompilerProperties",
             "bindingPrefix",
             "bindingSuffix",
             "generatedAnnotationClass",
-            "jsonschema2pojo",
-            "avroCompilerProperties"
+
         },
-        hiddenOptions = {"layout", "apiFiles", "zdlFile", "zdlFiles"})
+        hiddenOptions = {"layout", "apiFiles", "zdlFile", "zdlFiles", "style"})
 public class AsyncAPIGeneratorPlugin extends Plugin {
 
     public AsyncAPIGeneratorPlugin() {

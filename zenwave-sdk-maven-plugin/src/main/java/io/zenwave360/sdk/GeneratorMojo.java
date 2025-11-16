@@ -6,6 +6,7 @@ import java.net.URLClassLoader;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.zenwave360.jsonrefparser.AuthenticationValue;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -48,6 +49,11 @@ public class GeneratorMojo extends AbstractMojo {
     @Parameter(name = "zdlFiles", property = "zenwave.zdlFiles")
     private String[] zdlFiles;
 
+    /**
+     * Authentication configuration values for fetching remote resources.
+     */
+    @Parameter(name = "authentication", property = "zenwave.authentication")
+    private List<AuthenticationValue> authentication = List.of();
 
     /**
      * Location of the output directory.
@@ -136,6 +142,7 @@ public class GeneratorMojo extends AbstractMojo {
             Plugin plugin = Plugin.of(this.generatorName)
                     .withApiFile(apiFile)
                     .withZdlFiles(zdls)
+                    .withAuthentication(authentication)
                     .withTargetFolder(targetFolder.getAbsolutePath())
                     .withProjectClassLoader(projectClassLoader)
                     .withOptions(options);

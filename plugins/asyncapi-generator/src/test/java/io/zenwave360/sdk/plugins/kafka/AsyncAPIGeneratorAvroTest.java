@@ -155,5 +155,24 @@ public class AsyncAPIGeneratorAvroTest {
         Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/avro/Address.java").exists());
     }
 
+    @Test
+    public void test_generate_asyncapi_avro_from_playground() throws Exception {
+        String targetFolder = "target/out/asyncapi_avro_from_playground";
+        String baseUrl = "https://raw.githubusercontent.com/ZenWave360/zenwave-playground/refs/heads/main/examples/asyncapi/apis";
+        Plugin plugin = new AsyncAPIGeneratorPlugin()
+                .withApiFile(baseUrl + "/asyncapi-avro-refs.yml")
+                .withTargetFolder(targetFolder)
+                .withOption("avroCompilerProperties.imports", List.of(
+                        baseUrl + "/avro/Address.avsc",
+                        baseUrl + "/avro/PaymentMethod.avsc",
+                        baseUrl + "/avro/PaymentMethodType.avsc"))
+                .withOption("producerApiPackage", "io.example.api.producer")
+                .withOption("role", AsyncapiRoleType.provider)
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("skipFormatting", false);
+
+        new MainGenerator().generate(plugin);
+
+    }
 
 }
