@@ -31,7 +31,7 @@ operations:
     channel:
       $ref: '#/channels/ShoppingCartChannel'
     messages:
-      - $ref: '#/components/messages/ShoppingCartCreatedMessage'
+      - $ref: '#/channels/ShoppingCartChannel/messages/ShoppingCartCreatedMessage'
   onShoppingCartItemAdded:
     action: send
     tags:
@@ -39,7 +39,7 @@ operations:
     channel:
       $ref: '#/channels/ShoppingCartChannel'
     messages:
-      - $ref: '#/components/messages/ShoppingCartItemAddedMessage'
+      - $ref: '#/channels/ShoppingCartChannel/messages/ShoppingCartItemAddedMessage'
   onShoppingCartItemRemoved:
     action: send
     tags:
@@ -47,7 +47,7 @@ operations:
     channel:
       $ref: '#/channels/ShoppingCartChannel'
     messages:
-      - $ref: '#/components/messages/ShoppingCartItemRemovedMessage'
+      - $ref: '#/channels/ShoppingCartChannel/messages/ShoppingCartItemRemovedMessage'
   onShoppingCartItemUpdated:
     action: send
     tags:
@@ -55,7 +55,7 @@ operations:
     channel:
       $ref: '#/channels/ShoppingCartChannel'
     messages:
-      - $ref: '#/components/messages/ShoppingCartItemUpdatedMessage'
+      - $ref: '#/channels/ShoppingCartChannel/messages/ShoppingCartItemUpdatedMessage'
   onShoppingCartCheckedOut:
     action: send
     tags:
@@ -63,7 +63,7 @@ operations:
     channel:
       $ref: '#/channels/ShoppingCartChannel'
     messages:
-      - $ref: '#/components/messages/ShoppingCartCheckedOutMessage'
+      - $ref: '#/channels/ShoppingCartChannel/messages/ShoppingCartCheckedOutMessage'
 
 
 components:

@@ -19,7 +19,7 @@ import {{modelPackage}}.*;
 /**
  * {{asyncapi.description}}
  */
-@Component("{{bindingPrefix}}{{producerClassName serviceName operationRoleType}}")
+@Component("{{componentPrefix}}{{producerClassName serviceName operationRoleType}}")
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.AsyncAPIGeneratorPlugin", date = "{{date}}")
 {{~#if generatedAnnotationClass}}@{{generatedAnnotationClass}}{{~/if}}
 public class {{producerClassName serviceName operationRoleType}} implements {{producerInterfaceName serviceName operationRoleType}} {
@@ -29,7 +29,7 @@ public class {{producerClassName serviceName operationRoleType}} implements {{pr
     protected final ApplicationEventPublisher applicationEventPublisher;
     protected final ApplicationContext applicationContext;
 {{~#each operations as |operation|}}
-    public String {{operation.operationId}}BindingName = "{{bindingPrefix}}{{kebabCase operation.operationId}}-out{{bindingSuffix}}";
+    public String {{operation.operationId}}BindingName = "{{componentPrefix}}{{kebabCase operation.operationId}}{{componentSuffix}}-out";
 {{~/each}}
 
 {{~#if useEnterpriseEnvelope}}

@@ -3,16 +3,21 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.zenwave360.sdk/zenwave-sdk.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.zenwave360.sdk/zenwave-sdk)
 [![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-sdk)](https://github.com/ZenWave360/zenwave-sdk/blob/main/LICENSE)
-Generates Java classes from Avro schemas using Avro Compiler.
 
-Generates Java classes from Avro schemas using your provided Avro Compiler version. Compatible with Avro versions from 1.8.0 to 1.12.0.
+The Avro Schema Generator produces Java classes from Avro schemas using your chosen Avro Compiler version.  
+It supports Avro versions from 1.8.0 up to 1.12.0.
 
+### Why use this Avro Compiler Plugin?
+
+- Sources Avro schemas from **local files**, **classpath resources**, or **authenticated remote HTTP URLs**.
+- Automatically **sorts schemas** to resolve dependencies for Avro versions prior to 1.12.0.
+- Ensures generated code is consistent and ready for integration in Java projects.
 
 ## Usage
 
 ### Using the ZenWave CLI
 
-Pointing to remote http files:
+Generating from remote HTTP resources:
 
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.AvroSchemaGeneratorPlugin \
@@ -24,7 +29,7 @@ jbang zw -p io.zenwave360.sdk.plugins.AvroSchemaGeneratorPlugin \
     targetFolder=target/generated-sources/avro
 ```
 
-Pointing to local files:
+Generating from local folders and imports:
 
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.AvroSchemaGeneratorPlugin \
@@ -41,10 +46,15 @@ jbang zw -p io.zenwave360.sdk.plugins.AvroSchemaGeneratorPlugin \
     <groupId>io.zenwave360.sdk</groupId>
     <artifactId>zenwave-sdk-maven-plugin</artifactId>
     <version>${zenwave.version}</version>
+
     <configuration>
-        <addCompileSourceRoot>true</addCompileSourceRoot><!-- default is true -->
-        <addTestCompileSourceRoot>true</addTestCompileSourceRoot><!-- default is true -->
+        <!-- <authentication> -->
+        <!--     <authentication><key>API_KEY</key><value>XXX</value></authentication> -->
+        <!-- </authentication> -->
+        <addCompileSourceRoot>true</addCompileSourceRoot>!-- default is true -->
+        <addTestCompileSourceRoot>true</addTestCompileSourceRoot>!-- default is false -->
     </configuration>
+
     <executions>
         <execution>
             <id>generate-avros</id>
@@ -65,19 +75,69 @@ jbang zw -p io.zenwave360.sdk.plugins.AvroSchemaGeneratorPlugin \
             </configuration>
         </execution>
     </executions>
+
     <dependencies>
         <dependency>
             <groupId>io.zenwave360.sdk.plugins</groupId>
             <artifactId>avro-schema-compiler</artifactId>
-            <version>${zenwave.version}</version><!-- 2.2.0+ -->
+            <version>${zenwave.version}</version> <!-- Requires 2.2.0 or newer -->
         </dependency>
         <dependency>
             <groupId>org.apache.avro</groupId>
             <artifactId>avro-compiler</artifactId>
-            <version>${avro-compiler.version}</version><!-- 1.8.0 - 1.12.0+ -->
+            <version>${avro-compiler.version}</version> <!-- Supports 1.8.0 to 1.12.0+ -->
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 </plugin>
+```
+
+NOTE: you need to exclude jackson-core and jackson-databind from avro-compiler dependency to avoid conflicts with ZenWaveSDK requirements which expect newer versions.
+
+## Gradle Usage
+
+```kotlin
+plugins {
+    java
+    id("dev.jbang") version "0.3.0"
+}
+
+tasks.register<dev.jbang.gradle.tasks.JBangTask>("generateAvroClasses") {
+    group = "avro"
+    description = "Generates Avro classes from Avro schemas"
+    script.set("io.zenwave360.sdk:zenwave-sdk-cli:RELEASE")
+    jbangArgs.set(listOf(
+        "--deps=" +
+            "org.slf4j:slf4j-simple:1.7.36," +
+            "io.zenwave360.sdk.plugins:avro-schema-compiler:RELEASE," +
+            "org.apache.avro:avro-compiler:1.11.1"
+    ))
+    args.set(listOf(
+        "-p", "AvroSchemaGeneratorPlugin",
+        "avroFiles=" +
+            "https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/main/plugins/avro-schema-compiler/src/test/resources/avros/customer-event/Address.avsc," +
+            "https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/main/plugins/avro-schema-compiler/src/test/resources/avros/customer-event/PaymentMethod.avsc," +
+            "https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/main/plugins/avro-schema-compiler/src/test/resources/avros/customer-event/PaymentMethodType.avsc," +
+            "https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/main/plugins/avro-schema-compiler/src/test/resources/avros/customer-event/CustomerEvent.avsc"
+    ))
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir(layout.buildDirectory.dir("generated-sources/zenwave/src/main/java").get().asFile)
+        }
+    }
+}
 ```
 
 ## Options

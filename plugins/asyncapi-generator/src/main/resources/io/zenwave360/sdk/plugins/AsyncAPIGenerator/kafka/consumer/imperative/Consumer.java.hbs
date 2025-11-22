@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 import {{modelPackage}}.*;
 {{/if}}
 
-@Component("{{bindingPrefix}}{{kebabCase channelName}}")
+@Component("{{componentPrefix}}{{kebabCase channelName}}")
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.AsyncAPIGeneratorPlugin",  date = "{{date}}")
 {{~#if generatedAnnotationClass}}@{{generatedAnnotationClass}}{{~/if}}
 public class {{consumerName (camelCase channelName)}} {
@@ -34,7 +34,7 @@ public class {{consumerName (camelCase channelName)}} {
     protected {{consumerServiceInterfaceName (camelCase channelName)}} service;
     protected KafkaTemplate<String, Object> kafkaTemplate;
 
-    @Value("#{${app.kafka.topics.{{bindingPrefix}}{{kebabCase channelName}}.dead-letter-queue-error-map:{:}}}")
+    @Value("#{${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.dead-letter-queue-error-map:{:}}}")
     protected Map<Class<? extends Exception>, String> errorQueueMap;
 {{~#if useEnterpriseEnvelope}}
     public EnvelopeUnWrapper envelopeUnWrapper;
@@ -63,9 +63,9 @@ public class {{consumerName (camelCase channelName)}} {
 {{/if}}
 
     @KafkaListener(
-            topics = "${app.kafka.topics.{{bindingPrefix}}{{kebabCase channelName}}.topic}",
-            groupId = "${app.kafka.topics.{{bindingPrefix}}{{kebabCase channelName}}.groupId:}",
-            containerFactory = "${app.kafka.topics.{{bindingPrefix}}{{kebabCase channelName}}.containerFactory:}")
+            topics = "${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.topic}",
+            groupId = "${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.groupId:}",
+            containerFactory = "${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.containerFactory:}")
     public void listen(@Payload ConsumerRecord payload,
                       org.springframework.messaging.MessageHeaders headers,
                       Acknowledgment acknowledgment) {

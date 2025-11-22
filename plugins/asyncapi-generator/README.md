@@ -6,60 +6,89 @@
 
 ![AsyncAPI and Spring Cloud Streams 3](../../docs/ZenWave360-AsyncAPI-SpringCloudStreams.excalidraw.svg)
 
-Schema-first code generator for AsyncAPI specifications that generates complete Java/Spring-Boot implementations with support for Avro and JSON DTOs.
+The ZenWave AsyncAPI Generator solves a long-standing issue in event-driven Java applications: keeping message models and channel contracts fully aligned with their AsyncAPI specification. It provides build-time read-only code generation from AsyncAPI files sourced from their canonical locations: local files, classpath resources, or authenticated remote URLs.
+
+This approach eliminates API drift by enforcing the AsyncAPI file as the single source of truth for message schemas, channel definitions, and producer or consumer interfaces.
+
+All generated classes are strongly typed and annotated for validation, and any breaking change in the specification results in a compile-time error.
+
+This model aligns with the proven pattern used by the OpenAPI Maven Generator plugin, which solved API drift for OpenAPI in the Java ecosystem, generating non-editable interfaces and DTOs, and ensures contract consistency across consumers and producers.
+
+You just need to focus on implementing your business logic, and configuring either Spring Cloud Streams or Spring Kafka for message transport.
+
+A complete working example is available in the zenwave-playground repository: [asyncapi-shopping-cart](https://github.com/ZenWave360/zenwave-playground/blob/main/examples/asyncapi-shopping-cart/README.md).
+
 
 <!-- TOC -->
 * [AsyncAPI Generator for Java / Spring-Boot](#asyncapi-generator-for-java--spring-boot)
-  * [Features](#features)
-  * [Quick Configuration](#quick-configuration)
-  * [Command Line Usage](#command-line-usage)
-  * [Maven Usage](#maven-usage)
-    * [Properties Configuration](#properties-configuration)
-    * [Plugin Configuration](#plugin-configuration)
-  * [Gradle Usage](#gradle-usage)
-  * [Configuration Options](#configuration-options)
-  * [Getting Help](#getting-help)
+    * [Features](#features)
+    * [Quick Configuration](#quick-configuration)
+    * [Command Line Usage](#command-line-usage)
+    * [Maven Usage](#maven-usage)
+        * [Properties Configuration](#properties-configuration)
+        * [Plugin Configuration](#plugin-configuration)
+    * [Gradle Usage](#gradle-usage)
+    * [Configuration Options](#configuration-options)
+    * [Getting Help](#getting-help)
 <!-- TOC -->
 
 ## Features
 
-**Generated Code:**
-- Complete Consumer/Producer implementations for Java/Spring-Boot with thin wrappers around:
-  - **Spring Cloud Stream**: Connects to virtually any message broker
-  - **Spring Kafka**: Native official Spring library for Kafka
-- **JSON DTOs** using [jsonschema2pojo](https://www.jsonschema2pojo.org/) library
-- **Avro DTOs** using [Apache Avro](https://avro.apache.org/docs/current/gettingstartedjava/) library
+### Generated Code
+- Complete Producer and Consumer implementations for Java and Spring Boot with thin wrappers around:
+    - **Spring Cloud Stream** for multi-broker support
+    - **Spring Kafka** for native Kafka integrations
+- **JSON DTOs** generated via [jsonschema2pojo](https://www.jsonschema2pojo.org/) library
+- **Avro DTOs** generated via [Apache Avro](https://avro.apache.org/docs/current/gettingstartedjava/) library
 
-**Supported Features:**
+### Supported Capabilities
 - AsyncAPI v2 and v3
-- Local files, classpath files, and authenticated remote files via HTTP/HTTPS
-- Generates all AsyncAPI DTOs (JsonSchema or Avro schemas)
-- Automatic schema sorting for Avro versions prior to 1.12.0
-- Strongly typed header objects
+- Local files, classpath files, and authenticated remote URLs
+- DTO generation for JSON Schema and Avro
+- Automatic Avro schema ordering for Avro versions prior to 1.12.0
+- Strongly typed header objects from AsyncAPI message definitions
 
-**Advanced Patterns:**
-- Transactional Outbox using Spring Modulith implementation
-- Role reversal (provider ↔ client) with selective operation generation
-- Automatic header population at runtime using `x-runtime-expression` extension property
+### Advanced Patterns
+- Transactional Outbox pattern using Spring Modulith
+- Role reversal to generate only the side you need (provider or client)
+- Operation-level filtering for selective interface generation
+- Automatic header mapping at runtime through the `x-runtime-expression` extension
 
 ## Quick Configuration
 
-The essential configuration options are:
+Use these essential configuration options to get the generator running quickly:
 
-- **`inputSpec`**: AsyncAPI file path (local, classpath, or remote)
-- **`role`**: `provider` (default) or `client` 
-- **`templates`**: `SpringCloudStream` (default) or `SpringKafka`
-- **`modelPackage`**: Java package for DTOs (required for JSON Schema only)
-- **`producerApiPackage`**: Producer API package (provider role)
-- **`consumerApiPackage`**: Consumer API package (client role)
-- **`avroCompilerProperties.imports`**: Avro files/folders (comma-separated)
-- **`operationIds`**: Specific operations to generate (empty = all)
+- **inputSpec**: Path or URL for the AsyncAPI specification
+- **role**: `provider` (default) or `client`
+- **templates**: `SpringCloudStream` (default) or `SpringKafka`
+- **modelPackage**: Java package for generated DTOs (required for JSON Schema)
+- **producerApiPackage**: Java package for producer interfaces (provider role)
+- **consumerApiPackage**: Java package for consumer interfaces (client role)
+- **avroCompilerProperties.imports**: Comma-separated Avro files or folders
+- **operationIds**: Filter to generate only selected operations
+- **authentication**: Credentials for authenticated remote AsyncAPI files
 
-For authenticated remote files, use the `authentication` property.
+Advanced customization is available through:
 
-Additional configuration for upstream libraries:
-- **`avroCompilerProperties.xxx`**: [Avro Compiler properties](https://avro.apache.org/docs/current/gettingstartedjava/)
-- **`jsonschema2pojo.xxx`**: [JsonSchema2Pojo properties](https://www.jsonschema2pojo.org/)
+- **avroCompilerProperties.xxx**: Settings passed to the underlying Avro compiler
+- **jsonschema2pojo.xxx**: Settings passed to jsonschema2pojo
+
+## Why ZenWave doesn’t source Spring Cloud Stream / Spring Kafka config from AsyncAPI
+
+ZenWaveSDK provides all the building blocks to prevent API drift, keeping your source code aligned with your AsyncAPI specification. But it does not attempt to auto-configure Spring Cloud Stream or Spring Kafka from the AsyncAPI file.
+
+While configuring Spring Cloud Stream or Spring Kafka from AsyncAPI would be convenient, it is not currently feasible.
+
+AsyncAPI, even with specific bindings like Kafka bindings, does not yet provide enough information to fully configure Spring Kafka or Spring Cloud Stream:
+
+- no standard fields for `acks`, `transaction.id`, `idempotence`, and similar settings
+- Avro SerDes configuration is too ambiguous to infer automatically
+- Kafka bindings define `clientId` and `consumerGroupId` per operation, although these are typically application-wide
+- you can configure a schema registry endpoint but not compatibility modes (BACKWARD, FORWARD, etc.) for subjects or topics
+
+This is why ZenWave does not attempt full auto-configuration from AsyncAPI. The specification is not expressive enough for these frameworks.
+
+Still, this is a one-time operation that belongs in your Spring configuration files, where it can be controlled explicitly, versioned with your application, and tuned independently from your AsyncAPI contract.
 
 ## Command Line Usage
 
@@ -81,8 +110,6 @@ jbang zw -p AsyncAPIGeneratorPlugin \
 
 ### Properties Configuration
 
-Example properties configuration:
-
 ```xml
 <properties>
     <asyncapiPrefix>classpath:io/example/asyncapi/shoppingcart/apis</asyncapiPrefix>
@@ -90,6 +117,7 @@ Example properties configuration:
     <asyncapi.avro.imports>
         ${asyncapiPrefix}/avro/
     </asyncapi.avro.imports>
+
     <zenwave.asyncapiGenerator.templates>SpringKafka</zenwave.asyncapiGenerator.templates>
 
     <asyncApiProducerApiPackage>${basePackage}.events</asyncApiProducerApiPackage>
@@ -178,7 +206,7 @@ plugins {
 
 tasks.register<dev.jbang.gradle.tasks.JBangTask>("generateAsyncApiProvider") {
     group = "asyncapi"
-    description = "Generates Complete Consumer/Producer code from AsyncAPI specification"
+    description = "Generates Producer and Consumer code from AsyncAPI specification"
     script.set("io.zenwave360.sdk:zenwave-sdk-cli:RELEASE")
     jbangArgs.set(listOf(
         "--deps=" +
@@ -222,7 +250,7 @@ sourceSets {
 ## Configuration Options
 
 | **Option** | **Description** | **Type** | **Default** | **Values** |
-|------------|-----------------|----------|-------------|------------|
+|------------|-----------------|----------|-----------|------------|
 | `apiFile` | API Specification File | URI |  |   |
 | `role` | Project role: provider/client | AsyncapiRoleType | provider | provider, client  |
 | `templates` | Templates to use for code generation. | String | SpringCloudStream | SpringCloudStream, SpringKafka, FQ Class Name  |
@@ -241,8 +269,8 @@ sourceSets {
 | `avroCompilerProperties.excludes` | A set of Ant-like exclusion patterns used to prevent certain files from being processed. By default, this set is empty such that no files are excluded. | List |  |   |
 | `avroCompilerProperties.customLogicalTypeFactories` | Custom Logical Type Factories | List |  |   |
 | `avroCompilerProperties.customConversions` | Custom Conversions | List |  |   |
-| `bindingPrefix` | SC Streams Binding Name Prefix (used in @Component name) | String |  |   |
-| `bindingSuffix` | Spring-Boot binding suffix. It will be appended to the operation name kebab-cased. E.g. <operation-id>-in-0 | String | -0 |   |
+| `componentPrefix` | Prefix used in to reference this component in @Component and application.yml | String |  |   |
+| `componentSuffix` | Suffix used in to reference this component in @Component and application.yml | String |  |   |
 | `generatedAnnotationClass` | Annotation class to mark generated code (e.g. `org.springframework.aot.generate.Generated`). When retained at runtime, this prevents code coverage tools like Jacoco from including generated classes in coverage reports. | String |  |   |
 | `authentication` | Authentication configuration values for fetching remote resources. | List | [] |   |
 | `targetFolder` | Target folder to generate code to. If left empty, it will print to stdout. | File |  |   |
@@ -258,8 +286,8 @@ sourceSets {
 | `useEnterpriseEnvelope` | Include support for enterprise envelop wrapping/unwrapping. | boolean | false |   |
 | `envelopeJavaTypeExtensionName` | AsyncAPI Message extension name for the envelop java type for wrapping/unwrapping. | String | x-envelope-java-type |   |
 | `methodAndMessageSeparator` | To avoid method erasure conflicts, when exposeMessage or reactive style this character will be used as separator to append message payload type to method names in consumer interfaces. | String | $ |   |
-| `consumerPrefix` | SC Streams Binder class prefix | String |  |   |
-| `consumerSuffix` | SC Streams Binder class suffix | String | Consumer |   |
+| `consumerPrefix` | Consumer object class name prefix | String |  |   |
+| `consumerSuffix` | Consumer object class name suffix | String | Consumer |   |
 | `consumerServicePrefix` | Business/Service interface prefix | String | I |   |
 | `consumerServiceSuffix` | Business/Service interface suffix | String | ConsumerService |   |
 | `formatter` | Code formatter implementation | Formatters | palantir | palantir, spring, google  |

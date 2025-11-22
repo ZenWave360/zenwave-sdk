@@ -32,7 +32,7 @@ public class {{producerInMemoryName serviceName operationRoleType}} implements {
     }
 
 {{~#each operations as |operation|}}
-    public String {{operation.operationId}}BindingName = "{{bindingPrefix}}{{kebabCase operation.operationId}}-out{{bindingSuffix}}";
+    public String {{operation.operationId}}BindingName = "{{componentPrefix}}{{kebabCase operation.operationId}}{{componentSuffix}}";
 {{~/each}}
 
 {{~#if useEnterpriseEnvelope}}
@@ -46,6 +46,11 @@ public class {{producerInMemoryName serviceName operationRoleType}} implements {
     public Map<String, List<Message>> getCapturedMessages() {
         return capturedMessages;
     }
+{{~#each operations as |operation|}}
+    public List<Message> get{{capitalize operation.operationId}}CapturedMessages() {
+        return getCapturedMessages({{operation.operationId}}BindingName);
+    }
+{{~/each}}
     public List<Message> getCapturedMessages(String bindingName) {
         return capturedMessages.getOrDefault(bindingName, new ArrayList<>());
     }

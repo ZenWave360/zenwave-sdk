@@ -95,6 +95,10 @@ public class MainGenerator {
             }
         }
 
+        if (plugin instanceof Generator generator) {
+            generator.configuration = configuration;
+        }
+
         try {
             plugin.getClass().getMethod("onPropertiesSet").invoke(plugin);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {

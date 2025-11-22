@@ -1,5 +1,6 @@
 package io.zenwave360.sdk.plugins;
 
+import io.zenwave360.sdk.MainGenerator;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractAsyncapiGenerator;
 import io.zenwave360.sdk.options.ProgrammingStyle;
@@ -28,7 +29,7 @@ public class AsyncAPIGenerator extends AbstractAsyncapiGenerator {
         none, modulith
     }
 
-//    @DocumentedOption(description = "Programming style")
+    @Deprecated
     public final ProgrammingStyle style = ProgrammingStyle.imperative;
 
     @DocumentedOption(description = "Transactional outbox type for message producers.")
@@ -37,8 +38,8 @@ public class AsyncAPIGenerator extends AbstractAsyncapiGenerator {
 //    @DocumentedOption(description = "Include ApplicationEvent listener for consuming messages within the modulith.")
 //    public boolean includeApplicationEventListener = false;
 
-    @DocumentedOption(description = "Generate only the producer interface and skip the implementation.")
-    public boolean skipProducerImplementation = false;
+//    @DocumentedOption(description = "Generate only the producer interface and skip the implementation.")
+//    public boolean skipProducerImplementation = false;
 
     @DocumentedOption(description = "Whether to expose underlying spring Message to consumers or not.")
     public boolean exposeMessage = false;
@@ -52,13 +53,16 @@ public class AsyncAPIGenerator extends AbstractAsyncapiGenerator {
     @DocumentedOption(description = "To avoid method erasure conflicts, when exposeMessage or reactive style this character will be used as separator to append message payload type to method names in consumer interfaces.")
     public String methodAndMessageSeparator = "$";
 
-    @DocumentedOption(description = "SC Streams Binding Name Prefix (used in @Component name)"  )
-    public String bindingPrefix = "";
+    @DocumentedOption(description = "Prefix used in to reference this component in @Component and application.yml"  )
+    public String componentPrefix = "";
 
-    @DocumentedOption(description = "SC Streams Binder class prefix")
+    @DocumentedOption(description = "Suffix used in to reference this component in @Component and application.yml")
+    public String componentSuffix = "";
+
+    @DocumentedOption(description = "Consumer object class name prefix")
     public String consumerPrefix = "";
 
-    @DocumentedOption(description = "SC Streams Binder class suffix")
+    @DocumentedOption(description = "Consumer object class name suffix")
     public String consumerSuffix = "Consumer";
 
     @DocumentedOption(description = "Business/Service interface prefix")
@@ -66,9 +70,6 @@ public class AsyncAPIGenerator extends AbstractAsyncapiGenerator {
 
     @DocumentedOption(description = "Business/Service interface suffix")
     public String consumerServiceSuffix = "ConsumerService";
-
-    @DocumentedOption(description = "Spring-Boot binding suffix. It will be appended to the operation name kebab-cased. E.g. <operation-id>-in-0")
-    public String bindingSuffix = "-0";
 
     @DocumentedOption(description = "AsyncAPI extension property name for runtime auto-configuration of headers.")
     public String runtimeHeadersProperty = "x-runtime-expression";
@@ -80,21 +81,29 @@ public class AsyncAPIGenerator extends AbstractAsyncapiGenerator {
     public String templates = "SpringCloudStream";
 
     protected Templates configureTemplates() {
+        Templates templatesObject = null;
         if("SpringCloudStream".equals(templates)) {
-            return new SpringCloudStreamTemplates(this);
+            templatesObject = new SpringCloudStreamTemplates(this);
         }
-        if("SpringKafka".equals(templates)) {
-            return new SpringKafkaTemplates(this);
-        }
-        // Instantiate FQ class name
-        try {
-            return (Templates) Class.forName(templates).getConstructor(AsyncAPIGenerator.class).newInstance(this);
-        } catch (Exception e) {
+        else if("SpringKafka".equals(templates)) {
+            templatesObject = new SpringKafkaTemplates(this);
+        } else {
+            // Instantiate FQ class name
             try {
-                return (Templates) Class.forName(templates).getConstructor().newInstance();
-            } catch (Exception ex) {
-                throw new RuntimeException(e);
+                templatesObject = (Templates) Class.forName(templates).getConstructor(AsyncAPIGenerator.class).newInstance(this);
+            } catch (Exception e) {
+                try {
+                    templatesObject = (Templates) Class.forName(templates).getConstructor().newInstance();
+                } catch (Exception ex) {
+                    throw new RuntimeException(e);
+                }
             }
+        }
+        try {
+            MainGenerator.applyConfiguration(0, templatesObject, configuration);
+            return templatesObject;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

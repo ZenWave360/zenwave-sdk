@@ -19,7 +19,7 @@ import {{modelPackage}}.*;
 /**
  * {{asyncapi.description}}
  */
-@Component("{{bindingPrefix}}{{producerClassName serviceName operationRoleType}}")
+@Component("{{componentPrefix}}{{producerClassName serviceName operationRoleType}}")
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.AsyncAPIGeneratorPlugin", date = "{{date}}")
 {{~#if generatedAnnotationClass}}@{{generatedAnnotationClass}}{{~/if}}
 public class {{producerClassName serviceName operationRoleType}} implements {{producerInterfaceName serviceName operationRoleType}} {
@@ -29,7 +29,7 @@ public class {{producerClassName serviceName operationRoleType}} implements {{pr
     protected final StreamBridge streamBridge;
     protected final ApplicationContext applicationContext;
 {{~#each (channelNames operations) as |channelName|}}
-    public String {{asInstanceName channelName}}BindingName = "{{bindingPrefix}}{{kebabCase channelName}}-out{{bindingSuffix}}";
+    public String {{asInstanceName channelName}}BindingName = "{{componentPrefix}}{{kebabCase channelName}}{{componentSuffix}}-out";
 {{~/each}}
 
 {{~#if useEnterpriseEnvelope}}

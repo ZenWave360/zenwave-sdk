@@ -26,7 +26,7 @@ import {{modelPackage}}.*;
 /**
  * {{asyncapi.description}}
  */
-@Component("{{bindingPrefix}}{{producerClassName serviceName operationRoleType}}")
+@Component("{{componentPrefix}}{{producerClassName serviceName operationRoleType}}")
 @jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.AsyncAPIGeneratorPlugin", date = "{{date}}")
 {{~#if generatedAnnotationClass}}@{{generatedAnnotationClass}}{{~/if}}
 public class {{producerClassName serviceName operationRoleType}} implements {{producerInterfaceName serviceName operationRoleType}} {
@@ -36,9 +36,9 @@ public class {{producerClassName serviceName operationRoleType}} implements {{pr
     protected final KafkaTemplate kafkaTemplate;
     protected final ApplicationContext applicationContext;
 {{~#each (channelNames operations) as |channelName|}}
-    @Value("${app.kafka.topics.{{bindingPrefix}}{{kebabCase channelName}}.topic:{{bindingPrefix}}{{kebabCase channelName}}\\}")
+    @Value("${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.topic:{{componentPrefix}}{{kebabCase channelName}}\\}")
     public String {{asInstanceName channelName}}TopicName;
-    @Value("${app.kafka.topics.{{bindingPrefix}}{{kebabCase channelName}}.timeout:10}")
+    @Value("${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.timeout:10}")
     public int {{asInstanceName channelName}}Timeout = 10;
 {{~/each}}
 
