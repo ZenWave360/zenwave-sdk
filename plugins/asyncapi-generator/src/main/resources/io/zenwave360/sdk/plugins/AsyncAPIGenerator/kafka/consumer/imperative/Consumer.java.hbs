@@ -1,0 +1,118 @@
+package {{consumerApiPackage}};
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Payload;
+{{~#if exposeMessage}}
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.MessageBuilder;
+{{~/if}}
+import org.springframework.stereotype.Component;
+
+{{#if modelPackage}}
+import {{modelPackage}}.*;
+{{/if}}
+
+@Component("{{componentPrefix}}{{kebabCase channelName}}")
+@jakarta.annotation.Generated(value = "io.zenwave360.sdk.plugins.AsyncAPIGeneratorPlugin",  date = "{{date}}")
+{{~#if generatedAnnotationClass}}@{{generatedAnnotationClass}}{{~/if}}
+public class {{consumerName (camelCase channelName)}} {
+
+    protected Logger log = LoggerFactory.getLogger(getClass());
+
+    protected {{consumerServiceInterfaceName (camelCase channelName)}} service;
+    protected KafkaTemplate<String, Object> kafkaTemplate;
+
+    @Value("#{${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.dead-letter-queue-error-map:{:}}}")
+    protected Map<Class<? extends Exception>, String> errorQueueMap;
+{{~#if useEnterpriseEnvelope}}
+    public EnvelopeUnWrapper envelopeUnWrapper;
+{{~/if}}
+
+    public {{consumerName (camelCase channelName)}}({{consumerServiceInterfaceName (camelCase channelName)}} service, @Autowired(required=false) KafkaTemplate<String, Object> kafkaTemplate) {
+        this.service = service;
+        this.kafkaTemplate = kafkaTemplate;
+    }
+
+    public void setErrorQueueMap(Map<Class<? extends Exception>, String> errorQueueMap) {
+        this.errorQueueMap = errorQueueMap;
+    }
+{{~#if useEnterpriseEnvelope}}
+    @Autowired(required = false)
+    public void setEnvelopeUnWrapper(EnvelopeUnWrapper envelopeUnWrapper) {
+        this.envelopeUnWrapper = envelopeUnWrapper;
+    }
+{{~/if}}
+
+{{~#if includeApplicationEventListener}}
+    @org.springframework.modulith.events.ApplicationModuleListener
+    public void on(Message<{{messageType operations}}> message) {
+        accept(message);
+    }
+{{/if}}
+
+    @KafkaListener(
+            topics = "${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.topic}",
+            groupId = "${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.groupId:}",
+            containerFactory = "${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.containerFactory:}")
+    public void listen(@Payload ConsumerRecord payload,
+                      org.springframework.messaging.MessageHeaders headers,
+                      Acknowledgment acknowledgment) {
+        log.debug("Received message: {}", payload);
+        try {
+            Object unwrappedPayload = {{#if (hasEnterpriseEnvelope operations)}}unwrap(payload.value()){{else}}payload.value(){{/if}};
+        {{~initVisited 'messageType'}}
+        {{~#each operations as |operation|}}
+            {{~#each operation.x--messages as |message|}}
+            {{~#unless (isVisited 'messageType' message.x--javaType register=true)}}
+            if(unwrappedPayload instanceof {{message.x--javaType}}) {
+                {{~#if exposeMessage}}
+                service.{{operation.operationId}}{{methodSuffix message operation}}(MessageBuilder.createMessage(({{message.x--javaType}}) unwrappedPayload, new MessageHeaders(headers)));
+                {{~else}}
+                var serviceHeaders = new {{consumerServiceInterfaceName (camelCase channelName)}}.{{message.x--javaTypeSimpleName}}Headers();
+                serviceHeaders.putAll(headers);
+                service.{{operation.operationId}}{{methodSuffix message operation}}(({{message.x--javaType}}) unwrappedPayload, serviceHeaders);
+                {{~/if}}
+                acknowledgment.acknowledge();
+                return;
+            }
+            {{~/unless}}
+            {{~/each}}
+        {{~/each}}
+            log.warn("Received message without any business handler: [payload: {}]", unwrappedPayload.getClass().getName());
+            {{~#if exposeMessage}}
+            service.defaultHandler(MessageBuilder.createMessage(unwrappedPayload, new MessageHeaders(headers)));
+            {{~else}}
+            service.defaultHandler(unwrappedPayload, headers);
+            {{~/if}}
+            acknowledgment.acknowledge();
+        } catch (Exception e) {
+            log.error("Error processing message", e);
+            throw e; // Let RetryableTopic handle retries and DLQ
+        }
+    }
+
+{{~#if useEnterpriseEnvelope}}
+    protected Object unwrap(Object payload) {
+        if(envelopeUnWrapper != null) {
+            return envelopeUnWrapper.unwrap(payload);
+        }
+        return payload;
+    }
+
+    public interface EnvelopeUnWrapper {
+        public Object unwrap(Object payload);
+    }
+{{/if}}
+}

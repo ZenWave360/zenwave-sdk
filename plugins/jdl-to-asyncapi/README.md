@@ -1,5 +1,7 @@
-# JDL To AsyncAPI Generator (io.zenwave360.sdk.plugins.JDLToAsyncAPIPlugin)
+# JDL To AsyncAPI Generator
 > ZenWave360 👉 Create Software Easy to Understand
+
+> **Note**: This plugin has been superseded by [ZDL To AsyncAPI](../zdl-to-asyncapi/).
 
 Generates a full AsyncAPI definitions for CRUD operations from JDL models
 

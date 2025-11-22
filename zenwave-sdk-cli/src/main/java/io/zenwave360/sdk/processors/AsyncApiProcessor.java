@@ -35,7 +35,7 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
         }
 
         public static boolean isSchemaFormat(SchemaFormatType formatType) {
-            return formatType == null || ASYNCAPI_ALL.contains(formatType) || OPENAPI_ALL.contains(formatType);
+            return formatType == null || ASYNCAPI_ALL.contains(formatType) || OPENAPI_ALL.contains(formatType) || JSONSCHEMA_ALL.contains(formatType);
         }
 
         public static boolean isJsonSchemaFormat(SchemaFormatType formatType) {
@@ -47,7 +47,7 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
         }
 
         public static boolean isNativeFormat(SchemaFormatType formatType) {
-            return isSchemaFormat(formatType);
+            return formatType == null || ASYNCAPI_ALL.contains(formatType) || OPENAPI_ALL.contains(formatType);
         }
 
         public static boolean isYamlFormat(SchemaFormatType formatType) {
@@ -88,6 +88,12 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
         boolean isV3 = AsyncapiVersionType.isV3(apiModel);
 
         apiModel.getRefs().getOriginalRefsList().forEach(pair -> {
+            if (pair.getValue() instanceof Map) {
+                ((Map) pair.getValue()).put("x--original-$ref", pair.getKey().getRef());
+            }
+        });
+
+        apiModel.getRefs().getReplacedRefsList().forEach(pair -> {
             if (pair.getValue() instanceof Map) {
                 ((Map) pair.getValue()).put("x--original-$ref", pair.getKey().getRef());
             }
@@ -146,6 +152,7 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
                 }
             }
             if (isV3) {
+                ((Map) channel).put("x--channel", channelEntry.getKey());
                 // collect channel messages
                 var messages = JSONPath.get(channel, "$.messages[*]", Collections.emptyList());
                 ((Map) channel).put("x--messages", messages);
@@ -158,7 +165,8 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
                 operationEntry.getValue().put("operationId", operationEntry.getKey());
                 addOperationIdVariants(operationEntry.getValue());
                 addNormalizedTagName(operationEntry.getValue());
-                operationEntry.getValue().put("x--messages", JSONPath.get(operationEntry.getValue(), "$.channel.x--messages"));
+                addChannelNameToOperation(operationEntry.getValue(), JSONPath.get(operationEntry.getValue(), "$.channel.x--channel"));
+                operationEntry.getValue().put("x--messages", JSONPath.getFirst(operationEntry.getValue(), "$.messages", "$.channel.x--messages"));
             }
         }
 

@@ -1,0 +1,219 @@
+asyncapi: 2.6.0
+info:
+  title: Zenwave 360 Generated API
+  version: 0.0.1
+
+defaultContentType: application/json
+
+tags:
+  - name: "Default"
+  - name: "Customer"
+
+channels:
+  customerEventsChannel:
+    x-address: "customer-events-topic"
+    publish:
+      summary: CustomerEvent
+      operationId: onCreateCustomer
+      tags:
+        - name: Customer
+      message:
+        oneOf:
+          - $ref: "#/components/messages/CustomerEventMessage"
+          - $ref: "#/components/messages/CustomerCreatedMessage"
+          - $ref: "#/components/messages/CustomerEventMessage"
+          - $ref: "#/components/messages/CustomerUpdatedMessage"
+          - $ref: "#/components/messages/CustomerDeletedMessage"
+
+components:
+  messages:
+    CustomerEventMessage:
+      messageId: CustomerEventMessage
+      name: CustomerEventMessage
+      title: CustomerEvent
+      summary: CustomerEvent
+      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        $ref: "#/components/schemas/CustomerEvent"
+    CustomerCreatedMessage:
+      messageId: CustomerCreatedMessage
+      name: CustomerCreatedMessage
+      title: CustomerCreated
+      summary: CustomerCreated
+      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        $ref: "#/components/schemas/CustomerCreated"
+    CustomerCreatedNestedMessage:
+      messageId: CustomerCreatedNestedMessage
+      name: CustomerCreatedNestedMessage
+      title: CustomerCreatedNested
+      summary: CustomerCreatedNested
+      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        $ref: "#/components/schemas/CustomerCreatedNested"
+    CustomerUpdatedMessage:
+      messageId: CustomerUpdatedMessage
+      name: CustomerUpdatedMessage
+      title: CustomerUpdated
+      summary: CustomerUpdated
+      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        $ref: "#/components/schemas/CustomerUpdated"
+    CustomerDeletedMessage:
+      messageId: CustomerDeletedMessage
+      name: CustomerDeletedMessage
+      title: CustomerDeleted
+      summary: CustomerDeleted
+      schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        $ref: "#/components/schemas/CustomerDeleted"
+
+  messageTraits:
+    CommonHeaders:
+      headers:
+        type: object
+        properties:
+          kafka_messageKey:
+            type: string
+            description: This header value will be populated automatically at runtime
+            x-runtime-expression: $message.payload#/id
+          tracingId:
+            type: string
+            description: This header value will be populated automatically at runtime
+            x-runtime-expression: $tracingIdSupplier
+
+  schemas:
+    CustomerEvent:
+      type: "object"
+      x-business-entity: "CustomerEvent"
+      required:
+        - "username"
+        - "email"
+      properties:
+        id:
+          type: "string"
+        username:
+          type: "string"
+          minLength: 2
+          maxLength: 250
+          description: "username javadoc comment"
+        email:
+          type: "string"
+          description: "email javadoc comment"
+        tags:
+          type: "array"
+          items:
+            type: "string"
+            description: "tags javadoc comment"
+        addresses:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Address"
+    CustomerCreated:
+      type: "object"
+      x-business-entity: "CustomerCreated"
+      properties:
+        id:
+          type: "string"
+        customerId:
+          type: "string"
+        customer:
+          $ref: "#/components/schemas/Customer"
+    CustomerCreatedNested:
+      type: "object"
+      x-business-entity: "CustomerCreatedNested"
+      properties:
+        id:
+          type: "string"
+        customerId:
+          type: "string"
+        customer:
+          type: "string"
+    CustomerNested:
+      type: "object"
+      x-business-entity: "CustomerNested"
+      properties:
+        customerName:
+          type: "string"
+    CustomerUpdated:
+      type: "object"
+      x-business-entity: "CustomerUpdated"
+      properties:
+        id:
+          type: "string"
+        customerId:
+          type: "string"
+        customer:
+          $ref: "#/components/schemas/Customer"
+    CustomerDeleted:
+      type: "object"
+      x-business-entity: "CustomerDeleted"
+      properties:
+        id:
+          type: "string"
+        customerId:
+          type: "string"
+    Customer:
+      type: "object"
+      x-business-entity: "Customer"
+      required:
+        - "username"
+        - "email"
+      properties:
+        id:
+          type: "string"
+        username:
+          type: "string"
+          minLength: 2
+          maxLength: 250
+          description: "username javadoc comment"
+        email:
+          type: "string"
+          description: "email javadoc comment"
+        tags:
+          type: "array"
+          items:
+            type: "string"
+            description: "tags javadoc comment"
+        addresses:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Address"
+    Address:
+      type: "object"
+      x-business-entity: "Address"
+      required:
+        - "street"
+        - "type"
+      properties:
+        street:
+          type: "string"
+          description: "street javadoc comment"
+        city:
+          type: "string"
+          description: "city javadoc comment"
+        state:
+          type: "string"
+          description: "state javadoc comment"
+        zip:
+          type: "string"
+          description: "zip javadoc comment"
+        type:
+          $ref: "#/components/schemas/AddressType"
+    AddressType:
+      type: "string"
+      x-business-entity: "AddressType"
+      enum:
+        - "HOME"
+        - "WORK"
+

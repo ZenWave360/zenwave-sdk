@@ -1,0 +1,15 @@
+{
+  "type" : "record",
+  "name" : "ShoppingCartItemRemoved",
+  "namespace" : "io.example.asyncapi.shoppingcart.events.avro",
+  "fields" : [ {
+    "name" : "customerId",
+    "type" : "long"
+  }, {
+    "name" : "shoppingCart",
+    "type" : "ShoppingCart"
+  }, {
+    "name" : "item",
+    "type" : "Item"
+  } ]
+}

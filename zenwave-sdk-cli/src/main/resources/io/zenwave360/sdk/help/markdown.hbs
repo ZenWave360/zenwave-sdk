@@ -10,7 +10,7 @@
 | **Option** | **Description** | **Type** | **Default** | **Values** |
 |------------|-----------------|----------|-------------|------------|
 {{~#each options as |option|}}
-| `{{@key}}` | {{{option.description}}} {{#if option.docLink}}[(documentation)]({{option.docLink}}){{/if}} | {{{option.type}}} | {{{option.defaultValue}}} | {{join option.values ", " }}  |
+| `{{@key}}` | {{{option.description}}} | {{{option.type}}} | {{{option.defaultValue}}} | {{join option.values ", " }}  |
 {{~/each}}
 
 ## Getting Help

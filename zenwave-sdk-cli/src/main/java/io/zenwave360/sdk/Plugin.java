@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import io.zenwave360.jsonrefparser.AuthenticationValue;
 import io.zenwave360.sdk.zdl.layouts.DefaultProjectLayout;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 import org.apache.commons.lang3.ClassUtils;
@@ -38,6 +39,9 @@ public class Plugin {
     @DocumentedOption(description = "API Spec files to parse (comma separated)")
     public List<String> apiFiles;
 
+    @DocumentedOption(description = "Authentication configuration values for fetching remote resources.")
+    public List<AuthenticationValue> authentication = List.of();
+
     @DocumentedOption(description = "Target folder for generated output")
     public String targetFolder;
 
@@ -50,6 +54,7 @@ public class Plugin {
     private ClassLoader projectClassLoader;
 
     public static Plugin of(String pluginConfigAsString) throws Exception {
+        System.out.println("of: " + pluginConfigAsString);
         if (pluginConfigAsString != null) {
             if (pluginConfigAsString.contains(".")) {
                 return (Plugin) Plugin.class.getClassLoader().loadClass(pluginConfigAsString).getDeclaredConstructor().newInstance();
@@ -78,6 +83,7 @@ public class Plugin {
                 return pluginClass.getDeclaredConstructor().newInstance();
             } catch (Exception ignored) {
                 // ignore
+                System.out.println("ignored: " + ignored.getMessage() + " " + simpleClassName);
             }
         }
         return null;
@@ -160,6 +166,12 @@ public class Plugin {
         }
         this.zdlFiles = zdlFiles.stream().map(zdlFile -> zdlFile != null ? zdlFile.replaceAll("\\\\", "/") : zdlFile).toList();
         this.options.put("zdlFiles", this.zdlFiles);
+        return this;
+    }
+
+    public Plugin withAuthentication(List<AuthenticationValue> authentication) {
+        this.authentication = authentication;
+        this.options.put("authentication", this.authentication);
         return this;
     }
 

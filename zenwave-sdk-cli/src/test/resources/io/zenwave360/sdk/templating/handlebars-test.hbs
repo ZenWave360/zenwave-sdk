@@ -68,3 +68,11 @@ Name in parent is: {{name}}
     Value.name: {{{@value.name}}}
 {{/joinWithTemplate}}
 Name in parent is: {{name}}
+
+No duplicates:
+{{~initVisited "visited"}}
+{{~#each listWithDuplicates as |value|}}
+    {{~#unless (isVisited "visited" value register=true)~}}
+        {{value}},
+    {{~/unless~}}
+{{~/each}}

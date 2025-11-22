@@ -1,0 +1,26 @@
+
+    static class {{message.x--javaTypeSimpleName}}Headers extends java.util.HashMap<String, Object> {
+    {{~#if isProducer}}
+        {{~#if (hasRuntimeHeaders message)}}
+        static java.util.Map<String, String> _runtimeheaders = java.util.Map.of({{{runtimeHeadersMap message}}});
+        {{/if}}
+    {{~/if}}
+    {{~#each message.headers.properties as |header|}}
+        {{~#if header.description}}
+        /** {{{header.description}}} */
+        {{~/if}}
+        {{~#if isProducer}}
+        public {{message.x--javaTypeSimpleName}}Headers {{asInstanceName @key}}({{propertyType header}} {{asInstanceName @key}}) {
+            return set("{{@key}}", {{asInstanceName @key}});
+        }
+        {{~else}}
+        public {{propertyType header}} {{asInstanceName @key}}() {
+            return ({{propertyType header}}) get("{{ifTruthy (eq @key 'kafka_messageKey') 'kafka_receivedMessageKey' @key}}");
+        }
+        {{~/if}}
+    {{~/each}}
+        public {{message.x--javaTypeSimpleName}}Headers set(String header, Object value) {
+            put(header, value);
+            return this;
+        }
+    }

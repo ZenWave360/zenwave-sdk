@@ -6,6 +6,7 @@ import java.net.URLClassLoader;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.zenwave360.jsonrefparser.AuthenticationValue;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -48,6 +49,11 @@ public class GeneratorMojo extends AbstractMojo {
     @Parameter(name = "zdlFiles", property = "zenwave.zdlFiles")
     private String[] zdlFiles;
 
+    /**
+     * Authentication configuration values for fetching remote resources.
+     */
+    @Parameter(name = "authentication", property = "zenwave.authentication")
+    private List<AuthenticationValue> authentication = List.of();
 
     /**
      * Location of the output directory.
@@ -120,7 +126,7 @@ public class GeneratorMojo extends AbstractMojo {
                 projectClassLoader = new URLClassLoader(classpathFiles.toArray(new URL[0]), this.getClass().getClassLoader());
             }
 
-            String apiFile = inputSpec.startsWith("classpath:") ? inputSpec : new File(inputSpec).toURI().toString();
+            String apiFile = isRemoteOrClasspathResource(inputSpec) ? inputSpec : new File(inputSpec).toURI().toString();
             List<String> zdls = new ArrayList<>();
             if(zdlFile != null) {
                 zdls.add(zdlFile);
@@ -136,6 +142,7 @@ public class GeneratorMojo extends AbstractMojo {
             Plugin plugin = Plugin.of(this.generatorName)
                     .withApiFile(apiFile)
                     .withZdlFiles(zdls)
+                    .withAuthentication(authentication)
                     .withTargetFolder(targetFolder.getAbsolutePath())
                     .withProjectClassLoader(projectClassLoader)
                     .withOptions(options);
@@ -197,5 +204,9 @@ public class GeneratorMojo extends AbstractMojo {
                 throw new RuntimeException(e);
             }
         }).collect(Collectors.toList());
+    }
+
+    private boolean isRemoteOrClasspathResource(String spec) {
+        return spec.startsWith("classpath:") || spec.startsWith("http://") || spec.startsWith("https://");
     }
 }
