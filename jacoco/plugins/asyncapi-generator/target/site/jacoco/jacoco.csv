@@ -1,0 +1,8 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+io.zenwave360.sdk.plugins:asyncapi-generator,io.zenwave360.sdk.plugins.templates,AsyncAPIHandlebarsHelpers,589,329,73,33,88,54,60,22,16,13
+io.zenwave360.sdk.plugins:asyncapi-generator,io.zenwave360.sdk.plugins.templates,SpringKafkaTemplates,6,55,1,1,1,11,1,1,0,1
+io.zenwave360.sdk.plugins:asyncapi-generator,io.zenwave360.sdk.plugins.templates,SpringCloudStreamTemplates,6,55,1,1,1,11,1,1,0,1
+io.zenwave360.sdk.plugins:asyncapi-generator,io.zenwave360.sdk.plugins,AsyncAPIGenerator,46,89,2,4,9,24,2,4,0,3
+io.zenwave360.sdk.plugins:asyncapi-generator,io.zenwave360.sdk.plugins,AsyncAPIGeneratorPlugin,0,53,1,1,0,6,1,2,0,2
+io.zenwave360.sdk.plugins:asyncapi-generator,io.zenwave360.sdk.plugins,AsyncApiAvroGenerator,4,177,2,6,1,37,3,8,1,6
+io.zenwave360.sdk.plugins:asyncapi-generator,io.zenwave360.sdk.plugins,AsyncAPIGenerator.TransactionalOutboxType,0,15,0,0,0,2,0,1,0,1
