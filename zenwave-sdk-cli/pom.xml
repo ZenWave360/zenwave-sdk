@@ -21,6 +21,58 @@
       <version>${reflections.version}</version>
     </dependency>
     <dependency>
+        <groupId>dev.jbang</groupId>
+        <artifactId>jbang-cli</artifactId>
+        <version>${jbang-core.version}</version>
+<!--        <scope>provided</scope>-->
+        <exclusions>
+            <exclusion>
+                <groupId>org.slf4j</groupId>
+                <artifactId>*</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>dev.jbang</groupId>
+                <artifactId>devkitman</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>io.quarkus.qute</groupId>
+                <artifactId>qute-core</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-java</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.jspecify</groupId>
+                <artifactId>jspecify</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.jboss</groupId>
+                <artifactId>jandex</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.codejive</groupId>
+                <artifactId>java-properties</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>eu.maveniverse.maven.nisse</groupId>
+                <artifactId>sources</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>
+    <dependency>
       <groupId>com.github.jknack</groupId>
       <artifactId>handlebars</artifactId>
       <version>${handlebars-java.version}</version>

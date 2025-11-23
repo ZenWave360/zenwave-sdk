@@ -54,7 +54,6 @@ public class Plugin {
     private ClassLoader projectClassLoader;
 
     public static Plugin of(String pluginConfigAsString) throws Exception {
-        System.out.println("of: " + pluginConfigAsString);
         if (pluginConfigAsString != null) {
             if (pluginConfigAsString.contains(".")) {
                 return (Plugin) Plugin.class.getClassLoader().loadClass(pluginConfigAsString).getDeclaredConstructor().newInstance();

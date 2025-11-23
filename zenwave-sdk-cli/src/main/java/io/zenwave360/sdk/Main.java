@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import io.zenwave360.sdk.utils.MavenLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,12 @@ public class Main implements Callable<Integer> {
 
     @Option(names = {"-p", "--plugin"}, arity = "0..1", description = "Plugin Class or short-code")
     String pluginClass;
+
+    @Option(names = {"-d", "--deps"}, arity = "0..1", description = "Dependencies to include in classpath")
+    List<String> deps;
+
+    @Option(names = {"-r", "--repos"}, arity = "0..1", description = "Repositories to search for extra dependencies")
+    List<String> repos;
 
     @Option(names = {"-f", "--force"}, description = "Force overwrite", defaultValue = "false")
     boolean forceOverwrite = false;
@@ -65,6 +72,7 @@ public class Main implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
+
         if(forceOverwrite) {
             options.put("forceOverwrite", true);
         }
@@ -81,6 +89,7 @@ public class Main implements Callable<Integer> {
                 .withZdlFiles(split(options.get("zdlFiles")))
                 .withTargetFolder((String) options.get("targetFolder"))
                 .withForceOverwrite(forceOverwrite)
+                .withProjectClassLoader(MavenLoader.loadJBangDependencies(deps, repos))
                 .withOptions(options);
         new MainGenerator().generate(plugin);
         return 0;
