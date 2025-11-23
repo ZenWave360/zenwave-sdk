@@ -60,11 +60,10 @@ public class MavenLoaderTest {
         List<String> repos = List.of("https://repo1.maven.org/maven2/");
 
         // When
-        MavenLoader.loadJBangDependencies(dependencies, repos);
+        ClassLoader projectClassLoader = MavenLoader.loadJBangDependencies(dependencies, repos);
 
         // Then
-        ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
-        Assertions.assertInstanceOf(URLClassLoader.class, currentClassLoader);
+        Assertions.assertInstanceOf(URLClassLoader.class, projectClassLoader);
     }
 
     @Test
