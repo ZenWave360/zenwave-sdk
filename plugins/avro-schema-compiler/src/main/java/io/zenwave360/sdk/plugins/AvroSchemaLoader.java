@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -118,8 +119,14 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
                             log.trace("Scanning classpath package for .avsc files: {}", packagePath);
                             try {
                                 ConfigurationBuilder config = new ConfigurationBuilder()
-                                        .forPackage(packagePath.replace("/", "."))
                                         .setScanners(Scanners.Resources);
+
+                                if (this.projectClassLoader instanceof URLClassLoader urlClassLoader) {
+                                    config.addClassLoaders(urlClassLoader);
+                                    config.addUrls(urlClassLoader.getURLs());
+                                } else {
+                                    config.forPackage(packagePath.replace("/", "."));
+                                }
 
                                 Set<String> avscResources = new Reflections(config).getResources(Pattern.compile(".*\\.avsc"));
 
