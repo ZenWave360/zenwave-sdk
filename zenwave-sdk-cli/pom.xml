@@ -28,7 +28,7 @@
         <exclusions>
             <exclusion>
                 <groupId>org.slf4j</groupId>
-                <artifactId>*</artifactId>
+                <artifactId>slf4j-nop</artifactId>
             </exclusion>
             <exclusion>
                 <groupId>dev.jbang</groupId>
