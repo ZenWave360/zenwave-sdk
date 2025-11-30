@@ -71,6 +71,7 @@
         <logcaptor.version>2.7.10</logcaptor.version>
         <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
         <mockito.version>5.8.0</mockito.version>
+        <jacoco.version>0.8.14</jacoco.version>
 
         <surefire.argLine>
             --add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED
@@ -232,7 +233,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.11</version>
+                <version>${jacoco.version}</version>
                 <configuration>
                     <excludes>
                         <exclude>com/intuit/karate/core/**</exclude>

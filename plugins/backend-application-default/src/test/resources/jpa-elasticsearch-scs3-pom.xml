@@ -18,6 +18,7 @@
         <java.version>17</java.version>
         <spring-boot.version>${project.parent.version}</spring-boot.version>
         <archunit-junit5.version>1.0.1</archunit-junit5.version>
+        <lombok.version>1.18.42</lombok.version>
         <mapstruct.version>1.5.1.Final</mapstruct.version>
         <spring-cloud.version>2025.0.0</spring-cloud.version>
         <spring-modulith.version>1.4.1</spring-modulith.version>
@@ -124,6 +125,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
             <optional>true</optional>
         </dependency>
 
