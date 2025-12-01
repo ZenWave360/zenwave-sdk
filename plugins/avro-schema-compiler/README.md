@@ -13,6 +13,17 @@ It supports Avro versions from 1.8.0 up to 1.12.0.
 - Automatically **sorts schemas** to resolve dependencies for Avro versions prior to 1.12.0.
 - Ensures generated code is consistent and ready for integration in Java projects.
 
+<!-- TOC -->
+* [Avro Schema Generator](#avro-schema-generator)
+    * [Why use this Avro Compiler Plugin?](#why-use-this-avro-compiler-plugin)
+  * [Usage](#usage)
+    * [Using the ZenWave CLI](#using-the-zenwave-cli)
+    * [Using the ZenWave Maven Plugin](#using-the-zenwave-maven-plugin)
+    * [Gradle Usage](#gradle-usage)
+  * [Options](#options)
+  * [Getting Help](#getting-help)
+<!-- TOC -->
+
 ## Usage
 
 ### Using the ZenWave CLI
@@ -27,6 +38,16 @@ jbang zw -p io.zenwave360.sdk.plugins.AvroSchemaGeneratorPlugin \
               https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/main/plugins/avro-schema-compiler/src/test/resources/avros/customer-event/CustomerEvent.avsc" \
     sourceFolder=src/main/java \
     targetFolder=target/generated-sources/avro
+```
+
+This will generate the following Java classes:
+
+```shell
+$ find target/ -type f
+target/generated-sources/avro/src/main/java/io/zenwave360/example/core/outbound/events/dtos/Address.java
+target/generated-sources/avro/src/main/java/io/zenwave360/example/core/outbound/events/dtos/CustomerEvent.java
+target/generated-sources/avro/src/main/java/io/zenwave360/example/core/outbound/events/dtos/PaymentMethod.java
+target/generated-sources/avro/src/main/java/io/zenwave360/example/core/outbound/events/dtos/PaymentMethodType.java
 ```
 
 Generating from local folders and imports:
@@ -103,7 +124,7 @@ jbang zw -p io.zenwave360.sdk.plugins.AvroSchemaGeneratorPlugin \
 
 NOTE: you need to exclude jackson-core and jackson-databind from avro-compiler dependency to avoid conflicts with ZenWaveSDK requirements which expect newer versions.
 
-## Gradle Usage
+### Gradle Usage
 
 ```kotlin
 plugins {

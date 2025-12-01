@@ -6,7 +6,11 @@
 
 ![AsyncAPI and Spring Cloud Streams 3](../../docs/ZenWave360-AsyncAPI-SpringCloudStreams.excalidraw.svg)
 
-The ZenWave AsyncAPI Generator solves a long-standing issue in event-driven Java applications: keeping message models and channel contracts fully aligned with their AsyncAPI specification. It provides build-time read-only code generation from AsyncAPI files sourced from their canonical locations: local files, classpath resources, or authenticated remote URLs.
+The ZenWave AsyncAPI Generator solves a long-standing issue in event-driven Java applications: 
+
+👉 keeping message models and channel contracts fully aligned with their AsyncAPI specification. 
+
+It provides build-time read-only code generation from AsyncAPI files sourced from their canonical locations: local files, classpath resources, or authenticated remote URLs.
 
 This approach eliminates API drift by enforcing the AsyncAPI file as the single source of truth for message schemas, channel definitions, and producer or consumer interfaces.
 
@@ -212,12 +216,7 @@ tasks.register<dev.jbang.gradle.tasks.JBangTask>("generateAsyncApiProvider") {
         "--deps=" +
             "org.slf4j:slf4j-simple:1.7.36," +
             "io.zenwave360.sdk.plugins:asyncapi-generator:RELEASE," +
-            "org.apache.avro:avro-compiler:1.11.1",
-        "--java-options \"--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED\"",
-        "--java-options \"--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED\"",
-        "--java-options \"--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED\"",
-        "--java-options \"--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED\"",
-        "--java-options \"--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED\""
+            "org.apache.avro:avro-compiler:1.11.1"
     ))
     args.set(listOf(
         "-p", "AsyncAPIGenerator",
