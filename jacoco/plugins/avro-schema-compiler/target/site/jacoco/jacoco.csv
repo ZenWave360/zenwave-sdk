@@ -1,5 +1,5 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 io.zenwave360.sdk.plugins:avro-schema-compiler,io.zenwave360.sdk.plugins,AvroSchemaGeneratorPlugin,0,16,0,0,0,3,0,1,0,1
 io.zenwave360.sdk.plugins:avro-schema-compiler,io.zenwave360.sdk.plugins,AvroCompilerProperties,25,70,1,1,6,21,1,2,0,2
-io.zenwave360.sdk.plugins:avro-schema-compiler,io.zenwave360.sdk.plugins,AvroSchemaLoader,239,372,35,31,44,65,28,20,2,13
+io.zenwave360.sdk.plugins:avro-schema-compiler,io.zenwave360.sdk.plugins,AvroSchemaLoader,265,372,37,31,47,65,29,20,2,13
 io.zenwave360.sdk.plugins:avro-schema-compiler,io.zenwave360.sdk.plugins,AvroSchemaGenerator,54,494,16,58,18,118,18,36,2,15
