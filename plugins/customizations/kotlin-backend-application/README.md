@@ -1,5 +1,4 @@
 # Backend Application Kotlin Templates
-> 👉 ZenWave360 Helps You Create Software Easy to Understand
 
 Generates a full backend application using the provided 'layout' property, but using Kotlin instead of Java.
 

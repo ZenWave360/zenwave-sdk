@@ -40,7 +40,7 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     @DocumentedOption(description = "Include Controller Unit tests (using ServicesInMemoryConfig)")
     public boolean includeControllerTests = true;
 
-    @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. User '$.items' for lists or '$.properties.<content property>.items' for paginated results.")
+    @DocumentedOption(description = "JSONPath list to search for response DTO schemas for list or paginated results. User '$.items' for lists or '`$.properties.<content property>.items`' for paginated results.")
     public List<String> paginatedDtoItemsJsonPath = List.of("$.items", "$.properties.content.items");
 
     protected HandlebarsEngine handlebarsEngine = new HandlebarsEngine();

@@ -1,5 +1,4 @@
 # Zdl To Markdown
-> 👉 ZenWave360 Helps You Create Software Easy to Understand
 
 Generates Markdown glossary from Zdl Models
 

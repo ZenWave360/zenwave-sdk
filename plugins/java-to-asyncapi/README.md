@@ -1,5 +1,4 @@
 # Java 2 AsyncAPI Reverse Engineering
-> 👉 ZenWave360 Helps You Create Software Easy to Understand
 
 If you are using Spring Modulith Events and want to generate an AsyncAPI definition from your event producer class, you can use this plugin.
 

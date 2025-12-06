@@ -1,5 +1,4 @@
 # AsyncAPI and JsonSchema2Pojo (with maven plugin)
-> 👉 ZenWave360 Helps You Create Software Easy to Understand
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.zenwave360.sdk/zenwave-sdk.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.zenwave360.sdk/zenwave-sdk)
 [![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-sdk)](https://github.com/ZenWave360/zenwave-sdk/blob/main/LICENSE)
@@ -43,7 +42,7 @@ jbang zw -p io.zenwave360.sdk.plugins.AsyncApiJsonSchema2PojoPlugin --help
 You can use ZenWave Maven Plugin to generate code as part of your build process:
 
 - Adding this generator jar as dependency to zenwave maven plugin.
-- Passing any configuration as <configOptions>.
+- Passing any configuration as `<configOptions>`.
 
 Use jsonschema2pojo prefix to pass any option to https://www.jsonschema2pojo.org/ underlying library.
 

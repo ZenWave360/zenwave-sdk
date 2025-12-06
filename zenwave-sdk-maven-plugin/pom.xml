@@ -45,6 +45,12 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>zenwave-sdk-cli</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>dev.jbang</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
