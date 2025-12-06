@@ -1,5 +1,4 @@
 # Java 2 JDL Reverse Engineering
-> 👉 ZenWave360 Helps You Create Software Easy to Understand
 
 If starting with legacy project, you can reverse engineer JDL from Java entity classes. JPA and MongoDB are supported.
 
