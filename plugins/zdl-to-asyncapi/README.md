@@ -1,5 +1,4 @@
 # ZDL To AsyncAPI Generator
-> 👉 ZenWave360 Helps You Create Software that's Easy to Understand
 
 Generate AsyncAPI definition from ZDL Services and Events:
 
