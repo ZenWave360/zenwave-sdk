@@ -1,5 +1,4 @@
 # Avro Schema Generator
-> 👉 ZenWave360 Helps You Create Software Easy to Understand
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.zenwave360.sdk/zenwave-sdk.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.zenwave360.sdk/zenwave-sdk)
 [![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-sdk)](https://github.com/ZenWave360/zenwave-sdk/blob/main/LICENSE)
@@ -72,8 +71,8 @@ jbang zw -p io.zenwave360.sdk.plugins.AvroSchemaGeneratorPlugin \
         <!-- <authentication> -->
         <!--     <authentication><key>API_KEY</key><value>XXX</value></authentication> -->
         <!-- </authentication> -->
-        <addCompileSourceRoot>true</addCompileSourceRoot>!-- default is true -->
-        <addTestCompileSourceRoot>true</addTestCompileSourceRoot>!-- default is false -->
+        <addCompileSourceRoot>true</addCompileSourceRoot><!-- default is true -->
+        <addTestCompileSourceRoot>true</addTestCompileSourceRoot><!-- default is false -->
     </configuration>
 
     <executions>

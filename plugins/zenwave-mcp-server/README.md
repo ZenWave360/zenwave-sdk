@@ -1,5 +1,4 @@
 # ZenWave MCP Server
-> 👉 ZenWave360 Helps You Create Software Easy to Understand
 
 Model Code Project (MCP) server for ZenWave SDK that provides tools for generating documentation and diagrams from ZDL files.
 

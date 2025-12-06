@@ -1,10 +1,9 @@
 # AsyncAPI Generator for Java / Spring-Boot
-> 👉 ZenWave360 Helps You Create Software Easy to Understand
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.zenwave360.sdk/zenwave-sdk.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.zenwave360.sdk/zenwave-sdk)
 [![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-sdk)](https://github.com/ZenWave360/zenwave-sdk/blob/main/LICENSE)
 
-![AsyncAPI and Spring Cloud Streams 3](../../docs/ZenWave360-AsyncAPI-SpringCloudStreams.excalidraw.svg)
+![ZenWave AsyncAPI Generator](https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/refs/heads/main/docs/ZenWave360-AsyncAPI-SpringCloudStreams.excalidraw.svg)
 
 The ZenWave AsyncAPI Generator solves a long-standing issue in event-driven Java applications: 
 
@@ -254,8 +253,8 @@ sourceSets {
 | `role` | Project role: provider/client | AsyncapiRoleType | provider | provider, client  |
 | `templates` | Templates to use for code generation. | String | SpringCloudStream | SpringCloudStream, SpringKafka, FQ Class Name  |
 | `modelPackage` | Java Models package name | String |  |   |
-| `producerApiPackage` | Java API package name for outbound (producer) services. It can override apiPackage for producers. | String | {{apiPackage}} |   |
-| `consumerApiPackage` | Java API package name for inbound (consumer) services. It can override apiPackage for consumer. | String | {{apiPackage}} |   |
+| `producerApiPackage` | Java API package name for outbound (producer) services. It can override apiPackage for producers. | String | `{{apiPackage}}` |   |
+| `consumerApiPackage` | Java API package name for inbound (consumer) services. It can override apiPackage for consumer. | String | `{{apiPackage}}` |   |
 | `apiPackage` | Java API package, if `producerApiPackage` and `consumerApiPackage` are not set. | String |  |   |
 | `operationIds` | Operation ids to include in code generation. Generates code for ALL if left empty | List | [] |   |
 | `excludeOperationIds` | Operation ids to exclude in code generation. Skips code generation if is not included or is excluded. | List | [] |   |

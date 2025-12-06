@@ -1,5 +1,4 @@
 # ZDL To OpenAPI Generator
-> 👉 ZenWave360 Helps You Create Software Easy to Understand
 
 Generate OpenAPI definition from ZDL Models:
 

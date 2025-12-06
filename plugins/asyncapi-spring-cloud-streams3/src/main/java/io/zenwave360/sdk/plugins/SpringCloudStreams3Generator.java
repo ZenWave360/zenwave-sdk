@@ -66,7 +66,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
     @DocumentedOption(description = "Business/Service interface suffix")
     public String consumerServiceSuffix = "ConsumerService";
 
-    @DocumentedOption(description = "Spring-Boot binding suffix. It will be appended to the operation name kebab-cased. E.g. <operation-id>-in-0")
+    @DocumentedOption(description = "Spring-Boot binding suffix. It will be appended to the operation name kebab-cased. E.g. `<operation-id>-in-0`")
     public String bindingSuffix = "-0";
 
     @DocumentedOption(description = "AsyncAPI extension property name for runtime auto-configuration of headers.")

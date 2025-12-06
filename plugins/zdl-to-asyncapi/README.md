@@ -32,7 +32,7 @@ event OrderStatusUpdated {
 - An a `Channel` named `OrderUpdatesChannel` containing a reference to the `OrderStatusUpdatedMessage` message.
 - It also will generate an `Operation` named `onOrderStatusUpdated` with and action `send`to the `OrderUpdatesChannel` channel.
 
-This is as a compact format as it can get!! Saving you a lot of typing and giving you very concise representation of your events.
+This is as a compact format as it can get! Saving you a lot of typing and giving you very concise representation of your events.
 
 ## Options
 
