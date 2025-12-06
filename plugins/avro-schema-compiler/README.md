@@ -1,4 +1,4 @@
-# Avro Schema Generator
+# (A Better) Avro Schema Generator
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.zenwave360.sdk/zenwave-sdk.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.zenwave360.sdk/zenwave-sdk)
 [![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-sdk)](https://github.com/ZenWave360/zenwave-sdk/blob/main/LICENSE)
@@ -6,15 +6,15 @@
 The Avro Schema Generator produces Java classes from Avro schemas using your chosen Avro Compiler version.  
 It supports Avro versions from 1.8.0 up to 1.12.0.
 
-### Why use this Avro Compiler Plugin?
+## Why use this Avro Generator Plugin?
 
 - Sources Avro schemas from **local files**, **classpath resources**, or **authenticated remote HTTP URLs**.
 - Automatically **sorts schemas** to resolve dependencies for Avro versions prior to 1.12.0.
 - Ensures generated code is consistent and ready for integration in Java projects.
 
 <!-- TOC -->
-* [Avro Schema Generator](#avro-schema-generator)
-    * [Why use this Avro Compiler Plugin?](#why-use-this-avro-compiler-plugin)
+* [(A Better) Avro Schema Generator](#a-better-avro-schema-generator)
+  * [Why use this Avro Generator Plugin?](#why-use-this-avro-generator-plugin)
   * [Usage](#usage)
     * [Using the ZenWave CLI](#using-the-zenwave-cli)
     * [Using the ZenWave Maven Plugin](#using-the-zenwave-maven-plugin)
