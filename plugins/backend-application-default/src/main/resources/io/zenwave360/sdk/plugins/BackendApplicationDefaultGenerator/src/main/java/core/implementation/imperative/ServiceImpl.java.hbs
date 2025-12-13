@@ -39,6 +39,10 @@ import org.springframework.transaction.annotation.Transactional;
 {{~#if useLombok}}
 @lombok.AllArgsConstructor
 {{~/if}}
+{{~#if useSpringModulith}}
+@org.springframework.modulith.NamedInterface("{{service.name}}")
+{{~/if}}
+{{annotate service.javaService service}}
 public class {{service.name}}Impl implements {{service.name}} {
 
     private final Logger log = LoggerFactory.getLogger(getClass());

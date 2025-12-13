@@ -150,13 +150,14 @@ public class JavaZdlModel {
         var params = new ArrayList<MethodParameter>();
         if(JSONPath.get(method, "paramId") != null) {
             var hasNaturalId = JSONPath.get(method, "naturalId", false);
+            var paramIdIsOptional = JSONPath.get(method, "paramIdIsOptional", false);
             if (hasNaturalId) {
                 var fields = ZDLFindUtils.naturalIdFields(JSONPath.get(zdlModel, "$.entities." + method.get("entity")));
                 for (var field : fields) {
-                    params.add(new MethodParameter((String) field.get("name"), (String) field.get("type"), false, false, new ArrayList<>()));
+                    params.add(new MethodParameter((String) field.get("name"), (String) field.get("type"), MethodParameterType.NATURAL_ID,false, paramIdIsOptional, new ArrayList<>()));
                 }
             } else {
-                params.add(new MethodParameter("id", idJavaType, false, false, new ArrayList<>()));
+                params.add(new MethodParameter("id", idJavaType, MethodParameterType.ID,false, paramIdIsOptional, new ArrayList<>()));
             }
         }
         var parameterType = (String) method.get("parameter");
@@ -168,16 +169,16 @@ public class JavaZdlModel {
                 for (var field : fields.values()) {
                     var isArray = JSONPath.get(field, "$.isArray", false);
                     var isRequired = JSONPath.get(field, "validations.required") != null;
-                    params.add(new MethodParameter((String) field.get("name"), (String) field.get("type"), isArray, !isRequired, new ArrayList<>()));
+                    params.add(new MethodParameter((String) field.get("name"), (String) field.get("type"), MethodParameterType.PARAMETER, isArray, !isRequired, new ArrayList<>()));
                 }
             } else {
                 var methodParameterType = ZDLJavaSignatureUtils.methodParameterType(method, zdlModel);
                 var isOptional = JSONPath.get(method, "parameterIsOptional", false);
-                params.add(new MethodParameter("input", methodParameterType, false, isOptional, new ArrayList<>()));
+                params.add(new MethodParameter("input", methodParameterType, MethodParameterType.PARAMETER,false, isOptional, new ArrayList<>()));
             }
         }
         if(JSONPath.get(method, "options.paginated") != null) {
-            params.add(new MethodParameter("pageable", "Pageable", false, false, new ArrayList<>()));
+            params.add(new MethodParameter("pageable", "Pageable", MethodParameterType.PAGINATION,false, false, new ArrayList<>()));
         }
         return params;
     }
@@ -213,7 +214,11 @@ public class JavaZdlModel {
     public record ServiceMethod(String name, String comment, List<MethodParameter> parameters, ReturnType returnType, List<Annotation> annotations) {
     }
 
-    public record MethodParameter(String name, String type, boolean isArray, boolean isOptional, List<Annotation> annotations) {
+    public enum MethodParameterType {
+        ID, NATURAL_ID, PARAMETER, PAGINATION
+    }
+
+    public record MethodParameter(String name, String type, MethodParameterType parameterType, boolean isArray, boolean isOptional, List<Annotation> annotations) {
     }
 
     public record ReturnType(String type, boolean isArray, boolean isOptional, List<Annotation> annotations) {
