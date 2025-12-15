@@ -81,7 +81,7 @@ public class YamlOverlyMerger {
                 if (updateValue != null) {
                     Object targetNode = JSONPath.get(result, target);
                     if(targetNode == null) {
-                        System.out.println("Target node not found: " + target);
+                        // System.out.println("Target node not found: " + target);
                     } else {
                         JSONPath.set(result, target, updateValue);
                     }

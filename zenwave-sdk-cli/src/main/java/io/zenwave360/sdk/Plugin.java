@@ -82,7 +82,7 @@ public class Plugin {
                 return pluginClass.getDeclaredConstructor().newInstance();
             } catch (Exception ignored) {
                 // ignore
-                System.out.println("ignored: " + ignored.getMessage() + " " + simpleClassName);
+                // System.out.println("ignored: " + ignored.getMessage() + " " + simpleClassName);
             }
         }
         return null;

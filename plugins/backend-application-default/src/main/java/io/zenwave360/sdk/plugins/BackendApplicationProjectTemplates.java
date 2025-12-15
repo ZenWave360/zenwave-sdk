@@ -2,6 +2,7 @@ package io.zenwave360.sdk.plugins;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
+import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.CleanArchitectureProjectLayout;
@@ -15,13 +16,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
+import static io.zenwave360.sdk.templating.OutputFormatType.*;
 import static io.zenwave360.sdk.zdl.utils.ZDLFindUtils.is;
 
 public class BackendApplicationProjectTemplates extends ProjectTemplates {
 
     @DocumentedOption(description = "Whether to use Spring Modulith annotations and features")
     public boolean useSpringModulith = false;
+
+    public PersistenceType persistence = PersistenceType.mongodb;
 
     public boolean includeEmitEventsImplementation = true;
 
@@ -30,6 +33,8 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
 //    protected Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo", "input", "abstract");
     protected Function<Map<String, Object>, Boolean> skipEntity = (model) -> is(model, "vo", "input");
 //    protected Function<Map<String, Object>, Boolean> skipEntityInput = (model) -> inputDTOSuffix == null || inputDTOSuffix.isEmpty();
+
+    protected Function<Map<String, Object>, Boolean> skipDataSql = (model) -> persistence != PersistenceType.jpa;
 
     protected Function<Map<String, Object>, Boolean> skipEvents = (model) -> !includeEmitEventsImplementation;
     protected Function<Map<String, Object>, Boolean> skipEventsBus = (model) -> ((Collection) model.get("events")).isEmpty();
@@ -79,6 +84,9 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
         this.addTemplate(this.entityTemplates, "src/test/java", "infrastructure/{{persistence}}/{{style}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.java",
                 layoutNames.infrastructureRepositoryPackage, "inmemory/InMemory{{capitalizeFirst persistence}}Repository.java", JAVA, skipEntityRepository, true);
 
+        this.addTemplate(this.entityTemplates, "src/test/resources", "data/{{persistence}}/entity/1.json",
+                "", "data/{{persistence}}/{{entity.name}}/1.json", JSON, skipEntity, true);
+
         this.addTemplate(this.enumTemplates, "src/main/java", "core/domain/common/DomainEnum.java",
                 layoutNames.entitiesPackage, "{{enum.name}}.java", JAVA, null, false);
         this.addTemplate(this.inputEnumTemplates, "src/main/java", "core/domain/common/InputEnum.java",
@@ -117,9 +125,12 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
                 layoutNames.infrastructureEventsPackage, "InMemoryEventPublisher.java", JAVA, skipEventsBus, false);
 
         this.addTemplate(this.singleTemplates, "src/test/java", "config/TestDataLoader-{{persistence}}.java",
-                layoutNames.moduleConfigPackage, "TestDataLoader.java", JAVA, null, true);
+                layoutNames.configPackage, "TestDataLoader.java", JAVA, null, true);
         this.addTemplate(this.singleTemplates, "src/test/java", "config/DockerComposeInitializer-{{persistence}}.java",
                 layoutNames.configPackage, "DockerComposeInitializer.java", JAVA, null, true);
+
+        this.addTemplate(this.singleTemplates, "src/test/resources", "data.sql",
+                "", "data.sql", SQL, skipDataSql, true);
 
         this.addTemplate(this.singleTemplates, "src/main/java", "core/inbound/dtos/package-info.java",
                 layoutNames.inboundDtosPackage, "package-info.java", JAVA, null, true);

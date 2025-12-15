@@ -78,7 +78,7 @@ public class {{serviceName}}ApiController implements {{serviceName}}Api {
     {{/if~}}
     {{~#if isBinaryDownload ~}}
         var {{{asInstanceName methodReturnType}}} = {{TODO}} {{asInstanceName serviceMethod.serviceName}}.{{serviceMethodCall}};
-        byte[] bytes = null; // TODO get bytes from {{{serviceMethod.options.filedownload}}}
+        byte[] bytes = null; // TODO get bytes from {{{asInstanceName methodReturnType}}}.{{{serviceMethod.options.filedownload}}}
         ByteArrayResource resource = new ByteArrayResource(bytes);
         return ResponseEntity
             .status({{statusCode}})

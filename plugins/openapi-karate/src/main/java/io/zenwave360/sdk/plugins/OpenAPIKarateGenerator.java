@@ -16,7 +16,7 @@ import io.zenwave360.sdk.templating.TemplateEngine;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 
-import static io.zenwave360.sdk.templating.OutputFormatType.GERKIN;
+import static io.zenwave360.sdk.templating.OutputFormatType.GHERKIN;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 public class OpenAPIKarateGenerator extends AbstractOpenAPIGenerator {
@@ -44,9 +44,9 @@ public class OpenAPIKarateGenerator extends AbstractOpenAPIGenerator {
     private final TemplateInput partialTemplate = new TemplateInput(prefix + "partials/Operation.feature", "src/test/resources/{{asPackageFolder testsPackage}}/Operation.feature");
 //    private final TemplateInput testSetTemplate = new TemplateInput(prefix + "ControllersTestSet.java", "{{asPackageFolder testsPackage}}/ControllersTestSet.java").withMimeType(JAVA);
 
-    private final TemplateInput businessFlowTestTemplate = new TemplateInput(prefix + "BusinessFlowTest.feature", "src/test/resources/{{asPackageFolder testsPackage}}/{{businessFlowTestName}}.feature").withMimeType(GERKIN);
-    private final TemplateInput serviceTestTemplate = new TemplateInput(prefix + "Service.feature", "src/test/resources/{{asPackageFolder testsPackage}}/{{serviceName}}.feature").withMimeType(GERKIN);
-    private final TemplateInput operationTestTemplate = new TemplateInput(prefix + "Operation.feature", "src/test/resources/{{asPackageFolder testsPackage}}/{{serviceName}}/{{asJavaTypeName operationId}}.feature").withMimeType(GERKIN);
+    private final TemplateInput businessFlowTestTemplate = new TemplateInput(prefix + "BusinessFlowTest.feature", "src/test/resources/{{asPackageFolder testsPackage}}/{{businessFlowTestName}}.feature").withMimeType(GHERKIN);
+    private final TemplateInput serviceTestTemplate = new TemplateInput(prefix + "Service.feature", "src/test/resources/{{asPackageFolder testsPackage}}/{{serviceName}}.feature").withMimeType(GHERKIN);
+    private final TemplateInput operationTestTemplate = new TemplateInput(prefix + "Operation.feature", "src/test/resources/{{asPackageFolder testsPackage}}/{{serviceName}}/{{asJavaTypeName operationId}}.feature").withMimeType(GHERKIN);
 
     @Override
     public void onPropertiesSet() {

@@ -1,0 +1,40 @@
+-- ============================================================================
+-- SQL Data Script for Clinical Tool JPA Project
+-- ============================================================================
+--
+-- PROMPT TO GENERATE THIS FILE:
+--
+-- Create an SQL data script (data.sql) that inserts exactly one sample record
+-- per table for all entities in the project.
+--
+-- Requirements:
+-- - Use nextval('sequence_name') for all ID columns to properly call the database sequences
+-- - Respect foreign key dependencies and insert parent records before child records
+-- - Populate ALL required fields (NOT NULL columns) with realistic sample data
+-- - Include optional fields where it makes sense for a complete example
+-- - Use proper SQL syntax for:
+--   * JSON/JSONB columns (use valid JSON strings)
+--   * Array columns (use PostgreSQL array syntax)
+--   * LOB/BLOB columns (use appropriate data)
+--   * Embedded objects (map to prefixed column names)
+--   * Enum values (use the integer representation from converters)
+--   * Timestamp fields (use CURRENT_TIMESTAMP where appropriate)
+--   * Auditing fields (created_by, created_date, last_modified_by, last_modified_date)
+-- - Organize the script by module with clear section comments
+-- - Ensure referential integrity (all foreign keys reference valid parent IDs)
+-- - Use consistent test data (e.g., user_id=1, hospital_id=1, patient_id=1)
+--
+-- Format:
+-- - Add section headers for each module
+-- - Comment each table insertion
+-- - Use readable formatting with proper indentation
+-- - Include a header comment explaining the script's purpose
+--
+-- Entity tables in this project:
+-- You can find all entities and tables running: grep @Table -R src/main/java/
+--
+-- ============================================================================
+
+-- example:
+-- INSERT INTO application_user (id, version, name, username, email, password, roles, enabled, credentials_non_expired, account_non_expired, account_non_locked, additional_properties, created_by, created_date, last_modified_by, last_modified_date)
+-- VALUES (nextval('application_user_seq'), 0, 'Admin User', 'admin', 'user@email.com', '$2a$10$I86fM/OvHg8ounuxGq2oBufCecu3NFO4vT1SWIvd4hnM72lrzdXBG', ARRAY['USER', 'ADMIN'], true, true, true, true, '{"theme": "dark", "notifications": true}', 'user', '2024-08-02 13:36:47.389586', 'system', '2024-08-02 13:36:47.389586');

@@ -2,12 +2,12 @@ package io.zenwave360.sdk.plugins.kotlin;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
+import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.plugins.BackendApplicationDefaultGenerator;
 import io.zenwave360.sdk.plugins.BackendApplicationDefaultHelpers;
 import io.zenwave360.sdk.plugins.BackendApplicationDefaultJpaHelpers;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
-import io.zenwave360.sdk.zdl.layouts.CleanArchitectureProjectLayout;
 import io.zenwave360.sdk.zdl.layouts.CleanHexagonalProjectLayout;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
@@ -18,13 +18,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import static io.zenwave360.sdk.templating.OutputFormatType.KOTLIN;
+import static io.zenwave360.sdk.templating.OutputFormatType.*;
 import static io.zenwave360.sdk.zdl.utils.ZDLFindUtils.is;
 
 public class BackendApplicationKotlinTemplates extends ProjectTemplates {
 
     @DocumentedOption(description = "Whether to use Spring Modulith annotations and features")
     public boolean useSpringModulith = false;
+
+    public PersistenceType persistence = PersistenceType.mongodb;
 
     @DocumentedOption(description = "Whether to add AsyncAPI/ApplicationEventPublisher as service dependencies. Depends on the naming convention of zenwave-asyncapi plugin to work.")
     public boolean includeEmitEventsImplementation = true;
@@ -34,6 +36,9 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
     protected Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo", "input", "abstract");
     protected Function<Map<String, Object>, Boolean> skipEntity = (model) -> is(model, "vo", "input");
 //    protected Function<Map<String, Object>, Boolean> skipEntityInput = (model) -> inputDTOSuffix == null || inputDTOSuffix.isEmpty();
+
+    protected Function<Map<String, Object>, Boolean> skipDataSql = (model) -> persistence != PersistenceType.jpa;
+
 
     protected Function<Map<String, Object>, Boolean> skipEvents = (model) -> !includeEmitEventsImplementation;
     protected Function<Map<String, Object>, Boolean> skipEventsBus = (model) -> ((Collection) model.get("events")).isEmpty();
@@ -85,6 +90,9 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
         this.addTemplate(this.entityTemplates, "src/test/kotlin", "infrastructure/{{persistence}}/{{style}}/inmemory/InMemory{{capitalizeFirst persistence}}Repository.kt",
                 layoutNames.infrastructureRepositoryPackage, "inmemory/InMemory{{capitalizeFirst persistence}}Repository.kt", KOTLIN, skipEntityRepository, true);
 
+        this.addTemplate(this.entityTemplates, "src/test/resources", "data/{{persistence}}/entity/1.json",
+                "", "data/{{persistence}}/{{entity.name}}/1.json", JSON, skipEntity, true);
+
         this.addTemplate(this.enumTemplates, "src/main/kotlin", "core/domain/common/DomainEnum.kt",
                 layoutNames.entitiesPackage, "{{enum.name}}.kt", KOTLIN, null, false);
         this.addTemplate(this.inputEnumTemplates, "src/main/kotlin", "core/domain/common/InputEnum.kt",
@@ -123,9 +131,12 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
                 layoutNames.infrastructureEventsPackage, "InMemoryEventPublisher.kt", KOTLIN, skipEventsBus, false);
 
         this.addTemplate(this.singleTemplates, "src/test/kotlin", "config/TestDataLoader-{{persistence}}.kt",
-                layoutNames.moduleConfigPackage, "TestDataLoader.kt", KOTLIN, null, true);
+                layoutNames.configPackage, "TestDataLoader.kt", KOTLIN, null, true);
         this.addTemplate(this.singleTemplates, "src/test/kotlin", "config/DockerComposeInitializer-{{persistence}}.kt",
                 layoutNames.configPackage, "DockerComposeInitializer.kt", KOTLIN, null, true);
+
+        this.addTemplate(this.singleTemplates, "src/test/resources", "data.sql",
+                "", "data.sql", SQL, skipDataSql, true);
 
         this.addTemplate(this.singleTemplates, "src/main/kotlin", "core/inbound/dtos/package-info.kt",
                 layoutNames.inboundDtosPackage, "package-info.kt", KOTLIN, null, true);

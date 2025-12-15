@@ -7,10 +7,13 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Component
-@lombok.RequiredArgsConstructor
 public class DefaultEventPublisher implements EventPublisher {
 
     private final ApplicationEventPublisher applicationEventPublisher;
+
+    public DefaultEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        this.applicationEventPublisher = applicationEventPublisher;
+    }
 
 {{#each events as |event|}}
     public void on{{event.className}}({{event.className}} event) {
