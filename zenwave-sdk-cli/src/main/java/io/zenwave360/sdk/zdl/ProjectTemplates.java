@@ -5,6 +5,7 @@ import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
+import io.zenwave360.sdk.zdl.utils.ZDLAnnotator;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
 import java.lang.reflect.Field;
@@ -69,6 +70,8 @@ public class ProjectTemplates {
     public List<Object> getTemplateHelpers(Generator generator) {
         return List.of();
     }
+
+    public List<ZDLAnnotator> getZDLAnnotators() { return List.of(); }
 
     public List<TemplateInput> aggregateTemplates = new ArrayList<>();
 

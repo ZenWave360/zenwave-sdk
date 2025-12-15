@@ -2,6 +2,7 @@ package io.zenwave360.sdk.processors;
 
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
+import io.zenwave360.sdk.zdl.model.JavaZdlModel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,9 @@ public class ZDLProcessor extends AbstractBaseProcessor {
         }
 
         processCopyAnnotation(zdlModel);
+
+        var zdlJavaModel = new JavaZdlModel(zdlModel);
+        zdlModel.put("javaModel", zdlJavaModel);
 
         return contextModel;
     }
@@ -92,6 +96,8 @@ public class ZDLProcessor extends AbstractBaseProcessor {
     public void processServiceName(Map<String, Object> zdlModel) {
         var services = JSONPath.get(zdlModel, "$.services", Map.of());
         for (Map.Entry<Object, Object> service : services.entrySet()) {
+            var serviceValue = (Map<String, Object>) service.getValue();
+            serviceValue.put("entityNames", serviceValue.get("aggregates"));
             var aggregates = JSONPath.get(service.getValue(), "$.aggregates", List.of());
             for (Object aggregate : aggregates) {
                 if(JSONPath.get(zdlModel, "$.entities." + aggregate) != null) {

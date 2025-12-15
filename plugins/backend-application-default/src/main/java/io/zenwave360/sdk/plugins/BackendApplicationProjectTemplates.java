@@ -3,11 +3,14 @@ package io.zenwave360.sdk.plugins;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.options.PersistenceType;
+import io.zenwave360.sdk.plugins.annotators.AnnotationHelper;
+import io.zenwave360.sdk.plugins.annotators.JSpecifyAnnotator;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.CleanArchitectureProjectLayout;
 import io.zenwave360.sdk.zdl.layouts.CleanHexagonalProjectLayout;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
+import io.zenwave360.sdk.zdl.utils.ZDLAnnotator;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 
 import java.util.ArrayList;
@@ -23,6 +26,9 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
 
     @DocumentedOption(description = "Whether to use Spring Modulith annotations and features")
     public boolean useSpringModulith = false;
+
+    @DocumentedOption(description = "Whether to use JSpecify for nullability annotations")
+    public boolean useJSpecify = true;
 
     public PersistenceType persistence = PersistenceType.mongodb;
 
@@ -54,7 +60,17 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
         var helpers = new ArrayList<>(super.getTemplateHelpers(generator));
         helpers.add(new BackendApplicationDefaultHelpers((BackendApplicationDefaultGenerator) generator));
         helpers.add(new BackendApplicationDefaultJpaHelpers((BackendApplicationDefaultGenerator) generator));
+        helpers.add(AnnotationHelper.class);
         return helpers;
+    }
+
+    @Override
+    public List<ZDLAnnotator> getZDLAnnotators() {
+        var annotators = new ArrayList<>(super.getZDLAnnotators());
+        if(useJSpecify) {
+            annotators.add(new JSpecifyAnnotator());
+        }
+        return annotators;
     }
 
     public BackendApplicationProjectTemplates() {

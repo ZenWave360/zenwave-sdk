@@ -3,6 +3,7 @@ package io.zenwave360.sdk.zdl.utils;
 import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.NamingUtils;
+import io.zenwave360.sdk.zdl.model.JavaZdlModel;
 import org.apache.commons.lang3.StringUtils;
 
 import java.sql.Blob;
@@ -21,6 +22,7 @@ public class ZDLJavaSignatureUtils {
         return (String) field.get("type");
     }
 
+    // XXX: solo se esta usando en tests
     public static String methodParameterType(Map method, Map zdl) {
         var isPatch = JSONPath.get(method, "options.patch") != null;
         if(isPatch) {
@@ -92,44 +94,35 @@ public class ZDLJavaSignatureUtils {
         return String.format("findBy%s(%s)", StringUtils.join(fieldNames, "And"), params);
     }
 
-
     public static String methodParametersSignature(String idJavaType, Map method, Map zdl) {
         var params = new ArrayList<String>();
-        if(JSONPath.get(method, "paramId") != null) {
-            var hasNaturalId = JSONPath.get(method, "naturalId", false);
-            if (hasNaturalId) {
-                var fields = ZDLFindUtils.naturalIdFields(JSONPath.get(zdl, "$.entities." + method.get("entity")));
-                params.add(ZDLJavaSignatureUtils.fieldsParamsSignature(fields));
-            } else {
-                params.add(idJavaType + " id");
+        var javaServiceMethod = (JavaZdlModel.ServiceMethod) method.get("javaServiceMethod");
+        for (var parameter : javaServiceMethod.parameters()) {
+            var type = "id".equals(parameter.name())? idJavaType : parameter.type();
+            if(parameter.isArray()) {
+                type = "List<" + type + ">";
             }
-        }
-        if(JSONPath.get(method, "parameter") != null) {
-            params.addAll(methodInputSignature(method, zdl));
-        }
-        if(JSONPath.get(method, "options.paginated") != null) {
-            params.add("Pageable pageable");
+            var annotations = parameter.annotations().stream().map(a -> "@" + a.name()).collect(Collectors.joining(" "));
+            params.add((annotations + " " + type + " " + parameter.name()).trim());
         }
         return StringUtils.join(params, ", ");
     }
 
     public static String kotlinMethodParametersSignature(String idJavaType, Map method, Map zdl) {
-        var signature = methodParametersSignature(idJavaType, method, zdl);
-        signature = signature.replace("java.util.Map", "Map<String,Any?>");
-        var kotlinSignature = toKotlinMethodSignature(signature);
-        var isInlineParam = JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("parameter") + ".options.inline", false);
-        if(isInlineParam) {
-            var optionalParamFields = JSONPath.get(zdl, "$.inputs." + method.get("parameter") + ".fields[*][?(!@.validations.required)]", List.<Map>of());
-            for (var field : optionalParamFields) {
-                if(JSONPath.get(field, "$.isArray", false)) {
-                    kotlinSignature = kotlinSignature.replace(field.get("name") + ": List<" + field.get("type") + ">", field.get("name") + ": List<" + field.get("type") + ">?");
-                } else {
-                    kotlinSignature = kotlinSignature.replace(field.get("name") + ": " + field.get("type"), field.get("name") + ": " + field.get("type") + "?");
-                }
+        var params = new ArrayList<String>();
+        var javaServiceMethod = (JavaZdlModel.ServiceMethod) method.get("javaServiceMethod");
+        for (var parameter : javaServiceMethod.parameters()) {
+            var type = "id".equals(parameter.name())? idJavaType : parameter.type();
+            if("java.util.Map".equals(type)) {
+                type = "Map<String,Any?>";
             }
-
+            if(parameter.isArray()) {
+                type = "List<" + type + ">";
+            }
+            var annotations = parameter.annotations().stream().map(a -> "@" + a.name()).collect(Collectors.joining(" "));
+            params.add((annotations + " " + parameter.name() + ": " + type + (parameter.isOptional() ? "?" : "")).trim());
         }
-        return kotlinSignature;
+        return StringUtils.join(params, ", ").trim();
     }
 
     public static String toKotlinMethodSignature(String signature) {
@@ -145,9 +138,8 @@ public class ZDLJavaSignatureUtils {
     }
 
     public static String methodParametersCallSignature(Map method, Map zdl) {
-        return Arrays.stream(methodParametersSignature("not-used", method, zdl).split(", "))
-                .map(p -> p.contains(" ")? p.split(" ")[1] : "")
-                .collect(Collectors.joining(", "));
+        var javaServiceMethod = (JavaZdlModel.ServiceMethod) method.get("javaServiceMethod");
+        return javaServiceMethod.parameters().stream().map(p -> p.name()).collect(Collectors.joining(", "));
     }
 
     private static List<String> methodInputSignature(Map method, Map zdl) {

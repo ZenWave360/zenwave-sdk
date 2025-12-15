@@ -39,7 +39,7 @@ entity Customer {
   }
 }
 
-enum AddressType {  HOME(1) /** home description */,  WORK(1) /** work description */ }
+enum AddressType {  HOME(1) /** home description */,  WORK(2) /** work description */ }
 
 /**
  * Customer input javadoc comment
