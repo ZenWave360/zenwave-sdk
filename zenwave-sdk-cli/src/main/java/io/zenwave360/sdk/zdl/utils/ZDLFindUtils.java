@@ -75,7 +75,7 @@ public class ZDLFindUtils {
     }
 
     public static List<String> findDependentEntities(Map<String, Object> model, List<String> entityNames) {
-        System.out.println("entityNames = " + entityNames);
+        // System.out.println("entityNames = " + entityNames);
         return entityNames.stream().map(entityName -> findDependentEntities(model, entityName)).peek(System.out::println).flatMap(List::stream).collect(Collectors.toList());
     }
 

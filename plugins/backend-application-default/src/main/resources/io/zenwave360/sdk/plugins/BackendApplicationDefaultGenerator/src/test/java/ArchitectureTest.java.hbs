@@ -32,7 +32,7 @@ class ArchitectureTest {
         .layer("Config").definedBy("..config..")
         .layer("Core").definedBy("..core..")
         .layer("Domain").definedBy("..core.domain..")
-        .layer("Models").definedBy("..core.domain..", "..core.inbound.dtos..")
+        .optionalLayer("Models").definedBy("..core.domain..", "..core.inbound.dtos..")
         .optionalLayer("SearchModel").definedBy("..core.domain.search..")
         .optionalLayer("InfrastructureSearch").definedBy("..core.outbound.search..")
         .layer("CoreImplementation").definedBy("..core.implementation..")

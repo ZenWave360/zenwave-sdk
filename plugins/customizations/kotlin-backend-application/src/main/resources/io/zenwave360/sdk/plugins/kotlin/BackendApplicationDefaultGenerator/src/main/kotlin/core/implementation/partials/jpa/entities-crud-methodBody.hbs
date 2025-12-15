@@ -38,8 +38,7 @@
 {{~else if (and (isCrudMethod 'delete' method=method entity=_entity ) hasNaturalId)}}
     {{{logMethodCall method}}}
     val {{_entity.instanceName}} = {{_entity.instanceName}}Repository.{{{naturalIdsRepoMethodCallSignature _entity}}}
-        ?.let { {{_entity.instanceName}}Repository.delete(it))
-        {{~> (partial '../withEvents')}}
-    }
+        ?.let { {{_entity.instanceName}}Repository.delete(it) }
+    {{~> (partial '../withEvents')}}
 {{~/if}}
 

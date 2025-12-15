@@ -1,4 +1,4 @@
-package {{layout.moduleConfigPackage}}
+package {{layout.configPackage}}
 
 import org.springframework.beans.BeanUtils
 import org.springframework.boot.autoconfigure.mongo.MongoProperties
@@ -10,7 +10,6 @@ import org.springframework.data.mongodb.MongoManagedTypes
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions
 import org.springframework.data.mongodb.core.convert.NoOpDbRefResolver
-import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext
 import org.springframework.data.util.NullableWrapperConverters
 import org.bson.Document as BsonDocument
@@ -33,21 +32,7 @@ class TestDataLoader(private val mongoManagedTypes: List<Class<*>>) {
     }
 
     fun loadCollectionTestDataAsJson(collectionClass: Class<*>): List<String> {
-        val annotation = collectionClass.getAnnotation(Document::class.java)
-        val collection = annotation.collection
-        return readDirectoryFilesAsString("src/test/resources/data/mongodb/$collection")
-    }
-
-    fun loadCollectionTestDataAsJson(collection: String): List<String> {
-        return readDirectoryFilesAsString("src/test/resources/data/mongodb/$collection")
-    }
-
-    fun listAllMongodbCollectionsWithTestData(): List<String> {
-        return listFolders("src/test/resources/data/mongodb")
-    }
-
-    protected fun listFolders(directory: String): List<String> {
-        return File(directory).listFiles()?.map { it.name } ?: emptyList()
+        return readDirectoryFilesAsString("src/test/resources/data/mongodb/${collectionClass.getSimpleName()}")
     }
 
     protected fun readDirectoryFilesAsString(directory: String): List<String> {

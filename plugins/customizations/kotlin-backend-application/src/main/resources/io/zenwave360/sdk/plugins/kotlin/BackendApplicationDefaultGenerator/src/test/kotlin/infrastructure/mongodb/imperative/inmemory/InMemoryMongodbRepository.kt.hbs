@@ -22,7 +22,7 @@ import java.util.stream.StreamSupport
 
 import org.apache.commons.lang3.ObjectUtils.firstNonNull
 
-open class InMemoryMongodbRepository<T> : MongoRepository<T, String> {
+open class InMemoryMongodbRepository<T: Any> : MongoRepository<T, String> {
 
     interface PrimaryKeyGenerator<String> {
         fun next(): String

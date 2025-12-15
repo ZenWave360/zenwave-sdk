@@ -101,13 +101,11 @@ public class ProjectTemplates {
     public List<TemplateInput> allExternalEventsTemplates = new ArrayList<>();
     public List<TemplateInput> singleTemplates = new ArrayList<>();
 
-    public void addTemplate(List<TemplateInput> templates, String sourceFolder, String templateLocation, String targetPackagePlaceholder, String targetFile, OutputFormatType mimeType, Function<Map<String, Object>, Boolean> skip, boolean skipOverwrite) {
-        addTemplate(templates, sourceFolder, templateLocation, null, targetPackagePlaceholder, targetFile, mimeType, skip, skipOverwrite);
+    public void addTemplate(List<TemplateInput> templates, String sourceFolder, String templateLocation, String targetPackage, String targetFile, OutputFormatType mimeType, Function<Map<String, Object>, Boolean> skip, boolean skipOverwrite) {
+        addTemplate(templates, sourceFolder, templateLocation, null, targetPackage, targetFile, mimeType, skip, skipOverwrite);
     }
 
-    public void addTemplate(List<TemplateInput> templates, String sourceFolder, String templateLocation, String targetModule, String targetPackagePlaceholder, String targetFile, OutputFormatType mimeType, Function<Map<String, Object>, Boolean> skip, boolean skipOverwrite) {
-        // let the template engine resolve the target package at runtime
-        var targetPackage = "{{asPackageFolder layout." + targetPackagePlaceholder + "}}";
+    public void addTemplate(List<TemplateInput> templates, String sourceFolder, String templateLocation, String targetModule, String targetPackage, String targetFile, OutputFormatType mimeType, Function<Map<String, Object>, Boolean> skip, boolean skipOverwrite) {
         var template = new TemplateInput()
                 .withTemplateLocation(joinPath(templatesFolder, sourceFolder, templateLocation))
                 .withTargetFile(joinPath(targetModule, sourceFolder, targetPackage, targetFile))

@@ -163,7 +163,7 @@ public class Help {
         }
         Object defaultValue = null;
         try {
-            defaultValue = FieldUtils.readField(field, plugin, true);
+            defaultValue = "`" + FieldUtils.readField(field, plugin, true) + "`";
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }

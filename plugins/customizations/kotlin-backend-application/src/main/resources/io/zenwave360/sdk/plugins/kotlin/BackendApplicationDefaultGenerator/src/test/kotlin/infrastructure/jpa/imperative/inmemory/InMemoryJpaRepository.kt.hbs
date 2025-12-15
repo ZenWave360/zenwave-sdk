@@ -22,7 +22,7 @@ import java.util.stream.StreamSupport
 
 import org.apache.commons.lang3.ObjectUtils.firstNonNull
 
-open class InMemoryJpaRepository<T, ID> : JpaRepository<T, ID> {
+open class InMemoryJpaRepository<T : Any, ID : Any> : JpaRepository<T, ID> {
 
     interface PrimaryKeyGenerator<ID> {
         fun next(): ID
@@ -95,7 +95,7 @@ open class InMemoryJpaRepository<T, ID> : JpaRepository<T, ID> {
         }
     }
 
-    override fun getReferenceById(id: ID): T & Any {
+    override fun getReferenceById(id: ID): T {
         return findByUniqueField("id", id) ?: throw EmptyResultDataAccessException("Entity with id $id not found", 1)
     }
 

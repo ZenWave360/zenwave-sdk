@@ -17,12 +17,14 @@ import static java.lang.String.format;
 public class ZDLHttpUtils {
 
     public static List<Pair<String, String>> methodParameters(Map operation, String openApiModelNamePrefix, String openApiModelNameSuffix) {
-        List<Map<String, Object>> params = (List) operation.getOrDefault("parameters", Collections.emptyList());
+        List<Map<String, Object>> params = new ArrayList((List) operation.getOrDefault("parameters", List.of()));
         if(JSONPath.get(operation, "requestBody.content['multipart/form-data']") instanceof Map) {
-            params = JSONPath.get(operation, "requestBody.content['multipart/form-data'].schema.properties", Map.of())
+            params.addAll(
+                    JSONPath.get(operation, "requestBody.content['multipart/form-data'].schema.properties", Map.of())
                     .entrySet().stream().map(entry -> {
                         return Map.of("name", entry.getKey(), "schema", entry.getValue());
-                    }).toList();
+                    }).toList()
+            );
         };
         List<Pair<String, String>> methodParams = params.stream()
                 .sorted((param1, param2) -> compareParamsByRequire(param1, param2))
@@ -124,7 +126,8 @@ public class ZDLHttpUtils {
         var httpOption = getHttpOption(method);
         var params = new LinkedHashMap<String, Object>(JSONPath.get(httpOption, "$.httpOptions.params", Map.of()));
         var methodParameterType = (String) method.get("parameter");
-        if ("get".equals(httpOption.get("httpMethod"))) {
+        var isFileUpload = JSONPath.get(method, "$.options.fileupload") != null;
+        if ("get".equals(httpOption.get("httpMethod")) || isFileUpload) {
             var parameterEntity = JSONPath.get(zdl, "$.allEntitiesAndEnums." + methodParameterType);
             if (parameterEntity != null) {
                 var fields = JSONPath.get(parameterEntity, "$.fields", Map.<String, Map>of());
