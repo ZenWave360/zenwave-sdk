@@ -1,7 +1,7 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 io.zenwave360.sdk.plugins.customizations:kotlin-backend-application,io.zenwave360.sdk.plugins.kotlin,OpenAPIControllersKotlinHelpers,107,364,37,37,26,64,31,17,0,11
 io.zenwave360.sdk.plugins.customizations:kotlin-backend-application,io.zenwave360.sdk.plugins.kotlin,SpringWebTestClientKotlinHelpers,0,63,0,4,0,12,0,5,0,3
-io.zenwave360.sdk.plugins.customizations:kotlin-backend-application,io.zenwave360.sdk.plugins.kotlin,BackendApplicationKotlinTemplates,32,589,5,11,0,56,7,13,2,10
+io.zenwave360.sdk.plugins.customizations:kotlin-backend-application,io.zenwave360.sdk.plugins.kotlin,BackendApplicationKotlinTemplates,32,629,5,13,0,60,7,15,2,11
 io.zenwave360.sdk.plugins.customizations:kotlin-backend-application,io.zenwave360.sdk.plugins.kotlin,OpenAPIControllersKotlinTemplates,7,118,2,2,1,15,2,4,0,4
 io.zenwave360.sdk.plugins.customizations:kotlin-backend-application,io.zenwave360.sdk.plugins.kotlin,SpringWebTestClientKotlinTemplates,5,208,1,1,1,31,1,8,0,8
 io.zenwave360.sdk.plugins.customizations:kotlin-backend-application,io.zenwave360.sdk.plugins.kotlin,BackendApplicationKotlinHelpers,147,228,13,11,23,53,15,20,6,16
