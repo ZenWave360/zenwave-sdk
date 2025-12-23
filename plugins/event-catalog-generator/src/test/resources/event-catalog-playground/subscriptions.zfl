@@ -1,0 +1,89 @@
+@import(subscriptions: "http://localhost:8080/subscription/model.zdl")
+@import(payments: "com.example.domain:payments:RELEASE")
+
+/**
+ * @title Payment Flow for customers
+ * @description Business flow for processing subscription renewals and payments.
+ * @version 1.3.0
+ */
+flow PaymentsFlow {
+
+    systems {
+        Subscription {
+            zdl "subscription/model.zdl"
+            service SubscriptionService {
+                commands: renewSubscription, suspendSubscription, cancelRenewal
+            }
+            events: SubscriptionRenewed, SubscriptionSuspended, RenewalCancelled
+        }
+        Payments  {
+            service {
+                commands: chargePayment, retryPayment
+            }
+            events: PaymentSucceeded, PaymentFailed
+        }
+        Billing {
+            service {
+                commands: recordPayment
+            }
+            events: PaymentRecorded
+        }
+    }
+
+    @actor(Customer)
+    start CustomerRequestsSubscriptionRenewal {
+        subscriptionId String
+        customerId String
+        paymentMethodId String
+    }
+
+    @time("end of month")
+    start BillingCycleEnded {
+        subscriptionId String
+    }
+
+    when CustomerRequestsSubscriptionRenewal {
+        command renewSubscription
+        event SubscriptionRenewed
+    }
+
+    when SubscriptionRenewed {
+        command chargePayment
+        event PaymentSucceeded
+        event PaymentFailed
+    }
+
+    when PaymentFailed {
+        if "less than 3 attempts" {
+            command retryPayment
+            event PaymentRetryScheduled
+        }
+        else {
+            policy "Suspend after 3 failed attempts"
+            command suspendSubscription
+            event SubscriptionSuspended
+        }
+    }
+
+    // Join: proceed only once the payment has succeeded
+    // and the monthly billing cycle has ended
+    when PaymentSucceeded and BillingCycleEnded {
+        command recordPayment
+        event PaymentRecorded
+    }
+
+    @time("5 minutes after SubscriptionRenewed and not PaymentSucceeded or PaymentFailed")
+    start PaymentTimeout {
+    }
+
+    when PaymentTimeout {
+        command cancelRenewal
+        event RenewalCancelled
+    }
+
+    end {
+        completed: PaymentRecorded
+        suspended: SubscriptionSuspended
+        cancelled: RenewalCancelled
+    }
+}

@@ -1,0 +1,54 @@
+/**
+ * Inventory Adjustment Service Domain Model
+ * Processes inventory adjustments and updates
+ */
+config {
+    title "Inventory Adjustment Service"
+    basePackage "com.retail.merchandising.inventory.adjustment"
+    persistence jpa
+    databaseType postgresql
+}
+
+/**
+ * Inventory Item aggregate
+ */
+@aggregate
+entity InventoryItem {
+    sku String required maxlength(50)
+    productName String required maxlength(254)
+    quantity Integer required
+    location String required maxlength(100)
+    lastAdjustedAt Instant
+}
+
+/**
+ * Inventory Adjustment Service
+ */
+service InventoryAdjustmentService for (InventoryItem) {
+    adjustInventory(InventoryItem) InventoryItem withEvents InventoryAdjusted
+    recordStockCount(InventoryItem) InventoryItem withEvents StockCountRecorded
+}
+
+/**
+ * Inventory Adjusted Event
+ */
+@asyncapi({ channel: "InventoryChannel", topic: "inventory.adjusted" })
+event InventoryAdjusted {
+    sku String
+    previousQuantity Integer
+    newQuantity Integer
+    location String
+    adjustedAt Instant
+}
+
+/**
+ * Stock Count Recorded Event
+ */
+@asyncapi({ channel: "InventoryChannel", topic: "inventory.stock-counted" })
+event StockCountRecorded {
+    sku String
+    countedQuantity Integer
+    location String
+    countedAt Instant
+}
+

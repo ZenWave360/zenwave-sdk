@@ -1,0 +1,108 @@
+{
+  "type": "record",
+  "name": "AdjustInventoryResponse",
+  "namespace": "io.zenwave360.example.merchandising.inventory.adjustment.responses",
+  "doc": "Response containing the result of an inventory adjustment operation",
+  "fields": [
+    {
+      "name": "adjustmentId",
+      "type": "string",
+      "doc": "Unique identifier matching the original adjustment request"
+    },
+    {
+      "name": "success",
+      "type": "boolean",
+      "doc": "Indicates whether the adjustment was successful"
+    },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "AdjustmentStatus",
+        "symbols": [
+          "COMPLETED",
+          "FAILED",
+          "PARTIALLY_COMPLETED",
+          "REJECTED"
+        ]
+      },
+      "doc": "Status of the adjustment operation"
+    },
+    {
+      "name": "productId",
+      "type": "string",
+      "doc": "Identifier of the product that was adjusted"
+    },
+    {
+      "name": "locationId",
+      "type": "string",
+      "doc": "Identifier of the location where adjustment occurred"
+    },
+    {
+      "name": "previousQuantity",
+      "type": ["null", "int"],
+      "default": null,
+      "doc": "Quantity before the adjustment"
+    },
+    {
+      "name": "newQuantity",
+      "type": ["null", "int"],
+      "default": null,
+      "doc": "Quantity after the adjustment"
+    },
+    {
+      "name": "actualQuantityChanged",
+      "type": ["null", "int"],
+      "default": null,
+      "doc": "Actual quantity that was changed (may differ from requested)"
+    },
+    {
+      "name": "validationErrors",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "ValidationError",
+          "fields": [
+            {
+              "name": "field",
+              "type": "string",
+              "doc": "Field that failed validation"
+            },
+            {
+              "name": "message",
+              "type": "string",
+              "doc": "Error message"
+            },
+            {
+              "name": "code",
+              "type": "string",
+              "doc": "Error code"
+            }
+          ]
+        }
+      },
+      "default": [],
+      "doc": "List of validation errors if the adjustment failed"
+    },
+    {
+      "name": "errorMessage",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "General error message if the operation failed"
+    },
+    {
+      "name": "processedTimestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis",
+      "doc": "Timestamp when the adjustment was processed"
+    },
+    {
+      "name": "correlationId",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Correlation ID matching the original request"
+    }
+  ]
+}
+

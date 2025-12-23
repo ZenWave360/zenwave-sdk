@@ -1,0 +1,56 @@
+/**
+ * Price Change Service Domain Model
+ * Manages price updates and promotions
+ */
+config {
+    title "Price Change Service"
+    basePackage "com.retail.merchandising.pricing.change"
+    persistence jpa
+    databaseType postgresql
+}
+
+/**
+ * Product Price aggregate
+ */
+@aggregate
+entity ProductPrice {
+    sku String required maxlength(50)
+    productName String required maxlength(254)
+    currentPrice BigDecimal required
+    currency String required maxlength(3)
+    effectiveDate Instant required
+}
+
+/**
+ * Price Change Service
+ */
+service PriceChangeService for (ProductPrice) {
+    updatePrice(ProductPrice) ProductPrice withEvents PriceUpdated
+    applyPromotion(ProductPrice) ProductPrice withEvents PromotionApplied
+}
+
+/**
+ * Price Updated Event
+ */
+@asyncapi({ channel: "PricingChannel", topic: "pricing.price-updated" })
+event PriceUpdated {
+    sku String
+    previousPrice BigDecimal
+    newPrice BigDecimal
+    currency String
+    effectiveDate Instant
+}
+
+/**
+ * Promotion Applied Event
+ */
+@asyncapi({ channel: "PricingChannel", topic: "pricing.promotion-applied" })
+event PromotionApplied {
+    sku String
+    originalPrice BigDecimal
+    promotionalPrice BigDecimal
+    currency String
+    effectiveDate Instant
+    expirationDate Instant
+}
+

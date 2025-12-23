@@ -1,0 +1,154 @@
+config:
+  title: "ARTS-inspired Retail Event Catalog Playground"
+  version: 0.0.1
+  properties:
+    root: src/test/resources/event-catalog-playground
+
+domains:
+  "merchandising":
+    id: "merchandising"
+    name: "Merchandising"
+    description: "ARTS Merchandising Area - Product planning, pricing and promotion management"
+    repository: "{{root}}/merchandising"
+    docs:
+      - SUMMARY.md
+      - EVENT_CATALOG.md
+      - CHANGELOG.md
+
+  "customer-relationship":
+    id: "customer-relationship"
+    name: "Customer Relationship"
+    description: "ARTS Customer Relationship Area - Customer management and loyalty programs"
+    repository: "{{root}}/customer-relationship"
+    docs:
+      - SUMMARY.md
+      - EVENT_CATALOG.md
+      - CHANGELOG.md
+
+subdomains:
+  "merchandising.inventory":
+    id: "merchandising.inventory"
+    name: "Inventory"
+    description: "Inventory tracking and management subdomain"
+    repository: "{{root}}/merchandising/inventory"
+    docs:
+      - SUMMARY.md
+      - EVENT_CATALOG.md
+      - CHANGELOG.md
+
+  "merchandising.pricing":
+    id: "merchandising.pricing"
+    name: "Pricing"
+    description: "Pricing strategies and adjustments subdomain"
+    repository: "{{root}}/merchandising/pricing"
+    docs:
+      - SUMMARY.md
+      - EVENT_CATALOG.md
+      - CHANGELOG.md
+
+  "customer-relationship.customer-management":
+    id: "customer-relationship.customer-management"
+    name: "Customer Management"
+    description: "Customer profile and relationship management subdomain"
+    repository: "{{root}}/customer-relationship/customer-management"
+    docs:
+      - SUMMARY.md
+      - EVENT_CATALOG.md
+      - CHANGELOG.md
+
+services:
+  "merchandising.inventory.inventory-adjustment":
+    id: "merchandising.inventory.inventory-adjustment"
+    name: "Inventory Adjustment"
+    description: "ARTS Service Domain - Processes inventory adjustments and updates"
+    repository: "{{root}}/merchandising/inventory/inventory-adjustment"
+    docs:
+      - SUMMARY.md
+      - EVENT_CATALOG.md
+      - CHANGELOG.md
+    specs:
+      - type: zdl
+        path: "domain-model.zdl"
+      - type: asyncapi
+        path: "asyncapi.yml"
+      - type: asyncapi
+        path: "asyncapi-as-client.yml"
+    consumers:
+      - $ref: "#/services/merchandising.pricing.price-change"
+      - $ref: "#/services/customer-relationship.customer-management.customer-profile"
+
+  "merchandising.pricing.price-change":
+    id: "merchandising.pricing.price-change"
+    name: "Price Change"
+    description: "ARTS Service Domain - Manages price updates and promotions"
+    repository: "{{root}}/merchandising/pricing/price-change"
+    docs:
+      - SUMMARY.md
+      - EVENT_CATALOG.md
+      - CHANGELOG.md
+    specs:
+      - type: zdl
+        path: "domain-model.zdl"
+      - type: asyncapi
+        path: "asyncapi.yml"
+      - type: asyncapi
+        path: "asyncapi-as-client.yml"
+    consumers:
+      - $ref: "#/services/merchandising.inventory.inventory-adjustment"
+
+  "customer-relationship.customer-management.customer-profile":
+    id: "customer-relationship.customer-management.customer-profile"
+    name: "Customer Profile"
+    description: "ARTS Service Domain - Maintains customer profiles and data"
+    repository: "{{root}}/customer-relationship/customer-management/customer-profile"
+    docs:
+      - SUMMARY.md
+      - EVENT_CATALOG.md
+      - CHANGELOG.md
+    specs:
+      - type: zdl
+        path: "domain-model.zdl"
+      - type: asyncapi
+        path: "asyncapi.yml"
+      - type: asyncapi
+        path: "asyncapi-as-client.yml"
+    consumers:
+      - $ref: "#/services/customer-relationship.customer-management.loyalty-management"
+
+  "customer-relationship.customer-management.loyalty-management":
+    id: "customer-relationship.customer-management.loyalty-management"
+    name: "Loyalty Management"
+    description: "ARTS Service Domain - Handles loyalty programs and points"
+    repository: "{{root}}/customer-relationship/customer-management/loyalty-management"
+    docs:
+      - SUMMARY.md
+      - EVENT_CATALOG.md
+      - CHANGELOG.md
+    specs:
+      - type: zdl
+        path: "domain-model.zdl"
+      - type: asyncapi
+        path: "asyncapi.yml"
+      - type: asyncapi
+        path: "asyncapi-as-client.yml"
+    consumers:
+      - $ref: "#/services/merchandising.pricing.price-change"
+
+  "merchandising.inventory.stock-replenishment":
+    id: "merchandising.inventory.stock-replenishment"
+    name: "Stock Replenishment"
+    description: "ARTS Service Domain - Manages stock ordering and replenishment"
+    repository: "{{root}}/merchandising/inventory/stock-replenishment"
+    docs:
+      - SUMMARY.md
+      - EVENT_CATALOG.md
+      - CHANGELOG.md
+    specs:
+      - type: zdl
+        path: "domain-model.zdl"
+      - type: asyncapi
+        path: "asyncapi.yml"
+      - type: asyncapi
+        path: "asyncapi-as-client.yml"
+    consumers:
+      - $ref: "#/services/merchandising.inventory.inventory-adjustment"

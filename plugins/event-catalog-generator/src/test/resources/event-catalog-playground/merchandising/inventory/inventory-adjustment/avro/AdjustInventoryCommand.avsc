@@ -1,0 +1,70 @@
+{
+  "type": "record",
+  "name": "AdjustInventoryCommand",
+  "namespace": "io.zenwave360.example.merchandising.inventory.adjustment.commands",
+  "doc": "Command to adjust inventory levels for a specific product at a location",
+  "fields": [
+    {
+      "name": "adjustmentId",
+      "type": "string",
+      "doc": "Unique identifier for this adjustment request"
+    },
+    {
+      "name": "productId",
+      "type": "string",
+      "doc": "Identifier of the product being adjusted"
+    },
+    {
+      "name": "locationId",
+      "type": "string",
+      "doc": "Identifier of the location (warehouse, store, etc.)"
+    },
+    {
+      "name": "quantityChange",
+      "type": "int",
+      "doc": "Quantity to adjust (positive for increase, negative for decrease)"
+    },
+    {
+      "name": "reason",
+      "type": {
+        "type": "enum",
+        "name": "AdjustmentReason",
+        "symbols": [
+          "DAMAGE",
+          "THEFT",
+          "CORRECTION",
+          "RETURN",
+          "TRANSFER",
+          "EXPIRED",
+          "FOUND",
+          "OTHER"
+        ]
+      },
+      "doc": "Reason for the inventory adjustment"
+    },
+    {
+      "name": "notes",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Additional notes or comments about the adjustment"
+    },
+    {
+      "name": "requestedBy",
+      "type": "string",
+      "doc": "User or system that requested the adjustment"
+    },
+    {
+      "name": "requestTimestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis",
+      "doc": "Timestamp when the adjustment was requested"
+    },
+    {
+      "name": "correlationId",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Correlation ID for tracking related operations"
+    }
+  ]
+}
+

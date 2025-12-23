@@ -1,0 +1,58 @@
+/**
+ * Stock Replenishment Service Domain Model
+ * Manages stock ordering and replenishment
+ */
+config {
+    title "Stock Replenishment Service"
+    basePackage "com.retail.merchandising.inventory.replenishment"
+    persistence jpa
+    databaseType postgresql
+}
+
+/**
+ * Replenishment Order aggregate
+ */
+@aggregate
+entity ReplenishmentOrder {
+    orderNumber String required maxlength(50)
+    sku String required maxlength(50)
+    productName String required maxlength(254)
+    requestedQuantity Integer required
+    supplierName String required maxlength(254)
+    expectedDeliveryDate Instant
+    status ReplenishmentStatus required
+}
+
+enum ReplenishmentStatus { PENDING, ORDERED, IN_TRANSIT, DELIVERED }
+
+/**
+ * Stock Replenishment Service
+ */
+service StockReplenishmentService for (ReplenishmentOrder) {
+    createReplenishmentOrder(ReplenishmentOrder) ReplenishmentOrder withEvents ReplenishmentOrderCreated
+    receiveStock(ReplenishmentOrder) ReplenishmentOrder withEvents StockReceived
+}
+
+/**
+ * Replenishment Order Created Event
+ */
+@asyncapi({ channel: "ReplenishmentChannel", topic: "replenishment.order-created" })
+event ReplenishmentOrderCreated {
+    orderNumber String
+    sku String
+    requestedQuantity Integer
+    supplierName String
+    expectedDeliveryDate Instant
+}
+
+/**
+ * Stock Received Event
+ */
+@asyncapi({ channel: "ReplenishmentChannel", topic: "replenishment.stock-received" })
+event StockReceived {
+    orderNumber String
+    sku String
+    receivedQuantity Integer
+    receivedDate Instant
+}
+
