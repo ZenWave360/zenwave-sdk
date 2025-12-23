@@ -19,6 +19,7 @@
             <groupId>io.zenwave360.sdk</groupId>
             <artifactId>zenwave-sdk-cli</artifactId>
             <version>${zenwave-sdk.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.zenwave360.sdk</groupId>
@@ -43,6 +44,7 @@
         <module>openapi-controllers</module>
         <module>openapi-spring-webtestclient</module>
         <module>openapi-karate</module>
+        <module>event-catalog-generator</module>
         <module>zenwave-mcp-server</module>
         <module>customizations</module>
     </modules>
