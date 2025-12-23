@@ -44,7 +44,6 @@
         <module>openapi-controllers</module>
         <module>openapi-spring-webtestclient</module>
         <module>openapi-karate</module>
-        <module>event-catalog-generator</module>
         <module>zenwave-mcp-server</module>
         <module>customizations</module>
     </modules>
