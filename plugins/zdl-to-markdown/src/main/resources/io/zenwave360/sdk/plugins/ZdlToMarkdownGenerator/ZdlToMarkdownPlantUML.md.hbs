@@ -1,0 +1,77 @@
+# {{{zdlModel.title}}}
+
+{{{zdlModel.javadoc}}}
+
+{{~#each zdlModel.services as |service|}}
+
+## <a name="service_{{service.name}}"></a> {{service.name}}
+
+{{{service.javadoc}}}
+
+```plantuml
+@startuml
+class {{service.name}}  << service >> {
+{{~#each service.methods as |method|}}
+    {{method.name}}({{methodParamsSignature method}}): {{methodReturnType method}} withEvents {{methodEvents method}}
+{{~/each}}
+}
+@enduml
+```
+
+{{#each service.aggregates as |aggregates|}}
+{{~assign "entity" (lookup zdlModel.entities this)}}
+### <a name="aggregate_{{entity.name}}"></a> {{entity.name}}
+```plantuml
+@startuml
+{{> (partial 'entityClass.plantuml') stereotype='aggregate' }}
+
+{{~#each (entityAssociations entity) as |association|}}
+    {{../entity.name}} {{association.linkType}}down- {{association.entity.name}}
+    {{> (partial 'entityClass.plantuml') entity=association.entity }}
+{{~/each}}
+@enduml
+```
+{{/each}}
+
+{{assign "inputs" (serviceInputs service)}}
+{{#if inputs}}
+### <a name="inputs"></a> {{service.name}} Command Inputs
+
+```plantuml
+@startuml
+    {{~#each inputs as |entity|}}
+        {{> (partial 'entityClass.plantuml') stereotype=entity.type }}
+    {{~/each}}
+@enduml
+```
+{{/if}}
+
+{{assign "outputs" (serviceOutputs service)}}
+{{#if outputs}}
+### <a name="outputs"></a> {{service.name}} Command Outputs
+
+```plantuml
+@startuml
+    {{~#each outputs as |entity|}}
+{{> (partial 'entityClass.plantuml') stereotype=entity.type }}
+    {{~/each}}
+@enduml
+```
+{{/if}}
+
+
+{{assign "events" (serviceEvents service)}}
+{{#if events}}
+### <a name="events"></a> {{service.name}} Domain Events
+
+```plantuml
+@startuml
+    {{~#each events as |entity|}}
+{{> (partial 'entityClass.plantuml') stereotype=entity.type }}
+    {{~/each}}
+@enduml
+```
+{{/if}}
+
+
+{{/each~}}

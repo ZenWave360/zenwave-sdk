@@ -4,7 +4,7 @@ class {{entity.name}} {{#if stereotype}}<< {{stereotype}} >>{{/if}} {
 --
 {{~/if}}
 {{~#each entity.fields as |field|}}
-{{{field.type}}} {{field.name}}
+{{{field.type}}}{{#if field.isArray}}[]{{/if}} {{field.name}}
 {{~/each}}
 {{~#if entity.relationships}}
 --
@@ -15,3 +15,12 @@ class {{entity.name}} {{#if stereotype}}<< {{stereotype}} >>{{/if}} {
 {{~/each}}
 {{~/if}}
 }
+
+{{~#each entity.fields as |field|}}
+{{~#if field.isEnum}}
+{{entity.name}} *--down- {{field.type}}
+{{~assign "enum" (lookup zdlModel.allEntitiesAndEnums field.type)}}
+{{> (partial 'enumClass.plantuml')}}
+{{/if}}
+{{~/each}}
+

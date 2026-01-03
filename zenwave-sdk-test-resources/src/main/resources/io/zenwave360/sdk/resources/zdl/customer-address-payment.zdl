@@ -1,0 +1,82 @@
+/**
+ * Sample ZenWave Model Definition.
+ * Use zenwave-scripts.zdl to generate your code from this model definition.
+ */
+config {
+    title "ZenWave Customer JPA Example"
+    basePackage "io.zenwave360.example"
+    persistence jpa
+    databaseType postgresql
+
+    layout CleanHexagonalProjectLayout
+
+    // these should match the values of openapi-generator-maven-plugin
+    // used by the OpenAPIControllersPlugin and SpringWebTestClientPlugin
+    openApiApiPackage "{{basePackage}}.adapters.web"
+    openApiModelPackage "{{basePackage}}.adapters.web.model"
+    openApiModelNameSuffix DTO
+}
+
+/**
+* Customer entity
+*/
+@aggregate
+@auditing // adds auditing fields to the entity
+entity Customer {
+    name String required maxlength(254) /** Customer name */
+    email String required maxlength(254)
+    /** Customer Addresses can be stored in a JSON column in the database. */
+    @json addresses Address[] minlength(1) maxlength(5) {
+        street String required maxlength(254)
+        city String required maxlength(254)
+    }
+}
+
+@auditing
+entity PaymentMethod {
+    type PaymentMethodType required
+    cardNumber String required
+}
+
+enum PaymentMethodType { VISA(1), MASTERCARD(2) }
+
+relationship OneToMany {
+    Customer{paymentMethods required maxlength(3)} to PaymentMethod{customer required}
+}
+
+// you can create 'inputs' as dtos for your service methods, or use entities directly
+input CustomerSearchCriteria {
+    name String
+    email String
+    city String
+    state String
+}
+
+@rest("/customers")
+service CustomerService for (Customer) {
+    @post
+    createCustomer(Customer) Customer withEvents CustomerEvent
+    @get("/{id}")
+    getCustomer(id) Customer?
+    @put("/{id}")
+    updateCustomer(id, Customer) Customer? withEvents CustomerEvent
+    @delete("/{id}")
+    deleteCustomer(id) withEvents CustomerDeletedEvent
+    @post("/search")
+    @paginated
+    searchCustomers(CustomerSearchCriteria) Customer[]
+}
+
+@copy(Customer)
+@asyncapi({ channel: "CustomersChannel", topic: "customers" })
+event CustomerEvent {
+    id Long required
+    version Integer
+    // all fields from Customer are copied here, but not relationships
+    paymentMethods PaymentMethod[]
+}
+
+@asyncapi({ channel: "CustomersChannel", topic: "customers" })
+event CustomerDeletedEvent {
+    id Long required
+}
