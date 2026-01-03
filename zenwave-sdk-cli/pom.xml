@@ -95,8 +95,8 @@
     </dependency>
     <dependency>
       <groupId>io.zenwave360.sdk</groupId>
-      <artifactId>zdl-jvm</artifactId>
-      <version>${zdl-jvm.version}</version>
+      <artifactId>dsl-kotlin-jvm</artifactId>
+      <version>${dsl-jvm.version}</version>
     </dependency>
 <!--    <dependency>-->
 <!--      <groupId>com.graphql-java</groupId>-->
