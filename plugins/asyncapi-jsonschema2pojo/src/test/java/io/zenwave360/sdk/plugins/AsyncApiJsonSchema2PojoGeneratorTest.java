@@ -30,6 +30,8 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
         new MainGenerator().generate(plugin);
 
         Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/v3/domain/events/CustomerInput.java").exists());
+        Assertions.assertTrue(new File("target/zenwave630/src/main/java/mypackage/CustomerCreated.java").exists());
+        Assertions.assertFalse(new File("target/zenwave630/src/main/java/io/example/v3/domain/events/CustomerCreated.java").exists());
     }
 
     @Test
