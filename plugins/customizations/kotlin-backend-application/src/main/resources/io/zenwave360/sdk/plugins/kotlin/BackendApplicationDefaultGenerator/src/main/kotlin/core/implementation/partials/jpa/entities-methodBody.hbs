@@ -28,7 +28,7 @@
         {{~/unless}}
         {{~#if method.withEvents}}
         ?.also {
-            {{~> (partial '../withEvents')}}
+            {{~> (partial '../withEvents') varName='it' }}
         }
         {{~/if}}
 {{!-- Optional<Entity> update(id, Entity) --}}
@@ -43,7 +43,7 @@
         {{~/unless}}
         {{~#if method.withEvents}}
         ?.also {
-            {{~> (partial '../withEvents')}}
+            {{~> (partial '../withEvents') varName='it' }}
         }
         {{~/if}}
 {{!-- Entity update(id, Entity) --}}
@@ -55,7 +55,7 @@
         ?.let { {{_entity.instanceName}}Repository.save(it) }
         {{~#if method.withEvents}}
         ?.also {
-            {{~> (partial '../withEvents')}}
+            {{~> (partial '../withEvents') varName='it' }}
         }
         {{~/if}}
         ?: throw NoSuchElementException("{{_entity.className}} not found with id: {{{idForStringInterpolation method}}}")
@@ -72,30 +72,30 @@
 {{~else if (and _entity method.parameter method.returnType method.returnTypeIsOptional)}}
     val {{_entity.instanceName}} = {{asInstanceName service.name}}Mapper.update({{_entity.className}}(), {{{mapperInputCallSignature method.parameter}}})
     // TODO: implement this method
-    {{~> (partial '../withEvents')}}
+    {{~> (partial '../withEvents') varName=_entity.instanceName }}
     return {{wrapWithMapper _entity}}
 {{!-- Optional<Entity> get(MyEntity) --}}
 {{~else if (and _entity method.parameter method.returnType)}}
     val {{_entity.instanceName}} = {{asInstanceName service.name}}Mapper.update({{_entity.className}}(), {{{mapperInputCallSignature method.parameter}}})
     // TODO: implement this method
-    {{~> (partial '../withEvents')}}
+    {{~> (partial '../withEvents') varName=_entity.instanceName }}
     return {{wrapWithMapper _entity}}
 {{!-- Optional<Entity> get() --}}
 {{~else if (and _entity method.returnType)}}
     val {{_entity.instanceName}} = {{_entity.className}}()
     // TODO: implement this method
-    {{~> (partial '../withEvents')}}
+    {{~> (partial '../withEvents') varName=_entity.instanceName }}
     return {{wrapWithMapper _entity}}
 {{!-- void get() --}}
 {{~else if (and _entity)}}
     val {{_entity.instanceName}} = {{_entity.className}}()
     // TODO: implement this method
-    {{~> (partial '../withEvents')}}
+    {{~> (partial '../withEvents') varName=_entity.instanceName }}
 
 {{!-- we know nothing (???) --}}
 {{~else~}}
     // TODO: implement this method
-    {{~> (partial '../withEvents')}}
+    {{~> (partial '../withEvents') varName=_entity.instanceName }}
   {{~#if method.returnType}}
     return null
   {{~/if}}

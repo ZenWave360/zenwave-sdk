@@ -4,7 +4,7 @@
         // emit events
         {{~#each (methodEvents method) as |event|}}
             {{~#if (methodEntity method)}}
-                {{~#assign 'eventsMapperCall'}} eventsMapper.as{{event.name}}({{_entity.instanceName}}{{#if method.returnTypeIsOptional~}} .get() {{~/if}}){{/assign}}
+                {{~#assign 'eventsMapperCall'}} eventsMapper.as{{event.name}}({{varName}} {{~#if method.returnTypeIsOptional~}} .get() {{~/if}}){{/assign}}
             {{~else}}
                 {{~#assign 'eventsMapperCall'}} eventsMapper.as{{event.name}}({{{methodParametersCallSignature method}}}){{/assign}}
             {{~/if}}

@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Service Implementation for managing {{service.entityNames}}.
  */
 @Service
-@Transactional(readOnly = true)
+@Transactional
 {{~#if useLombok}}
 @lombok.AllArgsConstructor
 {{~/if}}

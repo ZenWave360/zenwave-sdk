@@ -66,11 +66,6 @@ public class BackendApplicationDefaultHelpers {
         }
         return Map.of("templateFile", "aggregates-commands-methodBody", "aggregatesCommandsForMethod", aggregatesCommandsForMethod);
     }
-    public boolean isWriteMethod(Map method, Options options) {
-        var methodName = (String) method.get("name");
-        var hasId = method.get("paramId") != null;
-        return hasId || methodName.startsWith("create") || methodName.startsWith("update") || methodName.startsWith("delete");
-    }
 
     @Deprecated
     public boolean isCrudMethod(String crudMethodPrefix, Options options) {
