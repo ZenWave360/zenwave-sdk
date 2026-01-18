@@ -136,7 +136,7 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
                 layoutNames.configPackage, "DockerComposeInitializer.kt", KOTLIN, null, true);
 
         this.addTemplate(this.singleTemplates, "src/test/resources", "data.sql",
-                "", "data.sql", SQL, skipDataSql, true);
+                null, "data.sql", SQL, skipDataSql, true);
 
         this.addTemplate(this.singleTemplates, "src/main/kotlin", "core/inbound/dtos/package-info.kt",
                 layoutNames.inboundDtosPackage, "package-info.kt", KOTLIN, null, true);

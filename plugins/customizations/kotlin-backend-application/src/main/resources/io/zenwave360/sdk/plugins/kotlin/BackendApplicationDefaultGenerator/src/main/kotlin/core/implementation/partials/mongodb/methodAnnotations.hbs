@@ -1,5 +1,5 @@
-{{~#if (isWriteMethod method)}}
-    @Transactional
+{{~#if method.options.get}}
+    @Transactional(readOnly = true)
 {{~/if}}
 {{~#if method.options.async}}
     @Async{{#if (not (eq method.options.async true))}}("{{method.options.async}}"){{/if}}

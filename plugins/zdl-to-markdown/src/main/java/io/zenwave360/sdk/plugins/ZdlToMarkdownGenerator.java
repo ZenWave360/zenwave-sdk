@@ -25,7 +25,7 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
     public String sourceProperty = "zdl";
 
     public enum OutputFormat {
-        glossary, task_list, aggregate
+        glossary, task_list, aggregate, plantuml
     }
 
     @DocumentedOption(description = "Template type")
@@ -44,9 +44,10 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
         return ((HandlebarsEngine) getTemplateEngine()).getHandlebars();
     }
 
-    private final TemplateInput modelGlossaryTemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZdlToMarkdownGenerator/ZdlToMarkdownGenerator.md", "{{targetFile}}").withMimeType(OutputFormatType.MARKDOWN);
+    private final TemplateInput modelGlossaryTemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZdlToMarkdownGenerator/ZdlToMarkdownGlossary.md", "{{targetFile}}").withMimeType(OutputFormatType.MARKDOWN);
     private final TemplateInput modelTaskListTemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZdlToMarkdownGenerator/ZdlToMarkdownTaskList.md", "{{targetFile}}").withMimeType(OutputFormatType.MARKDOWN);
     private final TemplateInput modelAggregateTemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZdlToMarkdownGenerator/ZdlToMarkdownAggregate.md", "{{targetFile}}").withMimeType(OutputFormatType.MARKDOWN);
+    private final TemplateInput modelUmlTemplate = new TemplateInput("io/zenwave360/sdk/plugins/ZdlToMarkdownGenerator/ZdlToMarkdownPlantUML.md", "{{targetFile}}").withMimeType(OutputFormatType.MARKDOWN);
 
     public ZdlToMarkdownGenerator withOutputFormat(OutputFormat outputFormat) {
         this.outputFormat = outputFormat;
@@ -82,8 +83,24 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
 
         } else {
 
-            var template = outputFormat == OutputFormat.glossary ? modelGlossaryTemplate : modelTaskListTemplate;
-            targetFile = outputFormat == OutputFormat.glossary ? "zdl-glossary.md" : "zdl-task-list.md";
+            TemplateInput template = switch (outputFormat) {
+                case glossary -> {
+                    targetFile = "zdl-glossary.md";
+                    yield modelGlossaryTemplate;
+                }
+                case task_list -> {
+                    targetFile = "zdl-task-list.md";
+                    yield modelTaskListTemplate;
+                }
+                case plantuml -> {
+                    targetFile = "zdl-plantuml.md";
+                    yield modelUmlTemplate;
+                }
+                default -> {
+                    targetFile = "zdl-markdown.md";
+                    yield modelGlossaryTemplate;
+                }
+            };
 
             generatedProjectFiles.singleFiles.add(generateTemplateOutput(contextModel, template, zdlModel));
         }

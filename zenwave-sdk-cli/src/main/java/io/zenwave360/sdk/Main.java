@@ -27,10 +27,10 @@ public class Main implements Callable<Integer> {
     @Option(names = {"-p", "--plugin"}, arity = "0..1", description = "Plugin Class or short-code")
     String pluginClass;
 
-    @Option(names = {"-d", "--deps"}, arity = "0..1", description = "Dependencies to include in classpath")
+    @Option(names = {"-d", "--deps"}, split = ",", description = "Dependencies to include in classpath")
     List<String> deps;
 
-    @Option(names = {"-r", "--repos"}, arity = "0..1", description = "Repositories to search for extra dependencies")
+    @Option(names = {"-r", "--repos"}, split = ",", description = "Repositories to search for extra dependencies")
     List<String> repos;
 
     @Option(names = {"-f", "--force"}, description = "Force overwrite", defaultValue = "false")

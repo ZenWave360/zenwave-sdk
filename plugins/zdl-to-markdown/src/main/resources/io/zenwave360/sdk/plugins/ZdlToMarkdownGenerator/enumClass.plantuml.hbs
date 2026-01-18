@@ -1,0 +1,9 @@
+enum {{enum.name}} {
+{{~#if enum.javadoc}}
+{{{enum.javadoc}}}
+{{~/if}}
+--
+{{~#each enum.values }}
+{{ this.name }} {{#if this.value}}({{this.value}}){{/if}}
+{{~/each}}
+}

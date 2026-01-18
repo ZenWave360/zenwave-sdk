@@ -23,7 +23,7 @@ public class MavenLoader {
         log.info("Loading {} dependencies: {}", dependencies.size(), dependencies);
         var urls = findJBangDependencies(dependencies, repos);
         log.info("Found {} urls: {}", urls.size(), urls);
-        return new URLClassLoader(
+        return new ChildFirstURLClassLoader(
                 urls.toArray(new URL[0]),
                 Thread.currentThread().getContextClassLoader()
         );
@@ -37,7 +37,6 @@ public class MavenLoader {
         mavenRepos.add(new MavenRepo("central", "https://repo1.maven.org/maven2/"));
         mavenRepos.add(new MavenRepo("snapshots", "https://s01.oss.sonatype.org/content/repositories/snapshots/"));
 
-        // TODO: Resolve dependencies urls using JBang dependency resolver
         var modularClassPath = DependencyUtil.resolveDependencies(dependencies, mavenRepos, false, false, false, false, false);
         List<String> files = modularClassPath.getClassPaths();
         List<URL> urls = files.stream().map(f -> {
@@ -48,5 +47,27 @@ public class MavenLoader {
             }
         }).toList();
         return urls;
+    }
+
+    private static class ChildFirstURLClassLoader extends URLClassLoader {
+        public ChildFirstURLClassLoader(URL[] urls, ClassLoader parent) {
+            super(urls, parent);
+        }
+
+        @Override
+        protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+            Class<?> c = findLoadedClass(name);
+            if (c == null) {
+                try {
+                    c = findClass(name);
+                } catch (ClassNotFoundException e) {
+                    c = super.loadClass(name, resolve);
+                }
+            }
+            if (resolve) {
+                resolveClass(c);
+            }
+            return c;
+        }
     }
 }

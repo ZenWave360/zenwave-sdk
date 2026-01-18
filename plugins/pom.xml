@@ -19,6 +19,7 @@
             <groupId>io.zenwave360.sdk</groupId>
             <artifactId>zenwave-sdk-cli</artifactId>
             <version>${zenwave-sdk.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.zenwave360.sdk</groupId>

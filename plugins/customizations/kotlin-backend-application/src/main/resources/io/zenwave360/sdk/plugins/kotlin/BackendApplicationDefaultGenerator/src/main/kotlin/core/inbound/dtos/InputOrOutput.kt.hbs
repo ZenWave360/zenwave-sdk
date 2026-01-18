@@ -12,7 +12,7 @@ import jakarta.validation.constraints.*
 data class {{entity.className}}(
 {{#each entity.fields as |field|}}
     {{{fieldValidationAnnotations field}}}
-    val {{field.name}}: {{{fieldType field}}}{{#unless field.isArray}}?{{/unless}} {{{fieldTypeInitializer field}}}{{~#unless @last}},{{~/unless}}
+    val {{field.name}}: {{{fieldType field}}}{{#unless (or field.validations.required field.isArray)}}?{{/unless}} {{#if field.isArray}} = mutableListOf(){{/if}} {{~#unless @last}},{{~/unless}}
 {{/each}}
 ) {{addExtends entity}} : Serializable {
 

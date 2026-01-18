@@ -6,7 +6,7 @@
     var {{_entity.instanceName}} = {{asInstanceName service.name}}Mapper.update({{_entity.className}}(), {{{mapperInputCallSignature method.parameter}}})
     {{_entity.instanceName}} = {{_entity.instanceName}}Repository.save({{_entity.instanceName}})
     // TODO: may need to reload the entity to fetch relationships 'mapped by id'
-    {{~> (partial '../withEvents')}}
+    {{~> (partial '../withEvents') varName=_entity.instanceName }}
     return {{wrapWithMapper _entity}}
 {{~else if (isCrudMethod 'list' method=method entity=_entity )}}
     {{~#if method.options.paginated}}
@@ -34,12 +34,12 @@
 {{~else if (and (isCrudMethod 'delete' method=method entity=_entity ) notHasNaturalId)}}
     log.debug("[CRUD] Request to delete {{_entity.className}} : {}", id)
     {{_entity.instanceName}}Repository.deleteById(id)
-    {{~> (partial '../withEvents')}}
+    {{~> (partial '../withEvents') varName=_entity.instanceName }}
 {{~else if (and (isCrudMethod 'delete' method=method entity=_entity ) hasNaturalId)}}
     {{{logMethodCall method}}}
     val {{_entity.instanceName}} = {{_entity.instanceName}}Repository.{{{naturalIdsRepoMethodCallSignature _entity}}}
         ?.let { {{_entity.instanceName}}Repository.delete(it))
-        {{~> (partial '../withEvents')}}
+        {{~> (partial '../withEvents') varName=_entity.instanceName }}
     }
 {{~/if}}
 

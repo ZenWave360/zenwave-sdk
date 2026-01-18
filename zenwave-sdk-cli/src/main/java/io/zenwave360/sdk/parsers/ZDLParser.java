@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import io.zenwave360.zdl.ZdlParser;
+import io.zenwave360.language.zdl.ZdlParser;
 import io.zenwave360.sdk.Plugin;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.plugins.ConfigurationProvider;
@@ -61,7 +61,7 @@ public class ZDLParser implements Parser, ConfigurationProvider {
         if(zdlString == null) {
             zdlString = zdlFiles.stream().map(this::loadSpecFile).collect(Collectors.joining());
         }
-        Map<String, Object> zdlModel = new ZdlParser().parseModel(zdlString);
+        Map zdlModel = new ZdlParser().parseModel(zdlString);
         var problems = JSONPath.get(zdlModel, "$.problems", List.of());
         if(!problems.isEmpty()) {
             for (Object problem : problems) {
