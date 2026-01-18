@@ -137,6 +137,7 @@ components:
     CustomerCreated:
       type: "object"
       x-business-entity: "CustomerCreated"
+      javaType: "mypackage.CustomerCreated"
       properties:
         id:
           type: "string"

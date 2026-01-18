@@ -1,0 +1,10 @@
+val input: {{methodParameterType method}} = {{methodParameterType method}}(
+{{~#unless (jsonPath method 'options.patch')}}
+{{~#each entity.fields as |field|}}
+    {{~#unless (or field.isId field.isArray)}}
+    {{field.name}} = {{{populateField field}}}{{#unless @last}},{{/unless}}
+    {{~/unless}}
+{{~/each}}
+{{~/unless}}
+)
+

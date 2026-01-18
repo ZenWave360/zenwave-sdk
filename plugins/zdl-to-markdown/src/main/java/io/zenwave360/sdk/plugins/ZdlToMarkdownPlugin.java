@@ -11,8 +11,7 @@ import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 
-import static io.zenwave360.sdk.plugins.ZdlToMarkdownGenerator.OutputFormat.aggregate;
-import static io.zenwave360.sdk.plugins.ZdlToMarkdownGenerator.OutputFormat.task_list;
+import static io.zenwave360.sdk.plugins.ZdlToMarkdownGenerator.OutputFormat.*;
 
 @DocumentedPlugin(summary = "Generates Markdown glossary from Zdl Models",
         hiddenOptions = {"apiFile", "apiFiles", "layout", "targetFolder", "basePackage"})
@@ -23,7 +22,7 @@ public class ZdlToMarkdownPlugin extends Plugin {
         withChain(ZDLParser.class, ZDLProcessor.class, ZdlToMarkdownGenerator.class, TemplateFileWriter.class);
     }
 
-    public static String generateMarkdown(String zdlContent) throws IOException {
+    public static String generateGlossary(String zdlContent) throws IOException {
         Map<String, Object> model = new ZDLParser().withContent(zdlContent).parse();
         model = new ZDLProcessor().process(model);
         model = new PathsProcessor().process(model);
@@ -32,6 +31,17 @@ public class ZdlToMarkdownPlugin extends Plugin {
                 .getAllTemplateOutputs();
         return out.get(0).getContent();
     }
+
+    public static String generatePlantUML(String zdlContent) throws IOException {
+        Map<String, Object> model = new ZDLParser().withContent(zdlContent).parse();
+        model = new ZDLProcessor().process(model);
+        model = new PathsProcessor().process(model);
+        var out = new ZdlToMarkdownGenerator()
+                .withOutputFormat(plantuml)
+                .generate(model).getAllTemplateOutputs();
+        return out.get(0).getContent();
+    }
+
 
     public static String generateTaskList(String zdlContent) throws IOException {
         Map<String, Object> model = new ZDLParser().withContent(zdlContent).parse();

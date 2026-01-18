@@ -20,7 +20,8 @@ public class ZdlToJsonPlugin extends Plugin implements Processor {
 
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
-        var zdl = contextModel.get("zdl");
+        var zdl = (Map)  contextModel.get("zdl");
+        zdl.remove("javaModel");
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             var json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(zdl);

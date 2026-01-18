@@ -1,20 +1,12 @@
 {{~#each entities as |entity|}}
     {{~#if (isCrudMethod 'create' method=method entity=entity )}}
-        val input: {{methodParameterType method}} = {{methodParameterType method}}() // TODO
-        // TODO fill input data
-        {{~#each entity.fields as |field|}}
-        // input.{{field.name}} = {{{populateField field}}}
-        {{~/each}}
+        {{> (partial '../../partials/inputInstantiation')~}}
         val {{entity.instanceName}} = {{serviceInstance}}.create{{entity.className}}(input)
         assertNotNull({{entity.instanceName}}.id)
         assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}))
     {{~else if (isCrudMethod 'update' method=method entity=entity )}}
         {{{idFieldInitialization method}}}
-        val input: {{methodParameterType method}} = {{methodParameterType method}}() // TODO
-        // TODO fill input data
-        {{~#each entity.fields as |field|}}
-        // input.{{field.name}} = {{{populateField field}}}
-        {{~/each}}
+        {{> (partial '../../partials/inputInstantiation')~}}
         // assertTrue({{entity.instanceName}}Repository.containsKey(id))
         val {{entity.instanceName}} = {{serviceInstance}}.update{{entity.className}}({{idParamsCallSignature method}}, input)
         assertNotNull({{entity.instanceName}})

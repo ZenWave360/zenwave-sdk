@@ -18,17 +18,25 @@ public class ZdlToMarkdownGeneratorTest {
 
 
     @Test
-    public void test_customer_address_zdl_to_markdown() throws Exception {
+    public void test_customer_address_zdl_to_glossary() throws Exception {
         String content = parser.loadSpecFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
-        String markdown = ZdlToMarkdownPlugin.generateMarkdown(content);
+        String markdown = ZdlToMarkdownPlugin.generateGlossary(content);
         System.out.println(markdown);
         FileUtils.write(new File("target/customer-address.md"), markdown, "UTF-8");
     }
 
     @Test
+    public void test_customer_address_zdl_to_plantuml() throws Exception {
+        String content = parser.loadSpecFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address-payment.zdl");
+        String markdown = ZdlToMarkdownPlugin.generatePlantUML(content);
+        System.out.println(markdown);
+        FileUtils.write(new File("target/customer-address-plantuml.md"), markdown, "UTF-8");
+    }
+
+    @Test
     public void test_customer_address_relational_zdl_to_markdown() throws Exception {
         String content = parser.loadSpecFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address-relational.zdl");
-        String markdown = ZdlToMarkdownPlugin.generateMarkdown(content);
+        String markdown = ZdlToMarkdownPlugin.generateGlossary(content);
         System.out.println(markdown);
         FileUtils.write(new File("target/customer-address-relational.md"), markdown, "UTF-8");
     }
@@ -36,7 +44,7 @@ public class ZdlToMarkdownGeneratorTest {
     @Test
     public void test_customer_address_relational_zdl_to_markdown_with_aggregates() throws Exception {
         String content = parser.loadSpecFile("classpath:io/zenwave360/sdk/resources/zdl/orders-with-aggregate.zdl");
-        String markdown = ZdlToMarkdownPlugin.generateMarkdown(content);
+        String markdown = ZdlToMarkdownPlugin.generateGlossary(content);
         System.out.println(markdown);
         FileUtils.write(new File("target/orders-with-aggregate.md"), markdown, "UTF-8");
     }
@@ -70,7 +78,7 @@ public class ZdlToMarkdownGeneratorTest {
     @Test
     public void test_order_faults_zdl_to_markdown() throws Exception {
         String content = parser.loadSpecFile("classpath:io/zenwave360/sdk/resources/zdl/order-faults-attachments-model.zdl");
-        String markdown = ZdlToMarkdownPlugin.generateMarkdown(content);
+        String markdown = ZdlToMarkdownPlugin.generateGlossary(content);
         System.out.println(markdown);
         FileUtils.write(new File("target/customer-address-relational.md"), markdown, "UTF-8");
     }

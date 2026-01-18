@@ -1,17 +1,14 @@
 package io.zenwave360.sdk.generators;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
-import io.zenwave360.sdk.utils.CommaSeparatedCollectionDeserializationHandler;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
+import io.zenwave360.sdk.zdl.model.JavaZdlModel;
+import io.zenwave360.sdk.zdl.utils.ZDLAnnotator;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 
 import java.util.*;
@@ -44,6 +41,10 @@ public class ZDLProjectGenerator extends AbstractZDLGenerator {
     public GeneratedProjectFiles generateProjectFiles(Map<String, Object> contextModel) {
         var generatedProjectFiles = new GeneratedProjectFiles();
         var apiModel = getZDLModel(contextModel);
+
+        for (ZDLAnnotator zdlAnnotator : templates.getZDLAnnotators()) {
+            zdlAnnotator.annotate((JavaZdlModel) apiModel.get("javaModel"), apiModel);
+        }
 
         Map<String, Map<String, Object>> aggregates = (Map) apiModel.get("aggregates");
         Set<Map<String, Object>> domainEvents = new HashSet<>();
@@ -139,11 +140,10 @@ public class ZDLProjectGenerator extends AbstractZDLGenerator {
             }
         }
 
-        Map<String, Map<String, Object>> services = JSONPath.get(apiModel, "$.options.options.service", Collections.emptyMap());
+        Map<String, Map<String, Object>> services = JSONPath.get(apiModel, "$.services", Collections.emptyMap());
         List<Map<String, Object>> servicesList = new ArrayList<>();
         for (Map<String, Object> service : services.values()) {
-            String serviceName = ((String) service.get("value"));
-            service.put("name", serviceName);
+            String serviceName = ((String) service.get("name"));
             List<Map<String, Object>> entitiesByService = getEntitiesByService(service, apiModel);
             service.put("entities", entitiesByService);
 //            boolean isGenerateService = entitiesByService.stream().anyMatch(entity -> isGenerateEntity(entity));

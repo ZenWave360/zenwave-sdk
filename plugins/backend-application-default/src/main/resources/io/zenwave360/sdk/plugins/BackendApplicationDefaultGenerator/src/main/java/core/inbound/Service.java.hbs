@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 {{~#if useSpringModulith}}
 @org.springframework.modulith.NamedInterface("{{service.name}}")
 {{~/if}}
+{{annotate service.javaService service}}
 public interface {{service.name}} {
 
 {{#each service.methods as |method|}}
