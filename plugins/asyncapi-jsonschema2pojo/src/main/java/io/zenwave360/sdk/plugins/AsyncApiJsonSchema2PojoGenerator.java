@@ -14,18 +14,17 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.zenwave360.sdk.utils.AsyncAPIUtils;
+import io.zenwave360.sdk.utils.Maps;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.RegExUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.jsonschema2pojo.*;
 import org.jsonschema2pojo.exception.ClassAlreadyExistsException;
 import org.jsonschema2pojo.rules.RuleFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -151,33 +150,42 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
         codeModel.build(sourcesWriter, resourcesWriter);
     }
 
-    private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
     private final ObjectMapper jsonMapper = new ObjectMapper();
 
     protected String convertToJson(final Map<String, Object> payload, final String packageName) throws JsonProcessingException {
-        this.yamlMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        String yml = this.yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(payload);
+        populateJavaTypeFromRefsRecursively(payload, packageName);
+        return this.jsonMapper.writeValueAsString(payload);
+    }
 
-        List<String> regexPatterns = List.of(
-                originalRefProperty + ": \".*#/components/schemas/([^\"]+)\"",
-                "ref: \".*#/components/schemas/([^\"]+)\""
-        );
+    private void populateJavaTypeFromRefsRecursively(Object obj, String packageName) {
+        if (obj instanceof Map) {
+            Map<String, Object> map = (Map<String, Object>) obj;
 
-        for (String regex : regexPatterns) {
-            Pattern pattern = Pattern.compile(regex);
-            Matcher matcher = pattern.matcher(yml);
-            StringBuilder result = new StringBuilder();
+            // Replace $ref and original ref with javaType (if not already present)
+            if (!map.containsKey("javaType")) {
+                String refValue = JSONPath.getFirst(map, "$['" + originalRefProperty + "']", "$['$ref']");
 
-            while (matcher.find()) {
-                String matchedGroup = matcher.group(1);
-                String className = NamingUtils.asJavaTypeName(matchedGroup);
-                matcher.appendReplacement(result, "javaType: \"" + packageName + "." + className + "\"");
+                if (refValue != null && refValue.contains("#/components/schemas/")) {
+                    String schemaName = refValue.substring(refValue.lastIndexOf("/") + 1);
+                    String className = NamingUtils.asJavaTypeName(schemaName);
+                    map.put("javaType", packageName + "." + className);
+                }
             }
-            yml = matcher.appendTail(result).toString();
-        }
+            map.remove("x--original-$ref");
+            map.remove("$ref");
 
-        Object jsonObject = this.yamlMapper.readTree(yml);
-        return this.jsonMapper.writeValueAsString(jsonObject);
+
+            // Recursively process all values in the map
+            for (Object value : map.values()) {
+                populateJavaTypeFromRefsRecursively(value, packageName);
+            }
+
+        } else if (obj instanceof List) {
+            List<Object> list = (List<Object>) obj;
+            for (Object item : list) {
+                populateJavaTypeFromRefsRecursively(item, packageName);
+            }
+        }
     }
 
     private Annotator instantiate(Class<? extends Annotator> annotatorClass, GenerationConfig config) {
