@@ -94,7 +94,7 @@
       <version>${handlebars-java.version}</version>
     </dependency>
     <dependency>
-      <groupId>io.zenwave360.sdk</groupId>
+      <groupId>io.zenwave360.dsl</groupId>
       <artifactId>dsl-kotlin-jvm</artifactId>
       <version>${dsl-jvm.version}</version>
     </dependency>
