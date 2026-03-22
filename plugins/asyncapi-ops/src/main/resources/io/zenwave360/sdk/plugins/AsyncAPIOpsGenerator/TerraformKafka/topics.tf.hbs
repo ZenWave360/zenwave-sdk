@@ -1,0 +1,17 @@
+
+{{~#each channels as |channel|}}
+# Local / self-hosted Kafka topic (staging uses local Kafka)
+resource "kafka_topic" "{{channel.x--channel}}" {
+  name               = "{{channel.address}}"
+  replication_factor = {{channel.bindings.kafka.replicationFactor ?? 1}}
+  partitions         = {{channel.bindings.kafka.replicationFactor ?? 1}}
+
+  config = {
+    "cleanup.policy"      = local.cleanup_policy
+    "retention.ms"        = local.retention_ms
+    "retention.bytes"     = local.retention_bytes
+    "delete.retention.ms" = local.delete_retention_ms
+    "max.message.bytes"   = local.max_message_bytes
+  }
+}
+{{~/each}}
