@@ -18,10 +18,14 @@
     {{~#unless skipDiagrams}}
 ```plantuml
 @startuml
-{{> (partial 'entityClass.plantuml') stereotype='aggregate' }}
+{{#if aggregate}}
+{{> (partial 'aggregateClass.plantuml') aggregate=aggregate }}
+{{aggregate.name}} *--down- {{entity.name}}
+{{/if}}
+{{> (partial 'entityClass.plantuml') entity=entity stereotype='aggregate' }}
 
 {{~#each (entityAssociations entity) as |association|}}
-    {{../entity.name}} {{association.linkType}}down- {{association.entity.name}}
+    {{association.source}} {{association.linkType}}down- {{association.entity.name}}
     {{> (partial 'entityClass.plantuml') entity=association.entity }}
 {{~/each}}
 @enduml
