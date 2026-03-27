@@ -1,0 +1,13 @@
+class {{aggregate.name}} << aggregate >> {
+{{~#if aggregate.javadoc}}
+{{{aggregate.javadoc}}}
+--
+{{~/if}}
+{{~#each aggregate.commands as |method|}}
+{{~#each (methodAnnotations method) as |annotation|}}
+    {{{annotation}}}
+{{~/each}}
+    {{method.name}}({{methodParamsSignature method}}){{#if (methodEvents method)}} withEvents {{methodEvents method}}{{/if}}
+
+{{~/each}}
+}

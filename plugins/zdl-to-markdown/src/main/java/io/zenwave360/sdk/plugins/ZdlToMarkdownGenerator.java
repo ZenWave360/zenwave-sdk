@@ -111,14 +111,13 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
     {
         getHandlebars().registerHelper("entityAssociations", (entity, options) -> {
             var zdlModel = options.context.get("zdlModel", true);
-            var compositions = JSONPath.get(entity, "fields[*][?(@.isEntity==true || @.isEnum==true)].type", List.of());
-            var associations = JSONPath.get(entity, "relationships[?(@.fieldName)].otherEntityName", List.of());
-            var entityAssociations = new ArrayList<Map>();
-            compositions.stream().map(name -> Maps.of("linkType", "*--", "entity", JSONPath.get(zdlModel, "$.entities." + name))).forEach(entityAssociations::add);
-            compositions.stream().map(name -> Maps.of("linkType", "*--", "entity", JSONPath.get(zdlModel, "$.enums." + name))).forEach(entityAssociations::add);
-            associations.stream().map(name -> Maps.of("linkType", "o--", "entity", JSONPath.get(zdlModel, "$.entities." + name))).forEach(entityAssociations::add);
-            return entityAssociations.stream().filter(e -> e.get("entity") != null).collect(Collectors.toList());
+            return collectEntityAssociations((Map<String, Object>) entity, (Map<String, Object>) zdlModel);
         });
+        getHandlebars().registerHelper("collectionAssociations", (entities, options) -> {
+            var zdlModel = options.context.get("zdlModel", true);
+            return collectCollectionAssociations((Collection<Map<String, Object>>) entities, (Map<String, Object>) zdlModel);
+        });
+        getHandlebars().registerHelper("associationTargets", (associations, options) -> uniqueAssociationTargets((Collection<Map<String, Object>>) associations));
         getHandlebars().registerHelper("relationshipType", (relationship, options) -> {
             boolean isOwnerSide = JSONPath.get(relationship, "ownerSide", false);
             var type = JSONPath.get(relationship, "type");
@@ -150,6 +149,7 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
             var events = JSONPath.get(method, "withEvents", List.of());
             return StringUtils.join(events, " ").replaceAll(", ", " | ");
         });
+        getHandlebars().registerHelper("methodAnnotations", (method, options) -> formatMethodAnnotations((Map<String, Object>) method));
 
         getHandlebars().registerHelper("serviceInputs", (service, options) -> {
             var zdlModel = options.context.get("zdlModel", true);
@@ -300,6 +300,78 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
         return (List<Map<String, Object>>) JSONPath.get(aggregateOrEntity, "$.commands[*]", List.<Map<String, Object>>of());
     }
 
+    private static List<Map<String, Object>> collectEntityAssociations(Map<String, Object> entity, Map<String, Object> zdlModel) {
+        if (entity == null || zdlModel == null) {
+            return List.of();
+        }
+        var associations = new ArrayList<Map<String, Object>>();
+        var visitedEntities = new LinkedHashSet<String>();
+        var visitedLinks = new LinkedHashSet<String>();
+        collectEntityAssociations(entity, zdlModel, associations, visitedEntities, visitedLinks);
+        return associations;
+    }
+
+    private static List<Map<String, Object>> collectCollectionAssociations(Collection<Map<String, Object>> entities, Map<String, Object> zdlModel) {
+        if (entities == null || zdlModel == null) {
+            return List.of();
+        }
+        var associations = new ArrayList<Map<String, Object>>();
+        var visitedEntities = new LinkedHashSet<String>();
+        var visitedLinks = new LinkedHashSet<String>();
+        for (var entity : entities) {
+            collectEntityAssociations(entity, zdlModel, associations, visitedEntities, visitedLinks);
+        }
+        return associations;
+    }
+
+    private static void collectEntityAssociations(Map<String, Object> entity,
+                                                  Map<String, Object> zdlModel,
+                                                  List<Map<String, Object>> associations,
+                                                  Set<String> visitedEntities,
+                                                  Set<String> visitedLinks) {
+        if (entity == null) {
+            return;
+        }
+        String sourceName = JSONPath.get(entity, "$.name", (String) null);
+        if (sourceName == null || !visitedEntities.add(sourceName)) {
+            return;
+        }
+
+        var compositions = JSONPath.get(entity, "fields[*][?(@.isEntity==true || @.isEnum==true)].type", List.<String>of());
+        for (String targetName : compositions) {
+            Map<String, Object> target = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + targetName);
+            addAssociation(sourceName, "*--", target, associations, visitedLinks);
+            if (target != null && !"enums".equals(JSONPath.get(target, "type", ""))) {
+                collectEntityAssociations(target, zdlModel, associations, visitedEntities, visitedLinks);
+            }
+        }
+
+        var relationshipTargets = JSONPath.get(entity, "relationships[?(@.fieldName)].otherEntityName", List.<String>of());
+        for (String targetName : relationshipTargets) {
+            Map<String, Object> target = JSONPath.get(zdlModel, "$.entities." + targetName);
+            addAssociation(sourceName, "o--", target, associations, visitedLinks);
+            collectEntityAssociations(target, zdlModel, associations, visitedEntities, visitedLinks);
+        }
+    }
+
+    private static void addAssociation(String sourceName,
+                                       String linkType,
+                                       Map<String, Object> target,
+                                       List<Map<String, Object>> associations,
+                                       Set<String> visitedLinks) {
+        if (target == null) {
+            return;
+        }
+        String targetName = JSONPath.get(target, "$.name", (String) null);
+        if (targetName == null) {
+            return;
+        }
+        String key = sourceName + "|" + linkType + "|" + targetName;
+        if (visitedLinks.add(key)) {
+            associations.add(Map.of("source", sourceName, "linkType", linkType, "entity", target));
+        }
+    }
+
     private static Object transitionFrom(Map<String, Object> methodOrCommand) {
         if (methodOrCommand == null) {
             return null;
@@ -386,6 +458,66 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
             return signature + "\\n/ " + StringUtils.join(eventNames, ", ");
         }
         return signature;
+    }
+
+    private static List<String> formatMethodAnnotations(Map<String, Object> method) {
+        if (method == null) {
+            return List.of();
+        }
+        var annotations = new ArrayList<String>();
+        Map<String, Object> options = JSONPath.get(method, "$.options", Map.of());
+        for (var entry : options.entrySet()) {
+            annotations.add(formatAnnotation(entry.getKey(), entry.getValue()));
+        }
+        return annotations;
+    }
+
+    private static String formatAnnotation(String name, Object value) {
+        if (value == null || Boolean.TRUE.equals(value)) {
+            return "@" + name;
+        }
+        if (value instanceof String stringValue) {
+            return "@" + name + "(\"" + stringValue + "\")";
+        }
+        if (value instanceof Collection<?> collectionValue) {
+            return "@" + name + "(" + collectionValue.stream().map(String::valueOf).collect(Collectors.joining(", ")) + ")";
+        }
+        if (value instanceof Map<?, ?> mapValue) {
+            return "@" + name + "(" + mapValue.entrySet().stream()
+                    .map(entry -> entry.getKey() + ": " + formatAnnotationValue(entry.getValue()))
+                    .collect(Collectors.joining(", ")) + ")";
+        }
+        return "@" + name + "(" + value + ")";
+    }
+
+    private static String formatAnnotationValue(Object value) {
+        if (value instanceof Collection<?> collectionValue) {
+            return "[" + collectionValue.stream().map(String::valueOf).collect(Collectors.joining(", ")) + "]";
+        }
+        if (value instanceof Map<?, ?> mapValue) {
+            return "{" + mapValue.entrySet().stream()
+                    .map(entry -> entry.getKey() + ": " + formatAnnotationValue(entry.getValue()))
+                    .collect(Collectors.joining(", ")) + "}";
+        }
+        return String.valueOf(value);
+    }
+
+    private static List<Map<String, Object>> uniqueAssociationTargets(Collection<Map<String, Object>> associations) {
+        if (associations == null) {
+            return List.of();
+        }
+        var unique = new LinkedHashMap<String, Map<String, Object>>();
+        for (var association : associations) {
+            if (association == null) {
+                continue;
+            }
+            var entity = (Map<String, Object>) association.get("entity");
+            String name = JSONPath.get(entity, "$.name", (String) null);
+            if (name != null) {
+                unique.putIfAbsent(name, entity);
+            }
+        }
+        return new ArrayList<>(unique.values());
     }
 
     private static String lifecycleInitialState(Map<String, Object> lifecycle) {

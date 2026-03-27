@@ -1,34 +1,48 @@
-# {{{zdlModel.title}}}
+# {{{zdlModel.config.title}}}
+{{~#if zdlModel.javadoc}}
 
 {{{zdlModel.javadoc}}}
-
+{{~/if}}
 {{~#each zdlModel.services as |service|}}
 
 ## <a name="service_{{service.name}}"></a> {{service.name}}
+{{~#if service.javadoc}}
 
 {{{service.javadoc}}}
+{{~/if}}
 
 ```plantuml
 @startuml
 class {{service.name}}  << service >> {
 {{~#each service.methods as |method|}}
-    {{method.name}}({{methodParamsSignature method}}): {{methodReturnType method}} withEvents {{methodEvents method}}
+{{~#each (methodAnnotations method) as |annotation|}}
+    {{{annotation}}}
+{{~/each}}
+    {{method.name}}({{methodParamsSignature method}}): {{methodReturnType method}}{{#if (methodEvents method)}} withEvents {{methodEvents method}}{{/if}}
 {{~/each}}
 }
 @enduml
 ```
 
 {{#each service.aggregates as |aggregates|}}
-{{~assign "entity" (lookup zdlModel.entities this)}}
 {{~assign "aggregate" (lookup zdlModel.aggregates this)}}
-### <a name="aggregate_{{entity.name}}"></a> {{entity.name}}
+{{~assign "entity" (lookup zdlModel.entities aggregate.aggregateRoot)}}
+### <a name="aggregate_{{aggregate.name}}"></a> {{aggregate.name}}
 ```plantuml
 @startuml
-{{> (partial 'entityClass.plantuml') stereotype='aggregate' }}
+{{> (partial 'aggregateClass.plantuml') aggregate=aggregate }}
+{{aggregate.name}} *--down- {{entity.name}}
+{{> (partial 'entityClass.plantuml') entity=entity stereotype='aggregate' }}
 
 {{~#each (entityAssociations entity) as |association|}}
-    {{../entity.name}} {{association.linkType}}down- {{association.entity.name}}
-    {{> (partial 'entityClass.plantuml') entity=association.entity }}
+    {{association.source}} {{association.linkType}}down- {{association.entity.name}}
+{{~/each}}
+{{~#each (associationTargets (entityAssociations entity)) as |relatedEntity|}}
+    {{~#if (eq relatedEntity.type 'enums')}}
+    {{> (partial 'enumClass.plantuml') enum=relatedEntity }}
+    {{~else}}
+    {{> (partial 'entityClass.plantuml') entity=relatedEntity }}
+    {{~/if}}
 {{~/each}}
 @enduml
 ```
@@ -63,6 +77,16 @@ class {{service.name}}  << service >> {
     {{~#each inputs as |entity|}}
         {{> (partial 'entityClass.plantuml') stereotype=entity.type }}
     {{~/each}}
+    {{~#each (collectionAssociations inputs) as |association|}}
+        {{association.source}} {{association.linkType}}down- {{association.entity.name}}
+    {{~/each}}
+    {{~#each (associationTargets (collectionAssociations inputs)) as |relatedEntity|}}
+        {{~#if (eq relatedEntity.type 'enums')}}
+        {{> (partial 'enumClass.plantuml') enum=relatedEntity }}
+        {{~else}}
+        {{> (partial 'entityClass.plantuml') entity=relatedEntity }}
+        {{~/if}}
+    {{~/each}}
 @enduml
 ```
 {{/if}}
@@ -75,6 +99,16 @@ class {{service.name}}  << service >> {
 @startuml
     {{~#each outputs as |entity|}}
 {{> (partial 'entityClass.plantuml') stereotype=entity.type }}
+    {{~/each}}
+    {{~#each (collectionAssociations outputs) as |association|}}
+        {{association.source}} {{association.linkType}}down- {{association.entity.name}}
+    {{~/each}}
+    {{~#each (associationTargets (collectionAssociations outputs)) as |relatedEntity|}}
+        {{~#if (eq relatedEntity.type 'enums')}}
+        {{> (partial 'enumClass.plantuml') enum=relatedEntity }}
+        {{~else}}
+        {{> (partial 'entityClass.plantuml') entity=relatedEntity }}
+        {{~/if}}
     {{~/each}}
 @enduml
 ```
@@ -89,6 +123,16 @@ class {{service.name}}  << service >> {
 @startuml
     {{~#each events as |entity|}}
 {{> (partial 'entityClass.plantuml') stereotype=entity.type }}
+    {{~/each}}
+    {{~#each (collectionAssociations events) as |association|}}
+        {{association.source}} {{association.linkType}}down- {{association.entity.name}}
+    {{~/each}}
+    {{~#each (associationTargets (collectionAssociations events)) as |relatedEntity|}}
+        {{~#if (eq relatedEntity.type 'enums')}}
+        {{> (partial 'enumClass.plantuml') enum=relatedEntity }}
+        {{~else}}
+        {{> (partial 'entityClass.plantuml') entity=relatedEntity }}
+        {{~/if}}
     {{~/each}}
 @enduml
 ```

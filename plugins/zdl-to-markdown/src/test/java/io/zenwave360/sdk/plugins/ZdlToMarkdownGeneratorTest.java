@@ -26,7 +26,7 @@ public class ZdlToMarkdownGeneratorTest {
     }
 
     @Test
-    public void test_customer_address_zdl_to_plantuml() throws Exception {
+    public void test_customer_address_aggregates_zdl_to_plantuml() throws Exception {
         String content = parser.loadSpecFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address-payment.zdl");
         String markdown = ZdlToMarkdownPlugin.generatePlantUML(content);
         System.out.println(markdown);
@@ -49,6 +49,13 @@ public class ZdlToMarkdownGeneratorTest {
         FileUtils.write(new File("target/orders-with-aggregate.md"), markdown, "UTF-8");
     }
 
+    @Test
+    public void test_orders_with_aggregate_zdl_to_plantuml() throws Exception {
+        String content = parser.loadSpecFile("classpath:io/zenwave360/sdk/resources/zdl/orders-with-aggregate.zdl");
+        String markdown = ZdlToMarkdownPlugin.generatePlantUML(content);
+        System.out.println(markdown);
+        FileUtils.write(new File("target/orders-with-aggregate-plantuml.md"), markdown, "UTF-8");
+    }
 
     @Test
     public void test_customer_address_relational_zdl_to_task_list() throws Exception {
