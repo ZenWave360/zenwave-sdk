@@ -72,11 +72,10 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
         if(outputFormat == OutputFormat.aggregate) {
 
             targetFile = "zdl-aggregate-" + aggregateName + ".md";
-            var aggregate = (Map) JSONPath.get(zdlModel, "$.aggregates." + aggregateName);
-            var entity = (Map) JSONPath.get(zdlModel, "$.entities." + aggregateName);
-            if (entity == null) {
-                entity = (Map) JSONPath.get(zdlModel, "$.entities." + aggregate.get("aggregateRoot"));
-            }
+            var aggregate = resolveAggregate(zdlModel, aggregateName);
+            var entity = aggregate != null
+                    ? resolveAggregateRootEntity(zdlModel, aggregate)
+                    : (Map) JSONPath.get(zdlModel, "$.entities." + aggregateName);
             zdlModel.put("aggregate", aggregate);
             zdlModel.put("entity", entity);
             generatedProjectFiles.singleFiles.add(generateTemplateOutput(contextModel, modelAggregateTemplate, zdlModel));
@@ -117,7 +116,18 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
             var zdlModel = options.context.get("zdlModel", true);
             return collectCollectionAssociations((Collection<Map<String, Object>>) entities, (Map<String, Object>) zdlModel);
         });
-        getHandlebars().registerHelper("associationTargets", (associations, options) -> uniqueAssociationTargets((Collection<Map<String, Object>>) associations));
+        getHandlebars().registerHelper("associationTargets", (associations, options) -> {
+            Object excludedNames = options.param(0, null);
+            return uniqueAssociationTargets((Collection<Map<String, Object>>) associations, excludedNames);
+        });
+        getHandlebars().registerHelper("resolveDiagramAggregate", (aggregateOrEntityName, options) -> {
+            var zdlModel = (Map<String, Object>) options.context.get("zdlModel", true);
+            return resolveAggregate(zdlModel, aggregateOrEntityName);
+        });
+        getHandlebars().registerHelper("resolveDiagramEntity", (aggregateOrEntityName, options) -> {
+            var zdlModel = (Map<String, Object>) options.context.get("zdlModel", true);
+            return resolveDiagramEntity(zdlModel, aggregateOrEntityName);
+        });
         getHandlebars().registerHelper("relationshipType", (relationship, options) -> {
             boolean isOwnerSide = JSONPath.get(relationship, "ownerSide", false);
             var type = JSONPath.get(relationship, "type");
@@ -256,12 +266,23 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
             return null;
         }
         if (aggregateOrName instanceof Map) {
-            return (Map<String, Object>) aggregateOrName;
+            var aggregate = (Map<String, Object>) aggregateOrName;
+            return isNamedAggregate(aggregate) ? aggregate : null;
         }
         if (aggregateOrName instanceof String name && zdlModel != null) {
-            return (Map<String, Object>) JSONPath.get(zdlModel, "$.aggregates." + name);
+            var aggregate = (Map<String, Object>) JSONPath.get(zdlModel, "$.aggregates." + name);
+            return isNamedAggregate(aggregate) ? aggregate : null;
         }
         return null;
+    }
+
+    private static boolean isNamedAggregate(Map<String, Object> aggregate) {
+        if (aggregate == null) {
+            return false;
+        }
+        String name = JSONPath.get(aggregate, "$.name", (String) null);
+        String aggregateRoot = JSONPath.get(aggregate, "$.aggregateRoot", (String) null);
+        return StringUtils.isNotBlank(name) && StringUtils.isNotBlank(aggregateRoot);
     }
 
     private static Map<String, Object> resolveAggregateRootEntity(Map<String, Object> zdlModel, Map<String, Object> aggregate) {
@@ -279,6 +300,17 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
             entity = (Map<String, Object>) JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + entityName);
         }
         return entity;
+    }
+
+    private static Map<String, Object> resolveDiagramEntity(Map<String, Object> zdlModel, Object aggregateOrEntityName) {
+        if (zdlModel == null || aggregateOrEntityName == null) {
+            return null;
+        }
+        Map<String, Object> aggregate = resolveAggregate(zdlModel, aggregateOrEntityName);
+        if (aggregate != null) {
+            return resolveAggregateRootEntity(zdlModel, aggregate);
+        }
+        return (Map<String, Object>) JSONPath.get(zdlModel, "$.entities." + aggregateOrEntityName);
     }
 
     private static Map<String, Object> lifecycleOf(Map<String, Object> model) {
@@ -346,12 +378,98 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
             }
         }
 
-        var relationshipTargets = JSONPath.get(entity, "relationships[?(@.fieldName)].otherEntityName", List.<String>of());
-        for (String targetName : relationshipTargets) {
+        String sourceBoundary = aggregateBoundaryName(zdlModel, sourceName);
+        var relationships = JSONPath.get(entity, "relationships[?(@.fieldName)]", List.<Map<String, Object>>of());
+        for (Map<String, Object> relationship : relationships) {
+            if (!Boolean.TRUE.equals(JSONPath.get(relationship, "$.ownerSide", false))) {
+                continue;
+            }
+            String targetName = JSONPath.get(relationship, "$.otherEntityName", (String) null);
+            if (targetName == null) {
+                continue;
+            }
             Map<String, Object> target = JSONPath.get(zdlModel, "$.entities." + targetName);
-            addAssociation(sourceName, "o--", target, associations, visitedLinks);
-            collectEntityAssociations(target, zdlModel, associations, visitedEntities, visitedLinks);
+            String targetBoundary = aggregateBoundaryName(zdlModel, targetName);
+            boolean sameBoundary = Objects.equals(sourceBoundary, targetBoundary);
+            addAssociation(sourceName, sameBoundary ? "o--" : "..>", target, associations, visitedLinks);
+            if (sameBoundary) {
+                collectEntityAssociations(target, zdlModel, associations, visitedEntities, visitedLinks);
+            }
         }
+
+    }
+
+    private static String aggregateBoundaryName(Map<String, Object> zdlModel, String entityName) {
+        if (zdlModel == null || entityName == null) {
+            return null;
+        }
+        if (Boolean.TRUE.equals(JSONPath.get(zdlModel, "$.entities." + entityName + ".options.aggregate", false))) {
+            return entityName;
+        }
+        for (String aggregateRoot : aggregateBoundaryRoots(zdlModel)) {
+            if (isEntityWithinAggregateBoundary(zdlModel, aggregateRoot, entityName, new LinkedHashSet<>())) {
+                return aggregateRoot;
+            }
+        }
+        return null;
+    }
+
+    private static List<String> aggregateBoundaryRoots(Map<String, Object> zdlModel) {
+        var roots = new LinkedHashSet<String>();
+        var aggregates = (Map<String, Object>) JSONPath.get(zdlModel, "$.aggregates", Map.<String, Object>of());
+        for (Object value : aggregates.values()) {
+            if (!(value instanceof Map<?, ?> aggregate)) {
+                continue;
+            }
+            String aggregateRoot = JSONPath.get(aggregate, "$.aggregateRoot", (String) null);
+            if (aggregateRoot != null) {
+                roots.add(aggregateRoot);
+            }
+        }
+        var entities = (Map<String, Object>) JSONPath.get(zdlModel, "$.entities", Map.<String, Object>of());
+        for (Object value : entities.values()) {
+            if (!(value instanceof Map<?, ?> entity)) {
+                continue;
+            }
+            if (Boolean.TRUE.equals(JSONPath.get(entity, "$.options.aggregate", false))) {
+                String entityName = JSONPath.get(entity, "$.name", (String) null);
+                if (entityName != null) {
+                    roots.add(entityName);
+                }
+            }
+        }
+        return new ArrayList<>(roots);
+    }
+
+    private static boolean isEntityWithinAggregateBoundary(Map<String, Object> zdlModel,
+                                                           String currentEntityName,
+                                                           String targetEntityName,
+                                                           Set<String> visited) {
+        if (zdlModel == null || currentEntityName == null || targetEntityName == null || !visited.add(currentEntityName)) {
+            return false;
+        }
+        if (currentEntityName.equals(targetEntityName)) {
+            return true;
+        }
+        var entity = (Map<String, Object>) JSONPath.get(zdlModel, "$.entities." + currentEntityName);
+        if (entity == null) {
+            return false;
+        }
+        var nestedTypes = new LinkedHashSet<String>();
+        nestedTypes.addAll(JSONPath.get(entity, "fields[*][?(@.isEntity==true)].type", List.<String>of()));
+        nestedTypes.addAll(JSONPath.get(entity, "relationships[?(@.fieldName)].otherEntityName", List.<String>of()));
+        for (String nestedType : nestedTypes) {
+            if (targetEntityName.equals(nestedType)) {
+                return true;
+            }
+            if (Boolean.TRUE.equals(JSONPath.get(zdlModel, "$.entities." + nestedType + ".options.aggregate", false))) {
+                continue;
+            }
+            if (isEntityWithinAggregateBoundary(zdlModel, nestedType, targetEntityName, visited)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void addAssociation(String sourceName,
@@ -474,7 +592,7 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
 
     private static String formatAnnotation(String name, Object value) {
         if (value == null || Boolean.TRUE.equals(value)) {
-            return "@" + name;
+            return "@" + name + "()";
         }
         if (value instanceof String stringValue) {
             return "@" + name + "(\"" + stringValue + "\")";
@@ -502,10 +620,11 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
         return String.valueOf(value);
     }
 
-    private static List<Map<String, Object>> uniqueAssociationTargets(Collection<Map<String, Object>> associations) {
+    private static List<Map<String, Object>> uniqueAssociationTargets(Collection<Map<String, Object>> associations, Object excludedNames) {
         if (associations == null) {
             return List.of();
         }
+        Set<String> excluded = normalizeExcludedNames(excludedNames);
         var unique = new LinkedHashMap<String, Map<String, Object>>();
         for (var association : associations) {
             if (association == null) {
@@ -513,11 +632,24 @@ public class ZdlToMarkdownGenerator extends AbstractZDLGenerator {
             }
             var entity = (Map<String, Object>) association.get("entity");
             String name = JSONPath.get(entity, "$.name", (String) null);
-            if (name != null) {
+            if (name != null && !excluded.contains(name)) {
                 unique.putIfAbsent(name, entity);
             }
         }
         return new ArrayList<>(unique.values());
+    }
+
+    private static Set<String> normalizeExcludedNames(Object excludedNames) {
+        if (excludedNames == null) {
+            return Set.of();
+        }
+        if (excludedNames instanceof Collection<?> collection) {
+            return collection.stream()
+                    .filter(Objects::nonNull)
+                    .map(Object::toString)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+        }
+        return Set.of(excludedNames.toString());
     }
 
     private static String lifecycleInitialState(Map<String, Object> lifecycle) {

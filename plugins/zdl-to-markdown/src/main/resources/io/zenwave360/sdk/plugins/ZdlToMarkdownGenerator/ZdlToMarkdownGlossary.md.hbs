@@ -25,7 +25,13 @@
 
 {{~#each (entityAssociations entity) as |association|}}
     {{association.source}} {{association.linkType}}down- {{association.entity.name}}
-    {{> (partial 'entityClass.plantuml') entity=association.entity }}
+{{~/each}}
+{{~#each (associationTargets (entityAssociations entity) entity.name) as |relatedEntity|}}
+    {{~#if (eq relatedEntity.type 'enums')}}
+    {{> (partial 'enumClass.plantuml') enum=relatedEntity }}
+    {{~else}}
+    {{> (partial 'entityClass.plantuml') entity=relatedEntity }}
+    {{~/if}}
 {{~/each}}
 @enduml
 ```

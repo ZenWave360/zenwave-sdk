@@ -1,16 +1,21 @@
 ```plantuml
 @startuml
 {{#each service.aggregates as |aggregates|}}
-    {{~assign "aggregate" (lookup zdlModel.aggregates this)}}
-    {{~assign "entity" (lookup zdlModel.entities aggregate.aggregateRoot)}}
+    {{~assign "aggregate" (resolveDiagramAggregate this)}}
+    {{~assign "entity" (resolveDiagramEntity this)}}
+    {{~#if aggregate}}
     {{service.name}} -up-> {{aggregate.name}}
     {{> (partial 'aggregateClass.plantuml') aggregate=aggregate }}
     {{aggregate.name}} *--down- {{entity.name}}
     {{> (partial 'entityClass.plantuml') entity=entity stereotype='aggregate' }}
+    {{~else}}
+    {{service.name}} -up-> {{entity.name}}
+    {{> (partial 'entityClass.plantuml') entity=entity stereotype='aggregate' }}
+    {{~/if}}
     {{~#each (entityAssociations entity) as |association|}}
     {{association.source}} {{association.linkType}}down- {{association.entity.name}}
     {{~/each}}
-    {{~#each (associationTargets (entityAssociations entity)) as |relatedEntity|}}
+    {{~#each (associationTargets (entityAssociations entity) entity.name) as |relatedEntity|}}
     {{~#if (eq relatedEntity.type 'enums')}}
     {{> (partial 'enumClass.plantuml') enum=relatedEntity }}
     {{~else}}
@@ -74,16 +79,6 @@ class {{service.name}}  << service >> {
     namespace events #DDDDDD {
     {{~#each events as |event|}}
         {{> (partial 'entityClass.plantuml') entity=event stereotype=event.type }}
-    {{~/each}}
-    {{~#each (collectionAssociations events) as |association|}}
-        {{association.source}} {{association.linkType}}down- {{association.entity.name}}
-    {{~/each}}
-    {{~#each (associationTargets (collectionAssociations events)) as |relatedEntity|}}
-        {{~#if (eq relatedEntity.type 'enums')}}
-        {{> (partial 'enumClass.plantuml') enum=relatedEntity }}
-        {{~else}}
-        {{> (partial 'entityClass.plantuml') entity=relatedEntity }}
-        {{~/if}}
     {{~/each}}
     }
 {{/if}}

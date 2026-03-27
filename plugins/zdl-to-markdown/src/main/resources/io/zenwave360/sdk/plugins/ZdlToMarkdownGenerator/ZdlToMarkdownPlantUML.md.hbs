@@ -25,19 +25,26 @@ class {{service.name}}  << service >> {
 ```
 
 {{#each service.aggregates as |aggregates|}}
-{{~assign "aggregate" (lookup zdlModel.aggregates this)}}
-{{~assign "entity" (lookup zdlModel.entities aggregate.aggregateRoot)}}
+{{~assign "aggregate" (resolveDiagramAggregate this)}}
+{{~assign "entity" (resolveDiagramEntity this)}}
+{{~#if aggregate}}
 ### <a name="aggregate_{{aggregate.name}}"></a> {{aggregate.name}}
 ```plantuml
 @startuml
 {{> (partial 'aggregateClass.plantuml') aggregate=aggregate }}
 {{aggregate.name}} *--down- {{entity.name}}
 {{> (partial 'entityClass.plantuml') entity=entity stereotype='aggregate' }}
+{{~else}}
+### <a name="aggregate_{{entity.name}}"></a> {{entity.name}}
+```plantuml
+@startuml
+{{> (partial 'entityClass.plantuml') entity=entity stereotype='aggregate' }}
+{{~/if}}
 
 {{~#each (entityAssociations entity) as |association|}}
     {{association.source}} {{association.linkType}}down- {{association.entity.name}}
 {{~/each}}
-{{~#each (associationTargets (entityAssociations entity)) as |relatedEntity|}}
+{{~#each (associationTargets (entityAssociations entity) entity.name) as |relatedEntity|}}
     {{~#if (eq relatedEntity.type 'enums')}}
     {{> (partial 'enumClass.plantuml') enum=relatedEntity }}
     {{~else}}
@@ -47,6 +54,7 @@ class {{service.name}}  << service >> {
 @enduml
 ```
 
+{{~#if aggregate}}
 {{~assign "aggregateLifecycle" (aggregateLifecycleStateMachine aggregates)}}
 {{~#if aggregateLifecycle}}
 
@@ -55,6 +63,7 @@ class {{service.name}}  << service >> {
 ```plantuml
 {{{aggregateLifecycle}}}
 ```
+{{~/if}}
 {{~/if}}
 
 {{~assign "entityServiceLifecycle" (entityServiceLifecycleStateMachine service entity)}}
@@ -123,16 +132,6 @@ class {{service.name}}  << service >> {
 @startuml
     {{~#each events as |entity|}}
 {{> (partial 'entityClass.plantuml') stereotype=entity.type }}
-    {{~/each}}
-    {{~#each (collectionAssociations events) as |association|}}
-        {{association.source}} {{association.linkType}}down- {{association.entity.name}}
-    {{~/each}}
-    {{~#each (associationTargets (collectionAssociations events)) as |relatedEntity|}}
-        {{~#if (eq relatedEntity.type 'enums')}}
-        {{> (partial 'enumClass.plantuml') enum=relatedEntity }}
-        {{~else}}
-        {{> (partial 'entityClass.plantuml') entity=relatedEntity }}
-        {{~/if}}
     {{~/each}}
 @enduml
 ```
