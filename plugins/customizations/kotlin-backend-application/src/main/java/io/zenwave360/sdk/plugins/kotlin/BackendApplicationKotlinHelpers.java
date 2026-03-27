@@ -128,6 +128,19 @@ public class BackendApplicationKotlinHelpers {
         return populate;
     }
 
+    public String transitionNaturalIdExpression(Map entity, Options options) {
+        if (entity == null) {
+            return "null";
+        }
+        List<Map> fields = ZDLFindUtils.naturalIdFields(entity);
+        if (fields == null || fields.isEmpty()) {
+            return "null";
+        }
+        return fields.stream()
+                .map(field -> "\"" + field.get("name") + "=\" + entity." + field.get("name"))
+                .collect(Collectors.joining(" + \", \" + "));
+    }
+
     private String idInitialization(String idJavaType) {
         return switch (idJavaType) {
             case "Long" -> "1L";

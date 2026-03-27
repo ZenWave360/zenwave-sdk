@@ -116,8 +116,9 @@ public class BackendApplicationDefaultHelpers {
     public boolean isAggregate(String entityName, Options options) {
         var zdl = options.get("zdl");
         var isAggregateRoot = JSONPath.get(zdl, "$.entities." + entityName + "[?(@.options.aggregate == true)]", List.of());
+        var isLifecycleEntity = JSONPath.get(zdl, "$.entities." + entityName + "[?(@.options.lifecycle)]", List.of());
         var aggregateName = findEntityAggregate(entityName, options);
-        return !isAggregateRoot.isEmpty() || aggregateName != null;
+        return !isAggregateRoot.isEmpty() || !isLifecycleEntity.isEmpty() || aggregateName != null;
     }
 
     public String findEntityAggregate(String entityName, Options options) {
@@ -231,6 +232,15 @@ public class BackendApplicationDefaultHelpers {
         return ZDLJavaSignatureUtils.methodParametersCallSignature(method, zdl);
     }
 
+    public List<Map> methodParameterFields(Map<String, Object> method, Options options) {
+        var zdl = (Map) options.get("zdl");
+        var parameterType = (String) method.get("parameter");
+        if (parameterType == null) {
+            return List.of();
+        }
+        return JSONPath.get(zdl, "$.allEntitiesAndEnums." + parameterType + ".fields[*]", List.<Map>of());
+    }
+
     public boolean includeEmitEventsImplementation(Map service, Options options) {
         if(service == null) {
             return generator.includeEmitEventsImplementation;
@@ -295,6 +305,230 @@ public class BackendApplicationDefaultHelpers {
 
     public String operationNameForEvent(String eventName, Options options) {
         return  "on" + asJavaTypeName(eventName);
+    }
+
+    /**
+     * Returns the result record type name for an aggregate command (e.g., "PlaceOrderResult").
+     */
+    public String commandResultTypeName(Map<String, Object> command, Options options) {
+        return asJavaTypeName((String) command.get("name")) + "Result";
+    }
+
+    /**
+     * Returns the Java type name for the lifecycle status field of an aggregate.
+     * Looks up the entity and finds the field type for the field defined in lifecycle.
+     */
+    public String lifecycleFieldType(Map<String, Object> aggregate, Options options) {
+        if (aggregate == null) {
+            return null;
+        }
+        var lifecycle = (Map<String, Object>) JSONPath.get(aggregate, "lifecycle");
+        if (lifecycle == null) {
+            return null;
+        }
+        var rootEntity = aggregateRootEntity(aggregate, options);
+        if (rootEntity == null) {
+            return null;
+        }
+        var field = (String) lifecycle.get("field");
+        return JSONPath.get(rootEntity, "$.fields." + field + ".type");
+    }
+
+    /**
+     * Returns true if the aggregate has a lifecycle (state machine) defined.
+     */
+    public boolean hasLifecycle(Map<String, Object> aggregate, Options options) {
+        return lifecycleFieldType(aggregate, options) != null;
+    }
+
+    /**
+     * Returns true if any command in the aggregate has from/to state transitions.
+     */
+    public boolean hasStateTransitions(Map<String, Object> aggregate, Options options) {
+        if (aggregate == null) return false;
+        var commands = JSONPath.get(aggregate, "$.commands[*]", List.<Map>of());
+
+        return commands.stream().anyMatch(cmd -> JSONPath.get(cmd, "$.transition.from") != null || JSONPath.get(cmd, "$.transition.to") != null);
+    }
+
+    public String transitionMethodName(Map<String, Object> method, Options options) {
+        return "ensureCan" + asJavaTypeName((String) method.get("name"));
+    }
+
+    public String aggregateTransitionsClassName(Map<String, Object> aggregate, Options options) {
+        return asJavaTypeName((String) aggregate.get("aggregateRoot")) + "AggregateTransitions";
+    }
+
+    public Map<String, Object> aggregateRootEntity(Map<String, Object> aggregate, Options options) {
+        if (aggregate == null) {
+            return null;
+        }
+        var zdl = (Map<String, Object>) options.get("zdl");
+        return JSONPath.get(zdl, "$.allEntitiesAndEnums." + aggregate.get("aggregateRoot"));
+    }
+
+    public List<Map<String, Object>> aggregateTransitionMethods(Map<String, Object> aggregate, Options options) {
+        if (aggregate == null || !hasLifecycle(aggregate, options)) {
+            return Collections.emptyList();
+        }
+        var commands = JSONPath.get(aggregate, "$.commands[*]", List.<Map<String, Object>>of());
+        return commands.stream()
+                .filter(command -> JSONPath.get(command, "$.transition.from") != null)
+                .toList();
+    }
+
+    public boolean hasAggregateTransitionMethods(Map<String, Object> aggregate, Options options) {
+        return !aggregateTransitionMethods(aggregate, options).isEmpty();
+    }
+
+    /**
+     * Returns the requireState call arguments for a command's from states, e.g.
+     * "OrderStatus.DRAFT, OrderStatus.PLACED"
+     */
+    public String commandFromStatesSignature(Map<String, Object> command, Map<String, Object> aggregate, Options options) {
+        var fromStates = (List<String>) JSONPath.get(command, "$.transition.from");
+        if (fromStates == null || fromStates.isEmpty()) return "";
+        var fieldType = lifecycleFieldType(aggregate, options);
+        return fromStates.stream()
+                .map(state -> fieldType + "." + state)
+                .collect(Collectors.joining(", "));
+    }
+
+    // ==================== Entity Lifecycle Helpers ====================
+
+    /**
+     * Returns true if the entity has a @lifecycle annotation (for non-aggregate entities).
+     */
+    public boolean hasEntityLifecycle(Map<String, Object> entity, Options options) {
+        return entity != null && JSONPath.get(entity, "lifecycle") != null;
+    }
+
+    /**
+     * Returns the Java enum type name for the lifecycle status field of an entity.
+     * Looks up the field type from the entity's own field map.
+     */
+    public String entityLifecycleFieldType(Map<String, Object> entity, Options options) {
+        var lifecycle = (Map<String, Object>) JSONPath.get(entity, "lifecycle");
+        if (lifecycle == null) return "";
+        var field = (String) lifecycle.get("field");
+        return JSONPath.get(entity, "$.fields." + field + ".type");
+    }
+
+    /**
+     * Returns the requireState call arguments for a service method's from states on an entity,
+     * e.g. "OrderStatus.DRAFT, OrderStatus.PLACED"
+     */
+    public String entityCommandFromStatesSignature(Map<String, Object> method, Map<String, Object> entity, Options options) {
+        var fromStates = (List<String>) JSONPath.get(method, "$.transition.from");
+        if (fromStates == null || fromStates.isEmpty()) return "";
+        var fieldType = entityLifecycleFieldType(entity, options);
+        return fromStates.stream()
+                .map(state -> fieldType + "." + state)
+                .collect(Collectors.joining(", "));
+    }
+
+    public String entityServiceTransitionsClassName(Map<String, Object> entity, Options options) {
+        return asJavaTypeName((String) entity.get("name")) + "Transitions";
+    }
+
+    public String transitionNaturalIdExpression(Map<String, Object> entity, Options options) {
+        if (entity == null) {
+            return "null";
+        }
+        var fields = naturalIdFields(entity, options);
+        if (fields == null || fields.isEmpty()) {
+            return "null";
+        }
+        return fields.stream()
+                .map(field -> "\"" + field.get("name") + "=\" + entity.get" + asJavaTypeName((String) field.get("name")) + "()")
+                .collect(Collectors.joining(" + \", \" + "));
+    }
+
+    public List<Map<String, Object>> entityServiceTransitionMethods(Map<String, Object> entity, Options options) {
+        if (entity == null || !hasEntityLifecycle(entity, options)) {
+            return Collections.emptyList();
+        }
+        var zdl = (Map<String, Object>) options.get("zdl");
+        var services = JSONPath.get(zdl, "$.services[*]", List.<Map<String, Object>>of());
+        var entityName = (String) entity.get("name");
+        var methodsByName = new LinkedHashMap<String, Map<String, Object>>();
+        for (var service : services) {
+            var methods = JSONPath.get(service, "$.methods[*]", List.<Map<String, Object>>of());
+            for (var method : methods) {
+                if (entityName.equals(method.get("entity")) && JSONPath.get(method, "$.transition.from") != null) {
+                    methodsByName.putIfAbsent((String) method.get("name"), method);
+                }
+            }
+        }
+        return new ArrayList<>(methodsByName.values());
+    }
+
+    public boolean hasEntityServiceTransitionMethods(Map<String, Object> entity, Options options) {
+        return !entityServiceTransitionMethods(entity, options).isEmpty();
+    }
+
+    /**
+	 * Returns true if the service has at least one method with from/to state transitions.
+	 *
+	 * Used to decide whether to generate the generic {@code requireState(...)} helper method
+	 * in the ServiceImpl templates.
+     */
+    public boolean serviceHasEntityStateTransitions(Map<String, Object> service, Options options) {
+		var methods = JSONPath.get(service, "$.methods[*]", List.<Map>of());
+		for (var method : methods) {
+			if (JSONPath.get(method, "$.transition.from") != null || JSONPath.get(method, "$.transition.to") != null) return true;
+		}
+		return false;
+    }
+
+    /**
+     * For a service method, returns the list of event publishing instructions.
+     * Each entry contains: eventName, instanceName, producerCall, hasProducer, isAsyncApi, producedByAggregate.
+     */
+    public List<Map<String, Object>> serviceMethodEventPublications(Map<String, Object> method, Options options) {
+        var zdl = (Map) options.get("zdl");
+        var serviceEventNames = ZDLFindUtils.methodEventsFlatList(method);
+        if (serviceEventNames.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Find aggregate commands for this method to know which events aggregates produce
+        var aggregateCommandsForMethod = ZDLFindUtils.findAggregateCommandsForMethod(zdl, method);
+        var aggregateProducedEvents = new HashSet<String>();
+        for (var aggCmd : aggregateCommandsForMethod) {
+            var command = (Map<String, Object>) aggCmd.get("command");
+            if (command != null) {
+                aggregateProducedEvents.addAll(ZDLFindUtils.methodEventsFlatList(command));
+            }
+        }
+
+        var result = new ArrayList<Map<String, Object>>();
+        for (String eventName : serviceEventNames) {
+            var event = (Map<String, Object>) JSONPath.get(zdl, "$.events." + eventName);
+            boolean producedByAggregate = aggregateProducedEvents.contains(eventName);
+            boolean isAsyncApi = event != null && JSONPath.get(event, "options.asyncapi") != null;
+            String producerMethod = "on" + asJavaTypeName(eventName);
+
+            // Count how many aggregates produce this event (for disambiguation)
+            int producerCount = 0;
+            for (var aggCmd : aggregateCommandsForMethod) {
+                var command = (Map<String, Object>) aggCmd.get("command");
+                if (command != null && ZDLFindUtils.methodEventsFlatList(command).contains(eventName)) {
+                    producerCount++;
+                }
+            }
+
+            var entry = new HashMap<String, Object>();
+            entry.put("eventName", eventName);
+            entry.put("eventClassName", event != null ? event.get("className") : eventName);
+            entry.put("instanceName", NamingUtils.asInstanceName(eventName));
+            entry.put("producerMethod", producerMethod);
+            entry.put("producedByAggregate", producedByAggregate);
+            entry.put("isAsyncApi", isAsyncApi);
+            entry.put("multipleProducers", producerCount > 1);
+            result.add(entry);
+        }
+        return result;
     }
 
     public List<Map> methodPolicies(Map<String, Object> method, Options options) {

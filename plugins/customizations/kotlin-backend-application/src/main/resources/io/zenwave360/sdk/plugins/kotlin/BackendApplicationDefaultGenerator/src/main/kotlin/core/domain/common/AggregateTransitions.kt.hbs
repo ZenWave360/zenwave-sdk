@@ -1,0 +1,39 @@
+package {{layout.entitiesPackage}}
+
+{{~assign "_aggregate" aggregate}}
+{{~assign "_rootEntity" (aggregateRootEntity aggregate)}}
+object {{aggregateTransitionsClassName aggregate}} {
+
+{{#each (aggregateTransitionMethods aggregate) as |method|}}
+    fun {{transitionMethodName method}}(entity: {{_rootEntity.className}}) {
+        require("{{method.name}}", entity, {{commandFromStatesSignature method _aggregate}})
+    }
+
+{{/each}}
+    private fun require(command: String, entity: {{_rootEntity.className}}, vararg allowed: {{lifecycleFieldType aggregate}}) {
+        val current = entity.{{aggregate.lifecycle.field}}
+        if (current != null && allowed.any { it == current }) {
+            return
+        }
+        throw InvalidStateTransitionException(
+            entityType = entity::class.simpleName ?: "{{_rootEntity.className}}",
+            entityId = entity.id,
+            naturalId = {{{transitionNaturalIdExpression _rootEntity}}},
+            operation = command,
+            currentState = current,
+            allowedStates = allowed.toList()
+        )
+    }
+
+    class InvalidStateTransitionException(
+        val entityType: String,
+        val entityId: Any?,
+        val naturalId: Any?,
+        val operation: String,
+        val currentState: Any?,
+        val allowedStates: List<*>
+    ) : IllegalStateException(
+        "Invalid state transition for $entityType (${naturalId ?: "id=$entityId"}): " +
+                "operation '$operation' not allowed from state $currentState, allowed states: $allowedStates"
+    )
+}

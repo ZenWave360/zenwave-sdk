@@ -70,11 +70,17 @@ apis {
 }
 
 
+@lifecycle(field: status, initial: RECEIVED)
 aggregate CustomerOrderAggregate(CustomerOrder) {
+
     createOrder(CustomerOrderInput) withEvents OrderEvent
+    @transition(from: [RECEIVED, KITCHEN_ACCEPTED], to: KITCHEN_IN_PROGRESS)
     updateOrder(CustomerOrderInput) withEvents OrderEvent OrderStatusUpdated
+    @transition(from: [RECEIVED, KITCHEN_ACCEPTED, KITCHEN_IN_PROGRESS], to: KITCHEN_READY)
     updateKitchenStatus(KitchenStatusInput) withEvents OrderEvent OrderStatusUpdated
+    @transition(from: [KITCHEN_READY, ON_DELIVERY], to: DELIVERED)
     updateDeliveryStatus(DeliveryStatusInput) withEvents OrderEvent OrderStatusUpdated
+    @transition(from: [RECEIVED, KITCHEN_ACCEPTED, KITCHEN_IN_PROGRESS], to: CANCELLED)
     cancelOrder(CancelOrderInput) withEvents OrderEvent OrderStatusUpdated
 }
 

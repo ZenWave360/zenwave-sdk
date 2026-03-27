@@ -1,0 +1,11 @@
+logging.level.org.hibernate.SQL: DEBUG
+logging.level.org.springframework.transaction: DEBUG
+
+spring.jpa.hibernate.ddl-auto: create
+spring.jpa.defer-datasource-initialization: true
+spring.sql.init.mode: always
+
+DATASOURCE_URL: jdbc:postgresql://localhost:5432/app
+DATASOURCE_USERNAME: postgres
+DATASOURCE_PASSWORD: admin123
+KAFKA_BOOTSTRAP_SERVERS: localhost:9092

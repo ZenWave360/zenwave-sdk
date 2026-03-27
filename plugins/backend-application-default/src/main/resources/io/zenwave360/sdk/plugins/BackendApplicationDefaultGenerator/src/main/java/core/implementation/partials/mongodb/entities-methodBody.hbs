@@ -4,6 +4,41 @@
 {{!-- @Async --}}
 {{~#if method.options.async}}
     {{#if method.returnType}}return CompletableFuture.completedFuture({{/if}} {{method.name}}Sync({{methodParametersCallSignature method}}){{#if method.returnType}}){{/if}};
+{{!-- Lifecycle Optional<Entity> update/delete(id, Entity) with from/to - takes priority over @delete --}}
+{{~else if (and _entity (hasEntityLifecycle _entity) method.paramId method.parameter method.returnType method.returnTypeIsOptional)}}
+    var {{_entity.instanceName}} = {{_entity.instanceName}}Repository.{{{findById method}}}.map(existing{{_entity.className}} -> {
+		{{~#if method.transition.from}}
+        {{entityServiceTransitionsClassName _entity}}.{{transitionMethodName method}}(existing{{_entity.className}});
+        {{~/if}}
+        {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}});
+		{{~#if method.transition.to}}
+		existing{{_entity.className}}.set{{asJavaTypeName _entity.options.lifecycle.field}}({{entityLifecycleFieldType _entity}}.{{method.transition.to}});
+        {{~/if}}
+        return existing{{_entity.className}};
+    })
+    .map({{_entity.instanceName}}Repository::save)
+    {{~#unless (eq _entity.name method.returnType)}}
+        .map({{asInstanceName service.name}}Mapper::as{{returnType}})
+    {{~/unless}}
+    ;
+    {{~> (partial '../withEvents')}}
+    return {{_entity.instanceName}};
+{{!-- Lifecycle Entity update/delete(id, Entity) with from/to - takes priority over @delete --}}
+{{~else if (and _entity (hasEntityLifecycle _entity) method.paramId method.parameter method.returnType)}}
+    var {{_entity.instanceName}} = {{_entity.instanceName}}Repository.{{{findById method}}}.map(existing{{_entity.className}} -> {
+		{{~#if method.transition.from}}
+        {{entityServiceTransitionsClassName _entity}}.{{transitionMethodName method}}(existing{{_entity.className}});
+        {{~/if}}
+        {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}});
+		{{~#if method.transition.to}}
+		existing{{_entity.className}}.set{{asJavaTypeName _entity.options.lifecycle.field}}({{entityLifecycleFieldType _entity}}.{{method.transition.to}});
+        {{~/if}}
+        return existing{{_entity.className}};
+    })
+    .map({{_entity.instanceName}}Repository::save)
+    .orElseThrow();
+    {{~> (partial '../withEvents')}}
+    return {{wrapWithMapper _entity}};
 {{!-- @delete --}}
 {{~else if (and _entity method.options.delete method.paramId)}}
     log.debug("Request to delete {{_entity.className}} : {}", id);
@@ -44,6 +79,39 @@
 {{~else if (and _entity method.paramId method.parameter method.returnType)}}
     var {{_entity.instanceName}} = {{_entity.instanceName}}Repository.{{{findById method}}}.map(existing{{_entity.className}} -> {
     return {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}});
+    })
+    .map({{_entity.instanceName}}Repository::save)
+    .orElseThrow();
+    {{~> (partial '../withEvents')}}
+    return {{wrapWithMapper _entity}};
+{{!-- Optional<Entity> transition(id) with lifecycle from/to (no input) --}}
+{{~else if (and _entity (hasEntityLifecycle _entity) method.paramId (not method.parameter) method.returnType method.returnTypeIsOptional (or method.transition.from method.transition.to))}}
+    var {{_entity.instanceName}} = {{_entity.instanceName}}Repository.{{{findById method}}}.map(existing{{_entity.className}} -> {
+        {{~#if method.transition.from}}
+        {{entityServiceTransitionsClassName _entity}}.{{transitionMethodName method}}(existing{{_entity.className}});
+        {{~/if}}
+        {{~#if method.transition.to}}
+        existing{{_entity.className}}.set{{asJavaTypeName _entity.options.lifecycle.field}}({{entityLifecycleFieldType _entity}}.{{method.transition.to}});
+        {{~/if}}
+        return existing{{_entity.className}};
+    })
+    .map({{_entity.instanceName}}Repository::save)
+    {{~#unless (eq _entity.name method.returnType)}}
+        .map({{asInstanceName service.name}}Mapper::as{{returnType}})
+    {{~/unless}}
+    ;
+    {{~> (partial '../withEvents')}}
+    return {{_entity.instanceName}};
+{{!-- Entity transition(id) with lifecycle from/to (no input) --}}
+{{~else if (and _entity (hasEntityLifecycle _entity) method.paramId (not method.parameter) method.returnType (or method.transition.from method.transition.to))}}
+    var {{_entity.instanceName}} = {{_entity.instanceName}}Repository.{{{findById method}}}.map(existing{{_entity.className}} -> {
+        {{~#if method.transition.from}}
+        {{entityServiceTransitionsClassName _entity}}.{{transitionMethodName method}}(existing{{_entity.className}});
+        {{~/if}}
+        {{~#if method.transition.to}}
+        existing{{_entity.className}}.set{{asJavaTypeName _entity.options.lifecycle.field}}({{entityLifecycleFieldType _entity}}.{{method.transition.to}});
+        {{~/if}}
+        return existing{{_entity.className}};
     })
     .map({{_entity.instanceName}}Repository::save)
     .orElseThrow();

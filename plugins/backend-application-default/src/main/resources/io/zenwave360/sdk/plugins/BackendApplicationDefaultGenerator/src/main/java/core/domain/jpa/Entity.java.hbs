@@ -82,7 +82,7 @@ public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}}
     {{~#if field.options.transient}} @jakarta.persistence.Transient {{/if}}
     {{~#if field.options.naturalId}} @org.hibernate.annotations.NaturalId {{/if}}
     {{~#if (endsWith field.type 'Blob')}} @Lob {{/if}}
-    private {{{fieldType field}}} {{field.name}} {{{fieldTypeInitializer field}}};
+    private {{{fieldType field}}} {{field.name}} {{#if (and (hasEntityLifecycle ../entity) (eq field.name ../entity.options.lifecycle.field))}}= {{entityLifecycleFieldType ../entity}}.{{../entity.options.lifecycle.initial}}{{else}}{{{fieldTypeInitializer field}}}{{/if}};
 {{/each}}
 
 {{#each entity.relationships as |relationship|}}

@@ -74,7 +74,11 @@ data class {{entity.className}}(
     {{~#if field.options.transient}} @jakarta.persistence.Transient {{/if}}
     {{~#if field.options.naturalId}} @org.hibernate.annotations.NaturalId {{/if}}
     {{~#if (endsWith field.type 'Blob')}} @Lob {{/if}}
+    {{~#if (and (hasEntityLifecycle ../entity) (eq field.name ../entity.options.lifecycle.field))s}}
+    var {{field.name}}: {{{fieldType field}}} = {{entityLifecycleFieldType ../entity}}.{{../entity.options.lifecycle.initial}}{{#unless @last}},{{/unless}}
+    {{~else}}
     var {{field.name}}: {{{fieldType field}}} {{~#unless field.isArray~}} ? {{~/unless}} {{{fieldTypeInitializer field}}}{{#unless @last}},{{/unless}}
+    {{~/if}}
 {{/each}}
 
 ) {{addExtends entity}} : Serializable {

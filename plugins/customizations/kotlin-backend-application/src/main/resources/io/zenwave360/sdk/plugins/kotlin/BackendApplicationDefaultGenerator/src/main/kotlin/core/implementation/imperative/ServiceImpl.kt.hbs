@@ -67,26 +67,4 @@ open class {{service.name}}Impl(
     }
 {{/each}}
 
-{{#each (serviceAggregates service) as |aggregate|}}
-    private fun persistAndEmitEvents({{asInstanceName aggregate.name}}: {{aggregate.name}}): {{aggregate.name}} {
-        val {{asInstanceName aggregate.aggregateRoot}} = {{asInstanceName aggregate.aggregateRoot}}Repository.save({{asInstanceName aggregate.name}}.rootEntity)
-        {{asInstanceName aggregate.name}}.events.forEach { event ->
-        {{#each (aggregateEvents aggregate) as |event|}}
-            if (event is {{event.className}}) {
-            {{~#if event.options.asyncapi }}
-                {{~#if includeEmitEventsImplementation }}
-                eventsProducer.{{operationNameForEvent event.name}}(eventsMapper.as{{event.name}}(event))
-                {{~else}}
-                // TODO: set 'includeEmitEventsImplementation' to generate this
-                // eventsProducer.{{operationNameForEvent event.name}}(eventsMapper.as{{event.name}}(event))
-                {{~/if}}
-            {{~else}}
-                eventPublisher.on{{event.className}}(event)
-            {{~/if}}
-            }
-        {{/each}}
-        }
-        return {{asInstanceName aggregate.name}}
-    }
-{{/each}}
 }
