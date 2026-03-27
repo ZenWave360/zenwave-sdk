@@ -24,15 +24,23 @@ A complete working example is available in the zenwave-playground repository: [a
 
 <!-- TOC -->
 * [AsyncAPI Generator for Java / Spring-Boot](#asyncapi-generator-for-java--spring-boot)
-    * [Features](#features)
-    * [Quick Configuration](#quick-configuration)
-    * [Command Line Usage](#command-line-usage)
-    * [Maven Usage](#maven-usage)
-        * [Properties Configuration](#properties-configuration)
-        * [Plugin Configuration](#plugin-configuration)
-    * [Gradle Usage](#gradle-usage)
-    * [Configuration Options](#configuration-options)
-    * [Getting Help](#getting-help)
+  * [Features](#features)
+    * [Generated Code](#generated-code)
+    * [Supported Capabilities](#supported-capabilities)
+    * [Advanced Patterns](#advanced-patterns)
+  * [Quick Configuration](#quick-configuration)
+  * [Why ZenWave doesn’t source Spring Cloud Stream / Spring Kafka config from AsyncAPI](#why-zenwave-doesnt-source-spring-cloud-stream--spring-kafka-config-from-asyncapi)
+  * [Command Line Usage](#command-line-usage)
+  * [Maven Usage](#maven-usage)
+    * [Properties Configuration](#properties-configuration)
+    * [Plugin Configuration](#plugin-configuration)
+  * [Gradle Usage](#gradle-usage)
+  * [Configuring Spring Cloud Stream Bindings](#configuring-spring-cloud-stream-bindings)
+    * [Producing Messages](#producing-messages)
+    * [Consuming Messages](#consuming-messages)
+  * [Configuring Spring Kafka Bindings](#configuring-spring-kafka-bindings)
+  * [Configuration Options](#configuration-options)
+  * [Getting Help](#getting-help)
 <!-- TOC -->
 
 ## Features
@@ -243,6 +251,55 @@ sourceSets {
         }
     }
 }
+```
+
+## Configuring Spring Cloud Stream Bindings
+
+ZenWaveSDK does not derive Spring Cloud Stream bindings from the AsyncAPI specification. Binding configuration must be provided explicitly in your `application.yml`.
+
+### Producing Messages
+
+```yaml
+spring:
+  cloud:
+      stream:
+        bindings:
+          shopping-cart-channel-out: # AsyncAPI channel name (kebab-case) with the `-out` suffix (no `-0`)
+            destination: shopping-cart
+            content-type: application/*+avro
+            producer:
+              use-native-encoding: true
+```
+
+### Consuming Messages
+
+```yaml
+spring:
+  cloud:
+    stream:
+      kafka.binder.enable-observation: true
+      bindings:
+        shopping-cart-channel-in-0: # AsyncAPI channel name (kebab-case) with the `-in-0` suffix
+          destination: shopping-cart
+          group: shopping-cart-group
+```
+
+> **Note on binding name suffixes:** Producer and consumer bindings use different naming conventions. Producers use the binding name exactly as declared (for example, -out), while consumers use the indexed form (-in-0) required by Spring Cloud Stream.
+> The AsyncAPI generator does not append -0 to producer bindings (unlike the legacy SpringCloudStream3Plugin). This behavior is kept for backward compatibility.
+
+
+## Configuring Spring Kafka Bindings
+
+ZenWaveSDK also does not generate Spring Kafka configuration from the AsyncAPI file. Topic and consumer settings must be defined manually in `application.yml`.
+
+```yaml
+app:
+  kafka:
+    topics:
+      shopping-cart-channel: # AsyncAPI channel name (kebab-case)
+        topic: shopping-cart
+        groupId: shopping-cart-group            # consumers only
+        containerFactory: shopping-cart-container-factory # consumers only
 ```
 
 ## Configuration Options

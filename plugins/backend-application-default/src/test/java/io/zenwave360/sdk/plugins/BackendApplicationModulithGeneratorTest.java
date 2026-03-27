@@ -52,7 +52,7 @@ public class BackendApplicationModulithGeneratorTest {
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductConsumer.java"));
         // Assertions.assertTrue(logs.contains("Writing template with targetFile: io/example/integration/test/api/provider_for_commands_reactive/DoCreateProductService.java"));
 
-        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/jpa-elasticsearch-scs3-pom.xml", targetFolder);
+        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/jpa-pom.xml", targetFolder);
         Assertions.assertEquals(0, exitCode);
     }
 }

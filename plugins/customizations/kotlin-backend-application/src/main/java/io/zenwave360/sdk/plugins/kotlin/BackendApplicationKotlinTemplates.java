@@ -32,9 +32,43 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
     public boolean includeEmitEventsImplementation = true;
 
     protected Function<Map<String, Object>, Boolean> skipEntityRepository = (model) -> is(model, "persistence") // if polyglot persistence -> skip
-            || !(is(model, "aggregate") || ZDLFindUtils.isAggregateRoot(JSONPath.get(model, "zdl"), JSONPath.get(model, "$.entity.name")));
+            || !(is(model, "aggregate") || is(model, "lifecycle") || ZDLFindUtils.isAggregateRoot(JSONPath.get(model, "zdl"), JSONPath.get(model, "$.entity.name")));
     protected Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo", "input", "abstract");
     protected Function<Map<String, Object>, Boolean> skipEntity = (model) -> is(model, "vo", "input");
+    protected Function<Map<String, Object>, Boolean> skipAggregateTransitions = (model) -> {
+        var aggregate = (Map<String, Object>) model.get("aggregate");
+        if (aggregate == null && model.get("aggregateRoot") != null) {
+            aggregate = model;
+        }
+        var zdl = (Map<String, Object>) model.get("zdl");
+        var aggregateRoot = aggregate != null ? (String) aggregate.get("aggregateRoot") : null;
+        var rootEntity = aggregateRoot != null && zdl != null
+                ? (Map<String, Object>) JSONPath.get(zdl, "$.allEntitiesAndEnums." + aggregateRoot)
+                : null;
+        if (aggregate == null || (JSONPath.get(aggregate, "lifecycle") == null && JSONPath.get(rootEntity, "lifecycle") == null)) {
+            return true;
+        }
+        var commands = JSONPath.get(aggregate, "$.commands[*]", List.<Map<String, Object>>of());
+        return commands.stream().noneMatch(command -> JSONPath.get(command, "$.transition.from") != null);
+    };
+    protected Function<Map<String, Object>, Boolean> skipEntityServiceTransitions = (model) -> {
+        var entity = (Map<String, Object>) model.get("entity");
+        var zdl = (Map<String, Object>) model.get("zdl");
+        if (entity == null || zdl == null || JSONPath.get(entity, "lifecycle") == null) {
+            return true;
+        }
+        var entityName = (String) entity.get("name");
+        var services = JSONPath.get(zdl, "$.services[*]", List.<Map<String, Object>>of());
+        for (var service : services) {
+            var methods = JSONPath.get(service, "$.methods[*]", List.<Map<String, Object>>of());
+            for (var method : methods) {
+                if (entityName.equals(method.get("entity")) && JSONPath.get(method, "$.transition.from") != null) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    };
 //    protected Function<Map<String, Object>, Boolean> skipEntityInput = (model) -> inputDTOSuffix == null || inputDTOSuffix.isEmpty();
 
     protected Function<Map<String, Object>, Boolean> skipDataSql = (model) -> persistence != PersistenceType.jpa;
@@ -70,11 +104,15 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
 
         this.addTemplate(this.aggregateTemplates, "src/main/kotlin", "core/domain/common/Aggregate.kt",
                 layoutNames.entitiesPackage, "{{aggregate.name}}.kt", KOTLIN, null, true);
+        this.addTemplate(this.aggregateTemplates, "src/main/kotlin", "core/domain/common/AggregateTransitions.kt",
+                layoutNames.entitiesPackage, "{{aggregateTransitionsClassName aggregate}}.kt", KOTLIN, skipAggregateTransitions, true);
         this.addTemplate(this.domainEventsTemplates, "src/main/kotlin", "core/domain/common/DomainEvent.kt",
                 layoutNames.domainEventsPackage, "{{event.name}}.kt", KOTLIN, null, true);
 
         this.addTemplate(this.entityTemplates, "src/main/kotlin", "core/domain/{{persistence}}/Entity.kt",
                 layoutNames.entitiesPackage, "{{entity.name}}.kt", KOTLIN, skipEntity, false);
+        this.addTemplate(this.entityTemplates, "src/main/kotlin", "core/domain/common/EntityTransitions.kt",
+                layoutNames.entitiesPackage, "{{entityServiceTransitionsClassName entity}}.kt", KOTLIN, skipEntityServiceTransitions, true);
         this.addTemplate(this.entityTemplates, "src/main/kotlin", "core/outbound/{{persistence}}/{{style}}/EntityRepository.kt",
                 layoutNames.outboundRepositoryPackage, "{{entity.className}}Repository.kt", KOTLIN, skipEntityRepository, true);
 //        this.addTemplate(this.entityTemplates, "src/main/kotlin", "core/inbound/dtos/EntityInput.kt",

@@ -45,7 +45,7 @@ public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}}
     {{~/if}}
     {{fieldPersistenceAnnotations field}}
     {{{fieldValidationAnnotations field}}}
-    private {{{fieldType field}}} {{field.name}} {{{fieldTypeInitializer field}}};
+    private {{{fieldType field}}} {{field.name}} {{#if (and (hasEntityLifecycle ../entity) (eq field.name ../entity.options.lifecycle.field))}}= {{entityLifecycleFieldType ../entity}}.{{../entity.options.lifecycle.initial}}{{else}}{{{fieldTypeInitializer field}}}{{/if}};
 {{/each}}
 
 {{~#if entity.options.auditing}}

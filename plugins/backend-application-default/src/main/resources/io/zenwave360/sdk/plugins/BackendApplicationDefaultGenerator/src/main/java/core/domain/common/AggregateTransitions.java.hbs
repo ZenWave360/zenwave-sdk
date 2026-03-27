@@ -1,0 +1,41 @@
+package {{layout.entitiesPackage}};
+
+import java.util.Arrays;
+
+{{~assign "_aggregate" aggregate}}
+{{~assign "_rootEntity" (aggregateRootEntity aggregate)}}
+public final class {{aggregateTransitionsClassName aggregate}} {
+
+    private {{aggregateTransitionsClassName aggregate}}() {
+    }
+
+{{#each (aggregateTransitionMethods aggregate) as |method|}}
+    public static void {{transitionMethodName method}}({{_rootEntity.className}} entity) {
+        require("{{method.name}}", entity, {{commandFromStatesSignature method _aggregate}});
+    }
+
+{{/each}}
+    private static void require(String command, {{_rootEntity.className}} entity, {{lifecycleFieldType aggregate}}... allowed) {
+        var current = entity.get{{asJavaTypeName aggregate.lifecycle.field}}();
+        for (var state : allowed) {
+            if (current != null && current == state) {
+                return;
+            }
+        }
+        throw new InvalidStateTransitionException(
+                entity.getClass().getSimpleName(),
+                entity.getId(),
+                {{{transitionNaturalIdExpression _rootEntity}}},
+                command,
+                current,
+                Arrays.asList(allowed));
+    }
+
+    public static class InvalidStateTransitionException extends IllegalStateException {
+
+        public InvalidStateTransitionException(String entityType, Object entityId, Object naturalId, String operation, Object currentState, java.util.Collection<?> allowedStates) {
+            super("Invalid state transition for " + entityType + " (" + (naturalId != null ? naturalId : "id=" + entityId) + ")" +
+                    ": operation '" + operation + "' not allowed from state " + currentState + ", allowed states: " + allowedStates);
+        }
+    }
+}

@@ -1,10 +1,20 @@
 ```plantuml
 @startuml
+{{#if zdlModel.aggregate}}
+{{> (partial 'aggregateClass.plantuml') aggregate=zdlModel.aggregate }}
+{{zdlModel.aggregate.name}} *--down- {{zdlModel.entity.name}}
+{{/if}}
 {{> (partial 'entityClass.plantuml') stereotype='aggregate' entity=zdlModel.entity }}
 
 {{~#each (entityAssociations zdlModel.entity) as |association|}}
-    {{zdlModel.entity.name}} {{association.linkType}}down- {{association.entity.name}}
-    {{> (partial 'entityClass.plantuml') entity=association.entity }}
+    {{association.source}} {{association.linkType}}down- {{association.entity.name}}
+{{~/each}}
+{{~#each (associationTargets (entityAssociations zdlModel.entity) zdlModel.entity.name) as |relatedEntity|}}
+    {{~#if (eq relatedEntity.type 'enums')}}
+    {{> (partial 'enumClass.plantuml') enum=relatedEntity }}
+    {{~else}}
+    {{> (partial 'entityClass.plantuml') entity=relatedEntity }}
+    {{~/if}}
 {{~/each}}
 @enduml
 ```

@@ -17,11 +17,15 @@ public class BackendApplicationMultiModuleProjectTemplates extends BackendApplic
                 layoutNames.entitiesPackage, "{{aggregate.name}}.java", JAVA, null, true);
         this.addTemplate(this.aggregateTemplates, "src/main/java", "core/domain/common/Aggregate.java", "{{mavenModulesPrefix}}-domain",
                 layoutNames.entitiesPackage, "{{aggregate.name}}.java", JAVA, null, true);
+        this.addTemplate(this.aggregateTemplates, "src/main/java", "core/domain/common/AggregateTransitions.java", "{{mavenModulesPrefix}}-domain",
+                layoutNames.entitiesPackage, "{{aggregateTransitionsClassName aggregate}}.java", JAVA, skipAggregateTransitions, true);
         this.addTemplate(this.domainEventsTemplates, "src/main/java", "core/domain/common/DomainEvent.java", "{{mavenModulesPrefix}}-domain",
                 layoutNames.domainEventsPackage, "{{event.name}}.java", JAVA, null, true);
 
         this.addTemplate(this.entityTemplates, "src/main/java", "core/domain/{{persistence}}/Entity.java", "{{mavenModulesPrefix}}-domain",
                 layoutNames.entitiesPackage, "{{entity.name}}.java", JAVA, skipEntity, false);
+        this.addTemplate(this.entityTemplates, "src/main/java", "core/domain/common/EntityTransitions.java", "{{mavenModulesPrefix}}-domain",
+                layoutNames.entitiesPackage, "{{entityServiceTransitionsClassName entity}}.java", JAVA, skipEntityServiceTransitions, true);
         this.addTemplate(this.entityTemplates, "src/main/java", "core/outbound/{{persistence}}/{{style}}/EntityRepository.java", "{{mavenModulesPrefix}}-domain",
                 layoutNames.outboundRepositoryPackage, "{{entity.className}}Repository.java", JAVA, skipEntityRepository, true);
 //        this.addTemplate(this.entityTemplates, "src/main/java", "core/inbound/dtos/EntityInput.java", "{{mavenModulesPrefix}}-domain",

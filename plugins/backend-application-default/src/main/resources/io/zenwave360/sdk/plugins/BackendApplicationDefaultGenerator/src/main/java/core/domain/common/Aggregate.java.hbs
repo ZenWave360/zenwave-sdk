@@ -1,8 +1,6 @@
 package {{layout.entitiesPackage}};
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 
 import {{layout.domainEventsPackage}}.*;
 import {{layout.inboundDtosPackage}}.*;
@@ -16,16 +14,17 @@ public class {{aggregate.name}} {
 
     private final {{aggregate.aggregateRoot}} rootEntity;
 
-    private final List<Object> events = new ArrayList<>();
-
     public {{aggregate.name}}() {
         this(new {{aggregate.aggregateRoot}}());
+        {{~#if (hasLifecycle aggregate)}}
+        rootEntity.set{{asJavaTypeName aggregate.lifecycle.field}}({{lifecycleFieldType aggregate}}.{{aggregate.lifecycle.initial}});
+        {{~/if}}
     }
     public {{aggregate.name}}({{aggregate.aggregateRoot}} rootEntity) {
         this.rootEntity = rootEntity;
     }
 
-    public String getId() {
+    public {{idJavaType}} getId() {
         return rootEntity.getId();
     }
 
@@ -33,25 +32,42 @@ public class {{aggregate.name}} {
         return rootEntity;
     }
 
-    public List<?> getEvents() {
-        return Collections.unmodifiableList(events);
-    }
 
 {{#each aggregate.commands as |method|}}
     {{~> (partial '../../implementation/partials/serviceMethodJavadoc')}}
-    public void {{method.name}}({{method.parameter}} input) {
+    public {{asJavaTypeName method.name}}Result {{method.name}}({{#if method.parameter}}{{method.parameter}} input{{/if}}) {
+		{{~#if method.transition.from}}
+        {{aggregateTransitionsClassName ../aggregate}}.{{transitionMethodName method}}(rootEntity);
+        {{~/if}}
         // TODO: implement this command
+        {{~#if method.parameter}}
         mapper.update(rootEntity, input);
-        {{~#each (methodEvents method) as |event|}}
-        events.add(mapper.as{{event.name}}(rootEntity));
-        {{~/each}}
+        {{~/if}}
+		{{~#if method.transition.to}}
+		rootEntity.set{{asJavaTypeName ../aggregate.lifecycle.field}}({{lifecycleFieldType ../aggregate}}.{{method.transition.to}});
+        {{~/if}}
+
+        return new {{asJavaTypeName method.name}}Result(
+            rootEntity{{~#each (methodEvents method) as |event|}},
+            Optional.of(mapper.as{{event.name}}(rootEntity)){{~/each}}
+        );
     }
+{{/each}}
+
+{{#each aggregate.commands as |method|}}
+    public record {{asJavaTypeName method.name}}Result(
+        {{aggregate.aggregateRoot}} aggregateRoot{{~#each (methodEvents method) as |event|}},
+        Optional<{{event.className}}> {{asInstanceName event.name}}{{~/each}}
+    ) {}
+
 {{/each}}
 
     @org.mapstruct.Mapper
     interface Mapper {
         {{~#each (findAggregateInputs aggregate) as |input|}}
+        {{~#if input}}
         {{aggregate.aggregateRoot}} update(@MappingTarget {{aggregate.aggregateRoot}} entity, {{input}} input);
+        {{~/if}}
         {{~/each}}
 
         {{~#each (aggregateEvents aggregate) as |event|}}

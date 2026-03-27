@@ -1,0 +1,138 @@
+config {
+    title "Order Fulfillment DDD Example"
+    basePackage "io.zenwave360.example.orderfulfillment"
+    persistence jpa
+    databaseType postgresql
+
+    // you can choose: DefaultProjectLayout, LayeredProjectLayout, SimpleDomainProjectLayout
+    //                 CleanHexagonalProjectLayout, HexagonalProjectLayout, CleanArchitectureProjectLayout
+    layout SimpleDomainProjectLayout
+
+    // these should match what you have configured in your pom.xml for asyncapi-generator-maven-plugin
+    layout.asyncApiModelPackage "{{basePackage}}.events.dtos"
+    layout.asyncApiProducerApiPackage "{{basePackage}}.events"
+    layout.asyncApiConsumerApiPackage "{{basePackage}}.commands"
+}
+
+/**
+ * Order aggregate root
+ */
+@aggregate
+@auditing
+@lifecycle(field: status, initial: PLACED)
+entity Order(order_table) {
+    /** prefix doc comment */
+    @naturalId
+    orderNumber String required unique maxlength(36)
+    status OrderStatus required /** suffix inline doc comment */
+    totalAmount BigDecimal required
+    currency String required maxlength(3)
+
+    paymentReference String
+    trackingNumber String
+
+    /**
+     * Order lines stored as JSON for simplicity in the demo
+     */
+    @json items OrderItem[] minlength(1) {
+        productId String required
+        productName String required maxlength(254)
+        quantity Integer required min(1)
+        unitPrice BigDecimal required
+    }
+}
+
+policies (Order) {
+    orderNumberUnique "orderNumber must be unique"
+}
+
+policies {
+    shipedOrdersCanNotBeCancelled "Shipped orders can not be cancelled"
+}
+
+enum OrderStatus {
+    PLACED(1),
+    PAID(2),
+    SHIPPED(3),
+    CANCELLED(4)
+}
+
+/**
+ * Commands / Inputs
+ */
+input PlaceOrderInput {
+    items OrderItem[] minlength(1)
+    currency String required maxlength(3)
+}
+
+input PayOrderInput {
+     paymentReference String required
+}
+
+input ShipOrderInput {
+    trackingNumber String required
+}
+
+/**
+ * Order Application Service
+ */
+@rest("/orders")
+service OrderService for (Order) {
+
+    /** Customer places an order */
+    @post
+    @transition(to: PLACED)
+    placeOrder(PlaceOrderInput) Order withEvents OrderPlaced
+
+    /** Order is paid */
+    @post("/{orderNumber}/pay")
+    @transition(from: PLACED, to: PAID)
+    payOrder(@natural id, PayOrderInput) Order withEvents OrderPaid
+
+    /** Order is shipped */
+    @post("/{orderNumber}/ship")
+    @transition(from: PAID, to: SHIPPED)
+    shipOrder(@natural id, ShipOrderInput) Order withEvents OrderShipped
+
+    /** Order is cancelled */
+    @post("/{orderNumber}/cancel")
+    @policy(shipedOrdersCanNotBeCancelled)
+    @transition(from: [PLACED, PAID], to: CANCELLED)
+    cancelOrder(@natural id) Order withEvents OrderCancelled
+
+    /** Query order */
+    @get("/{orderNumber}")
+    getOrder(@natural id) Order?
+}
+
+/**
+ * Domain Events
+ */
+@copy(Order)
+//@asyncapi({ channel: "OrdersPlacedChannel", topic: "orders.placed" })
+event OrderPlaced {
+    id Long
+    version Integer
+}
+
+@copy(Order)
+@asyncapi({ channel: "OrdersPaidChannel", topic: "orders.paid" })
+event OrderPaid {
+    id Long
+    version Integer
+}
+
+@copy(Order)
+@asyncapi({ channel: "OrdersShippedChannel", topic: "orders.shipped" })
+event OrderShipped {
+    id Long
+    version Integer
+    trackingNumber String
+}
+
+@copy(Order)
+@asyncapi({ channel: "OrdersCancelledChannel", topic: "orders.cancelled" })
+event OrderCancelled {
+    id Long
+    version Integer
+}

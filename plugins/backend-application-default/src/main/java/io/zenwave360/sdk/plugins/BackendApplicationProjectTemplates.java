@@ -35,9 +35,38 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
     public boolean includeEmitEventsImplementation = true;
 
     protected Function<Map<String, Object>, Boolean> skipEntityRepository = (model) -> is(model, "persistence") // if polyglot persistence -> skip
-            || !(is(model, "aggregate") || ZDLFindUtils.isAggregateRoot(JSONPath.get(model, "zdl"), JSONPath.get(model, "$.entity.name")));
+            || !(is(model, "aggregate") || is(model, "lifecycle") || ZDLFindUtils.isAggregateRoot(JSONPath.get(model, "zdl"), JSONPath.get(model, "$.entity.name")));
 //    protected Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo", "input", "abstract");
     protected Function<Map<String, Object>, Boolean> skipEntity = (model) -> is(model, "vo", "input");
+    protected Function<Map<String, Object>, Boolean> skipAggregateTransitions = (model) -> {
+        var aggregate = (Map<String, Object>) model.get("aggregate");
+        if (aggregate == null && model.get("aggregateRoot") != null) {
+            aggregate = model;
+        }
+        if (aggregate == null || JSONPath.get(aggregate, "lifecycle") == null) {
+            return true;
+        }
+        var commands = JSONPath.get(aggregate, "$.commands[*]", List.<Map<String, Object>>of());
+        return commands.stream().noneMatch(command -> JSONPath.get(command, "$.transition.from") != null);
+    };
+    protected Function<Map<String, Object>, Boolean> skipEntityServiceTransitions = (model) -> {
+        var entity = (Map<String, Object>) model.get("entity");
+        var zdl = (Map<String, Object>) model.get("zdl");
+        if (entity == null || zdl == null || JSONPath.get(entity, "lifecycle") == null) {
+            return true;
+        }
+        var entityName = (String) entity.get("name");
+        var services = JSONPath.get(zdl, "$.services[*]", List.<Map<String, Object>>of());
+        for (var service : services) {
+            var methods = JSONPath.get(service, "$.methods[*]", List.<Map<String, Object>>of());
+            for (var method : methods) {
+                if (entityName.equals(method.get("entity")) && JSONPath.get(method, "$.transition.from") != null) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    };
 //    protected Function<Map<String, Object>, Boolean> skipEntityInput = (model) -> inputDTOSuffix == null || inputDTOSuffix.isEmpty();
 
     protected Function<Map<String, Object>, Boolean> skipDataSql = (model) -> persistence != PersistenceType.jpa;
@@ -80,11 +109,15 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
 
         this.addTemplate(this.aggregateTemplates, "src/main/java", "core/domain/common/Aggregate.java",
                 layoutNames.entitiesPackage, "{{aggregate.name}}.java", JAVA, null, true);
+        this.addTemplate(this.aggregateTemplates, "src/main/java", "core/domain/common/AggregateTransitions.java",
+                layoutNames.entitiesPackage, "{{aggregateTransitionsClassName aggregate}}.java", JAVA, skipAggregateTransitions, true);
         this.addTemplate(this.domainEventsTemplates, "src/main/java", "core/domain/common/DomainEvent.java",
                 layoutNames.domainEventsPackage, "{{event.name}}.java", JAVA, null, true);
 
         this.addTemplate(this.entityTemplates, "src/main/java", "core/domain/{{persistence}}/Entity.java",
                 layoutNames.entitiesPackage, "{{entity.name}}.java", JAVA, skipEntity, false);
+        this.addTemplate(this.entityTemplates, "src/main/java", "core/domain/common/EntityTransitions.java",
+                layoutNames.entitiesPackage, "{{entityServiceTransitionsClassName entity}}.java", JAVA, skipEntityServiceTransitions, true);
         this.addTemplate(this.entityTemplates, "src/main/java", "core/outbound/{{persistence}}/{{style}}/EntityRepository.java",
                 layoutNames.outboundRepositoryPackage, "{{entity.className}}Repository.java", JAVA, skipEntityRepository, true);
 //        this.addTemplate(this.entityTemplates, "src/main/java", "core/inbound/dtos/EntityInput.java",

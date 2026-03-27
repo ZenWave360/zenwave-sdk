@@ -36,7 +36,7 @@ public class {{producerClassName serviceName operationRoleType}} implements {{pr
     protected final KafkaTemplate kafkaTemplate;
     protected final ApplicationContext applicationContext;
 {{~#each (channelNames operations) as |channelName|}}
-    @Value("${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.topic:{{componentPrefix}}{{kebabCase channelName}}\\}")
+    @Value("${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.topic:{{componentPrefix}}{{kebabCase channelName}} {{~lower '}'}}")
     public String {{asInstanceName channelName}}TopicName;
     @Value("${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.timeout:10}")
     public int {{asInstanceName channelName}}Timeout = 10;
