@@ -1,0 +1,88 @@
+/**
+ * ZenWave Orders - Lifecycle Entity Demo.
+ * Demonstrates state machine guardrails on service methods for simple (non-rich) entities.
+ */
+config {
+    title "ZenWave Orders (Lifecycle Entity)"
+    basePackage "io.zenwave360.example"
+    persistence mongodb
+}
+
+@aggregate
+@auditing
+@lifecycle(field: status, initial: DRAFT)
+entity Order {
+    status OrderStatus
+    customerId String required
+    restaurantId String required
+    orderTime Instant
+    orderItems OrderItem[] {
+        menuItemId String required
+        name String required
+        price BigDecimal required
+        quantity Integer required
+    }
+}
+
+enum OrderStatus {
+    DRAFT, PLACED, CONFIRMED, KITCHEN_IN_PROGRESS, KITCHEN_READY, DELIVERED, CANCELLED
+}
+
+input PlaceOrderInput {
+    customerId String required
+    restaurantId String required
+    orderItems OrderItem[] {
+        menuItemId String required
+        name String required
+        price BigDecimal required
+        quantity Integer required
+    }
+}
+
+input ConfirmOrderInput {
+    restaurantId String
+    estimatedTime Integer
+}
+
+input CancelOrderInput {
+    reason String
+}
+
+@rest("/orders")
+service OrderService for (Order) {
+
+    @post
+    createOrder(PlaceOrderInput) Order
+
+    @put("/{orderId}/place")
+    @transition(from: DRAFT, to: PLACED)
+    placeOrder(id, PlaceOrderInput) Order withEvents OrderPlaced
+
+    @put("/{orderId}/confirm")
+    @transition(from: [PLACED, CONFIRMED], to: KITCHEN_IN_PROGRESS)
+    confirmOrder(id, ConfirmOrderInput) Order withEvents OrderConfirmed
+
+    @delete("/{orderId}")
+    @transition(from: [DRAFT, PLACED, CONFIRMED], to: CANCELLED)
+    cancelOrder(id, CancelOrderInput) Order? withEvents OrderCancelled
+
+    @get("/{orderId}")
+    getOrder(id) Order?
+}
+
+event OrderPlaced {
+    orderId String
+    status OrderStatus
+}
+
+event OrderConfirmed {
+    orderId String
+    status OrderStatus
+}
+
+event OrderCancelled {
+    orderId String
+    reason String
+    status OrderStatus
+}
+

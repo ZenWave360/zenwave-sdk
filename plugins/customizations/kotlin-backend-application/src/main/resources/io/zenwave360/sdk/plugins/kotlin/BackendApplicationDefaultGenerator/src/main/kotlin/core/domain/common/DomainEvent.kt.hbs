@@ -28,7 +28,7 @@ import {{layout.entitiesPackage}}.*
 {{#each event.fields as |field|}}
     {{~#if field.isArray}}
     fun add{{capitalize field.name}}({{field.name}}: {{javaType field}}): {{event.className}} {
-        this.{{field.name}}.add({{field.name}})
+        this.{{field.name}}?.add({{field.name}})
         return this
     }
     {{~/if}}

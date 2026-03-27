@@ -1,0 +1,40 @@
+package {{layout.entitiesPackage}};
+
+import java.util.Arrays;
+
+{{~assign "_entity" entity}}
+public final class {{entityServiceTransitionsClassName entity}} {
+
+    private {{entityServiceTransitionsClassName entity}}() {
+    }
+
+{{#each (entityServiceTransitionMethods entity) as |method|}}
+    public static void {{transitionMethodName method}}({{_entity.className}} entity) {
+        require("{{method.name}}", entity, {{entityCommandFromStatesSignature method _entity}});
+    }
+
+{{/each}}
+    private static void require(String command, {{entity.className}} entity, {{entityLifecycleFieldType entity}}... allowed) {
+        var current = entity.get{{asJavaTypeName entity.options.lifecycle.field}}();
+        for (var state : allowed) {
+            if (current != null && current == state) {
+                return;
+            }
+        }
+        throw new InvalidStateTransitionException(
+                entity.getClass().getSimpleName(),
+                entity.getId(),
+                {{{transitionNaturalIdExpression entity}}},
+                command,
+                current,
+                Arrays.asList(allowed));
+    }
+
+    public static class InvalidStateTransitionException extends IllegalStateException {
+
+        public InvalidStateTransitionException(String entityType, Object entityId, Object naturalId, String operation, Object currentState, java.util.Collection<?> allowedStates) {
+            super("Invalid state transition for " + entityType + " (" + (naturalId != null ? naturalId : "id=" + entityId) + ")" +
+                    ": operation '" + operation + "' not allowed from state " + currentState + ", allowed states: " + allowedStates);
+        }
+    }
+}

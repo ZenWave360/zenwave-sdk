@@ -42,6 +42,9 @@ local.properties
 .idea
 *.iml
 
+.mcp_data
+.m2
+
 # yarn specific
 **/src/main/frontend/dist/**
 
