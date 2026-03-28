@@ -14,9 +14,8 @@ jbang zw -p io.zenwave360.sdk.plugins.ZdlToMarkdownPlugin \
 |----------------------|----------------------------------------------|--------------|-----------------|--------------------------------|
 | `zdlFile`            | ZDL file to parse                            | String       |                 |                                |
 | `zdlFiles`           | ZDL files to parse (comma separated)         | List         |                 |                                |
-| `outputFormat`       | Template type                                | OutputFormat | glossary        | glossary, task_list, aggregate |
+| `outputFormat`       | Template type                                | OutputFormat | glossary        | glossary, aggregate, plantuml  |
 | `aggregateName`      | Aggregate name                               | String       |                 |                                |
-| `skipDiagrams`       | Skip generating PlantUML diagrams            | boolean      | false           |                                |
 | `targetFile`         | Target file                                  | String       | zdl-glossary.md |                                |
 | `continueOnZdlError` | Continue even when ZDL contains fatal errors | boolean      | true            |                                |
 

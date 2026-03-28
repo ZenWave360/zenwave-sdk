@@ -1,7 +1,7 @@
 ## What’s Changed
 
 - Merged release **2.4.0** by @ivangsa  
-  https://github.com/ZenWave360/zenwave-sdk/pull/101
+https://github.com/ZenWave360/zenwave-sdk/pull/102
 
 ## What’s New
 

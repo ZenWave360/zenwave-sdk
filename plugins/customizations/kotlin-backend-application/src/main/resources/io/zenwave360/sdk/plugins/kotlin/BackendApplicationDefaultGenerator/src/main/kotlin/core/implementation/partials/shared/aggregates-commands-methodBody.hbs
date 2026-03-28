@@ -1,0 +1,105 @@
+    {{{logMethodCall method}}}
+{{~#if (eq (size aggregateCommandsForMethod.aggregatesCommandsForMethod) 1)}}
+    {{~assign 'aggregateCommand' aggregateCommandsForMethod.aggregatesCommandsForMethod.0}}
+    {{~#if method.paramId}}
+        {{~#if method.naturalId}}
+    val {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.{{{naturalIdsRepoMethodCallSignature aggregateCommand.entity}}}
+        ?.let { {{aggregateCommand.aggregate.className}}(it) }
+        ?: throw NoSuchElementException("{{aggregateCommand.entity.className}} not found")
+        {{~else}}
+    val {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.find{{aggregateCommand.aggregate.className}}ById({{method.paramId}})
+        ?: throw NoSuchElementException("{{_entity.className}} not found with id: ${{method.paramId}}")
+        {{~/if}}
+    {{~else}}
+    val {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.aggregate.className}}()
+    {{~/if}}
+
+	val rootEntity = {{asInstanceName aggregateCommand.aggregate.className}}.getRootEntity()
+	{{~#if aggregateCommand.command.transition.from}}
+	{{aggregateTransitionsClassName aggregateCommand.aggregate}}.{{transitionMethodName aggregateCommand.command}}(rootEntity)
+	{{~/if}}
+
+    val result = {{asInstanceName aggregateCommand.aggregate.className}}.{{aggregateCommand.command.name}}({{#if method.parameter}}input{{/if}})
+
+	{{~#if method.transition.to}}
+	rootEntity.{{aggregateCommand.aggregate.lifecycle.field}} = {{lifecycleFieldType aggregateCommand.aggregate}}.{{method.transition.to}}
+	{{~/if}}
+
+    {{aggregateCommand.entity.instanceName}}Repository.save(result.aggregateRoot)
+    {{~#if (includeEmitEventsImplementation service)}}
+    {{~#each (serviceMethodEventPublications method) as |pub|}}
+        {{~#if pub.multipleProducers}}
+    // TODO: Multiple aggregates produce {{pub.eventName}}, manual disambiguation required
+        {{~else if pub.producedByAggregate}}
+            {{~#if pub.isAsyncApi}}
+    result.{{pub.instanceName}}.ifPresent { eventsProducer.{{pub.producerMethod}}(eventsMapper.as{{pub.eventClassName}}(it)) }
+            {{~else}}
+    result.{{pub.instanceName}}.ifPresent { eventPublisher.on{{pub.eventClassName}}(it) }
+            {{~/if}}
+        {{~else}}
+    // TODO: Event {{pub.eventName}} declared in service but not produced by any aggregate
+        {{~/if}}
+    {{~/each}}
+    {{~else}}
+    {{~#each (serviceMethodEventPublications method) as |pub|}}
+    // TODO: set 'includeEmitEventsImplementation' to generate event publishing for {{pub.eventName}}
+    {{~/each}}
+    {{~/if}}
+    {{~#if method.returnType}}
+        {{~#if (eq aggregateCommand.aggregate.className method.returnType)}}
+    return {{asInstanceName aggregateCommand.aggregate.className}}
+        {{~else if (eq aggregateCommand.aggregate.aggregateRoot method.returnType)}}
+    return result.aggregateRoot
+        {{~else}}
+    return {{asInstanceName service.name}}Mapper.as{{returnType}}(result.aggregateRoot)
+        {{~/if}}
+    {{~/if}}
+{{~else}}
+	{{~#each aggregateCommandsForMethod.aggregatesCommandsForMethod as |aggregateCommand| }}
+	run {
+    {{~#if method.paramId}}
+        {{~#if method.naturalId}}
+    val {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.{{{naturalIdsRepoMethodCallSignature aggregateCommand.entity}}}
+        ?.let { {{aggregateCommand.aggregate.className}}(it) }
+        ?: throw NoSuchElementException("{{aggregateCommand.entity.className}} not found")
+        {{~else}}
+    val {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.find{{aggregateCommand.aggregate.className}}ById({{method.paramId}})
+        ?: throw NoSuchElementException("{{aggregateCommand.entity.className}} not found with id: ${{method.paramId}}")
+        {{~/if}}
+    {{~else}}
+    val {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.aggregate.className}}()
+    {{~/if}}
+
+	val rootEntity = {{asInstanceName aggregateCommand.aggregate.className}}.getRootEntity()
+	{{~#if command.transition.from}}
+	{{aggregateTransitionsClassName aggregateCommand.aggregate}}.{{transitionMethodName aggregateCommand.command}}(rootEntity)
+	{{~/if}}
+
+	val {{asInstanceName aggregateCommand.aggregate.className}}Result = {{asInstanceName aggregateCommand.aggregate.className}}.{{command.name}}({{#if method.parameter}}input{{/if}})
+
+	{{~#if method.transition.to}}
+	rootEntity.{{aggregateCommand.aggregate.lifecycle.field}} = {{lifecycleFieldType aggregateCommand.aggregate}}.{{method.transition.to}}
+	{{~/if}}
+
+    {{aggregateCommand.entity.instanceName}}Repository.save({{asInstanceName aggregateCommand.aggregate.className}}Result.aggregateRoot)
+	}
+{{~/each}}
+    {{~#each (serviceMethodEventPublications method) as |pub|}}
+        {{~#if pub.multipleProducers}}
+    // TODO: Multiple aggregates produce {{pub.eventName}}, manual disambiguation required
+        {{~else if pub.producedByAggregate}}
+    // TODO: resolve which aggregate result produces {{pub.eventName}} for multi-aggregate methods
+        {{~else}}
+    // TODO: Event {{pub.eventName}} declared in service but not produced by any aggregate
+        {{~/if}}
+    {{~/each}}
+{{~#if method.returnType}}
+    {{~#if (eq aggregateCommand.aggregate.className method.returnType)}}
+    return {{asInstanceName aggregateCommand.aggregate.className}}
+    {{~else if (eq aggregateCommand.aggregate.aggregateRoot method.returnType)}}
+    return {{asInstanceName aggregateCommand.aggregate.className}}Result.aggregateRoot
+    {{~else}}
+    return null
+    {{~/if}}
+{{~/if}}
+{{~/if}}

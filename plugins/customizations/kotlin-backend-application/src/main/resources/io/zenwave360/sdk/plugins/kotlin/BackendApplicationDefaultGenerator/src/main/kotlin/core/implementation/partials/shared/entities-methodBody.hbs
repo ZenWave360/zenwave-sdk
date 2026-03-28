@@ -1,0 +1,175 @@
+{{~assign "_entity" aggregateCommandsForMethod.entity}}
+{{~assign "returnEntity" (methodReturnEntity method)}}
+    {{{logMethodCall method}}}
+{{!-- @Async --}}
+{{~#if method.options.async}}
+    {{#if method.returnType}}return CompletableFuture.completedFuture({{/if}} {{method.name}}Sync({{methodParametersCallSignature method}}){{#if method.returnType}}){{/if}}
+{{!-- @delete --}}
+{{~else if (and _entity method.options.delete method.paramId (not (hasEntityLifecycle _entity)))}}
+    log.debug("Request to delete {{_entity.className}} : {}", id)
+    {{_entity.instanceName}}Repository.deleteById(id)
+{{!-- list search --}}
+{{~else if (and _entity method.returnType method.returnTypeIsArray)}}
+    {{~#if (eq _entity.name returnEntity)}}
+    return {{_entity.instanceName}}Repository.findAll({{#if method.options.paginated}}pageable{{/if}})
+    {{~else}}
+    val {{_entity.instanceNamePlural}} = {{_entity.instanceName}}Repository.findAll({{#if method.options.paginated}}pageable{{/if}})
+    return {{wrapWithMapper _entity}}
+    {{~/if}}
+{{!-- Optional<Entity> patch(id, Map) --}}
+{{~else if (and _entity method.options.patch method.paramId method.parameter method.returnType method.returnTypeIsOptional)}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}
+        ?.let { existing{{_entity.className}} ->
+            {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
+        }
+        ?.let { {{_entity.instanceName}}Repository.save(it) }
+        {{~#unless (eq _entity.name method.returnType)}}
+        ?.let { {{asInstanceName service.name}}Mapper.as{{returnType}}(it) }
+        {{~/unless}}
+        {{~#if method.withEvents}}
+        ?.also {
+            {{~> (partial '../withEvents') varName='it' }}
+        }
+        {{~/if}}
+{{!-- Optional<Entity> update(id, Entity) with lifecycle from/to --}}
+{{~else if (and _entity (hasEntityLifecycle _entity) method.paramId method.parameter method.returnType method.returnTypeIsOptional)}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}
+        ?.let { existing{{_entity.className}} ->
+			{{~#if method.transition.from}}
+            {{entityServiceTransitionsClassName _entity}}.{{transitionMethodName method}}(existing{{_entity.className}})
+            {{~/if}}
+            {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
+			{{~#if method.transition.to}}
+			existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{method.transition.to}}
+            {{~/if}}
+            existing{{_entity.className}}
+        }
+        ?.let { {{_entity.instanceName}}Repository.save(it) }
+        {{~#unless (eq _entity.name method.returnType)}}
+        ?.let { {{asInstanceName service.name}}Mapper.as{{returnType}}(it) }
+        {{~/unless}}
+        {{~#if method.withEvents}}
+        ?.also {
+            {{~> (partial '../withEvents') varName='it' }}
+        }
+        {{~/if}}
+{{!-- Optional<Entity> update(id, Entity) --}}
+{{~else if (and _entity method.paramId method.parameter method.returnType method.returnTypeIsOptional)}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}
+        ?.let { existing{{_entity.className}} ->
+            {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
+        }
+        ?.let { {{_entity.instanceName}}Repository.save(it) }
+        {{~#unless (eq _entity.name method.returnType)}}
+        ?.let { {{asInstanceName service.name}}Mapper.as{{returnType}}(it) }
+        {{~/unless}}
+        {{~#if method.withEvents}}
+        ?.also {
+            {{~> (partial '../withEvents') varName='it' }}
+        }
+        {{~/if}}
+{{!-- Entity update(id, Entity) with lifecycle from/to --}}
+{{~else if (and _entity (hasEntityLifecycle _entity) method.paramId method.parameter method.returnType)}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}
+        ?.let { existing{{_entity.className}} ->
+			{{~#if method.transition.from}}
+            {{entityServiceTransitionsClassName _entity}}.{{transitionMethodName method}}(existing{{_entity.className}})
+            {{~/if}}
+            {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
+			{{~#if method.transition.to}}
+			existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{method.transition.to}}
+            {{~/if}}
+            existing{{_entity.className}}
+        }
+        ?.let { {{_entity.instanceName}}Repository.save(it) }
+        {{~#if method.withEvents}}
+        ?.also {
+            {{~> (partial '../withEvents') varName='it' }}
+        }
+        {{~/if}}
+        ?: throw NoSuchElementException("{{_entity.className}} not found with id: {{{idForStringInterpolation method}}}")
+{{!-- Entity update(id, Entity) --}}
+{{~else if (and _entity method.paramId method.parameter method.returnType)}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}
+        ?.let { existing{{_entity.className}} ->
+            {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
+        }
+        ?.let { {{_entity.instanceName}}Repository.save(it) }
+        {{~#if method.withEvents}}
+        ?.also {
+            {{~> (partial '../withEvents') varName='it' }}
+        }
+        {{~/if}}
+        ?: throw NoSuchElementException("{{_entity.className}} not found with id: {{{idForStringInterpolation method}}}")
+{{!-- Optional<Entity> transition(id) with lifecycle from/to (no input) --}}
+{{~else if (and _entity (hasEntityLifecycle _entity) method.paramId (not method.parameter) method.returnType method.returnTypeIsOptional (or method.transition.from method.transition.to))}}
+	return {{_entity.instanceName}}Repository.{{{findById method}}}
+		?.let { existing{{_entity.className}} ->
+			{{~#if method.transition.from}}
+			{{entityServiceTransitionsClassName _entity}}.{{transitionMethodName method}}(existing{{_entity.className}})
+			{{~/if}}
+			{{~#if method.transition.to}}
+			existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{method.transition.to}}
+			{{~/if}}
+			existing{{_entity.className}}
+		}
+		?.let { {{_entity.instanceName}}Repository.save(it) }
+		{{~#if method.withEvents}}
+		?.also {
+			{{~> (partial '../withEvents') varName='it' }}
+		}
+		{{~/if}}
+{{!-- Entity transition(id) with lifecycle from/to (no input) --}}
+{{~else if (and _entity (hasEntityLifecycle _entity) method.paramId (not method.parameter) method.returnType (or method.transition.from method.transition.to))}}
+	val existing{{_entity.className}} = {{_entity.instanceName}}Repository.{{{findById method}}}
+		?: throw NoSuchElementException("{{_entity.className}} not found with id: {{{idForStringInterpolation method}}}")
+	{{~#if method.transition.from}}
+	{{entityServiceTransitionsClassName _entity}}.{{transitionMethodName method}}(existing{{_entity.className}})
+	{{~/if}}
+	{{~#if method.transition.to}}
+	existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{method.transition.to}}
+	{{~/if}}
+	val {{_entity.instanceName}} = {{_entity.instanceName}}Repository.save(existing{{_entity.className}})
+	{{~> (partial '../withEvents') varName=_entity.instanceName }}
+	return {{wrapWithMapper _entity}}
+{{!-- Optional<Entity> get(id) --}}
+{{~else if (and _entity method.paramId method.returnType method.returnTypeIsOptional)}}
+    {{~assign 'needMapping' (not (eq _entity.name method.returnType))}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}{{#if needMapping}}?.let { {{asInstanceName service.name}}Mapper.as{{method.returnType}}(it) }{{/if}}
+{{!-- Entity get(id) --}}
+{{~else if (and _entity method.paramId method.returnType)}}
+    {{~assign 'needMapping' (not (eq _entity.name method.returnType))}}
+    return {{_entity.instanceName}}Repository.{{{findById method}}}{{#if needMapping}}?.let { {{asInstanceName service.name}}Mapper.as{{method.returnType}}(it) }{{/if}}
+        ?: throw NoSuchElementException("{{_entity.className}} not found with id: {{{idForStringInterpolation method}}}")
+{{!-- Optional<Entity> get(MyEntity) --}}
+{{~else if (and _entity method.parameter method.returnType method.returnTypeIsOptional)}}
+    val {{_entity.instanceName}} = {{asInstanceName service.name}}Mapper.update({{_entity.className}}(), {{{mapperInputCallSignature method.parameter}}})
+    // TODO: implement this method
+    {{~> (partial '../withEvents') varName=_entity.instanceName }}
+    return {{wrapWithMapper _entity}}
+{{!-- Optional<Entity> get(MyEntity) --}}
+{{~else if (and _entity method.parameter method.returnType)}}
+    val {{_entity.instanceName}} = {{asInstanceName service.name}}Mapper.update({{_entity.className}}(), {{{mapperInputCallSignature method.parameter}}})
+    // TODO: implement this method
+    {{~> (partial '../withEvents') varName=_entity.instanceName }}
+    return {{wrapWithMapper _entity}}
+{{!-- Optional<Entity> get() --}}
+{{~else if (and _entity method.returnType)}}
+    val {{_entity.instanceName}} = {{_entity.className}}()
+    // TODO: implement this method
+    {{~> (partial '../withEvents') varName=_entity.instanceName }}
+    return {{wrapWithMapper _entity}}
+{{!-- void get() --}}
+{{~else if (and _entity)}}
+    val {{_entity.instanceName}} = {{_entity.className}}()
+    // TODO: implement this method
+    {{~> (partial '../withEvents') varName=_entity.instanceName }}
+
+{{!-- we know nothing (???) --}}
+{{~else~}}
+    // TODO: implement this method
+    {{~> (partial '../withEvents') varName=_entity.instanceName }}
+  {{~#if method.returnType}}
+    return null
+  {{~/if}}
+{{~/if}}

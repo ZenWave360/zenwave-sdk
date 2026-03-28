@@ -1,0 +1,103 @@
+    {{{logMethodCall method}}}
+{{~#if (eq (size aggregateCommandsForMethod.aggregatesCommandsForMethod) 1)}}
+    {{~assign 'aggregateCommand' aggregateCommandsForMethod.aggregatesCommandsForMethod.0}}
+    {{~#if method.paramId}}
+        {{~#if method.naturalId}}
+    var {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.{{{naturalIdsRepoMethodCallSignature aggregateCommand.entity}}}.map({{aggregateCommand.aggregate.className}}::new).orElseThrow();
+        {{~else}}
+    var {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.find{{aggregateCommand.aggregate.className}}ById({{method.paramId}}).orElseThrow();
+        {{~/if}}
+    {{~else}}
+    var {{asInstanceName aggregateCommand.aggregate.className}} = new {{aggregateCommand.aggregate.className}}();
+    {{~/if}}
+
+	var rootEntity = {{asInstanceName aggregateCommand.aggregate.className}}.getRootEntity();
+	{{~#if aggregateCommand.command.transition.from}}
+	{{aggregateTransitionsClassName aggregateCommand.aggregate}}.{{transitionMethodName aggregateCommand.command}}(rootEntity);
+	{{~/if}}
+
+    var result = {{asInstanceName aggregateCommand.aggregate.className}}.{{aggregateCommand.command.name}}({{#if method.parameter}}input{{/if}});
+
+	{{~#if method.transition.to}}
+	rootEntity.set{{asJavaTypeName aggregateCommand.aggregate.lifecycle.field}}({{lifecycleFieldType aggregateCommand.aggregate}}.{{method.transition.to}});
+	{{~/if}}
+
+    {{aggregateCommand.entity.instanceName}}Repository.save(result.aggregateRoot());
+    {{~#if (includeEmitEventsImplementation service)}}
+    {{~#each (serviceMethodEventPublications method) as |pub|}}
+        {{~#if pub.multipleProducers}}
+    // TODO: Multiple aggregates produce {{pub.eventName}}, manual disambiguation required
+        {{~else if pub.producedByAggregate}}
+            {{~#if pub.isAsyncApi}}
+    result.{{pub.instanceName}}().ifPresent(it -> eventsProducer.{{pub.producerMethod}}(eventsMapper.as{{pub.eventClassName}}(it)));
+            {{~else}}
+    result.{{pub.instanceName}}().ifPresent(it -> eventPublisher.on{{pub.eventClassName}}(it));
+            {{~/if}}
+        {{~else}}
+    // TODO: Event {{pub.eventName}} declared in service but not produced by any aggregate
+        {{~/if}}
+    {{~/each}}
+    {{~else}}
+    {{~#each (serviceMethodEventPublications method) as |pub|}}
+    // TODO: set 'includeEmitEventsImplementation' to generate event publishing for {{pub.eventName}}
+    {{~/each}}
+    {{~/if}}
+    {{~#if method.returnType}}
+        {{~#if (eq aggregateCommand.aggregate.className method.returnType)}}
+    return {{asInstanceName aggregateCommand.aggregate.className}};
+        {{~else if (eq aggregateCommand.aggregate.aggregateRoot method.returnType)}}
+    return result.aggregateRoot();
+        {{~else}}
+    return {{asInstanceName service.name}}Mapper.as{{returnType}}(result.aggregateRoot());
+        {{~/if}}
+    {{~/if}}
+{{~else}}
+{{~#each aggregateCommandsForMethod.aggregatesCommandsForMethod as |aggregateCommand| }}
+	{
+    {{~#if method.paramId}}
+        {{~#if method.naturalId}}
+    var {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.{{{naturalIdsRepoMethodCallSignature aggregateCommand.entity}}}.map({{aggregateCommand.aggregate.className}}::new).orElseThrow();
+        {{~else}}
+    var {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.find{{aggregateCommand.aggregate.className}}ById({{method.paramId}}).orElseThrow();
+        {{~/if}}
+    {{~else}}
+    var {{asInstanceName aggregateCommand.aggregate.className}} = new {{aggregateCommand.aggregate.className}}();
+    {{~/if}}
+
+	var rootEntity = {{asInstanceName aggregateCommand.aggregate.className}}.getRootEntity();
+	{{~#if command.transition.from}}
+	{{aggregateTransitionsClassName aggregateCommand.aggregate}}.{{transitionMethodName aggregateCommand.command}}(rootEntity);
+	{{~/if}}
+
+    var {{asInstanceName aggregateCommand.aggregate.className}}Result = {{asInstanceName aggregateCommand.aggregate.className}}.{{aggregateCommand.command.name}}({{#if method.parameter}}input{{/if}});
+
+	{{~#if method.transition.to}}
+	rootEntity.set{{asJavaTypeName aggregateCommand.aggregate.lifecycle.field}}({{lifecycleFieldType aggregateCommand.aggregate}}.{{method.transition.to}});
+	{{~/if}}
+
+    {{aggregateCommand.entity.instanceName}}Repository.save({{asInstanceName aggregateCommand.aggregate.className}}Result.aggregateRoot());
+	}
+{{~/each}}
+    {{~#each (serviceMethodEventPublications method) as |pub|}}
+        {{~#if pub.multipleProducers}}
+    // TODO: Multiple aggregates produce {{pub.eventName}}, manual disambiguation required
+        {{~else if pub.producedByAggregate}}
+            {{~#if pub.isAsyncApi}}
+    // TODO: resolve which aggregate result produces {{pub.eventName}} for multi-aggregate methods
+            {{~else}}
+    // TODO: resolve which aggregate result produces {{pub.eventName}} for multi-aggregate methods
+            {{~/if}}
+        {{~else}}
+    // TODO: Event {{pub.eventName}} declared in service but not produced by any aggregate
+        {{~/if}}
+    {{~/each}}
+{{~#if method.returnType}}
+    {{~#if (eq aggregateCommand.aggregate.className method.returnType)}}
+    return {{asInstanceName aggregateCommand.aggregate.className}};
+    {{~else if (eq aggregateCommand.aggregate.aggregateRoot method.returnType)}}
+    return {{asInstanceName aggregateCommand.aggregate.className}}Result.aggregateRoot();
+    {{~else}}
+    return null;
+    {{~/if}}
+{{~/if}}
+{{~/if}}
