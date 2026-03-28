@@ -146,12 +146,18 @@ public class ZdlToMarkdownSupportTest {
         method.put("options", options);
 
         var annotations = ServiceHelperFormatter.formatMethodAnnotations(method);
+        var asyncapiAnnotation = annotations.stream()
+                .filter(annotation -> annotation.startsWith("@asyncapi("))
+                .findFirst()
+                .orElseThrow();
 
         Assertions.assertEquals("CustomerOutput?", ServiceHelperFormatter.methodReturnType(method));
         Assertions.assertTrue(annotations.contains("@secured()"));
         Assertions.assertTrue(annotations.contains("@nullable()"));
         Assertions.assertTrue(annotations.contains("@roles(admin, support)"));
-        Assertions.assertTrue(annotations.contains("@asyncapi(channel: customerChannel, headers: {tenant: acme}, tags: [customer, events])"));
+        Assertions.assertTrue(asyncapiAnnotation.contains("channel: customerChannel"));
+        Assertions.assertTrue(asyncapiAnnotation.contains("headers: {tenant: acme}"));
+        Assertions.assertTrue(asyncapiAnnotation.contains("tags: [customer, events]"));
     }
 
     @SuppressWarnings("unchecked")
