@@ -1,6 +1,10 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownPlugin,78,145,5,1,17,32,6,4,3,4
-io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownGenerator.new Record() {...},0,12,0,0,0,1,0,1,0,1
-io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownGenerator,484,2074,116,208,108,418,105,119,3,58
-io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownGenerator.new Record() {...},12,0,0,0,1,0,1,0,1,0
-io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownGenerator.OutputFormat,0,27,0,0,0,2,0,1,0,1
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownPlugin,36,102,2,0,6,22,3,3,2,3
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownGenerator,15,486,6,13,4,98,7,36,1,32
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,DiagramModelResolver,13,120,11,23,5,26,11,10,0,4
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,LifecycleDiagramBuilder,48,1000,32,96,22,191,31,51,0,18
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,LifecycleDiagramBuilder.new Record() {...},0,12,0,0,0,1,0,1,0,1
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownGenerator.OutputFormat,0,21,0,0,0,2,0,1,0,1
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,LifecycleDiagramBuilder.new Record() {...},0,12,0,0,0,1,0,1,0,1
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,AssociationCollector,16,508,26,70,10,109,26,31,0,9
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ServiceHelperFormatter,7,414,3,43,2,77,3,37,0,17

@@ -111,11 +111,15 @@ io.zenwave360.sdk:zenwave-sdk-test-resources,io.zenwave360.sdk.mongodb2jdl,Tag,1
 io.zenwave360.sdk:zenwave-sdk-test-resources,io.zenwave360.sdk.mongodb2jdl,Post,143,0,8,0,49,0,28,0,24,0
 io.zenwave360.sdk:zenwave-sdk-test-resources,io.zenwave360.sdk.mongodb2jdl,PostType,15,0,0,0,2,0,1,0,1,0
 io.zenwave360.sdk:zenwave-sdk-test-resources,io.zenwave360.sdk.mongodb2jdl,AbstractAuditingEntity,37,0,0,0,17,0,9,0,9,0
-io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownPlugin,78,145,5,1,17,32,6,4,3,4
-io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownGenerator.new Record() {...},0,12,0,0,0,1,0,1,0,1
-io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownGenerator,484,2074,116,208,108,418,105,119,3,58
-io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownGenerator.new Record() {...},12,0,0,0,1,0,1,0,1,0
-io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownGenerator.OutputFormat,0,27,0,0,0,2,0,1,0,1
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownPlugin,36,102,2,0,6,22,3,3,2,3
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownGenerator,15,486,6,13,4,98,7,36,1,32
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,DiagramModelResolver,13,120,11,23,5,26,11,10,0,4
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,LifecycleDiagramBuilder,48,1000,32,96,22,191,31,51,0,18
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,LifecycleDiagramBuilder.new Record() {...},0,12,0,0,0,1,0,1,0,1
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownGenerator.OutputFormat,0,21,0,0,0,2,0,1,0,1
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,LifecycleDiagramBuilder.new Record() {...},0,12,0,0,0,1,0,1,0,1
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,AssociationCollector,16,508,26,70,10,109,26,31,0,9
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ServiceHelperFormatter,7,414,3,43,2,77,3,37,0,17
 io.zenwave360.sdk.plugins:asyncapi-jsonschema2pojo,io.zenwave360.sdk.plugins,AsyncApiJsonSchema2PojoGenerator.new AbstractRuleLogger() {...},46,8,2,0,15,2,10,2,9,2
 io.zenwave360.sdk.plugins:asyncapi-jsonschema2pojo,io.zenwave360.sdk.plugins,AsyncApiJsonSchema2PojoPlugin,4,20,0,0,1,3,1,1,1,1
 io.zenwave360.sdk.plugins:asyncapi-jsonschema2pojo,io.zenwave360.sdk.plugins,JsonSchema2PojoConfiguration,384,522,11,27,144,142,90,63,80,54
@@ -147,7 +151,7 @@ io.zenwave360.sdk.plugins:zdl-to-openapi,io.zenwave360.sdk.plugins,ZDLToOpenAPIG
 io.zenwave360.sdk.plugins:zdl-to-openapi,io.zenwave360.sdk.plugins,ZDLToOpenAPIPlugin,45,0,4,0,6,0,4,0,2,0
 io.zenwave360.sdk.plugins:zdl-to-openapi,io.zenwave360.sdk.plugins,PathsProcessor,15,271,6,24,2,58,6,16,0,7
 io.zenwave360.sdk.plugins:zdl-to-openapi,io.zenwave360.sdk.plugins,OpenAPIToJDLGenerator,10,497,4,42,5,92,5,24,1,5
-io.zenwave360.sdk.plugins:zenwave-mcp-server,io.zenwave360.sdk.plugins.mcp,ZenWaveProjectTools,0,10,0,0,0,3,0,3,0,3
+io.zenwave360.sdk.plugins:zenwave-mcp-server,io.zenwave360.sdk.plugins.mcp,ZenWaveProjectTools,0,7,0,0,0,2,0,2,0,2
 io.zenwave360.sdk.plugins:zenwave-mcp-server,io.zenwave360.sdk.plugins.mcp,McpServerApplication,18,0,0,0,4,0,3,0,3,0
 io.zenwave360.sdk.plugins:openapi-spring-webtestclient,io.zenwave360.sdk.plugins,SpringWebTestClientGenerator.GroupByType,0,27,0,0,0,2,0,1,0,1
 io.zenwave360.sdk.plugins:openapi-spring-webtestclient,io.zenwave360.sdk.plugins,SpringWebTestClientGenerator,42,352,2,24,8,61,3,19,1,8
@@ -175,11 +179,19 @@ io.zenwave360.sdk.plugins.customizations:kotlin-backend-application,io.zenwave36
 io.zenwave360.sdk.plugins.customizations:kotlin-backend-application,io.zenwave360.sdk.plugins.kotlin,OpenAPIControllersKotlinTemplates,7,118,2,2,1,15,2,4,0,4
 io.zenwave360.sdk.plugins.customizations:kotlin-backend-application,io.zenwave360.sdk.plugins.kotlin,SpringWebTestClientKotlinTemplates,5,208,1,1,1,31,1,8,0,8
 io.zenwave360.sdk.plugins.customizations:kotlin-backend-application,io.zenwave360.sdk.plugins.kotlin,BackendApplicationKotlinHelpers,152,256,15,15,23,61,18,22,6,18
+io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins.support,MapperSupport,2,376,1,33,1,41,1,19,0,3
+io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins.support,RepositoryIdSupport,0,95,0,6,0,16,0,7,0,4
+io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins.support,CrudMethodSupport,0,34,0,2,0,6,0,2,0,1
+io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins.support,LifecycleSupport,14,307,15,39,7,59,15,30,0,18
+io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins.support,MethodBodyPlan,3,30,0,0,1,11,1,5,1,5
+io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins.support,ServiceEventPlanner,4,247,8,26,0,53,8,13,0,4
+io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins.support,MethodBodyCase,0,105,0,0,0,18,0,1,0,1
+io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins.support,ServiceMethodBodyPlanner,58,244,65,95,10,38,52,30,0,2
 io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins.annotators,AnnotationHelper,70,29,5,1,12,5,11,2,8,2
 io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins.annotators,JSpecifyAnnotator,28,0,2,0,6,0,4,0,3,0
-io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultPlugin,0,34,0,0,0,4,0,2,0,2
 io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultJpaHelpers,87,88,15,7,9,17,9,9,0,7
 io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationMultiModuleProjectTemplates,0,464,0,0,0,37,0,1,0,1
-io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultHelpers,344,2009,65,177,57,332,74,139,18,74
-io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationProjectTemplates,15,796,12,34,3,86,11,28,0,16
+io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultHelpers,222,1158,25,87,39,209,38,105,17,70
 io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultGenerator,0,60,0,2,0,14,0,4,0,3
+io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationDefaultPlugin,0,34,0,0,0,4,0,2,0,2
+io.zenwave360.sdk.plugins:backend-application-default,io.zenwave360.sdk.plugins,BackendApplicationProjectTemplates,15,796,12,34,3,86,11,28,0,16
