@@ -6,8 +6,15 @@ import java.util.stream.Stream;
 
 import io.zenwave360.sdk.utils.Maps;
 import io.zenwave360.sdk.utils.NamingUtils;
+import io.zenwave360.sdk.plugins.support.CrudMethodSupport;
+import io.zenwave360.sdk.plugins.support.LifecycleSupport;
+import io.zenwave360.sdk.plugins.support.MapperSupport;
+import io.zenwave360.sdk.plugins.support.RepositoryIdSupport;
+import io.zenwave360.sdk.plugins.support.ServiceEventPlanner;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 import io.zenwave360.sdk.zdl.utils.ZDLJavaSignatureUtils;
+import io.zenwave360.sdk.plugins.support.MethodBodyPlan;
+import io.zenwave360.sdk.plugins.support.ServiceMethodBodyPlanner;
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.jknack.handlebars.Options;
@@ -70,14 +77,8 @@ public class BackendApplicationDefaultHelpers {
     @Deprecated
     public boolean isCrudMethod(String crudMethodPrefix, Options options) {
         var entity = (Map<String, Object>) options.hash("entity");
-        var entityName = (String) entity.get("name");
-        var entityNamePlural = (String) entity.get("classNamePlural");
         var method = (Map<String, Object>) options.hash("method");
-        var methodName = (String) method.get("name");
-        var isArray = "true".equals(String.valueOf(method.get("returnTypeIsArray")));
-        var isOptional = "true".equals(String.valueOf(method.get("returnTypeIsOptional")));
-        var entityMethodSuffix = isArray ? entityNamePlural : entityName;
-        var isCrudMethod = methodName.equals(crudMethodPrefix + entityMethodSuffix);
+        var isCrudMethod = CrudMethodSupport.isCrudMethod(crudMethodPrefix, entity, method);
         if(isCrudMethod) {
             method.put("isCrudMethod", isCrudMethod);
         }
@@ -140,81 +141,29 @@ public class BackendApplicationDefaultHelpers {
     }
 
     public String findById(Map method, Options options) {
-        var zdl = options.get("zdl");
-        var hasNaturalId = JSONPath.get(method, "$.naturalId", false);
-        if(hasNaturalId) {
-            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("entity"));
-            return ZDLJavaSignatureUtils.naturalIdsRepoMethodCallSignature(entity);
-        }
-        return "findById(id)";
+        var zdl = (Map<String, Object>) options.get("zdl");
+        return RepositoryIdSupport.findById(zdl, method);
     }
 
     public String idFieldInitialization(Map method, Options options) {
-        var zdl = options.get("zdl");
-        var hasNaturalId = JSONPath.get(method, "$.naturalId", false);
-        if(hasNaturalId) {
-            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("entity"));
-            List<Map> fields = ZDLFindUtils.naturalIdFields(entity);
-            return fields.stream().map(field -> String.format("var %s = %s;", field.get("name"), ZDLJavaSignatureUtils.populateField(field)))
-                    .collect(Collectors.joining("\n"));
-        }
-        return generator.getIdJavaType() + " id = null;";
+        var zdl = (Map<String, Object>) options.get("zdl");
+        return RepositoryIdSupport.idFieldInitialization(zdl, method, generator.getIdJavaType());
     }
 
     public String idParamsCallSignature(Map method, Options options) {
-        var zdl = options.get("zdl");
-        var hasNaturalId = JSONPath.get(method, "$.naturalId", false);
-        if(hasNaturalId) {
-            var entity = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("entity"));
-            var fields = ZDLFindUtils.naturalIdFields(entity);
-            return ZDLJavaSignatureUtils.fieldsParamsCallSignature(fields);
-        }
-        return "id";
+        var zdl = (Map<String, Object>) options.get("zdl");
+        return RepositoryIdSupport.idParamsCallSignature(zdl, method);
     }
 
     public Map<String, Object> serviceParameterEntityPairs(Map service, Options options) {
         var zdl = (Map) options.get("zdl");
         var inputDTOSuffix = (String) options.get("inputDTOSuffix");
-        var map = new HashMap<String, Object>();
-        for (Map method : JSONPath.get(service, "methods[*]", List.<Map>of())) {
-            var input = (Map) JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("parameter"));
-            var entity = (Map)JSONPath.get(zdl, "$.entities." + method.get("entity"));
-            var isInput = input != null && "inputs".equals(input.get("type"));
-            var isPatch = JSONPath.get(method, "options.patch") != null;
-
-            if (entity != null) {
-                if (isPatch) {
-                    var key = "java.util.Map-" + entity.get("className");
-                    map.put(key, Maps.of("input", Map.of("className","Map"), "entity", entity, "method", method));
-                } else if (input != null) {
-                    var key = input.get("className") + (isInput? inputDTOSuffix : "") + "-" + entity.get("className");
-                    map.put(key, Maps.of("input", input, "entity", entity, "method", method));
-                }
-            }
-
-        }
-        return map;
+        return MapperSupport.serviceParameterEntityPairs(zdl, service, inputDTOSuffix);
     }
 
     public Map<String, Object> serviceEntityReturnTypePairs(Map service, Options options) {
         var zdl = (Map) options.get("zdl");
-        var map = new HashMap<String, Object>();
-        for (Map method : JSONPath.get(service, "methods[*]", List.<Map>of())) {
-            var entity = (Map)JSONPath.get(zdl, "$.entities." + method.get("entity"));
-            var output = (Map)JSONPath.get(zdl, "$.allEntitiesAndEnums." + method.get("returnType"));
-            var isArray = Boolean.TRUE.equals(method.get("returnTypeIsArray"));
-            var isOptional = Boolean.TRUE.equals(method.get("returnTypeIsOptional"));
-            var isPaginated = JSONPath.get(method, "options.paginated", false);
-
-            if (entity != null && output != null) {
-                if (entity.get("name").equals(output.get("name"))) {
-                    continue;
-                }
-                var key = entity.get("className") + "-" + output.get("className");
-                map.put(key, Maps.of("entity", entity, "output", output, "method", method, "isArray", isArray, "isOptional", isOptional, "isPaginated", isPaginated));
-            }
-        }
-        return map;
+        return MapperSupport.serviceEntityReturnTypePairs(zdl, service);
     }
 
     public String methodParameterType(Map<String, Object> method, Options options) {
@@ -230,6 +179,16 @@ public class BackendApplicationDefaultHelpers {
     public String methodParametersCallSignature(Map<String, Object> method, Options options) {
         var zdl = (Map) options.get("zdl");
         return ZDLJavaSignatureUtils.methodParametersCallSignature(method, zdl);
+    }
+
+    public MethodBodyPlan planEntityMethodBody(Map<String, Object> aggregateCommandsForMethod,
+                                               Map<String, Object> method,
+                                               Options options) {
+        var entity = aggregateCommandsForMethod != null
+                ? (Map<String, Object>) aggregateCommandsForMethod.get("entity")
+                : null;
+        var returnEntity = methodReturnEntity(method, options);
+        return ServiceMethodBodyPlanner.planEntityMethodBody(method, entity, returnEntity);
     }
 
     public List<Map> methodParameterFields(Map<String, Object> method, Options options) {
@@ -319,62 +278,41 @@ public class BackendApplicationDefaultHelpers {
      * Looks up the entity and finds the field type for the field defined in lifecycle.
      */
     public String lifecycleFieldType(Map<String, Object> aggregate, Options options) {
-        if (aggregate == null) {
-            return null;
-        }
-        var lifecycle = (Map<String, Object>) JSONPath.get(aggregate, "lifecycle");
-        if (lifecycle == null) {
-            return null;
-        }
-        var rootEntity = aggregateRootEntity(aggregate, options);
-        if (rootEntity == null) {
-            return null;
-        }
-        var field = (String) lifecycle.get("field");
-        return JSONPath.get(rootEntity, "$.fields." + field + ".type");
+        var zdl = (Map<String, Object>) options.get("zdl");
+        return LifecycleSupport.lifecycleFieldType(zdl, aggregate);
     }
 
     /**
      * Returns true if the aggregate has a lifecycle (state machine) defined.
      */
     public boolean hasLifecycle(Map<String, Object> aggregate, Options options) {
-        return lifecycleFieldType(aggregate, options) != null;
+        var zdl = (Map<String, Object>) options.get("zdl");
+        return LifecycleSupport.hasLifecycle(zdl, aggregate);
     }
 
     /**
      * Returns true if any command in the aggregate has from/to state transitions.
      */
     public boolean hasStateTransitions(Map<String, Object> aggregate, Options options) {
-        if (aggregate == null) return false;
-        var commands = JSONPath.get(aggregate, "$.commands[*]", List.<Map>of());
-
-        return commands.stream().anyMatch(cmd -> JSONPath.get(cmd, "$.transition.from") != null || JSONPath.get(cmd, "$.transition.to") != null);
+        return LifecycleSupport.hasStateTransitions(aggregate);
     }
 
     public String transitionMethodName(Map<String, Object> method, Options options) {
-        return "ensureCan" + asJavaTypeName((String) method.get("name"));
+        return LifecycleSupport.transitionMethodName(method);
     }
 
     public String aggregateTransitionsClassName(Map<String, Object> aggregate, Options options) {
-        return asJavaTypeName((String) aggregate.get("aggregateRoot")) + "AggregateTransitions";
+        return LifecycleSupport.aggregateTransitionsClassName(aggregate);
     }
 
     public Map<String, Object> aggregateRootEntity(Map<String, Object> aggregate, Options options) {
-        if (aggregate == null) {
-            return null;
-        }
         var zdl = (Map<String, Object>) options.get("zdl");
-        return JSONPath.get(zdl, "$.allEntitiesAndEnums." + aggregate.get("aggregateRoot"));
+        return LifecycleSupport.aggregateRootEntity(zdl, aggregate);
     }
 
     public List<Map<String, Object>> aggregateTransitionMethods(Map<String, Object> aggregate, Options options) {
-        if (aggregate == null || !hasLifecycle(aggregate, options)) {
-            return Collections.emptyList();
-        }
-        var commands = JSONPath.get(aggregate, "$.commands[*]", List.<Map<String, Object>>of());
-        return commands.stream()
-                .filter(command -> JSONPath.get(command, "$.transition.from") != null)
-                .toList();
+        var zdl = (Map<String, Object>) options.get("zdl");
+        return LifecycleSupport.aggregateTransitionMethods(zdl, aggregate);
     }
 
     public boolean hasAggregateTransitionMethods(Map<String, Object> aggregate, Options options) {
@@ -386,12 +324,8 @@ public class BackendApplicationDefaultHelpers {
      * "OrderStatus.DRAFT, OrderStatus.PLACED"
      */
     public String commandFromStatesSignature(Map<String, Object> command, Map<String, Object> aggregate, Options options) {
-        var fromStates = (List<String>) JSONPath.get(command, "$.transition.from");
-        if (fromStates == null || fromStates.isEmpty()) return "";
-        var fieldType = lifecycleFieldType(aggregate, options);
-        return fromStates.stream()
-                .map(state -> fieldType + "." + state)
-                .collect(Collectors.joining(", "));
+        var zdl = (Map<String, Object>) options.get("zdl");
+        return LifecycleSupport.commandFromStatesSignature(zdl, command, aggregate);
     }
 
     // ==================== Entity Lifecycle Helpers ====================
@@ -400,7 +334,7 @@ public class BackendApplicationDefaultHelpers {
      * Returns true if the entity has a @lifecycle annotation (for non-aggregate entities).
      */
     public boolean hasEntityLifecycle(Map<String, Object> entity, Options options) {
-        return entity != null && JSONPath.get(entity, "lifecycle") != null;
+        return LifecycleSupport.hasEntityLifecycle(entity);
     }
 
     /**
@@ -408,10 +342,7 @@ public class BackendApplicationDefaultHelpers {
      * Looks up the field type from the entity's own field map.
      */
     public String entityLifecycleFieldType(Map<String, Object> entity, Options options) {
-        var lifecycle = (Map<String, Object>) JSONPath.get(entity, "lifecycle");
-        if (lifecycle == null) return "";
-        var field = (String) lifecycle.get("field");
-        return JSONPath.get(entity, "$.fields." + field + ".type");
+        return LifecycleSupport.entityLifecycleFieldType(entity);
     }
 
     /**
@@ -419,16 +350,11 @@ public class BackendApplicationDefaultHelpers {
      * e.g. "OrderStatus.DRAFT, OrderStatus.PLACED"
      */
     public String entityCommandFromStatesSignature(Map<String, Object> method, Map<String, Object> entity, Options options) {
-        var fromStates = (List<String>) JSONPath.get(method, "$.transition.from");
-        if (fromStates == null || fromStates.isEmpty()) return "";
-        var fieldType = entityLifecycleFieldType(entity, options);
-        return fromStates.stream()
-                .map(state -> fieldType + "." + state)
-                .collect(Collectors.joining(", "));
+        return LifecycleSupport.entityCommandFromStatesSignature(method, entity);
     }
 
     public String entityServiceTransitionsClassName(Map<String, Object> entity, Options options) {
-        return asJavaTypeName((String) entity.get("name")) + "Transitions";
+        return LifecycleSupport.entityServiceTransitionsClassName(entity);
     }
 
     public String transitionNaturalIdExpression(Map<String, Object> entity, Options options) {
@@ -445,22 +371,8 @@ public class BackendApplicationDefaultHelpers {
     }
 
     public List<Map<String, Object>> entityServiceTransitionMethods(Map<String, Object> entity, Options options) {
-        if (entity == null || !hasEntityLifecycle(entity, options)) {
-            return Collections.emptyList();
-        }
         var zdl = (Map<String, Object>) options.get("zdl");
-        var services = JSONPath.get(zdl, "$.services[*]", List.<Map<String, Object>>of());
-        var entityName = (String) entity.get("name");
-        var methodsByName = new LinkedHashMap<String, Map<String, Object>>();
-        for (var service : services) {
-            var methods = JSONPath.get(service, "$.methods[*]", List.<Map<String, Object>>of());
-            for (var method : methods) {
-                if (entityName.equals(method.get("entity")) && JSONPath.get(method, "$.transition.from") != null) {
-                    methodsByName.putIfAbsent((String) method.get("name"), method);
-                }
-            }
-        }
-        return new ArrayList<>(methodsByName.values());
+        return LifecycleSupport.entityServiceTransitionMethods(zdl, entity);
     }
 
     public boolean hasEntityServiceTransitionMethods(Map<String, Object> entity, Options options) {
@@ -474,11 +386,7 @@ public class BackendApplicationDefaultHelpers {
 	 * in the ServiceImpl templates.
      */
     public boolean serviceHasEntityStateTransitions(Map<String, Object> service, Options options) {
-		var methods = JSONPath.get(service, "$.methods[*]", List.<Map>of());
-		for (var method : methods) {
-			if (JSONPath.get(method, "$.transition.from") != null || JSONPath.get(method, "$.transition.to") != null) return true;
-		}
-		return false;
+		return LifecycleSupport.serviceHasEntityStateTransitions(service);
     }
 
     /**
@@ -487,48 +395,7 @@ public class BackendApplicationDefaultHelpers {
      */
     public List<Map<String, Object>> serviceMethodEventPublications(Map<String, Object> method, Options options) {
         var zdl = (Map) options.get("zdl");
-        var serviceEventNames = ZDLFindUtils.methodEventsFlatList(method);
-        if (serviceEventNames.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // Find aggregate commands for this method to know which events aggregates produce
-        var aggregateCommandsForMethod = ZDLFindUtils.findAggregateCommandsForMethod(zdl, method);
-        var aggregateProducedEvents = new HashSet<String>();
-        for (var aggCmd : aggregateCommandsForMethod) {
-            var command = (Map<String, Object>) aggCmd.get("command");
-            if (command != null) {
-                aggregateProducedEvents.addAll(ZDLFindUtils.methodEventsFlatList(command));
-            }
-        }
-
-        var result = new ArrayList<Map<String, Object>>();
-        for (String eventName : serviceEventNames) {
-            var event = (Map<String, Object>) JSONPath.get(zdl, "$.events." + eventName);
-            boolean producedByAggregate = aggregateProducedEvents.contains(eventName);
-            boolean isAsyncApi = event != null && JSONPath.get(event, "options.asyncapi") != null;
-            String producerMethod = "on" + asJavaTypeName(eventName);
-
-            // Count how many aggregates produce this event (for disambiguation)
-            int producerCount = 0;
-            for (var aggCmd : aggregateCommandsForMethod) {
-                var command = (Map<String, Object>) aggCmd.get("command");
-                if (command != null && ZDLFindUtils.methodEventsFlatList(command).contains(eventName)) {
-                    producerCount++;
-                }
-            }
-
-            var entry = new HashMap<String, Object>();
-            entry.put("eventName", eventName);
-            entry.put("eventClassName", event != null ? event.get("className") : eventName);
-            entry.put("instanceName", NamingUtils.asInstanceName(eventName));
-            entry.put("producerMethod", producerMethod);
-            entry.put("producedByAggregate", producedByAggregate);
-            entry.put("isAsyncApi", isAsyncApi);
-            entry.put("multipleProducers", producerCount > 1);
-            result.add(entry);
-        }
-        return result;
+        return ServiceEventPlanner.serviceMethodEventPublications(zdl, method);
     }
 
     public List<Map> methodPolicies(Map<String, Object> method, Options options) {
@@ -566,28 +433,7 @@ public class BackendApplicationDefaultHelpers {
     public String wrapWithMapper(Map<String, Object> entity, Options options) {
         var method = (Map) options.get("method");
         var returnType = methodReturnEntity(method, options);
-        if(returnType == null) {
-            return "";
-        }
-        var returnTypeIsArray = (Boolean) method.getOrDefault("returnTypeIsArray", false);
-        var isReturnTypeOptional = (Boolean) method.getOrDefault("returnTypeIsOptional", false);
-        var instanceName = returnTypeIsArray? entity.get("instanceNamePlural") : entity.get("instanceName");
-        var serviceInstanceName = NamingUtils.asInstanceName((String) method.get("serviceName"));
-        if (Objects.equals(entity.get("name"), returnType.get("name"))) {
-//            if(JSONPath.get(method, "options.paginated", false)) {
-//                return (String) instanceName;
-//            }
-            return (String) instanceName;
-        } else {
-            if(returnTypeIsArray) {
-                if(JSONPath.get(method, "options.paginated", false)) {
-                    return String.format("%sMapper.as%sPage(%s)", serviceInstanceName, returnType.get("className"), instanceName);
-                }
-                return String.format("%sMapper.as%sList(%s)", serviceInstanceName, returnType.get("className"), instanceName);
-            } else {
-                return String.format("%sMapper.as%s(%s)", serviceInstanceName, returnType.get("className"), instanceName);
-            }
-        }
+        return MapperSupport.wrapWithMapper(method, entity, returnType);
     }
 
     public String returnType(Map<String, Object> method, Options options) {
@@ -722,23 +568,12 @@ public class BackendApplicationDefaultHelpers {
 
     public boolean needsEventsProducer(Map service, Options options) {
         Map<String, Object> zdl = options.get("zdl");
-        var methods = service != null?
-                JSONPath.get(service, "methods[*]", List.<Map<String, Object>>of())
-                : ZDLFindUtils.methodsWithEvents(zdl);
-        var eventNamesExpr = methods.stream().map(ZDLFindUtils::methodEventsFlatList).flatMap(List::stream).collect(Collectors.joining("|"));
-        var externalEvents = (List) JSONPath.get(zdl, "$.events[*][?(@.name =~ /(" + eventNamesExpr + ")/)].options.asyncapi");
-        return externalEvents != null && !externalEvents.isEmpty();
+        return ServiceEventPlanner.needsEventsProducer(zdl, service);
     }
 
     public boolean needsEventBus(Map service, Options options) {
         Map<String, Object> zdl = options.get("zdl");
-        var methods = service != null?
-                JSONPath.get(service, "methods[*]", List.<Map<String, Object>>of())
-                : ZDLFindUtils.methodsWithEvents(zdl);
-        var eventNamesExpr = methods.stream().map(ZDLFindUtils::methodEventsFlatList).flatMap(List::stream).collect(Collectors.joining("|"));
-        var domainEvents = JSONPath.get(zdl, "$.events[*][?(@.name =~ /(" + eventNamesExpr + ")/)]", List.<Map>of()).stream()
-                .filter(event -> JSONPath.get(event, "options.asyncapi") == null).collect(Collectors.toSet());
-        return domainEvents != null && !domainEvents.isEmpty();
+        return ServiceEventPlanner.needsEventBus(zdl, service);
     }
 
     public Object eventsProducerInterface(String serviceName, Options options) {
