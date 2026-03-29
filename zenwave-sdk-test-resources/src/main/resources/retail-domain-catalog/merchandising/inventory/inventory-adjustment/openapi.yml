@@ -1,0 +1,78 @@
+openapi: "3.0.3"
+info:
+  title: Inventory Adjustment API
+  version: "1.0.0"
+  description: REST API for querying inventory adjustments
+
+paths:
+  /inventory-items:
+    get:
+      operationId: listInventoryItems
+      summary: List Inventory Items
+      description: Returns a paginated list of inventory items
+      tags: [InventoryItems]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryItemList"
+
+  /inventory-items/{sku}:
+    get:
+      operationId: getInventoryItem
+      summary: Get Inventory Item
+      description: Returns a single inventory item by SKU
+      tags: [InventoryItems]
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryItem"
+        "404":
+          description: Not Found
+
+components:
+  schemas:
+    InventoryItem:
+      type: object
+      properties:
+        sku:
+          type: string
+        productName:
+          type: string
+        quantity:
+          type: integer
+        location:
+          type: string
+        lastAdjustedAt:
+          type: string
+          format: date-time
+
+    InventoryItemList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/InventoryItem"
+        totalElements:
+          type: integer

@@ -8,8 +8,7 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
-public interface Parser {
-    Parser withProjectClassLoader(ClassLoader projectClassLoader);
+public interface Parser extends WithProjectClassLoader<Parser> {
 
     Map<String, Object> parse() throws IOException;
 

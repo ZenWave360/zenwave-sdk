@@ -1,0 +1,16 @@
+{
+  "type": "record",
+  "name": "ReserveStockCommand",
+  "namespace": "com.acme.merchandising.inventory.inventoryadjustment.commands",
+  "doc": "Command requesting stock reservation for an order.",
+  "fields": [
+    { "name": "reservationId", "type": "string" },
+    { "name": "orderId", "type": "string" },
+    { "name": "productId", "type": "string" },
+    { "name": "locationId", "type": "string" },
+    { "name": "quantity", "type": "int" },
+    { "name": "requestedBy", "type": "string" },
+    { "name": "requestedAt", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "correlationId", "type": ["null", "string"], "default": null }
+  ]
+}

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.zenwave360.sdk.formatters.Formatter;
 import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.parsers.Parser;
+import io.zenwave360.sdk.parsers.WithProjectClassLoader;
 import io.zenwave360.sdk.plugins.ConfigurationProvider;
 import io.zenwave360.sdk.processors.Processor;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
@@ -39,9 +40,11 @@ public class MainGenerator {
             Object plugin = pluginClass.getDeclaredConstructor().newInstance();
             applyConfiguration(chainIndex++, plugin, configuration);
 
+            if (plugin instanceof WithProjectClassLoader) {
+                ((WithProjectClassLoader) plugin).withProjectClassLoader(configuration.getProjectClassLoader());
+            }
             if (plugin instanceof Parser) {
-                Map parsed = ((Parser) plugin).withProjectClassLoader(configuration.getProjectClassLoader()).parse();
-                model.putAll(parsed);
+                model.putAll(((Parser) plugin).parse());
             }
             if (plugin instanceof ConfigurationProvider) {
                 ((ConfigurationProvider) plugin).updateConfiguration(configuration, model);

@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "ReplenishStockCommand",
+  "namespace": "com.acme.merchandising.inventory.stockreplenishment.commands",
+  "doc": "Command requesting stock replenishment from a supplier or upstream warehouse.",
+  "fields": [
+    { "name": "replenishmentId", "type": "string" },
+    { "name": "productId", "type": "string" },
+    { "name": "locationId", "type": "string" },
+    { "name": "targetQuantity", "type": "int" },
+    { "name": "supplierId", "type": ["null", "string"], "default": null },
+    { "name": "requestedAt", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "correlationId", "type": ["null", "string"], "default": null }
+  ]
+}

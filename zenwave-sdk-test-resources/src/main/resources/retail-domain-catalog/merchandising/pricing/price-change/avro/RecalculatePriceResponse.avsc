@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "RecalculatePriceResponse",
+  "namespace": "com.acme.merchandising.pricing.pricechange.responses",
+  "doc": "Response for a recalculate price command.",
+  "fields": [
+    { "name": "priceCalculationId", "type": "string" },
+    { "name": "productId", "type": "string" },
+    { "name": "success", "type": "boolean" },
+    { "name": "calculatedPrice", "type": ["null", "double"], "default": null },
+    { "name": "currency", "type": "string" },
+    { "name": "processedAt", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "correlationId", "type": ["null", "string"], "default": null }
+  ]
+}

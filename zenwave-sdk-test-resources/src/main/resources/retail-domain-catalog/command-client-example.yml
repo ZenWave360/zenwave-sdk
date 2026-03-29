@@ -1,0 +1,37 @@
+asyncapi: 3.0.0
+id: url:merchandising.inventory.stock-replenishment.client
+info:
+  title: Client for Stock Reservation Commands
+  version: 1.0.0
+  description: This example shows how to send async stock reservation commands to the inventory adjustment service and listen for responses, configuring retry and DLQ topics.
+
+channels:
+  reserve-stock-command:
+    $ref: 'command-provider-example.yml#/channels/reserve-stock-command'
+  reserve-stock-response:
+    $ref: 'command-provider-example.yml#/channels/reserve-stock-response'
+
+operations:
+  doReserveStock:
+    action: send
+    channel:
+      $ref: '#/channels/reserve-stock-command'
+    bindings:
+      kafka:
+        x-principal: "merchandising.inventory.stock-replenishment"
+
+  onReserveStockResponse:
+    action: receive
+    channel:
+      $ref: '#/channels/reserve-stock-response'
+    bindings:
+      kafka:
+        x-principal: "merchandising.inventory.stock-replenishment"
+        x-groupId: "merchandising.inventory.stock-replenishment"
+        x-error-topics:
+          addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
+          retryTopics: 3
+          retry:
+            $ref: 'master/kafka-bindings.yml#/components/x-error-topics/retry/silver'
+          dlq:
+            $ref: 'master/kafka-bindings.yml#/components/x-error-topics/dlq/standard'

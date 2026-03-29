@@ -1,0 +1,23 @@
+{
+  "type": "record",
+  "name": "InventoryAdjusted",
+  "namespace": "com.acme.merchandising.inventory.inventoryadjustment.events",
+  "doc": "Event emitted when inventory levels are adjusted.",
+  "fields": [
+    { "name": "adjustmentId", "type": "string" },
+    { "name": "productId", "type": "string" },
+    { "name": "locationId", "type": "string" },
+    { "name": "previousQuantity", "type": "int" },
+    { "name": "newQuantity", "type": "int" },
+    {
+      "name": "reason",
+      "type": {
+        "type": "enum",
+        "name": "InventoryAdjustmentReason",
+        "symbols": ["RESERVATION", "REPLENISHMENT", "CORRECTION", "RETURN", "TRANSFER", "OTHER"]
+      }
+    },
+    { "name": "adjustedAt", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "correlationId", "type": ["null", "string"], "default": null }
+  ]
+}

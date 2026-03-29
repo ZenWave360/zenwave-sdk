@@ -1,0 +1,90 @@
+intent:
+  metadata:
+    source_ref:
+      - asyncapi.yml
+      - asyncapi-client.yml
+    generated_at: 2026-04-08T00:00:00Z
+
+kafka:
+  topics:
+    # Owned topics (inline channels from asyncapi.yml)
+    - name: merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0
+      access:
+        consumers:
+          - merchandising.inventory.inventory-adjustment
+
+    - name: merchandising.inventory.inventory-adjustment.reserve-stock.response.avro.v0
+      access:
+        producers:
+          - merchandising.inventory.inventory-adjustment
+
+    - name: merchandising.inventory.inventory-adjustment.inventory-adjusted.event.avro.v0
+      access:
+        producers:
+          - merchandising.inventory.inventory-adjustment
+
+    # Error topics from asyncapi.yml: doReserveStockCommand (groupId = x-principal = merchandising.inventory.inventory-adjustment)
+    # addressTemplate: ${groupId}.__.${channel.address}.${suffix}
+    - name: merchandising.inventory.inventory-adjustment.__.merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0.retry-0
+      config:
+        retention.ms: "259200000"   # silver retry preset
+
+    - name: merchandising.inventory.inventory-adjustment.__.merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0.retry-1
+      config:
+        retention.ms: "259200000"
+
+    - name: merchandising.inventory.inventory-adjustment.__.merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0.retry-2
+      config:
+        retention.ms: "259200000"
+
+    - name: merchandising.inventory.inventory-adjustment.__.merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0.dlq
+      config:
+        retention.ms: "2592000000"  # standard dlq preset
+        cleanup.policy: delete
+
+    # External topics — owned by stock-replenishment; NOT provisioned here
+    # ACLs and error topics for client operations are provisioned (see below)
+
+    # Error topics from asyncapi-client.yml: onReplenishStockResponse
+    - name: merchandising.inventory.inventory-adjustment.__.merchandising.inventory.stock-replenishment.replenish-stock.response.avro.v0.retry-0
+    - name: merchandising.inventory.inventory-adjustment.__.merchandising.inventory.stock-replenishment.replenish-stock.response.avro.v0.retry-1
+    - name: merchandising.inventory.inventory-adjustment.__.merchandising.inventory.stock-replenishment.replenish-stock.response.avro.v0.retry-2
+    - name: merchandising.inventory.inventory-adjustment.__.merchandising.inventory.stock-replenishment.replenish-stock.response.avro.v0.dlq
+
+    # Error topics from asyncapi-client.yml: onStockReplenishedEvent
+    - name: merchandising.inventory.inventory-adjustment.sys.__.merchandising.inventory.stock-replenishment.stock-replenished.event.avro.v0.retry-0
+    - name: merchandising.inventory.inventory-adjustment.sys.__.merchandising.inventory.stock-replenishment.stock-replenished.event.avro.v0.retry-1
+    - name: merchandising.inventory.inventory-adjustment.sys.__.merchandising.inventory.stock-replenishment.stock-replenished.event.avro.v0.retry-2
+    - name: merchandising.inventory.inventory-adjustment.sys.__.merchandising.inventory.stock-replenishment.stock-replenished.event.avro.v0.dlq
+
+    # Error topics from asyncapi-client.yml: onRecalculatePriceResponse
+    - name: merchandising.inventory.inventory-adjustment.__.merchandising.pricing.price-change.recalculate-price.response.avro.v0.retry-0
+    - name: merchandising.inventory.inventory-adjustment.__.merchandising.pricing.price-change.recalculate-price.response.avro.v0.retry-1
+    - name: merchandising.inventory.inventory-adjustment.__.merchandising.pricing.price-change.recalculate-price.response.avro.v0.retry-2
+    - name: merchandising.inventory.inventory-adjustment.__.merchandising.pricing.price-change.recalculate-price.response.avro.v0.dlq
+
+    # Error topics from asyncapi-client.yml: onPriceChangedEvent
+    - name: merchandising.inventory.inventory-adjustment.sys.__.merchandising.pricing.price-change.price-changed.event.avro.v0.retry-0
+    - name: merchandising.inventory.inventory-adjustment.sys.__.merchandising.pricing.price-change.price-changed.event.avro.v0.retry-1
+    - name: merchandising.inventory.inventory-adjustment.sys.__.merchandising.pricing.price-change.price-changed.event.avro.v0.retry-2
+    - name: merchandising.inventory.inventory-adjustment.sys.__.merchandising.pricing.price-change.price-changed.event.avro.v0.dlq
+
+schema_registry:
+  subjects:
+    - subject: merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0-ReserveStockCommand-value
+      schema_type: avro
+      compatibility: BACKWARD
+      schema_ref:
+        file: avro/ReserveStockCommand.avsc
+
+    - subject: merchandising.inventory.inventory-adjustment.reserve-stock.response.avro.v0-ReserveStockResponse-value
+      schema_type: avro
+      compatibility: FORWARD
+      schema_ref:
+        file: avro/ReserveStockResponse.avsc
+
+    - subject: merchandising.inventory.inventory-adjustment.inventory-adjusted.event.avro.v0-InventoryAdjusted-value
+      schema_type: avro
+      compatibility: FORWARD
+      schema_ref:
+        file: avro/InventoryAdjusted.avsc

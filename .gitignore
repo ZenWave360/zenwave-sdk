@@ -49,3 +49,4 @@ local.properties
 **/src/main/frontend/dist/**
 
 /_site/
+/.claude/settings.local.json

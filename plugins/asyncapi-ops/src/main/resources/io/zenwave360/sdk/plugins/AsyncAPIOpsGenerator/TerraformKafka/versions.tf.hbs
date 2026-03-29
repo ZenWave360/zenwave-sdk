@@ -1,0 +1,19 @@
+terraform {
+  required_providers {
+    # Include only providers needed for your environments
+    kafka = {
+      source  = "Mongey/kafka"
+      version = "~> 0.13"
+    }
+
+    confluent = {
+      source  = "confluentinc/confluent"
+      version = "~> 2.0"
+    }
+
+    schemaregistry = {
+      source  = "cultureamp/schemaregistry"
+      version = "~> 1.5"
+    }
+  }
+}

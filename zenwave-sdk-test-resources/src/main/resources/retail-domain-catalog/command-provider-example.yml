@@ -1,0 +1,66 @@
+asyncapi: 3.0.0
+id: url:merchandising.inventory.inventory-adjustment
+info:
+  title: Provider for Inventory Commands with Response
+  version: 1.0.0
+  description: This example shows how to provide async ecommerce commands with a response, configuring retry and DLQ topics for the command channel.
+
+channels:
+  reserve-stock-command:
+    address: merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.area.v0
+    summary: Reserve Stock Command
+    description: This channel is used to request stock reservation for products at a specific location
+    messages:
+      ReserveStockCommand:
+        payload:
+          schemaFormat: 'application/vnd.apache.avro+json;version=1.9.0'
+          schema:
+            $ref: './avro/ReserveStockCommand.avsc'
+        traits:
+          - $ref: 'master/kafka-bindings.yml#/components/messageTraits/kafkaKeyString'
+          - $ref: 'master/kafka-bindings.yml#/components/messageTraits/kafkaTopicRecordNameStrategy'
+          - $ref: 'master/kafka-bindings.yml#/components/messageTraits/kafkaBackwardCompatibility'
+    bindings:
+      $ref: 'master/kafka-bindings.yml#/components/channelBindings/kafkaGold'
+
+  reserve-stock-response:
+    address: merchandising.inventory.inventory-adjustment.reserve-stock.response.avro.canonical.area.v0
+    summary: Reserve Stock Response
+    description: This channel informs the result of a stock reservation request
+    messages:
+      ReserveStockResponse:
+        payload:
+          schemaFormat: 'application/vnd.apache.avro+json;version=1.9.0'
+          schema:
+            $ref: './avro/ReserveStockResponse.avsc'
+        traits:
+          - $ref: 'master/kafka-bindings.yml#/components/messageTraits/kafkaKeyString'
+          - $ref: 'master/kafka-bindings.yml#/components/messageTraits/kafkaTopicRecordNameStrategy'
+          - $ref: 'master/kafka-bindings.yml#/components/messageTraits/kafkaForwardCompatibility'
+    bindings:
+      $ref: 'master/kafka-bindings.yml#/components/channelBindings/kafkaGold'
+
+operations:
+  doReserveStockCommand:
+    action: receive
+    channel:
+      $ref: '#/channels/reserve-stock-command'
+    bindings:
+      kafka:
+        x-principal: "merchandising.inventory.inventory-adjustment"
+        groupId: "merchandising.inventory.inventory-adjustment"
+        x-error-topics:
+          addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
+          retryTopics: 3
+          retry:
+            $ref: 'master/kafka-bindings.yml#/components/x-error-topics/retry/silver'
+          dlq:
+            $ref: 'master/kafka-bindings.yml#/components/x-error-topics/dlq/standard'
+
+  onReserveStockResponse:
+    action: send
+    channel:
+      $ref: '#/channels/reserve-stock-response'
+    bindings:
+      kafka:
+        x-principal: "merchandising.inventory.inventory-adjustment"

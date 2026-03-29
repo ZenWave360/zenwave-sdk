@@ -1,0 +1,22 @@
+{
+  "type": "record",
+  "name": "EnrollLoyaltyMemberResponse",
+  "namespace": "com.acme.customerrelationship.customermanagement.customerprofile.responses",
+  "doc": "Response for a loyalty enrollment command.",
+  "fields": [
+    { "name": "customerId", "type": "string" },
+    { "name": "loyaltyMemberId", "type": ["null", "string"], "default": null },
+    { "name": "success", "type": "boolean" },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "EnrollLoyaltyMemberStatus",
+        "symbols": ["ENROLLED", "ALREADY_ENROLLED", "REJECTED", "FAILED"]
+      }
+    },
+    { "name": "message", "type": ["null", "string"], "default": null },
+    { "name": "processedAt", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "correlationId", "type": ["null", "string"], "default": null }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "StockReplenished",
+  "namespace": "com.acme.merchandising.inventory.stockreplenishment.events",
+  "doc": "Event emitted when replenished stock is received into inventory.",
+  "fields": [
+    { "name": "replenishmentId", "type": "string" },
+    { "name": "productId", "type": "string" },
+    { "name": "locationId", "type": "string" },
+    { "name": "quantityReceived", "type": "int" },
+    { "name": "receivedAt", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "correlationId", "type": ["null", "string"], "default": null }
+  ]
+}

@@ -1,0 +1,101 @@
+asyncapi: 3.0.0
+id: url:merchandising.inventory.inventory-adjustment.client
+info:
+  title: Inventory Adjustment Topic Client
+  version: 1.0.0
+  description: This specification defines the topics consumed or invoked by the inventory adjustment service as a client.
+
+channels:
+  replenish-stock-command:
+    $ref: '../stock-replenishment/asyncapi.yml#/channels/replenish-stock-command'
+  replenish-stock-response:
+    $ref: '../stock-replenishment/asyncapi.yml#/channels/replenish-stock-response'
+  stock-replenished:
+    $ref: '../stock-replenishment/asyncapi.yml#/channels/stock-replenished'
+  recalculate-price-command:
+    $ref: '../../pricing/price-change/asyncapi.yml#/channels/recalculate-price-command'
+  recalculate-price-response:
+    $ref: '../../pricing/price-change/asyncapi.yml#/channels/recalculate-price-response'
+  price-changed:
+    $ref: '../../pricing/price-change/asyncapi.yml#/channels/price-changed'
+
+operations:
+  doReplenishStock:
+    action: send
+    channel:
+      $ref: '#/channels/replenish-stock-command'
+    bindings:
+      kafka:
+        x-principal: "merchandising.inventory.inventory-adjustment"
+
+  onReplenishStockResponse:
+    action: receive
+    channel:
+      $ref: '#/channels/replenish-stock-response'
+    bindings:
+      kafka:
+        x-principal: "merchandising.inventory.inventory-adjustment"
+        x-groupId: "merchandising.inventory.inventory-adjustment"
+        x-error-topics:
+          addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
+          retryTopics: 3
+          retry:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/retry/silver'
+          dlq:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/dlq/standard'
+
+  onStockReplenishedEvent:
+    action: receive
+    channel:
+      $ref: '#/channels/stock-replenished'
+    bindings:
+      kafka:
+        x-principal: "merchandising.inventory.inventory-adjustment.sys"
+        x-groupId: "merchandising.inventory.inventory-adjustment.sys"
+        x-error-topics:
+          addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
+          retryTopics: 3
+          retry:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/retry/silver'
+          dlq:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/dlq/standard'
+
+  doRecalculatePrice:
+    action: send
+    channel:
+      $ref: '#/channels/recalculate-price-command'
+    bindings:
+      kafka:
+        x-principal: "merchandising.inventory.inventory-adjustment"
+
+  onRecalculatePriceResponse:
+    action: receive
+    channel:
+      $ref: '#/channels/recalculate-price-response'
+    bindings:
+      kafka:
+        x-principal: "merchandising.inventory.inventory-adjustment"
+        x-groupId: "merchandising.inventory.inventory-adjustment"
+        x-error-topics:
+          addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
+          retryTopics: 3
+          retry:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/retry/silver'
+          dlq:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/dlq/standard'
+
+  onPriceChangedEvent:
+    action: receive
+    channel:
+      $ref: '#/channels/price-changed'
+    bindings:
+      kafka:
+        x-principal: "merchandising.inventory.inventory-adjustment.sys"
+        x-groupId: "merchandising.inventory.inventory-adjustment.sys"
+        x-error-topics:
+          addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
+          retryTopics: 3
+          retry:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/retry/silver'
+          dlq:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/dlq/standard'

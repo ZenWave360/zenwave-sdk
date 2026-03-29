@@ -1,0 +1,121 @@
+asyncapi: 3.0.0
+id: url:merchandising.inventory.stock-replenishment
+info:
+  title: Stock Replenishment Topic Provider
+  version: 1.0.0
+  description: This specification defines the topics provided by the stock replenishment service from the provider point of view.
+
+servers:
+  dev:
+    host: kafka-dev.example.com
+    protocol: kafka
+  staging:
+    host: kafka-staging.example.com
+    protocol: kafka
+  production:
+    host: kafka-production.example.com
+    protocol: kafka
+
+channels:
+  replenish-stock-command:
+    address: merchandising.inventory.stock-replenishment.replenish-stock.command.avro.v0
+    summary: Replenish Stock Command
+    description: This channel is used to request stock replenishment for a product at a location.
+    messages:
+      ReplenishStockCommand:
+        payload:
+          schemaFormat: 'application/vnd.apache.avro+json;version=1.9.0'
+          schema:
+            $ref: './avro/ReplenishStockCommand.avsc'
+        traits:
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaKeyString'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaTopicRecordNameStrategy'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaBackwardCompatibility'
+    bindings:
+      $ref: '../../../master/kafka-bindings.yml#/components/channelBindings/kafkaGold'
+
+  replenish-stock-response:
+    address: merchandising.inventory.stock-replenishment.replenish-stock.response.avro.v0
+    summary: Replenish Stock Response
+    description: This channel informs the result of a stock replenishment request.
+    messages:
+      ReplenishStockResponse:
+        payload:
+          schemaFormat: 'application/vnd.apache.avro+json;version=1.9.0'
+          schema:
+            $ref: './avro/ReplenishStockResponse.avsc'
+        traits:
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaKeyString'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaTopicRecordNameStrategy'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaForwardCompatibility'
+    bindings:
+      $ref: '../../../master/kafka-bindings.yml#/components/channelBindings/kafkaGold'
+
+  stock-replenished:
+    address: merchandising.inventory.stock-replenishment.stock-replenished.event.avro.v0
+    summary: Stock Replenished Event
+    description: This channel informs that stock replenishment was completed for a product at a location.
+    messages:
+      StockReplenishedEvent:
+        payload:
+          schemaFormat: 'application/vnd.apache.avro+json;version=1.9.0'
+          schema:
+            $ref: './avro/StockReplenished.avsc'
+        traits:
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaKeyString'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaTopicRecordNameStrategy'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaForwardCompatibility'
+    bindings:
+      $ref: '../../../master/kafka-bindings.yml#/components/channelBindings/kafkaGold'
+
+operations:
+  doReplenishStockCommand:
+    action: receive
+    channel:
+      $ref: '#/channels/replenish-stock-command'
+    bindings:
+      kafka:
+        x-principal: "merchandising.inventory.stock-replenishment"
+        x-groupId: "merchandising.inventory.stock-replenishment"
+        x-error-topics:
+          addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
+          retryTopics: 3
+          retry:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/retry/silver'
+          dlq:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/dlq/standard'
+
+  onReplenishStockResponse:
+    action: send
+    channel:
+      $ref: '#/channels/replenish-stock-response'
+    traits:
+      - $ref: '#/components/operationTraits/kafkaPrincipal'
+      - $ref: '#/components/operationTraits/kafkaClientId'
+
+  onStockReplenishedEvent:
+    action: send
+    channel:
+      $ref: '#/channels/stock-replenished'
+    traits:
+      - $ref: '#/components/operationTraits/kafkaPrincipal'
+      - $ref: '#/components/operationTraits/kafkaClientId'
+
+components:
+  operationTraits:
+    kafkaPrincipal:
+      bindings:
+        kafka:
+          x-principal: "merchandising.inventory.stock-replenishment"
+    kafkaClientId:
+      bindings:
+        kafka:
+          clientId:
+            type: "string"
+            enum: ["merchandising.inventory.stock-replenishment"]
+    kafkaConsumerGroup:
+      bindings:
+        kafka:
+          groupId:
+            type: "string"
+            enum: ["merchandising.inventory.stock-replenishment"]

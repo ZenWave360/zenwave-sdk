@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "EnrollLoyaltyMemberCommand",
+  "namespace": "com.acme.customerrelationship.customermanagement.customerprofile.commands",
+  "doc": "Command requesting loyalty enrollment for a customer profile.",
+  "fields": [
+    { "name": "customerId", "type": "string" },
+    { "name": "email", "type": "string" },
+    { "name": "programCode", "type": "string" },
+    { "name": "requestedBy", "type": "string" },
+    { "name": "requestedAt", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "correlationId", "type": ["null", "string"], "default": null }
+  ]
+}

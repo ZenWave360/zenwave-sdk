@@ -1,0 +1,23 @@
+{
+  "type": "record",
+  "name": "ReplenishStockResponse",
+  "namespace": "com.acme.merchandising.inventory.stockreplenishment.responses",
+  "doc": "Response for a replenish stock command.",
+  "fields": [
+    { "name": "replenishmentId", "type": "string" },
+    { "name": "productId", "type": "string" },
+    { "name": "success", "type": "boolean" },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "ReplenishStockStatus",
+        "symbols": ["ORDERED", "IN_TRANSIT", "REJECTED", "FAILED"]
+      }
+    },
+    { "name": "expectedDeliveryDate", "type": ["null", { "type": "int", "logicalType": "date" }], "default": null },
+    { "name": "message", "type": ["null", "string"], "default": null },
+    { "name": "processedAt", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "correlationId", "type": ["null", "string"], "default": null }
+  ]
+}
