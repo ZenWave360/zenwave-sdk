@@ -50,3 +50,4 @@ local.properties
 
 /_site/
 /.claude/settings.local.json
+/.m2*
