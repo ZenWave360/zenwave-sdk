@@ -57,6 +57,8 @@ jobs:
             ./plugins/openapi-spring-webtestclient/target/site/jacoco/jacoco.csv
             ./plugins/openapi-karate/target/site/jacoco/jacoco.csv
             ./plugins/zenwave-mcp-server/target/site/jacoco/jacoco.csv
+            ./plugins/asyncapi-ops/target/site/jacoco/jacoco.csv
+            ./plugins/event-catalog-generator/target/site/jacoco/jacoco.csv
             ./zenwave-sdk-cli/target/site/jacoco/jacoco.csv
             ./plugins/customizations/kotlin-backend-application/target/site/jacoco/jacoco.csv
 
