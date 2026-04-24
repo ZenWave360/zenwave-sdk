@@ -12,6 +12,7 @@ Single provider spec:
 ```shell
 jbang zw -p AsyncAPIOpsGeneratorPlugin \
   apiFile=asyncapi.yml \
+  avroImports=classpath:shared-avro/avro \
   server=staging \
   targetFolder=terraform/inventory-adjustment
 ```
@@ -20,6 +21,7 @@ Multiple spec together for a single service (i.e.: provider + client):
 ```shell
 jbang zw -p AsyncAPIOpsGeneratorPlugin \
   apiFiles=asyncapi.yml,asyncapi-client.yml \
+  avroImports=https://remote/schemas/avro1.avsc,https://remote/schemas/avro2.avsc \
   server=staging \
   targetFolder=terraform/inventory-adjustment
 ```
@@ -30,6 +32,7 @@ jbang zw -p AsyncAPIOpsGeneratorPlugin \
 |------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|------------------|-------------------------------|
 | `apiFile`        | AsyncAPI Specification File                                                                                                                                                  | URI      | `null`           |                               |
 | `apiFiles`       | List of AsyncAPI specs. Supported schemas are local files, http/s and classpath resources.                                                                                   | List     | `[]`             |                               |
+| `avroImports`    | Avro schema files or folders available while bundling owned message schemas. Supports local files/folders, `classpath:` files/folders and `https://` files.                | List     | `[]`             |                               |
 | `authentication` | Authentication configuration values for fetching remote resources.                                                                                                           | List     | `[]`             |                               |
 | `server`         | Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Used to merge env-server-overrides from channel and error-topic bindings. | String   | `null`           |                               |
 | `templates`      | Templates to use for code generation.                                                                                                                                        | String   | `TerraformKafka` | TerraformKafka, FQ Class Name |
@@ -45,6 +48,14 @@ One run per service. All files land in `targetFolder`.
 | `topics.tf` | `kafka_topic` resources for owned channels + retry/DLQ topics |
 | `schemas.tf` | `schemaregistry_schema` resources for Avro messages on owned channels |
 | `acls.tf` | `kafka_acl` resources derived from operation bindings across all specs |
+| `<api-name>/.../*.avsc` | Bundled Avro schema files generated per owned message and referenced from `schemas.tf` |
+
+Schema files are generated inside the Terraform module and referenced with `${path.module}`. Each bundled file contains a single fully inlined Avro schema JSON object, built from the owned message schema plus only the required types found in `avroImports`.
+
+When multiple AsyncAPI specs are passed together, bundled schemas are namespaced by the sanitized spec basename:
+
+- `asyncapi.yml` → `asyncapi/avro/...`
+- `asyncapi client.yml` → `asyncapi_client/avro/...`
 
 Terraform resource names are derived from the full Kafka topic address (dots and dashes → underscores), guaranteeing global uniqueness in multi-service modules:
 
@@ -220,6 +231,7 @@ x-error-topics:
                 <inputSpec>asyncapi.yml</inputSpec>
                 <configOptions>
                     <apiFiles>asyncapi.yml,asyncapi-client.yml</apiFiles>
+                    <avroImports>${project.basedir}/src/main/asyncapi/avro</avroImports>
                     <server>staging</server>
                     <targetFolder>${project.basedir}/terraform</targetFolder>
                 </configOptions>

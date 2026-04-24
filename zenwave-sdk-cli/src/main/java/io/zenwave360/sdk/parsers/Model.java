@@ -21,6 +21,10 @@ public class Model extends AbstractMap<String, Object> {
         return refs;
     }
 
+    public URI getUri() {
+        return uri;
+    }
+
     public Map<String, Object> model() {
         return (Map<String, Object>) this.refs.jsonContext.json();
     }

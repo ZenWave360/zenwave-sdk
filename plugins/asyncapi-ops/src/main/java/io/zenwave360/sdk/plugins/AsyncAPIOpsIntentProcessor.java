@@ -10,9 +10,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -46,22 +48,23 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
         AsyncAPIOpsIntent intent = new AsyncAPIOpsIntent();
         intent.server = server;
 
+        Map<Model, String> apiNamespaces = createApiNamespaces(apis);
         for (Model apiModel : apis) {
-            processModel(apiModel, intent);
+            processModel(apiModel, apiNamespaces.get(apiModel), intent);
         }
 
         contextModel.put("intent", intent);
         return contextModel;
     }
 
-    private void processModel(Model apiModel, AsyncAPIOpsIntent intent) {
+    private void processModel(Model apiModel, String apiNamespace, AsyncAPIOpsIntent intent) {
         Map<String, Map> channels = JSONPath.get(apiModel, "$.channels", Collections.emptyMap());
         Map<String, Map> operations = JSONPath.get(apiModel, "$.operations", Collections.emptyMap());
 
         for (Map.Entry<String, Map> entry : channels.entrySet()) {
             if (isOwnedChannel(entry.getValue())) {
                 intent.topics.add(buildOwnedTopic(entry.getKey(), entry.getValue()));
-                intent.schemas.addAll(buildSchemas(entry.getKey(), entry.getValue()));
+                intent.schemas.addAll(buildSchemas(apiModel, apiNamespace, entry.getKey(), entry.getValue()));
             }
         }
 
@@ -121,7 +124,7 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
     // Schemas (owned channels only)
     // -------------------------------------------------------------------------
 
-    private List<AsyncAPIOpsIntent.SchemaIntent> buildSchemas(String channelName, Map channel) {
+    private List<AsyncAPIOpsIntent.SchemaIntent> buildSchemas(Model apiModel, String apiNamespace, String channelName, Map channel) {
         List<AsyncAPIOpsIntent.SchemaIntent> result = new ArrayList<>();
         Map<String, Map> messages = JSONPath.get(channel, "$.messages", Collections.emptyMap());
         String topicAddress = (String) channel.get("address");
@@ -139,9 +142,10 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
             schema.subject = topicAddress + "-" + messageName + "-value";
             schema.resourceName = toTerraformId(schema.subject);
             schema.compatibility = JSONPath.get(message, "$.bindings.kafka.x-schemaCompatibility");
-            schema.schemaFile = resolveSchemaFile(message);
+            schema.sourceSchemaUri = resolveSchemaSourceUri(apiModel, message);
+            schema.schemaFile = resolveTargetSchemaFile(apiNamespace, message);
 
-            if (schema.schemaFile == null) {
+            if (schema.sourceSchemaUri == null) {
                 log.warn("Could not resolve schema file path for message '{}' in channel '{}'", messageName, channelName);
             }
             result.add(schema);
@@ -149,22 +153,32 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
         return result;
     }
 
-    private String resolveSchemaFile(Map message) {
+    private String resolveSchemaSourceUri(Model apiModel, Map message) {
         Map schema = JSONPath.get(message, "$.payload.schema");
         if (schema == null) {
             return null;
         }
         String originalRef = (String) schema.get("x--original-$ref");
-        if (originalRef != null) {
-            int avroIdx = originalRef.lastIndexOf("avro/");
-            if (avroIdx >= 0) {
-                return originalRef.substring(avroIdx);
-            }
-            String fileName = originalRef.substring(originalRef.lastIndexOf('/') + 1);
-            return "avro/" + fileName;
-        }
         String name = (String) schema.get("name");
-        return name != null ? "avro/" + name + ".avsc" : null;
+        String schemaRef = originalRef != null ? originalRef : (name != null ? "avro/" + name + ".avsc" : null);
+        if (schemaRef == null) {
+            return null;
+        }
+        return resolveAgainstApi(apiModel.getUri(), schemaRef).toString();
+    }
+
+    private String resolveTargetSchemaFile(String apiNamespace, Map message) {
+        Map schema = JSONPath.get(message, "$.payload.schema");
+        if (schema == null) {
+            return null;
+        }
+        String originalRef = (String) schema.get("x--original-$ref");
+        String name = (String) schema.get("name");
+        String schemaRef = originalRef != null ? originalRef : (name != null ? "avro/" + name + ".avsc" : null);
+        if (schemaRef == null) {
+            return null;
+        }
+        return apiNamespace + "/" + toTargetRelativePath(schemaRef, name);
     }
 
     // -------------------------------------------------------------------------
@@ -331,5 +345,81 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
             }
         }
         return defaultValue;
+    }
+
+    private Map<Model, String> createApiNamespaces(List<Model> apis) {
+        Map<Model, String> namespaces = new HashMap<>();
+        Map<String, Integer> collisions = new HashMap<>();
+        for (Model api : apis) {
+            String base = sanitizeApiBasename(api.getUri());
+            int count = collisions.merge(base, 1, Integer::sum);
+            namespaces.put(api, count == 1 ? base : base + "_" + count);
+        }
+        return namespaces;
+    }
+
+    private String sanitizeApiBasename(java.net.URI uri) {
+        String source = Objects.toString(uri, "api");
+        String fileName = source;
+        int lastSlash = Math.max(source.lastIndexOf('/'), source.lastIndexOf('\\'));
+        if (lastSlash >= 0 && lastSlash + 1 < source.length()) {
+            fileName = source.substring(lastSlash + 1);
+        }
+        int extensionIndex = fileName.lastIndexOf('.');
+        if (extensionIndex > 0) {
+            fileName = fileName.substring(0, extensionIndex);
+        }
+        fileName = fileName.replace(" ", "_").replaceAll("[^A-Za-z0-9._-]", "_");
+        fileName = fileName.replaceAll("_+", "_").replaceAll("^_|_$", "");
+        return fileName.isBlank() ? "api" : fileName;
+    }
+
+    private java.net.URI resolveAgainstApi(java.net.URI apiUri, String schemaRef) {
+        String path = stripFragment(schemaRef);
+        if (path.matches("^[a-zA-Z][a-zA-Z0-9+.-]*:.*")) {
+            return java.net.URI.create(path);
+        }
+        if ("classpath".equalsIgnoreCase(apiUri.getScheme())) {
+            String basePath = apiUri.getSchemeSpecificPart();
+            String baseDir = basePath.contains("/") ? basePath.substring(0, basePath.lastIndexOf('/') + 1) : "";
+            return java.net.URI.create("classpath:" + normalizeRelativePath(baseDir + path));
+        }
+        return apiUri.resolve(path);
+    }
+
+    private String toTargetRelativePath(String schemaRef, String schemaName) {
+        String path = stripFragment(schemaRef);
+        if (path.matches("^[a-zA-Z][a-zA-Z0-9+.-]*:.*")) {
+            String fileName = path.substring(path.lastIndexOf('/') + 1);
+            return fileName.isBlank() ? "avro/" + schemaName + ".avsc" : fileName;
+        }
+        String normalized = normalizeRelativePath(path);
+        while (normalized.startsWith("../")) {
+            normalized = normalized.substring(3);
+        }
+        normalized = normalized.replaceAll("^/+", "");
+        return normalized.isBlank() ? "avro/" + schemaName + ".avsc" : normalized;
+    }
+
+    private String stripFragment(String schemaRef) {
+        int fragmentIndex = schemaRef.indexOf('#');
+        return fragmentIndex >= 0 ? schemaRef.substring(0, fragmentIndex) : schemaRef;
+    }
+
+    private String normalizeRelativePath(String path) {
+        List<String> normalized = new ArrayList<>();
+        for (String segment : path.replace("\\", "/").split("/")) {
+            if (segment.isBlank() || ".".equals(segment)) {
+                continue;
+            }
+            if ("..".equals(segment)) {
+                if (!normalized.isEmpty()) {
+                    normalized.remove(normalized.size() - 1);
+                }
+                continue;
+            }
+            normalized.add(segment);
+        }
+        return String.join("/", normalized);
     }
 }

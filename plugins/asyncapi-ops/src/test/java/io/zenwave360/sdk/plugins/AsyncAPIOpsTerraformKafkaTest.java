@@ -8,9 +8,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -45,10 +42,11 @@ public class AsyncAPIOpsTerraformKafkaTest {
 
         String schemas = Files.readString(Path.of(targetFolder + "/schemas.tf"));
         Assertions.assertTrue(schemas.contains("ReserveStockCommand-value"));
-        Assertions.assertTrue(schemas.contains("avro/ReserveStockCommand.avsc"));
+        Assertions.assertTrue(schemas.contains("asyncapi/avro/ReserveStockCommand.avsc"));
         Assertions.assertTrue(schemas.contains("BACKWARD") || schemas.contains("FORWARD"));
         // No schemas for external topics
         Assertions.assertFalse(schemas.contains("replenish"), "External channel must not appear in schemas.tf");
+        Assertions.assertTrue(new File(targetFolder + "/asyncapi/avro/ReserveStockCommand.avsc").exists());
 
         String acls = Files.readString(Path.of(targetFolder + "/acls.tf"));
         Assertions.assertTrue(acls.contains("User:merchandising.inventory.inventory-adjustment"));
@@ -74,5 +72,25 @@ public class AsyncAPIOpsTerraformKafkaTest {
         Assertions.assertFalse(schemas.contains("replenish"), "External channel must not get a schema resource");
 
         Assertions.assertTrue(new File(targetFolder + "/acls.tf").exists());
+    }
+
+    @Test
+    public void test_provider_generation_bundles_only_required_imports() throws Exception {
+        String targetFolder = "target/out/test_provider_generation_with_bundled_imports";
+        new MainGenerator().generate(new AsyncAPIOpsGeneratorPlugin()
+                .withApiFile("classpath:asyncapi-bundling/asyncapi.yml")
+                .withOption("templates", "TerraformKafka")
+                .withOption("avroImports", "classpath:asyncapi-bundling/imports")
+                .withTargetFolder(targetFolder)
+                .withOption("skipFormatting", true));
+
+        String schemas = Files.readString(Path.of(targetFolder + "/schemas.tf"));
+        Assertions.assertTrue(schemas.contains("${path.module}/asyncapi/avro/ShoppingCartItemAdded.avsc"));
+
+        String bundledSchema = Files.readString(Path.of(targetFolder + "/asyncapi/avro/ShoppingCartItemAdded.avsc"));
+        Assertions.assertTrue(bundledSchema.contains("\"name\":\"ShoppingCartItemAdded\""));
+        Assertions.assertTrue(bundledSchema.contains("\"name\":\"ShoppingCart\""));
+        Assertions.assertTrue(bundledSchema.contains("\"name\":\"Item\""));
+        Assertions.assertFalse(bundledSchema.contains("UnusedImport"));
     }
 }

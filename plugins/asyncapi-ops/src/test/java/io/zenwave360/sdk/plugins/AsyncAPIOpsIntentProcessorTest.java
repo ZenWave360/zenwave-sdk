@@ -57,7 +57,8 @@ public class AsyncAPIOpsIntentProcessorTest {
         intent.schemas.forEach(s -> {
             Assertions.assertTrue(s.subject.endsWith("-value"));
             Assertions.assertNotNull(s.schemaFile);
-            Assertions.assertTrue(s.schemaFile.startsWith("avro/"));
+            Assertions.assertTrue(s.schemaFile.startsWith("asyncapi/avro/"));
+            Assertions.assertNotNull(s.sourceSchemaUri);
             Assertions.assertFalse(s.resourceName.contains("."), "Schema resourceName must not contain dots");
         });
 

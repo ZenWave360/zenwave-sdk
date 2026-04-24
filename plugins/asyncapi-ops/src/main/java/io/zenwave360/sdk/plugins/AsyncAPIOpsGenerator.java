@@ -13,6 +13,7 @@ import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +28,12 @@ public class AsyncAPIOpsGenerator extends Generator {
 
     @DocumentedOption(description = "Templates to use for code generation.", values = {"TerraformKafka", "FQ Class Name"})
     public String templates = "TerraformKafka";
+
+    @DocumentedOption(description = "Avro schema files or folders available while bundling owned message schemas.")
+    public List<String> avroImports = List.of();
+
+    @DocumentedOption(description = "Target folder to generate code to.")
+    public File targetFolder;
 
     public String sourceProperty = "api";
 
@@ -43,6 +50,7 @@ public class AsyncAPIOpsGenerator extends Generator {
             commonExtModel.put("intent", intent);
         }
         outputList.addAll(generateTemplateOutput(contextModel, templates.commonTemplates, commonExtModel));
+        outputList.addAll(generateBundledSchemaOutputs((AsyncAPIOpsIntent) intent));
 
         if (apiModel != null) {
             var channels = JSONPath.get(apiModel, "$.channels", Map.<String, Map>of());
@@ -74,6 +82,17 @@ public class AsyncAPIOpsGenerator extends Generator {
         GeneratedProjectFiles generatedProjectFiles = new GeneratedProjectFiles();
         generatedProjectFiles.singleFiles.addAll(outputList);
         return generatedProjectFiles;
+    }
+
+    protected List<TemplateOutput> generateBundledSchemaOutputs(AsyncAPIOpsIntent intent) {
+        if (intent == null || intent.schemas.isEmpty()) {
+            return List.of();
+        }
+        ClassLoader projectClassLoader = configuration != null ? configuration.getProjectClassLoader() : null;
+        AsyncAPIOpsAvroBundler bundler = new AsyncAPIOpsAvroBundler(avroImports, projectClassLoader);
+        return intent.schemas.stream()
+                .map(bundler::bundle)
+                .toList();
     }
 
     protected Templates configureTemplates() {

@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -81,8 +82,16 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
         return schemas;
     }
 
+    public List<Map<String, Object>> loadSchemas(List<URI> avroFileURIs) throws IOException {
+        return avroSchemasAsList(avroFileURIs);
+    }
+
     protected List<URI> collectAvscFiles(AvroCompilerProperties avroCompilerProperties) throws IOException {
         return collectAvscFiles(avroCompilerProperties.sourceDirectory, avroCompilerProperties.imports, avroCompilerProperties.includes, avroCompilerProperties.excludes);
+    }
+
+    public List<URI> collectImportUris(List<String> imports) throws IOException {
+        return collectAvscFiles(null, imports, List.of("**/*.avsc"), List.of());
     }
 
     protected List<URI> collectAvscFiles(File sourceFolder, List<String> imports, List<String> includes, List<String> excludes) throws IOException {
@@ -193,6 +202,102 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
         allURIs.addAll(importedURIs);
 
         return allURIs;
+    }
+
+    public List<Map<String, Object>> sortSchemas(List<Map<String, Object>> schemas) {
+        if (isAvroVersionLater("1.12.0")) {
+            return schemas;
+        }
+        log.info("Avro version detected {} < 1.12.0. Sorting schemas...", AVRO_VERSION);
+
+        log.debug("Sorting schemas: {}", schemas.stream().map(schema -> schema.get("name")).toList());
+        schemas.sort(createDependencyComparator());
+        log.debug("Sorted schemas: {}", schemas.stream().map(schema -> schema.get("name")).toList());
+
+        return schemas;
+    }
+
+    private Comparator<Map<String, Object>> createDependencyComparator() {
+        return (map1, map2) -> {
+            String name1 = (String) map1.get("name");
+            String name2 = (String) map2.get("name");
+            String type1 = (String) map1.get("type");
+            String type2 = (String) map2.get("type");
+
+            List<String> dependencies1 = extractDependencies(map1);
+            List<String> dependencies2 = extractDependencies(map2);
+
+            boolean map1IsEnum = "enum".equals(type1);
+            boolean map2IsEnum = "enum".equals(type2);
+            boolean map1HasNoDeps = dependencies1.isEmpty();
+            boolean map2HasNoDeps = dependencies2.isEmpty();
+
+            if ((map1IsEnum || map1HasNoDeps) && !(map2IsEnum || map2HasNoDeps)) {
+                return -1;
+            } else if (!(map1IsEnum || map1HasNoDeps) && (map2IsEnum || map2HasNoDeps)) {
+                return 1;
+            }
+
+            boolean map1DependsOnMap2 = dependencies1.contains(name2);
+            boolean map2DependsOnMap1 = dependencies2.contains(name1);
+
+            if (map1DependsOnMap2 && !map2DependsOnMap1) {
+                return 1;
+            } else if (!map1DependsOnMap2 && map2DependsOnMap1) {
+                return -1;
+            }
+            return 0;
+        };
+    }
+
+    private List<String> extractDependencies(Map<String, Object> schema) {
+        List<Object> fieldTypes = io.zenwave360.sdk.utils.JSONPath.get(schema, "$.fields[*].type", List.of());
+        List<String> dependencies = new ArrayList<>();
+        Set<String> primitiveTypes = Set.of("null", "boolean", "int", "long", "float", "double", "bytes", "string");
+
+        for (Object fieldType : fieldTypes) {
+            if (fieldType instanceof String typeName) {
+                if (!primitiveTypes.contains(typeName)) {
+                    dependencies.add(typeName);
+                }
+            } else if (fieldType instanceof List<?> unionTypes) {
+                for (Object unionType : unionTypes) {
+                    if (unionType instanceof String typeName && !primitiveTypes.contains(typeName)) {
+                        dependencies.add(typeName);
+                    }
+                }
+            } else if (fieldType instanceof Map<?, ?> typeMap) {
+                String items = io.zenwave360.sdk.utils.JSONPath.get(typeMap, "$.items", null);
+                if (items != null && !primitiveTypes.contains(items)) {
+                    dependencies.add(items);
+                }
+            }
+        }
+
+        return dependencies;
+    }
+
+    private static String AVRO_VERSION = getAvroVersion();
+
+    private static String getAvroVersion() {
+        Package avroPackage = org.apache.avro.Schema.class.getPackage();
+        if (avroPackage != null && avroPackage.getImplementationVersion() != null) {
+            return avroPackage.getImplementationVersion();
+        }
+        return "0.0.0";
+    }
+
+    public boolean isAvroVersionLater(String version) {
+        String[] currentVersionParts = AVRO_VERSION.split("\\.");
+        String[] targetVersionParts = version.split("\\.");
+
+        int currentMajor = Integer.parseInt(currentVersionParts[0]);
+        int currentMinor = Integer.parseInt(currentVersionParts[1]);
+        int targetMajor = Integer.parseInt(targetVersionParts[0]);
+        int targetMinor = Integer.parseInt(targetVersionParts[1]);
+
+        return currentMajor > targetMajor ||
+                (currentMajor == targetMajor && currentMinor >= targetMinor);
     }
 
     private boolean matchesIncludes(String pathString, List<String> includes) {

@@ -6,7 +6,7 @@ resource "schemaregistry_schema" "{{schema.resourceName}}" {
   subject             = "{{schema.subject}}"
   schema_type         = "{{schema.schemaType}}"
   compatibility_level = {{#if schema.compatibility}}"{{schema.compatibility}}"{{else}}var.default_compatibility{{/if}}
-  schema              = file("${path.module}/../{{schema.schemaFile}}")
+  schema              = file("${path.module}/{{schema.schemaFile}}")
 }
 
 {{/each}}

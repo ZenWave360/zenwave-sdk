@@ -43,8 +43,10 @@ public class AsyncAPIOpsIntent {
         public String schemaType = "AVRO";
         /** BACKWARD, FORWARD, or null (template falls back to var.default_compatibility) */
         public String compatibility;
-        /** Relative path to .avsc file, e.g. avro/ReserveStockCommand.avsc */
+        /** Relative path to generated bundled .avsc file inside targetFolder */
         public String schemaFile;
+        /** Source .avsc URI resolved from the owning AsyncAPI file */
+        public String sourceSchemaUri;
     }
 
     public static class AclIntent {
