@@ -2,6 +2,7 @@ package io.zenwave360.sdk.plugins;
 
 import io.zenwave360.jsonrefparser.$RefParser;
 import io.zenwave360.jsonrefparser.$RefParserOptions;
+import io.zenwave360.jsonrefparser.AuthenticationValue;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.parsers.Parser;
 import io.zenwave360.sdk.utils.AntStyleMatcher;
@@ -43,6 +44,9 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
     @DocumentedOption(description = "Avro Compiler Properties")
     public AvroCompilerProperties avroCompilerProperties = new AvroCompilerProperties();
 
+    @DocumentedOption(description = "Authentication configuration values for fetching remote resources.")
+    public List<AuthenticationValue> authentication = List.of();
+
     private ClassLoader projectClassLoader;
 
     @Override
@@ -71,6 +75,7 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
         for (URI uri : avroFileURIs) {
             $RefParser parser = new $RefParser(uri)
                     .withResourceClassLoader(this.projectClassLoader)
+                    .withAuthenticationValues(authentication)
                     .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing($RefParserOptions.OnMissing.FAIL));
             Object schema = parser.parse().getRefs().jsonContext.json();
             if(schema instanceof List) {
