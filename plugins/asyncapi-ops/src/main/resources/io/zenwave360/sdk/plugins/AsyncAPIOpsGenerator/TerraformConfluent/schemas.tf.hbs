@@ -1,0 +1,17 @@
+# Generated from asyncapi.yml{{#if intent.server}} for environment: {{intent.server}}{{/if}}
+# Command: jbang zw -p AsyncAPIToTerraform{{#if intent.server}} server={{intent.server}}{{/if}}
+
+{{#each intent.schemas as |schema|}}
+resource "confluent_schema" "{{schema.resourceName}}" {
+  subject_name = "{{schema.subject}}"
+  format       = "{{schema.schemaType}}"
+  schema       = file("${path.module}/{{schema.schemaFile}}")
+}
+
+resource "confluent_subject_config" "{{schema.resourceName}}_config" {
+  subject_name         = "{{schema.subject}}"
+  compatibility_level  = {{#if schema.compatibility}}"{{schema.compatibility}}"{{else}}var.default_compatibility{{/if}}
+  depends_on           = [confluent_schema.{{schema.resourceName}}]
+}
+
+{{/each}}

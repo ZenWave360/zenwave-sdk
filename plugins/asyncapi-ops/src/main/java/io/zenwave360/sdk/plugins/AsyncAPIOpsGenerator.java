@@ -1,9 +1,11 @@
 package io.zenwave360.sdk.plugins;
 
 import io.zenwave360.sdk.MainGenerator;
+import io.zenwave360.jsonrefparser.AuthenticationValue;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.parsers.Model;
+import io.zenwave360.sdk.plugins.templates.TerraformConfluentTemplates;
 import io.zenwave360.sdk.plugins.templates.TerraformKafkaTemplates;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateInput;
@@ -26,11 +28,14 @@ public class AsyncAPIOpsGenerator extends Generator {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    @DocumentedOption(description = "Templates to use for code generation.", values = {"TerraformKafka", "FQ Class Name"})
+    @DocumentedOption(description = "Templates to use for code generation.", values = {"TerraformKafka", "TerraformConfluent", "FQ Class Name"})
     public String templates = "TerraformKafka";
 
     @DocumentedOption(description = "Avro schema files or folders available while bundling owned message schemas.")
     public List<String> avroImports = List.of();
+
+    @DocumentedOption(description = "Authentication configuration values for fetching remote resources.")
+    public List<AuthenticationValue> authentication = List.of();
 
     @DocumentedOption(description = "Target folder to generate code to.")
     public File targetFolder;
@@ -89,7 +94,7 @@ public class AsyncAPIOpsGenerator extends Generator {
             return List.of();
         }
         ClassLoader projectClassLoader = configuration != null ? configuration.getProjectClassLoader() : null;
-        AsyncAPIOpsAvroBundler bundler = new AsyncAPIOpsAvroBundler(avroImports, projectClassLoader);
+        AsyncAPIOpsAvroBundler bundler = new AsyncAPIOpsAvroBundler(avroImports, authentication, projectClassLoader);
         return intent.schemas.stream()
                 .map(bundler::bundle)
                 .toList();
@@ -99,6 +104,8 @@ public class AsyncAPIOpsGenerator extends Generator {
         Templates templatesObject = null;
         if("TerraformKafka".equals(templates)) {
             templatesObject = new TerraformKafkaTemplates(this);
+        } else if("TerraformConfluent".equals(templates)) {
+            templatesObject = new TerraformConfluentTemplates(this);
         } else {
             // Instantiate FQ class name
             try {

@@ -1,0 +1,17 @@
+# Generated from asyncapi.yml{{#if intent.server}} for environment: {{intent.server}}{{/if}}
+# Command: jbang zw -p AsyncAPIToTerraform{{#if intent.server}} server={{intent.server}}{{/if}}
+
+{{~#each intent.topics as |topic|}}
+resource "confluent_kafka_topic" "{{topic.resourceName}}" {
+  topic_name       = "{{topic.topicName}}"
+  partitions_count = {{topic.partitions}}
+{{~#if topic.config}}
+  config = {
+{{~#each topic.config as |value key|}}
+    "{{key}}" = "{{value}}"
+{{~/each}}
+  }
+{{~/if}}
+}
+
+{{~/each}}

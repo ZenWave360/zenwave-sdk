@@ -21,9 +21,37 @@ Multiple spec together for a single service (i.e.: provider + client):
 ```shell
 jbang zw -p AsyncAPIOpsGeneratorPlugin \
   apiFiles=asyncapi.yml,asyncapi-client.yml \
-  avroImports=https://remote/schemas/avro1.avsc,https://remote/schemas/avro2.avsc \
+  avroImports=schemas/avro1.avsc,schemas/avro2.avsc \
   server=staging \
   targetFolder=terraform/inventory-adjustment
+```
+
+Remote files with TerraformConfluent provider:
+
+```shell
+jbang zw -p AsyncAPIOpsGeneratorPlugin \
+  authentication.key=Authorization \
+  authentication.value="Bearer $TOKEN" \
+  authentication.type=HEADER \
+  authentication.urlPatterns[0]='https://raw.githubusercontent.com/.*' \
+  apiFile=https://raw.githubusercontent.com/ZenWave360/zenwave-playground/refs/heads/main/examples/asyncapi-shopping-cart/apis/asyncapi.yml \
+  avroImports=\
+https://raw.githubusercontent.com/ZenWave360/zenwave-playground/refs/heads/main/examples/asyncapi-shopping-cart/apis/avro/Item.avsc,\
+https://raw.githubusercontent.com/ZenWave360/zenwave-playground/refs/heads/main/examples/asyncapi-shopping-cart/apis/avro/ShoppingCart.avsc \
+  templates=TerraformConfluent \
+  targetFolder=confluent/work
+```
+
+Remote files with authentication:
+
+```shell
+jbang zw -p AsyncAPIOpsGeneratorPlugin \
+  apiFile=https://raw.githubusercontent.com/ZenWave360/zenwave-playground/refs/heads/main/examples/asyncapi-shopping-cart/apis/asyncapi.yml \
+  avroImports=\
+https://raw.githubusercontent.com/ZenWave360/zenwave-playground/refs/heads/main/examples/asyncapi-shopping-cart/apis/avro/Item.avsc,\
+https://raw.githubusercontent.com/ZenWave360/zenwave-playground/refs/heads/main/examples/asyncapi-shopping-cart/apis/avro/ShoppingCart.avsc \
+  templates=TerraformConfluent \
+  targetFolder=confluent/work
 ```
 
 ## Configuration options
@@ -35,7 +63,7 @@ jbang zw -p AsyncAPIOpsGeneratorPlugin \
 | `avroImports`    | Avro schema files or folders available while bundling owned message schemas. Supports local files/folders, `classpath:` files/folders and `https://` files.                | List     | `[]`             |                               |
 | `authentication` | Authentication configuration values for fetching remote resources.                                                                                                           | List     | `[]`             |                               |
 | `server`         | Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Used to merge env-server-overrides from channel and error-topic bindings. | String   | `null`           |                               |
-| `templates`      | Templates to use for code generation.                                                                                                                                        | String   | `TerraformKafka` | TerraformKafka, FQ Class Name |
+| `templates`      | Templates to use for code generation.                                                                                                                                        | String   | `TerraformKafka` | TerraformKafka, TerraformConfluent, FQ Class Name |
 | `targetFolder`   | Output directory for `.tf` files.                                                                                                                                            | File     | `null`           |                               |
 
 ## What it generates

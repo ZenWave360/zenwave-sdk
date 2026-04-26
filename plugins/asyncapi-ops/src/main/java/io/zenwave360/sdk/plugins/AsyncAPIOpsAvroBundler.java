@@ -1,6 +1,7 @@
 package io.zenwave360.sdk.plugins;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.zenwave360.jsonrefparser.AuthenticationValue;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import org.apache.avro.Schema;
@@ -18,10 +19,11 @@ class AsyncAPIOpsAvroBundler {
     private final AvroSchemaLoader loader;
     private final List<String> avroImports;
 
-    AsyncAPIOpsAvroBundler(List<String> avroImports, ClassLoader projectClassLoader) {
+    AsyncAPIOpsAvroBundler(List<String> avroImports, List<AuthenticationValue> authentication, ClassLoader projectClassLoader) {
         this.avroImports = avroImports != null ? avroImports : List.of();
         this.loader = new AvroSchemaLoader();
         this.loader.withProjectClassLoader(projectClassLoader);
+        this.loader.authentication = authentication != null ? authentication : List.of();
     }
 
     TemplateOutput bundle(AsyncAPIOpsIntent.SchemaIntent schemaIntent) {
