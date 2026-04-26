@@ -38,7 +38,7 @@ public class AsyncAPIOpsTerraformConfluentTest {
         String schemas = Files.readString(Path.of(targetFolder + "/schemas.tf"));
         Assertions.assertTrue(schemas.contains("resource \"confluent_schema\""));
         Assertions.assertTrue(schemas.contains("resource \"confluent_subject_config\""));
-        Assertions.assertTrue(schemas.contains("subject_name = \"ReserveStockCommand-value\""));
+        Assertions.assertTrue(schemas.contains("subject_name = \"merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0-ReserveStockCommand-value\""));
         Assertions.assertTrue(schemas.contains("format       = \"AVRO\""));
         Assertions.assertTrue(schemas.contains("compatibility_level"));
         Assertions.assertTrue(new File(targetFolder + "/asyncapi/avro/ReserveStockCommand.avsc").exists());
