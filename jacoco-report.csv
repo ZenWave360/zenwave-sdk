@@ -125,8 +125,8 @@ io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsInte
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsAvroBundler,32,151,7,7,5,28,7,5,0,5
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntent,0,42,1,1,0,9,1,2,0,2
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsGeneratorPlugin,0,27,0,0,0,5,0,1,0,1
-io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntentProcessor,126,1011,51,79,28,200,45,49,0,29
-io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsSpecLoader,20,178,2,16,5,42,2,15,0,8
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntentProcessor,119,1018,50,80,26,202,44,50,0,29
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsSpecLoader,20,178,1,17,5,42,1,16,0,8
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsGenerator.Templates,9,58,0,0,2,17,1,2,1,2
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntent.AclIntent,0,6,0,0,0,2,0,1,0,1
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsGenerator,161,210,9,13,29,48,7,9,0,5
