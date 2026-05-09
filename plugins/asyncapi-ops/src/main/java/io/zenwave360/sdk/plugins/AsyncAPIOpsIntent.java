@@ -28,8 +28,8 @@ public class AsyncAPIOpsIntent {
         public String resourceName;
         /** Actual Kafka topic address */
         public String topicName;
-        public int partitions = 1;
-        public int replicationFactor = 1;
+        public Integer partitions;
+        public Integer replicationFactor;
         public Map<String, String> config = new LinkedHashMap<>();
         /** True for auto-generated retry/DLQ topics — rendered without config block */
         public boolean isRetryOrDlq;

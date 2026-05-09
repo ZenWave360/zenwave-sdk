@@ -22,7 +22,7 @@ public class AsyncAPIOpsGeneratorPlugin extends Plugin {
     @DocumentedOption(description = "Avro schema files or folders available while bundling owned message schemas. Supports local files/folders, classpath resources, and https:// files.")
     public java.util.List<String> avroImports = java.util.List.of();
 
-    @DocumentedOption(description = "Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Applies x-env-server-overrides from channel bindings.")
+    @DocumentedOption(description = "Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Applies x-env-server-overrides/env-server-overrides from channel and error-topic bindings.")
     public String server;
 
     public AsyncAPIOpsGeneratorPlugin() {

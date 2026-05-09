@@ -5,6 +5,7 @@ import io.zenwave360.jsonrefparser.AuthenticationValue;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.parsers.Model;
+import io.zenwave360.sdk.plugins.templates.TerraformConfluentHybridTemplates;
 import io.zenwave360.sdk.plugins.templates.TerraformConfluentTemplates;
 import io.zenwave360.sdk.plugins.templates.TerraformKafkaTemplates;
 import io.zenwave360.sdk.templating.OutputFormatType;
@@ -28,7 +29,7 @@ public class AsyncAPIOpsGenerator extends Generator {
 
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    @DocumentedOption(description = "Templates to use for code generation.", values = {"TerraformKafka", "TerraformConfluent", "FQ Class Name"})
+    @DocumentedOption(description = "Templates to use for code generation.", values = {"TerraformKafka", "TerraformConfluent", "TerraformConfluentHybrid", "FQ Class Name"})
     public String templates = "TerraformKafka";
 
     @DocumentedOption(description = "Avro schema files or folders available while bundling owned message schemas.")
@@ -106,6 +107,8 @@ public class AsyncAPIOpsGenerator extends Generator {
             templatesObject = new TerraformKafkaTemplates(this);
         } else if("TerraformConfluent".equals(templates)) {
             templatesObject = new TerraformConfluentTemplates(this);
+        } else if("TerraformConfluentHybrid".equals(templates)) {
+            templatesObject = new TerraformConfluentHybridTemplates(this);
         } else {
             // Instantiate FQ class name
             try {

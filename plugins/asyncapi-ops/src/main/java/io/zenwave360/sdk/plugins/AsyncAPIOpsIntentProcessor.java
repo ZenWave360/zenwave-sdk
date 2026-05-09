@@ -25,13 +25,14 @@ import java.util.stream.Collectors;
  * declared inline in a spec file are owned (generate topic + schemas); channels resolved
  * from a cross-file {@code $ref} are external (contribute ACLs and error topics only).
  *
- * <p>Retry/DLQ provisioning is driven by the {@code x-error-topics} operation binding extension.
+ * <p>Retry/DLQ provisioning is driven by the {@code x-error-topics} or {@code error-topics}
+ * operation binding extension.
  */
 public class AsyncAPIOpsIntentProcessor implements Processor {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @DocumentedOption(description = "Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Used to merge env-server-overrides from channel and error-topic bindings.")
+    @DocumentedOption(description = "Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Used to merge x-env-server-overrides/env-server-overrides from channel and error-topic bindings.")
     public String server;
 
     @DocumentedOption(description = "Context key holding the list of AsyncAPI models loaded by AsyncAPIOpsSpecLoader.")
@@ -99,8 +100,8 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
         Map<String, Object> kafkaBinding = mergeChannelServerOverrides(
                 JSONPath.get(channel, "$.bindings.kafka", Collections.emptyMap()));
 
-        topic.partitions = intValue(kafkaBinding, "partitions", 1);
-        topic.replicationFactor = intValue(kafkaBinding, "replicas", 1);
+        topic.partitions = integerValue(kafkaBinding, "partitions");
+        topic.replicationFactor = integerValue(kafkaBinding, "replicas");
         topic.config = buildTopicConfig(kafkaBinding);
         return topic;
     }
@@ -113,8 +114,8 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
 
         if (errorTopicConfig != null) {
             Map<String, Object> merged = mergeErrorTopicServerOverrides(errorTopicConfig);
-            topic.partitions = intValue(merged, "partitions", 1);
-            topic.replicationFactor = intValue(merged, "replicas", 1);
+            topic.partitions = integerValue(merged, "partitions");
+            topic.replicationFactor = integerValue(merged, "replicas");
             topic.config = buildTopicConfig(merged);
         }
         return topic;
@@ -212,7 +213,7 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
         // Error topics for receive operations
         if (!isSend) {
             String groupId = getGroupId(operation);
-            Map errorTopics = JSONPath.get(operation, "$.bindings.kafka.x-error-topics");
+            Map errorTopics = getErrorTopicsConfig(operation);
             if (errorTopics != null && groupId != null) {
                 expandErrorTopics(errorTopics, groupId, topicAddress, principal, intent);
             }
@@ -275,14 +276,15 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
     // -------------------------------------------------------------------------
 
     /**
-     * Merges {@code x-env-server-overrides[server]} into the channel kafka binding.
+     * Merges {@code x-env-server-overrides[server]} or {@code env-server-overrides[server]}
+     * into the channel kafka binding.
      */
     @SuppressWarnings("unchecked")
     private Map<String, Object> mergeChannelServerOverrides(Map<String, Object> kafkaBinding) {
         if (server == null || kafkaBinding.isEmpty()) {
             return kafkaBinding;
         }
-        Map<String, Object> overrides = JSONPath.get(kafkaBinding, "$.x-env-server-overrides." + server);
+        Map<String, Object> overrides = getServerOverrides(kafkaBinding);
         if (overrides == null || overrides.isEmpty()) {
             return kafkaBinding;
         }
@@ -290,19 +292,29 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
     }
 
     /**
-     * Merges {@code env-server-overrides[server]} into the error topic (retry/dlq) config.
-     * Error topic configs use {@code env-server-overrides} (no {@code x-} prefix).
+     * Merges {@code x-env-server-overrides[server]} or {@code env-server-overrides[server]}
+     * into the error topic (retry/dlq) config.
      */
     @SuppressWarnings("unchecked")
     private Map<String, Object> mergeErrorTopicServerOverrides(Map<String, Object> config) {
         if (server == null || config.isEmpty()) {
             return config;
         }
-        Map<String, Object> overrides = JSONPath.get(config, "$.env-server-overrides." + server);
+        Map<String, Object> overrides = getServerOverrides(config);
         if (overrides == null || overrides.isEmpty()) {
             return config;
         }
         return Maps.deepMerge(Maps.copy(config), overrides);
+    }
+
+    private Map getErrorTopicsConfig(Map operation) {
+        return JSONPath.getFirst(operation, "$.bindings.kafka.x-error-topics", "$.bindings.kafka.error-topics");
+    }
+
+    private Map<String, Object> getServerOverrides(Map<String, Object> config) {
+        return JSONPath.getFirst(config,
+                "$.x-env-server-overrides." + server,
+                "$.env-server-overrides." + server);
     }
 
     private Map<String, String> buildTopicConfig(Map<String, Object> binding) {
@@ -345,6 +357,21 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
             }
         }
         return defaultValue;
+    }
+
+    private Integer integerValue(Map map, String key) {
+        Object value = map.get(key);
+        if (value instanceof Number n) {
+            return n.intValue();
+        }
+        if (value instanceof String s) {
+            try {
+                return Integer.parseInt(s);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
     }
 
     private Map<Model, String> createApiNamespaces(List<Model> apis) {

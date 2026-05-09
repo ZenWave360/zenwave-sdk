@@ -1,10 +1,14 @@
 package io.zenwave360.sdk.plugins;
 
+import io.zenwave360.sdk.parsers.Model;
+import io.zenwave360.sdk.utils.JSONPath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class AsyncAPIOpsIntentProcessorTest {
 
@@ -161,19 +165,96 @@ public class AsyncAPIOpsIntentProcessorTest {
         Assertions.assertEquals(intent.topics.size(), distinctResourceNames, "Resource names must be unique");
     }
 
+    @Test
+    public void test_unprefixed_extensions_are_supported() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+
+        Map<String, Object> channelBinding = JSONPath.get(api, "$.channels['reserve-stock-command'].bindings.kafka");
+        channelBinding.put("env-server-overrides", channelBinding.remove("x-env-server-overrides"));
+
+        Map<String, Object> operationBinding = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka");
+        operationBinding.put("error-topics", operationBinding.remove("x-error-topics"));
+
+        context = buildIntent("staging", context);
+
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+        long ownedTopics = intent.topics.stream().filter(t -> !t.isRetryOrDlq).count();
+        Assertions.assertEquals(3, ownedTopics);
+        intent.topics.stream().filter(t -> !t.isRetryOrDlq).forEach(t -> Assertions.assertEquals(3, t.partitions));
+
+        long retryDlqTopics = intent.topics.stream().filter(t -> t.isRetryOrDlq).count();
+        Assertions.assertEquals(4, retryDlqTopics, "Unprefixed error-topics must still generate retry/DLQ topics");
+    }
+
+    @Test
+    public void test_defaults_are_sourced_from_base_config_when_overrides_are_absent() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+
+        Map<String, Object> channelBinding = JSONPath.get(api, "$.channels['reserve-stock-command'].bindings.kafka");
+        Map<String, Object> baseChannelBinding = new LinkedHashMap<>(channelBinding);
+        baseChannelBinding.remove("x-env-server-overrides");
+        baseChannelBinding.remove("env-server-overrides");
+        replaceAll(channelBinding, baseChannelBinding);
+
+        Map<String, Object> operationBinding = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka");
+        Map<String, Object> errorTopics = JSONPath.get(operationBinding, "$.x-error-topics");
+        Map<String, Object> retryConfig = JSONPath.get(errorTopics, "$.retry");
+        Map<String, Object> retryBaseConfig = new LinkedHashMap<>(retryConfig);
+        retryBaseConfig.remove("x-env-server-overrides");
+        retryBaseConfig.remove("env-server-overrides");
+        replaceAll(retryConfig, retryBaseConfig);
+
+        context = buildIntent("staging", context);
+
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+
+        AsyncAPIOpsIntent.TopicIntent ownedTopic = intent.topics.stream()
+                .filter(t -> !t.isRetryOrDlq && "merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0".equals(t.topicName))
+                .findFirst()
+                .orElseThrow();
+        Assertions.assertEquals(20, ownedTopic.partitions, "Without env overrides the base channel partitions must be used");
+        Assertions.assertEquals(3, ownedTopic.replicationFactor, "Without env overrides the base channel replicas must be used");
+
+        AsyncAPIOpsIntent.TopicIntent retryTopic = intent.topics.stream()
+                .filter(t -> t.isRetryOrDlq && t.topicName.endsWith(".retry-0"))
+                .findFirst()
+                .orElseThrow();
+        Assertions.assertEquals(1, retryTopic.partitions, "Retry topic should fall back to the base retry config");
+        Assertions.assertEquals(2, retryTopic.replicationFactor, "Retry topic should fall back to the base retry config");
+        Assertions.assertEquals("259200000", retryTopic.config.get("retention.ms"), "Retry topic should keep base topicConfiguration values");
+    }
+
     // -------------------------------------------------------------------------
     // Helper
     // -------------------------------------------------------------------------
 
     private Map<String, Object> loadAndBuildIntent(String server, String... specPaths) throws Exception {
+        return buildIntent(server, loadContext(specPaths));
+    }
+
+    private Map<String, Object> loadContext(String... specPaths) throws Exception {
         AsyncAPIOpsSpecLoader loader = new AsyncAPIOpsSpecLoader();
         loader.apiFiles = java.util.Arrays.stream(specPaths).map(URI::create).toList();
 
         Map<String, Object> context = new java.util.LinkedHashMap<>();
-        context = loader.process(context);
+        return loader.process(context);
+    }
 
+    private Map<String, Object> buildIntent(String server, Map<String, Object> context) {
         AsyncAPIOpsIntentProcessor intentProcessor = new AsyncAPIOpsIntentProcessor();
         intentProcessor.server = server;
         return intentProcessor.process(context);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Model> getApis(Map<String, Object> context) {
+        return (List<Model>) context.get("apis");
+    }
+
+    private void replaceAll(Map<String, Object> target, Map<String, Object> replacement) {
+        target.clear();
+        target.putAll(replacement);
     }
 }

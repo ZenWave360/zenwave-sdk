@@ -9,41 +9,38 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public class AsyncAPIOpsTerraformConfluentTest {
+public class AsyncAPIOpsTerraformConfluentHybridTest {
 
     static final String ASYNCAPI_PROVIDER = "classpath:retail-domain-catalog/merchandising/inventory/inventory-adjustment/asyncapi.yml";
     static final String ASYNCAPI_CLIENT   = "classpath:retail-domain-catalog/merchandising/inventory/inventory-adjustment/asyncapi-client.yml";
 
     @Test
     public void test_provider_generation() throws Exception {
-        String targetFolder = "target/out/test_confluent_provider_generation";
+        String targetFolder = "target/out/test_confluent_hybrid_provider_generation";
         new MainGenerator().generate(new AsyncAPIOpsGeneratorPlugin()
                 .withApiFile(ASYNCAPI_PROVIDER)
                 .withOption("server", "staging")
-                .withOption("templates", "TerraformConfluent")
+                .withOption("templates", "TerraformConfluentHybrid")
                 .withTargetFolder(targetFolder)
                 .withOption("skipFormatting", true));
 
         String versions = Files.readString(Path.of(targetFolder + "/versions.tf"));
         Assertions.assertTrue(versions.contains("confluentinc/confluent"));
+        Assertions.assertTrue(versions.contains("cultureamp/schemaregistry"));
         Assertions.assertFalse(versions.contains("Mongey/kafka"));
-        Assertions.assertFalse(versions.contains("cultureamp/schemaregistry"));
-        Assertions.assertTrue(versions.contains("variable \"default_partitions\""));
-        Assertions.assertTrue(versions.contains("variable \"default_topic_config\""));
 
         String topics = Files.readString(Path.of(targetFolder + "/topics.tf"));
         Assertions.assertTrue(topics.contains("resource \"confluent_kafka_topic\""));
         Assertions.assertTrue(topics.contains("merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0"));
         Assertions.assertTrue(topics.contains("partitions_count = 3"), "Staging override");
-        Assertions.assertTrue(topics.contains("merge(var.default_topic_config"), "Topic config should merge Terraform defaults with AsyncAPI config");
         Assertions.assertFalse(topics.contains("replenish_stock"), "External channel must not appear in topics.tf");
 
         String schemas = Files.readString(Path.of(targetFolder + "/schemas.tf"));
-        Assertions.assertTrue(schemas.contains("resource \"confluent_schema\""));
-        Assertions.assertTrue(schemas.contains("resource \"confluent_subject_config\""));
-        Assertions.assertTrue(schemas.contains("subject_name = \"merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0-ReserveStockCommand-value\""));
-        Assertions.assertTrue(schemas.contains("format       = \"AVRO\""));
+        Assertions.assertTrue(schemas.contains("resource \"schemaregistry_schema\""));
+        Assertions.assertTrue(schemas.contains("ReserveStockCommand-value"));
+        Assertions.assertTrue(schemas.contains("asyncapi/avro/ReserveStockCommand.avsc"));
         Assertions.assertTrue(schemas.contains("compatibility_level"));
+        Assertions.assertFalse(schemas.contains("resource \"confluent_schema\""));
         Assertions.assertTrue(new File(targetFolder + "/asyncapi/avro/ReserveStockCommand.avsc").exists());
 
         String acls = Files.readString(Path.of(targetFolder + "/acls.tf"));
@@ -55,12 +52,12 @@ public class AsyncAPIOpsTerraformConfluentTest {
 
     @Test
     public void test_provider_and_client_terraform() throws Exception {
-        String targetFolder = "target/out/test_provider_and_client_confluent";
+        String targetFolder = "target/out/test_provider_and_client_confluent_hybrid";
         new MainGenerator().generate(new AsyncAPIOpsGeneratorPlugin()
                 .withApiFile(ASYNCAPI_PROVIDER)
                 .withOption("apiFiles", List.of(ASYNCAPI_CLIENT))
                 .withOption("server", "staging")
-                .withOption("templates", "TerraformConfluent")
+                .withOption("templates", "TerraformConfluentHybrid")
                 .withTargetFolder(targetFolder)
                 .withOption("skipFormatting", true));
 
@@ -72,19 +69,5 @@ public class AsyncAPIOpsTerraformConfluentTest {
         Assertions.assertFalse(schemas.contains("replenish"), "External channel must not get a schema resource");
 
         Assertions.assertTrue(new File(targetFolder + "/acls.tf").exists());
-    }
-
-    @Test
-    public void test_missing_topic_settings_render_provider_default_fallbacks() throws Exception {
-        String targetFolder = "target/out/test_confluent_provider_generation_with_missing_topic_settings";
-        new MainGenerator().generate(new AsyncAPIOpsGeneratorPlugin()
-                .withApiFile("classpath:defaulting/asyncapi-minimal.yml")
-                .withOption("templates", "TerraformConfluent")
-                .withTargetFolder(targetFolder)
-                .withOption("skipFormatting", true));
-
-        String topics = Files.readString(Path.of(targetFolder + "/topics.tf"));
-        Assertions.assertTrue(topics.contains("partitions_count = var.default_partitions"));
-        Assertions.assertTrue(topics.contains("config = length(var.default_topic_config) > 0 ? var.default_topic_config : null"));
     }
 }

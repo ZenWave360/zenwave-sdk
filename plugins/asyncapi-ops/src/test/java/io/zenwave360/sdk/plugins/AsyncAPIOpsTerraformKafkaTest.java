@@ -33,12 +33,19 @@ public class AsyncAPIOpsTerraformKafkaTest {
         // Actual topic address in name field
         Assertions.assertTrue(topics.contains("merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0"));
         Assertions.assertTrue(topics.contains("partitions         = 3"), "Staging override");
+        Assertions.assertTrue(topics.contains("coalesce(var.default_replication_factor, -1)") || topics.contains("replication_factor = 2"), "Template should support Terraform fallback or explicit value");
+        Assertions.assertTrue(topics.contains("merge(var.default_topic_config"), "Topic config should merge Terraform defaults with AsyncAPI config");
         Assertions.assertTrue(topics.contains(".__."),"Error topics use .__.  separator");
         Assertions.assertTrue(topics.contains("retry"));
         Assertions.assertTrue(topics.contains("dlq"));
         Assertions.assertTrue(topics.contains("retention.ms"), "Error topics should have config block");
         // No resources for external topics
         Assertions.assertFalse(topics.contains("replenish_stock"), "External channel must not appear in topics.tf");
+
+        String versions = Files.readString(Path.of(targetFolder + "/versions.tf"));
+        Assertions.assertTrue(versions.contains("variable \"default_partitions\""));
+        Assertions.assertTrue(versions.contains("variable \"default_replication_factor\""));
+        Assertions.assertTrue(versions.contains("variable \"default_topic_config\""));
 
         String schemas = Files.readString(Path.of(targetFolder + "/schemas.tf"));
         Assertions.assertTrue(schemas.contains("ReserveStockCommand-value"));
@@ -72,6 +79,21 @@ public class AsyncAPIOpsTerraformKafkaTest {
         Assertions.assertFalse(schemas.contains("replenish"), "External channel must not get a schema resource");
 
         Assertions.assertTrue(new File(targetFolder + "/acls.tf").exists());
+    }
+
+    @Test
+    public void test_missing_topic_settings_render_provider_aware_fallbacks() throws Exception {
+        String targetFolder = "target/out/test_provider_generation_with_missing_topic_settings";
+        new MainGenerator().generate(new AsyncAPIOpsGeneratorPlugin()
+                .withApiFile("classpath:defaulting/asyncapi-minimal.yml")
+                .withOption("templates", "TerraformKafka")
+                .withTargetFolder(targetFolder)
+                .withOption("skipFormatting", true));
+
+        String topics = Files.readString(Path.of(targetFolder + "/topics.tf"));
+        Assertions.assertTrue(topics.contains("partitions         = var.default_partitions"));
+        Assertions.assertTrue(topics.contains("replication_factor = coalesce(var.default_replication_factor, -1)"));
+        Assertions.assertTrue(topics.contains("config = length(var.default_topic_config) > 0 ? var.default_topic_config : null"));
     }
 
     @Test
