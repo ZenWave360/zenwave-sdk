@@ -1,0 +1,11 @@
+asyncapi: 3.0.0
+info:
+  title: Defaulting Sample
+  version: 1.0.0
+channels:
+  sample-topic:
+    address: sample.topic.v1
+    messages: {}
+    bindings:
+      kafka: {}
+operations: {}

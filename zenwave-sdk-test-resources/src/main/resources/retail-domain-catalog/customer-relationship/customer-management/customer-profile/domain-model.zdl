@@ -1,0 +1,58 @@
+/**
+ * Customer Profile Service Domain Model
+ * Maintains customer profiles and data
+ */
+config {
+    title "Customer Profile Service"
+    basePackage "com.retail.customer.management.profile"
+    persistence jpa
+    databaseType postgresql
+}
+
+/**
+ * Customer Profile aggregate
+ */
+@aggregate
+entity CustomerProfile {
+    firstName String required maxlength(100)
+    lastName String required maxlength(100)
+    email String required maxlength(254)
+    phoneNumber String maxlength(20)
+    registrationDate Instant required
+    status CustomerStatus required
+}
+
+enum CustomerStatus { ACTIVE, INACTIVE, SUSPENDED }
+
+/**
+ * Customer Profile Service
+ */
+service CustomerProfileService for (CustomerProfile) {
+    createProfile(CustomerProfile) CustomerProfile withEvents CustomerProfileCreated
+    updateProfile(CustomerProfile) CustomerProfile withEvents CustomerProfileUpdated
+}
+
+/**
+ * Customer Profile Created Event
+ */
+@asyncapi({ channel: "CustomerChannel", topic: "customer.profile-created" })
+event CustomerProfileCreated {
+    customerId String
+    firstName String
+    lastName String
+    email String
+    registrationDate Instant
+}
+
+/**
+ * Customer Profile Updated Event
+ */
+@asyncapi({ channel: "CustomerChannel", topic: "customer.profile-updated" })
+event CustomerProfileUpdated {
+    customerId String
+    email String
+    phoneNumber String
+    status CustomerStatus
+    updatedAt Instant
+}
+

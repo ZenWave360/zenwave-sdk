@@ -40,10 +40,12 @@
         <module>avro-schema-compiler</module>
         <module>asyncapi-spring-cloud-streams3</module>
         <module>asyncapi-generator</module>
+        <module>asyncapi-ops</module>
         <module>backend-application-default</module>
         <module>openapi-controllers</module>
         <module>openapi-spring-webtestclient</module>
         <module>openapi-karate</module>
+        <module>event-catalog-generator</module>
         <module>zenwave-mcp-server</module>
         <module>customizations</module>
     </modules>

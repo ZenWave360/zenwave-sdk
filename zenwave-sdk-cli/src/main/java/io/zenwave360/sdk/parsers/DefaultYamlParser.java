@@ -68,7 +68,7 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
         if(apiFile != null) {
             $RefParser parser = new $RefParser(apiFile)
                     .withResourceClassLoader(this.projectClassLoader)
-//                    .withAuthenticationValues(authentication)
+                    .withAuthenticationValues(authentication)
                     .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing(OnMissing.SKIP));
             model.put(targetProperty, new Model(apiFile, parser.parse().dereference().mergeAllOf().getRefs()));
         } else {

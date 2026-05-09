@@ -1,0 +1,91 @@
+components:
+  messageTraits:
+    kafkaTopicRecordNameStrategy:
+      bindings:
+        kafka:
+          schemaLookupStrategy: "TopicRecordNameStrategy" # `<topic_name>-<record_name>-value` y `<topic_name>-<record_name>-key`
+          x-normalize: true
+    kafkaBackwardCompatibility:
+      bindings:
+        kafka:
+          x-schemaCompatibility: "BACKWARD"
+    kafkaForwardCompatibility:
+      bindings:
+        kafka:
+          x-schemaCompatibility: "FORWARD"
+    kafkaKeyString:
+      bindings:
+        kafka:
+          key:
+            type: string
+
+  x-error-topics:
+    retry:
+      silver:
+        partitions: 1
+        replicas: 2
+        topicConfiguration:
+          retention.ms: 259200000       # 3 days
+        env-server-overrides:
+          dev:
+            replicas: 1
+            topicConfiguration:
+              retention.ms: 3600000     # 1 hour in dev
+      gold:
+        partitions: 3
+        replicas: 3
+        topicConfiguration:
+          retention.ms: 604800000       # 7 days
+        env-server-overrides:
+          dev:
+            partitions: 1
+            replicas: 1
+            topicConfiguration:
+              retention.ms: 3600000
+    dlq:
+      standard:
+        partitions: 1
+        replicas: 2
+        topicConfiguration:
+          retention.ms: 2592000000      # 30 days
+          cleanup.policy: ["delete"]
+        env-server-overrides:
+          dev:
+            replicas: 1
+            topicConfiguration:
+              retention.ms: 86400000    # 1 day in dev
+      compliance:
+        partitions: 1
+        replicas: 3
+        topicConfiguration:
+          retention.ms: 31536000000     # 1 year
+          cleanup.policy: ["delete"]
+        env-server-overrides:
+          dev:
+            replicas: 1
+            topicConfiguration:
+              retention.ms: 86400000
+          staging:
+            replicas: 2
+
+  channelBindings:
+    kafkaGold:
+      kafka:
+        partitions: 20
+        replicas: 3
+        topicConfiguration:
+          cleanup.policy: ["delete", "compact"]
+          retention.ms: 604800000
+          retention.bytes: 1000000000
+          delete.retention.ms: 86400000
+          max.message.bytes: 1048588
+        x-env-server-overrides:
+          dev:
+            partitions: 1
+            replicas: 1
+            topicConfiguration:
+              cleanup.policy: ["delete"]
+              retention.ms: 604800
+          staging:
+            partitions: 3
+            replicas: 2

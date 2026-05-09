@@ -1,0 +1,55 @@
+asyncapi: 3.0.0
+id: url:customer-relationship.customer-management.loyalty-management.client
+info:
+  title: Loyalty Management Topic Client
+  version: 1.0.0
+  description: This specification defines the topics consumed or invoked by the loyalty management service as a client.
+
+channels:
+  enroll-loyalty-member-command:
+    $ref: '../customer-profile/asyncapi.yml#/channels/enroll-loyalty-member-command'
+  enroll-loyalty-member-response:
+    $ref: '../customer-profile/asyncapi.yml#/channels/enroll-loyalty-member-response'
+  customer-profile-updated:
+    $ref: '../customer-profile/asyncapi.yml#/channels/customer-profile-updated'
+
+operations:
+  doEnrollLoyaltyMember:
+    action: send
+    channel:
+      $ref: '#/channels/enroll-loyalty-member-command'
+    bindings:
+      kafka:
+        x-principal: "customer-relationship.customer-management.loyalty-management"
+
+  onEnrollLoyaltyMemberResponse:
+    action: receive
+    channel:
+      $ref: '#/channels/enroll-loyalty-member-response'
+    bindings:
+      kafka:
+        x-principal: "customer-relationship.customer-management.loyalty-management"
+        x-groupId: "customer-relationship.customer-management.loyalty-management"
+        x-error-topics:
+          addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
+          retryTopics: 3
+          retry:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/retry/silver'
+          dlq:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/dlq/standard'
+
+  onCustomerProfileUpdatedEvent:
+    action: receive
+    channel:
+      $ref: '#/channels/customer-profile-updated'
+    bindings:
+      kafka:
+        x-principal: "customer-relationship.customer-management.loyalty-management.sys"
+        x-groupId: "customer-relationship.customer-management.loyalty-management.sys"
+        x-error-topics:
+          addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
+          retryTopics: 3
+          retry:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/retry/silver'
+          dlq:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/dlq/standard'

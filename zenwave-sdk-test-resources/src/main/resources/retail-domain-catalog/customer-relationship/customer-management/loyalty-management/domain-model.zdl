@@ -1,0 +1,60 @@
+/**
+ * Loyalty Management Service Domain Model
+ * Handles loyalty programs and points
+ */
+config {
+    title "Loyalty Management Service"
+    basePackage "com.retail.customer.management.loyalty"
+    persistence jpa
+    databaseType postgresql
+}
+
+/**
+ * Loyalty Account aggregate
+ */
+@aggregate
+entity LoyaltyAccount {
+    accountNumber String required maxlength(50)
+    customerId String required maxlength(50)
+    currentPoints Integer required
+    tierLevel LoyaltyTier required
+    memberSince Instant required
+    lastActivityDate Instant
+}
+
+enum LoyaltyTier { BRONZE, SILVER, GOLD, PLATINUM }
+
+/**
+ * Loyalty Management Service
+ */
+service LoyaltyManagementService for (LoyaltyAccount) {
+    awardPoints(id, LoyaltyAccount) LoyaltyAccount withEvents PointsAwarded
+    redeemPoints(id, LoyaltyAccount) LoyaltyAccount withEvents PointsRedeemed
+}
+
+/**
+ * Points Awarded Event
+ */
+@asyncapi({ channel: "LoyaltyChannel", topic: "loyalty.points-awarded" })
+event PointsAwarded {
+    accountNumber String
+    customerId String
+    pointsAwarded Integer
+    currentPoints Integer
+    awardedAt Instant
+    reason String
+}
+
+/**
+ * Points Redeemed Event
+ */
+@asyncapi({ channel: "LoyaltyChannel", topic: "loyalty.points-redeemed" })
+event PointsRedeemed {
+    accountNumber String
+    customerId String
+    pointsRedeemed Integer
+    remainingPoints Integer
+    redeemedAt Instant
+    redemptionType String
+}
+

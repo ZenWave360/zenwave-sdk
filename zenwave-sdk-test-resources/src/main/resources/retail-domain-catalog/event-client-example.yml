@@ -1,0 +1,28 @@
+# asyncapi-client.yml
+asyncapi: 3.0.0
+id: url:merchandising.inventory.stock-replenishment.client
+info:
+  title: Client for Stock Replenishment - Consumes Inventory Events
+  version: 1.0.0
+  description: This service consumes inventory adjusted events from the inventory adjustment service to drive replenishment workflows, with retry and DLQ configuration.
+
+channels:
+  inventory-adjusted:
+    $ref: 'event-provider-example.yml#/channels/inventory-adjusted'
+
+operations:
+  onInventoryAdjustedEvent:
+    action: receive
+    channel:
+      $ref: '#/channels/inventory-adjusted'
+    bindings:
+      kafka:
+        x-principal: "merchandising.inventory.stock-replenishment.sys"
+        x-groupId: "merchandising.inventory.stock-replenishment.sys"
+        x-error-topics:
+          addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
+          retryTopics: 3
+          retry:
+            $ref: 'master/kafka-bindings.yml#/components/x-error-topics/retry/silver'
+          dlq:
+            $ref: 'master/kafka-bindings.yml#/components/x-error-topics/dlq/standard'

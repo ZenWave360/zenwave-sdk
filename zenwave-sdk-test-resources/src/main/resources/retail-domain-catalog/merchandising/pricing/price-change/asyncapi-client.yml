@@ -1,0 +1,27 @@
+asyncapi: 3.0.0
+id: url:merchandising.pricing.price-change.client
+info:
+  title: Price Change Topic Client
+  version: 1.0.0
+  description: This specification defines the topics consumed or invoked by the price change service as a client.
+
+channels:
+  stock-replenished:
+    $ref: '../../inventory/stock-replenishment/asyncapi.yml#/channels/stock-replenished'
+
+operations:
+  onStockReplenishedEvent:
+    action: receive
+    channel:
+      $ref: '#/channels/stock-replenished'
+    bindings:
+      kafka:
+        x-principal: "merchandising.pricing.price-change.sys"
+        x-groupId: "merchandising.pricing.price-change.sys"
+        x-error-topics:
+          addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
+          retryTopics: 3
+          retry:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/retry/silver'
+          dlq:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/dlq/standard'

@@ -18,7 +18,7 @@
 		<spring-boot.version>${project.parent.version}</spring-boot.version>
 		<spring-cloud.version>2025.1.0</spring-cloud.version>
 
-		<zenwave.version>2.3.0-SNAPSHOT</zenwave.version>
+		<zenwave.version>2.5.0-SNAPSHOT</zenwave.version>
 
 		<jakarta.validation-api.version>3.1.1</jakarta.validation-api.version>
 		<mapstruct.version>1.6.3</mapstruct.version>

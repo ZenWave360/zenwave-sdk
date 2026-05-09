@@ -1,0 +1,28 @@
+{
+  "type": "record",
+  "name": "LoyaltyTierUpdated",
+  "namespace": "com.acme.customerrelationship.customermanagement.loyaltymanagement.events",
+  "doc": "Event emitted when a loyalty tier changes.",
+  "fields": [
+    { "name": "customerId", "type": "string" },
+    { "name": "loyaltyMemberId", "type": "string" },
+    {
+      "name": "previousTier",
+      "type": {
+        "type": "enum",
+        "name": "PreviousLoyaltyTier",
+        "symbols": ["BRONZE", "SILVER", "GOLD", "PLATINUM"]
+      }
+    },
+    {
+      "name": "newTier",
+      "type": {
+        "type": "enum",
+        "name": "NewLoyaltyTier",
+        "symbols": ["BRONZE", "SILVER", "GOLD", "PLATINUM"]
+      }
+    },
+    { "name": "updatedAt", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "correlationId", "type": ["null", "string"], "default": null }
+  ]
+}

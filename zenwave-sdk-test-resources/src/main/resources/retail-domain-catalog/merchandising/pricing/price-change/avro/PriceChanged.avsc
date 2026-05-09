@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "PriceChanged",
+  "namespace": "com.acme.merchandising.pricing.pricechange.events",
+  "doc": "Event emitted when a product price changes.",
+  "fields": [
+    { "name": "productId", "type": "string" },
+    { "name": "previousPrice", "type": "double" },
+    { "name": "newPrice", "type": "double" },
+    { "name": "currency", "type": "string" },
+    { "name": "effectiveAt", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "correlationId", "type": ["null", "string"], "default": null }
+  ]
+}

@@ -1,0 +1,15 @@
+# Generated from asyncapi.yml{{#if intent.server}} for environment: {{intent.server}}{{/if}}
+# Command: jbang zw -p AsyncAPIToTerraform{{#if intent.server}} server={{intent.server}}{{/if}}
+
+{{#each intent.acls as |acl|}}
+resource "confluent_kafka_acl" "{{acl.resourceName}}" {
+  resource_type = "TOPIC"
+  resource_name = "{{acl.topicName}}"
+  pattern_type  = "LITERAL"
+  principal     = "{{acl.principal}}"
+  host          = "*"
+  operation     = "{{upper acl.operation}}"
+  permission    = "{{upper acl.permissionType}}"
+}
+
+{{/each}}

@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "RecalculatePriceCommand",
+  "namespace": "com.acme.merchandising.pricing.pricechange.commands",
+  "doc": "Command requesting price recalculation for a product.",
+  "fields": [
+    { "name": "priceCalculationId", "type": "string" },
+    { "name": "productId", "type": "string" },
+    { "name": "market", "type": "string" },
+    { "name": "currency", "type": "string" },
+    { "name": "requestedAt", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "correlationId", "type": ["null", "string"], "default": null }
+  ]
+}

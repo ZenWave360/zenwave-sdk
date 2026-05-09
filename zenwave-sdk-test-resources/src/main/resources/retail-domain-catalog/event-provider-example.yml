@@ -1,0 +1,65 @@
+asyncapi: 3.0.0
+id: url:merchandising.inventory.inventory-adjustment
+info:
+  title: Provider for Inventory Events
+  version: 1.0.0
+  description: This example shows how to publish an ecommerce inventory domain event for downstream services such as replenishment and pricing.
+
+servers:
+  dev:
+    host: kafka-dev.example.com
+    protocol: kafka
+  staging:
+    host: kafka-staging.example.com
+    protocol: kafka
+  production:
+    host: kafka-production.example.com
+    protocol: kafka
+
+
+channels:
+  inventory-adjusted:
+    address: merchandising.inventory.inventory-adjustment.inventory-adjusted.event.avro.area.v0
+    summary: Inventory Adjusted Event
+    description: This channel informs that inventory was adjusted for a product at a specific location, and is a domain event of interest for other services.
+    messages:
+      InventoryAdjustedEvent:
+        payload:
+          schemaFormat: 'application/vnd.apache.avro+json;version=1.9.0'
+          schema:
+            $ref: './avro/InventoryAdjusted.avsc'
+        traits:
+          - $ref: 'master/kafka-bindings.yml#/components/messageTraits/kafkaKeyString'
+          - $ref: 'master/kafka-bindings.yml#/components/messageTraits/kafkaTopicRecordNameStrategy'
+          - $ref: 'master/kafka-bindings.yml#/components/messageTraits/kafkaForwardCompatibility'
+    bindings:
+      $ref: 'master/kafka-bindings.yml#/components/channelBindings/kafkaGold'
+
+operations:
+  onInventoryAdjustedEvent:
+    action: send
+    channel:
+      $ref: '#/channels/inventory-adjusted'
+    traits:
+      - $ref: '#/components/operationTraits/kafkaPrincipal'
+      - $ref: '#/components/operationTraits/kafkaClientId'
+
+
+components:
+  operationTraits:
+    kafkaPrincipal:
+      bindings:
+        kafka:
+          x-principal: "merchandising.inventory.inventory-adjustment"
+    kafkaClientId:
+      bindings:
+        kafka:
+          clientId:
+            type: "string"
+            enum: ["merchandising.inventory.inventory-adjustment"]
+    kafkaConsumerGroup:
+      bindings:
+        kafka:
+          groupId:
+            type: "string"
+            enum: ["merchandising.inventory.inventory-adjustment"]

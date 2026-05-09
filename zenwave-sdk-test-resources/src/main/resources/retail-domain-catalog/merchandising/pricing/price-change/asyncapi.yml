@@ -1,0 +1,121 @@
+asyncapi: 3.0.0
+id: url:merchandising.pricing.price-change
+info:
+  title: Price Change Topic Provider
+  version: 1.0.0
+  description: This specification defines the topics provided by the price change service from the provider point of view.
+
+servers:
+  dev:
+    host: kafka-dev.example.com
+    protocol: kafka
+  staging:
+    host: kafka-staging.example.com
+    protocol: kafka
+  production:
+    host: kafka-production.example.com
+    protocol: kafka
+
+channels:
+  recalculate-price-command:
+    address: merchandising.pricing.price-change.recalculate-price.command.avro.v0
+    summary: Recalculate Price Command
+    description: This channel is used to request price recalculation for a product or assortment.
+    messages:
+      RecalculatePriceCommand:
+        payload:
+          schemaFormat: 'application/vnd.apache.avro+json;version=1.9.0'
+          schema:
+            $ref: './avro/RecalculatePriceCommand.avsc'
+        traits:
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaKeyString'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaTopicRecordNameStrategy'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaBackwardCompatibility'
+    bindings:
+      $ref: '../../../master/kafka-bindings.yml#/components/channelBindings/kafkaGold'
+
+  recalculate-price-response:
+    address: merchandising.pricing.price-change.recalculate-price.response.avro.v0
+    summary: Recalculate Price Response
+    description: This channel informs the result of a price recalculation request.
+    messages:
+      RecalculatePriceResponse:
+        payload:
+          schemaFormat: 'application/vnd.apache.avro+json;version=1.9.0'
+          schema:
+            $ref: './avro/RecalculatePriceResponse.avsc'
+        traits:
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaKeyString'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaTopicRecordNameStrategy'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaForwardCompatibility'
+    bindings:
+      $ref: '../../../master/kafka-bindings.yml#/components/channelBindings/kafkaGold'
+
+  price-changed:
+    address: merchandising.pricing.price-change.price-changed.event.avro.v0
+    summary: Price Changed Event
+    description: This channel informs that a price change has been published for a product or assortment.
+    messages:
+      PriceChangedEvent:
+        payload:
+          schemaFormat: 'application/vnd.apache.avro+json;version=1.9.0'
+          schema:
+            $ref: './avro/PriceChanged.avsc'
+        traits:
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaKeyString'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaTopicRecordNameStrategy'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaForwardCompatibility'
+    bindings:
+      $ref: '../../../master/kafka-bindings.yml#/components/channelBindings/kafkaGold'
+
+operations:
+  doRecalculatePriceCommand:
+    action: receive
+    channel:
+      $ref: '#/channels/recalculate-price-command'
+    bindings:
+      kafka:
+        x-principal: "merchandising.pricing.price-change"
+        x-groupId: "merchandising.pricing.price-change"
+        x-error-topics:
+          addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
+          retryTopics: 3
+          retry:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/retry/silver'
+          dlq:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/dlq/standard'
+
+  onRecalculatePriceResponse:
+    action: send
+    channel:
+      $ref: '#/channels/recalculate-price-response'
+    traits:
+      - $ref: '#/components/operationTraits/kafkaPrincipal'
+      - $ref: '#/components/operationTraits/kafkaClientId'
+
+  onPriceChangedEvent:
+    action: send
+    channel:
+      $ref: '#/channels/price-changed'
+    traits:
+      - $ref: '#/components/operationTraits/kafkaPrincipal'
+      - $ref: '#/components/operationTraits/kafkaClientId'
+
+components:
+  operationTraits:
+    kafkaPrincipal:
+      bindings:
+        kafka:
+          x-principal: "merchandising.pricing.price-change"
+    kafkaClientId:
+      bindings:
+        kafka:
+          clientId:
+            type: "string"
+            enum: ["merchandising.pricing.price-change"]
+    kafkaConsumerGroup:
+      bindings:
+        kafka:
+          groupId:
+            type: "string"
+            enum: ["merchandising.pricing.price-change"]

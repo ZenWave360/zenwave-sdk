@@ -1,0 +1,47 @@
+intent:
+  metadata:
+    source_ref: release/v1.3.0
+    asyncapi_checksum: sha256:9b7e2a...
+    generated_at: 2026-01-20T09:15:00Z
+
+kafka:
+  topics:
+    - name: orders
+      partitions: 6
+      configs:
+        cleanup.policy: compact
+        retention.ms: 604800000
+
+      access:
+        producers:
+          - orders-service
+        consumers:
+          - billing-service
+          - analytics-service
+
+    - name: payments
+      partitions: 3
+      configs:
+        cleanup.policy: delete
+
+      access:
+        producers:
+          - payments-service
+        consumers:
+          - orders-service
+
+schema_registry:
+  subjects:
+    - subject: orders-value
+      schema_type: avro
+      compatibility: BACKWARD
+      schema_ref:
+        file: avro/order-created.avsc
+        checksum: sha256:3f1a8c...
+
+    - subject: payments-value
+      schema_type: avro
+      compatibility: BACKWARD
+      schema_ref:
+        file: avro/payment-created.avsc
+        checksum: sha256:7a91de...

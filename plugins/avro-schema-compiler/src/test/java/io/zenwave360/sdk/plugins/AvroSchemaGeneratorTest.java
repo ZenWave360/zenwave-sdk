@@ -35,11 +35,11 @@ public class AvroSchemaGeneratorTest {
                 "src/test/resources/avros/shopping-cart/Item.avsc"
         );
         // Set AVRO_VERSION using reflection since it's private final
-        var avroVersionField = AvroSchemaGenerator.class.getDeclaredField("AVRO_VERSION");
+        var avroVersionField = AvroSchemaLoader.class.getDeclaredField("AVRO_VERSION");
         avroVersionField.setAccessible(true);
         avroVersionField.set(null, "1.11.0");
         var schemas = loader.parse();
-        var sorted = new AvroSchemaGenerator().sortSchemas((List) schemas.get(AvroSchemaLoader.AVRO_SCHEMAS_LIST));
+        var sorted = new AvroSchemaLoader().sortSchemas((List) schemas.get(AvroSchemaLoader.AVRO_SCHEMAS_LIST));
         Assertions.assertEquals("Item", ((Map) sorted.get(1)).get("name"));
         Assertions.assertEquals("ShoppingCart", ((Map) sorted.get(2)).get("name"));
     }

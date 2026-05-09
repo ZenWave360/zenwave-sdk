@@ -1,0 +1,121 @@
+asyncapi: 3.0.0
+id: url:customer-relationship.customer-management.customer-profile
+info:
+  title: Customer Profile Topic Provider
+  version: 1.0.0
+  description: This specification defines the topics provided by the customer profile service from the provider point of view.
+
+servers:
+  dev:
+    host: kafka-dev.example.com
+    protocol: kafka
+  staging:
+    host: kafka-staging.example.com
+    protocol: kafka
+  production:
+    host: kafka-production.example.com
+    protocol: kafka
+
+channels:
+  enroll-loyalty-member-command:
+    address: customer-relationship.customer-management.customer-profile.enroll-loyalty-member.command.avro.v0
+    summary: Enroll Loyalty Member Command
+    description: This channel is used to request enrollment of a customer into the loyalty program.
+    messages:
+      EnrollLoyaltyMemberCommand:
+        payload:
+          schemaFormat: 'application/vnd.apache.avro+json;version=1.9.0'
+          schema:
+            $ref: './avro/EnrollLoyaltyMemberCommand.avsc'
+        traits:
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaKeyString'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaTopicRecordNameStrategy'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaBackwardCompatibility'
+    bindings:
+      $ref: '../../../master/kafka-bindings.yml#/components/channelBindings/kafkaGold'
+
+  enroll-loyalty-member-response:
+    address: customer-relationship.customer-management.customer-profile.enroll-loyalty-member.response.avro.v0
+    summary: Enroll Loyalty Member Response
+    description: This channel informs the result of a loyalty member enrollment request.
+    messages:
+      EnrollLoyaltyMemberResponse:
+        payload:
+          schemaFormat: 'application/vnd.apache.avro+json;version=1.9.0'
+          schema:
+            $ref: './avro/EnrollLoyaltyMemberResponse.avsc'
+        traits:
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaKeyString'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaTopicRecordNameStrategy'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaForwardCompatibility'
+    bindings:
+      $ref: '../../../master/kafka-bindings.yml#/components/channelBindings/kafkaGold'
+
+  customer-profile-updated:
+    address: customer-relationship.customer-management.customer-profile.customer-profile-updated.event.avro.v0
+    summary: Customer Profile Updated Event
+    description: This channel informs that a customer profile was updated and can be consumed by downstream services.
+    messages:
+      CustomerProfileUpdatedEvent:
+        payload:
+          schemaFormat: 'application/vnd.apache.avro+json;version=1.9.0'
+          schema:
+            $ref: './avro/CustomerProfileUpdated.avsc'
+        traits:
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaKeyString'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaTopicRecordNameStrategy'
+          - $ref: '../../../master/kafka-bindings.yml#/components/messageTraits/kafkaForwardCompatibility'
+    bindings:
+      $ref: '../../../master/kafka-bindings.yml#/components/channelBindings/kafkaGold'
+
+operations:
+  doEnrollLoyaltyMemberCommand:
+    action: receive
+    channel:
+      $ref: '#/channels/enroll-loyalty-member-command'
+    bindings:
+      kafka:
+        x-principal: "customer-relationship.customer-management.customer-profile"
+        x-groupId: "customer-relationship.customer-management.customer-profile"
+        x-error-topics:
+          addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
+          retryTopics: 3
+          retry:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/retry/silver'
+          dlq:
+            $ref: '../../../master/kafka-bindings.yml#/components/x-error-topics/dlq/standard'
+
+  onEnrollLoyaltyMemberResponse:
+    action: send
+    channel:
+      $ref: '#/channels/enroll-loyalty-member-response'
+    traits:
+      - $ref: '#/components/operationTraits/kafkaPrincipal'
+      - $ref: '#/components/operationTraits/kafkaClientId'
+
+  onCustomerProfileUpdatedEvent:
+    action: send
+    channel:
+      $ref: '#/channels/customer-profile-updated'
+    traits:
+      - $ref: '#/components/operationTraits/kafkaPrincipal'
+      - $ref: '#/components/operationTraits/kafkaClientId'
+
+components:
+  operationTraits:
+    kafkaPrincipal:
+      bindings:
+        kafka:
+          x-principal: "customer-relationship.customer-management.customer-profile"
+    kafkaClientId:
+      bindings:
+        kafka:
+          clientId:
+            type: "string"
+            enum: ["customer-relationship.customer-management.customer-profile"]
+    kafkaConsumerGroup:
+      bindings:
+        kafka:
+          groupId:
+            type: "string"
+            enum: ["customer-relationship.customer-management.customer-profile"]

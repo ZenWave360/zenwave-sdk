@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "RefreshCustomerTierCommand",
+  "namespace": "com.acme.customerrelationship.customermanagement.loyaltymanagement.commands",
+  "doc": "Command requesting loyalty tier recalculation.",
+  "fields": [
+    { "name": "customerId", "type": "string" },
+    { "name": "loyaltyMemberId", "type": "string" },
+    { "name": "evaluationPeriod", "type": "string" },
+    { "name": "requestedBy", "type": "string" },
+    { "name": "requestedAt", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "correlationId", "type": ["null", "string"], "default": null }
+  ]
+}

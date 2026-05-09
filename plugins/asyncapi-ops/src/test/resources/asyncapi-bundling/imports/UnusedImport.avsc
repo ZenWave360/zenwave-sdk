@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "UnusedImport",
+  "namespace": "io.example.asyncapi.shoppingcart.events.avro",
+  "fields": [
+    {
+      "name": "value",
+      "type": "string"
+    }
+  ]
+}

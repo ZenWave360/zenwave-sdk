@@ -1,0 +1,32 @@
+# Generated from asyncapi.yml{{#if intent.server}} for environment: {{intent.server}}{{/if}}
+# Command: jbang zw -p AsyncAPIToTerraform{{#if intent.server}} server={{intent.server}}{{/if}}
+
+{{~#each intent.topics as |topic|}}
+resource "kafka_topic" "{{topic.resourceName}}" {
+  name               = "{{topic.topicName}}"
+{{~#if topic.replicationFactor}}
+  replication_factor = {{topic.replicationFactor}}
+{{~else}}
+  replication_factor = coalesce(var.default_replication_factor, -1)
+{{~/if}}
+{{~#if topic.partitions}}
+  partitions         = {{topic.partitions}}
+{{~else}}
+  partitions         = var.default_partitions
+{{~/if}}
+{{~#if topic.config}}
+  config = length(merge(var.default_topic_config, {
+{{~#each topic.config as |value key|}}
+    "{{key}}" = "{{value}}"
+{{~/each}}
+  })) > 0 ? merge(var.default_topic_config, {
+{{~#each topic.config as |value key|}}
+    "{{key}}" = "{{value}}"
+{{~/each}}
+  }) : null
+{{~else}}
+  config = length(var.default_topic_config) > 0 ? var.default_topic_config : null
+{{~/if}}
+}
+
+{{~/each}}

@@ -1,0 +1,23 @@
+{
+  "type": "record",
+  "name": "ReserveStockResponse",
+  "namespace": "com.acme.merchandising.inventory.inventoryadjustment.responses",
+  "doc": "Response for a reserve stock command.",
+  "fields": [
+    { "name": "reservationId", "type": "string" },
+    { "name": "orderId", "type": "string" },
+    { "name": "success", "type": "boolean" },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "ReserveStockStatus",
+        "symbols": ["RESERVED", "PARTIALLY_RESERVED", "REJECTED", "FAILED"]
+      }
+    },
+    { "name": "reservedQuantity", "type": ["null", "int"], "default": null },
+    { "name": "message", "type": ["null", "string"], "default": null },
+    { "name": "processedAt", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "correlationId", "type": ["null", "string"], "default": null }
+  ]
+}

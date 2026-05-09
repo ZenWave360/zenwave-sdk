@@ -36,6 +36,12 @@
         </dependency>
         <dependency>
             <groupId>io.zenwave360.sdk.plugins</groupId>
+            <artifactId>asyncapi-ops</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.zenwave360.sdk.plugins</groupId>
             <artifactId>zdl-to-asyncapi</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>

@@ -1,0 +1,21 @@
+{
+  "type": "record",
+  "name": "CustomerProfileUpdated",
+  "namespace": "com.acme.customerrelationship.customermanagement.customerprofile.events",
+  "doc": "Event emitted when a customer profile changes.",
+  "fields": [
+    { "name": "customerId", "type": "string" },
+    { "name": "email", "type": ["null", "string"], "default": null },
+    { "name": "phoneNumber", "type": ["null", "string"], "default": null },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "CustomerProfileStatus",
+        "symbols": ["ACTIVE", "INACTIVE", "SUSPENDED"]
+      }
+    },
+    { "name": "updatedAt", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "correlationId", "type": ["null", "string"], "default": null }
+  ]
+}

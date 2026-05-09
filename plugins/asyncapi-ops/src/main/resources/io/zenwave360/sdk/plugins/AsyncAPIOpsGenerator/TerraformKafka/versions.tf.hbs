@@ -1,0 +1,32 @@
+terraform {
+  required_providers {
+    # Include only providers needed for your environments
+    kafka = {
+      source  = "Mongey/kafka"
+      version = "~> 0.13"
+    }
+
+    schemaregistry = {
+      source  = "cultureamp/schemaregistry"
+      version = "~> 1.5"
+    }
+  }
+}
+
+variable "default_partitions" {
+  type        = number
+  default     = null
+  description = "Default partition count for topics that omit partitions in AsyncAPI. Required by the Mongey/kafka provider when a generated topic does not define partitions explicitly."
+}
+
+variable "default_replication_factor" {
+  type        = number
+  default     = null
+  description = "Default replication factor for topics that omit replicas in AsyncAPI. If null, the generator delegates to the broker default by emitting -1 for the Mongey/kafka provider."
+}
+
+variable "default_topic_config" {
+  type        = map(string)
+  default     = {}
+  description = "Default topic configuration applied to topics that omit topicConfiguration in AsyncAPI. AsyncAPI values override individual keys."
+}
