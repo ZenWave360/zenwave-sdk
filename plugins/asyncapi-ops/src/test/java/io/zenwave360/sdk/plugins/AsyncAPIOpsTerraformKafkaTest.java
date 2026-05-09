@@ -58,6 +58,7 @@ public class AsyncAPIOpsTerraformKafkaTest {
         String acls = Files.readString(Path.of(targetFolder + "/acls.tf"));
         Assertions.assertTrue(acls.contains("User:merchandising.inventory.inventory-adjustment"));
         Assertions.assertTrue(acls.contains("Read") && acls.contains("Write"));
+        Assertions.assertTrue(acls.contains("Describe"));
     }
 
     @Test

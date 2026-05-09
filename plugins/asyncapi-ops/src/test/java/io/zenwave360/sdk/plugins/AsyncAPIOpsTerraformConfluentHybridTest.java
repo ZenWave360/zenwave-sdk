@@ -47,6 +47,7 @@ public class AsyncAPIOpsTerraformConfluentHybridTest {
         Assertions.assertTrue(acls.contains("resource \"confluent_kafka_acl\""));
         Assertions.assertTrue(acls.contains("operation     = \"READ\""));
         Assertions.assertTrue(acls.contains("operation     = \"WRITE\""));
+        Assertions.assertTrue(acls.contains("operation     = \"DESCRIBE\""));
         Assertions.assertTrue(acls.contains("permission    = \"ALLOW\""));
     }
 

@@ -71,6 +71,7 @@ public class TestAsyncAPIOpsTerraformKafkaE2E {
             Assertions.assertTrue(stateList.output.contains("kafka_topic."));
             Assertions.assertTrue(stateList.output.contains("schemaregistry_schema."));
             Assertions.assertTrue(stateList.output.contains("kafka_acl."));
+            Assertions.assertTrue(stateList.output.contains("Describe"));
 
             CommandResult topicList = runCommand(targetDirectory, Duration.ofMinutes(2),
                     dockerCompose("exec", "-T", "kafka", "kafka-topics", "--bootstrap-server", "kafka:29092", "--list"));
@@ -78,6 +79,10 @@ public class TestAsyncAPIOpsTerraformKafkaE2E {
 
             String subjects = httpGet("http://localhost:8081/subjects");
             Assertions.assertTrue(subjects.contains("ReserveStockCommand-value"));
+
+            String acls = Files.readString(Path.of(terraformFolder, "acls.tf"));
+            Assertions.assertTrue(acls.contains("acl_operation       = \"Describe\""));
+            Assertions.assertTrue(acls.contains("acl_operation       = \"Write\""));
         } finally {
             if (terraformInitialized) {
                 try {

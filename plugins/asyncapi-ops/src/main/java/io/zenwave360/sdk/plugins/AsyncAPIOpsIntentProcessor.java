@@ -202,13 +202,14 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
 
         boolean isSend = "send".equals(action);
 
-        // ACL for the main topic
-        AsyncAPIOpsIntent.AclIntent acl = new AsyncAPIOpsIntent.AclIntent();
-        acl.topicName = topicAddress;
-        acl.principal = "User:" + principal;
-        acl.operation = isSend ? "Write" : "Read";
-        acl.resourceName = toTerraformId(topicAddress + "_User_" + principal + "_" + acl.operation);
-        intent.addAcl(acl);
+        // ACLs for the main topic
+        if (isSend) {
+            addTopicAcl(topicAddress, principal, "Write", intent);
+            addTopicAcl(topicAddress, principal, "Describe", intent);
+        } else {
+            addTopicAcl(topicAddress, principal, "Read", intent);
+            addTopicAcl(topicAddress, principal, "Describe", intent);
+        }
 
         // Error topics for receive operations
         if (!isSend) {
@@ -256,11 +257,17 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
     }
 
     private void addErrorTopicAcl(String topicName, String principal, AsyncAPIOpsIntent intent) {
+        addTopicAcl(topicName, principal, "Read", intent);
+        addTopicAcl(topicName, principal, "Write", intent);
+        addTopicAcl(topicName, principal, "Describe", intent);
+    }
+
+    private void addTopicAcl(String topicName, String principal, String operation, AsyncAPIOpsIntent intent) {
         AsyncAPIOpsIntent.AclIntent acl = new AsyncAPIOpsIntent.AclIntent();
         acl.topicName = topicName;
         acl.principal = "User:" + principal;
-        acl.operation = "Read";
-        acl.resourceName = toTerraformId(topicName + "_User_" + principal + "_Read");
+        acl.operation = operation;
+        acl.resourceName = toTerraformId(topicName + "_User_" + principal + "_" + operation);
         intent.addAcl(acl);
     }
 

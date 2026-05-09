@@ -1,8 +1,8 @@
 # AsyncAPI to Terraform Generator
 
-![lifecycle: lab](https://img.shields.io/badge/lifecycle-lab-blueviolet)
+![lifecycle: beta](https://img.shields.io/badge/lifecycle-beta-red)
 
-> Lab lifecycle: A proof of concept. Built to showcase what's possible, not for production use. Fork it, learn from it, build on it.
+> Beta lifecycle: Feature-complete enough for early adopters and real testing, but still evolving. Expect changes, validate in your environment, and use with care in production.
 
 Generates Terraform HCL to provision Kafka platform resources: topics, Schema Registry subjects, and ACLs from AsyncAPI specs.
 
@@ -65,6 +65,17 @@ jbang zw -p AsyncAPIOpsGeneratorPlugin \
   targetFolder=terraform/inventory-adjustment
 ```
 
+## Testing Setups
+
+This plugin has been tested in the following setups:
+
+- **Confluent Provider**
+    - Service repository: [arcadia-editions/catalog-products-api](https://github.com/arcadia-editions/catalog-products-api)
+    - Reusable Terraform/pipeline repository: [arcadia-editions/asyncapi-ops-pipelines](https://github.com/arcadia-editions/asyncapi-ops-pipelines)
+- **Kafka OSS**
+    - End-to-end test: [TestAsyncAPIOpsTerraformKafkaE2E.java](https://github.com/ZenWave360/zenwave-sdk/blob/main/e2e/src/test/java/io/zenwave360/sdk/e2e/TestAsyncAPIOpsTerraformKafkaE2E.java)
+
+
 ## Configuration options
 
 | **Option**       | **Description**                                                                                                                                                              | **Type** | **Default**      | **Values**                    |
@@ -94,7 +105,7 @@ Schema files are generated inside the Terraform module and referenced with `${pa
 When multiple AsyncAPI specs are passed together, bundled schemas are namespaced by the sanitized spec basename:
 
 - `asyncapi.yml` → `asyncapi/avro/...`
-- `asyncapi client.yml` → `asyncapi_client/avro/...`
+- `asyncapi_client.yml` → `asyncapi_client/avro/...`
 
 Terraform resource names are derived from the full Kafka topic address (dots and dashes → underscores), guaranteeing global uniqueness in multi-service modules:
 
@@ -110,21 +121,52 @@ resource "kafka_topic" "merchandising_inventory_inventory_adjustment_reserve_sto
 }
 ```
 
-## How ownership works
+## Available Templates: Terraform Provider Targets
 
-You can pass multiple AsyncAPI files through the same `apiFiles` parameter. The generator determines ownership automatically:
+The plugin currently supports three Terraform template targets:
 
-- **Owned channel**: declared inline with an `address` field → provisioned as `kafka_topic` + `schemaregistry_schema`
-- **External channel**: a `$ref` to another service's file → contributes ACLs and error topics only, no `kafka_topic` or schema resource
+- `TerraformKafka`
+  - Uses the OSS providers `Mongey/kafka` for topics and ACLs, and `cultureamp/schemaregistry` for schemas.
+  - Best suited for Kafka deployments where topic and ACL management goes through the Kafka provider directly.
+  - Supports explicit replication factor management.
+- `TerraformConfluent`
+  - Uses `confluentinc/confluent` for Kafka topics, ACLs, and Schema Registry resources.
+  - Best suited for Confluent Cloud setups where Kafka and Schema Registry are managed through the Confluent provider.
+  - Replication factor is not configurable through `confluent_kafka_topic`; partition fallback behavior is provider-specific.
+- `TerraformConfluentHybrid`
+  - Uses `confluentinc/confluent` for Kafka topics and ACLs, and `cultureamp/schemaregistry` for Schema Registry resources.
+  - Best suited for environments that manage Kafka through Confluent but keep schema operations on the standalone Schema Registry provider.
+
+Template selection is controlled with the `templates` option:
+
+```shell
+jbang zw -p AsyncAPIOpsGeneratorPlugin \
+  apiFile=asyncapi.yml \
+  templates=TerraformConfluent \
+  targetFolder=terraform/out
+```
+
+Choose the template based on the Terraform provider contract you need to integrate with, not just on the Kafka platform brand. Topic defaulting behavior differs across providers and is described in the [Topic Configuration Defaults](#topic-configuration-defaults) section.
+
+## How Topic Ownership Works
+
+AsyncAPI has a natural mirror symmetry: the same channel can be modeled from the sender's point of view or the receiver's. This generator uses that symmetry to decide what to provision.
+
+The rule is simple: pass multiple AsyncAPI files through `apiFiles` and the generator figures out ownership automatically.
+
+- **Owned channel** — declared inline with an `address` field → provisions `kafka_topic` + `schemaregistry_schema`
+- **External channel** — a `$ref` to another service's spec → contributes ACLs only, no topic or schema resource
 
 ```yaml
-# asyncapi-client.yml — all channels are external ($ref to provider specs)
+# asyncapi-client.yml — all channels are external refs
 channels:
   replenish-stock-command:
     $ref: '../stock-replenishment/asyncapi.yml#/channels/replenish-stock-command'
 ```
 
-This means you run the generator once per service, passing both that service's provider spec and its client spec, and the right resources are generated automatically.
+ACLs follow the operation direction: `send` gets WRITE + DESCRIBE, `receive` gets READ + DESCRIBE. Every operation gets ACLs regardless of ownership.
+
+Run it once per service, passing both the provider spec and the client spec. The right resources come out the other side.
 
 ## AsyncAPI extensions used
 
@@ -255,43 +297,24 @@ x-error-topics:
     $ref: 'master/kafka-bindings.yml#/components/x-error-topics/dlq/compliance'
 ```
 
-## Defaulting contract
+## Topic Configuration Defaults
 
-This generator follows a strict defaulting contract for Kafka topic settings:
+Kafka topic settings: partitions, replication factor, and topic configuration, can be defined at three levels. This section explains how the generator resolves them and what ends up in the generated Terraform.
 
-- Keep `topicConfiguration` optional in AsyncAPI.
-- Keep `partitions` and `replicas` optional in AsyncAPI.
-- Do not force hardcoded defaults such as `partitions = 1` or `replicas = 1` when the spec omits them.
-- Allow platform-wide defaults to be supplied through Terraform variables.
-- Apply provider or broker defaults only when the target Terraform provider actually supports that fallback.
+The precedence order is:
 
-The primary contract is:
+**AsyncAPI value → Terraform variable → provider or broker default**
 
-**AsyncAPI > tfvars > provider-specific fallback**
+1. An explicit value in the AsyncAPI spec is always used as-is.
+2. A per-environment override from `x-env-server-overrides` / `env-server-overrides` is applied on top of the AsyncAPI value before rendering.
+3. If the AsyncAPI spec omits a setting, the generator renders the corresponding Terraform variable (`var.default_partitions`, `var.default_replication_factor`, `var.default_topic_config`).
+4. If the Terraform variable is also unset (`null`), the target provider applies its own default, or the Kafka broker applies its cluster-wide default.
 
-That means:
+This separation keeps individual specs clean. Topics that need specific sizing say so. Topics that rely on platform standards stay silent and inherit from Terraform variables set in the CI/CD pipeline.
 
-1. Explicit AsyncAPI value
-2. Environment-specific AsyncAPI override from `x-env-server-overrides` / `env-server-overrides`
-3. Terraform module default variable
-4. Provider-specific fallback behavior
+### Terraform Variables
 
-This is the intended separation of responsibilities:
-
-- AsyncAPI defines intentional per-topic behavior.
-- Terraform variables define deployment-time platform defaults.
-- The target Terraform provider determines what happens when neither contract layer sets a value.
-
-### Why this model
-
-- Requiring every topic to define `topicConfiguration` is too rigid for general-purpose open source usage and makes simple specs unnecessarily verbose.
-- Hardcoding `1` for omitted sizing values is the wrong default because it overrides infrastructure policy with a value that is often not appropriate for production.
-- Terraform variables let teams standardize defaults in CI/CD pipelines without repeating the same values in every AsyncAPI file.
-- Leaving unresolved settings unset preserves compatibility with managed Kafka platforms and existing infrastructure policies.
-
-### Recommended Terraform contract
-
-The generator should emit Terraform variables such as:
+The generator emits the following variables in the module so teams can supply platform-wide defaults without touching individual AsyncAPI files:
 
 ```hcl
 variable "default_partitions" {
@@ -310,84 +333,42 @@ variable "default_topic_config" {
 }
 ```
 
-### Provider-specific behavior
+Set these in a `terraform.tfvars` file or pass them through your CI/CD pipeline. Topics that specify values in AsyncAPI will override these variables for that specific resource.
 
-The exact fallback behavior depends on the selected template provider.
-
-#### `TerraformKafka` (`Mongey/kafka`)
-
-- `partitions` is required by the provider.
-- If AsyncAPI omits `partitions`, the generator renders `var.default_partitions`.
-- If neither AsyncAPI nor `var.default_partitions` provides a value, Terraform fails and the user must set `default_partitions`.
-- `replication_factor` is required by the provider, but the provider accepts `-1`.
-- If AsyncAPI omits `replicas`, the generator renders `coalesce(var.default_replication_factor, -1)`.
-- That means replication follows `AsyncAPI > tfvars > broker default`.
-- `config` follows `AsyncAPI > tfvars > broker default`.
-
-#### `TerraformConfluent` and `TerraformConfluentHybrid` (`confluentinc/confluent`)
-
-- `partitions_count` is optional in the provider and the provider applies its own default when the value is effectively unset.
-- If AsyncAPI omits `partitions`, the generator renders `var.default_partitions`.
-- If `var.default_partitions` is `null`, Terraform treats the argument as unset and the provider default applies.
-- Replication factor is not configurable through `confluent_kafka_topic`, so no Terraform variable is generated for it in these templates.
-- `config` follows `AsyncAPI > tfvars > provider/broker default`.
-
-### Generated topic rules
-
-- If AsyncAPI provides `partitions`, render that explicit value.
-- Otherwise, render `var.default_partitions` for the selected provider template.
-- If AsyncAPI provides `replicas`, render that explicit value.
-- Otherwise, use provider-specific fallback behavior:
-  - `TerraformKafka`: `coalesce(var.default_replication_factor, -1)`
-  - `TerraformConfluent*`: not applicable
-- If AsyncAPI provides `topicConfiguration`, merge it on top of `var.default_topic_config`.
-- If AsyncAPI does not provide `topicConfiguration`, use `var.default_topic_config`.
-- If the resulting config map is empty, render `null` so the provider treats the setting as unset.
-
-For config maps, the recommended merge precedence is:
+For topic configuration maps, the generator merges AsyncAPI values on top of the variable:
 
 ```hcl
 merge(var.default_topic_config, asyncapi_topic_config)
 ```
 
-That allows platform teams to define shared defaults while still letting individual topics override specific keys in AsyncAPI.
+This lets platform teams define shared baseline configuration (retention, cleanup policy) while individual topics can still override specific keys in AsyncAPI.
 
-## Maven usage
+### Provider-Specific Behavior
 
-```xml
-<plugin>
-    <groupId>io.zenwave360.sdk</groupId>
-    <artifactId>zenwave-sdk-maven-plugin</artifactId>
-    <version>${zenwave.version}</version>
-    <executions>
-        <execution>
-            <id>generate-terraform</id>
-            <phase>generate-resources</phase>
-            <goals><goal>generate</goal></goals>
-            <configuration>
-                <generatorName>AsyncAPIOpsGeneratorPlugin</generatorName>
-                <inputSpec>asyncapi.yml</inputSpec>
-                <configOptions>
-                    <apiFiles>asyncapi.yml,asyncapi-client.yml</apiFiles>
-                    <avroImports>${project.basedir}/src/main/asyncapi/avro</avroImports>
-                    <server>staging</server>
-                    <targetFolder>${project.basedir}/terraform</targetFolder>
-                </configOptions>
-            </configuration>
-        </execution>
-    </executions>
-    <dependencies>
-        <dependency>
-            <groupId>io.zenwave360.sdk.plugins</groupId>
-            <artifactId>asyncapi-ops</artifactId>
-            <version>${zenwave.version}</version>
-        </dependency>
-    </dependencies>
-</plugin>
-```
+The exact behavior when a setting is unset depends on the selected template. Choose the template based on the Terraform provider you are integrating with.
 
-## Getting help
+#### `TerraformKafka` (`Mongey/kafka`)
 
-```shell
-jbang zw -p AsyncAPIOpsGeneratorPlugin --help
-```
+- **Partitions**: required by the provider. If AsyncAPI omits `partitions`, the generator renders `var.default_partitions`. If that variable is also `null`, Terraform fails at plan time — you must set `default_partitions`.
+- **Replication factor**: required by the provider, but the provider accepts `-1` to delegate to the broker. If AsyncAPI omits `replicas`, the generator renders `coalesce(var.default_replication_factor, -1)`, which falls back to the broker cluster default when the variable is unset.
+- **Topic config**: follows `AsyncAPI → var.default_topic_config → broker default`. If the resulting map is empty, the generator renders `null` so the provider treats the setting as unset.
+
+#### `TerraformConfluent` (`confluentinc/confluent`)
+
+- **Partitions**: optional in the provider. If AsyncAPI omits `partitions`, the generator renders `var.default_partitions`. If that variable is `null`, Terraform treats the argument as unset and the Confluent provider applies its own default.
+- **Replication factor**: not configurable through `confluent_kafka_topic`. No variable is generated for it in this template.
+- **Topic config**: follows `AsyncAPI → var.default_topic_config → provider default`. Empty maps render as `null`.
+
+#### `TerraformConfluentHybrid` (`confluentinc/confluent` + `cultureamp/schemaregistry`)
+
+Same partitions and replication behavior as `TerraformConfluent`. Schema Registry resources use the standalone `cultureamp/schemaregistry` provider instead of the Confluent-managed one.
+
+### Generated Topic Rules Summary
+
+| Setting | AsyncAPI present | AsyncAPI absent |
+|---------|-----------------|-----------------|
+| `partitions` | Rendered as explicit value | Rendered as `var.default_partitions` |
+| `replicas` (`TerraformKafka`) | Rendered as explicit value | Rendered as `coalesce(var.default_replication_factor, -1)` |
+| `replicas` (`TerraformConfluent*`) | Not applicable | Not applicable |
+| `topicConfiguration` | Merged on top of `var.default_topic_config` | Rendered as `var.default_topic_config` |
+| Empty config map | — | Rendered as `null` |

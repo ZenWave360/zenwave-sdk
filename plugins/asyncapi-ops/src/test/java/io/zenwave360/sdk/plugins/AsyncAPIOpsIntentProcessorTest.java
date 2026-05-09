@@ -66,17 +66,36 @@ public class AsyncAPIOpsIntentProcessorTest {
             Assertions.assertFalse(s.resourceName.contains("."), "Schema resourceName must not contain dots");
         });
 
-        // ACLs from provider operations + error topic ACLs (same principal, Read)
+        // ACLs from provider operations + error topic ACLs
         Assertions.assertFalse(intent.acls.isEmpty());
         intent.acls.forEach(acl -> {
             Assertions.assertTrue(acl.principal.startsWith("User:"));
-            Assertions.assertTrue(acl.operation.equals("Read") || acl.operation.equals("Write"));
+            Assertions.assertTrue(acl.operation.equals("Read") || acl.operation.equals("Write") || acl.operation.equals("Describe"));
         });
-        // Error topic ACLs: 4 Read entries for the error topics
-        long errorTopicAcls = intent.acls.stream()
+        long mainTopicDescribeAcls = intent.acls.stream()
+                .filter(a -> "merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0".equals(a.topicName))
+                .filter(a -> "Describe".equals(a.operation))
+                .count();
+        Assertions.assertEquals(1, mainTopicDescribeAcls, "Receive operations should get Describe on the main topic");
+
+        long sendTopicDescribeAcls = intent.acls.stream()
+                .filter(a -> "merchandising.inventory.inventory-adjustment.reserve-stock.response.avro.v0".equals(a.topicName))
+                .filter(a -> "Describe".equals(a.operation))
+                .count();
+        Assertions.assertEquals(1, sendTopicDescribeAcls, "Send operations should get Describe on the main topic");
+
+        long errorTopicReadAcls = intent.acls.stream()
                 .filter(a -> a.topicName.contains(".__.")  && "Read".equals(a.operation))
                 .count();
-        Assertions.assertEquals(4, errorTopicAcls, "4 Read ACLs for error topics");
+        long errorTopicWriteAcls = intent.acls.stream()
+                .filter(a -> a.topicName.contains(".__.")  && "Write".equals(a.operation))
+                .count();
+        long errorTopicDescribeAcls = intent.acls.stream()
+                .filter(a -> a.topicName.contains(".__.")  && "Describe".equals(a.operation))
+                .count();
+        Assertions.assertEquals(4, errorTopicReadAcls, "4 Read ACLs for error topics");
+        Assertions.assertEquals(4, errorTopicWriteAcls, "4 Write ACLs for error topics");
+        Assertions.assertEquals(4, errorTopicDescribeAcls, "4 Describe ACLs for error topics");
     }
 
     @Test

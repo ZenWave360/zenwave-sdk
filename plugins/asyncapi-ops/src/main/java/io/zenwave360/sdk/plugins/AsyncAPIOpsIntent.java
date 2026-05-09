@@ -55,7 +55,7 @@ public class AsyncAPIOpsIntent {
         public String topicName;
         /** e.g. User:merchandising.inventory.inventory-adjustment.baas */
         public String principal;
-        /** Read or Write */
+        /** Read, Write, or Describe */
         public String operation;
         public String permissionType = "Allow";
     }
