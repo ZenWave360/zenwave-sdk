@@ -1,0 +1,24 @@
+asyncapi: 3.0.0
+id: url:collision.beta
+info:
+  title: Collision Beta
+  version: 1.0.0
+
+channels:
+  customer-updated:
+    address: collision.beta.customer-updated.event.avro.v0
+    messages:
+      CustomerUpdated:
+        payload:
+          schemaFormat: 'application/vnd.apache.avro+json;version=1.9.0'
+          schema:
+            $ref: './avro/CustomerUpdated.avsc'
+
+operations:
+  onCustomerUpdated:
+    action: send
+    channel:
+      $ref: '#/channels/customer-updated'
+    bindings:
+      kafka:
+        x-principal: "collision.beta"

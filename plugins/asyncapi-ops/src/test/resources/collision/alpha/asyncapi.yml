@@ -1,0 +1,24 @@
+asyncapi: 3.0.0
+id: url:collision.alpha
+info:
+  title: Collision Alpha
+  version: 1.0.0
+
+channels:
+  customer-created:
+    address: collision.alpha.customer-created.event.avro.v0
+    messages:
+      CustomerCreated:
+        payload:
+          schemaFormat: 'application/vnd.apache.avro+json;version=1.9.0'
+          schema:
+            $ref: './avro/CustomerCreated.avsc'
+
+operations:
+  onCustomerCreated:
+    action: send
+    channel:
+      $ref: '#/channels/customer-created'
+    bindings:
+      kafka:
+        x-principal: "collision.alpha"

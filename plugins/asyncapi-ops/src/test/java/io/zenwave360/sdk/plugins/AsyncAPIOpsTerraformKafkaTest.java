@@ -16,6 +16,8 @@ public class AsyncAPIOpsTerraformKafkaTest {
 
     static final String ASYNCAPI_PROVIDER = "classpath:retail-domain-catalog/merchandising/inventory/inventory-adjustment/asyncapi.yml";
     static final String ASYNCAPI_CLIENT   = "classpath:retail-domain-catalog/merchandising/inventory/inventory-adjustment/asyncapi-client.yml";
+    static final String ASYNCAPI_COLLISION_ALPHA = "classpath:collision/alpha/asyncapi.yml";
+    static final String ASYNCAPI_COLLISION_BETA  = "classpath:collision/beta/asyncapi.yml";
 
     @Test
     public void test_provider_generation() throws Exception {
@@ -83,6 +85,24 @@ public class AsyncAPIOpsTerraformKafkaTest {
     }
 
     @Test
+    public void test_provider_is_not_generated_twice_when_present_in_apiFile_and_apiFiles() throws Exception {
+        String targetFolder = "target/out/test_provider_and_client_terraform_deduplicated";
+        new MainGenerator().generate(new AsyncAPIOpsGeneratorPlugin()
+                .withApiFile(ASYNCAPI_PROVIDER)
+                .withOption("apiFiles", List.of(ASYNCAPI_PROVIDER, ASYNCAPI_CLIENT))
+                .withOption("server", "staging")
+                .withOption("templates", "TerraformKafka")
+                .withTargetFolder(targetFolder)
+                .withOption("skipFormatting", true));
+
+        String topics = Files.readString(Path.of(targetFolder + "/topics.tf"));
+        Assertions.assertEquals(1, occurrencesOf(topics, "resource \"kafka_topic\" \"merchandising_inventory_inventory_adjustment_reserve_stock_command_avro_v0\""));
+
+        String schemas = Files.readString(Path.of(targetFolder + "/schemas.tf"));
+        Assertions.assertEquals(1, occurrencesOf(schemas, "ReserveStockCommand-value"));
+    }
+
+    @Test
     public void test_missing_topic_settings_render_provider_aware_fallbacks() throws Exception {
         String targetFolder = "target/out/test_provider_generation_with_missing_topic_settings";
         new MainGenerator().generate(new AsyncAPIOpsGeneratorPlugin()
@@ -115,5 +135,33 @@ public class AsyncAPIOpsTerraformKafkaTest {
         Assertions.assertTrue(bundledSchema.contains("\"name\":\"ShoppingCart\""));
         Assertions.assertTrue(bundledSchema.contains("\"name\":\"Item\""));
         Assertions.assertFalse(bundledSchema.contains("UnusedImport"));
+    }
+
+    @Test
+    public void test_multiple_specs_with_same_basename_generate_distinct_schema_output_folders() throws Exception {
+        String targetFolder = "target/out/test_provider_generation_with_colliding_spec_names";
+        new MainGenerator().generate(new AsyncAPIOpsGeneratorPlugin()
+                .withApiFile(ASYNCAPI_COLLISION_ALPHA)
+                .withOption("apiFiles", List.of(ASYNCAPI_COLLISION_BETA))
+                .withOption("templates", "TerraformKafka")
+                .withTargetFolder(targetFolder)
+                .withOption("skipFormatting", true));
+
+        Assertions.assertTrue(new File(targetFolder + "/asyncapi/avro/CustomerCreated.avsc").exists());
+        Assertions.assertTrue(new File(targetFolder + "/asyncapi_2/avro/CustomerUpdated.avsc").exists());
+
+        String schemas = Files.readString(Path.of(targetFolder + "/schemas.tf"));
+        Assertions.assertTrue(schemas.contains("${path.module}/asyncapi/avro/CustomerCreated.avsc"));
+        Assertions.assertTrue(schemas.contains("${path.module}/asyncapi_2/avro/CustomerUpdated.avsc"));
+    }
+
+    private int occurrencesOf(String content, String token) {
+        int count = 0;
+        int index = 0;
+        while ((index = content.indexOf(token, index)) >= 0) {
+            count++;
+            index += token.length();
+        }
+        return count;
     }
 }
