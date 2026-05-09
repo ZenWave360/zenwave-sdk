@@ -6,9 +6,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 
 public class AsyncAPIOpsIntentProcessorTest {
 
@@ -185,6 +186,20 @@ public class AsyncAPIOpsIntentProcessorTest {
         Assertions.assertEquals(20, intent.topics.stream().filter(t -> t.isRetryOrDlq).count());
     }
 
+    @Test
+    public void test_loader_with_no_input_files_produces_empty_apis_and_empty_intent() {
+        AsyncAPIOpsSpecLoader loader = new AsyncAPIOpsSpecLoader();
+
+        Map<String, Object> context = loader.process(new LinkedHashMap<>());
+        Assertions.assertEquals(List.of(), context.get("apis"));
+
+        context = buildIntent("staging", context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+        Assertions.assertTrue(intent.topics.isEmpty());
+        Assertions.assertTrue(intent.schemas.isEmpty());
+        Assertions.assertTrue(intent.acls.isEmpty());
+    }
+
 
     @Test
     public void test_multi_provider_intent_generation() throws Exception {
@@ -296,6 +311,88 @@ public class AsyncAPIOpsIntentProcessorTest {
         Assertions.assertTrue(intent.acls.stream().anyMatch(a ->
                 "merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0".equals(a.topicName)
                         && "Describe".equals(a.operation)));
+    }
+
+    @Test
+    public void test_invalid_numeric_values_and_missing_group_or_principal_follow_fallback_paths() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+
+        Map<String, Object> channelBinding = JSONPath.get(api, "$.channels['reserve-stock-command'].bindings.kafka");
+        channelBinding.put("partitions", "not-a-number");
+        channelBinding.put("replicas", "NaN");
+
+        Map<String, Object> receiveBinding = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka");
+        receiveBinding.remove("groupId");
+        receiveBinding.put("retryTopics", "not-used");
+
+        Map<String, Object> receiveErrorTopics = JSONPath.get(receiveBinding, "$.x-error-topics");
+        receiveErrorTopics.put("retryTopics", "invalid");
+
+        Map<String, Object> sendBinding = JSONPath.get(api, "$.operations['onReserveStockResponse'].bindings.kafka");
+        sendBinding.remove("x-principal");
+
+        context = buildIntent(null, context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+
+        AsyncAPIOpsIntent.TopicIntent ownedTopic = intent.topics.stream()
+                .filter(t -> "merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0".equals(t.topicName))
+                .findFirst()
+                .orElseThrow();
+        Assertions.assertNull(ownedTopic.partitions);
+        Assertions.assertNull(ownedTopic.replicationFactor);
+
+        Assertions.assertEquals(0, intent.topics.stream().filter(t -> t.isRetryOrDlq).count(), "missing groupId must skip retry/dlq expansion");
+        Assertions.assertFalse(intent.acls.stream().anyMatch(a ->
+                "merchandising.inventory.inventory-adjustment.reserve-stock.response.avro.v0".equals(a.topicName)
+                        && "Write".equals(a.operation)), "send operation without principal must not create ACLs");
+    }
+
+    @Test
+    public void test_schema_resolution_fallbacks_support_inline_names_absolute_refs_and_missing_schema_objects() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+
+        Map<String, Object> reserveStockCommand = JSONPath.get(api, "$.channels['reserve-stock-command'].messages['ReserveStockCommand']");
+        reserveStockCommand.put("payload", new HashMap<>(Map.of(
+                "schemaFormat", "application/vnd.apache.avro+json;version=1.9.0",
+                "schema", new LinkedHashMap<>(Map.of("name", "InlineOnly"))
+        )));
+
+        Map<String, Object> reserveStockResponse = JSONPath.get(api, "$.channels['reserve-stock-response'].messages['ReserveStockResponse']");
+        reserveStockResponse.put("payload", new HashMap<>(Map.of(
+                "schemaFormat", "application/vnd.apache.avro+json;version=1.9.0",
+                "schema", new LinkedHashMap<>(Map.of("x--original-$ref", "https://schemas.example.com/shared/ReserveStockResponse.avsc#/components/schemas/ReserveStockResponse"))
+        )));
+
+        Map<String, Object> inventoryAdjusted = JSONPath.get(api, "$.channels['inventory-adjusted'].messages['InventoryAdjustedEvent']");
+        inventoryAdjusted.put("payload", new HashMap<>(Map.of(
+                "schemaFormat", "application/vnd.apache.avro+json;version=1.9.0"
+        )));
+
+        context = buildIntent("staging", context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+
+        AsyncAPIOpsIntent.SchemaIntent inlineSchema = intent.schemas.stream()
+                .filter(s -> s.subject.endsWith("ReserveStockCommand-value"))
+                .findFirst()
+                .orElseThrow();
+        Assertions.assertEquals("classpath:retail-domain-catalog/merchandising/inventory/inventory-adjustment/avro/InlineOnly.avsc", inlineSchema.sourceSchemaUri);
+        Assertions.assertEquals("asyncapi/avro/InlineOnly.avsc", inlineSchema.schemaFile);
+
+        AsyncAPIOpsIntent.SchemaIntent absoluteRefSchema = intent.schemas.stream()
+                .filter(s -> s.subject.endsWith("ReserveStockResponse-value"))
+                .findFirst()
+                .orElseThrow();
+        Assertions.assertEquals("https://schemas.example.com/shared/ReserveStockResponse.avsc", absoluteRefSchema.sourceSchemaUri);
+        Assertions.assertEquals("asyncapi/ReserveStockResponse.avsc", absoluteRefSchema.schemaFile);
+
+        AsyncAPIOpsIntent.SchemaIntent missingSchema = intent.schemas.stream()
+                .filter(s -> s.subject.endsWith("InventoryAdjustedEvent-value"))
+                .findFirst()
+                .orElseThrow();
+        Assertions.assertNull(missingSchema.sourceSchemaUri);
+        Assertions.assertNull(missingSchema.schemaFile);
     }
 
     // -------------------------------------------------------------------------

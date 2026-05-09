@@ -89,4 +89,41 @@ public class HandlebarsEngineTest {
         }
 
     }
+
+    @Test
+    public void testProcessTemplatesHonorsSkipAndRestoresContextBetweenCalls() {
+        HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
+
+        TemplateInput skipped = new TemplateInput("io/zenwave360/sdk/templating/simple-template", "skipped.txt")
+                .withSkip(model -> true);
+        TemplateInput generated = new TemplateInput("io/zenwave360/sdk/templating/simple-template", "{{name}}.txt")
+                .withSkip(model -> false);
+
+        var firstModel = new HashMap<String, Object>();
+        firstModel.put("name", "first");
+        var secondModel = new HashMap<String, Object>();
+        secondModel.put("name", "second");
+
+        var firstOutputs = handlebarsEngine.processTemplates(firstModel, List.of(skipped, generated));
+        var secondOutputs = handlebarsEngine.processTemplates(secondModel, List.of(generated));
+
+        Assertions.assertEquals(1, firstOutputs.size());
+        Assertions.assertEquals("first.txt", firstOutputs.get(0).getTargetFile());
+        Assertions.assertEquals(1, secondOutputs.size());
+        Assertions.assertEquals("second.txt", secondOutputs.get(0).getTargetFile(), "previous model values must not leak into later calls");
+    }
+
+    @Test
+    public void testProcessTemplateNamesResolvesTargetNamesWithoutRenderingContent() {
+        HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
+
+        TemplateInput templateInput = new TemplateInput("io/zenwave360/sdk/templating/handlebars-test", "{{name}}/{{suffix}}.md")
+                .withSkip(model -> false);
+
+        var outputs = handlebarsEngine.processTemplateNames(Map.of("name", "customer", "suffix", "summary"), templateInput);
+
+        Assertions.assertEquals(1, outputs.size());
+        Assertions.assertEquals("customer/summary.md", outputs.get(0).getTargetFile());
+        Assertions.assertEquals(templateInput, outputs.get(0).getTemplateInput());
+    }
 }
