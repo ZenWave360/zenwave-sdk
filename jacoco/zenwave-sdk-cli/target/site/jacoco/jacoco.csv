@@ -4,7 +4,7 @@ io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.utils,ZDLFindUtils,113,5
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.utils,ZDLAnnotator,73,0,6,0,15,0,7,0,4,0
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.utils,ZDLHttpUtils,38,713,30,60,4,125,25,40,1,19
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,AbstractBaseProcessor,0,69,0,8,0,15,0,8,0,4
-io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,AsyncApiProcessor.SchemaFormatType,56,190,17,3,7,15,13,6,3,6
+io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,AsyncApiProcessor.SchemaFormatType,0,246,0,20,0,22,0,19,0,9
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,AsyncApiProcessor,21,707,10,66,4,129,10,39,0,11
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,ZDL2JDLProcessor,1,179,1,17,0,34,1,10,0,2
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,YamlOverlyMerger,103,79,18,12,27,20,15,6,3,3
@@ -58,7 +58,7 @@ io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk,Main.HelpFormatConverter,0,1
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk,Help,140,603,25,49,33,109,20,31,1,13
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,TemplateInput,43,63,0,2,13,21,3,13,3,12
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,OutputFormatType,0,51,0,0,0,2,0,1,0,1
-io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,HandlebarsEngine,38,237,6,2,7,43,6,8,2,8
+io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,HandlebarsEngine,18,257,1,7,6,44,2,12,1,9
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,CustomHandlebarsHelpers,112,490,27,55,21,93,28,46,5,28
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,TemplateOutput,15,94,0,0,5,31,1,10,1,10
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.templating,HandlebarsEngine.FolderTemplateLoader,4,21,1,1,0,4,1,2,0,2
