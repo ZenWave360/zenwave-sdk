@@ -1,0 +1,15 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,DomainFrontmatter,27,0,0,0,6,0,2,0,2,0
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,ServiceFrontmatter,66,0,12,0,9,0,8,0,2,0
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,QueryFrontmatter,36,0,2,0,7,0,3,0,2,0
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,CommandFrontmatter,36,0,2,0,7,0,3,0,2,0
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,EntityFrontmatter,51,0,6,0,8,0,5,0,2,0
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,EventFrontmatter,36,0,2,0,7,0,3,0,2,0
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogZdlProcessor,335,0,30,0,63,0,23,0,8,0
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogOpenApiProcessor,334,0,36,0,69,0,26,0,8,0
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogPlugin,53,0,4,0,6,0,4,0,2,0
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogFileWriter.new SimpleFileVisitor() {...},44,0,6,0,12,0,7,0,4,0
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogArchitectureLoader,265,0,36,0,53,0,23,0,5,0
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogAsyncApiProcessor,664,0,78,0,131,0,48,0,9,0
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogGenerator,847,0,60,0,155,0,45,0,15,0
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogFileWriter,339,0,38,0,70,0,29,0,10,0

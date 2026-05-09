@@ -1,0 +1,14 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins.templates,TerraformConfluentTemplates,0,40,0,0,0,6,0,1,0,1
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins.templates,TerraformConfluentHybridTemplates,0,40,0,0,0,6,0,1,0,1
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins.templates,TerraformKafkaTemplates,0,40,0,0,0,6,0,1,0,1
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntent.SchemaIntent,0,6,0,0,0,2,0,1,0,1
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntent.TopicIntent,0,8,0,0,0,2,0,1,0,1
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsAvroBundler,32,151,7,7,5,28,7,5,0,5
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntent,0,42,1,1,0,9,1,2,0,2
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsGeneratorPlugin,0,27,0,0,0,5,0,1,0,1
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntentProcessor,126,1011,51,79,28,200,45,49,0,29
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsSpecLoader,20,178,2,16,5,42,2,15,0,8
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsGenerator.Templates,9,58,0,0,2,17,1,2,1,2
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntent.AclIntent,0,6,0,0,0,2,0,1,0,1
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsGenerator,161,210,9,13,29,48,7,9,0,5
