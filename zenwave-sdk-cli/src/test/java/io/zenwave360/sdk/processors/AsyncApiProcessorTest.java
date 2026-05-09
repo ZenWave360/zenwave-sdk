@@ -5,9 +5,13 @@ import static io.zenwave360.sdk.utils.JSONPath.get;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;
@@ -127,5 +131,52 @@ public class AsyncApiProcessorTest {
         Assertions.assertEquals("ProductPayload", paramTypes.get(1));
         Assertions.assertEquals("ProductPayload", paramTypes.get(2));
         Assertions.assertEquals("io.example.schema.TransportNotificationEventData", paramTypes.get(3));
+    }
+
+    @Test
+    public void testProcessAsyncApiMarksRuntimeHeadersAndOriginalSchemaRefs() throws Exception {
+        Map<String, Object> model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-events.yml");
+
+        AsyncApiProcessor processor = new AsyncApiProcessor();
+        Model processed = (Model) processor.process(model).get(targetProperty);
+
+        Assertions.assertEquals(true, get(processed, "$.channels.createProductNotification2.publish.x--has-runtime-headers"));
+        Assertions.assertEquals("CreateProductPayload", get(processed, "$.components.messages.createProductMsg.payload.x--schema-name"));
+        Assertions.assertEquals("#/components/schemas/CreateProductPayload", get(processed, "$.components.messages.createProductMsg.payload.x--original-$ref"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("schemaFormats")
+    public void testSchemaFormatTypeHelpers(String schemaFormat, AsyncApiProcessor.SchemaFormatType expectedType,
+                                            boolean schemaFormatType, boolean jsonSchemaFormat, boolean avroFormat,
+                                            boolean nativeFormat, boolean yamlFormat) {
+        AsyncApiProcessor.SchemaFormatType resolved = AsyncApiProcessor.SchemaFormatType.getFormat(schemaFormat);
+
+        Assertions.assertEquals(expectedType, resolved);
+        Assertions.assertEquals(schemaFormatType, AsyncApiProcessor.SchemaFormatType.isSchemaFormat(resolved));
+        Assertions.assertEquals(jsonSchemaFormat, AsyncApiProcessor.SchemaFormatType.isJsonSchemaFormat(resolved));
+        Assertions.assertEquals(avroFormat, AsyncApiProcessor.SchemaFormatType.isAvroFormat(resolved));
+        Assertions.assertEquals(nativeFormat, AsyncApiProcessor.SchemaFormatType.isNativeFormat(resolved));
+        Assertions.assertEquals(yamlFormat, AsyncApiProcessor.SchemaFormatType.isYamlFormat(resolved));
+    }
+
+    @Test
+    public void testSchemaFormatTypeFallbacksForUnknownAndNullValues() {
+        Assertions.assertEquals(AsyncApiProcessor.SchemaFormatType.ASYNCAPI_YAML, AsyncApiProcessor.SchemaFormatType.getFormat(null));
+        Assertions.assertNull(AsyncApiProcessor.SchemaFormatType.getFormat("application/unknown;version=1.0.0"));
+        Assertions.assertTrue(AsyncApiProcessor.SchemaFormatType.isSchemaFormat(null));
+        Assertions.assertTrue(AsyncApiProcessor.SchemaFormatType.isNativeFormat(null));
+        Assertions.assertFalse(AsyncApiProcessor.SchemaFormatType.isYamlFormat(null));
+        Assertions.assertEquals("application/vnd.apache.avro+json;version=3.0.0",
+                AsyncApiProcessor.SchemaFormatType.AVRO_JSON.getSchemaFormat("3.0.0"));
+    }
+
+    private static Stream<Arguments> schemaFormats() {
+        return Stream.of(
+                Arguments.of("application/vnd.aai.asyncapi+yaml;version=3.0.0", AsyncApiProcessor.SchemaFormatType.ASYNCAPI_YAML, true, false, false, true, true),
+                Arguments.of("application/vnd.oai.openapi+json;version=3.0.0", AsyncApiProcessor.SchemaFormatType.OPENAPI_JSON, true, false, false, true, false),
+                Arguments.of("application/schema+json;version=draft-07", AsyncApiProcessor.SchemaFormatType.JSONSCHEMA_JSON, true, true, false, false, false),
+                Arguments.of("application/vnd.apache.avro+yaml;version=1.9.0", AsyncApiProcessor.SchemaFormatType.AVRO_YAML, false, false, true, false, true)
+        );
     }
 }
