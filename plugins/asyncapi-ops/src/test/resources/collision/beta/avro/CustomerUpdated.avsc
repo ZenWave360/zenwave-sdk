@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "CustomerUpdated",
+  "namespace": "io.zenwave360.collision.beta",
+  "fields": [
+    {
+      "name": "customerId",
+      "type": "string"
+    }
+  ]
+}

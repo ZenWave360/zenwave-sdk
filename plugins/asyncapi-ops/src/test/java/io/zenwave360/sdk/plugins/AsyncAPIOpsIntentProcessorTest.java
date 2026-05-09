@@ -15,6 +15,8 @@ public class AsyncAPIOpsIntentProcessorTest {
     static final String ASYNCAPI_PROVIDER = "classpath:retail-domain-catalog/merchandising/inventory/inventory-adjustment/asyncapi.yml";
     static final String ASYNCAPI_CLIENT   = "classpath:retail-domain-catalog/merchandising/inventory/inventory-adjustment/asyncapi-client.yml";
     static final String ASYNCAPI_STOCK    = "classpath:retail-domain-catalog/merchandising/inventory/stock-replenishment/asyncapi.yml";
+    static final String ASYNCAPI_COLLISION_ALPHA = "classpath:collision/alpha/asyncapi.yml";
+    static final String ASYNCAPI_COLLISION_BETA  = "classpath:collision/beta/asyncapi.yml";
 
     @Test
     public void test_provider_intent_generation() throws Exception {
@@ -164,6 +166,25 @@ public class AsyncAPIOpsIntentProcessorTest {
         Assertions.assertTrue(clientErrorTopics > 0, "x-groupId on client spec must produce error topics");
     }
 
+    @Test
+    public void test_loader_prepends_apiFile_and_deduplicates_apiFiles() throws Exception {
+        AsyncAPIOpsSpecLoader loader = new AsyncAPIOpsSpecLoader();
+        loader.apiFile = URI.create(ASYNCAPI_PROVIDER);
+        loader.apiFiles = List.of(URI.create(ASYNCAPI_PROVIDER), URI.create(ASYNCAPI_CLIENT));
+
+        Map<String, Object> context = loader.process(new LinkedHashMap<>());
+        List<Model> apis = getApis(context);
+
+        Assertions.assertEquals(2, apis.size(), "provider must not be loaded twice when present in apiFile and apiFiles");
+        Assertions.assertEquals(URI.create(ASYNCAPI_PROVIDER), apis.get(0).getUri(), "apiFile must be loaded first");
+        Assertions.assertEquals(URI.create(ASYNCAPI_CLIENT), apis.get(1).getUri());
+
+        context = buildIntent("staging", context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+        Assertions.assertEquals(3, intent.topics.stream().filter(t -> !t.isRetryOrDlq).count());
+        Assertions.assertEquals(20, intent.topics.stream().filter(t -> t.isRetryOrDlq).count());
+    }
+
 
     @Test
     public void test_multi_provider_intent_generation() throws Exception {
@@ -182,6 +203,17 @@ public class AsyncAPIOpsIntentProcessorTest {
         long distinctResourceNames = intent.topics.stream()
                 .map(t -> t.resourceName).distinct().count();
         Assertions.assertEquals(intent.topics.size(), distinctResourceNames, "Resource names must be unique");
+    }
+
+    @Test
+    public void test_colliding_api_basenames_get_distinct_schema_target_folders() throws Exception {
+        Map<String, Object> context = loadAndBuildIntent(null, ASYNCAPI_COLLISION_ALPHA, ASYNCAPI_COLLISION_BETA);
+
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+        Assertions.assertEquals(2, intent.schemas.size());
+        Assertions.assertEquals(
+                List.of("asyncapi/avro/CustomerCreated.avsc", "asyncapi_2/avro/CustomerUpdated.avsc"),
+                intent.schemas.stream().map(s -> s.schemaFile).sorted().toList());
     }
 
     @Test
@@ -243,6 +275,27 @@ public class AsyncAPIOpsIntentProcessorTest {
         Assertions.assertEquals(1, retryTopic.partitions, "Retry topic should fall back to the base retry config");
         Assertions.assertEquals(2, retryTopic.replicationFactor, "Retry topic should fall back to the base retry config");
         Assertions.assertEquals("259200000", retryTopic.config.get("retention.ms"), "Retry topic should keep base topicConfiguration values");
+    }
+
+    @Test
+    public void test_missing_error_topic_template_keeps_main_acls_but_skips_retry_and_dlq_topics() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+
+        Map<String, Object> operationBinding = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka");
+        Map<String, Object> errorTopics = JSONPath.get(operationBinding, "$.x-error-topics");
+        errorTopics.remove("addressTemplate");
+
+        context = buildIntent("staging", context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+
+        Assertions.assertEquals(0, intent.topics.stream().filter(t -> t.isRetryOrDlq).count(), "retry/dlq topics require addressTemplate");
+        Assertions.assertTrue(intent.acls.stream().anyMatch(a ->
+                "merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0".equals(a.topicName)
+                        && "Read".equals(a.operation)));
+        Assertions.assertTrue(intent.acls.stream().anyMatch(a ->
+                "merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0".equals(a.topicName)
+                        && "Describe".equals(a.operation)));
     }
 
     // -------------------------------------------------------------------------
