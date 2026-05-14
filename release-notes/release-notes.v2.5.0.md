@@ -1,7 +1,7 @@
 ## What's Changed
 
-- Merged release **2.6.0** by @ivangsa
-  https://github.com/ZenWave360/zenwave-sdk/pull/106
+- Merged release **2.5.0** by @ivangsa
+  https://github.com/ZenWave360/zenwave-sdk/pull/109
 
 ## What's New
 
@@ -15,4 +15,4 @@ Topic ownership is derived automatically from how channels are declared: inline 
 
 This is a beta plugin: it works and is based on real infrastructure automation experience, but expect the extension model and generated output to evolve.
 
-**Full Changelog**: https://github.com/ZenWave360/zenwave-sdk/compare/v2.5.0...v2.6.0
+**Full Changelog**: https://github.com/ZenWave360/zenwave-sdk/compare/v2.4.0...v2.5.0
