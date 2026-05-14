@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 import java.io.File;
 import java.io.FileFilter;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -13,9 +14,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jsonschema2pojo.*;
 import org.jsonschema2pojo.rules.RuleFactory;
+import org.jsonschema2pojo.util.JavaVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,10 +34,12 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
 
 //    private static final String PREFIX = "jsonschema2pojo.";
 
+    // Several defaults below intentionally differ from upstream DefaultGenerationConfig and are kept for backward compatibility.
     private AnnotationStyle annotationStyle = AnnotationStyle.JACKSON2;
     private String dateTimeType = "java.time.OffsetDateTime";
     private String dateType = "java.time.LocalDate";
     private String timeType = null;
+    // ZenWave default differs from upstream DefaultGenerationConfig, kept for backward compatibility.
     private boolean generateBuilders = true;
     private boolean includeJsr303Annotations = true;
     private boolean includeJsr305Annotations = false;
@@ -44,9 +48,11 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
     private boolean includeDynamicSetters = true;
     private boolean includeDynamicBuilders = true;
     private boolean includeTypeInfo = false;
+    // ZenWave default differs from upstream DefaultGenerationConfig, kept for backward compatibility.
     private boolean serializable = true;
     private Map<String, String> formatTypeMapping = new HashMap<String, String>();
     private boolean includeConstructorPropertiesAnnotation = false;
+    private boolean includeGeneratedAnnotation = true;
     private boolean usePrimitives = false;
     private Iterator<URL> source;
     private File targetDirectory = new File(".");
@@ -83,7 +89,7 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
     private boolean includeAdditionalProperties = true;
     private boolean includeGetters = true;
     private boolean includeSetters = true;
-    private String targetVersion = "1.6";
+    private String targetVersion = JavaVersion.parse(System.getProperty("java.version"));
     private boolean formatDates = false;
     private boolean formatTimes = false;
     private boolean formatDateTimes = false;
@@ -91,8 +97,11 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
     private String customTimePattern = null;
     private String customDateTimePattern = null;
     private String refFragmentPathDelimiters = "#/.";
-
-    private boolean isUseJakartaValidation = true;
+    private boolean removeOldOutput = false;
+    private FileFilter fileFilter = new AllFileFilter();
+    private boolean useInnerClassBuilders = false;
+    // ZenWave default differs from upstream DefaultGenerationConfig, kept for backward compatibility.
+    private boolean useJakartaValidation = true;
     private SourceSortOrder sourceSortOrder = SourceSortOrder.OS;
 
     public static JsonSchema2PojoConfiguration of(Map<String, String> settings) {
@@ -118,20 +127,23 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
         Object defaultValue = f.get(config);
         Object value = null;
 
+        String key = getSettingKey(s, f.getName());
         if (f.getType().isEnum()) {
-            value = s.containsKey(f.getName()) ? Enum.valueOf((Class) f.getType(), s.get(f.getName()).toUpperCase()) : defaultValue;
+            value = key != null ? Enum.valueOf((Class) f.getType(), s.get(key).toUpperCase()) : defaultValue;
         } else if (f.getType().isArray()) {
-            value = s.containsKey(f.getName()) ? getArray(s, f.getName()) : defaultValue;
+            value = key != null ? getArray(s, key) : defaultValue;
         } else if (f.getType().isAssignableFrom(boolean.class) || f.getType().isAssignableFrom(Boolean.class)) {
-            value = getBoolean(s, f.getName(), (Boolean) defaultValue);
+            value = getBoolean(s, key, (Boolean) defaultValue);
         } else if (f.getType().isAssignableFrom(String.class)) {
-            value = s.getOrDefault(f.getName(), (String) defaultValue);
+            value = key != null ? s.getOrDefault(key, (String) defaultValue) : defaultValue;
         } else if (f.getType().isAssignableFrom(Map.class)) {
-            value = s.containsKey(f.getName()) ? getMap(s, f.getName()) : defaultValue;
+            value = key != null ? getMap(s, key) : defaultValue;
         } else if (f.getType().isAssignableFrom(File.class)) {
-            value = s.containsKey(f.getName()) ? new File(s.get(f.getName())) : defaultValue;
+            value = key != null ? new File(s.get(key)) : defaultValue;
+        } else if (f.getType().isAssignableFrom(FileFilter.class)) {
+            value = key != null ? newFileFilter(s.get(key)) : defaultValue;
         } else if (f.getType().isAssignableFrom(Class.class)) {
-            value = s.containsKey(f.getName()) ? Class.forName(s.get(f.getName())) : defaultValue;
+            value = key != null ? Class.forName(s.get(key)) : defaultValue;
         }
 
         if (value != null && value != defaultValue) {
@@ -139,8 +151,28 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
         }
     }
 
+    private static String getSettingKey(Map<String, String> settings, String fieldName) {
+        if (settings.containsKey(fieldName)) {
+            return fieldName;
+        }
+        if ("useJakartaValidation".equals(fieldName) && settings.containsKey("isUseJakartaValidation")) {
+            return "isUseJakartaValidation";
+        }
+        return null;
+    }
+
+    private static FileFilter newFileFilter(String className) throws ClassNotFoundException {
+        try {
+            return (FileFilter) Class.forName(className).getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | NoSuchMethodException | InvocationTargetException e) {
+            throw new IllegalArgumentException("Invalid FileFilter class: " + className, e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Cannot access FileFilter class: " + className, e);
+        }
+    }
+
     private static boolean getBoolean(Map<String, String> s, String key, boolean defaultValue) {
-        if (s.containsKey(key)) {
+        if (key != null && s.containsKey(key)) {
             return Boolean.valueOf(s.get(key));
         }
         return defaultValue;
@@ -268,7 +300,7 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
 
     @Override
     public FileFilter getFileFilter() {
-        return null;
+        return fileFilter;
     }
 
     public void setSerializable(boolean serializable) {
@@ -281,25 +313,41 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
 
     @Override
     public boolean isUseInnerClassBuilders() {
-        return GenerationConfig.super.isUseInnerClassBuilders();
+        return useInnerClassBuilders;
     }
 
     @Override
     public boolean isIncludeGeneratedAnnotation() {
-        return false;
+        return includeGeneratedAnnotation;
     }
 
     @Override
     public boolean isUseJakartaValidation() {
-        return isUseJakartaValidation;
+        return useJakartaValidation;
     }
 
     public void setUseJakartaValidation(boolean useJakartaValidation) {
-        this.isUseJakartaValidation = useJakartaValidation;
+        this.useJakartaValidation = useJakartaValidation;
+    }
+
+    /**
+     * @deprecated use {@link #setUseJakartaValidation(boolean)} instead.
+     */
+    @Deprecated
+    public void setIsUseJakartaValidation(boolean useJakartaValidation) {
+        this.useJakartaValidation = useJakartaValidation;
     }
 
     public void setFormatTypeMapping(Map<String, String> formatTypeMapping) {
         this.formatTypeMapping = formatTypeMapping;
+    }
+
+    public void setUseInnerClassBuilders(boolean useInnerClassBuilders) {
+        this.useInnerClassBuilders = useInnerClassBuilders;
+    }
+
+    public void setIncludeGeneratedAnnotation(boolean includeGeneratedAnnotation) {
+        this.includeGeneratedAnnotation = includeGeneratedAnnotation;
     }
 
     public boolean isIncludeConstructorPropertiesAnnotation() {
@@ -452,7 +500,7 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
 
     @Override
     public boolean isRemoveOldOutput() {
-        return false;
+        return removeOldOutput;
     }
 
     public void setSourceType(SourceType sourceType) {
@@ -497,6 +545,14 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
 
     public void setParcelable(boolean parcelable) {
         this.parcelable = parcelable;
+    }
+
+    public void setFileFilter(FileFilter fileFilter) {
+        this.fileFilter = fileFilter;
+    }
+
+    public void setRemoveOldOutput(boolean removeOldOutput) {
+        this.removeOldOutput = removeOldOutput;
     }
 
     public boolean isInitializeCollections() {

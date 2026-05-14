@@ -66,6 +66,7 @@
         <ktfmt.version>0.59</ktfmt.version>
         <junit.version>5.10.1</junit.version>
         <spring-boot-dependencies.version>4.0.1</spring-boot-dependencies.version>
+        <jackson.version>2.21.0</jackson.version>
         <reflections.version>0.10.2</reflections.version>
         <junit.version>5.8.2</junit.version>
         <logcaptor.version>2.7.10</logcaptor.version>
@@ -81,6 +82,18 @@
             --add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED
         </surefire.argLine>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
