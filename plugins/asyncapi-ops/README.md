@@ -1,5 +1,7 @@
 # AsyncAPI to Terraform Generator
 
+[![Maven Central](https://img.shields.io/maven-central/v/io.zenwave360.sdk/zenwave-sdk.svg?label=Maven%20Central&logo=apachemaven)](https://search.maven.org/artifact/io.zenwave360.sdk/zenwave-sdk)
+[![GitHub](https://img.shields.io/github/license/ZenWave360/zenwave-sdk)](https://github.com/ZenWave360/zenwave-sdk/blob/main/LICENSE)
 ![lifecycle: beta](https://img.shields.io/badge/lifecycle-beta-red)
 
 > Beta lifecycle: Feature-complete enough for early adopters and real testing, but still evolving. Expect changes, validate in your environment, and use with care in production.
