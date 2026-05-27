@@ -34,6 +34,7 @@ components:
       required:
         - address
     Address_c:
+      title: postal address
       type: object
       additionalProperties: false
       properties:

@@ -16,7 +16,7 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
 
     @BeforeEach
     public void setup() throws IOException {
-        FileUtils.deleteDirectory(new File("target/zenwave630/out"));
+        FileUtils.deleteDirectory(new File("target/zenwave630"));
     }
 
     @Test
@@ -52,13 +52,29 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
                 .withApiFile("classpath:asyncapi-v3-schema-name-underscores.yml")
                 .withTargetFolder("target/zenwave630")
                 .withOption("modelPackage", "io.example.v31.domain.events")
-                .withOption("messageNames", "SampleMessage")
                 .withOption("jsonschema2pojo.propertyWordDelimiters", "_-");
 
         new MainGenerator().generate(plugin);
 
         Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/v31/domain/events/AddressC.java").exists());
         Assertions.assertFalse(new File("target/zenwave630/src/main/java/io/example/v31/domain/events/Address_c.java").exists());
+    }
+
+    @Test
+    public void test_generator_for_asyncapi_v31_schema_titles_and_prefix_suffix() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:asyncapi-v3-schema-title-prefix-suffix.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.v31.domain.events")
+                .withOption("jsonschema2pojo.useTitleAsClassname", "true")
+                .withOption("jsonschema2pojo.classNamePrefix", "Api")
+                .withOption("jsonschema2pojo.classNameSuffix", "Dto")
+                .withOption("jsonschema2pojo.propertyWordDelimiters", "_-");
+
+        new MainGenerator().generate(plugin);
+
+        Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/v31/domain/events/ApiPostalAddressDto.java").exists());
+        Assertions.assertFalse(new File("target/zenwave630/src/main/java/io/example/v31/domain/events/ApiAddressCDto.java").exists());
     }
 
     @Test

@@ -1,6 +1,7 @@
 package io.zenwave360.sdk.plugins;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.codemodel.JCodeModel;
 import io.zenwave360.jsonrefparser.$Ref;
@@ -104,7 +105,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
             String messageClassName = NamingUtils.asJavaTypeName(name); // TODO
             if (AsyncApiProcessor.SchemaFormatType.isNativeFormat(schemaFormatType)) {
-                generateFromNativeFormat(config, payload, modelPackage, messageClassName);
+                generateFromNativeFormat(apiModel, config, payload, modelPackage, messageClassName);
             } else {
                 generateFromJsonSchemaFile(config, resolveClasspathURI(payloadRef.getURI()), modelPackage, messageClassName);
             }
@@ -127,8 +128,8 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
         Jsonschema2Pojo.generate(config, ruleLogger);
     }
 
-    public void generateFromNativeFormat(JsonSchema2PojoConfiguration config, Map<String, Object> payload, String packageName, String className) throws IOException {
-        var json = this.convertToJson(config, payload, packageName);
+    public void generateFromNativeFormat(Model apiModel, JsonSchema2PojoConfiguration config, Map<String, Object> payload, String packageName, String className) throws IOException {
+        var json = this.convertToJson(apiModel, config, payload, packageName);
 
         List<Annotator> annotators = new ArrayList<>();
         Class<? extends Annotator> customAnnotatorClass = config.getCustomAnnotator();
@@ -149,17 +150,17 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
     private final ObjectMapper jsonMapper = new ObjectMapper();
 
-    protected String convertToJson(final JsonSchema2PojoConfiguration config, final Map<String, Object> payload, final String packageName) throws JsonProcessingException {
-        populateJavaTypeFromRefsRecursively(config, payload, packageName);
+    protected String convertToJson(final Model apiModel, final JsonSchema2PojoConfiguration config, final Map<String, Object> payload, final String packageName) throws JsonProcessingException {
+        populateJavaTypeFromRefsRecursively(apiModel, config, payload, packageName);
         return this.jsonMapper.writeValueAsString(payload);
     }
 
-    private void populateJavaTypeFromRefsRecursively(JsonSchema2PojoConfiguration config, Object obj, String packageName) {
+    private void populateJavaTypeFromRefsRecursively(Model apiModel, JsonSchema2PojoConfiguration config, Object obj, String packageName) {
         var nameHelper = new NameHelper(config);
-        populateJavaTypeFromRefsRecursively(nameHelper, obj, packageName);
+        populateJavaTypeFromRefsRecursively(apiModel, nameHelper, obj, packageName);
     }
 
-    private void populateJavaTypeFromRefsRecursively(NameHelper nameHelper, Object obj, String packageName) {
+    private void populateJavaTypeFromRefsRecursively(Model apiModel, NameHelper nameHelper, Object obj, String packageName) {
         if (obj instanceof Map) {
             Map<String, Object> map = (Map<String, Object>) obj;
 
@@ -168,8 +169,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
                 String refValue = JSONPath.getFirst(map, "$['" + originalRefProperty + "']", "$['$ref']");
 
                 if (refValue != null && refValue.contains("#/components/schemas/")) {
-                    String schemaName = refValue.substring(refValue.lastIndexOf("/") + 1);
-                    String className = nameHelper.normalizeName(nameHelper.replaceIllegalCharacters(schemaName));
+                    String className = getRefClassName(apiModel, nameHelper, refValue);
                     map.put("javaType", packageName + "." + className);
                 }
             }
@@ -179,15 +179,44 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
             // Recursively process all values in the map
             for (Object value : map.values()) {
-                populateJavaTypeFromRefsRecursively(nameHelper, value, packageName);
+                populateJavaTypeFromRefsRecursively(apiModel, nameHelper, value, packageName);
             }
 
         } else if (obj instanceof List) {
             List<Object> list = (List<Object>) obj;
             for (Object item : list) {
-                populateJavaTypeFromRefsRecursively(nameHelper, item, packageName);
+                populateJavaTypeFromRefsRecursively(apiModel, nameHelper, item, packageName);
             }
         }
+    }
+
+    private String getRefClassName(Model apiModel, NameHelper nameHelper, String refValue) {
+        String schemaName = refValue.substring(refValue.lastIndexOf("/") + 1);
+        try {
+            JsonNode schemaNode = getReferencedSchemaNode(apiModel, schemaName);
+            return getNormalizedClassName(nameHelper, schemaName, schemaNode);
+        } catch (Exception e) {
+            log.debug("Falling back to legacy ref class naming for ref {}", refValue, e);
+            return NamingUtils.asJavaTypeName(schemaName);
+        }
+    }
+
+    private String getNormalizedClassName(NameHelper nameHelper, String schemaName, JsonNode schemaNode) {
+        String className = nameHelper.getClassName(schemaName, schemaNode);
+        className = nameHelper.replaceIllegalCharacters(className);
+        return nameHelper.normalizeName(className);
+    }
+
+    private JsonNode getReferencedSchemaNode(Model apiModel, String schemaName) {
+        Map<String, Object> schemas = JSONPath.get(apiModel, "$.components.schemas");
+        if (schemas == null) {
+            return null;
+        }
+        Object schema = schemas.get(schemaName);
+        if (schema == null) {
+            return null;
+        }
+        return jsonMapper.valueToTree(schema);
     }
 
     private Annotator instantiate(Class<? extends Annotator> annotatorClass, GenerationConfig config) {
