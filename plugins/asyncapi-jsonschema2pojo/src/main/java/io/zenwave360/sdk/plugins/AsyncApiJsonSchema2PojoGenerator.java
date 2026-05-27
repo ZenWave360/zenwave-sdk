@@ -1,8 +1,24 @@
 package io.zenwave360.sdk.plugins;
 
-import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
-import static org.jsonschema2pojo.SourceType.JSONSCHEMA;
-import static org.jsonschema2pojo.SourceType.YAMLSCHEMA;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.codemodel.JCodeModel;
+import io.zenwave360.jsonrefparser.$Ref;
+import io.zenwave360.sdk.doc.DocumentedOption;
+import io.zenwave360.sdk.generators.AbstractAsyncapiGenerator;
+import io.zenwave360.sdk.parsers.Model;
+import io.zenwave360.sdk.processors.AsyncApiProcessor;
+import io.zenwave360.sdk.utils.AsyncAPIUtils;
+import io.zenwave360.sdk.utils.JSONPath;
+import io.zenwave360.sdk.utils.NamingUtils;
+import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
+import org.apache.commons.lang3.ObjectUtils;
+import org.jsonschema2pojo.*;
+import org.jsonschema2pojo.exception.ClassAlreadyExistsException;
+import org.jsonschema2pojo.rules.RuleFactory;
+import org.jsonschema2pojo.util.NameHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,33 +26,14 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import io.zenwave360.sdk.utils.AsyncAPIUtils;
-import io.zenwave360.sdk.utils.Maps;
-import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
-import org.apache.commons.lang3.ObjectUtils;
-import org.jsonschema2pojo.*;
-import org.jsonschema2pojo.exception.ClassAlreadyExistsException;
-import org.jsonschema2pojo.rules.RuleFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.sun.codemodel.JCodeModel;
-
-import io.zenwave360.sdk.doc.DocumentedOption;
-import io.zenwave360.sdk.generators.AbstractAsyncapiGenerator;
-import io.zenwave360.sdk.parsers.Model;
-import io.zenwave360.sdk.processors.AsyncApiProcessor;
-import io.zenwave360.sdk.utils.JSONPath;
-import io.zenwave360.sdk.utils.NamingUtils;
-import io.zenwave360.jsonrefparser.$Ref;
+import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
+import static org.jsonschema2pojo.SourceType.JSONSCHEMA;
+import static org.jsonschema2pojo.SourceType.YAMLSCHEMA;
 
 public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator {
 
@@ -131,7 +128,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     }
 
     public void generateFromNativeFormat(JsonSchema2PojoConfiguration config, Map<String, Object> payload, String packageName, String className) throws IOException {
-        var json = this.convertToJson(payload, packageName);
+        var json = this.convertToJson(config, payload, packageName);
 
         List<Annotator> annotators = new ArrayList<>();
         Class<? extends Annotator> customAnnotatorClass = config.getCustomAnnotator();
@@ -152,12 +149,17 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
     private final ObjectMapper jsonMapper = new ObjectMapper();
 
-    protected String convertToJson(final Map<String, Object> payload, final String packageName) throws JsonProcessingException {
-        populateJavaTypeFromRefsRecursively(payload, packageName);
+    protected String convertToJson(final JsonSchema2PojoConfiguration config, final Map<String, Object> payload, final String packageName) throws JsonProcessingException {
+        populateJavaTypeFromRefsRecursively(config, payload, packageName);
         return this.jsonMapper.writeValueAsString(payload);
     }
 
-    private void populateJavaTypeFromRefsRecursively(Object obj, String packageName) {
+    private void populateJavaTypeFromRefsRecursively(JsonSchema2PojoConfiguration config, Object obj, String packageName) {
+        var nameHelper = new NameHelper(config);
+        populateJavaTypeFromRefsRecursively(nameHelper, obj, packageName);
+    }
+
+    private void populateJavaTypeFromRefsRecursively(NameHelper nameHelper, Object obj, String packageName) {
         if (obj instanceof Map) {
             Map<String, Object> map = (Map<String, Object>) obj;
 
@@ -167,7 +169,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
                 if (refValue != null && refValue.contains("#/components/schemas/")) {
                     String schemaName = refValue.substring(refValue.lastIndexOf("/") + 1);
-                    String className = NamingUtils.asJavaTypeName(schemaName);
+                    String className = nameHelper.normalizeName(nameHelper.replaceIllegalCharacters(schemaName));
                     map.put("javaType", packageName + "." + className);
                 }
             }
@@ -177,13 +179,13 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
             // Recursively process all values in the map
             for (Object value : map.values()) {
-                populateJavaTypeFromRefsRecursively(value, packageName);
+                populateJavaTypeFromRefsRecursively(nameHelper, value, packageName);
             }
 
         } else if (obj instanceof List) {
             List<Object> list = (List<Object>) obj;
             for (Object item : list) {
-                populateJavaTypeFromRefsRecursively(item, packageName);
+                populateJavaTypeFromRefsRecursively(nameHelper, item, packageName);
             }
         }
     }

@@ -47,6 +47,21 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
     }
 
     @Test
+    public void test_generator_for_asyncapi_v31_schema_names_with_underscores() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:asyncapi-v3-schema-name-underscores.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.v31.domain.events")
+                .withOption("messageNames", "SampleMessage")
+                .withOption("jsonschema2pojo.propertyWordDelimiters", "_-");
+
+        new MainGenerator().generate(plugin);
+
+        Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/v31/domain/events/AddressC.java").exists());
+        Assertions.assertFalse(new File("target/zenwave630/src/main/java/io/example/v31/domain/events/Address_c.java").exists());
+    }
+
+    @Test
     public void test_generator_for_asyncapi_v3_filter_messages() throws Exception {
         Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
                 .withApiFile("classpath:asyncapi-v3.yml")

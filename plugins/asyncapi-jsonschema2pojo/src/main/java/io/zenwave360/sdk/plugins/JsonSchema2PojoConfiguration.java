@@ -57,7 +57,7 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
     private Iterator<URL> source;
     private File targetDirectory = new File(".");
     private String targetPackage = "";
-    private char[] propertyWordDelimiters = new char[] {'-', ' ', '_'};
+    private String propertyWordDelimiters = "- _";
     private boolean useLongIntegers = false;
     private boolean useBigIntegers = false;
     private boolean useDoubleNumbers = true;
@@ -391,10 +391,10 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
     }
 
     public char[] getPropertyWordDelimiters() {
-        return propertyWordDelimiters;
+        return propertyWordDelimiters.toCharArray();
     }
 
-    public void setPropertyWordDelimiters(char[] propertyWordDelimiters) {
+    public void setPropertyWordDelimiters(String propertyWordDelimiters) {
         this.propertyWordDelimiters = propertyWordDelimiters;
     }
 
