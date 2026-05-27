@@ -11,15 +11,26 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public class YamlOverlyMerger {
     private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 
     public static String mergeAndOverlay(String content, String mergeFile, List<String> overlayFiles) {
+        return mergeAndOverlay(content, mergeFile, overlayFiles, file -> {
+            try {
+                return getURI(file);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public static String mergeAndOverlay(String content, String mergeFile, List<String> overlayFiles, Function<String, Object> resourceLoader) {
         if(mergeFile != null) {
             try {
                 var asyncapiAsMap = (Map) Parser.parse(content).json();
-                var asyncapiMergeAsMap = (Map) Parser.parse(getURI(mergeFile)).json();
+                var asyncapiMergeAsMap = parseYaml(resourceLoader.apply(mergeFile));
                 var merged = YamlOverlyMerger.merge(asyncapiAsMap, (Map<String, Object>) asyncapiMergeAsMap);
                 content = yamlMapper.writeValueAsString(merged);
             } catch (IOException e) {
@@ -30,7 +41,7 @@ public class YamlOverlyMerger {
             try {
                 var asyncapiAsMap = (Map) Parser.parse(content).json();
                 for (String asyncapiOverlayFile : overlayFiles) {
-                    var asyncapiOverlayAsMap = (Map) Parser.parse(getURI(asyncapiOverlayFile)).json();
+                    var asyncapiOverlayAsMap = parseYaml(resourceLoader.apply(asyncapiOverlayFile));
                     asyncapiAsMap = YamlOverlyMerger.applyOverlay(asyncapiAsMap, (Map<String, Object>) asyncapiOverlayAsMap);
                 }
                 content = yamlMapper.writeValueAsString(asyncapiAsMap);
@@ -50,6 +61,16 @@ public class YamlOverlyMerger {
             return URI.create(uri);
         }
         return new File(uri).toURI();
+    }
+
+    private static Map parseYaml(Object source) throws IOException {
+        if (source instanceof URI uri) {
+            return (Map) Parser.parse(uri).json();
+        }
+        if (source instanceof String content) {
+            return (Map) Parser.parse(content).json();
+        }
+        throw new IllegalArgumentException("Unsupported YAML source: " + source);
     }
 
     public static Map<String, Object> merge(Map<String, Object> base, Map<String, Object> merger) {

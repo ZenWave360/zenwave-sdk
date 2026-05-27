@@ -35,6 +35,21 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
     }
 
     @Test
+    public void test_generator_for_asyncapi_v3_with_overlays() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:asyncapi-v3.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("apiOverlayFiles", List.of("classpath:asyncapi-v3-overlay.yml"))
+                .withOption("modelPackage", "io.example.v3.domain.events");
+
+        new MainGenerator().generate(plugin);
+
+        File customerEvent = new File("target/zenwave630/src/main/java/io/example/v3/domain/events/CustomerEvent.java");
+        Assertions.assertTrue(customerEvent.exists());
+        Assertions.assertTrue(FileUtils.readFileToString(customerEvent, "UTF-8").contains("externalId"));
+    }
+
+    @Test
     public void test_generator_for_asyncapi_schemas_with_delimiters() throws Exception {
         Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
                 .withApiFile("classpath:asyncapi.yml")

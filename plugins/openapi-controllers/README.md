@@ -7,6 +7,7 @@ After you have generated SpringMVC interfaces and DTOs with OpenAPI generator, y
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.OpenAPIControllersPlugin    
     openapiFile=src/main/resources/model/openapi.yml \
+    apiOverlayFiles=src/main/resources/model/openapi-overlay.yml \
     zdlFile=src/main/resources/model/orders-model.jdl \
     basePackage=io.zenwave360.example \
     openApiApiPackage=io.zenwave360.example.adapters.web \
@@ -14,6 +15,20 @@ jbang zw -p io.zenwave360.sdk.plugins.OpenAPIControllersPlugin
     openApiModelNameSuffix=DTO \
     targetFolder=.
 ```
+
+## Overlays
+
+Use `apiOverlayFiles` to patch the OpenAPI source before dereferencing and `allOf` merge.
+
+```shell
+jbang zw -p io.zenwave360.sdk.plugins.OpenAPIControllersPlugin \
+    openapiFile=src/main/resources/model/openapi.yml \
+    apiOverlayFiles=src/main/resources/model/openapi-overlay.yml \
+    zdlFile=src/main/resources/model/orders-model.jdl \
+    targetFolder=.
+```
+
+Overlay files are applied in order. This is intended for local files and file-backed `classpath:` resources.
 
 ## Configuring OpenAPI Generator for Compatibility
 
@@ -75,6 +90,7 @@ requestBody:
 | **Option**                  | **Description**                                                                                                                                                            | **Type**         | **Default**                           | **Values**                        |
 |-----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|---------------------------------------|-----------------------------------|
 | `openapiFile`               | OpenAPI Specification File                                                                                                                                                 | String           |                                       |                                   |
+| `apiOverlayFiles`           | Ordered list of API overlay YAML files applied before dereferencing and `allOf` merge.                                                                                    | List             | []                                    |                                   |
 | `zdlFile`                   | ZDL file to parse                                                                                                                                                          | String           |                                       |                                   |
 | `targetFolder`              | Target folder to generate code to. If left empty, it will print to stdout.                                                                                                 | File             |                                       |                                   |
 | `style`                     | Programming Style                                                                                                                                                          | ProgrammingStyle | imperative                            | imperative, reactive              |

@@ -1,0 +1,3 @@
+actions:
+  - target: $.channels.reserve-stock-command.address
+    update: merchandising.inventory.inventory-adjustment.reserve-stock.command.overlay.avro.v0

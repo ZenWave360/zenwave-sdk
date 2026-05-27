@@ -5,10 +5,26 @@ Generates test for KarateDSL based on OpenAPI and Arazzo specifications.
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.OpenAPIKaratePlugin \
     specFile=src/main/resources/model/openapi.yml \
+    apiOverlayFiles=src/main/resources/model/openapi-overlay.yml \
     targetFolder=src/test/resources \
     testsPackage=io.zenwave360.example.adapters.web.tests \
     groupBy=service
 ```
+
+## Overlays
+
+Use `apiOverlayFiles` to patch the OpenAPI source before dereferencing and `allOf` merge.
+
+```shell
+jbang zw -p io.zenwave360.sdk.plugins.OpenAPIKaratePlugin \
+    specFile=src/main/resources/model/openapi.yml \
+    apiOverlayFiles=src/main/resources/model/openapi-overlay.yml \
+    targetFolder=src/test/resources \
+    testsPackage=io.zenwave360.example.adapters.web.tests \
+    groupBy=service
+```
+
+Overlay files are applied in order. This is intended for local files and file-backed `classpath:` resources.
 
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.OpenAPIKaratePlugin \
@@ -25,6 +41,7 @@ jbang zw -p io.zenwave360.sdk.plugins.OpenAPIKaratePlugin \
 | **Option**                     | **Description**                                                              | **Type**    | **Default**                                              | **Values**                                |
 |--------------------------------|------------------------------------------------------------------------------|-------------|----------------------------------------------------------|-------------------------------------------|
 | `specFile`                     | API Specification File                                                       | URI         |                                                          |                                           |
+| `apiOverlayFiles`              | Ordered list of API overlay YAML files applied before dereferencing and `allOf` merge. | List  | []                                                       |                                           |
 | `targetFolder`                 | Target folder to generate code to. If left empty, it will print to stdout.   | File        |                                                          |                                           |
 | `basePackage`                  | Applications base package                                                    | String      |                                                          |                                           |
 | `testsPackage`                 | Package name for generated tests                                             | String      | `{{basePackage}}.adapters.web.tests`                       |                                           |

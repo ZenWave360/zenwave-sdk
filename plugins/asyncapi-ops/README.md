@@ -14,6 +14,7 @@ Single provider spec:
 ```shell
 jbang zw -p AsyncAPIOpsGeneratorPlugin \
   apiFile=asyncapi.yml \
+  apiOverlayFiles=asyncapi-overlay.yml \
   avroImports=classpath:shared-avro/avro \
   server=staging \
   targetFolder=terraform/inventory-adjustment
@@ -23,10 +24,25 @@ Multiple spec together for a single service (i.e.: provider + client):
 ```shell
 jbang zw -p AsyncAPIOpsGeneratorPlugin \
   apiFiles=asyncapi.yml,asyncapi-client.yml \
+  apiOverlayFiles=asyncapi-overlay.yml \
   avroImports=schemas/avro1.avsc,schemas/avro2.avsc \
   server=staging \
   targetFolder=terraform/inventory-adjustment
 ```
+
+## Overlays
+
+Use `apiOverlayFiles` to patch each input AsyncAPI before dereferencing and `allOf` merge.
+
+```shell
+jbang zw -p AsyncAPIOpsGeneratorPlugin \
+  apiFiles=asyncapi.yml,asyncapi-client.yml \
+  apiOverlayFiles=asyncapi-overlay.yml \
+  server=staging \
+  targetFolder=terraform/out
+```
+
+Overlay files are applied in order to every loaded spec. This is intended for local files and file-backed `classpath:` resources.
 
 Remote files with TerraformConfluent provider:
 
@@ -84,6 +100,7 @@ This plugin has been tested in the following setups:
 |------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|------------------|-------------------------------|
 | `apiFile`        | AsyncAPI Specification File                                                                                                                                                  | URI      | `null`           |                               |
 | `apiFiles`       | List of AsyncAPI specs. Supported schemas are local files, http/s and classpath resources.                                                                                   | List     | `[]`             |                               |
+| `apiOverlayFiles` | Ordered list of API overlay YAML files applied to each loaded spec before dereferencing and `allOf` merge.                                                            | List     | `[]`             |                               |
 | `avroImports`    | Avro schema files or folders available while bundling owned message schemas. Supports local files/folders, `classpath:` files/folders and `https://` files.                | List     | `[]`             |                               |
 | `authentication` | Authentication configuration values for fetching remote resources.                                                                                                           | List     | `[]`             |                               |
 | `server`         | Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Used to merge `x-env-server-overrides`/`env-server-overrides` from channel and error-topic bindings. | String   | `null`           |                               |

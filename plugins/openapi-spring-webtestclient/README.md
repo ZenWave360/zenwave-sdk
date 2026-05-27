@@ -5,6 +5,7 @@ Generates test for SpringMVC or Spring WebFlux using WebTestClient based on Open
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.SpringWebTestClientPlugin \
     specFile=src/main/resources/model/openapi.yml \
+    apiOverlayFiles=src/main/resources/model/openapi-overlay.yml \
     targetFolder=src/test/java \
     testsPackage=io.zenwave360.example.adapters.web.tests \
     openApiApiPackage=io.zenwave360.example.adapters.web \
@@ -12,6 +13,21 @@ jbang zw -p io.zenwave360.sdk.plugins.SpringWebTestClientPlugin \
     openApiModelNameSuffix=DTO \
     groupBy=service
 ```
+
+## Overlays
+
+Use `apiOverlayFiles` to patch the OpenAPI source before dereferencing and `allOf` merge.
+
+```shell
+jbang zw -p io.zenwave360.sdk.plugins.SpringWebTestClientPlugin \
+    specFile=src/main/resources/model/openapi.yml \
+    apiOverlayFiles=src/main/resources/model/openapi-overlay.yml \
+    targetFolder=src/test/java \
+    testsPackage=io.zenwave360.example.adapters.web.tests \
+    groupBy=service
+```
+
+Overlay files are applied in order. This is intended for local files and file-backed `classpath:` resources.
 
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.SpringWebTestClientPlugin \
@@ -31,6 +47,7 @@ jbang zw -p io.zenwave360.sdk.plugins.SpringWebTestClientPlugin \
 | **Option**                     | **Description**                                                              | **Type**           | **Default**                                              | **Values**                                |
 |--------------------------------|------------------------------------------------------------------------------|--------------------|----------------------------------------------------------|-------------------------------------------|
 | `specFile`                     | API Specification File                                                       | URI                |                                                          |                                           |
+| `apiOverlayFiles`              | Ordered list of API overlay YAML files applied before dereferencing and `allOf` merge. | List         | []                                                       |                                           |
 | `targetFolder`                 | Target folder to generate code to. If left empty, it will print to stdout.   | File               |                                                          |                                           |
 | `testsPackage`                 | Package name for generated tests                                             | String             | `{{basePackage}}.adapters.web.tests`                       |                                           |
 | `groupBy`                      | Generate test classes grouped by                                             | GroupByType        | service                                                  | service, operation, partial, businessFlow |

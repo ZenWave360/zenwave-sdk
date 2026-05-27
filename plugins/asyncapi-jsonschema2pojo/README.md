@@ -8,10 +8,25 @@ Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schem
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.AsyncApiJsonSchema2PojoPlugin \
     apiFile=src/main/resources/model/asyncapi.yml \
+    apiOverlayFiles=src/main/resources/model/asyncapi-overlay.yml \
     modelPackage=io.zenwave360.example.core.domain.events \
     jsonschema2pojo.includeTypeInfo=true \
     targetFolder=.
 ```
+
+## Overlays
+
+Use `apiOverlayFiles` to patch the AsyncAPI source before dereferencing and `allOf` merge.
+
+```shell
+jbang zw -p io.zenwave360.sdk.plugins.AsyncApiJsonSchema2PojoPlugin \
+    apiFile=src/main/resources/model/asyncapi.yml \
+    apiOverlayFiles=src/main/resources/model/asyncapi-overlay.yml \
+    modelPackage=io.zenwave360.example.core.domain.events \
+    targetFolder=.
+```
+
+Overlay files are applied in order. This is intended for local files and file-backed `classpath:` resources.
 
 ## Options
 
@@ -19,6 +34,7 @@ jbang zw -p io.zenwave360.sdk.plugins.AsyncApiJsonSchema2PojoPlugin \
 |----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------|-------------|------------|
 | `apiFile`                  | API Specification File                                                                                                                                                | URI                         |             |            |
 | `apiFiles`                 | API Spec files to parse (comma separated)                                                                                                                             | List                        |             |            |
+| `apiOverlayFiles`          | Ordered list of API overlay YAML files applied before dereferencing and `allOf` merge.                                                                               | List                        | []          |            |
 | `targetFolder`             | Target folder to generate code to.                                                                                                                                    | File                        |             |            |
 | `modelPackage`             | Java Models package name                                                                                                                                              | String                      |             |            |
 | `generatedAnnotationClass` | Annotation class to mark generated code (e.g. `org.springframework.aot.generate.Generated`). When retained at runtime, this prevents code coverage tools like Jacoco from including generated classes in coverage reports. | Class<? extends Annotation> |             |            |
@@ -63,6 +79,7 @@ Use jsonschema2pojo prefix to pass any option to https://www.jsonschema2pojo.org
                 <inputSpec>${pom.basedir}/src/main/resources/model/asyncapi.yml</inputSpec>
                 <configOptions>
                     <modelPackage>io.zenwave360.example.adapters.events.model</modelPackage>
+                    <apiOverlayFiles>${pom.basedir}/src/main/resources/model/asyncapi-overlay.yml</apiOverlayFiles>
                     <!-- use jsonschema2pojo prefix to pass any option to jsonschema2pojo underlying library -->
                     <jsonschema2pojo.includeTypeInfo>true</jsonschema2pojo.includeTypeInfo>
                 </configOptions>

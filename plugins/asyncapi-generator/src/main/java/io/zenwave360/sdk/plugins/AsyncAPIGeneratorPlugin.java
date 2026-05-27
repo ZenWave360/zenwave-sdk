@@ -14,6 +14,7 @@ import io.zenwave360.sdk.writers.TemplateFileWriter;
                 "Generates strongly typed SpringCloudStreams3 producer/consumer classes for AsyncAPI with Avro and JSON DTOs",
         mainOptions = {
             "apiFile",
+            "apiOverlayFiles",
             "role",
             "templates",
             "modelPackage",

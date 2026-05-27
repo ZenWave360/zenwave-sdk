@@ -11,6 +11,7 @@ import io.zenwave360.sdk.writers.TemplateFileWriter;
         mainOptions = {
             "apiFile",
             "apiFiles",
+            "apiOverlayFiles",
             "avroImports",
             "server",
             "templates",

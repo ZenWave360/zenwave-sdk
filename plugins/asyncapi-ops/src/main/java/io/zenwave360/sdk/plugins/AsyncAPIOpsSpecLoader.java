@@ -40,6 +40,15 @@ public class AsyncAPIOpsSpecLoader implements Processor, WithProjectClassLoader<
     @DocumentedOption(description = "AsyncAPI Specification Files")
     public List<URI> apiFiles = new ArrayList<>();
 
+    @DocumentedOption(description = "Ordered list of API overlay YAML files applied to each loaded spec before dereferencing and allOf merge.")
+    public List<String> apiOverlayFiles = List.of();
+
+    @Deprecated
+    @DocumentedOption(description = "Deprecated alias for apiOverlayFiles.")
+    public void setAsyncapiOverlayFiles(List<String> asyncapiOverlayFiles) {
+        this.apiOverlayFiles = asyncapiOverlayFiles;
+    }
+
     @Override
     public AsyncAPIOpsSpecLoader withProjectClassLoader(ClassLoader projectClassLoader) {
         this.projectClassLoader = projectClassLoader;
@@ -76,6 +85,7 @@ public class AsyncAPIOpsSpecLoader implements Processor, WithProjectClassLoader<
         DefaultYamlParser parser = new DefaultYamlParser()
                 .withApiFile(fileUri)
                 .withProjectClassLoader(projectClassLoader);
+        parser.apiOverlayFiles = apiOverlayFiles;
 
         Map<String, Object> parsed = parser.parse();
 
