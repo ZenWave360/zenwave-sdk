@@ -182,30 +182,9 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
                     ? uri
                     : uri.replace("classpath:", "classpath:/"));
         }
-        if (hasUriScheme(uri) && !isWindowsDriveLetterPath(uri)) {
+        if (uri.startsWith("http://") || uri.startsWith("https://") || uri.startsWith("file:")) {
             return URI.create(uri);
         }
         return new File(uri).toURI();
-    }
-
-    private boolean hasUriScheme(String uri) {
-        int colonIndex = uri.indexOf(':');
-        if (colonIndex <= 1) {
-            return false;
-        }
-        for (int i = 0; i < colonIndex; i++) {
-            char ch = uri.charAt(i);
-            if (!Character.isLetterOrDigit(ch) && ch != '+' && ch != '-' && ch != '.') {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean isWindowsDriveLetterPath(String uri) {
-        return uri.length() >= 3
-                && Character.isLetter(uri.charAt(0))
-                && uri.charAt(1) == ':'
-                && (uri.charAt(2) == '\\' || uri.charAt(2) == '/');
     }
 }
