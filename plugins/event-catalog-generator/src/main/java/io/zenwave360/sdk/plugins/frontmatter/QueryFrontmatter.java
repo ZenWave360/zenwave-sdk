@@ -1,22 +1,22 @@
 package io.zenwave360.sdk.plugins.frontmatter;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import io.zenwave360.sdk.plugins.frontmatter.FrontmatterTypes.ChannelPointerFrontmatter;
+import io.zenwave360.sdk.plugins.frontmatter.FrontmatterTypes.CommonFrontmatter;
+import io.zenwave360.sdk.plugins.frontmatter.FrontmatterTypes.MessageDetailsPanelFrontmatter;
+import io.zenwave360.sdk.plugins.frontmatter.FrontmatterTypes.OperationFrontmatter;
+import io.zenwave360.sdk.plugins.frontmatter.FrontmatterTypes.ResourcePointerFrontmatter;
 
-/** Typed frontmatter for query {@code index.mdx} pages. */
-public class QueryFrontmatter {
+import java.util.List;
 
-    public String id;
-    public String name;
-    public String version;
-    public String schemaPath;
-
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("id", id);
-        map.put("name", name);
-        map.put("version", version);
-        if (schemaPath != null) map.put("schemaPath", schemaPath);
-        return map;
-    }
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public record QueryFrontmatter(
+        @JsonUnwrapped CommonFrontmatter base,
+        OperationFrontmatter operation,
+        List<ResourcePointerFrontmatter> producers,
+        List<ResourcePointerFrontmatter> consumers,
+        List<ChannelPointerFrontmatter> channels,
+        List<ResourcePointerFrontmatter> messageChannels,
+        MessageDetailsPanelFrontmatter detailsPanel) implements Frontmatter {
 }
