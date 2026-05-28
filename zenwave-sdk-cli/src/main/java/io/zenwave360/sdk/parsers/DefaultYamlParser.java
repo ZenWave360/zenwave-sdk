@@ -104,13 +104,7 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
 
     protected Model parseWithOverlays() throws IOException {
         String baseContent = loadUriContent(apiFile);
-        String overlayedContent = YamlOverlyMerger.mergeAndOverlay(baseContent, null, apiOverlayFiles, file -> {
-            try {
-                return loadUriContent(file);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        String overlayedContent = YamlOverlyMerger.mergeAndOverlay(baseContent, null, apiOverlayFiles, this::loadUriContent);
         URI baseUri = normalizeBaseUri(apiFile);
         $RefParser parser = new $RefParser(overlayedContent, baseUri)
                 .withResourceClassLoader(this.projectClassLoader)
@@ -141,9 +135,7 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
     }
 
     protected String loadUriContent(String uri) throws IOException {
-        return loadUriContent(URI.create(uri.startsWith("classpath:") && !uri.startsWith("classpath:/")
-                ? uri.replace("classpath:", "classpath:/")
-                : uri));
+        return loadUriContent(normalizeInputUri(uri));
     }
 
     private String loadRemoteUriContent(URI uri) throws IOException {
@@ -182,5 +174,38 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
             return new File(uri.toString()).toURI();
         }
         return uri;
+    }
+
+    private URI normalizeInputUri(String uri) {
+        if (uri.startsWith("classpath:")) {
+            return URI.create(uri.startsWith("classpath:/")
+                    ? uri
+                    : uri.replace("classpath:", "classpath:/"));
+        }
+        if (hasUriScheme(uri) && !isWindowsDriveLetterPath(uri)) {
+            return URI.create(uri);
+        }
+        return new File(uri).toURI();
+    }
+
+    private boolean hasUriScheme(String uri) {
+        int colonIndex = uri.indexOf(':');
+        if (colonIndex <= 1) {
+            return false;
+        }
+        for (int i = 0; i < colonIndex; i++) {
+            char ch = uri.charAt(i);
+            if (!Character.isLetterOrDigit(ch) && ch != '+' && ch != '-' && ch != '.') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isWindowsDriveLetterPath(String uri) {
+        return uri.length() >= 3
+                && Character.isLetter(uri.charAt(0))
+                && uri.charAt(1) == ':'
+                && (uri.charAt(2) == '\\' || uri.charAt(2) == '/');
     }
 }

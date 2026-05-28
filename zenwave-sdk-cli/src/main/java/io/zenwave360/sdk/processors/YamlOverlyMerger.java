@@ -11,43 +11,37 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 public class YamlOverlyMerger {
     private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 
-    public static String mergeAndOverlay(String content, String mergeFile, List<String> overlayFiles) {
-        return mergeAndOverlay(content, mergeFile, overlayFiles, file -> {
-            try {
-                return getURI(file);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
+    @FunctionalInterface
+    public interface ThrowingResourceLoader {
+        Object apply(String resource) throws IOException;
     }
 
-    public static String mergeAndOverlay(String content, String mergeFile, List<String> overlayFiles, Function<String, Object> resourceLoader) {
+    public static String mergeAndOverlay(String content, String mergeFile, List<String> overlayFiles) {
+        try {
+            return mergeAndOverlay(content, mergeFile, overlayFiles, YamlOverlyMerger::getURI);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String mergeAndOverlay(String content, String mergeFile, List<String> overlayFiles, ThrowingResourceLoader resourceLoader) throws IOException {
         if(mergeFile != null) {
-            try {
-                var asyncapiAsMap = (Map) Parser.parse(content).json();
-                var asyncapiMergeAsMap = parseYaml(resourceLoader.apply(mergeFile));
-                var merged = YamlOverlyMerger.merge(asyncapiAsMap, (Map<String, Object>) asyncapiMergeAsMap);
-                content = yamlMapper.writeValueAsString(merged);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            var asyncapiAsMap = (Map) Parser.parse(content).json();
+            var asyncapiMergeAsMap = parseYaml(resourceLoader.apply(mergeFile));
+            var merged = YamlOverlyMerger.merge(asyncapiAsMap, (Map<String, Object>) asyncapiMergeAsMap);
+            content = yamlMapper.writeValueAsString(merged);
         }
         if (overlayFiles != null && !overlayFiles.isEmpty()) {
-            try {
-                var asyncapiAsMap = (Map) Parser.parse(content).json();
-                for (String asyncapiOverlayFile : overlayFiles) {
-                    var asyncapiOverlayAsMap = parseYaml(resourceLoader.apply(asyncapiOverlayFile));
-                    asyncapiAsMap = YamlOverlyMerger.applyOverlay(asyncapiAsMap, (Map<String, Object>) asyncapiOverlayAsMap);
-                }
-                content = yamlMapper.writeValueAsString(asyncapiAsMap);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            var asyncapiAsMap = (Map) Parser.parse(content).json();
+            for (String asyncapiOverlayFile : overlayFiles) {
+                var asyncapiOverlayAsMap = parseYaml(resourceLoader.apply(asyncapiOverlayFile));
+                asyncapiAsMap = YamlOverlyMerger.applyOverlay(asyncapiAsMap, (Map<String, Object>) asyncapiOverlayAsMap);
             }
+            content = yamlMapper.writeValueAsString(asyncapiAsMap);
         }
         return content;
     }

@@ -1,11 +1,13 @@
 package io.zenwave360.sdk.parsers;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -28,26 +30,38 @@ public class DefaultYamlParserTest {
     public void testParseWithMissingOverlayThrowsIOException() {
         DefaultYamlParser parser = new DefaultYamlParser()
                 .withApiFile(URI.create("classpath:io/zenwave360/sdk/resources/openapi/customer-address-openapi.yml"));
-        parser.apiOverlayFiles = java.util.List.of("does-not-exist-overlay.yml");
+        parser.apiOverlayFiles = List.of("does-not-exist-overlay.yml");
 
         Assertions.assertThrows(IOException.class, parser::parse);
     }
 
     @Test
-    public void testParseWithWindowsStyleOverlayPath() throws Exception {
+    public void testParseWithFilesystemOverlayPath() throws Exception {
         Path overlayFile = Files.createTempFile("openapi-overlay-", ".yml");
-        Files.writeString(overlayFile, """
-                actions:
-                  - target: $.info.title
-                    update: Overlayed From Windows Path
-                """, StandardCharsets.UTF_8);
+        try {
+            Files.writeString(overlayFile, """
+                    actions:
+                      - target: $.info.title
+                        update: Overlayed From Filesystem Path
+                    """, StandardCharsets.UTF_8);
 
-        DefaultYamlParser parser = new DefaultYamlParser()
-                .withApiFile(URI.create("classpath:io/zenwave360/sdk/resources/openapi/customer-address-openapi.yml"));
-        parser.apiOverlayFiles = java.util.List.of(overlayFile.toString().replace("/", "\\"));
+            DefaultYamlParser parser = new DefaultYamlParser()
+                    .withApiFile(URI.create("classpath:io/zenwave360/sdk/resources/openapi/customer-address-openapi.yml"));
+            parser.apiOverlayFiles = List.of(toNativePathString(overlayFile));
 
-        Model model = (Model) parser.parse().get("api");
+            Model model = (Model) parser.parse().get("api");
 
-        Assertions.assertEquals("Overlayed From Windows Path", JSONPath.get(model, "$.info.title"));
+            Assertions.assertEquals("Overlayed From Filesystem Path", JSONPath.get(model, "$.info.title"));
+        } finally {
+            Files.deleteIfExists(overlayFile);
+        }
+    }
+
+    private String toNativePathString(Path path) {
+        String normalized = path.toAbsolutePath().toString();
+        if (File.separatorChar == '\\') {
+            return normalized.replace('/', '\\');
+        }
+        return normalized;
     }
 }
