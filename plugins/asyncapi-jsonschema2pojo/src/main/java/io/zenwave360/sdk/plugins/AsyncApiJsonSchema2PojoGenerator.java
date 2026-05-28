@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.codemodel.JCodeModel;
 import io.zenwave360.jsonrefparser.$Ref;
+import io.zenwave360.jsonrefparser.$Refs;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractAsyncapiGenerator;
 import io.zenwave360.sdk.parsers.Model;
@@ -94,7 +95,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
         for (final Map<String, Object> message : messages) {
             Map<String, Object> payload = JSONPath.getFirst(message, "$.payload.schema", "$.payload");
             String name = (String)  ObjectUtils.firstNonNull(payload.get("x--schema-name"), message.get("name"));
-            $Ref payloadRef = apiModel.getRefs().getOriginalRef(payload);
+
             var schemaFormatPath = AsyncAPIUtils.isV3(apiModel) ? "$.payload.schemaFormat" : "$.schemaFormat";
             var schemaFormat = (String) firstNonNull(JSONPath.get(message, schemaFormatPath), defaultSchemaFormat);
             AsyncApiProcessor.SchemaFormatType schemaFormatType = AsyncApiProcessor.SchemaFormatType.getFormat(schemaFormat);
@@ -107,9 +108,30 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             if (AsyncApiProcessor.SchemaFormatType.isNativeFormat(schemaFormatType)) {
                 generateFromNativeFormat(apiModel, config, payload, modelPackage, messageClassName);
             } else {
+                var payloadRef = getOriginalRef(apiModel.getRefs(), payload);
                 generateFromJsonSchemaFile(config, resolveClasspathURI(payloadRef.getURI()), modelPackage, messageClassName);
             }
         }
+    }
+
+    public $Ref getOriginalRef($Refs refs, Object obj) {
+        var originalRef = refs.getOriginalRef(obj);
+        if (originalRef != null) {
+            return originalRef;
+        }
+        return getReplacedRef(refs, obj);
+    }
+
+    public $Ref getReplacedRef($Refs refs, Object obj) {
+        Object originalAllOf = refs.getReplacedRefsList();
+        return refs.getReplacedRefsList().stream()
+                .filter(pair -> isOriginalRef(obj, pair.getValue(), originalAllOf))
+                .map(pair -> pair.getKey())
+                .findFirst().orElse(null);
+    }
+
+    protected boolean isOriginalRef(Object value, Object savedValue, Object originalAllOf) {
+        return value == savedValue || (originalAllOf != null && savedValue instanceof Map && ((Map<?, ?>) savedValue).get("allOf") == originalAllOf);
     }
 
     private URL resolveClasspathURI(URI classpathURI) throws MalformedURLException {

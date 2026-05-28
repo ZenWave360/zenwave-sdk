@@ -76,6 +76,19 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
     }
 
     @Test
+    public void test_generator_for_asyncapi_v31_external_json_schema_defs_with_underscores() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:asyncapi-v3-external-json-schema-name-underscores.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.v31.domain.events");
+
+        new MainGenerator().generate(plugin);
+
+        Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/v31/domain/events/AddressC.java").exists());
+        Assertions.assertFalse(new File("target/zenwave630/src/main/java/io/example/v31/domain/events/Address.java").exists());
+    }
+
+    @Test
     public void test_generator_for_asyncapi_v31_schema_titles_and_prefix_suffix() throws Exception {
         Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
                 .withApiFile("classpath:asyncapi-v3-schema-title-prefix-suffix.yml")
