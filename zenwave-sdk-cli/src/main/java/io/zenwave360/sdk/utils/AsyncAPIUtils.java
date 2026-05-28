@@ -55,11 +55,11 @@ public class AsyncAPIUtils {
                 allMessages.addAll(messages);
             } else {
                 if(operationIds.isEmpty()) {
-                    Set<Map<String, Object>> messages = new HashSet<>(JSONPath.getFirst(apiModel, "$.operations[*].messages[*]", "$.operations[*].channel.messages[*]"));
+                    Set<Map<String, Object>> messages = new HashSet<>(JSONPath.getFirstNonEmpty(apiModel, "$.operations[*].messages[*]", "$.operations[*].channel.messages[*]"));
                     allMessages.addAll(messages);
                 } else {
                     for (String operationId : operationIds) {
-                        Set<Map<String, Object>> messages = new HashSet<>(JSONPath.getFirst(apiModel, "$.operations['" + operationId + "'].messages[*]", "$.operations['" + operationId + "'].channel.messages[*]"));
+                        Set<Map<String, Object>> messages = new HashSet<>(JSONPath.getFirstNonEmpty(apiModel, "$.operations['" + operationId + "'].messages[*]", "$.operations['" + operationId + "'].channel.messages[*]"));
                         allMessages.addAll(messages);
                     }
                 }

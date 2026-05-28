@@ -80,12 +80,12 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
         Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
                 .withApiFile("classpath:asyncapi-v3-external-json-schema-name-underscores.yml")
                 .withTargetFolder("target/zenwave630")
-                .withOption("modelPackage", "io.example.v31.domain.events");
+                .withOption("modelPackage", "io.example.v31_external.domain.events");
 
         new MainGenerator().generate(plugin);
 
-        Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/v31/domain/events/AddressC.java").exists());
-        Assertions.assertFalse(new File("target/zenwave630/src/main/java/io/example/v31/domain/events/Address.java").exists());
+        Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/v31_external/domain/events/AddressC.java").exists());
+        Assertions.assertFalse(new File("target/zenwave630/src/main/java/io/example/v31_external/domain/events/Address.java").exists());
     }
 
     @Test
