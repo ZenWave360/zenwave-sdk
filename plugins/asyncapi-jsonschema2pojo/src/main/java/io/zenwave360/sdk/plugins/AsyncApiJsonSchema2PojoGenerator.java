@@ -191,7 +191,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             if (!map.containsKey("javaType")) {
                 String refValue = JSONPath.getFirst(map, "$['" + originalRefProperty + "']", "$['$ref']");
 
-                if (refValue != null && refValue.contains("#/components/schemas/")) {
+                if (refValue != null && refValue.startsWith("#/")) {
                     String className = getRefClassName(apiModel, nameHelper, refValue);
                     map.put("javaType", packageName + "." + className);
                 }
@@ -216,11 +216,11 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     private String getRefClassName(Model apiModel, NameHelper nameHelper, String refValue) {
         String schemaName = refValue.substring(refValue.lastIndexOf("/") + 1);
         try {
-            JsonNode schemaNode = getReferencedSchemaNode(apiModel, schemaName);
+            JsonNode schemaNode = getReferencedSchemaNode(apiModel, refValue);
             return getNormalizedClassName(nameHelper, schemaName, schemaNode);
         } catch (Exception e) {
             log.debug("Falling back to legacy ref class naming for ref {}", refValue, e);
-            return NamingUtils.asJavaTypeName(schemaName);
+            return getNormalizedClassName(nameHelper, schemaName, null);
         }
     }
 
@@ -230,12 +230,21 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
         return nameHelper.normalizeName(className);
     }
 
-    private JsonNode getReferencedSchemaNode(Model apiModel, String schemaName) {
-        Map<String, Object> schemas = JSONPath.get(apiModel, "$.components.schemas");
-        if (schemas == null) {
-            return null;
+    private JsonNode getReferencedSchemaNode(Model apiModel, String refValue) {
+        Object schema = null;
+        if (refValue.startsWith("#/components/schemas/")) {
+            String schemaName = refValue.substring(refValue.lastIndexOf("/") + 1);
+            Map<String, Object> schemas = JSONPath.get(apiModel, "$.components.schemas");
+            if (schemas != null) {
+                schema = schemas.get(schemaName);
+            }
         }
-        Object schema = schemas.get(schemaName);
+        if (schema == null) {
+            schema = apiModel.getRefs().getObjectForRef($Ref.of(refValue, apiModel.getUri()));
+        }
+        if (schema == null) {
+            schema = apiModel.getRefs().get(refValue);
+        }
         if (schema == null) {
             return null;
         }

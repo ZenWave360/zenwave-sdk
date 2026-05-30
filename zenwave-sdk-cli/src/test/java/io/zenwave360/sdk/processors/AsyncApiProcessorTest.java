@@ -6,6 +6,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -143,6 +144,24 @@ public class AsyncApiProcessorTest {
         Assertions.assertEquals(true, get(processed, "$.channels.createProductNotification2.publish.x--has-runtime-headers"));
         Assertions.assertEquals("CreateProductPayload", get(processed, "$.components.messages.createProductMsg.payload.x--schema-name"));
         Assertions.assertEquals("#/components/schemas/CreateProductPayload", get(processed, "$.components.messages.createProductMsg.payload.x--original-$ref"));
+    }
+
+    @Test
+    public void testProcessAsyncApiDecoratesExternalJsonSchemaDefsWithoutSchemaFormat() throws Exception {
+        Map<String, Object> model = loadAsyncapiModelFromResource("classpath:asyncapi/external-json-schema-defs-without-schema-format.yml");
+        Model parsed = (Model) model.get(targetProperty);
+
+        List<String> originalRefs = parsed.getRefs().getOriginalRefsList().stream()
+                .map(pair -> pair.getKey().getRef())
+                .collect(Collectors.toList());
+        Assertions.assertTrue(originalRefs.contains("./sample-message.json"));
+        Assertions.assertTrue(originalRefs.contains("#/$defs/Address_c"));
+
+        AsyncApiProcessor processor = new AsyncApiProcessor();
+        Model processed = (Model) processor.process(model).get(targetProperty);
+
+        Assertions.assertEquals("#/$defs/Address_c",
+                get(processed, "$.components.messages.SampleMessage.payload.schema.properties.address.x--original-$ref"));
     }
 
     @ParameterizedTest
