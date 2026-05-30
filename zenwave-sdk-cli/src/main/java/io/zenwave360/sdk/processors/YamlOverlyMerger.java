@@ -2,7 +2,7 @@ package io.zenwave360.sdk.processors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import io.zenwave360.jsonrefparser.parser.Parser;
+import io.zenwave360.jsonrefparser.JavaRefParser;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
 
@@ -30,13 +30,13 @@ public class YamlOverlyMerger {
 
     public static String mergeAndOverlay(String content, String mergeFile, List<String> overlayFiles, ThrowingResourceLoader resourceLoader) throws IOException {
         if(mergeFile != null) {
-            var asyncapiAsMap = (Map) Parser.parse(content).json();
+            var asyncapiAsMap = parseYaml(content);
             var asyncapiMergeAsMap = parseYaml(resourceLoader.apply(mergeFile));
             var merged = YamlOverlyMerger.merge(asyncapiAsMap, (Map<String, Object>) asyncapiMergeAsMap);
             content = yamlMapper.writeValueAsString(merged);
         }
         if (overlayFiles != null && !overlayFiles.isEmpty()) {
-            var asyncapiAsMap = (Map) Parser.parse(content).json();
+            var asyncapiAsMap = parseYaml(content);
             for (String asyncapiOverlayFile : overlayFiles) {
                 var asyncapiOverlayAsMap = parseYaml(resourceLoader.apply(asyncapiOverlayFile));
                 asyncapiAsMap = YamlOverlyMerger.applyOverlay(asyncapiAsMap, (Map<String, Object>) asyncapiOverlayAsMap);
@@ -59,10 +59,10 @@ public class YamlOverlyMerger {
 
     private static Map parseYaml(Object source) throws IOException {
         if (source instanceof URI uri) {
-            return (Map) Parser.parse(uri).json();
+            return JavaRefParser.from(uri).parse().getParsedDocument().getSchema();
         }
         if (source instanceof String content) {
-            return (Map) Parser.parse(content).json();
+            return yamlMapper.readValue(content, Map.class);
         }
         throw new IllegalArgumentException("Unsupported YAML source: " + source);
     }

@@ -7,8 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.zenwave360.jsonrefparser.JavaRefParser;
 import io.zenwave360.jsonrefparser.$Refs;
-import io.zenwave360.jsonrefparser.parser.Parser;
 import io.zenwave360.sdk.Plugin;
 import io.zenwave360.sdk.parsers.Model;
 import org.apache.commons.io.FileUtils;
@@ -102,7 +102,10 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
     public void test_convert_to_json_uses_defs_original_ref_for_java_type() throws Exception {
         AsyncApiJsonSchema2PojoGenerator generator = new AsyncApiJsonSchema2PojoGenerator();
         JsonSchema2PojoConfiguration config = JsonSchema2PojoConfiguration.of(Map.of("propertyWordDelimiters", "_-"));
-        Model apiModel = new Model(URI.create("file:///tmp/asyncapi.yml"), new $Refs(Parser.parse("{}")));
+        Model apiModel = new Model(
+                URI.create("file:///tmp/asyncapi.yml"),
+                $Refs.from(JavaRefParser.fromText("{}", "file:///tmp/asyncapi.yml").parse().getParsedDocument())
+        );
 
         Map<String, Object> payload = new LinkedHashMap<>();
         Map<String, Object> properties = new LinkedHashMap<>();

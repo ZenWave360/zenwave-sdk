@@ -240,15 +240,57 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             }
         }
         if (schema == null) {
-            schema = apiModel.getRefs().getObjectForRef($Ref.of(refValue, apiModel.getUri()));
+            schema = getResolvedRefValue(apiModel.getRefs(), refValue);
         }
         if (schema == null) {
-            schema = apiModel.getRefs().get(refValue);
+            schema = getInternalRefValue(apiModel, refValue);
         }
         if (schema == null) {
             return null;
         }
         return jsonMapper.valueToTree(schema);
+    }
+
+    private Object getResolvedRefValue($Refs refs, String refValue) {
+        Object original = refs.getOriginalRefsList().stream()
+                .filter(pair -> refValue.equals(pair.getKey().getRef()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(null);
+        if (original != null) {
+            return original;
+        }
+        return refs.getReplacedRefsList().stream()
+                .filter(pair -> refValue.equals(pair.getKey().getRef()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private Object getInternalRefValue(Model apiModel, String refValue) {
+        if (!refValue.startsWith("#/")) {
+            return null;
+        }
+        Object current = apiModel.model();
+        String[] tokens = refValue.substring(2).split("/");
+        for (String token : tokens) {
+            String key = token.replace("~1", "/").replace("~0", "~");
+            if (current instanceof Map<?, ?> map) {
+                current = map.get(key);
+            } else if (current instanceof List<?> list) {
+                try {
+                    current = list.get(Integer.parseInt(key));
+                } catch (NumberFormatException ex) {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+            if (current == null) {
+                return null;
+            }
+        }
+        return current;
     }
 
     private Annotator instantiate(Class<? extends Annotator> annotatorClass, GenerationConfig config) {

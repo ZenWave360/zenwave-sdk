@@ -18,12 +18,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import io.zenwave360.jsonrefparser.AuthenticationValue;
+import io.zenwave360.jsonrefparser.JavaRefParser;
 import io.zenwave360.jsonrefparser.$Refs;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.jsonrefparser.$RefParser;
 import io.zenwave360.jsonrefparser.$RefParserOptions;
 import io.zenwave360.jsonrefparser.$RefParserOptions.OnMissing;
-import io.zenwave360.jsonrefparser.parser.Parser;
+import io.zenwave360.jsonrefparser.model.OnCircular;
+import io.zenwave360.jsonrefparser.model.RefParserOptions;
 import io.zenwave360.sdk.processors.YamlOverlyMerger;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -106,12 +108,11 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
         String baseContent = loadUriContent(apiFile);
         String overlayedContent = YamlOverlyMerger.mergeAndOverlay(baseContent, null, apiOverlayFiles, this::loadUriContent);
         URI baseUri = normalizeBaseUri(apiFile);
-        $RefParser parser = new $RefParser(overlayedContent, baseUri)
+        JavaRefParser parser = JavaRefParser.fromText(overlayedContent, baseUri.toString())
                 .withResourceClassLoader(this.projectClassLoader)
-                .withAuthenticationValues(authentication)
-                .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing(OnMissing.SKIP));
-        parser.refs = new $Refs(Parser.parse(overlayedContent), baseUri);
-        return new Model(apiFile, parser.dereference().mergeAllOf().getRefs());
+                .withAuthentication(authentication.toArray(AuthenticationValue[]::new))
+                .withOptions(new RefParserOptions(OnCircular.SKIP, io.zenwave360.jsonrefparser.model.OnMissing.SKIP));
+        return new Model(apiFile, $Refs.from(parser.parse().dereference().mergeAllOf().getParsedDocument()));
     }
 
     protected String loadUriContent(URI uri) throws IOException {
