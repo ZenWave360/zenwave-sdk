@@ -2,12 +2,12 @@ package io.zenwave360.sdk.processors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import io.zenwave360.jsonrefparser.parser.Parser;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -30,13 +30,13 @@ public class YamlOverlyMerger {
 
     public static String mergeAndOverlay(String content, String mergeFile, List<String> overlayFiles, ThrowingResourceLoader resourceLoader) throws IOException {
         if(mergeFile != null) {
-            var asyncapiAsMap = (Map) Parser.parse(content).json();
+            var asyncapiAsMap = parseYaml(content);
             var asyncapiMergeAsMap = parseYaml(resourceLoader.apply(mergeFile));
             var merged = YamlOverlyMerger.merge(asyncapiAsMap, (Map<String, Object>) asyncapiMergeAsMap);
             content = yamlMapper.writeValueAsString(merged);
         }
         if (overlayFiles != null && !overlayFiles.isEmpty()) {
-            var asyncapiAsMap = (Map) Parser.parse(content).json();
+            var asyncapiAsMap = parseYaml(content);
             for (String asyncapiOverlayFile : overlayFiles) {
                 var asyncapiOverlayAsMap = parseYaml(resourceLoader.apply(asyncapiOverlayFile));
                 asyncapiAsMap = YamlOverlyMerger.applyOverlay(asyncapiAsMap, (Map<String, Object>) asyncapiOverlayAsMap);
@@ -59,10 +59,22 @@ public class YamlOverlyMerger {
 
     private static Map parseYaml(Object source) throws IOException {
         if (source instanceof URI uri) {
-            return (Map) Parser.parse(uri).json();
+            if ("classpath".equalsIgnoreCase(uri.getScheme())) {
+                String resource = uri.getPath() != null ? uri.getPath() : uri.getSchemeSpecificPart();
+                if (resource.startsWith("/")) {
+                    resource = resource.substring(1);
+                }
+                try (InputStream inputStream = YamlOverlyMerger.class.getClassLoader().getResourceAsStream(resource)) {
+                    if (inputStream == null) {
+                        throw new IOException("Classpath resource not found: " + uri);
+                    }
+                    return yamlMapper.readValue(inputStream, Map.class);
+                }
+            }
+            return yamlMapper.readValue(uri.toURL(), Map.class);
         }
         if (source instanceof String content) {
-            return (Map) Parser.parse(content).json();
+            return yamlMapper.readValue(content, Map.class);
         }
         throw new IllegalArgumentException("Unsupported YAML source: " + source);
     }

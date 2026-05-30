@@ -240,15 +240,40 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             }
         }
         if (schema == null) {
-            schema = apiModel.getRefs().getObjectForRef($Ref.of(refValue, apiModel.getUri()));
-        }
-        if (schema == null) {
-            schema = apiModel.getRefs().get(refValue);
+            schema = resolveJsonPointer(apiModel.model(), refValue);
         }
         if (schema == null) {
             return null;
         }
         return jsonMapper.valueToTree(schema);
+    }
+
+    private Object resolveJsonPointer(Object root, String refValue) {
+        if (root == null || refValue == null || !refValue.startsWith("#/")) {
+            return null;
+        }
+        Object current = root;
+        String[] tokens = refValue.substring(2).split("/");
+        for (String rawToken : tokens) {
+            String token = rawToken.replace("~1", "/").replace("~0", "~");
+            if (current instanceof Map<?, ?> map) {
+                current = map.get(token);
+            } else if (current instanceof List<?> list) {
+                int index;
+                try {
+                    index = Integer.parseInt(token);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+                current = index >= 0 && index < list.size() ? list.get(index) : null;
+            } else {
+                return null;
+            }
+            if (current == null) {
+                return null;
+            }
+        }
+        return current;
     }
 
     private Annotator instantiate(Class<? extends Annotator> annotatorClass, GenerationConfig config) {

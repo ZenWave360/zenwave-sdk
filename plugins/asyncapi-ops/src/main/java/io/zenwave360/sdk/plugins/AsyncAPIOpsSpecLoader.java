@@ -1,6 +1,5 @@
 package io.zenwave360.sdk.plugins;
 
-import io.zenwave360.jsonrefparser.resolver.RefFormat;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.parsers.DefaultYamlParser;
 import io.zenwave360.sdk.parsers.Model;
@@ -106,7 +105,7 @@ public class AsyncAPIOpsSpecLoader implements Processor, WithProjectClassLoader<
         // Collect all objects resolved from cross-file (non-INTERNAL) refs
         List<Object> crossFileObjects = new ArrayList<>();
         model.getRefs().getOriginalRefsList().forEach(pair -> {
-            if (pair.getKey().getRefFormat() != RefFormat.INTERNAL) {
+            if (!"INTERNAL".equals(pair.getKey().getRefFormat().name())) {
                 crossFileObjects.add(pair.getValue());
             }
         });
