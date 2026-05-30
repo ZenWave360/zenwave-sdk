@@ -73,6 +73,8 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
 
         Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/v31/domain/events/AddressC.java").exists());
         Assertions.assertFalse(new File("target/zenwave630/src/main/java/io/example/v31/domain/events/Address_c.java").exists());
+        String samplePayload = FileUtils.readFileToString(new File("target/zenwave630/src/main/java/io/example/v31/domain/events/SamplePayload.java"), "UTF-8");
+        Assertions.assertEquals(3, countOccurrences(samplePayload, "@JsonProperty(\"address\")")); // field, getter and setter
     }
 
     @Test
@@ -86,6 +88,18 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
 
         Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/v31_external/domain/events/AddressC.java").exists());
         Assertions.assertFalse(new File("target/zenwave630/src/main/java/io/example/v31_external/domain/events/Address.java").exists());
+        String samplePayload = FileUtils.readFileToString(new File("target/zenwave630/src/main/java/io/example/v31_external/domain/events/SampleMessage.java"), "UTF-8");
+        Assertions.assertEquals(3, countOccurrences(samplePayload, "@JsonProperty(\"address\")")); // field, getter and setter
+    }
+
+    private int countOccurrences(String value, String token) {
+        int count = 0;
+        int index = 0;
+        while ((index = value.indexOf(token, index)) != -1) {
+            count++;
+            index += token.length();
+        }
+        return count;
     }
 
     @Test

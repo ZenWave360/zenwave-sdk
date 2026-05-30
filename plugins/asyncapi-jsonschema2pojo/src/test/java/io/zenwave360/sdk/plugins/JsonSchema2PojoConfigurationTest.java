@@ -2,6 +2,7 @@ package io.zenwave360.sdk.plugins;
 
 import java.util.Map;
 
+import org.jsonschema2pojo.NoopAnnotator;
 import org.jsonschema2pojo.AllFileFilter;
 import org.jsonschema2pojo.util.JavaVersion;
 import org.junit.jupiter.api.Assertions;
@@ -47,5 +48,12 @@ class JsonSchema2PojoConfigurationTest {
         JsonSchema2PojoConfiguration config = JsonSchema2PojoConfiguration.of(Map.of());
 
         Assertions.assertEquals(JavaVersion.parse(System.getProperty("java.version")), config.getTargetVersion());
+    }
+
+    @Test
+    void should_default_custom_annotator_to_noop() {
+        JsonSchema2PojoConfiguration config = JsonSchema2PojoConfiguration.of(Map.of());
+
+        Assertions.assertEquals(NoopAnnotator.class, config.getCustomAnnotator());
     }
 }

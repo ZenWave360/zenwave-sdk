@@ -154,6 +154,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
         var json = this.convertToJson(apiModel, config, payload, packageName);
 
         List<Annotator> annotators = new ArrayList<>();
+        annotators.add(new AnnotatorFactory(config).getAnnotator(config.getAnnotationStyle()));
         Class<? extends Annotator> customAnnotatorClass = config.getCustomAnnotator();
         annotators.add(instantiate(customAnnotatorClass, config));
         if(generatedAnnotationClass != null) {
