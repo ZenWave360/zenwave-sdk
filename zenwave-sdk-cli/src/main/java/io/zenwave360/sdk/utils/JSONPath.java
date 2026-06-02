@@ -6,6 +6,7 @@ import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.PathNotFoundException;
 import org.apache.commons.lang3.ObjectUtils;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,18 @@ public class JSONPath {
             for (String jsonPath : jsonPaths) {
                 var value = get(object, jsonPath);
                 if(value != null) {
+                    return (T) value;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static <T> T getFirstNonEmpty(Object object, String... jsonPaths) {
+        if(jsonPaths != null) {
+            for (String jsonPath : jsonPaths) {
+                var value = get(object, jsonPath);
+                if(value != null && (value instanceof Collection && !((Collection) value).isEmpty())) {
                     return (T) value;
                 }
             }

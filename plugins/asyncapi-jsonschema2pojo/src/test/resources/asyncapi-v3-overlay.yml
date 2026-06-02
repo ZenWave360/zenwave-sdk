@@ -1,0 +1,9 @@
+actions:
+  - target: $.components.schemas.CustomerEvent.properties
+    update:
+      id:
+        type: string
+      customerId:
+        type: string
+      externalId:
+        type: string

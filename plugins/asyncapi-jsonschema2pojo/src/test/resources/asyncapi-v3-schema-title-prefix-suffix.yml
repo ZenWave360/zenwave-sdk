@@ -1,0 +1,44 @@
+asyncapi: 3.1.0
+info:
+  title: ZenWave repro
+  version: 1.0.0
+
+channels:
+  sampleChannel:
+    address: sample.topic
+    messages:
+      SampleMessage:
+        $ref: '#/components/messages/SampleMessage'
+
+operations:
+  publishSample:
+    action: send
+    channel:
+      $ref: '#/channels/sampleChannel'
+
+components:
+  messages:
+    SampleMessage:
+      name: SampleMessage
+      payload:
+        schema:
+          $ref: '#/components/schemas/SamplePayload'
+
+  schemas:
+    SamplePayload:
+      type: object
+      additionalProperties: false
+      properties:
+        address:
+          $ref: '#/components/schemas/Address_c'
+      required:
+        - address
+    Address_c:
+      title: postal address
+      type: object
+      additionalProperties: false
+      properties:
+        city:
+          type: string
+      required:
+        - city

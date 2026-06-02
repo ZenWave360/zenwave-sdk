@@ -187,6 +187,20 @@ public class AsyncAPIOpsIntentProcessorTest {
     }
 
     @Test
+    public void test_loader_applies_overlays_before_processing() throws Exception {
+        AsyncAPIOpsSpecLoader loader = new AsyncAPIOpsSpecLoader();
+        loader.apiFile = URI.create(ASYNCAPI_PROVIDER);
+        loader.apiOverlayFiles = List.of("classpath:retail-domain-catalog/merchandising/inventory/inventory-adjustment/asyncapi-overlay.yml");
+
+        Map<String, Object> context = loader.process(new LinkedHashMap<>());
+        context = buildIntent("staging", context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+
+        Assertions.assertTrue(intent.topics.stream()
+                .anyMatch(t -> "merchandising.inventory.inventory-adjustment.reserve-stock.command.overlay.avro.v0".equals(t.topicName)));
+    }
+
+    @Test
     public void test_loader_with_no_input_files_produces_empty_apis_and_empty_intent() {
         AsyncAPIOpsSpecLoader loader = new AsyncAPIOpsSpecLoader();
 

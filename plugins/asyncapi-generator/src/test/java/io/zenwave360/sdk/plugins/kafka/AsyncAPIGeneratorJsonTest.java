@@ -1,6 +1,8 @@
 package io.zenwave360.sdk.plugins.kafka;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.util.List;
 
 import io.zenwave360.sdk.plugins.AsyncAPIGeneratorPlugin;
 import org.junit.jupiter.api.*;
@@ -68,6 +70,28 @@ public class AsyncAPIGeneratorJsonTest {
         new MainGenerator().generate(plugin);
 
         Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/model/CustomerEvent.java").exists());
+    }
+
+    @Test
+    public void test_generate_asyncapi_json_with_overlays() throws Exception {
+        String targetFolder = "target/out/asyncapi_json_with_overlays";
+        Plugin plugin = new AsyncAPIGeneratorPlugin()
+                .withApiFile("classpath:asyncapi-v3.yml")
+                .withTargetFolder(targetFolder)
+                .withOption("apiOverlayFiles", List.of("classpath:asyncapi-v3-overlay.yml"))
+                .withOption("modelPackage", "io.example.api.model")
+                .withOption("producerApiPackage", "io.example.api.producer")
+                .withOption("consumerApiPackage", "io.example.api.consumer")
+                .withOption("role", AsyncapiRoleType.provider)
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("templates", "SpringKafka")
+                .withOption("skipFormatting", false);
+
+        new MainGenerator().generate(plugin);
+
+        File generatedModel = new File(targetFolder + "/src/main/java/io/example/api/model/CustomerEvent.java");
+        Assertions.assertTrue(generatedModel.exists());
+        Assertions.assertTrue(Files.readString(generatedModel.toPath()).contains("externalId"));
     }
 
 }

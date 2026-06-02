@@ -117,6 +117,22 @@ jbang zw -p AsyncAPIGeneratorPlugin \
   targetFolder=target/generated-sources
 ```
 
+## Overlays
+
+Use `apiOverlayFiles` to patch the AsyncAPI source before dereferencing and `allOf` merge.
+
+```shell
+jbang zw -p AsyncAPIGeneratorPlugin \
+  apiFile=src/main/resources/asyncapi.yml \
+  apiOverlayFiles=src/main/resources/asyncapi-overlay.yml \
+  modelPackage=io.example.api.model \
+  producerApiPackage=io.example.api.producer \
+  consumerApiPackage=io.example.api.consumer \
+  targetFolder=target/generated-sources
+```
+
+Overlay files are applied in order. This is intended for local files and file-backed `classpath:` resources.
+
 ## Maven Usage
 
 ### Properties Configuration
@@ -307,6 +323,7 @@ app:
 | **Option** | **Description** | **Type** | **Default** | **Values** |
 |------------|-----------------|----------|-----------|------------|
 | `apiFile` | API Specification File | URI |  |   |
+| `apiOverlayFiles` | Ordered list of API overlay YAML files applied before dereferencing and `allOf` merge. | List | [] |   |
 | `role` | Project role: provider/client | AsyncapiRoleType | provider | provider, client  |
 | `templates` | Templates to use for code generation. | String | SpringCloudStream | SpringCloudStream, SpringKafka, FQ Class Name  |
 | `modelPackage` | Java Models package name | String |  |   |
