@@ -8,7 +8,7 @@ io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsAvro
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntent,0,42,1,1,0,9,1,2,0,2
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsGeneratorPlugin,0,27,0,0,0,5,0,1,0,1
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntentProcessor,65,1072,35,95,16,212,32,62,0,29
-io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsSpecLoader,9,189,0,18,2,45,0,17,0,8
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsSpecLoader,13,196,0,18,4,48,1,17,1,8
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsGenerator.Templates,9,58,0,0,2,17,1,2,1,2
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntent.AclIntent,0,6,0,0,0,2,0,1,0,1
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsGenerator,161,210,9,13,29,48,7,9,0,5

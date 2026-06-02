@@ -4,7 +4,7 @@ io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdow
 io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,DiagramModelResolver,7,126,7,27,2,29,7,14,0,4
 io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,LifecycleDiagramBuilder,46,1002,31,97,21,192,30,52,0,18
 io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,LifecycleDiagramBuilder.new Record() {...},0,12,0,0,0,1,0,1,0,1
-io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,LifecycleDiagramBuilder.new Record() {...},0,12,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ZdlToMarkdownGenerator.OutputFormat,0,21,0,0,0,2,0,1,0,1
+io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,LifecycleDiagramBuilder.new Record() {...},0,12,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,AssociationCollector,16,508,26,70,10,109,26,31,0,9
 io.zenwave360.sdk.plugins:zdl-to-markdown,io.zenwave360.sdk.plugins,ServiceHelperFormatter,7,414,3,43,2,77,3,37,0,17
