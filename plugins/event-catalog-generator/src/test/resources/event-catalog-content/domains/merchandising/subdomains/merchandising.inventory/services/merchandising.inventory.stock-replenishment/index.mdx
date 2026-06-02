@@ -1,0 +1,56 @@
+---
+id: merchandising.inventory.stock-replenishment
+name: Stock Replenishment
+summary: ARTS Service Domain - Manages stock ordering and replenishment
+version: 1.0.0
+specifications:
+  - type: asyncapi
+    path: >-
+      ../../../../../../../../../zenwave-sdk-test-resources/src/main/resources/retail-domain-catalog/merchandising/inventory/stock-replenishment/asyncapi.yml
+    name: asyncapi
+sends:
+  - id: merchandising.inventory.stock-replenishment.replenish-stock-response
+    to:
+      - id: merchandising.inventory.stock-replenishment.replenish-stock-response
+  - id: merchandising.inventory.stock-replenishment.stock-replenished
+    to:
+      - id: merchandising.inventory.stock-replenishment.stock-replenished
+receives:
+  - id: merchandising.inventory.stock-replenishment.replenish-stock-command
+    from:
+      - id: merchandising.inventory.stock-replenishment.replenish-stock-command
+entities:
+  - id: merchandising.inventory.stock-replenishment.replenishment-order
+    version: 1.0.0
+---
+## Overview
+
+ARTS Service Domain - Manages stock ordering and replenishment
+
+<NodeGraph />
+
+## Message Flow
+
+<MessageTable format="all" limit={8} showChannels={true} />
+
+## Domain Model
+
+<EntityMap />
+
+## Specifications
+
+The linked specifications in the frontmatter drive EventCatalog reference views for this service.
+
+# Stock Replenishment Service
+
+ARTS Service Domain - Manages stock ordering and replenishment
+
+
+# Stock Replenishment Service
+
+ARTS Service Domain - Manages stock ordering and replenishment
+
+
+# Changelog
+
+

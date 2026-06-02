@@ -15,7 +15,7 @@ public record EntityFrontmatter(
         Boolean aggregateRoot,
         String identifier,
         List<EntityPropertyFrontmatter> properties,
-        List<ResourcePointerFrontmatter> services,
-        List<ResourcePointerFrontmatter> domains,
+        List<String> services,
+        List<String> domains,
         EntityDetailsPanelFrontmatter detailsPanel) implements Frontmatter {
 }

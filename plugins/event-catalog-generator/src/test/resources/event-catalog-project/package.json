@@ -1,0 +1,22 @@
+{
+  "name": "event-catalog-forked",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "eventcatalog dev",
+    "editor": "npx @eventcatalog/editor@latest",
+    "build": "eventcatalog build",
+    "start": "eventcatalog start",
+    "preview": "eventcatalog preview",
+    "generate": "eventcatalog generate",
+    "export": "eventcatalog export",
+    "lint": "eventcatalog-linter",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@eventcatalog/core": "link:../../../../../../../archcatalog/packages/core",
+    "@eventcatalog/linter": "link:../../../../../../../archcatalog/packages/linter",
+    "@eventcatalog/sdk": "link:../../../../../../../archcatalog/packages/sdk",
+    "@eventcatalog/visualiser": "link:../../../../../../../archcatalog/packages/visualiser"
+  }
+}

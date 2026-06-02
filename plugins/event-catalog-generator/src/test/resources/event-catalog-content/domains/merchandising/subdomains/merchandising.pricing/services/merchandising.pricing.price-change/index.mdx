@@ -1,0 +1,56 @@
+---
+id: merchandising.pricing.price-change
+name: Price Change
+summary: ARTS Service Domain - Manages price updates and promotions
+version: 1.0.0
+specifications:
+  - type: asyncapi
+    path: >-
+      ../../../../../../../../../zenwave-sdk-test-resources/src/main/resources/retail-domain-catalog/merchandising/pricing/price-change/asyncapi.yml
+    name: asyncapi
+sends:
+  - id: merchandising.pricing.price-change.recalculate-price-response
+    to:
+      - id: merchandising.pricing.price-change.recalculate-price-response
+  - id: merchandising.pricing.price-change.price-changed
+    to:
+      - id: merchandising.pricing.price-change.price-changed
+receives:
+  - id: merchandising.pricing.price-change.recalculate-price-command
+    from:
+      - id: merchandising.pricing.price-change.recalculate-price-command
+entities:
+  - id: merchandising.pricing.price-change.product-price
+    version: 1.0.0
+---
+## Overview
+
+ARTS Service Domain - Manages price updates and promotions
+
+<NodeGraph />
+
+## Message Flow
+
+<MessageTable format="all" limit={8} showChannels={true} />
+
+## Domain Model
+
+<EntityMap />
+
+## Specifications
+
+The linked specifications in the frontmatter drive EventCatalog reference views for this service.
+
+# Price Change Service
+
+ARTS Service Domain - Manages price updates and promotions
+
+
+# Price Change Service
+
+ARTS Service Domain - Manages price updates and promotions
+
+
+# Changelog
+
+

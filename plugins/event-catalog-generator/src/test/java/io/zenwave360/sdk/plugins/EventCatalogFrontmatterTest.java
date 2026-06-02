@@ -25,7 +25,7 @@ class EventCatalogFrontmatterTest {
     void generatesStructuredDomainAndServiceFrontmatter() throws Exception {
         runGenerator();
 
-        Map<String, Object> domain = readFrontmatter("domains/merchandising/merchandising.inventory/index.mdx");
+        Map<String, Object> domain = readFrontmatter("domains/merchandising/subdomains/merchandising.inventory/index.mdx");
         assertEquals("merchandising.inventory", domain.get("id"));
         assertTrue(domain.containsKey("services"));
         assertTrue(domain.containsKey("entities"));
@@ -33,49 +33,61 @@ class EventCatalogFrontmatterTest {
         List<Map<String, Object>> services = asListOfMaps(domain.get("services"));
         assertTrue(services.stream().anyMatch(service -> "merchandising.inventory.inventory-adjustment".equals(service.get("id"))));
 
-        Map<String, Object> service = readFrontmatter("domains/merchandising/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/index.mdx");
-        assertTrue(service.containsKey("repository"));
+        Map<String, Object> service = readFrontmatter("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/index.mdx");
         assertTrue(service.containsKey("specifications"));
         assertTrue(service.containsKey("sends"));
         assertTrue(service.containsKey("receives"));
-
-        Map<String, Object> repository = asMap(service.get("repository"));
-        assertNotNull(repository.get("url"));
+        List<Map<String, Object>> entities = asListOfMaps(service.get("entities"));
+        assertTrue(entities.stream().anyMatch(entityRef -> "merchandising.inventory.inventory-adjustment.inventory-item".equals(entityRef.get("id"))));
 
         List<Map<String, Object>> specifications = asListOfMaps(service.get("specifications"));
         assertTrue(specifications.stream().anyMatch(spec -> "asyncapi".equals(spec.get("type"))));
         assertTrue(specifications.stream().anyMatch(spec -> "openapi".equals(spec.get("type"))));
+        assertTrue(specifications.stream()
+                .allMatch(spec -> spec.get("path").toString().contains("retail-domain-catalog")));
     }
 
     @Test
     void generatesEnrichedQueryEntityAndChannelFrontmatter() throws Exception {
         runGenerator();
 
-        Map<String, Object> query = readFrontmatter("domains/merchandising/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/queries/merchandising.inventory.inventory-adjustment.getInventoryItem/index.mdx");
+        Map<String, Object> query = readFrontmatter("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/queries/merchandising.inventory.inventory-adjustment.getInventoryItem/index.mdx");
         assertEquals("Returns a single inventory item by SKU", query.get("summary"));
         Map<String, Object> operation = asMap(query.get("operation"));
         assertEquals("GET", operation.get("method"));
         assertEquals("/inventory-items/{sku}", operation.get("path"));
         assertTrue(asStringList(operation.get("statusCodes")).contains("200"));
 
-        Map<String, Object> entity = readFrontmatter("domains/merchandising/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/entities/merchandising.inventory.inventory-adjustment.inventory-item/index.mdx");
+        Map<String, Object> entity = readFrontmatter("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/entities/merchandising.inventory.inventory-adjustment.inventory-item/index.mdx");
         assertEquals(Boolean.TRUE, entity.get("aggregateRoot"));
         List<Map<String, Object>> properties = asListOfMaps(entity.get("properties"));
         assertTrue(properties.stream().anyMatch(property -> "sku".equals(property.get("name"))));
         assertTrue(properties.stream().anyMatch(property -> "quantity".equals(property.get("name")) && Boolean.TRUE.equals(property.get("required"))));
+        assertTrue(asStringList(entity.get("services")).contains("merchandising.inventory.inventory-adjustment-1.0.0"));
+        assertTrue(asStringList(entity.get("domains")).contains("merchandising.inventory-0.0.1"));
 
-        Map<String, Object> channel = readFrontmatter("domains/merchandising/merchandising.inventory/channels/merchandising.inventory.inventory-adjustment.inventory-adjusted/index.mdx");
+        Map<String, Object> channel = readFrontmatter("domains/merchandising/subdomains/merchandising.inventory/channels/merchandising.inventory.inventory-adjustment.inventory-adjusted/index.mdx");
         assertEquals("merchandising.inventory.inventory-adjustment.inventory-adjusted.event.avro.v0", channel.get("address"));
         assertTrue(asStringList(channel.get("protocols")).contains("kafka"));
         List<Map<String, Object>> messages = asListOfMaps(channel.get("messages"));
         assertTrue(messages.stream().anyMatch(message -> "events".equals(message.get("collection"))));
     }
 
+    @Test
+    void generatesAstroReferencesForMessageParticipants() throws Exception {
+        runGenerator();
+
+        Map<String, Object> event = readFrontmatter("domains/customer-relationship/subdomains/customer-relationship.customer-management/services/customer-relationship.customer-management.customer-profile/events/customer-relationship.customer-management.customer-profile.customer-profile-updated/index.mdx");
+        assertTrue(asStringList(event.get("producers")).contains("customer-relationship.customer-management.customer-profile-1.0.0"));
+        assertTrue(event.get("schemaPath").toString().startsWith("https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/develop/"));
+    }
+
     private void runGenerator() throws Exception {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())
-                        .withOption("outputFolder", OUTPUT_FOLDER));
+                        .withOption("outputFolder", OUTPUT_FOLDER)
+                        .withOption("linkSource", "http"));
     }
 
     private static String architectureFilePath() {

@@ -1,0 +1,25 @@
+---
+id: "merchandising.inventory.inventory-adjustment.reserve-stock-command"
+name: "Reserve Stock Command"
+summary: "This channel is used to request reservation of stock for a product at a\
+  \ location."
+version: "1.0.0"
+address: "merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0"
+protocols:
+- "kafka"
+messages:
+- collection: "commands"
+  name: "Reserve Stock Command"
+  id: "merchandising.inventory.inventory-adjustment.reserve-stock-command"
+  version: "1.0.0"
+---
+## Overview
+
+This channel is used to request reservation of stock for a product at a location.
+
+<NodeGraph />
+
+## Messages
+
+<MessageTable format="all" limit={8} showChannels={true} />
+

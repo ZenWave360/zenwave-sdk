@@ -77,18 +77,19 @@ public class EventCatalogFileWriter implements TemplateWriter {
 
     /**
      * Returns true when the path matches the pattern for a service index page:
-     * {@code domains/{d}/{sd}/services/{svc}/index.mdx} — exactly depth 6 relative
-     * to the output root, with {@code services} as the 4th segment.
+     * {@code domains/{d}/subdomains/{sd}/services/{svc}/index.mdx} — exactly depth 7 relative
+     * to the output root, with {@code services} as the 5th segment.
      */
     private boolean isServiceIndexMdx(String targetFile) {
         // Normalise separators so the check works on all platforms
         String normalised = targetFile.replace('\\', '/');
         String[] parts = normalised.split("/");
-        // Expected: domains / domainId / subdomainId / services / serviceId / index.mdx
-        return parts.length == 6
+        // Expected: domains / domainId / subdomains / subdomainId / services / serviceId / index.mdx
+        return parts.length == 7
                 && "domains".equals(parts[0])
-                && "services".equals(parts[3])
-                && "index.mdx".equals(parts[5]);
+                && "subdomains".equals(parts[2])
+                && "services".equals(parts[4])
+                && "index.mdx".equals(parts[6]);
     }
 
     private void maybeArchiveServicePage(TemplateOutput output) {

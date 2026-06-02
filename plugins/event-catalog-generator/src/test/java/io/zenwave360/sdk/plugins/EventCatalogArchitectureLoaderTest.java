@@ -3,7 +3,6 @@ package io.zenwave360.sdk.plugins;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -21,21 +20,14 @@ class EventCatalogArchitectureLoaderTest {
     @Test
     @SuppressWarnings("unchecked")
     void loadsDirectDomainAndSubdomainServicesIntoNestedAndFlattenedMaps() throws Exception {
-        Path repos = tempDir.resolve("repos");
-        Files.createDirectories(repos.resolve("orders-api"));
-        Files.createDirectories(repos.resolve("shipping-api"));
-
         Path manifest = writeManifest("""
-                config:
-                  properties:
-                    root: ./repos
                 domains:
                   orders:
                     id: orders
                     services:
                       orders-api:
                         id: orders.orders-api
-                        repository: "{{root}}/orders-api"
+                        path: orders-api
                   fulfillment:
                     id: fulfillment
                     subdomains:
@@ -44,7 +36,7 @@ class EventCatalogArchitectureLoaderTest {
                         services:
                           shipping-api:
                             id: fulfillment.shipping.shipping-api
-                            repository: "{{root}}/shipping-api"
+                            path: shipping-api
                 """);
 
         Map<String, Object> architecture = loadArchitecture(manifest);
@@ -63,11 +55,14 @@ class EventCatalogArchitectureLoaderTest {
         Map<String, Object> flattenedServices = (Map<String, Object>) architecture.get("services");
         assertTrue(flattenedServices.containsKey("orders.orders-api"));
         assertTrue(flattenedServices.containsKey("fulfillment.shipping.shipping-api"));
+
+        Map<String, Object> ordersService = (Map<String, Object>) flattenedServices.get("orders.orders-api");
+        assertEquals("orders-api", ordersService.get("path"));
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    void resolvesRepositoryDocsSpecsAndNormalizesConsumers() throws Exception {
+    void resolvesPathDocsArtifactsAndNormalizesConsumers() throws Exception {
         Path repos = tempDir.resolve("repos");
         Path ordersApi = repos.resolve("orders-api");
         Path paymentsApi = repos.resolve("payments-api");
@@ -81,18 +76,23 @@ class EventCatalogArchitectureLoaderTest {
 
         Path manifest = writeManifest("""
                 config:
-                  properties:
-                    root: ./repos
+                  sourcePriority:
+                    - file
+                    - http
+                  sources:
+                    http:
+                      roots:
+                        - https://raw.githubusercontent.com/acme/catalog/develop
                 domains:
                   orders:
                     id: orders
                     services:
                       orders-api:
                         id: orders.orders-api
-                        repository: "{{root}}/orders-api"
+                        path: orders-api
                         docs:
                           summary: SUMMARY.md
-                        specs:
+                        artifacts:
                           - type: zdl
                             path: domain-model.zdl
                           - type: asyncapi
@@ -105,28 +105,27 @@ class EventCatalogArchitectureLoaderTest {
                     services:
                       payments-api:
                         id: payments.payments-api
-                        repository: "{{root}}/payments-api"
+                        path: payments-api
                   notifications:
                     id: notifications
                     services:
                       notifications-api:
                         id: notifications.notifications-api
-                        repository: "{{root}}/notifications-api"
+                        path: notifications-api
                 """);
 
         Map<String, Object> architecture = loadArchitecture(manifest);
         Map<String, Object> services = (Map<String, Object>) architecture.get("services");
         Map<String, Object> ordersService = (Map<String, Object>) services.get("orders.orders-api");
 
-        assertEquals(ordersApi.toString(), ordersService.get("repository"));
-        assertEquals(ordersApi, Path.of(URI.create(ordersService.get("repositoryUri").toString())));
+        assertEquals("orders-api", ordersService.get("path"));
 
         Map<String, Object> docs = (Map<String, Object>) ordersService.get("docs");
-        assertEquals(ordersApi.resolve("SUMMARY.md").toString(), docs.get("summary"));
+        assertEquals("SUMMARY.md", docs.get("summary"));
 
-        List<Map<String, Object>> specs = (List<Map<String, Object>>) ordersService.get("specs");
-        assertEquals(ordersApi.resolve("domain-model.zdl").toString(), specs.get(0).get("resolvedPath"));
-        assertEquals(ordersApi.resolve("asyncapi.yml").toString(), specs.get(1).get("resolvedPath"));
+        List<Map<String, Object>> artifacts = (List<Map<String, Object>>) ordersService.get("artifacts");
+        assertEquals("domain-model.zdl", artifacts.get(0).get("path"));
+        assertEquals("asyncapi.yml", artifacts.get(1).get("path"));
 
         List<String> consumers = (List<String>) ordersService.get("consumers");
         assertEquals(List.of("orders.notifications-api", "payments.payments-api"), consumers);

@@ -14,9 +14,9 @@ import java.util.List;
 public record EventFrontmatter(
         @JsonUnwrapped CommonFrontmatter base,
         OperationFrontmatter operation,
-        List<ResourcePointerFrontmatter> producers,
-        List<ResourcePointerFrontmatter> consumers,
+        List<String> producers,
+        List<String> consumers,
         List<ChannelPointerFrontmatter> channels,
-        List<ResourcePointerFrontmatter> messageChannels,
+        List<String> messageChannels,
         MessageDetailsPanelFrontmatter detailsPanel) implements Frontmatter {
 }

@@ -1,5 +1,11 @@
 package io.zenwave360.sdk.plugins;
 
+import io.zenwave360.manifest.ManifestArtifact;
+import io.zenwave360.manifest.ManifestLoadOptions;
+import io.zenwave360.manifest.ManifestService;
+import io.zenwave360.manifest.ZenWaveManifest;
+import io.zenwave360.manifest.ZenWaveManifestLoader;
+import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.processors.Processor;
 import io.zenwave360.sdk.utils.JSONPath;
@@ -8,62 +14,67 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.*;
 
 /**
- * Parses ZDL domain model specs declared in each service entry and augments the
- * service map with extracted entities and aggregates.
- *
- * <p>Only {@code type: zdl} specs are processed. Entities annotated with
- * {@code @aggregate} are marked as aggregate roots.
- *
- * <p>Augmented keys written to each service map (prefixed with {@code _}):
- * <ul>
- *   <li>{@code _entities} — List&lt;Map&gt; one entry per entity/aggregate</li>
- * </ul>
+ * Parses ZDL artifacts declared in each service entry and augments the service map
+ * with extracted entities and aggregates.
  */
 public class EventCatalogZdlProcessor implements Processor {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    @DocumentedOption(description = "Preferred artifact source for build-time content loading.")
+    public String preferredSource;
+    @DocumentedOption(description = "Allow source fallback for build-time content loading.")
+    public Boolean allowFallback;
+    @DocumentedOption(description = "Comma separated local roots for workspace-first content loading.")
+    public String localRoots;
+
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, Object> process(Map<String, Object> contextModel) {
         Map<String, Object> architecture = (Map<String, Object>) contextModel.get("architecture");
-        if (architecture == null) return contextModel;
+        ZenWaveManifest manifest = (ZenWaveManifest) contextModel.get("manifest");
+        ZenWaveManifestLoader manifestLoader = (ZenWaveManifestLoader) contextModel.get("manifestLoader");
+        File manifestFile = (File) contextModel.get("manifestFile");
+        if (architecture == null || manifest == null || manifestLoader == null) return contextModel;
 
         Map<String, Object> services = (Map<String, Object>) architecture.getOrDefault("services", Map.of());
+        ManifestLoadOptions contentOptions = ManifestRuntimeSupport.contentOptions(
+                manifest, manifestFile, preferredSource, allowFallback, localRoots);
 
         for (Map.Entry<String, Object> entry : services.entrySet()) {
-            Map<String, Object> service = (Map<String, Object>) entry.getValue();
-            String serviceId = str(service, "id", entry.getKey());
-            processZdlSpecs(service, serviceId);
+            Map<String, Object> serviceMap = (Map<String, Object>) entry.getValue();
+            ManifestService service = ManifestRuntimeSupport.findService(manifest, serviceMap);
+            if (service == null) {
+                continue;
+            }
+            String serviceId = str(serviceMap, "id", entry.getKey());
+            processZdlArtifacts(manifestLoader, manifest, service, serviceMap, serviceId, contentOptions);
         }
 
         return contextModel;
     }
 
-    @SuppressWarnings("unchecked")
-    private void processZdlSpecs(Map<String, Object> service, String serviceId) {
-        List<Map<String, Object>> specs = (List<Map<String, Object>>) service.getOrDefault("specs", List.of());
-        String repository = str(service, "repository", ".");
-
-        for (Map<String, Object> spec : specs) {
-            if (!"zdl".equals(spec.get("type"))) continue;
-
-            String specPath = resolveSpecPath(repository, spec);
-            File specFile = new File(specPath);
-            if (!specFile.exists()) {
-                log.warn("ZDL spec not found: {}", specFile.getAbsolutePath());
+    private void processZdlArtifacts(ZenWaveManifestLoader manifestLoader, ZenWaveManifest manifest,
+                                     ManifestService manifestService, Map<String, Object> serviceMap,
+                                     String serviceId, ManifestLoadOptions contentOptions) {
+        for (ManifestArtifact artifact : ManifestRuntimeSupport.findArtifacts(manifestService, "zdl")) {
+            String zdlText;
+            try {
+                zdlText = ManifestRuntimeSupport.loadArtifactText(manifestLoader, manifest, manifestService, artifact, contentOptions);
+            } catch (Exception e) {
+                log.warn("ZDL artifact could not be loaded for {}: {}", manifestService.getServiceRef(), e.getMessage());
                 continue;
             }
 
-            Map<String, Object> zdlModel = parseSpec(specFile);
+            Map<String, Object> zdlModel = parseSpec(artifact, zdlText);
             if (zdlModel == null) continue;
 
-            String version = str(service, "_version", str(service, "version", "0.0.1"));
+            String version = str(serviceMap, "_version", str(serviceMap, "version", "0.0.1"));
 
-            // Collect aggregate names for aggregate-root detection
             Map<String, Object> aggregates = JSONPath.get(zdlModel, "$.aggregates", Map.of());
             Set<String> aggregateRootNames = new LinkedHashSet<>();
             for (Map.Entry<String, Object> aggEntry : aggregates.entrySet()) {
@@ -82,38 +93,44 @@ public class EventCatalogZdlProcessor implements Processor {
 
                 String entityId = serviceId + "." + toKebabCase(entityName);
 
-                Map<String, Object> artifact = new LinkedHashMap<>();
-                artifact.put("id", entityId);
-                artifact.put("name", entityName);
-                artifact.put("version", version);
-                artifact.put("summary", str(entity, "javadoc", ""));
-                if (isAggregate) artifact.put("aggregateRoot", true);
+                Map<String, Object> entityArtifact = new LinkedHashMap<>();
+                entityArtifact.put("id", entityId);
+                entityArtifact.put("name", entityName);
+                entityArtifact.put("version", version);
+                entityArtifact.put("summary", str(entity, "javadoc", ""));
+                if (isAggregate) entityArtifact.put("aggregateRoot", true);
                 String identifier = resolveIdentifier(entity);
-                if (identifier != null) artifact.put("identifier", identifier);
+                if (identifier != null) entityArtifact.put("identifier", identifier);
                 List<Map<String, Object>> properties = buildProperties(entity, zdlModel);
-                if (!properties.isEmpty()) artifact.put("properties", properties);
+                if (!properties.isEmpty()) entityArtifact.put("properties", properties);
 
-                addToList(service, "_entities", artifact);
+                addToList(serviceMap, "_entities", entityArtifact);
             }
         }
     }
 
-    private Map<String, Object> parseSpec(File specFile) {
+    private Map<String, Object> parseSpec(ManifestArtifact artifact, String zdlText) {
+        File tempFile = null;
         String tempKey = "_ec_zdl_" + System.nanoTime();
         try {
+            tempFile = File.createTempFile("event-catalog-zdl-", ".zdl");
+            Files.writeString(tempFile.toPath(), zdlText);
             var parsed = new ZDLParser()
-                    .withZdlFile(specFile.getAbsolutePath())
+                    .withZdlFile(tempFile.getAbsolutePath())
                     .withTargetProperty(tempKey)
                     .parse();
 
             return (Map<String, Object>) parsed.get(tempKey);
         } catch (Exception e) {
-            log.warn("Failed to parse ZDL spec {}: {} ({})", specFile.getAbsolutePath(), e.getMessage(), e.getClass().getSimpleName());
+            log.warn("Failed to parse ZDL artifact {}: {} ({})", artifact.getPathExpression(), e.getMessage(), e.getClass().getSimpleName());
             return null;
+        } finally {
+            if (tempFile != null) {
+                tempFile.delete();
+            }
         }
     }
 
-    /** Converts CamelCase to kebab-case for use in EventCatalog folder names. */
     private String toKebabCase(String name) {
         if (name == null || name.isBlank()) return name;
         return name.replaceAll("([a-z])([A-Z])", "$1-$2").toLowerCase();
@@ -259,8 +276,10 @@ public class EventCatalogZdlProcessor implements Processor {
             return null;
         }
         return switch (type) {
-            case "one-to-many", "many-to-many" -> "hasMany";
-            case "many-to-one", "one-to-one" -> "hasOne";
+            case "one-to-one" -> "oneToOne";
+            case "one-to-many" -> "oneToMany";
+            case "many-to-one" -> "manyToOne";
+            case "many-to-many" -> "manyToMany";
             default -> type;
         };
     }
@@ -274,13 +293,5 @@ public class EventCatalogZdlProcessor implements Processor {
     private String str(Map<?, ?> map, String key, String defaultValue) {
         Object value = map.get(key);
         return value != null ? value.toString() : defaultValue;
-    }
-
-    private String resolveSpecPath(String repository, Map<String, Object> spec) {
-        String resolvedPath = str(spec, "resolvedPath", null);
-        if (resolvedPath != null && !resolvedPath.isBlank()) {
-            return resolvedPath;
-        }
-        return repository + File.separator + spec.get("path");
     }
 }

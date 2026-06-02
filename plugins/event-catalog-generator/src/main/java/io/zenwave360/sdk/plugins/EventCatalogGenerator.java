@@ -2,6 +2,10 @@ package io.zenwave360.sdk.plugins;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.zenwave360.manifest.ManifestLoadOptions;
+import io.zenwave360.manifest.ManifestService;
+import io.zenwave360.manifest.ZenWaveManifest;
+import io.zenwave360.manifest.ZenWaveManifestLoader;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.plugins.frontmatter.ChannelFrontmatter;
@@ -22,6 +26,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -48,6 +54,14 @@ public class EventCatalogGenerator extends Generator {
 
     @DocumentedOption(description = "Custom Handlebars template for docs body rendering.")
     public String docsTemplate;
+    @DocumentedOption(description = "Preferred artifact source for build-time content loading.")
+    public String preferredSource;
+    @DocumentedOption(description = "Allow source fallback for build-time content loading.")
+    public Boolean allowFallback;
+    @DocumentedOption(description = "Comma separated local roots for workspace-first content loading.")
+    public String localRoots;
+    @DocumentedOption(description = "Preferred source for generated frontmatter links.")
+    public String linkSource;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -63,21 +77,24 @@ public class EventCatalogGenerator extends Generator {
         for (Map.Entry<String, Object> domainEntry : domains.entrySet()) {
             Map<String, Object> domain = (Map<String, Object>) domainEntry.getValue();
             String domainId = str(domain, "id", domainEntry.getKey());
+            List<Map<String, Object>> domainServices = domainServices(services, domainId, domains);
+            List<Map<String, Object>> childDomains = childDomains(domain);
 
             files.singleFiles.add(mdxPage(
                     "domains/" + domainId + "/index.mdx",
-                    domainFrontmatter(domainId, domain, configVersion, domainServices(services, domainId, domains), childDomains(domain)),
-                    renderDocs(domain, contextModel)));
+                    domainFrontmatter(domainId, domain, configVersion, domainServices, childDomains),
+                    domainBody(domain, domainServices, childDomains, renderDocs(domain, contextModel))));
 
             Map<String, Object> subdomains = (Map<String, Object>) domain.getOrDefault("subdomains", Map.of());
             for (Map.Entry<String, Object> subEntry : subdomains.entrySet()) {
                 Map<String, Object> subdomain = (Map<String, Object>) subEntry.getValue();
                 String subdomainId = str(subdomain, "id", subEntry.getKey());
+                List<Map<String, Object>> subdomainServices = subdomainServices(services, domains, domainId, subdomainId);
 
                 files.singleFiles.add(mdxPage(
-                        "domains/" + domainId + "/" + subdomainId + "/index.mdx",
-                        domainFrontmatter(subdomainId, subdomain, configVersion, subdomainServices(services, domains, domainId, subdomainId), List.of()),
-                        renderDocs(subdomain, contextModel)));
+                        "domains/" + domainId + "/subdomains/" + subdomainId + "/index.mdx",
+                        domainFrontmatter(subdomainId, subdomain, configVersion, subdomainServices, List.of()),
+                        domainBody(subdomain, subdomainServices, List.of(), renderDocs(subdomain, contextModel))));
             }
         }
 
@@ -90,17 +107,17 @@ public class EventCatalogGenerator extends Generator {
 
             String subdomainId = resolveSubdomainId(domains, domainId, subdomainKey);
             String serviceBase = subdomainId != null && !subdomainId.isBlank()
-                    ? "domains/" + domainId + "/" + subdomainId + "/services/" + serviceId
+                    ? "domains/" + domainId + "/subdomains/" + subdomainId + "/services/" + serviceId
                     : "domains/" + domainId + "/services/" + serviceId;
 
             files.singleFiles.add(mdxPage(
                     serviceBase + "/index.mdx",
-                    serviceFrontmatter(serviceId, service, configVersion),
-                    renderDocs(service, contextModel)));
+                    serviceFrontmatter(serviceId, service, configVersion, serviceBase + "/index.mdx"),
+                    serviceBody(service, renderDocs(service, contextModel))));
 
             List<Map<String, Object>> channels = (List<Map<String, Object>>) service.getOrDefault("_channels", List.of());
             String channelBase = subdomainId != null && !subdomainId.isBlank()
-                    ? "domains/" + domainId + "/" + subdomainId + "/channels"
+                    ? "domains/" + domainId + "/subdomains/" + subdomainId + "/channels"
                     : "domains/" + domainId + "/channels";
             for (Map<String, Object> channel : channels) {
                 String channelId = str(channel, "id", null);
@@ -108,7 +125,7 @@ public class EventCatalogGenerator extends Generator {
                 files.singleFiles.add(mdxPage(
                         channelBase + "/" + channelId + "/index.mdx",
                         channelFrontmatter(channel, service),
-                        ""));
+                        channelBody(channel, service)));
             }
 
             // Event pages
@@ -119,7 +136,7 @@ public class EventCatalogGenerator extends Generator {
                 files.singleFiles.add(mdxPage(
                         serviceBase + "/events/" + eventId + "/index.mdx",
                         eventFrontmatter(event, services),
-                        ""));
+                        messageBody("event", event)));
             }
 
             // Command pages
@@ -130,7 +147,7 @@ public class EventCatalogGenerator extends Generator {
                 files.singleFiles.add(mdxPage(
                         serviceBase + "/commands/" + commandId + "/index.mdx",
                         commandFrontmatter(command, services),
-                        ""));
+                        messageBody("command", command)));
             }
 
             // Query pages (from OpenAPI GET operations)
@@ -141,7 +158,7 @@ public class EventCatalogGenerator extends Generator {
                 files.singleFiles.add(mdxPage(
                         serviceBase + "/queries/" + queryId + "/index.mdx",
                         queryFrontmatter(query, services),
-                        ""));
+                        queryBody(query)));
             }
 
             // Entity pages (from ZDL domain models)
@@ -152,7 +169,7 @@ public class EventCatalogGenerator extends Generator {
                 files.singleFiles.add(mdxPage(
                         serviceBase + "/entities/" + entityId + "/index.mdx",
                         entityFrontmatter(entity, service, domainId, subdomainId, serviceId, configVersion),
-                        ""));
+                        entityBody(entity)));
             }
         }
 
@@ -168,27 +185,27 @@ public class EventCatalogGenerator extends Generator {
         String version = str(entry, "version", configVersion);
         return new DomainFrontmatter(
                 commonFrontmatter(entry, id, str(entry, "name", id), version, str(entry, "description", str(entry, "summary", null)), null, null),
-                toResourcePointers(services, "service"),
-                toResourcePointers(listOfMaps(entry.get("agents")), "agent"),
-                toResourcePointers(childDomains, "domain"),
-                toResourcePointers(listOfMaps(entry.get("data-products")), "data-product"),
+                toPointers(services, null),
+                toPointers(listOfMaps(entry.get("agents")), version, null),
+                toPointers(childDomains, version, null),
+                toPointers(listOfMaps(entry.get("data-products")), version, null),
                 collectEntityPointers(services),
-                toResourcePointers(listOfMaps(entry.get("flows")), "flow"),
+                toPointers(listOfMaps(entry.get("flows")), version, null),
                 collectMessagePointers(services, "_sends"),
                 collectMessagePointers(services, "_receives"),
                 null);
     }
 
-    private Frontmatter serviceFrontmatter(String id, Map<String, Object> entry, String configVersion) {
+    private Frontmatter serviceFrontmatter(String id, Map<String, Object> entry, String configVersion, String servicePagePath) {
         String version = str(entry, "_version", str(entry, "version", configVersion));
         return new ServiceFrontmatter(
-                commonFrontmatter(entry, id, str(entry, "name", id), version, str(entry, "description", str(entry, "summary", null)), null, specifications(entry)),
+                commonFrontmatter(entry, id, str(entry, "name", id), version, str(entry, "description", str(entry, "summary", null)), null, specifications(entry, servicePagePath)),
                 messagePointers(entry.get("_sends")),
                 messagePointers(entry.get("_receives")),
-                toResourcePointers(listOfMaps(entry.get("_entities")), "entity"),
-                toResourcePointers(listOfMaps(entry.get("writesTo")), "container"),
-                toResourcePointers(listOfMaps(entry.get("readsFrom")), "container"),
-                toResourcePointers(listOfMaps(entry.get("flows")), "flow"),
+                toPointers(listOfMaps(entry.get("_entities")), version, null),
+                toPointers(listOfMaps(entry.get("writesTo")), version, null),
+                toPointers(listOfMaps(entry.get("readsFrom")), version, null),
+                toPointers(listOfMaps(entry.get("flows")), version, null),
                 bool(entry.get("externalSystem")),
                 null);
     }
@@ -198,8 +215,8 @@ public class EventCatalogGenerator extends Generator {
                 commonFrontmatter(event, str(event, "id", null), str(event, "name", str(event, "id", null)), str(event, "version", "0.0.1"),
                         str(event, "summary", null), str(event, "schemaPath", null), null),
                 operation(event),
-                relatedServices(services, eventIdPredicate(str(event, "id", null), "_sends")),
-                relatedServices(services, eventIdPredicate(str(event, "id", null), "_receives")),
+                relatedCollectionRefs(services, eventIdPredicate(str(event, "id", null), "_sends"), "services"),
+                relatedCollectionRefs(services, eventIdPredicate(str(event, "id", null), "_receives"), "services"),
                 channelPointers(event),
                 null,
                 null);
@@ -210,8 +227,8 @@ public class EventCatalogGenerator extends Generator {
                 commonFrontmatter(command, str(command, "id", null), str(command, "name", str(command, "id", null)), str(command, "version", "0.0.1"),
                         str(command, "summary", null), str(command, "schemaPath", null), null),
                 operation(command),
-                relatedServices(services, eventIdPredicate(str(command, "id", null), "_sends")),
-                relatedServices(services, eventIdPredicate(str(command, "id", null), "_receives")),
+                relatedCollectionRefs(services, eventIdPredicate(str(command, "id", null), "_sends"), "services"),
+                relatedCollectionRefs(services, eventIdPredicate(str(command, "id", null), "_receives"), "services"),
                 channelPointers(command),
                 null,
                 null);
@@ -222,8 +239,8 @@ public class EventCatalogGenerator extends Generator {
                 commonFrontmatter(query, str(query, "id", null), str(query, "name", str(query, "id", null)), str(query, "version", "0.0.1"),
                         str(query, "summary", null), str(query, "schemaPath", null), null),
                 operation(query),
-                relatedServices(services, eventIdPredicate(str(query, "id", null), "_sends")),
-                relatedServices(services, eventIdPredicate(str(query, "id", null), "_receives")),
+                relatedCollectionRefs(services, eventIdPredicate(str(query, "id", null), "_sends"), "services"),
+                relatedCollectionRefs(services, eventIdPredicate(str(query, "id", null), "_receives"), "services"),
                 channelPointers(query),
                 null,
                 null);
@@ -231,14 +248,17 @@ public class EventCatalogGenerator extends Generator {
 
     private Frontmatter entityFrontmatter(Map<String, Object> entity, Map<String, Object> service,
                                           String domainId, String subdomainId, String serviceId, String configVersion) {
+        String serviceVersion = str(service, "_version", str(service, "version", configVersion));
+        String effectiveDomainId = subdomainId != null ? subdomainId : domainId;
+        String entityVersion = str(entity, "version", configVersion);
         return new EntityFrontmatter(
-                commonFrontmatter(entity, str(entity, "id", null), str(entity, "name", str(entity, "id", null)), str(entity, "version", configVersion),
+                commonFrontmatter(entity, str(entity, "id", null), str(entity, "name", str(entity, "id", null)), entityVersion,
                         str(entity, "summary", null), null, null),
                 bool(entity.get("aggregateRoot")),
                 str(entity, "identifier", null),
                 entityProperties(entity),
-                List.of(new FrontmatterTypes.ResourcePointerFrontmatter(serviceId, str(service, "_version", str(service, "version", configVersion)), "service")),
-                List.of(new FrontmatterTypes.ResourcePointerFrontmatter(subdomainId != null ? subdomainId : domainId, null, "domain")),
+                List.of(collectionRef(serviceId, serviceVersion)),
+                effectiveDomainId != null ? List.of(collectionRef(effectiveDomainId, configVersion)) : null,
                 null);
     }
 
@@ -262,6 +282,22 @@ public class EventCatalogGenerator extends Generator {
 
     @SuppressWarnings("unchecked")
     private String renderDocs(Map<String, Object> entry, Map<String, Object> contextModel) {
+        ZenWaveManifest manifest = (ZenWaveManifest) contextModel.get("manifest");
+        ZenWaveManifestLoader manifestLoader = (ZenWaveManifestLoader) contextModel.get("manifestLoader");
+        File manifestFile = (File) contextModel.get("manifestFile");
+        ManifestService manifestService = manifest != null ? ManifestRuntimeSupport.findService(manifest, entry) : null;
+        if (manifest != null && manifestLoader != null && manifestService != null && !manifestService.getDocs().isEmpty()) {
+            try {
+                ManifestLoadOptions contentOptions = ManifestRuntimeSupport.contentOptions(
+                        manifest, manifestFile, preferredSource, allowFallback, localRoots);
+                Map<String, String> resolvedDocs = ManifestRuntimeSupport.loadServiceDocs(
+                        manifestLoader, manifest, manifestService, contentOptions);
+                return renderDocsTemplate(resolvedDocs);
+            } catch (Exception e) {
+                log.warn("Cannot load docs for {}: {}", manifestService.getServiceRef(), e.getMessage());
+            }
+        }
+
         Object docsObj = entry.get("docs");
         if (!(docsObj instanceof Map<?,?> docsMap)) {
             return "";
@@ -287,16 +323,150 @@ public class EventCatalogGenerator extends Generator {
             }
         }
 
-        if (resolvedDocs.isEmpty()) {
-            return "";
-        }
+        return renderDocsTemplate(resolvedDocs);
+    }
 
-        String templatePath = docsTemplate != null ? docsTemplate : DEFAULT_DOCS_TEMPLATE;
-        TemplateInput templateInput = new TemplateInput(templatePath, "docs");
-        Map<String, Object> model = new LinkedHashMap<>(asConfigurationMap());
-        model.put("docs", resolvedDocs);
-        TemplateOutput output = getTemplateEngine().processTemplate(model, templateInput);
-        return output != null ? output.getContent() : "";
+    // -------------------------------------------------------------------------
+    // Page body rendering
+    // -------------------------------------------------------------------------
+
+    private String domainBody(Map<String, Object> entry, List<Map<String, Object>> services,
+                              List<Map<String, Object>> childDomains, String docsBody) {
+        StringBuilder sb = new StringBuilder();
+        appendParagraph(sb, str(entry, "summary", str(entry, "description", null)));
+        sb.append("## Overview\n\n");
+        sb.append("This page is generated from the ZenWave architecture model and EventCatalog frontmatter.\n\n");
+        sb.append("<NodeGraph />\n\n");
+        sb.append("<MessageTable format=\"all\" limit={8} showChannels={true} title=\"Messages in and out\" />\n\n");
+        if (hasEntities(services)) {
+            sb.append("## Entity Map\n\n");
+            sb.append("<EntityMap />\n\n");
+        }
+        if (!childDomains.isEmpty() || !services.isEmpty()) {
+            sb.append("## Related Resources\n\n");
+            sb.append("<ResourceGroupTable id=\"related-resources\" limit={8} showOwners={true} title=\"Core resources\" />\n\n");
+        }
+        appendDocsBody(sb, docsBody);
+        return sb.toString();
+    }
+
+    private String serviceBody(Map<String, Object> service, String docsBody) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("## Overview\n\n");
+        appendParagraph(sb, str(service, "summary", str(service, "description", null)));
+        sb.append("<NodeGraph />\n\n");
+        if (hasMessages(service)) {
+            sb.append("## Message Flow\n\n");
+            sb.append("<MessageTable format=\"all\" limit={8} showChannels={true} />\n\n");
+        }
+        if (!listOfMaps(service.get("_entities")).isEmpty()) {
+            sb.append("## Domain Model\n\n");
+            sb.append("<EntityMap />\n\n");
+        }
+        if (hasSpecifications(service)) {
+            sb.append("## Specifications\n\n");
+            sb.append("The linked specifications in the frontmatter drive EventCatalog reference views for this service.\n\n");
+        }
+        appendDocsBody(sb, docsBody);
+        return sb.toString();
+    }
+
+    private String messageBody(String resourceType, Map<String, Object> resource) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("## Overview\n\n");
+        String summary = str(resource, "summary", null);
+        if (summary != null && !summary.isBlank()) {
+            sb.append(summary).append("\n\n");
+        } else {
+            sb.append("Generated ").append(resourceType).append(" reference page.\n\n");
+        }
+        sb.append("<NodeGraph />\n\n");
+        String schemaPath = str(resource, "schemaPath", null);
+        if (schemaPath != null && !schemaPath.isBlank()) {
+            sb.append("## Schema\n\n");
+            sb.append("<SchemaViewer file=\"").append(escapeAttribute(schemaPath)).append("\" />\n\n");
+        }
+        return sb.toString();
+    }
+
+    private String queryBody(Map<String, Object> query) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("## Overview\n\n");
+        String summary = str(query, "summary", null);
+        if (summary != null && !summary.isBlank()) {
+            sb.append(summary).append("\n\n");
+        } else {
+            sb.append("Generated query reference page.\n\n");
+        }
+        sb.append("<NodeGraph />\n\n");
+        String schemaPath = str(query, "schemaPath", null);
+        if (schemaPath != null && !schemaPath.isBlank()) {
+            sb.append("## Response Schema\n\n");
+            sb.append("<SchemaViewer file=\"").append(escapeAttribute(schemaPath)).append("\" />\n\n");
+        }
+        return sb.toString();
+    }
+
+    private String entityBody(Map<String, Object> entity) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("## Overview\n\n");
+        appendParagraph(sb, str(entity, "summary", null));
+        sb.append("### Entity Properties\n\n");
+        sb.append("<EntityPropertiesTable />\n\n");
+        if (hasRelationships(entity)) {
+            sb.append("## Relationships\n\n");
+            sb.append("This entity includes references to related entities captured in the generated frontmatter properties.\n\n");
+        }
+        return sb.toString();
+    }
+
+    private String channelBody(Map<String, Object> channel, Map<String, Object> service) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("## Overview\n\n");
+        appendParagraph(sb, str(channel, "summary", "Generated channel reference page."));
+        sb.append("<NodeGraph />\n\n");
+        if (channelMessages(channel, service) != null) {
+            sb.append("## Messages\n\n");
+            sb.append("<MessageTable format=\"all\" limit={8} showChannels={true} />\n\n");
+        }
+        return sb.toString();
+    }
+
+    private void appendParagraph(StringBuilder sb, String text) {
+        if (text == null || text.isBlank()) {
+            return;
+        }
+        sb.append(text).append("\n\n");
+    }
+
+    private void appendDocsBody(StringBuilder sb, String docsBody) {
+        if (docsBody != null && !docsBody.isBlank()) {
+            sb.append(docsBody);
+            if (!docsBody.endsWith("\n")) {
+                sb.append("\n");
+            }
+        }
+    }
+
+    private boolean hasSpecifications(Map<String, Object> service) {
+        return specifications(service, "index.mdx") != null;
+    }
+
+    private boolean hasMessages(Map<String, Object> service) {
+        return !strings(service.get("_sends")).isEmpty() || !strings(service.get("_receives")).isEmpty();
+    }
+
+    private boolean hasEntities(List<Map<String, Object>> services) {
+        return services.stream().anyMatch(service -> !listOfMaps(service.get("_entities")).isEmpty());
+    }
+
+    private boolean hasRelationships(Map<String, Object> entity) {
+        return listOfMaps(entity.get("properties")).stream()
+                .anyMatch(property -> str(property, "references", null) != null);
+    }
+
+    private String escapeAttribute(String value) {
+        return value.replace("&", "&amp;").replace("\"", "&quot;");
     }
 
     // -------------------------------------------------------------------------
@@ -409,8 +579,8 @@ public class EventCatalogGenerator extends Generator {
     }
 
     @SuppressWarnings("unchecked")
-    private List<FrontmatterTypes.SpecificationFrontmatter> specifications(Map<String, Object> entry) {
-        List<Map<String, Object>> specs = (List<Map<String, Object>>) entry.getOrDefault("specs", List.of());
+    private List<FrontmatterTypes.SpecificationFrontmatter> specifications(Map<String, Object> entry, String servicePagePath) {
+        List<Map<String, Object>> specs = (List<Map<String, Object>>) entry.getOrDefault("artifacts", List.of());
         if (specs.isEmpty()) {
             return null;
         }
@@ -421,7 +591,7 @@ public class EventCatalogGenerator extends Generator {
             if (!List.of("asyncapi", "openapi", "graphql").contains(type)) {
                 continue;
             }
-            String path = str(spec, "resolvedPath", str(spec, "path", null));
+            String path = specPathForEventCatalog(spec, servicePagePath);
             if (path == null) {
                 continue;
             }
@@ -432,6 +602,32 @@ public class EventCatalogGenerator extends Generator {
                     mapOfStrings(spec.get("headers"))));
         }
         return result.isEmpty() ? null : result;
+    }
+
+    private String specPathForEventCatalog(Map<String, Object> spec, String servicePagePath) {
+        String buildPath = str(spec, "buildPath", null);
+        if (buildPath != null && !buildPath.isBlank() && new File(buildPath).isAbsolute()) {
+            try {
+                Path eventCatalogRoot = Paths.get(System.getProperty("user.dir"), "src/test/resources/event-catalog-project").toAbsolutePath().normalize();
+                Path serviceDir = eventCatalogRoot.resolve(servicePagePath).getParent().normalize();
+                Path sourceFile = Paths.get(buildPath).toAbsolutePath().normalize();
+                return serviceDir.relativize(sourceFile).toString().replace('\\', '/');
+            } catch (Exception ignored) {
+            }
+        }
+        return str(spec, "buildPath", str(spec, "linkUri", str(spec, "path", null)));
+    }
+
+    private String renderDocsTemplate(Map<String, String> resolvedDocs) {
+        if (resolvedDocs == null || resolvedDocs.isEmpty()) {
+            return "";
+        }
+        String templatePath = docsTemplate != null ? docsTemplate : DEFAULT_DOCS_TEMPLATE;
+        TemplateInput templateInput = new TemplateInput(templatePath, "docs");
+        Map<String, Object> model = new LinkedHashMap<>(asConfigurationMap());
+        model.put("docs", resolvedDocs);
+        TemplateOutput output = getTemplateEngine().processTemplate(model, templateInput);
+        return output != null ? output.getContent() : "";
     }
 
     private List<Map<String, Object>> domainServices(Map<String, Object> services, String domainId, Map<String, Object> domains) {
@@ -483,7 +679,7 @@ public class EventCatalogGenerator extends Generator {
         for (Map<String, Object> service : services) {
             entities.addAll(listOfMaps(service.get("_entities")));
         }
-        return toResourcePointers(entities, "entity");
+        return toPointers(entities, null);
     }
 
     private List<FrontmatterTypes.MessagePointerFrontmatter> messagePointers(Object value) {
@@ -493,12 +689,81 @@ public class EventCatalogGenerator extends Generator {
                 .toList();
     }
 
-    private List<FrontmatterTypes.ResourcePointerFrontmatter> relatedServices(Map<String, Object> services, Predicate<Map<String, Object>> filter) {
-        return toResourcePointers(filterServices(services, filter), "service");
+    private List<String> relatedCollectionRefs(Map<String, Object> services, Predicate<Map<String, Object>> filter, String collection) {
+        return toCollectionRefs(filterServices(services, filter));
     }
 
     private Predicate<Map<String, Object>> eventIdPredicate(String id, String key) {
         return service -> strings(service.get(key)).contains(id);
+    }
+
+    private List<String> toCollectionRefs(List<Map<String, Object>> items) {
+        if (items == null || items.isEmpty()) {
+            return null;
+        }
+        List<String> result = new ArrayList<>();
+        Set<String> seen = new LinkedHashSet<>();
+        for (Map<String, Object> item : items) {
+            String id = str(item, "id", null);
+            String version = str(item, "_version", str(item, "version", null));
+            if (id == null || version == null) {
+                continue;
+            }
+            String ref = collectionRef(id, version);
+            if (seen.add(ref)) {
+                result.add(ref);
+            }
+        }
+        return result.isEmpty() ? null : result;
+    }
+
+    private List<String> toCollectionRefs(List<Map<String, Object>> items, String defaultVersion) {
+        if (items == null || items.isEmpty()) {
+            return null;
+        }
+        List<String> result = new ArrayList<>();
+        Set<String> seen = new LinkedHashSet<>();
+        for (Map<String, Object> item : items) {
+            String id = str(item, "id", null);
+            String version = str(item, "_version", str(item, "version", defaultVersion));
+            if (id == null || version == null) {
+                continue;
+            }
+            String ref = collectionRef(id, version);
+            if (seen.add(ref)) {
+                result.add(ref);
+            }
+        }
+        return result.isEmpty() ? null : result;
+    }
+
+    private List<FrontmatterTypes.ResourcePointerFrontmatter> toPointers(List<Map<String, Object>> items, String defaultVersion) {
+        return toPointers(items, defaultVersion, null);
+    }
+
+    private List<FrontmatterTypes.ResourcePointerFrontmatter> toPointers(List<Map<String, Object>> items, String defaultVersion, String defaultType) {
+        if (items == null || items.isEmpty()) {
+            return null;
+        }
+        List<FrontmatterTypes.ResourcePointerFrontmatter> result = new ArrayList<>();
+        Set<String> seen = new LinkedHashSet<>();
+        for (Map<String, Object> item : items) {
+            String id = str(item, "id", null);
+            String version = str(item, "_version", str(item, "version", defaultVersion));
+            String type = str(item, "type", defaultType);
+            if (id == null) {
+                continue;
+            }
+            String key = id + "|" + version + "|" + type;
+            if (seen.add(key)) {
+                result.add(new FrontmatterTypes.ResourcePointerFrontmatter(id, version, type));
+            }
+        }
+        return result.isEmpty() ? null : result;
+    }
+
+    private String collectionRef(String id, String version) {
+        return id + "-" + version;
     }
 
     @SuppressWarnings("unchecked")

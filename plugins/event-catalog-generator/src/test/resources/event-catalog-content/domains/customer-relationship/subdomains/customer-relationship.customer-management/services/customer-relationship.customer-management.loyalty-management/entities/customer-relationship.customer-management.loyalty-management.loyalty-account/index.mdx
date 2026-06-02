@@ -1,0 +1,48 @@
+---
+id: "customer-relationship.customer-management.loyalty-management.loyalty-account"
+name: "LoyaltyAccount"
+summary: "Loyalty Account aggregate"
+version: "1.0.0"
+aggregateRoot: true
+identifier: "customerId"
+properties:
+- name: "accountNumber"
+  type: "String"
+  required: true
+- name: "customerId"
+  type: "String"
+  required: true
+- name: "currentPoints"
+  type: "Integer"
+  required: true
+- name: "tierLevel"
+  type: "LoyaltyTier"
+  required: true
+  references: "LoyaltyTier"
+  enum:
+  - "BRONZE"
+  - "SILVER"
+  - "GOLD"
+  - "PLATINUM"
+- name: "memberSince"
+  type: "Instant"
+  required: true
+- name: "lastActivityDate"
+  type: "Instant"
+services:
+- "customer-relationship.customer-management.loyalty-management-1.0.0"
+domains:
+- "customer-relationship.customer-management-0.0.1"
+---
+## Overview
+
+Loyalty Account aggregate
+
+### Entity Properties
+
+<EntityPropertiesTable />
+
+## Relationships
+
+This entity includes references to related entities captured in the generated frontmatter properties.
+
