@@ -15,8 +15,8 @@ public class AsyncAPIUtilsTest {
     @Test
     void testExtractMessages_V2_WithOperationIds() throws Exception {
         // Given
-        Map<String, Object> apiModel = loadAsyncApiYmlModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v3/customer-address.yml");
-        List<String> operationIds = List.of("doCreateCustomer");
+        Map<String, Object> apiModel = loadAsyncApiYmlModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-events.yml");
+        List<String> operationIds = List.of("onProductCreated");
         List<String> messageNames = List.of();
 
         // When

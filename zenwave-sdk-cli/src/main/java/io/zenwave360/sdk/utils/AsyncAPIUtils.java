@@ -42,7 +42,7 @@ public class AsyncAPIUtils {
                 } else {
                     for (String operationId : operationIds) {
                         List<Map<String, Object>> operations = JSONPath.get(apiModel, "$.channels[*][*][?(@.operationId == '" + operationId + "')]");
-                        Set<Map<String, Object>> messages = JSONPath.get(operations, "$[*].x--messages[*]", Collections.emptySet());
+                        Set<Map<String, Object>> messages = new HashSet<>(JSONPath.get(operations, "$[*].x--messages[*]", Collections.emptySet()));
                         allMessages.addAll(messages);
                     }
                 }
