@@ -1,0 +1,58 @@
+asyncapi: 3.1.0
+info:
+  title: ZenWave jsonschema2pojo options repro
+  version: 1.0.0
+
+channels:
+  sampleChannel:
+    address: sample.topic
+
+operations:
+  publishSample:
+    action: send
+    channel:
+      $ref: '#/channels/sampleChannel'
+    messages:
+      - $ref: '#/components/messages/SampleMessage'
+
+components:
+  messages:
+    SampleMessage:
+      name: SampleMessage
+      payload:
+        $ref: '#/components/schemas/SamplePayload'
+
+  schemas:
+    SamplePayload:
+      type: object
+      additionalProperties: false
+      properties:
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+        localDate:
+          type: string
+          format: date
+        localTime:
+          type: string
+          format: time
+      required:
+        - addresses
+
+    Address:
+      type: object
+      additionalProperties: false
+      properties:
+        cities:
+          type: array
+          items:
+            type: string
+        localDate:
+          type: string
+          format: date
+        localTime:
+          type: string
+          format: time
+      required:
+        - cities

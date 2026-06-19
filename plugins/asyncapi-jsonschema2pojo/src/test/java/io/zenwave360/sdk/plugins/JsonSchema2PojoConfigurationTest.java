@@ -56,4 +56,21 @@ class JsonSchema2PojoConfigurationTest {
 
         Assertions.assertEquals(NoopAnnotator.class, config.getCustomAnnotator());
     }
+
+    @Test
+    void should_disable_default_date_type_when_joda_local_dates_are_explicitly_disabled() {
+        JsonSchema2PojoConfiguration config = JsonSchema2PojoConfiguration.of(Map.of(
+                "useJodaLocalDates", "false"));
+
+        Assertions.assertNull(config.getDateType());
+    }
+
+    @Test
+    void should_keep_explicit_date_type_when_joda_local_dates_are_disabled() {
+        JsonSchema2PojoConfiguration config = JsonSchema2PojoConfiguration.of(Map.of(
+                "useJodaLocalDates", "false",
+                "dateType", "java.time.LocalDate"));
+
+        Assertions.assertEquals("java.time.LocalDate", config.getDateType());
+    }
 }

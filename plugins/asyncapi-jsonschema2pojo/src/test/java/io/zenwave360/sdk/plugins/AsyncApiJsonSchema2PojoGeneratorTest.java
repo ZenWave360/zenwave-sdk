@@ -118,6 +118,45 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
         Assertions.assertTrue(json.contains("\"javaType\":\"io.example.v31_external.domain.events.AddressC\""));
     }
 
+    @Test
+    public void test_generator_honors_initialize_collections_false() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:asyncapi-v3-jsonschema2pojo-options.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.v31_options.domain.events")
+                .withOption("messageNames", List.of("SampleMessage"))
+                .withOption("jsonschema2pojo.initializeCollections", "false");
+
+        new MainGenerator().generate(plugin);
+
+        String samplePayload = FileUtils.readFileToString(new File("target/zenwave630/src/main/java/io/example/v31_options/domain/events/SamplePayload.java"), "UTF-8");
+        String address = FileUtils.readFileToString(new File("target/zenwave630/src/main/java/io/example/v31_options/domain/events/Address.java"), "UTF-8");
+        Assertions.assertFalse(samplePayload.contains("private List<Address> addresses = new ArrayList<Address>();"));
+        Assertions.assertFalse(address.contains("private List<String> cities = new ArrayList<String>();"));
+        Assertions.assertFalse(samplePayload.contains("new ArrayList"));
+        Assertions.assertFalse(address.contains("new ArrayList"));
+    }
+
+    @Test
+    public void test_generator_honors_use_joda_local_dates_false() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:asyncapi-v3-jsonschema2pojo-options.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.v31_options.domain.events")
+                .withOption("messageNames", List.of("SampleMessage"))
+                .withOption("jsonschema2pojo.useJodaLocalDates", "false")
+                .withOption("jsonschema2pojo.useJodaLocalTimes", "false");
+
+        new MainGenerator().generate(plugin);
+
+        String samplePayload = FileUtils.readFileToString(new File("target/zenwave630/src/main/java/io/example/v31_options/domain/events/SamplePayload.java"), "UTF-8");
+        String address = FileUtils.readFileToString(new File("target/zenwave630/src/main/java/io/example/v31_options/domain/events/Address.java"), "UTF-8");
+        Assertions.assertTrue(samplePayload.contains("private String localDate;"));
+        Assertions.assertTrue(samplePayload.contains("private String localTime;"));
+        Assertions.assertTrue(address.contains("private String localDate;"));
+        Assertions.assertTrue(address.contains("private String localTime;"));
+    }
+
     private int countOccurrences(String value, String token) {
         int count = 0;
         int index = 0;
