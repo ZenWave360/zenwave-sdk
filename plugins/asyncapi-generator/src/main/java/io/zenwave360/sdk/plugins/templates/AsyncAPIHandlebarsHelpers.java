@@ -139,6 +139,32 @@ public class AsyncAPIHandlebarsHelpers {
         return "Object";
     }
 
+    public Object headerPropertyTypeImports(Object messages, Options options) {
+        return collectHeaderPropertyTypeImports(messages);
+    }
+
+    private static Set<String> collectHeaderPropertyTypeImports(Object messages) {
+        Set<String> imports = new TreeSet<>();
+        Collection messageValues = messages instanceof Map ? ((Map) messages).values() : messages instanceof Collection ? (Collection) messages : List.of();
+        for (Object message : messageValues) {
+            List<Map> headers = JSONPath.get(message, "$.headers.properties[*]", Collections.emptyList());
+            for (Map header : headers) {
+                String type = (String) header.get("type");
+                String format = (String) header.get("format");
+                if ("date".equals(format)) {
+                    imports.add("java.time.LocalDate");
+                }
+                if ("date-time".equals(format)) {
+                    imports.add("java.time.Instant");
+                }
+                if ("number".equals(type)) {
+                    imports.add("java.math.BigDecimal");
+                }
+            }
+        }
+        return imports;
+    }
+
     public void registerHelpers(HandlebarsEngine handlebarsEngine) {
         handlebarsEngine.getHandlebars().registerHelper("producerInterfaceName", (serviceName, options) -> {
             AsyncAPIGenerator.OperationRoleType operationRoleType = options.param(0);
@@ -250,6 +276,10 @@ public class AsyncAPIHandlebarsHelpers {
                 return "String";
             }
             return "Object";
+        });
+
+        handlebarsEngine.getHandlebars().registerHelper("headerPropertyTypeImports", (messages, options) -> {
+            return collectHeaderPropertyTypeImports(messages);
         });
     }
 }

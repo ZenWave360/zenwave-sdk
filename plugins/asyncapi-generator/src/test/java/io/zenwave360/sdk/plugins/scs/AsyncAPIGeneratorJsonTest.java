@@ -9,6 +9,8 @@ import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.*;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class AsyncAPIGeneratorJsonTest {
 
@@ -45,6 +47,9 @@ public class AsyncAPIGeneratorJsonTest {
         new MainGenerator().generate(plugin);
 
         Assertions.assertTrue(new File(targetFolder + "/src/main/java/io/example/api/model/CustomerEvent.java").exists());
+        String producerInterface = Files.readString(Path.of(targetFolder, "src/main/java/io/example/api/producer/DefaultServiceEventsProducer.java"));
+        Assertions.assertTrue(producerInterface.contains("import java.time.Instant;"));
+        Assertions.assertTrue(producerInterface.contains("import java.time.LocalDate;"));
     }
 
     @Test

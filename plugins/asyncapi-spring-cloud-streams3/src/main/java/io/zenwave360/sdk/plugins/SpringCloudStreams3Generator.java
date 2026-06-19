@@ -4,9 +4,12 @@ import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -177,6 +180,11 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
             }
             return "Object";
         });
+        // Keep this helper local: asyncapi-spring-cloud-streams3 is maintenance-only.
+        // The actively evolved implementation lives in asyncapi-generator's AsyncAPIHandlebarsHelpers.
+        handlebarsEngine.getHandlebars().registerHelper("headerPropertyTypeImports", (messages, options) -> {
+            return collectHeaderPropertyTypeImports(messages);
+        });
     }
 
     protected String templatesPath = "io/zenwave360/sdk/plugins/SpringCloudStream3Generator";
@@ -197,6 +205,28 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
 
     public static String getApiClassName(String serviceName, AbstractAsyncapiGenerator.OperationRoleType operationRoleType) {
         return operationRoleType != null? serviceName + operationRoleType.getServiceSuffix() : serviceName;
+    }
+
+    private static Set<String> collectHeaderPropertyTypeImports(Object messages) {
+        Set<String> imports = new TreeSet<>();
+        Collection messageValues = messages instanceof Map ? ((Map) messages).values() : messages instanceof Collection ? (Collection) messages : List.of();
+        for (Object message : messageValues) {
+            List<Map> headers = JSONPath.get(message, "$.headers.properties[*]", Collections.emptyList());
+            for (Map header : headers) {
+                String type = (String) header.get("type");
+                String format = (String) header.get("format");
+                if ("date".equals(format)) {
+                    imports.add("java.time.LocalDate");
+                }
+                if ("date-time".equals(format)) {
+                    imports.add("java.time.Instant");
+                }
+                if ("number".equals(type)) {
+                    imports.add("java.math.BigDecimal");
+                }
+            }
+        }
+        return imports;
     }
 
 }

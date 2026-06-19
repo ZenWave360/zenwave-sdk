@@ -1,5 +1,7 @@
 package io.zenwave360.sdk.plugins;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.jupiter.api.*;
@@ -40,6 +42,10 @@ public class SpringCloudStreams3GeneratorV3Test {
                 .withOption("style", ProgrammingStyle.imperative);
 
         new MainGenerator().generate(plugin);
+
+        String producerInterface = Files.readString(Path.of("target/zenwave630/out/v3", "src/main/java/io/example/v3/DefaultServiceEventsProducer.java"));
+        Assertions.assertTrue(producerInterface.contains("import java.time.Instant;"));
+        Assertions.assertTrue(producerInterface.contains("import java.time.LocalDate;"));
     }
 
     @Test

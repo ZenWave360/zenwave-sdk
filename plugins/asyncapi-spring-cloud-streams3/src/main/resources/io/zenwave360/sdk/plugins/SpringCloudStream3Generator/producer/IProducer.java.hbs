@@ -3,6 +3,9 @@ package {{producerApiPackage}};
 {{#if modelPackage}}
 import {{modelPackage}}.*;
 {{/if}}
+{{#each (headerPropertyTypeImports messages)}}
+import {{this}};
+{{/each}}
 
 /**
  * {{asyncapi.description}}
