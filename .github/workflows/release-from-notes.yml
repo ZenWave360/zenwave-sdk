@@ -139,11 +139,9 @@ jobs:
             --title "${{ steps.validate.outputs.tag_name }}" \
             --notes-file "${{ steps.validate.outputs.release_notes }}"
 
-      - name: Sync release branch back to develop
-        # Use a PAT instead of github.token so the merge commit on develop triggers
-        # the snapshot publishing workflow.
+      - name: Sync main back to develop
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
@@ -152,23 +150,10 @@ jobs:
           DEVELOP_BRANCH="develop"
           RELEASE_PR="${{ steps.cpr.outputs.pull-request-number }}"
 
-          if [[ -z "${GH_TOKEN}" ]]; then
-            echo "Missing RELEASE_GITHUB_TOKEN secret."
-            echo "Use a fine-grained PAT with contents:write and pull-requests:write so the merge push triggers snapshot workflows."
-            exit 1
-          fi
-
           echo "Waiting for release PR #${RELEASE_PR} to merge into ${RELEASE_BRANCH}..."
           while [[ "$(gh pr view "${RELEASE_PR}" --json state --jq '.state')" != "MERGED" ]]; do
             sleep 30
           done
-
-          git fetch origin "${RELEASE_BRANCH}" "${DEVELOP_BRANCH}"
-
-          if [[ -z "$(git log --oneline "origin/${DEVELOP_BRANCH}..origin/${RELEASE_BRANCH}")" ]]; then
-            echo "${DEVELOP_BRANCH} already contains ${RELEASE_BRANCH}; nothing to sync."
-            exit 0
-          fi
 
           PR_NUMBER="$(gh pr list \
             --base "${DEVELOP_BRANCH}" \
@@ -187,3 +172,9 @@ jobs:
           fi
 
           gh pr merge "${PR_NUMBER}" --merge --auto
+
+      - name: Publish Maven snapshots on develop
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run publish-maven-snapshots.yml --ref develop
