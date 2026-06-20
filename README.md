@@ -28,6 +28,7 @@ ZenWave SDK is a configurable and extensible toolkit for **Domain Driven Design 
 - [ZenWave SDK](#zenwave-sdk)
   - [Jbang Instalation](#jbang-instalation)
   - [Available Plugins](#available-plugins)
+  - [Changelog](#changelog)
   - [Features / Roadmap](#features--roadmap)
   - [Building from source](#building-from-source)
   - [Usage](#usage)
@@ -102,6 +103,10 @@ Refer to individual plugin's documentation for more information:
 # ZenWave SDK Documentation
 
 Please refer to the [documentation](https://zenwave360.github.io/zenwave-sdk/) website for more information.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for an index of published release notes.
 
 ## Features / Roadmap
 
@@ -240,4 +245,3 @@ You can add choose a help format from the following: help, detailed, markdown, o
 ```shell
 jbang zw --help markdown -p <pluginConfigClass>
 ```
-
