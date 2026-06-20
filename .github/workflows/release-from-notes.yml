@@ -93,16 +93,32 @@ jobs:
         run: |
           mvn -B release:prepare \
             -DreleaseVersion=${{ github.event.inputs.releaseVersion }} \
-            -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
+            -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }} \
+            -DpushChanges=false
           mvn -B release:clean
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ github.token }}
 
-      - name: Push release commits and tag
-        run: |
-          git push origin HEAD:${{ github.event.inputs.targetBranch }}
-          git push origin ${{ steps.validate.outputs.tag_name }}
+      - name: Create Pull Request into target branch
+        id: cpr
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: "Release ${{ github.event.inputs.releaseVersion }}"
+          branch: release/${{ github.event.inputs.releaseVersion }}
+          base: ${{ github.event.inputs.targetBranch }}
+          title: "Release ${{ github.event.inputs.releaseVersion }}"
+          body: "Release ${{ github.event.inputs.releaseVersion }}"
+          labels: release
+          delete-branch: true
+
+      - name: Enable Pull Request Automerge
+        run: gh pr merge --merge --auto --delete-branch "${{ steps.cpr.outputs.pull-request-number }}"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Push release tag
+        run: git push --tags
 
       - name: Check out release tag
         run: git checkout ${{ steps.validate.outputs.tag_name }}
@@ -134,12 +150,18 @@ jobs:
 
           RELEASE_BRANCH="${{ github.event.inputs.targetBranch }}"
           DEVELOP_BRANCH="develop"
+          RELEASE_PR="${{ steps.cpr.outputs.pull-request-number }}"
 
           if [[ -z "${GH_TOKEN}" ]]; then
             echo "Missing RELEASE_GITHUB_TOKEN secret."
             echo "Use a fine-grained PAT with contents:write and pull-requests:write so the merge push triggers snapshot workflows."
             exit 1
           fi
+
+          echo "Waiting for release PR #${RELEASE_PR} to merge into ${RELEASE_BRANCH}..."
+          while [[ "$(gh pr view "${RELEASE_PR}" --json state --jq '.state')" != "MERGED" ]]; do
+            sleep 30
+          done
 
           git fetch origin "${RELEASE_BRANCH}" "${DEVELOP_BRANCH}"
 
