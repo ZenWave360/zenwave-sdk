@@ -43,15 +43,14 @@ body:
         - SpringWebTestClientPlugin
         - AvroSchemaGeneratorPlugin
         - AsyncApiJsonSchema2PojoPlugin
+        - AsyncAPIOpsGeneratorPlugin
         - SpringCloudStreams3Plugin
         - SpringCloudStreams3AdaptersPlugin
         - ZdlToMarkdownPlugin
         - JDLToAsyncAPIPlugin
         - OpenAPIToJDLPlugin
-        - ZdlToJsonPlugin
-        - BackendApplicationKotlinTemplates
-        - OpenAPIControllersKotlinTemplates
-        - SpringWebTestClientKotlinTemplates
+        - EventCatalogPlugin
+        - OpenAPIKaratePlugin
     validations:
       required: true
   - type: textarea
@@ -66,4 +65,3 @@ body:
     attributes:
       label: Relevant ZDL Model
       description: Please, also attach relevant parts of your ZDL file.
-
