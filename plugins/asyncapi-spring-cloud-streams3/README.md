@@ -249,7 +249,7 @@ jbang zw -p io.zenwave360.sdk.plugins.SpringCloudStreams3Plugin --help
 
 ZenWave SDK supports sending messages transactionaly using the [Transactional Outbox Pattern](https://microservices.io/patterns/data/transactional-outbox.html).
 
-![Transactional Outbox with AsyncAPI and Spring Modulith](../../docs/TransactionalOutBoxWithAsyncAPIAndSpringModulith-light.png)
+![Transactional Outbox with AsyncAPI and Spring Modulith](https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/refs/heads/main/docs/TransactionalOutBoxWithAsyncAPIAndSpringModulith-light.png)
 
 See [Implementing a Transactional OutBox With AsyncAPI, SpringModulith and ZenWaveSDK](https://www.zenwave360.io/posts/TransactionalOutBoxWithAsyncAPIAndSpringModulith/) for complete details.
 

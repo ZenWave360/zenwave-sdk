@@ -78,6 +78,17 @@ components:
       summary: "CustomerEvent"
       traits:
         - $ref: '#/components/messageTraits/CommonHeaders'
+      headers:
+        type: object
+        properties:
+          producedAt:
+            type: string
+            format: date-time
+            description: Event production timestamp
+          effectiveDate:
+            type: string
+            format: date
+            description: Event effective date
       payload:
         schemaFormat: application/vnd.aai.asyncapi;version=3.0.0
         schema:
@@ -256,4 +267,3 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/AddressInput"
-

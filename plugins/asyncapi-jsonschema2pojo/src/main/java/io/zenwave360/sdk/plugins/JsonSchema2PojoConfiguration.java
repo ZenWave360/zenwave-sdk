@@ -119,8 +119,16 @@ public class JsonSchema2PojoConfiguration implements GenerationConfig {
         if (StringUtils.isBlank(config.getTargetPackage())) {
             config.setTargetPackage(firstNonNull(settings.get(MODEL_PACKAGE), settings.get(API_PACKAGE)));
         }
+        if (isExplicitlyDisabled(settings, "useJodaLocalDates") && !settings.containsKey("dateType")) {
+            config.setDateType(null);
+        }
 
         return config;
+    }
+
+    private static boolean isExplicitlyDisabled(Map<String, String> settings, String fieldName) {
+        String key = getSettingKey(settings, fieldName);
+        return key != null && !Boolean.parseBoolean(settings.get(key));
     }
 
     private static void set(JsonSchema2PojoConfiguration config, Map<String, String> s, Field f) throws IllegalArgumentException, IllegalAccessException, ClassNotFoundException {
