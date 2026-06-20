@@ -1,0 +1,167 @@
+name: Release from Notes
+
+on:
+  workflow_dispatch:
+    inputs:
+      releaseVersion:
+        description: "Release version, for example 2.5.3"
+        required: true
+      developmentVersion:
+        description: "Next snapshot version, for example 2.5.4-SNAPSHOT"
+        required: true
+      targetBranch:
+        description: "Branch to release from"
+        required: true
+        default: "main"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-${{ github.event.inputs.releaseVersion }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Prepare, publish to Sonatype, and create GitHub release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.targetBranch }}
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: "maven"
+          server-id: central
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+
+      - name: Validate release inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          RELEASE_VERSION="${{ github.event.inputs.releaseVersion }}"
+          DEVELOPMENT_VERSION="${{ github.event.inputs.developmentVersion }}"
+          RELEASE_NOTES="release-notes/release-notes.v${RELEASE_VERSION}.md"
+
+          if [[ ! "${RELEASE_VERSION}" =~ ^[0-9]+[.][0-9]+[.][0-9]+$ ]]; then
+            echo "releaseVersion must look like 2.5.3"
+            exit 1
+          fi
+
+          if [[ ! "${DEVELOPMENT_VERSION}" =~ ^[0-9]+[.][0-9]+[.][0-9]+-SNAPSHOT$ ]]; then
+            echo "developmentVersion must look like 2.5.4-SNAPSHOT"
+            exit 1
+          fi
+
+          if [[ ! -f "${RELEASE_NOTES}" ]]; then
+            echo "Missing release notes: ${RELEASE_NOTES}"
+            exit 1
+          fi
+
+          if git rev-parse "v${RELEASE_VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${RELEASE_VERSION} already exists locally"
+            exit 1
+          fi
+
+          if git ls-remote --exit-code --tags origin "v${RELEASE_VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${RELEASE_VERSION} already exists on origin"
+            exit 1
+          fi
+
+          {
+            echo "release_notes=${RELEASE_NOTES}"
+            echo "tag_name=v${RELEASE_VERSION}"
+          } >> "${GITHUB_OUTPUT}"
+        id: validate
+
+      - name: Configure Git user
+        run: |
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git config user.name "${{ github.actor }}"
+
+      - name: Prepare Maven release
+        run: |
+          mvn -B release:prepare \
+            -DreleaseVersion=${{ github.event.inputs.releaseVersion }} \
+            -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
+          mvn -B release:clean
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Push release commits and tag
+        run: |
+          git push origin HEAD:${{ github.event.inputs.targetBranch }}
+          git push origin ${{ steps.validate.outputs.tag_name }}
+
+      - name: Check out release tag
+        run: git checkout ${{ steps.validate.outputs.tag_name }}
+
+      - name: Publish release deployment to Sonatype
+        run: mvn --batch-mode deploy -DdeployAtEnd=true -Dmaven.javadoc.skip=false
+        env:
+          MAVEN_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN }}
+          SIGN_KEY: ${{ secrets.SIGN_KEY }}
+          SIGN_KEY_PASS: ${{ secrets.SIGN_KEY_PASS }}
+
+      - name: Create GitHub release from release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.validate.outputs.tag_name }}" \
+            --title "${{ steps.validate.outputs.tag_name }}" \
+            --notes-file "${{ steps.validate.outputs.release_notes }}"
+
+      - name: Sync release branch back to develop
+        # Use a PAT instead of github.token so the merge commit on develop triggers
+        # the snapshot publishing workflow.
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          RELEASE_BRANCH="${{ github.event.inputs.targetBranch }}"
+          DEVELOP_BRANCH="develop"
+
+          if [[ -z "${GH_TOKEN}" ]]; then
+            echo "Missing RELEASE_GITHUB_TOKEN secret."
+            echo "Use a fine-grained PAT with contents:write and pull-requests:write so the merge push triggers snapshot workflows."
+            exit 1
+          fi
+
+          git fetch origin "${RELEASE_BRANCH}" "${DEVELOP_BRANCH}"
+
+          if [[ -z "$(git log --oneline "origin/${DEVELOP_BRANCH}..origin/${RELEASE_BRANCH}")" ]]; then
+            echo "${DEVELOP_BRANCH} already contains ${RELEASE_BRANCH}; nothing to sync."
+            exit 0
+          fi
+
+          PR_NUMBER="$(gh pr list \
+            --base "${DEVELOP_BRANCH}" \
+            --head "${RELEASE_BRANCH}" \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')"
+
+          if [[ -z "${PR_NUMBER}" ]]; then
+            PR_URL="$(gh pr create \
+              --base "${DEVELOP_BRANCH}" \
+              --head "${RELEASE_BRANCH}" \
+              --title "Sync ${RELEASE_BRANCH} back to ${DEVELOP_BRANCH} after ${{ steps.validate.outputs.tag_name }}" \
+              --body "Syncs the release version bump and next snapshot version back to ${DEVELOP_BRANCH}.")"
+            PR_NUMBER="${PR_URL##*/}"
+          fi
+
+          gh pr merge "${PR_NUMBER}" --merge --auto
