@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -30,12 +31,16 @@ public class MainGenerator {
     public void generate(Plugin configuration) throws Exception {
         log.debug("Executing 'generate' with config Options {}", configuration.getOptions());
         log.debug("Processed Options {}", configuration.processOptions());
-        log.debug("Processors chain is {}", configuration.getChain().stream().map(c -> c.getName()).collect(Collectors.toList()));
+        List<Class> chain = configuration.getChain();
+        if (chain == null || chain.isEmpty()) {
+            throw new IllegalArgumentException("Plugin '" + configuration.getClass().getName() + "' does not define a processor chain.");
+        }
+        log.debug("Processors chain is {}", chain.stream().map(c -> c.getName()).collect(Collectors.toList()));
         Map<String, Object> model = new HashMap<>();
         GeneratedProjectFiles generatedProjectFiles = new GeneratedProjectFiles();
 
         int chainIndex = 0;
-        for (Class pluginClass : configuration.getChain()) {
+        for (Class pluginClass : chain) {
             log.debug("Executing chained pluginClass {}", pluginClass);
             Object plugin = pluginClass.getDeclaredConstructor().newInstance();
             applyConfiguration(chainIndex++, plugin, configuration);

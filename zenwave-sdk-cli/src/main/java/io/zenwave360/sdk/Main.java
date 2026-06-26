@@ -42,6 +42,10 @@ public class Main implements Callable<Integer> {
     public static void main(String... args) {
         var main = new Main();
         CommandLine cmd = new CommandLine(main);
+        cmd.setExecutionExceptionHandler((ex, commandLine, parseResult) -> {
+            commandLine.getErr().println(ex.getMessage());
+            return commandLine.getCommandSpec().exitCodeOnExecutionException();
+        });
         CommandLine.ParseResult parsed = cmd.parseArgs(args);
 
         boolean noOptions = !parsed.hasMatchedOption("h") && !parsed.hasMatchedOption("p");

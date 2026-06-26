@@ -39,8 +39,13 @@ public class PluginTest {
 
     @Test
     public void testLoadConfigNotFound() throws Exception {
-        Plugin config = Plugin.of("not-found");
-        Assertions.assertNotNull(config);
-        Assertions.assertEquals(config.getClass(), Plugin.class);
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> Plugin.of("not-found"));
+        Assertions.assertEquals("Plugin not found: 'not-found'. Check the plugin name or use --help to list available plugins.", exception.getMessage());
+    }
+
+    @Test
+    public void testLoadConfigFullClassNameNotFound() {
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> Plugin.of("io.zenwave360.sdk.plugins.NotFoundPlugin"));
+        Assertions.assertEquals("Plugin not found: 'io.zenwave360.sdk.plugins.NotFoundPlugin'. Check the plugin name or use --help to list available plugins.", exception.getMessage());
     }
 }
