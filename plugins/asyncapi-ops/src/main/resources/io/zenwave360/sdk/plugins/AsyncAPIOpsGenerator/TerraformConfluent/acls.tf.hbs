@@ -3,13 +3,21 @@
 
 {{#each intent.acls as |acl|}}
 resource "confluent_kafka_acl" "{{acl.resourceName}}" {
-  resource_type = "TOPIC"
-  resource_name = "{{acl.topicName}}"
-  pattern_type  = "LITERAL"
+  resource_type = "{{acl.resourceType}}"
+  resource_name = "{{acl.kafkaResourceName}}"
+  pattern_type  = "{{acl.patternType}}"
   principal     = "{{acl.principal}}"
   host          = "*"
   operation     = "{{upper acl.operation}}"
   permission    = "{{upper acl.permissionType}}"
+}
+
+{{/each}}
+{{#each intent.roleBindings as |roleBinding|}}
+resource "confluent_role_binding" "{{roleBinding.resourceName}}" {
+  principal   = "{{roleBinding.principal}}"
+  role_name   = "{{roleBinding.roleName}}"
+  crn_pattern = "{{{roleBinding.crnPattern}}}"
 }
 
 {{/each}}

@@ -61,6 +61,8 @@ public class AsyncAPIOpsTerraformKafkaTest {
         Assertions.assertTrue(acls.contains("User:merchandising.inventory.inventory-adjustment"));
         Assertions.assertTrue(acls.contains("Read") && acls.contains("Write"));
         Assertions.assertTrue(acls.contains("Describe"));
+        Assertions.assertTrue(acls.contains("resource_type       = \"Group\""));
+        Assertions.assertTrue(acls.contains("resource_pattern_type_filter = \"Literal\""));
     }
 
     @Test
@@ -115,6 +117,22 @@ public class AsyncAPIOpsTerraformKafkaTest {
         Assertions.assertTrue(topics.contains("partitions         = var.default_partitions"));
         Assertions.assertTrue(topics.contains("replication_factor = coalesce(var.default_replication_factor, -1)"));
         Assertions.assertTrue(topics.contains("config = length(var.default_topic_config) > 0 ? var.default_topic_config : null"));
+    }
+
+    @Test
+    public void test_transactional_id_prefix_acl_uses_mongey_kafka_schema() throws Exception {
+        String targetFolder = "target/out/test_transactional_id_prefix_acl";
+        new MainGenerator().generate(new AsyncAPIOpsGeneratorPlugin()
+                .withApiFile("classpath:defaulting/asyncapi-transactional.yml")
+                .withOption("templates", "TerraformKafka")
+                .withTargetFolder(targetFolder)
+                .withOption("skipFormatting", true));
+
+        String acls = Files.readString(Path.of(targetFolder + "/acls.tf"));
+        Assertions.assertTrue(acls.contains("resource_type       = \"TransactionalID\""));
+        Assertions.assertTrue(acls.contains("resource_name       = \"sample-producer-\""));
+        Assertions.assertTrue(acls.contains("acl_operation       = \"Write\""));
+        Assertions.assertTrue(acls.contains("resource_pattern_type_filter = \"Prefixed\""));
     }
 
     @Test

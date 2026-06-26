@@ -191,7 +191,7 @@ Run it once per service, passing both the provider spec and the client spec. The
 
 ### Channel bindings: topic configuration
 
-Channel bindings follow the standard [AsyncAPI Kafka binding](https://github.com/asyncapi/bindings/blob/master/kafka/README.md) with one addition: `x-env-server-overrides` for per-environment tuning. The generator also accepts `env-server-overrides` without the `x-` prefix.
+Channel bindings follow the standard [AsyncAPI Kafka binding](https://github.com/asyncapi/bindings/blob/master/kafka/README.md) with one addition: `x-env-server-overrides` for per-environment tuning. The generator also accepts `env-server-overrides` without the `x-` prefix. If both are present, `x-env-server-overrides` wins.
 
 This extension was proposed in [AsyncAPI Bindings #292](https://github.com/asyncapi/bindings/issues/292).
 
@@ -218,10 +218,12 @@ Pass `server=staging` to the generator and the staging overrides are deep-merged
 
 ### Operation bindings: error topics and ACLs
 
-ACLs are derived from `x-principal` on operation bindings (`send` → Write, `receive` → Read).
+ACLs are derived from operation bindings. `x-principal` wins over `principal`. `send` operations get topic WRITE + DESCRIBE. `receive` operations get topic READ + DESCRIBE and consumer group READ when a group id can be resolved. Every operation principal also gets Schema Registry `DeveloperRead` access for the Avro subjects used by the operation channel.
 
 Retry and DLQ topics are provisioned from the `x-error-topics` extension on `receive` operations. The generator also accepts `error-topics` without the `x-` prefix.
-The consumer group id is read from `x-groupId` (ZenWave extension, plain string). If `groupId` is present it takes precedence — note that in standard AsyncAPI Kafka bindings `groupId` is a schema object, not a plain string; using it as a plain string is a ZenWave-specific interpretation.
+The consumer group id is resolved from `x-groupId` first, then standard `groupId`. `x-groupId` is a plain string. Standard `groupId` must be a schema with `enum`, string `const`, or string-array `const`; the first string value is used.
+
+Transactional producers can request a transactional id prefix ACL with `transactional: true` and `x-transactional-id-prefix`. The Confluent template renders this as a `TRANSACTIONAL_ID` ACL with `PREFIXED` pattern and WRITE operation.
 
 ```yaml
 operations:
@@ -232,7 +234,9 @@ operations:
     bindings:
       kafka:
         x-principal: "merchandising.inventory.inventory-adjustment"
-        x-groupId: "merchandising.inventory.inventory-adjustment"
+        groupId:
+          type: string
+          enum: ["merchandising.inventory.inventory-adjustment"]
         x-error-topics:
           addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
           retryTopics: 3
@@ -325,7 +329,7 @@ The precedence order is:
 **AsyncAPI value → Terraform variable → provider or broker default**
 
 1. An explicit value in the AsyncAPI spec is always used as-is.
-2. A per-environment override from `x-env-server-overrides` / `env-server-overrides` is applied on top of the AsyncAPI value before rendering.
+2. A per-environment override from `x-env-server-overrides` / `env-server-overrides` is applied on top of the AsyncAPI value before rendering. If both are present, the `x-` extension wins.
 3. If the AsyncAPI spec omits a setting, the generator renders the corresponding Terraform variable (`var.default_partitions`, `var.default_replication_factor`, `var.default_topic_config`).
 4. If the Terraform variable is also unset (`null`), the target provider applies its own default, or the Kafka broker applies its cluster-wide default.
 
@@ -352,6 +356,15 @@ variable "default_topic_config" {
 }
 ```
 
+Confluent templates also emit this variable for generated Schema Registry role bindings:
+
+```hcl
+variable "schema_registry_crn" {
+  type    = string
+  default = null
+}
+```
+
 Set these in a `terraform.tfvars` file or pass them through your CI/CD pipeline. Topics that specify values in AsyncAPI will override these variables for that specific resource.
 
 For topic configuration maps, the generator merges AsyncAPI values on top of the variable:
@@ -371,6 +384,7 @@ The exact behavior when a setting is unset depends on the selected template. Cho
 - **Partitions**: required by the provider. If AsyncAPI omits `partitions`, the generator renders `var.default_partitions`. If that variable is also `null`, Terraform fails at plan time — you must set `default_partitions`.
 - **Replication factor**: required by the provider, but the provider accepts `-1` to delegate to the broker. If AsyncAPI omits `replicas`, the generator renders `coalesce(var.default_replication_factor, -1)`, which falls back to the broker cluster default when the variable is unset.
 - **Topic config**: follows `AsyncAPI → var.default_topic_config → broker default`. If the resulting map is empty, the generator renders `null` so the provider treats the setting as unset.
+- **ACLs**: broker ACLs are rendered with `kafka_acl` for topic, group, and transactional-id resources. Transactional-id prefixes use `resource_type = "TransactionalID"` and `resource_pattern_type_filter = "Prefixed"`. Schema Registry permissions are not rendered by this template because they are not Kafka broker ACLs.
 
 #### `TerraformConfluent` (`confluentinc/confluent`)
 

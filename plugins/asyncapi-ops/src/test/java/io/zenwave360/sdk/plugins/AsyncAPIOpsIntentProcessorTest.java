@@ -88,13 +88,13 @@ public class AsyncAPIOpsIntentProcessorTest {
         Assertions.assertEquals(1, sendTopicDescribeAcls, "Send operations should get Describe on the main topic");
 
         long errorTopicReadAcls = intent.acls.stream()
-                .filter(a -> a.topicName.contains(".__.")  && "Read".equals(a.operation))
+                .filter(a -> a.topicName != null && a.topicName.contains(".__.")  && "Read".equals(a.operation))
                 .count();
         long errorTopicWriteAcls = intent.acls.stream()
-                .filter(a -> a.topicName.contains(".__.")  && "Write".equals(a.operation))
+                .filter(a -> a.topicName != null && a.topicName.contains(".__.")  && "Write".equals(a.operation))
                 .count();
         long errorTopicDescribeAcls = intent.acls.stream()
-                .filter(a -> a.topicName.contains(".__.")  && "Describe".equals(a.operation))
+                .filter(a -> a.topicName != null && a.topicName.contains(".__.")  && "Describe".equals(a.operation))
                 .count();
         Assertions.assertEquals(4, errorTopicReadAcls, "4 Read ACLs for error topics");
         Assertions.assertEquals(4, errorTopicWriteAcls, "4 Write ACLs for error topics");
@@ -150,7 +150,7 @@ public class AsyncAPIOpsIntentProcessorTest {
         Assertions.assertFalse(intent.acls.isEmpty());
         // Verify no duplicate (topicName, principal, operation) triples
         long distinctAcls = intent.acls.stream()
-                .map(a -> a.topicName + "|" + a.principal + "|" + a.operation)
+                .map(a -> a.resourceType + "|" + a.kafkaResourceName + "|" + a.patternType + "|" + a.principal + "|" + a.operation)
                 .distinct().count();
         Assertions.assertEquals(intent.acls.size(), distinctAcls, "ACLs must be deduplicated");
 
@@ -265,6 +265,84 @@ public class AsyncAPIOpsIntentProcessorTest {
 
         long retryDlqTopics = intent.topics.stream().filter(t -> t.isRetryOrDlq).count();
         Assertions.assertEquals(4, retryDlqTopics, "Unprefixed error-topics must still generate retry/DLQ topics");
+    }
+
+    @Test
+    public void test_x_prefixed_values_take_precedence_over_standard_binding_values() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+
+        Map<String, Object> channelBinding = JSONPath.get(api, "$.channels['reserve-stock-command'].bindings.kafka");
+        Map<String, Object> overrides = JSONPath.get(channelBinding, "$.x-env-server-overrides.staging");
+        overrides.put("partitions", 7);
+        channelBinding.put("env-server-overrides", Map.of("staging", Map.of("partitions", 11)));
+
+        Map<String, Object> operationBinding = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka");
+        operationBinding.put("principal", "standard.principal");
+        operationBinding.put("x-principal", "extension.principal");
+        operationBinding.put("x-groupId", "extension.group");
+        operationBinding.put("groupId", Map.of("type", "string", "enum", List.of("schema.group")));
+
+        context = buildIntent("staging", context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+
+        AsyncAPIOpsIntent.TopicIntent ownedTopic = intent.topics.stream()
+                .filter(t -> !t.isRetryOrDlq && "merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0".equals(t.topicName))
+                .findFirst()
+                .orElseThrow();
+        Assertions.assertEquals(7, ownedTopic.partitions, "x-env-server-overrides must win over env-server-overrides");
+
+        Assertions.assertTrue(intent.acls.stream().anyMatch(a -> "User:extension.principal".equals(a.principal)));
+        Assertions.assertFalse(intent.acls.stream().anyMatch(a -> "User:standard.principal".equals(a.principal)));
+        Assertions.assertTrue(intent.topics.stream().anyMatch(t -> t.isRetryOrDlq && t.topicName.startsWith("extension.group.__.")),
+                "x-groupId must win over schema groupId");
+    }
+
+    @Test
+    public void test_group_id_schema_shapes_and_transactional_prefix_acls() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+
+        Map<String, Object> receiveBinding = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka");
+        receiveBinding.remove("x-groupId");
+        receiveBinding.put("groupId", Map.of("type", "string", "const", List.of("const-array.group", "ignored.group")));
+
+        Map<String, Object> sendBinding = JSONPath.get(api, "$.operations['onReserveStockResponse'].bindings.kafka");
+        sendBinding.put("transactional", true);
+        sendBinding.put("x-transactional-id-prefix", "inventory-adjustment-tx-");
+
+        context = buildIntent("staging", context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+
+        Assertions.assertTrue(intent.acls.stream().anyMatch(a ->
+                "GROUP".equals(a.resourceType)
+                        && "const-array.group".equals(a.kafkaResourceName)
+                        && "Read".equals(a.operation)));
+        Assertions.assertTrue(intent.topics.stream().anyMatch(t -> t.isRetryOrDlq && t.topicName.startsWith("const-array.group.__.")));
+        Assertions.assertTrue(intent.acls.stream().anyMatch(a ->
+                "TRANSACTIONAL_ID".equals(a.resourceType)
+                        && "PREFIXED".equals(a.patternType)
+                        && "inventory-adjustment-tx-".equals(a.kafkaResourceName)
+                        && "Write".equals(a.operation)));
+        Assertions.assertTrue(intent.roleBindings.stream().anyMatch(r ->
+                "DeveloperRead".equals(r.roleName)
+                        && r.crnPattern.contains("/subject=merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0-ReserveStockCommand-value")));
+    }
+
+    @Test
+    public void test_unsupported_group_id_schema_skips_group_scoped_resources() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+
+        Map<String, Object> receiveBinding = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka");
+        receiveBinding.remove("x-groupId");
+        receiveBinding.put("groupId", Map.of("type", "object", "properties", Map.of()));
+
+        context = buildIntent("staging", context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+
+        Assertions.assertFalse(intent.acls.stream().anyMatch(a -> "GROUP".equals(a.resourceType)));
+        Assertions.assertEquals(0, intent.topics.stream().filter(t -> t.isRetryOrDlq).count(), "unsupported groupId schema must skip retry/dlq expansion");
     }
 
     @Test

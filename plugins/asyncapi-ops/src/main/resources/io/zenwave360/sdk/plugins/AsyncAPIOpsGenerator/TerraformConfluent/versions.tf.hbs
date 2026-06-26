@@ -18,3 +18,9 @@ variable "default_topic_config" {
   default     = {}
   description = "Default topic configuration applied to topics that omit topicConfiguration in AsyncAPI. AsyncAPI values override individual keys."
 }
+
+variable "schema_registry_crn" {
+  type        = string
+  default     = null
+  description = "Confluent Cloud Schema Registry cluster CRN/resource name used to scope generated Schema Registry role bindings."
+}

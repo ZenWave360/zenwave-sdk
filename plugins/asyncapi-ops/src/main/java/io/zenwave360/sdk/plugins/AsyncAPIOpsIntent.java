@@ -13,13 +13,22 @@ public class AsyncAPIOpsIntent {
     public List<TopicIntent> topics = new ArrayList<>();
     public List<SchemaIntent> schemas = new ArrayList<>();
     public List<AclIntent> acls = new ArrayList<>();
+    public List<RoleBindingIntent> roleBindings = new ArrayList<>();
 
     private final Set<String> aclKeys = new LinkedHashSet<>();
+    private final Set<String> roleBindingKeys = new LinkedHashSet<>();
 
     public void addAcl(AclIntent acl) {
-        String key = acl.topicName + "|" + acl.principal + "|" + acl.operation;
+        String key = acl.resourceType + "|" + acl.kafkaResourceName + "|" + acl.patternType + "|" + acl.principal + "|" + acl.operation;
         if (aclKeys.add(key)) {
             acls.add(acl);
+        }
+    }
+
+    public void addRoleBinding(RoleBindingIntent roleBinding) {
+        String key = roleBinding.principal + "|" + roleBinding.roleName + "|" + roleBinding.crnPattern;
+        if (roleBindingKeys.add(key)) {
+            roleBindings.add(roleBinding);
         }
     }
 
@@ -52,11 +61,26 @@ public class AsyncAPIOpsIntent {
     public static class AclIntent {
         /** Snake_case Terraform resource identifier */
         public String resourceName;
+        public String kafkaResourceName;
         public String topicName;
+        /** TOPIC, GROUP, or TRANSACTIONAL_ID for Confluent; Topic, Group, or TransactionalId for Kafka OSS templates */
+        public String resourceType = "TOPIC";
+        public String kafkaResourceType = "Topic";
+        public String patternType = "LITERAL";
+        public String kafkaPatternType = "Literal";
         /** e.g. User:merchandising.inventory.inventory-adjustment.baas */
         public String principal;
         /** Read, Write, or Describe */
         public String operation;
         public String permissionType = "Allow";
+    }
+
+    public static class RoleBindingIntent {
+        /** Snake_case Terraform resource identifier */
+        public String resourceName;
+        /** e.g. User:merchandising.inventory.inventory-adjustment.baas */
+        public String principal;
+        public String roleName;
+        public String crnPattern;
     }
 }
