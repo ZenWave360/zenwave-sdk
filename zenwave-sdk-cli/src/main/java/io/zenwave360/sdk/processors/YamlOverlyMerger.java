@@ -2,6 +2,8 @@ package io.zenwave360.sdk.processors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.jayway.jsonpath.JsonPath;
 import io.zenwave360.jsonrefparser.parser.Parser;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
@@ -11,9 +13,13 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
 public class YamlOverlyMerger {
-    private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+    private static final ObjectMapper yamlMapper = new ObjectMapper(YAMLFactory.builder()
+            .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+            .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+            .build());
 
     @FunctionalInterface
     public interface ThrowingResourceLoader {
@@ -21,19 +27,30 @@ public class YamlOverlyMerger {
     }
 
     public static String mergeAndOverlay(String content, String mergeFile, List<String> overlayFiles) {
+        return mergeAndOverlayWithOrderer(content, mergeFile, overlayFiles, UnaryOperator.identity());
+    }
+
+    public static String mergeAndOverlayWithOrderer(String content, String mergeFile, List<String> overlayFiles,
+                                                    UnaryOperator<Map<String, Object>> documentOrderer) {
         try {
-            return mergeAndOverlay(content, mergeFile, overlayFiles, YamlOverlyMerger::getURI);
+            return mergeAndOverlay(content, mergeFile, overlayFiles, YamlOverlyMerger::getURI, documentOrderer);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     public static String mergeAndOverlay(String content, String mergeFile, List<String> overlayFiles, ThrowingResourceLoader resourceLoader) throws IOException {
+        return mergeAndOverlay(content, mergeFile, overlayFiles, resourceLoader, UnaryOperator.identity());
+    }
+
+    public static String mergeAndOverlay(String content, String mergeFile, List<String> overlayFiles,
+                                         ThrowingResourceLoader resourceLoader,
+                                         UnaryOperator<Map<String, Object>> documentOrderer) throws IOException {
         if(mergeFile != null) {
             var asyncapiAsMap = (Map) Parser.parse(content).json();
             var asyncapiMergeAsMap = parseYaml(resourceLoader.apply(mergeFile));
             var merged = YamlOverlyMerger.merge(asyncapiAsMap, (Map<String, Object>) asyncapiMergeAsMap);
-            content = yamlMapper.writeValueAsString(merged);
+            content = writeYaml(merged, documentOrderer);
         }
         if (overlayFiles != null && !overlayFiles.isEmpty()) {
             var asyncapiAsMap = (Map) Parser.parse(content).json();
@@ -41,9 +58,44 @@ public class YamlOverlyMerger {
                 var asyncapiOverlayAsMap = parseYaml(resourceLoader.apply(asyncapiOverlayFile));
                 asyncapiAsMap = YamlOverlyMerger.applyOverlay(asyncapiAsMap, (Map<String, Object>) asyncapiOverlayAsMap);
             }
-            content = yamlMapper.writeValueAsString(asyncapiAsMap);
+            content = writeYaml(asyncapiAsMap, documentOrderer);
         }
         return content;
+    }
+
+    private static String writeYaml(Map<String, Object> document,
+                                    UnaryOperator<Map<String, Object>> documentOrderer) throws IOException {
+        Map<String, Object> orderedDocument = documentOrderer.apply(document);
+        return addSpacingBetweenRootElements(yamlMapper.writeValueAsString(orderedDocument));
+    }
+
+    private static String addSpacingBetweenRootElements(String yaml) {
+        StringBuilder formatted = new StringBuilder(yaml.length());
+        int rootElementCount = 0;
+        boolean firstRootElementWasOneLine = false;
+        boolean previousLineWasEmpty = false;
+
+        for (String line : yaml.split("\\R")) {
+            int separatorIndex = line.indexOf(':');
+            boolean rootElement = !line.isEmpty()
+                    && !Character.isWhitespace(line.charAt(0))
+                    && !line.startsWith("---")
+                    && separatorIndex > 0;
+            boolean followsOneLineFirstElement = rootElementCount == 1 && firstRootElementWasOneLine;
+            if (rootElement && rootElementCount > 0 && !previousLineWasEmpty && !followsOneLineFirstElement) {
+                formatted.append('\n');
+            }
+            formatted.append(line).append('\n');
+            previousLineWasEmpty = line.isEmpty();
+            if (rootElement) {
+                if (rootElementCount == 0) {
+                    firstRootElementWasOneLine = !line.substring(separatorIndex + 1).isBlank();
+                }
+                rootElementCount++;
+            }
+        }
+
+        return formatted.toString();
     }
 
     private static URI getURI(String uri) {
@@ -97,6 +149,13 @@ public class YamlOverlyMerger {
                     Object targetNode = JSONPath.get(result, target);
                     if(targetNode == null) {
                         // System.out.println("Target node not found: " + target);
+                    } else if (targetNode instanceof Map && updateValue instanceof Map) {
+                        Maps.deepMerge((Map) targetNode, (Map) updateValue);
+                    } else if (!JsonPath.isPathDefinite(target)
+                            && targetNode instanceof List<?> targetNodes
+                            && updateValue instanceof Map
+                            && targetNodes.stream().allMatch(Map.class::isInstance)) {
+                        targetNodes.forEach(node -> Maps.deepMerge((Map) node, (Map) updateValue));
                     } else {
                         JSONPath.set(result, target, updateValue);
                     }

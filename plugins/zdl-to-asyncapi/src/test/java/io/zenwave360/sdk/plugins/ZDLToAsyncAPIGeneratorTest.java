@@ -1,6 +1,8 @@
 package io.zenwave360.sdk.plugins;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +27,23 @@ public class ZDLToAsyncAPIGeneratorTest {
     private Map<String, Object> loadZDLModelFromResource(String resource) throws Exception {
         Map<String, Object> model = new ZDLParser().withZdlFile(resource).parse();
         return new ZDLProcessor().process(model);
+    }
+
+    @Test
+    public void test_order_asyncapi_root_elements_places_servers_after_info() {
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("asyncapi", "3.1.0");
+        document.put("info", Map.of("title", "Catalog Inventory"));
+        document.put("channels", Map.of());
+        document.put("components", Map.of());
+        document.put("servers", Map.of("develop", Map.of("host", "localhost:9092")));
+
+        Map<String, Object> ordered = ZDLToAsyncAPIGenerator.orderAsyncAPIRootElements(document);
+
+        Assertions.assertEquals(
+            List.of("asyncapi", "info", "servers", "channels", "components"),
+            new ArrayList<>(ordered.keySet())
+        );
     }
 
     @Test
