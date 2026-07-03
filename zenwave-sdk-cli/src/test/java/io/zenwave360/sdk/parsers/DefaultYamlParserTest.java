@@ -40,6 +40,10 @@ public class DefaultYamlParserTest {
         Path overlayFile = Files.createTempFile("openapi-overlay-", ".yml");
         try {
             Files.writeString(overlayFile, """
+                    overlay: 1.1.0
+                    info:
+                      title: Filesystem overlay
+                      version: 1.0.0
                     actions:
                       - target: $.info.title
                         update: Overlayed From Filesystem Path

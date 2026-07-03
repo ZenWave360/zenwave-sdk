@@ -21,6 +21,18 @@ public class YamlOverlyMergerTest {
         return (Map<String, Object>) parsed.get("api");
     }
 
+    private Map<String, Object> overlay(String version, Map<String, Object>... actions) {
+        return Map.of(
+            "overlay", version,
+            "info", Map.of(
+                "title", "Test overlay",
+                "version", "1.0.0",
+                "description", "Overlay description"
+            ),
+            "actions", List.of(actions)
+        );
+    }
+
     @Test
     public void testMergeCustomerAddressOpenAPIWithMerger() throws Exception {
         // Given
@@ -170,6 +182,11 @@ public class YamlOverlyMergerTest {
         base.put("channels", Map.of("inventoryChannel", inventoryChannel));
 
         Map<String, Object> overlay = Map.of(
+            "overlay", "1.1.0",
+            "info", Map.of(
+                "title", "Update AsyncAPI",
+                "version", "1.0.0"
+            ),
             "actions", List.of(
                 Map.of(
                     "target", "$",
@@ -254,6 +271,7 @@ public class YamlOverlyMergerTest {
             info:
               title: Shared defaults
               version: 1.0.0
+              description: Verifies Overlay 1.1 metadata
             actions:
               - target: $
                 update:
@@ -276,5 +294,320 @@ public class YamlOverlyMergerTest {
         Assertions.assertTrue(result.contains("\n\nservers:"));
         Assertions.assertTrue(result.contains("\n\nchannels:"));
         Assertions.assertTrue(result.contains("\n\ncomponents:"));
+    }
+
+    @Test
+    public void testOverlay11UpdatesPrimitiveTargetsDirectly() {
+        Map<String, Object> base = new LinkedHashMap<>();
+        base.put("info", new LinkedHashMap<>(Map.of("title", "Internal API", "version", "1.0.0")));
+
+        Map<String, Object> result = YamlOverlyMerger.applyOverlay(base, overlay(
+            "1.1.3",
+            Map.of("target", "$.info.title", "update", "Public API")
+        ));
+
+        Assertions.assertEquals("Public API", JSONPath.get(result, "$.info.title"));
+        Assertions.assertEquals("Internal API", JSONPath.get(base, "$.info.title"));
+    }
+
+    @Test
+    public void testOverlay11UpdatesPrimitiveTargetsToNull() {
+        Map<String, Object> update = new LinkedHashMap<>();
+        update.put("target", "$.info.description");
+        update.put("update", null);
+
+        Map<String, Object> base = Map.of(
+            "info", new LinkedHashMap<>(Map.of("description", "Present"))
+        );
+        Map<String, Object> result = YamlOverlyMerger.applyOverlay(base, overlay("1.1.0", update));
+
+        Map<String, Object> info = JSONPath.get(result, "$.info");
+        Assertions.assertTrue(info.containsKey("description"));
+        Assertions.assertNull(info.get("description"));
+    }
+
+    @Test
+    public void testOverlay11RemovesMultiplePrimitiveArrayElementsWithoutIndexShift() {
+        Map<String, Object> base = Map.of(
+            "tags", new ArrayList<>(List.of("public", "dummy", "dummy", "stable"))
+        );
+
+        Map<String, Object> result = YamlOverlyMerger.applyOverlay(base, overlay(
+            "1.1.0",
+            Map.of("target", "$.tags[?(@ == 'dummy')]", "remove", true)
+        ));
+
+        Assertions.assertEquals(List.of("public", "stable"), JSONPath.get(result, "$.tags"));
+        Assertions.assertEquals(
+            List.of("public", "dummy", "dummy", "stable"),
+            JSONPath.get(base, "$.tags"),
+            "Nested arrays in the original document must not be mutated"
+        );
+    }
+
+    @Test
+    public void testOverlay11CopiesObjectIntoExistingObject() {
+        Map<String, Object> base = new LinkedHashMap<>();
+        base.put("paths", new LinkedHashMap<>(Map.of(
+            "/items", new LinkedHashMap<>(Map.of(
+                "get", new LinkedHashMap<>(Map.of("description", "List items"))
+            )),
+            "/some-items", new LinkedHashMap<>(Map.of(
+                "delete", new LinkedHashMap<>(Map.of("description", "Delete items"))
+            ))
+        )));
+
+        Map<String, Object> result = YamlOverlyMerger.applyOverlay(base, overlay(
+            "1.1.0",
+            Map.of(
+                "target", "$.paths['/some-items']",
+                "copy", "$.paths['/items']"
+            )
+        ));
+
+        Assertions.assertEquals("List items", JSONPath.get(result, "$.paths['/some-items'].get.description"));
+        Assertions.assertEquals("Delete items", JSONPath.get(result, "$.paths['/some-items'].delete.description"));
+        Assertions.assertNull(JSONPath.get(base, "$.paths['/some-items'].get"));
+    }
+
+    @Test
+    public void testOverlay11CopiesThenRemovesToRenamePath() {
+        Map<String, Object> base = Map.of(
+            "paths", new LinkedHashMap<>(Map.of(
+                "/items", new LinkedHashMap<>(Map.of(
+                    "get", new LinkedHashMap<>(Map.of("description", "List items"))
+                ))
+            ))
+        );
+
+        Map<String, Object> result = YamlOverlyMerger.applyOverlay(base, overlay(
+            "1.1.0",
+            Map.of("target", "$.paths", "update", Map.of("/new-items", Map.of())),
+            Map.of("target", "$.paths['/new-items']", "copy", "$.paths['/items']"),
+            Map.of("target", "$.paths['/items']", "remove", true)
+        ));
+
+        Assertions.assertEquals("List items", JSONPath.get(result, "$.paths['/new-items'].get.description"));
+        Assertions.assertNull(JSONPath.get(result, "$.paths['/items']"));
+    }
+
+    @Test
+    public void testOverlay11CopySourceMustSelectExactlyOneNode() {
+        Map<String, Object> base = Map.of(
+            "source", Map.of("one", Map.of("value", 1), "two", Map.of("value", 2)),
+            "target", new LinkedHashMap<>()
+        );
+
+        IllegalArgumentException noSource = Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> YamlOverlyMerger.applyOverlay(base, overlay(
+                "1.1.0",
+                Map.of("target", "$.target", "copy", "$.missing")
+            ))
+        );
+        Assertions.assertTrue(noSource.getMessage().contains("selected 0"));
+
+        IllegalArgumentException multipleSources = Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> YamlOverlyMerger.applyOverlay(base, overlay(
+                "1.1.0",
+                Map.of("target", "$.target", "copy", "$.source.*")
+            ))
+        );
+        Assertions.assertTrue(multipleSources.getMessage().contains("selected 2"));
+    }
+
+    @Test
+    public void testOverlay11RejectsMixedTargetCategories() {
+        Map<String, Object> base = Map.of(
+            "object", new LinkedHashMap<>(),
+            "primitive", "value"
+        );
+
+        IllegalArgumentException exception = Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> YamlOverlyMerger.applyOverlay(base, overlay(
+                "1.1.0",
+                Map.of("target", "$['object','primitive']", "update", Map.of("added", true))
+            ))
+        );
+
+        Assertions.assertTrue(
+            exception.getMessage().contains("must all be objects, arrays, or primitives"),
+            exception::getMessage
+        );
+    }
+
+    @Test
+    public void testOverlay11ZeroTargetsAreANoOp() {
+        Map<String, Object> base = Map.of("info", Map.of("title", "API"));
+
+        Map<String, Object> result = YamlOverlyMerger.applyOverlay(base, overlay(
+            "1.1.0",
+            Map.of("target", "$.missing", "update", Map.of("description", "Ignored"))
+        ));
+
+        Assertions.assertEquals(base, result);
+        Assertions.assertNotSame(base, result);
+    }
+
+    @Test
+    public void testOverlay11RecursivelyMergesObjectsAndConcatenatesArrays() {
+        Map<String, Object> base = Map.of(
+            "schema", new LinkedHashMap<>(Map.of(
+                "type", "object",
+                "required", new ArrayList<>(List.of("id")),
+                "properties", new LinkedHashMap<>(Map.of(
+                    "id", new LinkedHashMap<>(Map.of("type", "string"))
+                ))
+            ))
+        );
+
+        Map<String, Object> result = YamlOverlyMerger.applyOverlay(base, overlay(
+            "1.1.0",
+            Map.of(
+                "target", "$.schema",
+                "update", Map.of(
+                    "required", List.of("name"),
+                    "properties", Map.of(
+                        "name", Map.of("type", "string")
+                    )
+                )
+            )
+        ));
+
+        Assertions.assertEquals(List.of("id", "name"), JSONPath.get(result, "$.schema.required"));
+        Assertions.assertEquals("string", JSONPath.get(result, "$.schema.properties.id.type"));
+        Assertions.assertEquals("string", JSONPath.get(result, "$.schema.properties.name.type"));
+    }
+
+    @Test
+    public void testOverlay11RejectsIncompatibleRecursiveMergeValues() {
+        Map<String, Object> base = Map.of(
+            "schema", new LinkedHashMap<>(Map.of("required", new ArrayList<>(List.of("id"))))
+        );
+
+        IllegalArgumentException exception = Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> YamlOverlyMerger.applyOverlay(base, overlay(
+                "1.1.0",
+                Map.of("target", "$.schema", "update", Map.of("required", "id"))
+            ))
+        );
+
+        Assertions.assertTrue(exception.getMessage().contains("incompatible values for property 'required'"));
+    }
+
+    @Test
+    public void testOverlay11AppendsOrConcatenatesArrayUpdates() {
+        Map<String, Object> base = Map.of(
+            "parameters", new ArrayList<>(List.of(Map.of("name", "existing")))
+        );
+
+        Map<String, Object> result = YamlOverlyMerger.applyOverlay(base, overlay(
+            "1.1.0",
+            Map.of("target", "$.parameters", "update", Map.of("name", "appended")),
+            Map.of("target", "$.parameters", "update", List.of(
+                Map.of("name", "concatenated-one"),
+                Map.of("name", "concatenated-two")
+            ))
+        ));
+
+        Assertions.assertEquals(
+            List.of("existing", "appended", "concatenated-one", "concatenated-two"),
+            JSONPath.get(result, "$.parameters[*].name")
+        );
+    }
+
+    @Test
+    public void testOverlayModifierPrecedenceIsRemoveThenUpdateThenCopy() {
+        Map<String, Object> base = Map.of(
+            "values", new LinkedHashMap<>(Map.of(
+                "removeMe", "original",
+                "updateMe", "original",
+                "copySource", "copied"
+            ))
+        );
+
+        Map<String, Object> result = YamlOverlyMerger.applyOverlay(base, overlay(
+            "1.1.0",
+            Map.of(
+                "target", "$.values.removeMe",
+                "remove", true,
+                "update", "updated",
+                "copy", "$.values.copySource"
+            ),
+            Map.of(
+                "target", "$.values.updateMe",
+                "update", "updated",
+                "copy", "$.values.copySource"
+            )
+        ));
+
+        Assertions.assertNull(JSONPath.get(result, "$.values.removeMe"));
+        Assertions.assertEquals("updated", JSONPath.get(result, "$.values.updateMe"));
+    }
+
+    @Test
+    public void testOverlay10PatchVersionsRemainSupportedWithLegacyArrayReplacement() {
+        Map<String, Object> base = Map.of(
+            "servers", new ArrayList<>(List.of(Map.of("url", "old")))
+        );
+
+        Map<String, Object> result = YamlOverlyMerger.applyOverlay(base, overlay(
+            "1.0.9",
+            Map.of("target", "$.servers", "update", List.of(Map.of("url", "new")))
+        ));
+
+        Assertions.assertEquals(List.of("new"), JSONPath.get(result, "$.servers[*].url"));
+    }
+
+    @Test
+    public void testOverlay10RejectsCopyAndPrimitiveTargets() {
+        Map<String, Object> base = Map.of(
+            "info", new LinkedHashMap<>(Map.of("title", "API")),
+            "copySource", Map.of("description", "Copied")
+        );
+
+        IllegalArgumentException copyException = Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> YamlOverlyMerger.applyOverlay(base, overlay(
+                "1.0.0",
+                Map.of("target", "$.info", "copy", "$.copySource")
+            ))
+        );
+        Assertions.assertTrue(copyException.getMessage().contains("requires Overlay 1.1"));
+
+        IllegalArgumentException primitiveException = Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> YamlOverlyMerger.applyOverlay(base, overlay(
+                "1.0.0",
+                Map.of("target", "$.info.title", "update", "Renamed")
+            ))
+        );
+        Assertions.assertTrue(primitiveException.getMessage().contains("only objects or arrays"));
+    }
+
+    @Test
+    public void testOverlayRejectsUnsupportedVersionsAndModifierlessActions() {
+        Map<String, Object> base = Map.of("info", Map.of("title", "API"));
+
+        IllegalArgumentException versionException = Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> YamlOverlyMerger.applyOverlay(base, overlay(
+                "1.2.0",
+                Map.of("target", "$.info", "update", Map.of("description", "Ignored"))
+            ))
+        );
+        Assertions.assertTrue(versionException.getMessage().contains("Unsupported Overlay feature set 1.2"));
+
+        IllegalArgumentException modifierException = Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> YamlOverlyMerger.applyOverlay(base, overlay(
+                "1.1.0",
+                Map.of("target", "$.info")
+            ))
+        );
+        Assertions.assertTrue(modifierException.getMessage().contains("must define update, copy, or remove"));
     }
 }

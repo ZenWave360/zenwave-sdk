@@ -3,9 +3,7 @@ package io.zenwave360.sdk.processors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.jayway.jsonpath.JsonPath;
 import io.zenwave360.jsonrefparser.parser.Parser;
-import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
 
 import java.io.File;
@@ -130,44 +128,6 @@ public class YamlOverlyMerger {
     }
 
     public static Map<String, Object> applyOverlay(Map<String, Object> base, Map<String, Object> overlay) {
-        if (base == null || overlay == null) {
-            return base;
-        }
-
-        // Create a deep copy of base to keep original untouched
-        Map<String, Object> result = Maps.copy(base);
-
-        // Process actions
-        List<Map<String, Object>> actions = (List<Map<String, Object>>) overlay.get("actions");
-        if (actions != null) {
-            for (Map<String, Object> action : actions) {
-                String target = (String) action.get("target");
-                Object updateValue = action.get("update");
-                Object removeValue = action.get("remove");
-
-                if (updateValue != null) {
-                    Object targetNode = JSONPath.get(result, target);
-                    if(targetNode == null) {
-                        // System.out.println("Target node not found: " + target);
-                    } else if (targetNode instanceof Map && updateValue instanceof Map) {
-                        Maps.deepMerge((Map) targetNode, (Map) updateValue);
-                    } else if (!JsonPath.isPathDefinite(target)
-                            && targetNode instanceof List<?> targetNodes
-                            && updateValue instanceof Map
-                            && targetNodes.stream().allMatch(Map.class::isInstance)) {
-                        targetNodes.forEach(node -> Maps.deepMerge((Map) node, (Map) updateValue));
-                    } else {
-                        JSONPath.set(result, target, updateValue);
-                    }
-                }
-
-                if (Boolean.TRUE.equals(removeValue)) {
-                    JSONPath.remove(result, target);
-                }
-
-            }
-        }
-
-        return result;
+        return OverlayApplicator.apply(base, overlay);
     }
 }
