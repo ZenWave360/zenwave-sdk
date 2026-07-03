@@ -56,6 +56,8 @@ A complete working example is available in the zenwave-playground repository: [a
 - **JSON DTOs** generated via [jsonschema2pojo](https://www.jsonschema2pojo.org/) library
 - **Avro DTOs** generated via [Apache Avro](https://avro.apache.org/docs/current/gettingstartedjava/) library
 
+For selected messages, jsonschema2pojo generates payload models by default. Object schemas declared on those messages are opt-in and off by default: set `generateMessageKeys=true` for message binding keys (e.g. Kafka keys), `generateMessageHeaders=true` for application headers declared on messages or inherited from message traits, and `generateBindingHeaders=true` for protocol binding header schemas (HTTP/JMS/MQTT).
+
 ### Supported Capabilities
 - AsyncAPI v2 and v3
 - Local files, classpath files, and authenticated remote URLs
@@ -338,6 +340,9 @@ app:
 | `excludeOperationIds` | Operation ids to exclude in code generation. Skips code generation if is not included or is excluded. | List | [] |   |
 | `transactionalOutbox` | Transactional outbox type for message producers. | TransactionalOutboxType | none | none, modulith  |
 | `jsonschema2pojo` | JsonSchema2Pojo settings for downstream library [(docs)](https://github.com/ZenWave360/zenwave-sdk/blob/main/plugins/asyncapi-jsonschema2pojo/src/main/java/io/zenwave360/sdk/plugins/JsonSchema2PojoConfiguration.java) | Map | {} |   |
+| `generateMessageKeys` | Generate POJOs for message binding keys (e.g. Kafka `bindings.kafka.key`) declared in selected messages. | Boolean | false |   |
+| `generateMessageHeaders` | Generate POJOs for application headers declared on selected messages or inherited from message traits. | Boolean | false |   |
+| `generateBindingHeaders` | Generate POJOs for protocol binding header schemas (HTTP/JMS/MQTT) declared in selected messages. | Boolean | false |   |
 | `avroCompilerProperties` | Avro Compiler Properties | AvroCompilerProperties | See [AvroCompilerProperties](https://github.com/ZenWave360/zenwave-sdk/blob/main/plugins/avro-schema-compiler/src/main/java/io/zenwave360/sdk/plugins/AvroCompilerProperties.java) |   |
 | `avroCompilerProperties.sourceDirectory` | Avro schema file or folder containing avro schemas | File |  |   |
 | `avroCompilerProperties.imports` | Avro schema files or folders containing avro schemas. It supports local files/folders, `classpath:` files/folders or `https://` file resources. | List |  |   |

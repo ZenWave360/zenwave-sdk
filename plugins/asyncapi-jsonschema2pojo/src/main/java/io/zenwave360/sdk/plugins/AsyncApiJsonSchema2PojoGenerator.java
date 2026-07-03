@@ -29,11 +29,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 import static org.jsonschema2pojo.SourceType.JSONSCHEMA;
 import static org.jsonschema2pojo.SourceType.YAMLSCHEMA;
 
@@ -48,6 +51,15 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
     @DocumentedOption(description = "JsonSchema2Pojo settings for downstream library", docLink = "https://github.com/ZenWave360/zenwave-sdk/blob/main/plugins/asyncapi-jsonschema2pojo/src/main/java/io/zenwave360/sdk/plugins/JsonSchema2PojoConfiguration.java")
     public Map<String, String> jsonschema2pojo = new HashMap<>();
+
+    @DocumentedOption(description = "Generate POJOs for message binding keys (e.g. Kafka `bindings.kafka.key`) declared in selected messages.")
+    public boolean generateMessageKeys = false;
+
+    @DocumentedOption(description = "Generate POJOs for application headers declared on selected messages or inherited from message traits.")
+    public boolean generateMessageHeaders = false;
+
+    @DocumentedOption(description = "Generate POJOs for protocol binding header schemas (HTTP/JMS/MQTT) declared in selected messages.")
+    public boolean generateBindingHeaders = false;
 
     @DocumentedOption(description = "Annotation class to mark generated code (e.g. `org.springframework.aot.generate.Generated`). When retained at runtime, this prevents code coverage tools like Jacoco from including generated classes in coverage reports.")
     public String generatedAnnotationClass;
@@ -75,7 +87,9 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
         Model apiModel = getApiModel(contextModel);
 
-        var jsonMessages = AsyncAPIUtils.extractMessages(apiModel, AsyncApiProcessor.SchemaFormatType::isSchemaFormat, operationIds, messageNames);
+        // Schema format is evaluated per message schema root. A JSON Schema key may,
+        // for example, belong to a message whose payload is Avro.
+        var jsonMessages = AsyncAPIUtils.extractMessages(apiModel, ignored -> true, operationIds, messageNames);
 
         targetSourceFolder = new File(targetFolder, sourceFolder);
 
@@ -92,26 +106,147 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     public void generate(Model apiModel, List<Map<String, Object>> messages) throws IOException, URISyntaxException {
         var asyncapiVersion = JSONPath.get(apiModel, "$.asyncapi");
         var defaultSchemaFormat = AsyncApiProcessor.SchemaFormatType.ASYNCAPI_YAML.getSchemaFormat((String) asyncapiVersion);
-        for (final Map<String, Object> message : messages) {
-            Map<String, Object> payload = JSONPath.getFirst(message, "$.payload.schema", "$.payload");
-            String name = (String)  ObjectUtils.firstNonNull(payload.get("x--schema-name"), message.get("name"));
+        Set<String> generatedSchemaRoots = new LinkedHashSet<>();
+        Map<String, String> generatedClassFqns = new LinkedHashMap<>();
 
-            var schemaFormatPath = AsyncAPIUtils.isV3(apiModel) ? "$.payload.schemaFormat" : "$.schemaFormat";
-            var schemaFormat = (String) firstNonNull(JSONPath.get(message, schemaFormatPath), defaultSchemaFormat);
-            AsyncApiProcessor.SchemaFormatType schemaFormatType = AsyncApiProcessor.SchemaFormatType.getFormat(schemaFormat);
+        // Generate in a stable order so that, when two schema roots resolve to the same class
+        // name, the winner is deterministic instead of depending on message hash-set ordering.
+        List<Map<String, Object>> orderedMessages = new ArrayList<>(messages);
+        orderedMessages.sort(Comparator.comparing(message -> String.valueOf(message.get("name"))));
 
-            final JsonSchema2PojoConfiguration config = JsonSchema2PojoConfiguration.of(jsonschema2pojo);
-            config.setTargetDirectory(targetSourceFolder);
-            config.setTargetPackage(modelPackage);
+        for (final Map<String, Object> message : orderedMessages) {
+            for (SchemaRoot schemaRoot : extractSchemaRoots(apiModel, message, defaultSchemaFormat)) {
+                if (!schemaRoot.generateScalarSchema() && !isPojoSchema(schemaRoot.schema())) {
+                    continue;
+                }
 
-            String messageClassName = NamingUtils.asJavaTypeName(name); // TODO
-            if (AsyncApiProcessor.SchemaFormatType.isNativeFormat(schemaFormatType)) {
-                generateFromNativeFormat(apiModel, config, payload, modelPackage, messageClassName);
-            } else {
-                var payloadRef = getOriginalRef(apiModel.getRefs(), payload);
-                generateFromJsonSchemaFile(config, resolveClasspathURI(payloadRef.getURI()), modelPackage, messageClassName);
+                AsyncApiProcessor.SchemaFormatType schemaFormatType = AsyncApiProcessor.SchemaFormatType.getFormat(schemaRoot.schemaFormat());
+                if (!AsyncApiProcessor.SchemaFormatType.isSchemaFormat(schemaFormatType)) {
+                    continue;
+                }
+
+                String deduplicationKey = getDeduplicationKey(apiModel, schemaRoot);
+                if (!generatedSchemaRoots.add(deduplicationKey)) {
+                    continue;
+                }
+
+                String className = getClassName(schemaRoot);
+                String classFqn = getClassFqn(schemaRoot, className);
+                String previousSource = generatedClassFqns.putIfAbsent(classFqn, deduplicationKey);
+                if (previousSource != null) {
+                    log.warn("Skipping schema '{}': class {} was already generated from '{}'. "
+                            + "Rename one of the schemas or set a distinct javaType to avoid the name clash.",
+                            deduplicationKey, classFqn, previousSource);
+                    continue;
+                }
+
+                generateSchemaRoot(apiModel, schemaRoot, schemaFormatType, className);
             }
         }
+    }
+
+    protected List<SchemaRoot> extractSchemaRoots(Model apiModel, Map<String, Object> message, String defaultSchemaFormat) {
+        List<SchemaRoot> roots = new ArrayList<>();
+        String messageName = (String) ObjectUtils.defaultIfNull(message.get("name"), "Message");
+
+        String payloadSchemaFormat = AsyncAPIUtils.isV3(apiModel)
+                ? JSONPath.get(message, "$.payload.schemaFormat", defaultSchemaFormat)
+                : JSONPath.get(message, "$.schemaFormat", defaultSchemaFormat);
+        addSchemaRoot(roots, message.get("payload"), payloadSchemaFormat, messageName, true);
+
+        if (generateMessageHeaders) {
+            addSchemaRoot(roots, message.get("headers"), defaultSchemaFormat, messageName + "Headers", true);
+        }
+
+        if (generateMessageKeys) {
+            addBindingSchemaRoot(roots, message, "$.bindings.kafka.key", defaultSchemaFormat, messageName + "Key");
+        }
+
+        if (generateBindingHeaders) {
+            addBindingSchemaRoot(roots, message, "$.bindings.http.headers", defaultSchemaFormat, messageName + "HttpHeaders");
+            addBindingSchemaRoot(roots, message, "$.bindings.jms.headers", defaultSchemaFormat, messageName + "JmsHeaders");
+            addBindingSchemaRoot(roots, message, "$.bindings.mqtt.correlationData", defaultSchemaFormat, messageName + "MqttCorrelationData");
+            addBindingSchemaRoot(roots, message, "$.bindings.mqtt.responseTopic", defaultSchemaFormat, messageName + "MqttResponseTopic");
+        }
+
+        return roots;
+    }
+
+    private void addBindingSchemaRoot(List<SchemaRoot> roots, Map<String, Object> message, String path, String defaultSchemaFormat, String fallbackName) {
+        addSchemaRoot(roots, JSONPath.get(message, path), defaultSchemaFormat, fallbackName, false);
+    }
+
+    private void addSchemaRoot(List<SchemaRoot> roots, Object schemaContainer, String defaultSchemaFormat, String fallbackName, boolean generateScalarSchema) {
+        if (!(schemaContainer instanceof Map<?, ?>)) {
+            return;
+        }
+
+        Map<String, Object> container = (Map<String, Object>) schemaContainer;
+        Object nestedSchema = container.get("schema");
+        Map<String, Object> schema = nestedSchema instanceof Map<?, ?>
+                ? (Map<String, Object>) nestedSchema
+                : container;
+        String schemaFormat = (String) ObjectUtils.defaultIfNull(container.get("schemaFormat"), defaultSchemaFormat);
+        roots.add(new SchemaRoot(schema, schemaFormat, fallbackName, generateScalarSchema));
+    }
+
+    private boolean isPojoSchema(Map<String, Object> schema) {
+        return "object".equals(schema.get("type"))
+                || schema.containsKey("properties")
+                || schema.containsKey("javaType")
+                || schema.containsKey("x--schema-name");
+    }
+
+    private String getDeduplicationKey(Model apiModel, SchemaRoot schemaRoot) {
+        Object javaType = schemaRoot.schema().get("javaType");
+        if (javaType != null) {
+            return "javaType:" + javaType;
+        }
+
+        Object originalRef = schemaRoot.schema().get("x--original-$ref");
+        if (originalRef != null) {
+            return "ref:" + originalRef;
+        }
+
+        $Ref ref = getOriginalRef(apiModel.getRefs(), schemaRoot.schema());
+        if (ref != null) {
+            return "ref:" + ref.getURI();
+        }
+        return "inline:" + schemaRoot.fallbackName();
+    }
+
+    private String getClassName(SchemaRoot schemaRoot) {
+        String schemaName = (String) ObjectUtils.firstNonNull(schemaRoot.schema().get("x--schema-name"), schemaRoot.fallbackName());
+        return NamingUtils.asJavaTypeName(schemaName);
+    }
+
+    /**
+     * Fully qualified name the generated class is expected to land at, used to detect name clashes.
+     * A root-level {@code javaType} overrides both the model package and the derived class name.
+     * Best-effort for external json-schema files, where jsonschema2pojo derives class names itself.
+     */
+    private String getClassFqn(SchemaRoot schemaRoot, String className) {
+        Object javaType = schemaRoot.schema().get("javaType");
+        return javaType != null ? javaType.toString() : modelPackage + "." + className;
+    }
+
+    private void generateSchemaRoot(Model apiModel, SchemaRoot schemaRoot, AsyncApiProcessor.SchemaFormatType schemaFormatType, String className) throws IOException {
+        final JsonSchema2PojoConfiguration config = JsonSchema2PojoConfiguration.of(jsonschema2pojo);
+        config.setTargetDirectory(targetSourceFolder);
+        config.setTargetPackage(modelPackage);
+
+        if (AsyncApiProcessor.SchemaFormatType.isNativeFormat(schemaFormatType)) {
+            generateFromNativeFormat(apiModel, config, schemaRoot.schema(), modelPackage, className);
+        } else {
+            $Ref schemaRef = getOriginalRef(apiModel.getRefs(), schemaRoot.schema());
+            if (schemaRef == null) {
+                throw new IllegalArgumentException("External JSON Schema root has no original reference: " + className);
+            }
+            generateFromJsonSchemaFile(config, resolveClasspathURI(schemaRef.getURI()), modelPackage, className);
+        }
+    }
+
+    protected record SchemaRoot(Map<String, Object> schema, String schemaFormat, String fallbackName, boolean generateScalarSchema) {
     }
 
     public $Ref getOriginalRef($Refs refs, Object obj) {
@@ -174,8 +309,9 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
     private final ObjectMapper jsonMapper = new ObjectMapper();
 
     protected String convertToJson(final Model apiModel, final JsonSchema2PojoConfiguration config, final Map<String, Object> payload, final String packageName) throws JsonProcessingException {
-        populateJavaTypeFromRefsRecursively(apiModel, config, payload, packageName);
-        return this.jsonMapper.writeValueAsString(payload);
+        Map<String, Object> payloadCopy = this.jsonMapper.convertValue(payload, Map.class);
+        populateJavaTypeFromRefsRecursively(apiModel, config, payloadCopy, packageName);
+        return this.jsonMapper.writeValueAsString(payloadCopy);
     }
 
     private void populateJavaTypeFromRefsRecursively(Model apiModel, JsonSchema2PojoConfiguration config, Object obj, String packageName) {

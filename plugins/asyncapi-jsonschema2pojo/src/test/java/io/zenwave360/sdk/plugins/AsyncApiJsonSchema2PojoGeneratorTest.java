@@ -116,6 +116,7 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
         String json = generator.convertToJson(apiModel, config, payload, "io.example.v31_external.domain.events");
 
         Assertions.assertTrue(json.contains("\"javaType\":\"io.example.v31_external.domain.events.AddressC\""));
+        Assertions.assertEquals("#/$defs/Address_c", address.get("x--original-$ref"));
     }
 
     @Test
@@ -195,6 +196,105 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
         new MainGenerator().generate(plugin);
 
         Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/v3/domain/byMessage/CustomerInput.java").exists());
+    }
+
+    @Test
+    public void test_generator_generates_only_payload_schemas_by_default() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:asyncapi-v3-message-schemas.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.message.schemas.defaults");
+
+        new MainGenerator().generate(plugin);
+
+        String base = "target/zenwave630/src/main/java/io/example/message/schemas/defaults/";
+        // Payloads are generated as before.
+        Assertions.assertTrue(new File(base + "IncludedPayload.java").exists());
+        Assertions.assertTrue(new File(base + "StandardKeyPayload.java").exists());
+        Assertions.assertTrue(new File(base + "TraitHeadersPayload.java").exists());
+        // Binding keys, protocol headers and application headers are all opt-in.
+        Assertions.assertFalse(new File(base + "KafkaMessageKey.java").exists());
+        Assertions.assertFalse(new File(base + "StandardKafkaKey.java").exists());
+        Assertions.assertFalse(new File(base + "AvroMessageJsonKey.java").exists());
+        Assertions.assertFalse(new File(base + "HttpProtocolHeaders.java").exists());
+        Assertions.assertFalse(new File(base + "IncludedMessageJmsHeaders.java").exists());
+        Assertions.assertFalse(new File(base + "TraitHeadersMessageHeaders.java").exists());
+    }
+
+    @Test
+    public void test_generator_generates_message_binding_keys_when_enabled() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:asyncapi-v3-message-schemas.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.message.schemas.keys")
+                .withOption("generateMessageKeys", true);
+
+        new MainGenerator().generate(plugin);
+
+        String base = "target/zenwave630/src/main/java/io/example/message/schemas/keys/";
+        Assertions.assertTrue(new File(base + "IncludedPayload.java").exists());
+        Assertions.assertTrue(new File(base + "KafkaMessageKey.java").exists());
+        Assertions.assertTrue(new File(base + "StandardKafkaKey.java").exists());
+        // Issue #130: a JSON-schema key on a message with an Avro payload is still generated,
+        // while the Avro payload itself is left to the Avro generator.
+        Assertions.assertTrue(new File(base + "AvroMessageJsonKey.java").exists());
+        Assertions.assertFalse(new File(base + "AvroPayload.java").exists());
+        // Only keys are enabled here: protocol headers stay off.
+        Assertions.assertFalse(new File(base + "HttpProtocolHeaders.java").exists());
+        Assertions.assertFalse(new File(base + "IncludedMessageJmsHeaders.java").exists());
+        // Messages not reachable from any operation are never generated.
+        Assertions.assertFalse(new File(base + "UnusedKafkaKey.java").exists());
+    }
+
+    @Test
+    public void test_generator_generates_protocol_binding_headers_when_enabled() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:asyncapi-v3-message-schemas.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.message.schemas.bindings")
+                .withOption("generateBindingHeaders", true);
+
+        new MainGenerator().generate(plugin);
+
+        String base = "target/zenwave630/src/main/java/io/example/message/schemas/bindings/";
+        Assertions.assertTrue(new File(base + "HttpProtocolHeaders.java").exists());
+        Assertions.assertTrue(new File(base + "IncludedMessageJmsHeaders.java").exists());
+        // Scalar binding schemas (mqtt correlationData is a plain string) are not turned into POJOs.
+        Assertions.assertFalse(new File(base + "IncludedMessageMqttCorrelationData.java").exists());
+        // Kafka key generation is a separate switch.
+        Assertions.assertFalse(new File(base + "KafkaMessageKey.java").exists());
+    }
+
+    @Test
+    public void test_generator_generates_referenced_and_trait_message_headers_when_enabled() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:asyncapi-v3-message-schemas.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.message.schemas.headers")
+                .withOption("generateMessageHeaders", true);
+
+        new MainGenerator().generate(plugin);
+
+        // Issue #120: a header schema with an explicit javaType lands at that type...
+        Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/custom/CustomMessageHeaders.java").exists());
+        // ...and headers inherited from a message trait are generated too.
+        Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/message/schemas/headers/TraitHeadersMessageHeaders.java").exists());
+    }
+
+    @Test
+    public void test_generator_generates_message_schemas_for_asyncapi_v2() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:asyncapi-v2-message-schemas.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.message.schemas.v2")
+                .withOption("generateMessageKeys", true)
+                .withOption("generateMessageHeaders", true);
+
+        new MainGenerator().generate(plugin);
+
+        Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/message/schemas/v2/V2Payload.java").exists());
+        Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/message/schemas/v2/V2KafkaMessageKey.java").exists());
+        Assertions.assertTrue(new File("target/zenwave630/src/main/java/io/example/message/schemas/v2/V2ApplicationHeaders.java").exists());
     }
 
     @Test
