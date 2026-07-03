@@ -76,6 +76,18 @@ public class AsyncApiProcessorTest {
     }
 
     @Test
+    public void testProcessAsyncApiOperationTraitsWithScalarProperties() throws Exception {
+        Map<String, Object> model = loadAsyncapiModelFromResource("classpath:asyncapi/operation-traits-v3.yml");
+
+        AsyncApiProcessor processor = new AsyncApiProcessor();
+        Model processed = (Model) processor.process(model).get(targetProperty);
+
+        Assertions.assertEquals("sample trait", get(processed, "$.operations.publishSample.title"));
+        Assertions.assertEquals("operation summary", get(processed, "$.operations.publishSample.summary"));
+        Assertions.assertEquals("send", get(processed, "$.operations.publishSample.action"));
+    }
+
+    @Test
     public void testCollectChannelMessagesV3() throws Exception {
         Map<String, Object> model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v3/customer-address.yml");
 

@@ -16,5 +16,6 @@ Draft release notes for the upcoming **2.5.4** release.
   - `generateMessageHeaders` &mdash; application headers declared on messages or inherited from message traits ([#120](https://github.com/ZenWave360/zenwave-sdk/issues/120)).
   - `generateBindingHeaders` &mdash; protocol binding header schemas (HTTP/JMS/MQTT).
 - Message schemas are now generated in a stable order, and a warning is logged when two schemas would resolve to the same class name instead of one silently overwriting the other.
+- Fixed processing of AsyncAPI operation traits containing scalar properties such as `title`, which previously failed with a `ClassCastException` ([#132](https://github.com/ZenWave360/zenwave-sdk/issues/132)).
 
 **Full Changelog**: https://github.com/ZenWave360/zenwave-sdk/compare/v2.5.3...HEAD
