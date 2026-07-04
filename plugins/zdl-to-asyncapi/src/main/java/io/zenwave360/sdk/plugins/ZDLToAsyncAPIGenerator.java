@@ -13,7 +13,6 @@ import io.zenwave360.sdk.generators.AbstractZDLGenerator;
 import io.zenwave360.sdk.generators.EntitiesToAvroConverter;
 import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
-import io.zenwave360.sdk.processors.YamlOverlyMerger;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateInput;
@@ -43,12 +42,6 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
     @DocumentedOption(description = "Target file")
     public String targetFile;
-
-    @DocumentedOption(description = "AsyncAPI file to be merged on top of generated AsyncAPI file")
-    public String asyncapiMergeFile;
-
-    @DocumentedOption(description = "Overlay Spec file to apply on top of generated AsyncAPI file")
-    public List<String> asyncapiOverlayFiles;
 
     @DocumentedOption(description = "Schema format for messages' payload")
     public SchemaFormat schemaFormat = SchemaFormat.schema;
@@ -162,36 +155,9 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         }
 
         var template = generateTemplateOutput(contextModel, zdlToAsyncAPITemplate, model, asyncAPISchemasString);
-        var templateContent = YamlOverlyMerger.mergeAndOverlayWithOrderer(
-                template.getContent(),
-                asyncapiMergeFile,
-                asyncapiOverlayFiles,
-                ZDLToAsyncAPIGenerator::orderAsyncAPIRootElements);
-        template = new TemplateOutput(template.getTargetFile(), templateContent, template.getMimeType(), template.isSkipOverwrite());
         generatedProjectFiles.singleFiles.add(template);
 
         return generatedProjectFiles;
-    }
-
-    static Map<String, Object> orderAsyncAPIRootElements(Map<String, Object> document) {
-        if (!document.containsKey("servers")) {
-            return document;
-        }
-
-        Map<String, Object> ordered = new LinkedHashMap<>();
-        for (Map.Entry<String, Object> entry : document.entrySet()) {
-            if ("servers".equals(entry.getKey())) {
-                continue;
-            }
-            ordered.put(entry.getKey(), entry.getValue());
-            if ("info".equals(entry.getKey())) {
-                ordered.put("servers", document.get("servers"));
-            }
-        }
-        if (!ordered.containsKey("servers")) {
-            ordered.put("servers", document.get("servers"));
-        }
-        return ordered;
     }
 
     private void addAllEventsAsMessages(LinkedHashMap<Object, Object> allMessages, Map<String, Map> events) {

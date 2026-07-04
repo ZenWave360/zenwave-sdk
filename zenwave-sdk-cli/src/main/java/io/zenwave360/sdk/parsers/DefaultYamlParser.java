@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import io.zenwave360.jsonrefparser.AuthenticationValue;
@@ -83,6 +84,20 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
         return this;
     }
 
+    public DefaultYamlParser withAuthentication(List<AuthenticationValue> authentication) {
+        this.authentication = authentication != null ? authentication : List.of();
+        return this;
+    }
+
+    public String mergeAndOverlay(String content, String mergeFile, List<String> overlayFiles) throws IOException {
+        return YamlOverlyMerger.mergeAndOverlay(content, mergeFile, overlayFiles, this::loadUriContent);
+    }
+
+    public String mergeAndOverlay(String content, String mergeFile, List<String> overlayFiles,
+                                  UnaryOperator<Map<String, Object>> documentOrderer) throws IOException {
+        return YamlOverlyMerger.mergeAndOverlay(content, mergeFile, overlayFiles, this::loadUriContent, documentOrderer);
+    }
+
     @Override
     public Map<String, Object> parse() throws IOException {
         Map<String, Object> model = new LinkedHashMap<>();
@@ -104,7 +119,7 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
 
     protected Model parseWithOverlays() throws IOException {
         String baseContent = loadUriContent(apiFile);
-        String overlayedContent = YamlOverlyMerger.mergeAndOverlay(baseContent, null, apiOverlayFiles, this::loadUriContent);
+        String overlayedContent = mergeAndOverlay(baseContent, null, apiOverlayFiles);
         URI baseUri = normalizeBaseUri(apiFile);
         $RefParser parser = new $RefParser(overlayedContent, baseUri)
                 .withResourceClassLoader(this.projectClassLoader)

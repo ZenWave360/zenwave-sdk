@@ -16,6 +16,7 @@ Draft release notes for the upcoming **2.6.0** release.
   - Overlay application fully deep-copies the source document, including objects nested in arrays.
 - Overlay 1.1 JSONPath expressions continue to use the existing Jayway JSONPath implementation. Jayway predates RFC 9535 and has syntax and semantic differences, so JSONPath support is legacy/best-effort and is not claimed as fully RFC 9535 compliant. Full RFC 9535 support is tracked in [#131](https://github.com/ZenWave360/zenwave-sdk/issues/131).
 - Fixed object updates for root and wildcard targets so overlay properties are recursively merged without replacing existing content.
+- Added authenticated HTTP(S) loading for merge and overlay resources applied to generated OpenAPI and AsyncAPI documents.
 - Improved generated AsyncAPI YAML formatting by preserving key order, adding spacing between root sections, omitting the document marker and unnecessary quotes, and placing overlay-added `servers` after `info`.
 
 ### CLI
