@@ -1,0 +1,41 @@
+asyncapi: 2.6.0
+info:
+  title: Message schema roots v2
+  version: 1.0.0
+
+channels:
+  included:
+    subscribe:
+      operationId: receiveIncluded
+      message:
+        $ref: '#/components/messages/IncludedMessage'
+
+components:
+  messages:
+    IncludedMessage:
+      name: IncludedMessage
+      headers:
+        $ref: '#/components/schemas/V2ApplicationHeaders'
+      bindings:
+        kafka:
+          key:
+            $ref: '#/components/schemas/V2KafkaMessageKey'
+      payload:
+        $ref: '#/components/schemas/V2Payload'
+
+  schemas:
+    V2Payload:
+      type: object
+      properties:
+        value:
+          type: string
+    V2KafkaMessageKey:
+      type: object
+      properties:
+        aggregateId:
+          type: string
+    V2ApplicationHeaders:
+      type: object
+      properties:
+        tenantId:
+          type: string

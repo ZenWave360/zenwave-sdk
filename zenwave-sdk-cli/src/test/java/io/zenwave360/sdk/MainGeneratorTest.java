@@ -9,6 +9,7 @@ import io.zenwave360.sdk.writers.TemplateStdoutWriter;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -53,6 +54,12 @@ public class MainGeneratorTest {
         new MainGenerator().generate(plugin);
 
         logCaptor.getLogs();
+    }
+
+    @Test
+    public void testGeneratorFailsWhenPluginChainIsMissing() {
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> new MainGenerator().generate(new Plugin()));
+        Assertions.assertEquals("Plugin 'io.zenwave360.sdk.Plugin' does not define a processor chain.", exception.getMessage());
     }
 
     @Test

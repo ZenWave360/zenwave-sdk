@@ -5,6 +5,11 @@
 
 Generate Plain Old Java Objects from OpenAPI/AsyncAPI schemas or full JSON-Schema files using https://www.jsonschema2pojo.org/ library.
 
+For selected AsyncAPI messages, jsonschema2pojo generates payload models by default. Additional object schemas declared on those messages are opt-in and off by default, so upgrading does not generate new classes unless you enable them:
+- `generateMessageKeys=true` &mdash; message binding keys, e.g. Kafka `bindings.kafka.key`.
+- `generateMessageHeaders=true` &mdash; application headers declared on messages or inherited from message traits.
+- `generateBindingHeaders=true` &mdash; protocol binding header schemas (HTTP/JMS/MQTT).
+
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.AsyncApiJsonSchema2PojoPlugin \
     apiFile=src/main/resources/model/asyncapi.yml \
@@ -38,6 +43,9 @@ Overlay files are applied in order. This is intended for local files and file-ba
 | `targetFolder`             | Target folder to generate code to.                                                                                                                                    | File                        |             |            |
 | `modelPackage`             | Java Models package name                                                                                                                                              | String                      |             |            |
 | `generatedAnnotationClass` | Annotation class to mark generated code (e.g. `org.springframework.aot.generate.Generated`). When retained at runtime, this prevents code coverage tools like Jacoco from including generated classes in coverage reports. | Class<? extends Annotation> |             |            |
+| `generateMessageKeys`      | Generate POJOs for message binding keys (e.g. Kafka `bindings.kafka.key`) declared in selected messages.                                                             | Boolean                     | false       |            |
+| `generateMessageHeaders`   | Generate POJOs for application headers declared on selected messages or inherited from message traits.                                                               | Boolean                     | false       |            |
+| `generateBindingHeaders`   | Generate POJOs for protocol binding header schemas (HTTP/JMS/MQTT) declared in selected messages.                                                                    | Boolean                     | false       |            |
 | `jsonschema2pojo`          | JsonSchema2Pojo settings                                                                                                                                              | Map                         | {}          |            |
 | `modelNamePrefix`          | Sets the prefix for model classes and enums                                                                                                                           | String                      |             |            |
 | `modelNameSuffix`          | Sets the suffix for model classes and enums                                                                                                                           | String                      |             |            |

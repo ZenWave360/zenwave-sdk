@@ -1,0 +1,36 @@
+asyncapi: 3.1.0
+info:
+  title: Operation traits test
+  version: 1.0.0
+
+channels:
+  sampleChannel:
+    address: sample.topic
+    messages:
+      SampleMessage:
+        $ref: '#/components/messages/SampleMessage'
+
+operations:
+  publishSample:
+    action: send
+    summary: operation summary
+    channel:
+      $ref: '#/channels/sampleChannel'
+    messages:
+      - $ref: '#/channels/sampleChannel/messages/SampleMessage'
+    traits:
+      - $ref: '#/components/operationTraits/SampleTrait'
+
+components:
+  operationTraits:
+    SampleTrait:
+      title: sample trait
+      summary: trait summary
+  messages:
+    SampleMessage:
+      name: SampleMessage
+      payload:
+        $ref: '#/components/schemas/SamplePayload'
+  schemas:
+    SamplePayload:
+      type: object
