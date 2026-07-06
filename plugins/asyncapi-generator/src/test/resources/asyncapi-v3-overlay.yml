@@ -1,3 +1,8 @@
+overlay: 1.1.0
+info:
+  title: AsyncAPI v3 test overlay
+  version: 1.0.0
+
 actions:
   - target: $.components.schemas.CustomerEvent.properties
     update:
