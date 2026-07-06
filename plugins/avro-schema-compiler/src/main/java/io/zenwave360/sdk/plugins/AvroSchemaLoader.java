@@ -1,9 +1,9 @@
 package io.zenwave360.sdk.plugins;
 
 import io.zenwave360.jsonrefparser.AuthenticationValue;
-import io.zenwave360.jsonrefparser.JavaRefParser;
-import io.zenwave360.jsonrefparser.model.OnMissing;
-import io.zenwave360.jsonrefparser.model.RefParserOptions;
+import io.zenwave360.jsonrefparser.$RefParser;
+import io.zenwave360.jsonrefparser.$RefParserOptions;
+import io.zenwave360.jsonrefparser.$RefParserOptions.OnMissing;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.parsers.Parser;
 import io.zenwave360.sdk.utils.AntStyleMatcher;
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static io.zenwave360.jsonrefparser.model.OnCircular.SKIP;
+import static io.zenwave360.jsonrefparser.$RefParserOptions.OnCircular.SKIP;
 
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
@@ -74,11 +74,11 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
     protected List<Map<String, Object>> avroSchemasAsList(List<URI> avroFileURIs) throws IOException {
         var schemas = new ArrayList<Map<String, Object>>();
         for (URI uri : avroFileURIs) {
-            JavaRefParser parser = JavaRefParser.from(uri)
+            $RefParser parser = new $RefParser(uri)
                     .withResourceClassLoader(this.projectClassLoader)
-                    .withAuthentication(authentication.toArray(AuthenticationValue[]::new))
-                    .withOptions(new RefParserOptions(SKIP, OnMissing.FAIL));
-            Object schema = parser.parse().getRoot();
+                    .withAuthenticationValues(authentication)
+                    .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing(OnMissing.FAIL));
+            Object schema = parser.parse().getRefs().schema();
             if(schema instanceof List) {
                 schemas.addAll((List<Map<String, Object>>) schema);
             } else {

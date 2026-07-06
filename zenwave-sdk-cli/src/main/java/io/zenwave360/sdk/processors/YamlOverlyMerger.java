@@ -3,7 +3,7 @@ package io.zenwave360.sdk.processors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import io.zenwave360.jsonrefparser.parser.Parser;
+import io.zenwave360.jsonrefparser.JavaRefParser;
 import io.zenwave360.sdk.utils.Maps;
 
 import java.io.File;
@@ -45,13 +45,13 @@ public class YamlOverlyMerger {
                                          ThrowingResourceLoader resourceLoader,
                                          UnaryOperator<Map<String, Object>> documentOrderer) throws IOException {
         if(mergeFile != null) {
-            var asyncapiAsMap = (Map) Parser.parse(content).json();
+            var asyncapiAsMap = parseYaml(content);
             var asyncapiMergeAsMap = parseYaml(resourceLoader.apply(mergeFile));
             var merged = YamlOverlyMerger.merge(asyncapiAsMap, (Map<String, Object>) asyncapiMergeAsMap);
             content = writeYaml(merged, documentOrderer);
         }
         if (overlayFiles != null && !overlayFiles.isEmpty()) {
-            var asyncapiAsMap = (Map) Parser.parse(content).json();
+            var asyncapiAsMap = parseYaml(content);
             for (String asyncapiOverlayFile : overlayFiles) {
                 var asyncapiOverlayAsMap = parseYaml(resourceLoader.apply(asyncapiOverlayFile));
                 asyncapiAsMap = YamlOverlyMerger.applyOverlay(asyncapiAsMap, (Map<String, Object>) asyncapiOverlayAsMap);
@@ -104,15 +104,18 @@ public class YamlOverlyMerger {
             }
             return URI.create(uri);
         }
+        if(uri.startsWith("http://") || uri.startsWith("https://") || uri.startsWith("file:")) {
+            return URI.create(uri);
+        }
         return new File(uri).toURI();
     }
 
     private static Map parseYaml(Object source) throws IOException {
         if (source instanceof URI uri) {
-            return (Map) Parser.parse(uri).json();
+            return JavaRefParser.from(uri).parse().getParsedDocument().getSchema();
         }
         if (source instanceof String content) {
-            return (Map) Parser.parse(content).json();
+            return JavaRefParser.fromText(content).parse().getParsedDocument().getSchema();
         }
         throw new IllegalArgumentException("Unsupported YAML source: " + source);
     }
