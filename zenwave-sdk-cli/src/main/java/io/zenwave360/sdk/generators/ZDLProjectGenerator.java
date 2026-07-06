@@ -1,6 +1,6 @@
 package io.zenwave360.sdk.generators;
 
-import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
@@ -21,8 +21,14 @@ public class ZDLProjectGenerator extends AbstractZDLGenerator {
     public ProjectLayout layout;
     public ProjectTemplates templates;
 
-    @JsonAnySetter
-    public Map<String, Object> options = new LinkedHashMap<>();
+    /**
+     * Backwards-compatible alias to the inherited {@link Generator#additionalProperties} map. Kept so templates that
+     * still reference {@code {{options.*}}} keep working; the single {@code @JsonAnySetter} now lives in {@link Generator}.
+     * Relies on superclass field initializers running before this one, so both names share the same map instance.
+     * {@code @JsonIgnore} keeps a literal {@code options} option from rebinding the reference and breaking the alias.
+     */
+    @JsonIgnore
+    public Map<String, Object> options = additionalProperties;
 
     protected Map<String, Object> getZDLModel(Map<String, Object> contextModel) {
         return (Map) contextModel.get(sourceProperty);

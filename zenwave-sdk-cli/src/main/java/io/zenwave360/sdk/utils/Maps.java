@@ -46,7 +46,7 @@ public interface Maps {
             if (extra.get(key) instanceof Map) {
                 Map subTarget = (Map) target.get(key);
                 if (subTarget == null) {
-                    subTarget = new HashMap();
+                    subTarget = new LinkedHashMap();
                     target.put(key, subTarget);
                 }
                 deepMerge(subTarget, (Map) extra.get(key));

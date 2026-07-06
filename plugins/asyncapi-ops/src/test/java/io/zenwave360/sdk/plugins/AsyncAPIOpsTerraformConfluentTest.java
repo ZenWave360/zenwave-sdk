@@ -30,6 +30,7 @@ public class AsyncAPIOpsTerraformConfluentTest {
         Assertions.assertFalse(versions.contains("cultureamp/schemaregistry"));
         Assertions.assertTrue(versions.contains("variable \"default_partitions\""));
         Assertions.assertTrue(versions.contains("variable \"default_topic_config\""));
+        Assertions.assertTrue(versions.contains("variable \"schema_registry_crn\""));
 
         String topics = Files.readString(Path.of(targetFolder + "/topics.tf"));
         Assertions.assertTrue(topics.contains("resource \"confluent_kafka_topic\""));
@@ -51,6 +52,10 @@ public class AsyncAPIOpsTerraformConfluentTest {
         Assertions.assertTrue(acls.contains("operation     = \"READ\""));
         Assertions.assertTrue(acls.contains("operation     = \"WRITE\""));
         Assertions.assertTrue(acls.contains("operation     = \"DESCRIBE\""));
+        Assertions.assertTrue(acls.contains("resource_type = \"GROUP\""));
+        Assertions.assertTrue(acls.contains("resource \"confluent_role_binding\""));
+        Assertions.assertTrue(acls.contains("role_name   = \"DeveloperRead\""));
+        Assertions.assertTrue(acls.contains("${var.schema_registry_crn}/subject="));
         Assertions.assertTrue(acls.contains("permission    = \"ALLOW\""));
     }
 

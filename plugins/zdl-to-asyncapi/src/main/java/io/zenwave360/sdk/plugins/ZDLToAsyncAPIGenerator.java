@@ -13,7 +13,6 @@ import io.zenwave360.sdk.generators.AbstractZDLGenerator;
 import io.zenwave360.sdk.generators.EntitiesToAvroConverter;
 import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
-import io.zenwave360.sdk.processors.YamlOverlyMerger;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateInput;
@@ -43,12 +42,6 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
     @DocumentedOption(description = "Target file")
     public String targetFile;
-
-    @DocumentedOption(description = "AsyncAPI file to be merged on top of generated AsyncAPI file")
-    public String asyncapiMergeFile;
-
-    @DocumentedOption(description = "Overlay Spec file to apply on top of generated AsyncAPI file")
-    public List<String> asyncapiOverlayFiles;
 
     @DocumentedOption(description = "Schema format for messages' payload")
     public SchemaFormat schemaFormat = SchemaFormat.schema;
@@ -162,8 +155,6 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         }
 
         var template = generateTemplateOutput(contextModel, zdlToAsyncAPITemplate, model, asyncAPISchemasString);
-        var templateContent = YamlOverlyMerger.mergeAndOverlay(template.getContent(), asyncapiMergeFile, asyncapiOverlayFiles);
-        template = new TemplateOutput(template.getTargetFile(), templateContent, template.getMimeType(), template.isSkipOverwrite());
         generatedProjectFiles.singleFiles.add(template);
 
         return generatedProjectFiles;
