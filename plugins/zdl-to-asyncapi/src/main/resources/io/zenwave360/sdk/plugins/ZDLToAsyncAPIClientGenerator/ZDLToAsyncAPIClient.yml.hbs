@@ -1,0 +1,26 @@
+asyncapi: 3.0.0
+id: {{clientModel.id}}
+info:
+  title: "{{clientModel.title}}"
+  version: {{clientModel.version}}
+  description: "{{clientModel.description}}"
+{{#if clientModel.channels}}
+channels:
+{{#each clientModel.channels as |channel|}}
+  {{@key}}:
+    $ref: '{{channel.ref}}'
+{{/each}}
+{{else}}
+channels: {}
+{{/if}}
+{{#if clientModel.operations}}
+operations:
+{{#each clientModel.operations as |operation|}}
+  {{@key}}:
+    action: {{operation.action}}
+    channel:
+      $ref: '#/channels/{{operation.channel}}'
+{{/each}}
+{{else}}
+operations: {}
+{{/if}}
