@@ -2,7 +2,7 @@
 set -euo pipefail
 
 EVENTCATALOG_REPO="/c/Users/ivangsa/workspace/zenwave/archcatalog"
-PROJECT_DIR="/c/Users/ivangsa/workspace/zenwave/zenwave-sdk/plugins/event-catalog-generator/src/test/resources/event-catalog-project"
+PROJECT_DIR="/c/Users/ivangsa/workspace/zenwave/zenwave-sdk/plugins/event-catalog-generator/event-catalog-project"
 CONTENT_DIR="/c/Users/ivangsa/workspace/zenwave/zenwave-sdk/plugins/event-catalog-generator/src/test/resources/event-catalog-content"
 CATALOG_DIR="$EVENTCATALOG_REPO/packages/core/eventcatalog"
 

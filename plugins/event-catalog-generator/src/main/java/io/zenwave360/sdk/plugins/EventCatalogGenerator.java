@@ -608,7 +608,7 @@ public class EventCatalogGenerator extends Generator {
         String buildPath = str(spec, "buildPath", null);
         if (buildPath != null && !buildPath.isBlank() && new File(buildPath).isAbsolute()) {
             try {
-                Path eventCatalogRoot = Paths.get(System.getProperty("user.dir"), "src/test/resources/event-catalog-project").toAbsolutePath().normalize();
+                Path eventCatalogRoot = Paths.get(System.getProperty("user.dir"), "event-catalog-project").toAbsolutePath().normalize();
                 Path serviceDir = eventCatalogRoot.resolve(servicePagePath).getParent().normalize();
                 Path sourceFile = Paths.get(buildPath).toAbsolutePath().normalize();
                 return serviceDir.relativize(sourceFile).toString().replace('\\', '/');

@@ -171,7 +171,7 @@ The generator writes to:
 
 The EventCatalog project fixture consumes checked-in catalog content through:
 
-- `src/test/resources/event-catalog-project/scripts/sync-from-target.sh`
+- `event-catalog-project/scripts/sync-from-target.sh`
 
 The importer fixture content lives under:
 
