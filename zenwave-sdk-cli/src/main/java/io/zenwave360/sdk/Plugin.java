@@ -56,7 +56,11 @@ public class Plugin {
     public static Plugin of(String pluginConfigAsString) throws Exception {
         if (pluginConfigAsString != null) {
             if (pluginConfigAsString.contains(".")) {
-                return (Plugin) Plugin.class.getClassLoader().loadClass(pluginConfigAsString).getDeclaredConstructor().newInstance();
+                try {
+                    return (Plugin) Plugin.class.getClassLoader().loadClass(pluginConfigAsString).getDeclaredConstructor().newInstance();
+                } catch (ClassNotFoundException e) {
+                    throw pluginNotFound(pluginConfigAsString);
+                }
             }
             Plugin plugin = getPluginFromDeprecatedShortCodes(pluginConfigAsString);
             if (plugin != null) {
@@ -70,8 +74,14 @@ public class Plugin {
             if (plugin != null) {
                 return plugin;
             }
+            throw pluginNotFound(pluginConfigAsString);
         }
         return new Plugin();
+    }
+
+    private static IllegalArgumentException pluginNotFound(String pluginConfigAsString) {
+        return new IllegalArgumentException("Plugin not found: '" + pluginConfigAsString
+                + "'. Check the plugin name or use --help to list available plugins.");
     }
 
     private static Plugin ofSimpleClassName(String simpleClassName) {

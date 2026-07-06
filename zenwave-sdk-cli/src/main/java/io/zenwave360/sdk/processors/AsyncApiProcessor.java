@@ -99,20 +99,24 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
             }
         });
 
-        List<Map<String, Map>> traitsParents = JSONPath.get(apiModel, "$..[?(@.traits)]");
-        for (Map<String, Map> traitParent : traitsParents) {
-            List<Map<String, Map>> traitsList = (List) traitParent.get("traits");
+        List<Map<String, Object>> traitsParents = JSONPath.get(apiModel, "$..[?(@.traits)]");
+        for (Map<String, Object> traitParent : traitsParents) {
+            List<Map<String, Object>> traitsList = (List) traitParent.get("traits");
             // merge traits into parent
             // TODO this works differently in v2 and v3
-            for (Map<String, Map> traits : traitsList) {
-                for (Map.Entry<String, Map> trait : traits.entrySet()) {
+            for (Map<String, Object> traits : traitsList) {
+                for (Map.Entry<String, Object> trait : traits.entrySet()) {
                     String traitName = trait.getKey();
                     if(traitName.startsWith("x--")) {
                         continue; // do not merge internal extensions
                     }
                     if(traitParent.containsKey(traitName)) {
-                        var merged = Maps.deepMerge(Maps.copy(trait.getValue()), traitParent.get(traitName));
-                        traitParent.put(traitName, merged);
+                        Object traitValue = trait.getValue();
+                        Object parentValue = traitParent.get(traitName);
+                        if (traitValue instanceof Map && parentValue instanceof Map) {
+                            var merged = Maps.deepMerge(Maps.copy((Map) traitValue), (Map) parentValue);
+                            traitParent.put(traitName, merged);
+                        }
                     } else {
                         traitParent.put(traitName, trait.getValue());
                     }

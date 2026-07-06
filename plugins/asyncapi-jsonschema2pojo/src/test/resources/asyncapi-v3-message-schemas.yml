@@ -1,0 +1,154 @@
+asyncapi: 3.0.0
+info:
+  title: Message schema roots
+  version: 1.0.0
+
+channels:
+  included:
+    address: included
+    messages:
+      IncludedMessage:
+        $ref: '#/components/messages/IncludedMessage'
+      StandardKeyMessage:
+        $ref: '#/components/messages/StandardKeyMessage'
+      TraitHeadersMessage:
+        $ref: '#/components/messages/TraitHeadersMessage'
+      AvroPayloadMessage:
+        $ref: '#/components/messages/AvroPayloadMessage'
+  unused:
+    address: unused
+    messages:
+      UnusedMessage:
+        $ref: '#/components/messages/UnusedMessage'
+
+operations:
+  receiveIncluded:
+    action: receive
+    channel:
+      $ref: '#/channels/included'
+
+components:
+  messages:
+    IncludedMessage:
+      name: IncludedMessage
+      headers:
+        $ref: '#/components/schemas/ApplicationHeaders'
+      bindings:
+        kafka:
+          key:
+            schemaFormat: application/vnd.aai.asyncapi+yaml;version=3.0.0
+            schema:
+              $ref: '#/components/schemas/KafkaMessageKey'
+        http:
+          headers:
+            $ref: '#/components/schemas/HttpProtocolHeaders'
+        jms:
+          headers:
+            type: object
+            properties:
+              JMSCorrelationID:
+                type: string
+        mqtt:
+          correlationData:
+            type: string
+            format: uuid
+      payload:
+        $ref: '#/components/schemas/IncludedPayload'
+    StandardKeyMessage:
+      name: StandardKeyMessage
+      bindings:
+        kafka:
+          key:
+            $ref: '#/components/schemas/StandardKafkaKey'
+      payload:
+        $ref: '#/components/schemas/StandardKeyPayload'
+    TraitHeadersMessage:
+      name: TraitHeadersMessage
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        $ref: '#/components/schemas/TraitHeadersPayload'
+    AvroPayloadMessage:
+      name: AvroPayloadMessage
+      bindings:
+        kafka:
+          key:
+            $ref: '#/components/schemas/AvroMessageJsonKey'
+      payload:
+        schemaFormat: application/vnd.apache.avro+yaml;version=1.9.0
+        schema:
+          type: record
+          name: AvroPayload
+          namespace: io.example.avro
+          fields:
+            - name: value
+              type: string
+    UnusedMessage:
+      name: UnusedMessage
+      bindings:
+        kafka:
+          key:
+            $ref: '#/components/schemas/UnusedKafkaKey'
+      payload:
+        $ref: '#/components/schemas/UnusedPayload'
+
+  messageTraits:
+    CommonHeaders:
+      headers:
+        type: object
+        properties:
+          traceId:
+            type: string
+
+  schemas:
+    IncludedPayload:
+      type: object
+      properties:
+        value:
+          type: string
+    KafkaMessageKey:
+      type: object
+      properties:
+        aggregateId:
+          type: string
+    ApplicationHeaders:
+      type: object
+      javaType: io.example.custom.CustomMessageHeaders
+      properties:
+        tenantId:
+          type: string
+    HttpProtocolHeaders:
+      type: object
+      properties:
+        Content-Type:
+          type: string
+    StandardKafkaKey:
+      type: object
+      properties:
+        id:
+          type: string
+    StandardKeyPayload:
+      type: object
+      properties:
+        value:
+          type: string
+    TraitHeadersPayload:
+      type: object
+      properties:
+        value:
+          type: string
+    AvroMessageJsonKey:
+      type: object
+      properties:
+        id:
+          type: string
+    UnusedKafkaKey:
+      type: object
+      properties:
+        id:
+          type: string
+    UnusedPayload:
+      type: object
+      properties:
+        value:
+          type: string
