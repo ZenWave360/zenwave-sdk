@@ -26,23 +26,32 @@ class EventCatalogImporterTest {
         runImporter(EVENT_CATALOG_CONTENT, OUTPUT_FOLDER + "/zenwave-architecture.yml");
 
         Map<String, Object> manifest = readManifest();
+        Map<String, Object> config = asMap(manifest.get("config"));
+        assertEquals(List.of("workspace"), config.get("contentResolution"));
+        assertFalse(config.containsKey("sourcePriority"));
+        assertFalse(config.containsKey("naming"));
+
         Map<String, Object> domains = asMap(manifest.get("domains"));
         assertTrue(domains.containsKey("merchandising"));
 
         Map<String, Object> merchandising = asMap(domains.get("merchandising"));
+        assertFalse(merchandising.containsKey("docs"));
         Map<String, Object> subdomains = asMap(merchandising.get("subdomains"));
         Map<String, Object> inventory = asMap(subdomains.get("inventory"));
+        assertFalse(inventory.containsKey("docs"));
         Map<String, Object> services = asMap(inventory.get("services"));
         Map<String, Object> service = asMap(services.get("inventory-adjustment"));
 
-        assertEquals("merchandising.inventory.inventory-adjustment", service.get("id"));
-        assertEquals("merchandising/inventory/inventory-adjustment", service.get("path"));
+        assertFalse(service.containsKey("id"));
+        assertFalse(service.containsKey("path"));
         assertEquals("EVENT_CATALOG.md", asMap(service.get("docs")).get("content"));
 
         List<Map<String, Object>> artifacts = asListOfMaps(service.get("artifacts"));
         assertTrue(artifacts.stream().anyMatch(artifact -> "asyncapi".equals(artifact.get("type"))));
         assertTrue(artifacts.stream().anyMatch(artifact -> "openapi".equals(artifact.get("type"))));
         assertTrue(artifacts.stream().anyMatch(artifact -> "zdl".equals(artifact.get("type"))));
+        assertTrue(artifacts.stream().allMatch(artifact -> artifact.keySet().stream()
+                .allMatch(key -> List.of("name", "artifactId", "type", "path", "version").contains(key))));
 
         File serviceDoc = new File(OUTPUT_FOLDER, "merchandising/inventory/inventory-adjustment/EVENT_CATALOG.md");
         assertTrue(serviceDoc.exists());
@@ -57,7 +66,7 @@ class EventCatalogImporterTest {
     }
 
     @Test
-    void marksMissingSourceSpecsAsUnresolvedArtifacts() throws Exception {
+    void reportsMissingSourceSpecsWithoutEmittingInvalidPlaceholderArtifacts() throws Exception {
         File fixture = new File(OUTPUT_FOLDER, "minimal-catalog");
         File serviceDir = new File(fixture, "domains/sales/subdomains/sales.orders/services/sales.orders.order-service/events/sales.orders.order-service.order-created");
         assertTrue(serviceDir.mkdirs() || serviceDir.exists());
@@ -100,10 +109,7 @@ class EventCatalogImporterTest {
         Map<String, Object> serviceMap = asMap(asMap(asMap(asMap(manifest.get("domains")).get("sales")).get("subdomains")).get("orders"));
         Map<String, Object> importedService = asMap(asMap(serviceMap.get("services")).get("order-service"));
         List<Map<String, Object>> artifacts = asListOfMaps(importedService.get("artifacts"));
-        assertTrue(artifacts.stream().anyMatch(artifact ->
-                "asyncapi".equals(artifact.get("type"))
-                        && Boolean.TRUE.equals(artifact.get("unresolved"))
-                        && artifact.get("comment").toString().contains("source of truth")));
+        assertTrue(artifacts.isEmpty());
     }
 
     private void runImporter(String inputFolder, String outputFile) throws Exception {

@@ -9,7 +9,7 @@ import io.zenwave360.sdk.doc.DocumentedPlugin;
         summary = "Generates an EventCatalog source tree from a zenwave-architecture.yml master file.",
         mainOptions = {"inputFile", "outputFolder", "docsTemplate"},
         hiddenOptions = {"layout", "apiFile", "apiFiles", "zdlFile", "zdlFiles", "style", "targetFolder",
-                "preferredSource", "allowFallback", "localRoots", "linkSource"})
+                "preferredSource", "allowFallback", "linkSource"})
 public class EventCatalogPlugin extends Plugin {
 
     // Chain:
@@ -31,16 +31,13 @@ public class EventCatalogPlugin extends Plugin {
             + "Defaults to the built-in template that concatenates summary, content, and changelog.")
     public String docsTemplate;
 
-    @DocumentedOption(description = "Preferred artifact source for build-time loading, such as file or http.")
+    @DocumentedOption(description = "Preferred active manifest source for build-time loading, such as workspace or git.")
     public String preferredSource;
 
     @DocumentedOption(description = "Allow fallback across configured sources after the preferred source.")
     public Boolean allowFallback;
 
-    @DocumentedOption(description = "Comma separated local roots for workspace-first artifact resolution.")
-    public String localRoots;
-
-    @DocumentedOption(description = "Preferred source for generated frontmatter links, such as http.")
+    @DocumentedOption(description = "Preferred active manifest source for generated frontmatter links, such as git.")
     public String linkSource;
 
     public EventCatalogPlugin() {

@@ -23,20 +23,13 @@ class EventCatalogArchitectureLoaderTest {
         Path manifest = writeManifest("""
                 domains:
                   orders:
-                    id: orders
                     services:
                       orders-api:
-                        id: orders.orders-api
-                        path: orders-api
                   fulfillment:
-                    id: fulfillment
                     subdomains:
                       shipping:
-                        id: fulfillment.shipping
                         services:
                           shipping-api:
-                            id: fulfillment.shipping.shipping-api
-                            path: shipping-api
                 """);
 
         Map<String, Object> architecture = loadArchitecture(manifest);
@@ -57,7 +50,7 @@ class EventCatalogArchitectureLoaderTest {
         assertTrue(flattenedServices.containsKey("fulfillment.shipping.shipping-api"));
 
         Map<String, Object> ordersService = (Map<String, Object>) flattenedServices.get("orders.orders-api");
-        assertEquals("orders-api", ordersService.get("path"));
+        assertEquals("orders/orders-api", ordersService.get("serviceRef"));
     }
 
     @Test
@@ -76,20 +69,20 @@ class EventCatalogArchitectureLoaderTest {
 
         Path manifest = writeManifest("""
                 config:
-                  sourcePriority:
-                    - file
-                    - http
+                  contentResolution:
+                    - workspace
+                    - git
                   sources:
-                    http:
-                      roots:
-                        - https://raw.githubusercontent.com/acme/catalog/develop
+                    git:
+                      provider: generic
+                      server: https://raw.githubusercontent.com/acme/catalog/develop
+                      contentUrlExpression: "${server}/${content.path}"
                 domains:
                   orders:
                     id: orders
                     services:
                       orders-api:
                         id: orders.orders-api
-                        path: orders-api
                         docs:
                           summary: SUMMARY.md
                         artifacts:
@@ -105,20 +98,18 @@ class EventCatalogArchitectureLoaderTest {
                     services:
                       payments-api:
                         id: payments.payments-api
-                        path: payments-api
                   notifications:
                     id: notifications
                     services:
                       notifications-api:
                         id: notifications.notifications-api
-                        path: notifications-api
                 """);
 
         Map<String, Object> architecture = loadArchitecture(manifest);
         Map<String, Object> services = (Map<String, Object>) architecture.get("services");
         Map<String, Object> ordersService = (Map<String, Object>) services.get("orders.orders-api");
 
-        assertEquals("orders-api", ordersService.get("path"));
+        assertEquals("orders/orders-api", ordersService.get("serviceRef"));
 
         Map<String, Object> docs = (Map<String, Object>) ordersService.get("docs");
         assertEquals("SUMMARY.md", docs.get("summary"));

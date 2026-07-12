@@ -58,8 +58,6 @@ public class EventCatalogGenerator extends Generator {
     public String preferredSource;
     @DocumentedOption(description = "Allow source fallback for build-time content loading.")
     public Boolean allowFallback;
-    @DocumentedOption(description = "Comma separated local roots for workspace-first content loading.")
-    public String localRoots;
     @DocumentedOption(description = "Preferred source for generated frontmatter links.")
     public String linkSource;
 
@@ -284,12 +282,10 @@ public class EventCatalogGenerator extends Generator {
     private String renderDocs(Map<String, Object> entry, Map<String, Object> contextModel) {
         ZenWaveManifest manifest = (ZenWaveManifest) contextModel.get("manifest");
         ZenWaveManifestLoader manifestLoader = (ZenWaveManifestLoader) contextModel.get("manifestLoader");
-        File manifestFile = (File) contextModel.get("manifestFile");
         ManifestService manifestService = manifest != null ? ManifestRuntimeSupport.findService(manifest, entry) : null;
         if (manifest != null && manifestLoader != null && manifestService != null && !manifestService.getDocs().isEmpty()) {
             try {
-                ManifestLoadOptions contentOptions = ManifestRuntimeSupport.contentOptions(
-                        manifest, manifestFile, preferredSource, allowFallback, localRoots);
+                ManifestLoadOptions contentOptions = ManifestRuntimeSupport.contentOptions(preferredSource, allowFallback);
                 Map<String, String> resolvedDocs = ManifestRuntimeSupport.loadServiceDocs(
                         manifestLoader, manifest, manifestService, contentOptions);
                 return renderDocsTemplate(resolvedDocs);

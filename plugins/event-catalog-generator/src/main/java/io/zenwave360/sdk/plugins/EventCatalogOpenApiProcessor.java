@@ -12,7 +12,6 @@ import io.zenwave360.sdk.processors.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -32,8 +31,6 @@ public class EventCatalogOpenApiProcessor implements Processor {
     public String preferredSource;
     @DocumentedOption(description = "Allow source fallback for build-time content loading.")
     public Boolean allowFallback;
-    @DocumentedOption(description = "Comma separated local roots for workspace-first content loading.")
-    public String localRoots;
     @DocumentedOption(description = "Preferred source for generated frontmatter links.")
     public String linkSource;
 
@@ -43,12 +40,10 @@ public class EventCatalogOpenApiProcessor implements Processor {
         Map<String, Object> architecture = (Map<String, Object>) contextModel.get("architecture");
         ZenWaveManifest manifest = (ZenWaveManifest) contextModel.get("manifest");
         ZenWaveManifestLoader manifestLoader = (ZenWaveManifestLoader) contextModel.get("manifestLoader");
-        File manifestFile = (File) contextModel.get("manifestFile");
         if (architecture == null || manifest == null || manifestLoader == null) return contextModel;
 
         Map<String, Object> services = (Map<String, Object>) architecture.getOrDefault("services", Map.of());
-        ManifestLoadOptions contentOptions = ManifestRuntimeSupport.contentOptions(
-                manifest, manifestFile, preferredSource, allowFallback, localRoots);
+        ManifestLoadOptions contentOptions = ManifestRuntimeSupport.contentOptions(preferredSource, allowFallback);
 
         for (Map.Entry<String, Object> entry : services.entrySet()) {
             Map<String, Object> serviceMap = (Map<String, Object>) entry.getValue();
@@ -57,13 +52,13 @@ public class EventCatalogOpenApiProcessor implements Processor {
                 continue;
             }
             String serviceId = str(serviceMap, "id", entry.getKey());
-            processOpenApiArtifacts(manifestLoader, manifest, manifestFile, service, serviceMap, serviceId, contentOptions);
+            processOpenApiArtifacts(manifestLoader, manifest, service, serviceMap, serviceId, contentOptions);
         }
 
         return contextModel;
     }
 
-    private void processOpenApiArtifacts(ZenWaveManifestLoader manifestLoader, ZenWaveManifest manifest, File manifestFile,
+    private void processOpenApiArtifacts(ZenWaveManifestLoader manifestLoader, ZenWaveManifest manifest,
                                          ManifestService manifestService, Map<String, Object> serviceMap, String serviceId,
                                          ManifestLoadOptions contentOptions) {
         for (ManifestArtifact artifact : ManifestRuntimeSupport.findArtifacts(manifestService, "openapi")) {
@@ -75,7 +70,7 @@ public class EventCatalogOpenApiProcessor implements Processor {
                 continue;
             }
 
-            Map<String, Object> model = parseSpec(specText, manifestService.getServiceRef(), artifact.getPathExpression());
+            Map<String, Object> model = parseSpec(specText, manifestService.getServiceRef(), artifact.getPath());
             if (model == null) continue;
 
             String version = str(map(model.get("info")), "version", null);
@@ -83,7 +78,7 @@ public class EventCatalogOpenApiProcessor implements Processor {
                 serviceMap.put("_version", version);
             }
 
-            annotateArtifactLink(manifestLoader, manifest, manifestFile, manifestService, serviceMap, artifact);
+            annotateArtifactLink(manifestLoader, manifest, manifestService, serviceMap, artifact, contentOptions);
 
             Map<String, Object> paths = map(model.get("paths"));
             for (Map.Entry<String, Object> pathEntry : paths.entrySet()) {
@@ -98,7 +93,7 @@ public class EventCatalogOpenApiProcessor implements Processor {
 
                 String queryId = serviceId + "." + operationId;
                 String name = str(operation, "summary", operationId);
-                String schemaPath = resolveSchemaLink(manifest, manifestFile, manifestService, artifact, operation);
+                String schemaPath = resolveSchemaLink(manifestLoader, manifest, manifestService, artifact, operation);
 
                 Map<String, Object> query = new LinkedHashMap<>();
                 query.put("id", queryId);
@@ -114,21 +109,22 @@ public class EventCatalogOpenApiProcessor implements Processor {
     }
 
     @SuppressWarnings("unchecked")
-    private void annotateArtifactLink(ZenWaveManifestLoader manifestLoader, ZenWaveManifest manifest, File manifestFile,
-                                      ManifestService manifestService, Map<String, Object> serviceMap, ManifestArtifact artifact) {
+    private void annotateArtifactLink(ZenWaveManifestLoader manifestLoader, ZenWaveManifest manifest,
+                                      ManifestService manifestService, Map<String, Object> serviceMap,
+                                      ManifestArtifact artifact, ManifestLoadOptions contentOptions) {
         List<Map<String, Object>> artifacts = (List<Map<String, Object>>) serviceMap.get("artifacts");
         if (artifacts == null) {
             return;
         }
         for (Map<String, Object> artifactMap : artifacts) {
-            if (artifact.getName().equals(artifactMap.get("name")) && artifact.getType().equals(artifactMap.get("type"))) {
+            if (artifact.getPath().equals(artifactMap.get("path")) && artifact.getType().equals(artifactMap.get("type"))) {
                 String linkUri = ManifestRuntimeSupport.resolveLinkUri(
-                        manifest, manifestFile, manifestService, artifact, artifact.getPathExpression(), linkSource, localRoots);
+                        manifestLoader, manifest, manifestService, artifact, artifact.getPath(), linkSource);
                 if (linkUri != null) {
                     artifactMap.put("linkUri", linkUri);
                 }
                 String buildPath = ManifestRuntimeSupport.resolveContentPath(
-                        manifestLoader, manifest, manifestFile, manifestService, artifact, preferredSource, allowFallback, localRoots);
+                        manifestLoader, manifest, manifestService, artifact, contentOptions);
                 if (buildPath != null) {
                     artifactMap.put("buildPath", buildPath);
                 }
@@ -157,7 +153,7 @@ public class EventCatalogOpenApiProcessor implements Processor {
         }
     }
 
-    private String resolveSchemaLink(ZenWaveManifest manifest, File manifestFile, ManifestService manifestService,
+    private String resolveSchemaLink(ZenWaveManifestLoader manifestLoader, ZenWaveManifest manifest, ManifestService manifestService,
                                      ManifestArtifact artifact, Map<String, Object> operation) {
         Map<String, Object> responses = map(operation.get("responses"));
         for (Object responseValue : responses.values()) {
@@ -172,7 +168,7 @@ public class EventCatalogOpenApiProcessor implements Processor {
                 String filePart = ref.contains("#") ? ref.substring(0, ref.indexOf('#')) : ref;
                 if (!filePart.isBlank()) {
                     return ManifestRuntimeSupport.resolveLinkUri(
-                            manifest, manifestFile, manifestService, artifact, filePart, linkSource, localRoots);
+                            manifestLoader, manifest, manifestService, artifact, filePart, linkSource);
                 }
             }
         }

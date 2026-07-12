@@ -3,34 +3,28 @@
 config:
   title: "ARTS-inspired Retail Event Catalog Playground"
   version: 0.0.1
-  sourcePriority:
-    - file
-    - http
-  naming:
-    groupIdExpression: "${service.id}"
-    artifactIdExpression: "${artifactName}"
+  contentResolution:
+    - workspace
+    - git
   sources:
-    http:
-      roots:
-        - https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/develop/zenwave-sdk-test-resources/src/main/resources/retail-domain-catalog
+    git:
+      provider: generic
+      server: https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/develop/zenwave-sdk-test-resources/src/main/resources/retail-domain-catalog
+      contentUrlExpression: "${server}/${domain.id}/${subdomain.id}/${service.id}/${content.path}"
 
 domains:
   "merchandising":
-    id: "merchandising"
     name: "Merchandising"
     description: "ARTS Merchandising Area - Product planning, pricing and promotion management"
     subdomains:
       "inventory":
-        id: "merchandising.inventory"
         name: "Inventory"
         description: "Inventory tracking and management subdomain"
         services:
           "inventory-adjustment":
-            id: "merchandising.inventory.inventory-adjustment"
             version: "1.0.0"
             name: "Inventory Adjustment"
             description: "ARTS Service Domain - Processes inventory adjustments and updates"
-            path: "merchandising/inventory/inventory-adjustment"
             docs:
               summary: SUMMARY.md
               content: EVENT_CATALOG.md
@@ -49,11 +43,9 @@ domains:
               - $ref: "#/domains/customer-relationship/subdomains/customer-management/services/customer-profile"
 
           "stock-replenishment":
-            id: "merchandising.inventory.stock-replenishment"
             version: "1.0.0"
             name: "Stock Replenishment"
             description: "ARTS Service Domain - Manages stock ordering and replenishment"
-            path: "merchandising/inventory/stock-replenishment"
             docs:
               summary: SUMMARY.md
               content: EVENT_CATALOG.md
@@ -69,16 +61,13 @@ domains:
               - "merchandising/inventory/inventory-adjustment"
 
       "pricing":
-        id: "merchandising.pricing"
         name: "Pricing"
         description: "Pricing strategies and adjustments subdomain"
         services:
           "price-change":
-            id: "merchandising.pricing.price-change"
             version: "1.0.0"
             name: "Price Change"
             description: "ARTS Service Domain - Manages price updates and promotions"
-            path: "merchandising/pricing/price-change"
             docs:
               summary: SUMMARY.md
               content: EVENT_CATALOG.md
@@ -94,21 +83,17 @@ domains:
               - service: "merchandising/inventory/inventory-adjustment"
 
   "customer-relationship":
-    id: "customer-relationship"
     name: "Customer Relationship"
     description: "ARTS Customer Relationship Area - Customer management and loyalty programs"
     subdomains:
       "customer-management":
-        id: "customer-relationship.customer-management"
         name: "Customer Management"
         description: "Customer profile and relationship management subdomain"
         services:
           "customer-profile":
-            id: "customer-relationship.customer-management.customer-profile"
             version: "1.0.0"
             name: "Customer Profile"
             description: "ARTS Service Domain - Maintains customer profiles and data"
-            path: "customer-relationship/customer-management/customer-profile"
             docs:
               summary: SUMMARY.md
               content: EVENT_CATALOG.md
@@ -124,11 +109,9 @@ domains:
               - service: "customer-relationship/customer-management/loyalty-management"
 
           "loyalty-management":
-            id: "customer-relationship.customer-management.loyalty-management"
             version: "1.0.0"
             name: "Loyalty Management"
             description: "ARTS Service Domain - Handles loyalty programs and points"
-            path: "customer-relationship/customer-management/loyalty-management"
             docs:
               summary: SUMMARY.md
               content: EVENT_CATALOG.md

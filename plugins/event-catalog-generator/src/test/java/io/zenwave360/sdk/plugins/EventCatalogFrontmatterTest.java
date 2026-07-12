@@ -87,7 +87,7 @@ class EventCatalogFrontmatterTest {
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())
                         .withOption("outputFolder", OUTPUT_FOLDER)
-                        .withOption("linkSource", "http"));
+                        .withOption("linkSource", "git"));
     }
 
     private static String architectureFilePath() {

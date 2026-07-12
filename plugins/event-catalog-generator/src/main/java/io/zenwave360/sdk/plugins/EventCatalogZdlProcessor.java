@@ -29,21 +29,16 @@ public class EventCatalogZdlProcessor implements Processor {
     public String preferredSource;
     @DocumentedOption(description = "Allow source fallback for build-time content loading.")
     public Boolean allowFallback;
-    @DocumentedOption(description = "Comma separated local roots for workspace-first content loading.")
-    public String localRoots;
-
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, Object> process(Map<String, Object> contextModel) {
         Map<String, Object> architecture = (Map<String, Object>) contextModel.get("architecture");
         ZenWaveManifest manifest = (ZenWaveManifest) contextModel.get("manifest");
         ZenWaveManifestLoader manifestLoader = (ZenWaveManifestLoader) contextModel.get("manifestLoader");
-        File manifestFile = (File) contextModel.get("manifestFile");
         if (architecture == null || manifest == null || manifestLoader == null) return contextModel;
 
         Map<String, Object> services = (Map<String, Object>) architecture.getOrDefault("services", Map.of());
-        ManifestLoadOptions contentOptions = ManifestRuntimeSupport.contentOptions(
-                manifest, manifestFile, preferredSource, allowFallback, localRoots);
+        ManifestLoadOptions contentOptions = ManifestRuntimeSupport.contentOptions(preferredSource, allowFallback);
 
         for (Map.Entry<String, Object> entry : services.entrySet()) {
             Map<String, Object> serviceMap = (Map<String, Object>) entry.getValue();
@@ -122,7 +117,7 @@ public class EventCatalogZdlProcessor implements Processor {
 
             return (Map<String, Object>) parsed.get(tempKey);
         } catch (Exception e) {
-            log.warn("Failed to parse ZDL artifact {}: {} ({})", artifact.getPathExpression(), e.getMessage(), e.getClass().getSimpleName());
+            log.warn("Failed to parse ZDL artifact {}: {} ({})", artifact.getPath(), e.getMessage(), e.getClass().getSimpleName());
             return null;
         } finally {
             if (tempFile != null) {

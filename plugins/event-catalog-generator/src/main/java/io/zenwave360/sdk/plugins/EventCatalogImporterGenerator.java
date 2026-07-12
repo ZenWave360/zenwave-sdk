@@ -119,18 +119,14 @@ public class EventCatalogImporterGenerator extends Generator {
 
         for (DomainRef domainRef : model.domains.values()) {
             Page domainPage = domainRef.page;
-            Map<String, Object> domain = entry(domainPage, domainRef.id);
-            String domainDoc = "docs/domains/" + domainRef.id + "/EVENT_CATALOG.md";
-            addDocs(domain, files, outputRoot, domainDoc, domainDoc, domainPage);
+            Map<String, Object> domain = entry(domainPage);
             domains.put(domainRef.key(), domain);
 
             Map<String, Object> subdomains = ordered();
             domain.put("subdomains", subdomains);
             for (DomainRef subdomainRef : domainRef.subdomains.values()) {
                 Page subdomainPage = subdomainRef.page;
-                Map<String, Object> subdomain = entry(subdomainPage, subdomainRef.id);
-                String subdomainDoc = "docs/domains/" + domainRef.id + "/subdomains/" + subdomainRef.id + "/EVENT_CATALOG.md";
-                addDocs(subdomain, files, outputRoot, subdomainDoc, subdomainDoc, subdomainPage);
+                Map<String, Object> subdomain = entry(subdomainPage);
                 subdomains.put(subdomainRef.key(), subdomain);
 
                 Map<String, Object> services = ordered();
@@ -148,19 +144,14 @@ public class EventCatalogImporterGenerator extends Generator {
         Map<String, Object> config = ordered();
         config.put("title", "Imported EventCatalog");
         config.put("version", "0.0.1");
-        config.put("sourcePriority", List.of("file", "http"));
-        Map<String, Object> naming = ordered();
-        naming.put("groupIdExpression", "${service.id}");
-        naming.put("artifactIdExpression", "${artifactName}");
-        config.put("naming", naming);
+        config.put("contentResolution", List.of("workspace"));
         return config;
     }
 
     private Map<String, Object> serviceEntry(Path inputRoot, ServiceRef serviceRef, GeneratedProjectFiles files, Path outputRoot) {
         Page page = serviceRef.page;
-        Map<String, Object> service = entry(page, serviceRef.id);
+        Map<String, Object> service = entry(page);
         String servicePath = servicePath(serviceRef);
-        service.put("path", servicePath);
         addDocs(service, files, outputRoot, servicePath + "/EVENT_CATALOG.md", "EVENT_CATALOG.md", page);
 
         List<Map<String, Object>> artifacts = artifacts(inputRoot, outputRoot, servicePath, serviceRef);
@@ -188,11 +179,9 @@ public class EventCatalogImporterGenerator extends Generator {
         }
 
         if ((!serviceRef.events.isEmpty() || !serviceRef.commands.isEmpty()) && types.stream().noneMatch(type -> type.startsWith("asyncapi"))) {
-            artifacts.add(unresolvedArtifact("asyncapi", "EventCatalog messages exist, but no service specifications[].path resolved an AsyncAPI source of truth."));
             serviceRef.report.unresolved("asyncapi source for events/commands");
         }
         if (!serviceRef.queries.isEmpty() && !types.contains("openapi")) {
-            artifacts.add(unresolvedArtifact("openapi", "EventCatalog queries exist, but no service specifications[].path resolved an OpenAPI source of truth."));
             serviceRef.report.unresolved("openapi source for queries");
         }
         addOwnedArtifacts(artifacts, serviceRef.flows, "flow");
@@ -204,14 +193,12 @@ public class EventCatalogImporterGenerator extends Generator {
     private void addOwnedArtifacts(List<Map<String, Object>> artifacts, List<Page> pages, String type) {
         for (Page page : pages) {
             Map<String, Object> artifact = artifact(type, page.path);
-            artifact.put("id", str(page.frontmatter.get("id")));
             artifacts.add(artifact);
         }
     }
 
-    private Map<String, Object> entry(Page page, String fallbackId) {
+    private Map<String, Object> entry(Page page) {
         Map<String, Object> entry = ordered();
-        entry.put("id", str(page.frontmatter.getOrDefault("id", fallbackId)));
         putIfPresent(entry, "version", page.frontmatter.get("version"));
         putIfPresent(entry, "name", page.frontmatter.get("name"));
         putIfPresent(entry, "description", page.frontmatter.getOrDefault("summary", page.frontmatter.get("description")));
@@ -294,13 +281,6 @@ public class EventCatalogImporterGenerator extends Generator {
         Map<String, Object> artifact = ordered();
         artifact.put("type", type);
         artifact.put("path", path);
-        return artifact;
-    }
-
-    private Map<String, Object> unresolvedArtifact(String type, String comment) {
-        Map<String, Object> artifact = artifact(type, "UNRESOLVED");
-        artifact.put("unresolved", true);
-        artifact.put("comment", comment);
         return artifact;
     }
 

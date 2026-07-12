@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class EventCatalogGeneratorTest {
 
     private static final String ARCHITECTURE_CLASSPATH = "retail-domain-catalog/zenwave-architecture.yml";
-    private static final String OUTPUT_FOLDER = "target/event-catalog-test";
+    private static final String OUTPUT_FOLDER = "target/event-catalog-output-test";
 
     private static String architectureFilePath() {
         var resource = EventCatalogGeneratorTest.class.getClassLoader().getResource(ARCHITECTURE_CLASSPATH);
@@ -38,7 +38,7 @@ public class EventCatalogGeneratorTest {
 
         var plugin = new EventCatalogPlugin()
                 .withOption("inputFile", inputFile)
-                .withOption("linkSource", "http")
+                .withOption("linkSource", "git")
                 .withOption("outputFolder", OUTPUT_FOLDER);
 
         new MainGenerator().generate(plugin);
@@ -65,7 +65,7 @@ public class EventCatalogGeneratorTest {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())
-                        .withOption("linkSource", "http")
+                        .withOption("linkSource", "git")
                         .withOption("outputFolder", OUTPUT_FOLDER));
 
         String content = readMdx("domains/merchandising/index.mdx");
@@ -80,7 +80,7 @@ public class EventCatalogGeneratorTest {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())
-                        .withOption("linkSource", "http")
+                        .withOption("linkSource", "git")
                         .withOption("outputFolder", OUTPUT_FOLDER));
 
         String content = readMdx("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/index.mdx");
@@ -94,7 +94,7 @@ public class EventCatalogGeneratorTest {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())
-                        .withOption("linkSource", "http")
+                        .withOption("linkSource", "git")
                         .withOption("outputFolder", OUTPUT_FOLDER));
 
         // Service pages have sends/receives populated from AsyncAPI
@@ -110,7 +110,7 @@ public class EventCatalogGeneratorTest {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())
-                        .withOption("linkSource", "http")
+                        .withOption("linkSource", "git")
                         .withOption("outputFolder", OUTPUT_FOLDER));
 
         // inventory-adjustment has an openapi.yml with GET operations
@@ -128,7 +128,7 @@ public class EventCatalogGeneratorTest {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())
-                        .withOption("linkSource", "http")
+                        .withOption("linkSource", "git")
                         .withOption("outputFolder", OUTPUT_FOLDER));
 
         // inventory-adjustment has a domain-model.zdl with InventoryItem entity
@@ -145,7 +145,7 @@ public class EventCatalogGeneratorTest {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())
-                        .withOption("linkSource", "http")
+                        .withOption("linkSource", "git")
                         .withOption("outputFolder", OUTPUT_FOLDER));
 
         String domainContent = readMdx("domains/merchandising/index.mdx");
@@ -164,7 +164,7 @@ public class EventCatalogGeneratorTest {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())
-                        .withOption("linkSource", "http")
+                        .withOption("linkSource", "git")
                         .withOption("outputFolder", OUTPUT_FOLDER));
 
         // Check that at least one service with an asyncapi spec has sends or receives
@@ -240,7 +240,7 @@ public class EventCatalogGeneratorTest {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())
-                        .withOption("linkSource", "http")
+                        .withOption("linkSource", "git")
                         .withOption("outputFolder", outputFolder));
     }
 

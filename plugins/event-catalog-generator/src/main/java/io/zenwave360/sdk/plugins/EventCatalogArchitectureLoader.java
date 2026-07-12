@@ -98,8 +98,10 @@ public class EventCatalogArchitectureLoader implements Processor {
         if (!manifest.getConfig().getProperties().isEmpty()) {
             config.put("properties", new LinkedHashMap<>(manifest.getConfig().getProperties()));
         }
-        if (!manifest.getConfig().getSourcePriority().isEmpty()) {
-            config.put("sourcePriority", new ArrayList<>(manifest.getConfig().getSourcePriority()));
+        config.put("groupIdExpression", manifest.getConfig().getGroupIdExpression());
+        config.put("artifactIdExpression", manifest.getConfig().getArtifactIdExpression());
+        if (!manifest.getConfig().getContentResolution().isEmpty()) {
+            config.put("contentResolution", new ArrayList<>(manifest.getConfig().getContentResolution()));
         }
         return config;
     }
@@ -107,6 +109,7 @@ public class EventCatalogArchitectureLoader implements Processor {
     private Map<String, Object> toDomainMap(ZenWaveManifest manifest, ManifestDomain domain, Map<String, Object> flattenedServices) {
         Map<String, Object> domainMap = new LinkedHashMap<>();
         putIfNotNull(domainMap, "id", defaultString(domain.getId(), domain.getKey()));
+        putIfNotNull(domainMap, "version", domain.getVersion());
         putIfNotNull(domainMap, "name", domain.getName());
         putIfNotNull(domainMap, "description", domain.getDescription());
 
@@ -115,7 +118,7 @@ public class EventCatalogArchitectureLoader implements Processor {
             for (ManifestService service : domain.getServices()) {
                 Map<String, Object> serviceMap = toServiceMap(manifest, service);
                 servicesMap.put(service.getServiceKey(), serviceMap);
-                flattenedServices.put(serviceKey(service), serviceMap);
+                flattenedServices.put(catalogServiceId(service), serviceMap);
             }
             domainMap.put("services", servicesMap);
         }
@@ -123,7 +126,7 @@ public class EventCatalogArchitectureLoader implements Processor {
         if (!domain.getSubdomains().isEmpty()) {
             Map<String, Object> subdomains = new LinkedHashMap<>();
             for (ManifestSubdomain subdomain : domain.getSubdomains()) {
-                Map<String, Object> subdomainMap = toSubdomainMap(manifest, subdomain, flattenedServices);
+                Map<String, Object> subdomainMap = toSubdomainMap(manifest, domain, subdomain, flattenedServices);
                 subdomains.put(subdomain.getKey(), subdomainMap);
             }
             domainMap.put("subdomains", subdomains);
@@ -132,9 +135,11 @@ public class EventCatalogArchitectureLoader implements Processor {
         return domainMap;
     }
 
-    private Map<String, Object> toSubdomainMap(ZenWaveManifest manifest, ManifestSubdomain subdomain, Map<String, Object> flattenedServices) {
+    private Map<String, Object> toSubdomainMap(ZenWaveManifest manifest, ManifestDomain domain,
+                                               ManifestSubdomain subdomain, Map<String, Object> flattenedServices) {
         Map<String, Object> subdomainMap = new LinkedHashMap<>();
-        putIfNotNull(subdomainMap, "id", defaultString(subdomain.getId(), subdomain.getKey()));
+        putIfNotNull(subdomainMap, "id", catalogSubdomainId(domain, subdomain));
+        putIfNotNull(subdomainMap, "version", subdomain.getVersion());
         putIfNotNull(subdomainMap, "name", subdomain.getName());
         putIfNotNull(subdomainMap, "description", subdomain.getDescription());
 
@@ -143,7 +148,7 @@ public class EventCatalogArchitectureLoader implements Processor {
             for (ManifestService service : subdomain.getServices()) {
                 Map<String, Object> serviceMap = toServiceMap(manifest, service);
                 servicesMap.put(service.getServiceKey(), serviceMap);
-                flattenedServices.put(serviceKey(service), serviceMap);
+                flattenedServices.put(catalogServiceId(service), serviceMap);
             }
             subdomainMap.put("services", servicesMap);
         }
@@ -154,18 +159,16 @@ public class EventCatalogArchitectureLoader implements Processor {
     private Map<String, Object> toServiceMap(ZenWaveManifest manifest, ManifestService service) {
         Map<String, Object> serviceMap = new LinkedHashMap<>();
 
-        String serviceId = defaultString(service.getId(), service.getServiceRef().replace('/', '.'));
+        String serviceId = catalogServiceId(service);
         serviceMap.put("id", serviceId);
         serviceMap.put("serviceRef", service.getServiceRef());
-        putIfNotNull(serviceMap, "version", service.getVersion());
+        putIfNotNull(serviceMap, "version", service.resolvedVersion(null));
         putIfNotNull(serviceMap, "name", service.getName());
         putIfNotNull(serviceMap, "description", service.getDescription());
-        serviceMap.put("domain", service.getDomainKey());
+        serviceMap.put("domain", service.getDomainId());
         if (service.getSubdomainKey() != null) {
             serviceMap.put("subdomain", service.getSubdomainKey());
         }
-        serviceMap.put("path", service.getPath());
-
         if (!service.getDocs().isEmpty()) {
             serviceMap.put("docs", new LinkedHashMap<>(service.getDocs()));
         }
@@ -174,9 +177,10 @@ public class EventCatalogArchitectureLoader implements Processor {
             List<Map<String, Object>> artifacts = new ArrayList<>();
             for (ManifestArtifact artifact : service.getArtifacts()) {
                 Map<String, Object> artifactMap = new LinkedHashMap<>();
-                artifactMap.put("name", artifact.getName());
+                putIfNotNull(artifactMap, "name", artifact.getName());
+                putIfNotNull(artifactMap, "artifactId", artifact.getArtifactId());
                 artifactMap.put("type", artifact.getType());
-                artifactMap.put("path", artifact.getPathExpression());
+                artifactMap.put("path", artifact.getPath());
                 putIfNotNull(artifactMap, "version", artifact.getVersion());
                 artifacts.add(artifactMap);
             }
@@ -195,13 +199,22 @@ public class EventCatalogArchitectureLoader implements Processor {
         return serviceMap;
     }
 
-    private String serviceKey(ManifestService service) {
-        return defaultString(service.getId(), service.getServiceRef().replace('/', '.'));
+    private String catalogSubdomainId(ManifestDomain domain, ManifestSubdomain subdomain) {
+        if (!subdomain.getId().equals(subdomain.getKey())) {
+            return subdomain.getId();
+        }
+        return domain.getId() + "." + subdomain.getId();
+    }
+
+    private String catalogServiceId(ManifestService service) {
+        return service.getId().equals(service.getServiceKey())
+                ? service.getServiceRef().replace('/', '.')
+                : service.getId();
     }
 
     private String consumerReferenceToId(String consumerRef, ManifestService consumerService) {
         if (consumerService != null) {
-            return defaultString(consumerService.getId(), consumerService.getServiceRef().replace('/', '.'));
+            return catalogServiceId(consumerService);
         }
         return consumerRef != null ? consumerRef.replace('/', '.') : null;
     }
