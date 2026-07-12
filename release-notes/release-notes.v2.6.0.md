@@ -19,4 +19,13 @@ Draft release notes for the upcoming **2.6.0** release.
 - Added authenticated HTTP(S) loading for merge and overlay resources applied to generated OpenAPI and AsyncAPI documents.
 - Improved generated AsyncAPI YAML formatting by preserving key order, adding spacing between root sections, omitting the document marker and unnecessary quotes, and placing overlay-added `servers` after `info`.
 
+### EventCatalog Import and Export
+
+- Added bidirectional integration between [ZenWave Manifest](https://github.com/ZenWave360/zenwave-manifest) architecture manifests and [EventCatalog](https://www.eventcatalog.dev/):
+  - Export a ZenWave `zenwave-architecture.yml` manifest—including services, domains, subdomains, OpenAPI and AsyncAPI specifications, and entities—into an EventCatalog content tree.
+    - Generate pages for channels, events, commands, queries, and entities from AsyncAPI, OpenAPI, and ZDL artifacts.
+    - Include service documentation, specification links, schema references, message relationships, and entity metadata in the generated EventCatalog content.
+    - Preserve versioned EventCatalog content during regeneration.
+  - Import an EventCatalog content tree into a `zenwave-architecture.yml` manifest.
+
 **Full Changelog**: https://github.com/ZenWave360/zenwave-sdk/compare/v2.5.4...HEAD
