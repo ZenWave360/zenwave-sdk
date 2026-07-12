@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.zenwave360.sdk.MainGenerator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +22,9 @@ class EventCatalogImporterTest {
     };
     private static final String EVENT_CATALOG_CONTENT = "src/test/resources/event-catalog-content";
     private static final String OUTPUT_FOLDER = "target/event-catalog-import-test";
+
+    @TempDir
+    Path tempDir;
 
     @Test
     void importsEventCatalogHierarchyIntoZenWaveManifest() throws Exception {
@@ -112,10 +117,121 @@ class EventCatalogImporterTest {
         assertTrue(artifacts.isEmpty());
     }
 
+    @Test
+    void importsRichCatalogWithOwnedArtifactsAndMixedSpecificationLocations() throws Exception {
+        Path catalog = tempDir.resolve("catalog");
+        Path domain = catalog.resolve("domains/fulfillment");
+        Path subdomain = domain.resolve("subdomains/fulfillment.shipping");
+        Path service = subdomain.resolve("services/fulfillment.shipping.delivery");
+
+        write(domain.resolve("index.mdx"), "---\r\nid: fulfillment\r\nname: Fulfillment\r\n---\r\nDomain docs\r\n");
+        write(subdomain.resolve("index.mdx"), page("fulfillment.shipping", "Shipping", "Shipping docs"));
+        write(service.resolve("index.mdx"), """
+                ---
+                id: fulfillment.shipping.delivery
+                name: 'Delivery \\ "API"'
+                version: 4.2.0
+                summary: Delivery coordination
+                specifications:
+                  - type: asyncapi
+                    path: specs/asyncapi.yml
+                  - type: openapi
+                    path: https://example.test/openapi.yml
+                  - type: graphql
+                    path: %s
+                  - path: ignored-missing-type.yml
+                  - type: openapi
+                ---
+                """.formatted(tempDir.resolve("absolute.graphql").toString().replace("\\", "/")));
+
+        write(service.resolve("events/order-shipped/index.mdx"), page("fulfillment.shipping.delivery.order-shipped", "Order Shipped", "Event docs"));
+        write(service.resolve("commands/ship-order/index.md"), page("fulfillment.shipping.delivery.ship-order", "Ship Order", "Command docs"));
+        write(service.resolve("queries/find-shipment/index.mdx"), page("fulfillment.shipping.delivery.find-shipment", "Find Shipment", "Query docs"));
+        write(service.resolve("flows/delivery-flow/index.mdx"), page("delivery-flow", "Delivery Flow", "Flow docs"));
+        write(service.resolve("data-products/shipping-insights/index.mdx"), page("shipping-insights", "Shipping Insights", "Data product docs"));
+        write(service.resolve("diagrams/context/index.mdx"), page("shipping-context", "Shipping Context", "Diagram docs"));
+        write(service.resolve("unknown/ignored/index.mdx"), page("ignored", "Ignored", "Ignored docs"));
+        write(service.resolve("entities/shipment/index.mdx"), """
+                ---
+                id: fulfillment.shipping.delivery.shipment
+                name: Shipment
+                summary: 'Shipment "aggregate"'
+                aggregateRoot: true
+                properties:
+                  - name: trackingId
+                    type: UUID
+                    required: true
+                  - name: amount
+                    type: BigDecimal
+                  - name: carrier-code
+                    type: custom-code
+                  - name: note
+                  - ignored-non-map
+                ---
+                Entity docs
+                """);
+        write(service.resolve("entities/anonymous/index.mdx"), """
+                ---
+                properties:
+                  - name: value
+                    type: string
+                ---
+                """);
+
+        Path idle = subdomain.resolve("services/idle-service/index.mdx");
+        write(idle, "---\nid: idle-service\nname: Idle Service\n---");
+        write(catalog.resolve("node_modules/domains/fake/index.mdx"), page("fake", "Fake", "Must be ignored"));
+        write(catalog.resolve("README.md"), "No frontmatter");
+        write(catalog.resolve("unfinished.mdx"), "---\nid: unfinished\n");
+        write(catalog.resolve("ignored.txt"), page("ignored-text", "Ignored text", "Ignored"));
+        write(service.resolve("specs/asyncapi.yml"), "asyncapi: 3.0.0\n");
+        write(tempDir.resolve("absolute.graphql"), "type Query { shipment: String }\n");
+
+        Path output = tempDir.resolve("output/zenwave-architecture.yml");
+        runImporter(catalog.toString(), output.toString());
+
+        Map<String, Object> manifest = YAML.readValue(output.toFile(), MAP_TYPE);
+        Map<String, Object> fulfillment = asMap(asMap(manifest.get("domains")).get("fulfillment"));
+        Map<String, Object> shipping = asMap(asMap(fulfillment.get("subdomains")).get("shipping"));
+        Map<String, Object> services = asMap(shipping.get("services"));
+        Map<String, Object> delivery = asMap(services.get("delivery"));
+        assertFalse(delivery.containsKey("docs"), "A service with no body should not emit an empty docs entry");
+
+        List<Map<String, Object>> artifacts = asListOfMaps(delivery.get("artifacts"));
+        assertTrue(artifacts.stream().anyMatch(artifact -> "asyncapi".equals(artifact.get("type"))
+                && artifact.get("path").toString().endsWith("catalog/domains/fulfillment/subdomains/fulfillment.shipping/services/fulfillment.shipping.delivery/specs/asyncapi.yml")));
+        assertTrue(artifacts.stream().anyMatch(artifact -> "https://example.test/openapi.yml".equals(artifact.get("path"))));
+        assertTrue(artifacts.stream().anyMatch(artifact -> artifact.get("path").toString().endsWith("absolute.graphql")));
+        assertTrue(artifacts.stream().anyMatch(artifact -> "flow".equals(artifact.get("type"))));
+        assertTrue(artifacts.stream().anyMatch(artifact -> "data-product".equals(artifact.get("type"))));
+        assertTrue(artifacts.stream().anyMatch(artifact -> "diagram".equals(artifact.get("type"))));
+        assertTrue(artifacts.stream().anyMatch(artifact -> "zdl".equals(artifact.get("type"))));
+
+        Path zdl = tempDir.resolve("output/fulfillment/shipping/delivery/domain-model.zdl");
+        String zdlContent = Files.readString(zdl);
+        assertTrue(zdlContent.contains("@aggregate"));
+        assertTrue(zdlContent.contains("trackingId UUID required"));
+        assertTrue(zdlContent.contains("amount BigDecimal"));
+        assertTrue(zdlContent.contains("carrier-code CustomCode"));
+        assertTrue(zdlContent.contains("entity ImportedEntity"));
+        assertEquals(2, services.size());
+        assertTrue(services.containsKey("idle-service"));
+        assertFalse(asMap(manifest.get("domains")).containsKey("fake"));
+    }
+
     private void runImporter(String inputFolder, String outputFile) throws Exception {
         new MainGenerator().generate(new EventCatalogImporterPlugin()
                 .withOption("inputFolder", inputFolder)
                 .withOption("outputFile", outputFile));
+    }
+
+    private String page(String id, String name, String body) {
+        return "---\nid: " + id + "\nname: " + name + "\n---\n" + body + "\n";
+    }
+
+    private void write(Path path, String content) throws Exception {
+        Files.createDirectories(path.getParent());
+        Files.writeString(path, content);
     }
 
     private Map<String, Object> readManifest() throws Exception {
