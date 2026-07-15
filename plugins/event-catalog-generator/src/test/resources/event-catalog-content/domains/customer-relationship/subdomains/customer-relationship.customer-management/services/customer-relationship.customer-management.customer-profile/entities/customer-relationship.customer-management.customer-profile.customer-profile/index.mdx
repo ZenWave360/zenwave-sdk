@@ -1,0 +1,46 @@
+---
+id: "customer-relationship.customer-management.customer-profile.customer-profile"
+name: "CustomerProfile"
+summary: "Customer Profile aggregate"
+version: "1.0.0"
+aggregateRoot: true
+properties:
+- name: "firstName"
+  type: "String"
+  required: true
+- name: "lastName"
+  type: "String"
+  required: true
+- name: "email"
+  type: "String"
+  required: true
+- name: "phoneNumber"
+  type: "String"
+- name: "registrationDate"
+  type: "Instant"
+  required: true
+- name: "status"
+  type: "CustomerStatus"
+  required: true
+  references: "CustomerStatus"
+  enum:
+  - "ACTIVE"
+  - "INACTIVE"
+  - "SUSPENDED"
+services:
+- "customer-relationship.customer-management.customer-profile-1.0.0"
+domains:
+- "customer-relationship.customer-management-0.0.1"
+---
+## Overview
+
+Customer Profile aggregate
+
+### Entity Properties
+
+<EntityPropertiesTable />
+
+## Relationships
+
+This entity includes references to related entities captured in the generated frontmatter properties.
+

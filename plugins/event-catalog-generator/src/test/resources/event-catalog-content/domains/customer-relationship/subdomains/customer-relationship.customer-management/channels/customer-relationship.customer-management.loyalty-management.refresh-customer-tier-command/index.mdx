@@ -1,0 +1,25 @@
+---
+id: "customer-relationship.customer-management.loyalty-management.refresh-customer-tier-command"
+name: "Refresh Customer Tier Command"
+summary: "This channel is used to request recalculation of the customer's loyalty\
+  \ tier."
+version: "1.0.0"
+address: "customer-relationship.customer-management.loyalty-management.refresh-customer-tier.command.avro.v0"
+protocols:
+- "kafka"
+messages:
+- collection: "commands"
+  name: "Refresh Customer Tier Command"
+  id: "customer-relationship.customer-management.loyalty-management.refresh-customer-tier-command"
+  version: "1.0.0"
+---
+## Overview
+
+This channel is used to request recalculation of the customer's loyalty tier.
+
+<NodeGraph />
+
+## Messages
+
+<MessageTable format="all" limit={8} showChannels={true} />
+

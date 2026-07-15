@@ -1,0 +1,60 @@
+---
+id: merchandising.inventory.inventory-adjustment
+name: Inventory Adjustment
+summary: ARTS Service Domain - Processes inventory adjustments and updates
+version: 1.0.0
+specifications:
+  - type: asyncapi
+    path: >-
+      ../../../../../../../../../zenwave-sdk-test-resources/src/main/resources/retail-domain-catalog/merchandising/inventory/inventory-adjustment/asyncapi.yml
+    name: asyncapi
+  - type: openapi
+    path: >-
+      ../../../../../../../../../zenwave-sdk-test-resources/src/main/resources/retail-domain-catalog/merchandising/inventory/inventory-adjustment/openapi.yml
+    name: openapi
+sends:
+  - id: merchandising.inventory.inventory-adjustment.reserve-stock-response
+    to:
+      - id: merchandising.inventory.inventory-adjustment.reserve-stock-response
+  - id: merchandising.inventory.inventory-adjustment.inventory-adjusted
+    to:
+      - id: merchandising.inventory.inventory-adjustment.inventory-adjusted
+receives:
+  - id: merchandising.inventory.inventory-adjustment.reserve-stock-command
+    from:
+      - id: merchandising.inventory.inventory-adjustment.reserve-stock-command
+entities:
+  - id: merchandising.inventory.inventory-adjustment.inventory-item
+    version: 1.0.0
+---
+## Overview
+
+ARTS Service Domain - Processes inventory adjustments and updates
+
+<NodeGraph />
+
+## Message Flow
+
+<MessageTable format="all" limit={8} showChannels={true} />
+
+## Domain Model
+
+<EntityMap />
+
+## Specifications
+
+The linked specifications in the frontmatter drive EventCatalog reference views for this service.
+
+# Inventory Adjustment Service
+
+ARTS Service Domain - Processes inventory adjustments and updates
+
+
+# Inventory Adjustment Service
+
+ARTS Service Domain - Processes inventory adjustments and updates
+
+
+# Changelog
+
+

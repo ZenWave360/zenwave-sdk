@@ -1,0 +1,22 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@eventcatalog/core':
+        specifier: link:../../../../../../../archcatalog/packages/core
+        version: link:../../../../../../../archcatalog/packages/core
+      '@eventcatalog/linter':
+        specifier: link:../../../../../../../archcatalog/packages/linter
+        version: link:../../../../../../../archcatalog/packages/linter
+      '@eventcatalog/sdk':
+        specifier: link:../../../../../../../archcatalog/packages/sdk
+        version: link:../../../../../../../archcatalog/packages/sdk
+      '@eventcatalog/visualiser':
+        specifier: link:../../../../../../../archcatalog/packages/visualiser
+        version: link:../../../../../../../archcatalog/packages/visualiser

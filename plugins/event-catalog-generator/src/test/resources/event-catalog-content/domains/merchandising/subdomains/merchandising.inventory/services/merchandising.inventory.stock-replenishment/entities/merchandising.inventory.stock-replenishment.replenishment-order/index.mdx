@@ -1,0 +1,50 @@
+---
+id: "merchandising.inventory.stock-replenishment.replenishment-order"
+name: "ReplenishmentOrder"
+summary: "Replenishment Order aggregate"
+version: "1.0.0"
+aggregateRoot: true
+properties:
+- name: "orderNumber"
+  type: "String"
+  required: true
+- name: "sku"
+  type: "String"
+  required: true
+- name: "productName"
+  type: "String"
+  required: true
+- name: "requestedQuantity"
+  type: "Integer"
+  required: true
+- name: "supplierName"
+  type: "String"
+  required: true
+- name: "expectedDeliveryDate"
+  type: "Instant"
+- name: "status"
+  type: "ReplenishmentStatus"
+  required: true
+  references: "ReplenishmentStatus"
+  enum:
+  - "PENDING"
+  - "ORDERED"
+  - "IN_TRANSIT"
+  - "DELIVERED"
+services:
+- "merchandising.inventory.stock-replenishment-1.0.0"
+domains:
+- "merchandising.inventory-0.0.1"
+---
+## Overview
+
+Replenishment Order aggregate
+
+### Entity Properties
+
+<EntityPropertiesTable />
+
+## Relationships
+
+This entity includes references to related entities captured in the generated frontmatter properties.
+

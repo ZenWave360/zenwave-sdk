@@ -2,9 +2,16 @@ package io.zenwave360.sdk.plugins;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.zenwave360.manifest.ManifestLoadOptions;
+import io.zenwave360.manifest.ManifestService;
+import io.zenwave360.manifest.ZenWaveManifest;
+import io.zenwave360.manifest.ZenWaveManifestLoader;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
+import io.zenwave360.sdk.plugins.frontmatter.ChannelFrontmatter;
 import io.zenwave360.sdk.plugins.frontmatter.CommandFrontmatter;
+import io.zenwave360.sdk.plugins.frontmatter.Frontmatter;
+import io.zenwave360.sdk.plugins.frontmatter.FrontmatterTypes;
 import io.zenwave360.sdk.plugins.frontmatter.DomainFrontmatter;
 import io.zenwave360.sdk.plugins.frontmatter.EntityFrontmatter;
 import io.zenwave360.sdk.plugins.frontmatter.EventFrontmatter;
@@ -19,9 +26,16 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Generates EventCatalog {@code index.mdx} pages for domains, subdomains, and services.
@@ -40,6 +54,12 @@ public class EventCatalogGenerator extends Generator {
 
     @DocumentedOption(description = "Custom Handlebars template for docs body rendering.")
     public String docsTemplate;
+    @DocumentedOption(description = "Preferred artifact source for build-time content loading.")
+    public String preferredSource;
+    @DocumentedOption(description = "Allow source fallback for build-time content loading.")
+    public Boolean allowFallback;
+    @DocumentedOption(description = "Preferred source for generated frontmatter links.")
+    public String linkSource;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -48,32 +68,35 @@ public class EventCatalogGenerator extends Generator {
         GeneratedProjectFiles files = new GeneratedProjectFiles();
 
         String configVersion = configVersion(architecture);
+        Map<String, Object> services = (Map<String, Object>) architecture.getOrDefault("services", Map.of());
 
         // Domains and their subdomains
         Map<String, Object> domains = (Map<String, Object>) architecture.getOrDefault("domains", Map.of());
         for (Map.Entry<String, Object> domainEntry : domains.entrySet()) {
             Map<String, Object> domain = (Map<String, Object>) domainEntry.getValue();
             String domainId = str(domain, "id", domainEntry.getKey());
+            List<Map<String, Object>> domainServices = domainServices(services, domainId, domains);
+            List<Map<String, Object>> childDomains = childDomains(domain);
 
             files.singleFiles.add(mdxPage(
                     "domains/" + domainId + "/index.mdx",
-                    domainFrontmatter(domainId, domain, configVersion),
-                    renderDocs(domain, contextModel)));
+                    domainFrontmatter(domainId, domain, configVersion, domainServices, childDomains),
+                    domainBody(domain, domainServices, childDomains, renderDocs(domain, contextModel))));
 
             Map<String, Object> subdomains = (Map<String, Object>) domain.getOrDefault("subdomains", Map.of());
             for (Map.Entry<String, Object> subEntry : subdomains.entrySet()) {
                 Map<String, Object> subdomain = (Map<String, Object>) subEntry.getValue();
                 String subdomainId = str(subdomain, "id", subEntry.getKey());
+                List<Map<String, Object>> subdomainServices = subdomainServices(services, domains, domainId, subdomainId);
 
                 files.singleFiles.add(mdxPage(
-                        "domains/" + domainId + "/" + subdomainId + "/index.mdx",
-                        domainFrontmatter(subdomainId, subdomain, configVersion),
-                        renderDocs(subdomain, contextModel)));
+                        "domains/" + domainId + "/subdomains/" + subdomainId + "/index.mdx",
+                        domainFrontmatter(subdomainId, subdomain, configVersion, subdomainServices, List.of()),
+                        domainBody(subdomain, subdomainServices, List.of(), renderDocs(subdomain, contextModel))));
             }
         }
 
         // Services, events, and commands
-        Map<String, Object> services = (Map<String, Object>) architecture.getOrDefault("services", Map.of());
         for (Map.Entry<String, Object> serviceEntry : services.entrySet()) {
             Map<String, Object> service = (Map<String, Object>) serviceEntry.getValue();
             String serviceId = str(service, "id", serviceEntry.getKey());
@@ -81,12 +104,27 @@ public class EventCatalogGenerator extends Generator {
             String subdomainKey = str(service, "subdomain", null);
 
             String subdomainId = resolveSubdomainId(domains, domainId, subdomainKey);
-            String serviceBase = "domains/" + domainId + "/" + subdomainId + "/services/" + serviceId;
+            String serviceBase = subdomainId != null && !subdomainId.isBlank()
+                    ? "domains/" + domainId + "/subdomains/" + subdomainId + "/services/" + serviceId
+                    : "domains/" + domainId + "/services/" + serviceId;
 
             files.singleFiles.add(mdxPage(
                     serviceBase + "/index.mdx",
-                    serviceFrontmatter(serviceId, service, configVersion),
-                    renderDocs(service, contextModel)));
+                    serviceFrontmatter(serviceId, service, configVersion, serviceBase + "/index.mdx"),
+                    serviceBody(service, renderDocs(service, contextModel))));
+
+            List<Map<String, Object>> channels = (List<Map<String, Object>>) service.getOrDefault("_channels", List.of());
+            String channelBase = subdomainId != null && !subdomainId.isBlank()
+                    ? "domains/" + domainId + "/subdomains/" + subdomainId + "/channels"
+                    : "domains/" + domainId + "/channels";
+            for (Map<String, Object> channel : channels) {
+                String channelId = str(channel, "id", null);
+                if (channelId == null) continue;
+                files.singleFiles.add(mdxPage(
+                        channelBase + "/" + channelId + "/index.mdx",
+                        channelFrontmatter(channel, service),
+                        channelBody(channel, service)));
+            }
 
             // Event pages
             List<Map<String, Object>> events = (List<Map<String, Object>>) service.getOrDefault("_events", List.of());
@@ -95,8 +133,8 @@ public class EventCatalogGenerator extends Generator {
                 if (eventId == null) continue;
                 files.singleFiles.add(mdxPage(
                         serviceBase + "/events/" + eventId + "/index.mdx",
-                        eventFrontmatter(event),
-                        ""));
+                        eventFrontmatter(event, services),
+                        messageBody("event", event)));
             }
 
             // Command pages
@@ -106,8 +144,8 @@ public class EventCatalogGenerator extends Generator {
                 if (commandId == null) continue;
                 files.singleFiles.add(mdxPage(
                         serviceBase + "/commands/" + commandId + "/index.mdx",
-                        commandFrontmatter(command),
-                        ""));
+                        commandFrontmatter(command, services),
+                        messageBody("command", command)));
             }
 
             // Query pages (from OpenAPI GET operations)
@@ -117,8 +155,8 @@ public class EventCatalogGenerator extends Generator {
                 if (queryId == null) continue;
                 files.singleFiles.add(mdxPage(
                         serviceBase + "/queries/" + queryId + "/index.mdx",
-                        queryFrontmatter(query),
-                        ""));
+                        queryFrontmatter(query, services),
+                        queryBody(query)));
             }
 
             // Entity pages (from ZDL domain models)
@@ -128,8 +166,8 @@ public class EventCatalogGenerator extends Generator {
                 if (entityId == null) continue;
                 files.singleFiles.add(mdxPage(
                         serviceBase + "/entities/" + entityId + "/index.mdx",
-                        entityFrontmatter(entity),
-                        ""));
+                        entityFrontmatter(entity, service, domainId, subdomainId, serviceId, configVersion),
+                        entityBody(entity)));
             }
         }
 
@@ -140,64 +178,100 @@ public class EventCatalogGenerator extends Generator {
     // Frontmatter
     // -------------------------------------------------------------------------
 
-    private Map<String, Object> domainFrontmatter(String id, Map<String, Object> entry, String configVersion) {
-        DomainFrontmatter fm = new DomainFrontmatter();
-        fm.id = id;
-        fm.name = str(entry, "name", id);
-        fm.version = configVersion;
-        return fm.toMap();
+    private Frontmatter domainFrontmatter(String id, Map<String, Object> entry, String configVersion,
+                                          List<Map<String, Object>> services, List<Map<String, Object>> childDomains) {
+        String version = str(entry, "version", configVersion);
+        return new DomainFrontmatter(
+                commonFrontmatter(entry, id, str(entry, "name", id), version, str(entry, "description", str(entry, "summary", null)), null, null),
+                toPointers(services, null),
+                toPointers(listOfMaps(entry.get("agents")), version, null),
+                toPointers(childDomains, version, null),
+                toPointers(listOfMaps(entry.get("data-products")), version, null),
+                collectEntityPointers(services),
+                toPointers(listOfMaps(entry.get("flows")), version, null),
+                collectMessagePointers(services, "_sends"),
+                collectMessagePointers(services, "_receives"),
+                null);
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> serviceFrontmatter(String id, Map<String, Object> entry, String configVersion) {
-        ServiceFrontmatter fm = new ServiceFrontmatter();
-        fm.id = id;
-        fm.name = str(entry, "name", id);
-        // AsyncAPI version takes priority; fall back to explicit service version, then config version
-        String asyncApiVersion = str(entry, "_version", null);
-        fm.version = asyncApiVersion != null ? asyncApiVersion : str(entry, "version", configVersion);
-        fm.sends = (List<String>) entry.get("_sends");
-        fm.receives = (List<String>) entry.get("_receives");
-        fm.specifications = (List<String>) entry.get("_specifications");
-        return fm.toMap();
+    private Frontmatter serviceFrontmatter(String id, Map<String, Object> entry, String configVersion, String servicePagePath) {
+        String version = str(entry, "_version", str(entry, "version", configVersion));
+        return new ServiceFrontmatter(
+                commonFrontmatter(entry, id, str(entry, "name", id), version, str(entry, "description", str(entry, "summary", null)), null, specifications(entry, servicePagePath)),
+                messagePointers(entry.get("_sends")),
+                messagePointers(entry.get("_receives")),
+                toPointers(listOfMaps(entry.get("_entities")), version, null),
+                toPointers(listOfMaps(entry.get("writesTo")), version, null),
+                toPointers(listOfMaps(entry.get("readsFrom")), version, null),
+                toPointers(listOfMaps(entry.get("flows")), version, null),
+                bool(entry.get("externalSystem")),
+                null);
     }
 
-    private Map<String, Object> eventFrontmatter(Map<String, Object> event) {
-        EventFrontmatter fm = new EventFrontmatter();
-        fm.id = str(event, "id", null);
-        fm.name = str(event, "name", fm.id);
-        fm.version = str(event, "version", "0.0.1");
-        fm.schemaPath = str(event, "schemaPath", null);
-        return fm.toMap();
+    private Frontmatter eventFrontmatter(Map<String, Object> event, Map<String, Object> services) {
+        return new EventFrontmatter(
+                commonFrontmatter(event, str(event, "id", null), str(event, "name", str(event, "id", null)), str(event, "version", "0.0.1"),
+                        str(event, "summary", null), str(event, "schemaPath", null), null),
+                operation(event),
+                relatedCollectionRefs(services, eventIdPredicate(str(event, "id", null), "_sends"), "services"),
+                relatedCollectionRefs(services, eventIdPredicate(str(event, "id", null), "_receives"), "services"),
+                channelPointers(event),
+                null,
+                null);
     }
 
-    private Map<String, Object> commandFrontmatter(Map<String, Object> command) {
-        CommandFrontmatter fm = new CommandFrontmatter();
-        fm.id = str(command, "id", null);
-        fm.name = str(command, "name", fm.id);
-        fm.version = str(command, "version", "0.0.1");
-        fm.schemaPath = str(command, "schemaPath", null);
-        return fm.toMap();
+    private Frontmatter commandFrontmatter(Map<String, Object> command, Map<String, Object> services) {
+        return new CommandFrontmatter(
+                commonFrontmatter(command, str(command, "id", null), str(command, "name", str(command, "id", null)), str(command, "version", "0.0.1"),
+                        str(command, "summary", null), str(command, "schemaPath", null), null),
+                operation(command),
+                relatedCollectionRefs(services, eventIdPredicate(str(command, "id", null), "_sends"), "services"),
+                relatedCollectionRefs(services, eventIdPredicate(str(command, "id", null), "_receives"), "services"),
+                channelPointers(command),
+                null,
+                null);
     }
 
-    private Map<String, Object> queryFrontmatter(Map<String, Object> query) {
-        QueryFrontmatter fm = new QueryFrontmatter();
-        fm.id = str(query, "id", null);
-        fm.name = str(query, "name", fm.id);
-        fm.version = str(query, "version", "0.0.1");
-        fm.schemaPath = str(query, "schemaPath", null);
-        return fm.toMap();
+    private Frontmatter queryFrontmatter(Map<String, Object> query, Map<String, Object> services) {
+        return new QueryFrontmatter(
+                commonFrontmatter(query, str(query, "id", null), str(query, "name", str(query, "id", null)), str(query, "version", "0.0.1"),
+                        str(query, "summary", null), str(query, "schemaPath", null), null),
+                operation(query),
+                relatedCollectionRefs(services, eventIdPredicate(str(query, "id", null), "_sends"), "services"),
+                relatedCollectionRefs(services, eventIdPredicate(str(query, "id", null), "_receives"), "services"),
+                channelPointers(query),
+                null,
+                null);
     }
 
-    private Map<String, Object> entityFrontmatter(Map<String, Object> entity) {
-        EntityFrontmatter fm = new EntityFrontmatter();
-        fm.id = str(entity, "id", null);
-        fm.name = str(entity, "name", fm.id);
-        fm.version = str(entity, "version", "0.0.1");
-        fm.summary = str(entity, "summary", null);
-        Object agg = entity.get("aggregateRoot");
-        fm.aggregateRoot = Boolean.TRUE.equals(agg) ? true : null;
-        return fm.toMap();
+    private Frontmatter entityFrontmatter(Map<String, Object> entity, Map<String, Object> service,
+                                          String domainId, String subdomainId, String serviceId, String configVersion) {
+        String serviceVersion = str(service, "_version", str(service, "version", configVersion));
+        String effectiveDomainId = subdomainId != null ? subdomainId : domainId;
+        String entityVersion = str(entity, "version", configVersion);
+        return new EntityFrontmatter(
+                commonFrontmatter(entity, str(entity, "id", null), str(entity, "name", str(entity, "id", null)), entityVersion,
+                        str(entity, "summary", null), null, null),
+                bool(entity.get("aggregateRoot")),
+                str(entity, "identifier", null),
+                entityProperties(entity),
+                List.of(collectionRef(serviceId, serviceVersion)),
+                effectiveDomainId != null ? List.of(collectionRef(effectiveDomainId, configVersion)) : null,
+                null);
+    }
+
+    private Frontmatter channelFrontmatter(Map<String, Object> channel, Map<String, Object> service) {
+        return new ChannelFrontmatter(
+                commonFrontmatter(channel, str(channel, "id", null), str(channel, "name", str(channel, "id", null)), str(channel, "version", "0.0.1"),
+                        str(channel, "summary", null), null, null),
+                null,
+                str(channel, "address", null),
+                strings(channel.get("protocols")),
+                str(channel, "deliveryGuarantee", null),
+                null,
+                null,
+                channelMessages(channel, service),
+                null);
     }
 
     // -------------------------------------------------------------------------
@@ -206,6 +280,20 @@ public class EventCatalogGenerator extends Generator {
 
     @SuppressWarnings("unchecked")
     private String renderDocs(Map<String, Object> entry, Map<String, Object> contextModel) {
+        ZenWaveManifest manifest = (ZenWaveManifest) contextModel.get("manifest");
+        ZenWaveManifestLoader manifestLoader = (ZenWaveManifestLoader) contextModel.get("manifestLoader");
+        ManifestService manifestService = manifest != null ? ManifestRuntimeSupport.findService(manifest, entry) : null;
+        if (manifest != null && manifestLoader != null && manifestService != null && !manifestService.getDocs().isEmpty()) {
+            try {
+                ManifestLoadOptions contentOptions = ManifestRuntimeSupport.contentOptions(preferredSource, allowFallback);
+                Map<String, String> resolvedDocs = ManifestRuntimeSupport.loadServiceDocs(
+                        manifestLoader, manifest, manifestService, contentOptions);
+                return renderDocsTemplate(resolvedDocs);
+            } catch (Exception e) {
+                log.warn("Cannot load docs for {}: {}", manifestService.getServiceRef(), e.getMessage());
+            }
+        }
+
         Object docsObj = entry.get("docs");
         if (!(docsObj instanceof Map<?,?> docsMap)) {
             return "";
@@ -216,7 +304,10 @@ public class EventCatalogGenerator extends Generator {
         for (Map.Entry<?, ?> docEntry : docsMap.entrySet()) {
             String key = docEntry.getKey().toString();
             String fileName = docEntry.getValue().toString();
-            File docFile = new File(repository, fileName);
+            File docFile = new File(fileName);
+            if (!docFile.isAbsolute()) {
+                docFile = new File(repository, fileName);
+            }
             if (docFile.exists()) {
                 try {
                     resolvedDocs.put(key, Files.readString(docFile.toPath()));
@@ -228,24 +319,158 @@ public class EventCatalogGenerator extends Generator {
             }
         }
 
-        if (resolvedDocs.isEmpty()) {
-            return "";
-        }
+        return renderDocsTemplate(resolvedDocs);
+    }
 
-        String templatePath = docsTemplate != null ? docsTemplate : DEFAULT_DOCS_TEMPLATE;
-        TemplateInput templateInput = new TemplateInput(templatePath, "docs");
-        Map<String, Object> model = new LinkedHashMap<>(asConfigurationMap());
-        model.put("docs", resolvedDocs);
-        TemplateOutput output = getTemplateEngine().processTemplate(model, templateInput);
-        return output != null ? output.getContent() : "";
+    // -------------------------------------------------------------------------
+    // Page body rendering
+    // -------------------------------------------------------------------------
+
+    private String domainBody(Map<String, Object> entry, List<Map<String, Object>> services,
+                              List<Map<String, Object>> childDomains, String docsBody) {
+        StringBuilder sb = new StringBuilder();
+        appendParagraph(sb, str(entry, "summary", str(entry, "description", null)));
+        sb.append("## Overview\n\n");
+        sb.append("This page is generated from the ZenWave architecture model and EventCatalog frontmatter.\n\n");
+        sb.append("<NodeGraph />\n\n");
+        sb.append("<MessageTable format=\"all\" limit={8} showChannels={true} title=\"Messages in and out\" />\n\n");
+        if (hasEntities(services)) {
+            sb.append("## Entity Map\n\n");
+            sb.append("<EntityMap />\n\n");
+        }
+        if (!childDomains.isEmpty() || !services.isEmpty()) {
+            sb.append("## Related Resources\n\n");
+            sb.append("<ResourceGroupTable id=\"related-resources\" limit={8} showOwners={true} title=\"Core resources\" />\n\n");
+        }
+        appendDocsBody(sb, docsBody);
+        return sb.toString();
+    }
+
+    private String serviceBody(Map<String, Object> service, String docsBody) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("## Overview\n\n");
+        appendParagraph(sb, str(service, "summary", str(service, "description", null)));
+        sb.append("<NodeGraph />\n\n");
+        if (hasMessages(service)) {
+            sb.append("## Message Flow\n\n");
+            sb.append("<MessageTable format=\"all\" limit={8} showChannels={true} />\n\n");
+        }
+        if (!listOfMaps(service.get("_entities")).isEmpty()) {
+            sb.append("## Domain Model\n\n");
+            sb.append("<EntityMap />\n\n");
+        }
+        if (hasSpecifications(service)) {
+            sb.append("## Specifications\n\n");
+            sb.append("The linked specifications in the frontmatter drive EventCatalog reference views for this service.\n\n");
+        }
+        appendDocsBody(sb, docsBody);
+        return sb.toString();
+    }
+
+    private String messageBody(String resourceType, Map<String, Object> resource) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("## Overview\n\n");
+        String summary = str(resource, "summary", null);
+        if (summary != null && !summary.isBlank()) {
+            sb.append(summary).append("\n\n");
+        } else {
+            sb.append("Generated ").append(resourceType).append(" reference page.\n\n");
+        }
+        sb.append("<NodeGraph />\n\n");
+        String schemaPath = str(resource, "schemaPath", null);
+        if (schemaPath != null && !schemaPath.isBlank()) {
+            sb.append("## Schema\n\n");
+            sb.append("<SchemaViewer file=\"").append(escapeAttribute(schemaPath)).append("\" />\n\n");
+        }
+        return sb.toString();
+    }
+
+    private String queryBody(Map<String, Object> query) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("## Overview\n\n");
+        String summary = str(query, "summary", null);
+        if (summary != null && !summary.isBlank()) {
+            sb.append(summary).append("\n\n");
+        } else {
+            sb.append("Generated query reference page.\n\n");
+        }
+        sb.append("<NodeGraph />\n\n");
+        String schemaPath = str(query, "schemaPath", null);
+        if (schemaPath != null && !schemaPath.isBlank()) {
+            sb.append("## Response Schema\n\n");
+            sb.append("<SchemaViewer file=\"").append(escapeAttribute(schemaPath)).append("\" />\n\n");
+        }
+        return sb.toString();
+    }
+
+    private String entityBody(Map<String, Object> entity) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("## Overview\n\n");
+        appendParagraph(sb, str(entity, "summary", null));
+        sb.append("### Entity Properties\n\n");
+        sb.append("<EntityPropertiesTable />\n\n");
+        if (hasRelationships(entity)) {
+            sb.append("## Relationships\n\n");
+            sb.append("This entity includes references to related entities captured in the generated frontmatter properties.\n\n");
+        }
+        return sb.toString();
+    }
+
+    private String channelBody(Map<String, Object> channel, Map<String, Object> service) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("## Overview\n\n");
+        appendParagraph(sb, str(channel, "summary", "Generated channel reference page."));
+        sb.append("<NodeGraph />\n\n");
+        if (channelMessages(channel, service) != null) {
+            sb.append("## Messages\n\n");
+            sb.append("<MessageTable format=\"all\" limit={8} showChannels={true} />\n\n");
+        }
+        return sb.toString();
+    }
+
+    private void appendParagraph(StringBuilder sb, String text) {
+        if (text == null || text.isBlank()) {
+            return;
+        }
+        sb.append(text).append("\n\n");
+    }
+
+    private void appendDocsBody(StringBuilder sb, String docsBody) {
+        if (docsBody != null && !docsBody.isBlank()) {
+            sb.append(docsBody);
+            if (!docsBody.endsWith("\n")) {
+                sb.append("\n");
+            }
+        }
+    }
+
+    private boolean hasSpecifications(Map<String, Object> service) {
+        return specifications(service, "index.mdx") != null;
+    }
+
+    private boolean hasMessages(Map<String, Object> service) {
+        return !strings(service.get("_sends")).isEmpty() || !strings(service.get("_receives")).isEmpty();
+    }
+
+    private boolean hasEntities(List<Map<String, Object>> services) {
+        return services.stream().anyMatch(service -> !listOfMaps(service.get("_entities")).isEmpty());
+    }
+
+    private boolean hasRelationships(Map<String, Object> entity) {
+        return listOfMaps(entity.get("properties")).stream()
+                .anyMatch(property -> str(property, "references", null) != null);
+    }
+
+    private String escapeAttribute(String value) {
+        return value.replace("&", "&amp;").replace("\"", "&quot;");
     }
 
     // -------------------------------------------------------------------------
     // MDX page assembly
     // -------------------------------------------------------------------------
 
-    private TemplateOutput mdxPage(String targetFile, Map<String, Object> frontmatter, String body) {
-        return new TemplateOutput(targetFile, buildMdxContent(frontmatter, body));
+    private TemplateOutput mdxPage(String targetFile, Frontmatter frontmatter, String body) {
+        return new TemplateOutput(targetFile, buildMdxContent(frontmatter.toMap(), body));
     }
 
     private String buildMdxContent(Map<String, Object> frontmatter, String body) {
@@ -287,6 +512,14 @@ public class EventCatalogGenerator extends Generator {
     private String resolveSubdomainId(Map<String, Object> domains, String domainId, String subdomainKey) {
         if (domainId == null || subdomainKey == null) return subdomainKey;
         Object domainObj = domains.get(domainId);
+        if (!(domainObj instanceof Map<?, ?>)) {
+            domainObj = domains.values().stream()
+                    .filter(Map.class::isInstance)
+                    .map(Map.class::cast)
+                    .filter(domain -> domainId.equals(str(domain, "id", null)))
+                    .findFirst()
+                    .orElse(null);
+        }
         if (!(domainObj instanceof Map<?,?> domain)) return subdomainKey;
         Object subdomainsObj = ((Map<String, Object>) domain).get("subdomains");
         if (!(subdomainsObj instanceof Map<?,?> subdomains)) return subdomainKey;
@@ -298,5 +531,452 @@ public class EventCatalogGenerator extends Generator {
     private String str(Map<String, Object> map, String key, String defaultValue) {
         Object value = map.get(key);
         return value != null ? value.toString() : defaultValue;
+    }
+
+    private FrontmatterTypes.CommonFrontmatter commonFrontmatter(Map<String, Object> entry, String id, String name, String version,
+                                                                 String summary, String schemaPath,
+                                                                 List<FrontmatterTypes.SpecificationFrontmatter> specifications) {
+        return new FrontmatterTypes.CommonFrontmatter(
+                id,
+                name,
+                summary,
+                version,
+                draft(entry.get("draft")),
+                badges(entry.get("badges")),
+                owners(entry.get("owners")),
+                schemaPath,
+                specifications,
+                null,
+                repository(entry),
+                bool(entry.get("hidden")),
+                str(entry, "editUrl", null),
+                null,
+                null,
+                deprecated(entry.get("deprecated")),
+                bool(entry.get("visualiser")),
+                attachments(entry.get("attachments")),
+                toResourcePointers(listOfMaps(entry.get("diagrams")), "diagram"),
+                strings(entry.get("versions")),
+                str(entry, "latestVersion", null));
+    }
+
+    private FrontmatterTypes.RepositoryFrontmatter repository(Map<String, Object> entry) {
+        String repositoryUrl = str(entry, "repository", null);
+        if (repositoryUrl == null && entry.get("repository") instanceof Map<?, ?> repository) {
+            repositoryUrl = str((Map<String, Object>) repository, "url", null);
+        }
+        if (repositoryUrl == null) {
+            return null;
+        }
+        String language = entry.get("repository") instanceof Map<?, ?> repository
+                ? str((Map<String, Object>) repository, "language", null)
+                : null;
+        return new FrontmatterTypes.RepositoryFrontmatter(language, repositoryUrl);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<FrontmatterTypes.SpecificationFrontmatter> specifications(Map<String, Object> entry, String servicePagePath) {
+        List<Map<String, Object>> specs = (List<Map<String, Object>>) entry.getOrDefault("artifacts", List.of());
+        if (specs.isEmpty()) {
+            return null;
+        }
+
+        List<FrontmatterTypes.SpecificationFrontmatter> result = new ArrayList<>();
+        for (Map<String, Object> spec : specs) {
+            String type = str(spec, "type", null);
+            if (!List.of("asyncapi", "openapi", "graphql").contains(type)) {
+                continue;
+            }
+            String path = specPathForEventCatalog(spec, servicePagePath);
+            if (path == null) {
+                continue;
+            }
+            result.add(new FrontmatterTypes.SpecificationFrontmatter(
+                    type,
+                    path,
+                    str(spec, "name", null),
+                    mapOfStrings(spec.get("headers"))));
+        }
+        return result.isEmpty() ? null : result;
+    }
+
+    private String specPathForEventCatalog(Map<String, Object> spec, String servicePagePath) {
+        String buildPath = str(spec, "buildPath", null);
+        if (buildPath != null && !buildPath.isBlank() && new File(buildPath).isAbsolute()) {
+            try {
+                Path eventCatalogRoot = Paths.get(System.getProperty("user.dir"), "event-catalog-project").toAbsolutePath().normalize();
+                Path serviceDir = eventCatalogRoot.resolve(servicePagePath).getParent().normalize();
+                Path sourceFile = Paths.get(buildPath).toAbsolutePath().normalize();
+                return serviceDir.relativize(sourceFile).toString().replace('\\', '/');
+            } catch (Exception ignored) {
+            }
+        }
+        return str(spec, "buildPath", str(spec, "linkUri", str(spec, "path", null)));
+    }
+
+    private String renderDocsTemplate(Map<String, String> resolvedDocs) {
+        if (resolvedDocs == null || resolvedDocs.isEmpty()) {
+            return "";
+        }
+        String templatePath = docsTemplate != null ? docsTemplate : DEFAULT_DOCS_TEMPLATE;
+        TemplateInput templateInput = new TemplateInput(templatePath, "docs");
+        Map<String, Object> model = new LinkedHashMap<>(asConfigurationMap());
+        model.put("docs", resolvedDocs);
+        TemplateOutput output = getTemplateEngine().processTemplate(model, templateInput);
+        return output != null ? output.getContent() : "";
+    }
+
+    private List<Map<String, Object>> domainServices(Map<String, Object> services, String domainId, Map<String, Object> domains) {
+        return filterServices(services, service -> domainId.equals(str(service, "domain", null))
+                && resolveSubdomainId(domains, domainId, str(service, "subdomain", null)) == null);
+    }
+
+    private List<Map<String, Object>> subdomainServices(Map<String, Object> services, Map<String, Object> domains,
+                                                        String domainId, String subdomainId) {
+        return filterServices(services, service -> domainId.equals(str(service, "domain", null))
+                && subdomainId.equals(resolveSubdomainId(domains, domainId, str(service, "subdomain", null))));
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> childDomains(Map<String, Object> domain) {
+        Object subdomains = domain.get("subdomains");
+        if (!(subdomains instanceof Map<?, ?> map)) {
+            return List.of();
+        }
+        return map.values().stream()
+                .filter(Map.class::isInstance)
+                .map(Map.class::cast)
+                .map(value -> (Map<String, Object>) value)
+                .toList();
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> filterServices(Map<String, Object> services, Predicate<Map<String, Object>> filter) {
+        return services.values().stream()
+                .filter(Map.class::isInstance)
+                .map(Map.class::cast)
+                .map(value -> (Map<String, Object>) value)
+                .filter(filter)
+                .toList();
+    }
+
+    private List<FrontmatterTypes.MessagePointerFrontmatter> collectMessagePointers(List<Map<String, Object>> services, String key) {
+        Set<String> ids = new LinkedHashSet<>();
+        for (Map<String, Object> service : services) {
+            ids.addAll(strings(service.get(key)));
+        }
+        return ids.isEmpty() ? null : ids.stream()
+                .map(id -> new FrontmatterTypes.MessagePointerFrontmatter(id, null, null, null, null, null))
+                .toList();
+    }
+
+    private List<FrontmatterTypes.ResourcePointerFrontmatter> collectEntityPointers(List<Map<String, Object>> services) {
+        List<Map<String, Object>> entities = new ArrayList<>();
+        for (Map<String, Object> service : services) {
+            entities.addAll(listOfMaps(service.get("_entities")));
+        }
+        return toPointers(entities, null);
+    }
+
+    private List<FrontmatterTypes.MessagePointerFrontmatter> messagePointers(Object value) {
+        List<String> ids = strings(value);
+        return ids.isEmpty() ? null : ids.stream()
+                .map(id -> new FrontmatterTypes.MessagePointerFrontmatter(id, null, null, null, null, null))
+                .toList();
+    }
+
+    private List<String> relatedCollectionRefs(Map<String, Object> services, Predicate<Map<String, Object>> filter, String collection) {
+        return toCollectionRefs(filterServices(services, filter));
+    }
+
+    private Predicate<Map<String, Object>> eventIdPredicate(String id, String key) {
+        return service -> strings(service.get(key)).contains(id);
+    }
+
+    private List<String> toCollectionRefs(List<Map<String, Object>> items) {
+        if (items == null || items.isEmpty()) {
+            return null;
+        }
+        List<String> result = new ArrayList<>();
+        Set<String> seen = new LinkedHashSet<>();
+        for (Map<String, Object> item : items) {
+            String id = str(item, "id", null);
+            String version = str(item, "_version", str(item, "version", null));
+            if (id == null || version == null) {
+                continue;
+            }
+            String ref = collectionRef(id, version);
+            if (seen.add(ref)) {
+                result.add(ref);
+            }
+        }
+        return result.isEmpty() ? null : result;
+    }
+
+    private List<String> toCollectionRefs(List<Map<String, Object>> items, String defaultVersion) {
+        if (items == null || items.isEmpty()) {
+            return null;
+        }
+        List<String> result = new ArrayList<>();
+        Set<String> seen = new LinkedHashSet<>();
+        for (Map<String, Object> item : items) {
+            String id = str(item, "id", null);
+            String version = str(item, "_version", str(item, "version", defaultVersion));
+            if (id == null || version == null) {
+                continue;
+            }
+            String ref = collectionRef(id, version);
+            if (seen.add(ref)) {
+                result.add(ref);
+            }
+        }
+        return result.isEmpty() ? null : result;
+    }
+
+    private List<FrontmatterTypes.ResourcePointerFrontmatter> toPointers(List<Map<String, Object>> items, String defaultVersion) {
+        return toPointers(items, defaultVersion, null);
+    }
+
+    private List<FrontmatterTypes.ResourcePointerFrontmatter> toPointers(List<Map<String, Object>> items, String defaultVersion, String defaultType) {
+        if (items == null || items.isEmpty()) {
+            return null;
+        }
+        List<FrontmatterTypes.ResourcePointerFrontmatter> result = new ArrayList<>();
+        Set<String> seen = new LinkedHashSet<>();
+        for (Map<String, Object> item : items) {
+            String id = str(item, "id", null);
+            String version = str(item, "_version", str(item, "version", defaultVersion));
+            String type = str(item, "type", defaultType);
+            if (id == null) {
+                continue;
+            }
+            String key = id + "|" + version + "|" + type;
+            if (seen.add(key)) {
+                result.add(new FrontmatterTypes.ResourcePointerFrontmatter(id, version, type));
+            }
+        }
+        return result.isEmpty() ? null : result;
+    }
+
+    private String collectionRef(String id, String version) {
+        return id + "-" + version;
+    }
+
+    @SuppressWarnings("unchecked")
+    private FrontmatterTypes.OperationFrontmatter operation(Map<String, Object> entry) {
+        Object operation = entry.get("operation");
+        if (!(operation instanceof Map<?, ?> map)) {
+            return null;
+        }
+        return new FrontmatterTypes.OperationFrontmatter(
+                str((Map<String, Object>) map, "method", null),
+                str((Map<String, Object>) map, "path", null),
+                strings(((Map<String, Object>) map).get("statusCodes")));
+    }
+
+    private List<FrontmatterTypes.ChannelPointerFrontmatter> channelPointers(Map<String, Object> entry) {
+        String channelId = str(entry, "channelId", null);
+        if (channelId == null) {
+            return null;
+        }
+        return List.of(new FrontmatterTypes.ChannelPointerFrontmatter(channelId, null, null));
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<FrontmatterTypes.ChannelMessageFrontmatter> channelMessages(Map<String, Object> channel, Map<String, Object> service) {
+        String channelId = str(channel, "id", null);
+        if (channelId == null) {
+            return null;
+        }
+        List<FrontmatterTypes.ChannelMessageFrontmatter> messages = new ArrayList<>();
+        for (Map<String, Object> event : listOfMaps(service.get("_events"))) {
+            if (channelId.equals(str(event, "channelId", null))) {
+                messages.add(new FrontmatterTypes.ChannelMessageFrontmatter("events", str(event, "name", null), str(event, "id", null), str(event, "version", null)));
+            }
+        }
+        for (Map<String, Object> command : listOfMaps(service.get("_commands"))) {
+            if (channelId.equals(str(command, "channelId", null))) {
+                messages.add(new FrontmatterTypes.ChannelMessageFrontmatter("commands", str(command, "name", null), str(command, "id", null), str(command, "version", null)));
+            }
+        }
+        return messages.isEmpty() ? null : messages;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<FrontmatterTypes.EntityPropertyFrontmatter> entityProperties(Map<String, Object> entity) {
+        List<Map<String, Object>> properties = (List<Map<String, Object>>) entity.getOrDefault("properties", List.of());
+        if (properties.isEmpty()) {
+            return null;
+        }
+        List<FrontmatterTypes.EntityPropertyFrontmatter> result = new ArrayList<>();
+        for (Map<String, Object> property : properties) {
+            Map<String, Object> items = property.get("items") instanceof Map<?, ?> map ? (Map<String, Object>) map : null;
+            result.add(new FrontmatterTypes.EntityPropertyFrontmatter(
+                    str(property, "name", null),
+                    str(property, "type", null),
+                    bool(property.get("required")),
+                    str(property, "description", null),
+                    str(property, "references", null),
+                    str(property, "referencesIdentifier", null),
+                    str(property, "relationType", null),
+                    strings(property.get("enum")),
+                    items != null ? new FrontmatterTypes.EntityPropertyItemsFrontmatter(str(items, "type", null)) : null));
+        }
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<FrontmatterTypes.ResourcePointerFrontmatter> toResourcePointers(List<Map<String, Object>> items, String type) {
+        if (items == null || items.isEmpty()) {
+            return null;
+        }
+        List<FrontmatterTypes.ResourcePointerFrontmatter> result = new ArrayList<>();
+        Set<String> seen = new LinkedHashSet<>();
+        for (Map<String, Object> item : items) {
+            String id = str(item, "id", null);
+            if (id == null || !seen.add(id)) {
+                continue;
+            }
+            result.add(new FrontmatterTypes.ResourcePointerFrontmatter(id, str(item, "version", null), type));
+        }
+        return result.isEmpty() ? null : result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> listOfMaps(Object value) {
+        if (!(value instanceof Collection<?> collection)) {
+            return List.of();
+        }
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Object item : collection) {
+            if (item instanceof Map<?, ?> map) {
+                result.add((Map<String, Object>) map);
+            } else if (item instanceof String id) {
+                result.add(Map.of("id", id));
+            }
+        }
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> strings(Object value) {
+        if (value == null) {
+            return List.of();
+        }
+        if (value instanceof Collection<?> collection) {
+            List<String> result = new ArrayList<>();
+            for (Object item : collection) {
+                if (item instanceof String string) {
+                    result.add(string);
+                } else if (item instanceof Map<?, ?> map) {
+                    String id = str((Map<String, Object>) map, "id", null);
+                    if (id != null) {
+                        result.add(id);
+                    }
+                }
+            }
+            return result;
+        }
+        return List.of(value.toString());
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<FrontmatterTypes.BadgeFrontmatter> badges(Object value) {
+        List<Map<String, Object>> badges = listOfMaps(value);
+        if (badges.isEmpty()) {
+            return null;
+        }
+        return badges.stream()
+                .map(badge -> new FrontmatterTypes.BadgeFrontmatter(
+                        str(badge, "content", null),
+                        str(badge, "backgroundColor", null),
+                        str(badge, "textColor", null),
+                        str(badge, "icon", null),
+                        str(badge, "url", null)))
+                .toList();
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<FrontmatterTypes.OwnerFrontmatter> owners(Object value) {
+        if (!(value instanceof Collection<?> owners)) {
+            return null;
+        }
+        List<FrontmatterTypes.OwnerFrontmatter> result = new ArrayList<>();
+        for (Object owner : owners) {
+            if (owner instanceof String id) {
+                result.add(new FrontmatterTypes.OwnerFrontmatter(id));
+            } else if (owner instanceof Map<?, ?> map) {
+                String id = str((Map<String, Object>) map, "id", null);
+                if (id != null) {
+                    result.add(new FrontmatterTypes.OwnerFrontmatter(id));
+                }
+            }
+        }
+        return result.isEmpty() ? null : result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private FrontmatterTypes.DraftFrontmatter draft(Object value) {
+        if (value instanceof Boolean draft && draft) {
+            return new FrontmatterTypes.DraftFrontmatter(null, null);
+        }
+        if (value instanceof Map<?, ?> map) {
+            return new FrontmatterTypes.DraftFrontmatter(
+                    str((Map<String, Object>) map, "title", null),
+                    str((Map<String, Object>) map, "message", null));
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private FrontmatterTypes.DeprecatedFrontmatter deprecated(Object value) {
+        if (value instanceof Boolean deprecated && deprecated) {
+            return new FrontmatterTypes.DeprecatedFrontmatter(null, null);
+        }
+        if (value instanceof Map<?, ?> map) {
+            return new FrontmatterTypes.DeprecatedFrontmatter(
+                    str((Map<String, Object>) map, "message", null),
+                    str((Map<String, Object>) map, "date", null));
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<FrontmatterTypes.AttachmentFrontmatter> attachments(Object value) {
+        if (!(value instanceof Collection<?> attachments)) {
+            return null;
+        }
+        List<FrontmatterTypes.AttachmentFrontmatter> result = new ArrayList<>();
+        for (Object attachment : attachments) {
+            if (attachment instanceof String url) {
+                result.add(new FrontmatterTypes.AttachmentFrontmatter(url, null, null, null, null));
+            } else if (attachment instanceof Map<?, ?> map) {
+                result.add(new FrontmatterTypes.AttachmentFrontmatter(
+                        str((Map<String, Object>) map, "url", null),
+                        str((Map<String, Object>) map, "title", null),
+                        str((Map<String, Object>) map, "type", null),
+                        str((Map<String, Object>) map, "description", null),
+                        str((Map<String, Object>) map, "icon", null)));
+            }
+        }
+        return result.isEmpty() ? null : result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, String> mapOfStrings(Object value) {
+        if (!(value instanceof Map<?, ?> map)) {
+            return null;
+        }
+        Map<String, String> result = new LinkedHashMap<>();
+        for (Map.Entry<?, ?> entry : ((Map<?, ?>) map).entrySet()) {
+            if (entry.getKey() != null && entry.getValue() != null) {
+                result.put(entry.getKey().toString(), entry.getValue().toString());
+            }
+        }
+        return result.isEmpty() ? null : result;
+    }
+
+    private Boolean bool(Object value) {
+        return value instanceof Boolean bool ? bool : null;
     }
 }

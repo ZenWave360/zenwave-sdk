@@ -1,0 +1,42 @@
+---
+id: "customer-relationship.customer-management"
+name: "Customer Management"
+summary: "Customer profile and relationship management subdomain"
+version: "0.0.1"
+services:
+- id: "customer-relationship.customer-management.customer-profile"
+  version: "1.0.0"
+- id: "customer-relationship.customer-management.loyalty-management"
+  version: "1.0.0"
+entities:
+- id: "customer-relationship.customer-management.customer-profile.customer-profile"
+  version: "1.0.0"
+- id: "customer-relationship.customer-management.loyalty-management.loyalty-account"
+  version: "1.0.0"
+sends:
+- id: "customer-relationship.customer-management.customer-profile.enroll-loyalty-member-response"
+- id: "customer-relationship.customer-management.customer-profile.customer-profile-updated"
+- id: "customer-relationship.customer-management.loyalty-management.refresh-customer-tier-response"
+- id: "customer-relationship.customer-management.loyalty-management.loyalty-tier-updated"
+receives:
+- id: "customer-relationship.customer-management.customer-profile.enroll-loyalty-member-command"
+- id: "customer-relationship.customer-management.loyalty-management.refresh-customer-tier-command"
+---
+Customer profile and relationship management subdomain
+
+## Overview
+
+This page is generated from the ZenWave architecture model and EventCatalog frontmatter.
+
+<NodeGraph />
+
+<MessageTable format="all" limit={8} showChannels={true} title="Messages in and out" />
+
+## Entity Map
+
+<EntityMap />
+
+## Related Resources
+
+<ResourceGroupTable id="related-resources" limit={8} showOwners={true} title="Core resources" />
+

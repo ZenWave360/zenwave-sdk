@@ -8,7 +8,8 @@ import io.zenwave360.sdk.doc.DocumentedPlugin;
         title = "Event Catalog Generator",
         summary = "Generates an EventCatalog source tree from a zenwave-architecture.yml master file.",
         mainOptions = {"inputFile", "outputFolder", "docsTemplate"},
-        hiddenOptions = {"layout", "apiFile", "apiFiles", "zdlFile", "zdlFiles", "style", "targetFolder"})
+        hiddenOptions = {"layout", "apiFile", "apiFiles", "zdlFile", "zdlFiles", "style", "targetFolder",
+                "preferredSource", "allowFallback", "linkSource"})
 public class EventCatalogPlugin extends Plugin {
 
     // Chain:
@@ -29,6 +30,15 @@ public class EventCatalogPlugin extends Plugin {
             + "Receives a map of { key → file content }. "
             + "Defaults to the built-in template that concatenates summary, content, and changelog.")
     public String docsTemplate;
+
+    @DocumentedOption(description = "Preferred active manifest source for build-time loading, such as workspace or git.")
+    public String preferredSource;
+
+    @DocumentedOption(description = "Allow fallback across configured sources after the preferred source.")
+    public Boolean allowFallback;
+
+    @DocumentedOption(description = "Preferred active manifest source for generated frontmatter links, such as git.")
+    public String linkSource;
 
     public EventCatalogPlugin() {
         super();

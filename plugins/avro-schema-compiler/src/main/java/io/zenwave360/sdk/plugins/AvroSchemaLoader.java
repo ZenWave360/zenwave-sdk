@@ -1,8 +1,9 @@
 package io.zenwave360.sdk.plugins;
 
+import io.zenwave360.jsonrefparser.AuthenticationValue;
 import io.zenwave360.jsonrefparser.$RefParser;
 import io.zenwave360.jsonrefparser.$RefParserOptions;
-import io.zenwave360.jsonrefparser.AuthenticationValue;
+import io.zenwave360.jsonrefparser.$RefParserOptions.OnMissing;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.parsers.Parser;
 import io.zenwave360.sdk.utils.AntStyleMatcher;
@@ -60,7 +61,7 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
         List<URI> avroFileURIs = null;
         if(avroFiles != null && !avroFiles.isEmpty()) {
             log.info("Using {} avro files: {}", avroFiles.size(), avroFiles);
-            avroFileURIs = avroFiles.stream().map(URI::create).toList();
+            avroFileURIs = avroFiles.stream().map(this::toInputUri).toList();
         }
         else {
             avroFileURIs = collectAvscFiles(avroCompilerProperties);
@@ -76,8 +77,8 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
             $RefParser parser = new $RefParser(uri)
                     .withResourceClassLoader(this.projectClassLoader)
                     .withAuthenticationValues(authentication)
-                    .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing($RefParserOptions.OnMissing.FAIL));
-            Object schema = parser.parse().getRefs().jsonContext.json();
+                    .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing(OnMissing.FAIL));
+            Object schema = parser.parse().getRefs().schema();
             if(schema instanceof List) {
                 schemas.addAll((List<Map<String, Object>>) schema);
             } else {
@@ -89,6 +90,13 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
 
     public List<Map<String, Object>> loadSchemas(List<URI> avroFileURIs) throws IOException {
         return avroSchemasAsList(avroFileURIs);
+    }
+
+    private URI toInputUri(String value) {
+        if (value.startsWith("classpath:") || value.startsWith("http://") || value.startsWith("https://") || value.startsWith("file:")) {
+            return URI.create(value);
+        }
+        return new File(value).toURI();
     }
 
     protected List<URI> collectAvscFiles(AvroCompilerProperties avroCompilerProperties) throws IOException {

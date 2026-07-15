@@ -1,0 +1,24 @@
+---
+id: "merchandising.inventory.stock-replenishment.replenish-stock-command"
+name: "Replenish Stock Command"
+summary: "This channel is used to request stock replenishment for a product at a location."
+version: "1.0.0"
+address: "merchandising.inventory.stock-replenishment.replenish-stock.command.avro.v0"
+protocols:
+- "kafka"
+messages:
+- collection: "commands"
+  name: "Replenish Stock Command"
+  id: "merchandising.inventory.stock-replenishment.replenish-stock-command"
+  version: "1.0.0"
+---
+## Overview
+
+This channel is used to request stock replenishment for a product at a location.
+
+<NodeGraph />
+
+## Messages
+
+<MessageTable format="all" limit={8} showChannels={true} />
+
