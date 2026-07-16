@@ -1,0 +1,15 @@
+# Dependabot keeps release-relevant dependencies current:
+#  - github-actions: bumps the full-SHA pins in .github/workflows (supply-chain
+#    control -- pinned actions only move via a reviewable PR).
+#  - maven: dependency/plugin updates against the working branch 'develop'.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "maven"
+    directory: "/"
+    target-branch: "develop"
+    schedule:
+      interval: "weekly"
