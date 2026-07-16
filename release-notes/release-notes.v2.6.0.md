@@ -4,6 +4,25 @@ Draft release notes for the upcoming **2.6.0** release.
 
 ## What's New
 
+### AsyncAPI Traits and Semantic Navigation
+
+- Integrated the lightweight `asyncapi-parser-kmp` module while preserving the existing ZenWave processor APIs.
+- AsyncAPI trait processing now follows version-specific semantics in the parser library:
+  - AsyncAPI v2 message and operation traits continue to be supported.
+  - AsyncAPI v3 operation and message traits are processed according to the current specification.
+  - AsyncAPI v3 channel traits support the proposed `x-traits` field and the forward-compatible `traits` field, with `x-traits` taking precedence whenever it is present.
+  - Invalid traits are collected and reported as parser diagnostics without stopping generation.
+- Parsed SDK models now retain their `AsyncApiDocument`, including effective/source views and declaration/usage provenance (`value`, `pointer`, `sourceUri`, and `usagePointer`).
+- Added the version-neutral `operationMessages` Handlebars helper, backed directly by `AsyncApiDocument.operationMessages(operationId)`.
+- Migrated both AsyncAPI generator families and message-schema utilities to semantic navigation instead of ad-hoc JSONPath collection. The internal `x--messages` derived property is **deprecated**: it is still populated on channels/operations (now sourced from `AsyncApiDocument` navigation) for backward compatibility with custom templates that read it directly, but the SDK's own templates and processors no longer read it and it may be removed in a future release.
+- AsyncAPI v3 operations without an explicit `messages` list now correctly inherit messages declared by their referenced channel.
+- Fixed the by-channel consumer template (`IServiceByChannel.java` + the shared `Headers` partial, used by the `asyncapi-generator` plugin) generating a duplicate, incorrectly-named `Headers` inner class per channel instead of one distinct `<Message>Headers` class per message — this broke compilation for any channel with more than one message type.
+- Fixed several producer templates (`InMemoryEventsProducer`, transactional-outbox `Producer` variants, across `asyncapi-generator` and `asyncapi-spring-cloud-streams3`) silently skipping `processRuntimeHeaders(...)` generation due to passing the wrong context to the `hasRuntimeHeaders` helper.
+
+### Build & Dependencies
+
+- Fixed `asyncapi-generator`/`avro-schema-compiler` declaring `org.apache.avro:avro-compiler` as a `test`/`provided`-scope dependency, which never propagated transitively. This made `org.apache.avro.Schema` unresolvable at Mojo class-loading time for **every** consumer of the `AsyncAPIGenerator` Maven goal, even projects that don't use Avro at all (the generator chain always includes an Avro compilation stage). `avro-compiler` is now a regular `compile`-scope (transitive) dependency, so consumers no longer need to manually redeclare `org.apache.avro:avro-compiler` (with Jackson exclusions) in their own POM just to work around this — see the updated `asyncapi-generator` [README](https://github.com/ZenWave360/zenwave-sdk/blob/main/plugins/asyncapi-generator/README.md#maven-usage).
+
 ### API Overlays
 
 - Added Overlay 1.1 action semantics while preserving valid 1.0 overlays:

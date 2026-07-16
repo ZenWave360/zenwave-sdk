@@ -46,6 +46,30 @@ public class AbstractAsyncapiGeneratorTest {
         };
     }
 
+    private AbstractAsyncapiGenerator newAbstractAsyncapiGeneratorWithRealTemplateEngine() {
+        return new AbstractAsyncapiGenerator() {
+            @Override
+            protected Templates configureTemplates() {
+                return new Templates("");
+            }
+        };
+    }
+
+    @Test
+    public void testAsyncapiHandlebarsHelpersAreRegistered() throws Exception {
+        AbstractAsyncapiGenerator generator = newAbstractAsyncapiGeneratorWithRealTemplateEngine();
+        Map<String, Object> message = Map.of(
+                "x--javaType", "com.example.OrderEvent",
+                "x--javaTypeSimpleName", "OrderEvent",
+                "payload", Map.of("x--schema-name", "OrderPayload"));
+
+        String rendered = generator.getTemplateEngine().processInline(
+                "{{javaType message}}|{{javaTypeSimpleName message}}|{{schemaName message.payload}}",
+                Map.of("message", message));
+
+        Assertions.assertEquals("com.example.OrderEvent|OrderEvent|OrderPayload", rendered);
+    }
+
     @Test
     public void test_generate_v2() throws Exception {
         Model model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-orders-relational.yml");

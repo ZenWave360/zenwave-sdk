@@ -2,19 +2,23 @@ package io.zenwave360.sdk.processors;
 
 import java.util.*;
 
-import com.jayway.jsonpath.JsonPath;
-
+import io.zenwave360.asyncapi.AsyncApiDiagnostic;
+import io.zenwave360.asyncapi.AsyncApiTraitPresets;
+import io.zenwave360.asyncapi.InvalidTraitHandling;
+import io.zenwave360.asyncapi.TraitsProcessor;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.options.asyncapi.AsyncapiVersionType;
 import io.zenwave360.sdk.parsers.Model;
 import io.zenwave360.sdk.utils.AsyncAPIUtils;
 import io.zenwave360.sdk.utils.JSONPath;
-import io.zenwave360.sdk.utils.Maps;
-import org.apache.commons.lang3.ObjectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 public class AsyncApiProcessor extends AbstractBaseProcessor implements Processor {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     public enum SchemaFormatType {
 
@@ -87,6 +91,15 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
         boolean isV2 = AsyncapiVersionType.isV2(apiModel);
         boolean isV3 = AsyncapiVersionType.isV3(apiModel);
 
+        int majorVersion = isV2 ? 2 : isV3 ? 3 : -1;
+        if (majorVersion > 0) {
+            List<AsyncApiDiagnostic> diagnostics = new TraitsProcessor().apply(
+                    apiModel.model(), AsyncApiTraitPresets.forVersion(majorVersion), InvalidTraitHandling.COLLECT_AND_SKIP);
+            for (AsyncApiDiagnostic diagnostic : diagnostics) {
+                log.warn("AsyncAPI parser diagnostic [{}] at {}: {}", diagnostic.getCode(), diagnostic.getPointer(), diagnostic.getMessage());
+            }
+        }
+
         apiModel.getRefs().getOriginalRefsList().forEach(pair -> {
             if (pair.getValue() instanceof Map) {
                 ((Map) pair.getValue()).put("x--original-$ref", pair.getKey().getRef());
@@ -98,31 +111,6 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
                 ((Map) pair.getValue()).put("x--original-$ref", pair.getKey().getRef());
             }
         });
-
-        List<Map<String, Object>> traitsParents = JSONPath.get(apiModel, "$..[?(@.traits)]");
-        for (Map<String, Object> traitParent : traitsParents) {
-            List<Map<String, Object>> traitsList = (List) traitParent.get("traits");
-            // merge traits into parent
-            // TODO this works differently in v2 and v3
-            for (Map<String, Object> traits : traitsList) {
-                for (Map.Entry<String, Object> trait : traits.entrySet()) {
-                    String traitName = trait.getKey();
-                    if(traitName.startsWith("x--")) {
-                        continue; // do not merge internal extensions
-                    }
-                    if(traitParent.containsKey(traitName)) {
-                        Object traitValue = trait.getValue();
-                        Object parentValue = traitParent.get(traitName);
-                        if (traitValue instanceof Map && parentValue instanceof Map) {
-                            var merged = Maps.deepMerge(Maps.copy((Map) traitValue), (Map) parentValue);
-                            traitParent.put(traitName, merged);
-                        }
-                    } else {
-                        traitParent.put(traitName, trait.getValue());
-                    }
-                }
-            }
-        }
 
         Map<String, Map> schemas = JSONPath.get(apiModel, "$.components.schemas", Collections.emptyMap());
         for (Map.Entry<String, Map> entry : schemas.entrySet()) {
@@ -149,17 +137,15 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
                     addNormalizedTagName(channel.get("subscribe"));
                     addOperationIdVariants(channel.get("publish"));
                     addOperationIdVariants(channel.get("subscribe"));
-                    collectMessages(channel.get("publish"));
-                    collectMessages(channel.get("subscribe"));
-                    setHasRuntimeHeaders(channel.get("publish"));
-                    setHasRuntimeHeaders(channel.get("subscribe"));
+                    setHasRuntimeHeaders(apiModel, channel.get("publish"));
+                    setHasRuntimeHeaders(apiModel, channel.get("subscribe"));
+                    setDeprecatedXMessages(apiModel, channel.get("publish"));
+                    setDeprecatedXMessages(apiModel, channel.get("subscribe"));
                 }
             }
             if (isV3) {
                 ((Map) channel).put("x--channel", channelEntry.getKey());
-                // collect channel messages
-                var messages = JSONPath.get(channel, "$.messages[*]", Collections.emptyList());
-                ((Map) channel).put("x--messages", messages);
+                setDeprecatedXMessagesForChannel(apiModel, channel, channelEntry.getKey());
             }
         }
 
@@ -170,13 +156,8 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
                 addOperationIdVariants(operationEntry.getValue());
                 addNormalizedTagName(operationEntry.getValue());
                 addChannelNameToOperation(operationEntry.getValue(), JSONPath.get(operationEntry.getValue(), "$.channel.x--channel"));
-                operationEntry.getValue().put("x--messages", JSONPath.getFirst(operationEntry.getValue(), "$.messages", "$.channel.x--messages"));
+                setDeprecatedXMessages(apiModel, operationEntry.getValue());
             }
-        }
-
-        List<Map<String, Object>> messages = JSONPath.get(apiModel, "$.channels..x--messages[*]");
-        for (Map<String, Object> message : messages) {
-            calculateMessageParamType(apiModel, message);
         }
 
         Map<String, Map> componentsMessages = JSONPath.get(apiModel, "$.components.messages", Collections.emptyMap());
@@ -185,6 +166,12 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
                 message.getValue().put("name", message.getKey());
             }
         }
+
+        Set<Map<String, Object>> allMessages = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (String operationId : AsyncAPIUtils.allOperationIds(apiModel)) {
+            allMessages.addAll(AsyncAPIUtils.operationMessages(apiModel, operationId));
+        }
+        allMessages.forEach(message -> calculateMessageParamType(apiModel, message));
 
         return contextModel;
     }
@@ -201,25 +188,48 @@ public class AsyncApiProcessor extends AbstractBaseProcessor implements Processo
         }
     }
 
-    private void setHasRuntimeHeaders(Map operation) {
+    private void setHasRuntimeHeaders(Map apiModel, Map operation) {
         if(operation != null) {
-            boolean hasAutoheader = !JSONPath.get(operation, String.format("$.x--messages..headers..[?(@.%s)]", runtimeHeadersProperty), Collections.emptyList()).isEmpty();
+            String operationId = (String) operation.get("operationId");
+            List<Map<String, Object>> messages = operationId == null ? List.of() : AsyncAPIUtils.operationMessages(apiModel, operationId);
+            boolean hasAutoheader = !JSONPath.get(messages, String.format("$[*]..headers..[?(@.%s)]", runtimeHeadersProperty), Collections.emptyList()).isEmpty();
             if(hasAutoheader) {
                 operation.put("x--has-runtime-headers", true);
             }
         }
     }
 
+    /**
+     * @deprecated no longer used by the SDK, which navigates messages through {@link AsyncAPIUtils}
+     * instead. Retained as a no-op for binary/source compatibility with any code that calls it directly;
+     * {@code x--messages} population now happens in {@link #process}. Will be removed in a future release.
+     */
+    @Deprecated
     public void collectMessages(Map<String, Object> operation) {
+        // no-op: see setDeprecatedXMessages/setDeprecatedXMessagesForChannel
+    }
+
+    /**
+     * @deprecated {@code x--messages} is a derived, non-canonical property kept only so that existing
+     * custom templates that read it directly keep working. The SDK's own templates/processors navigate
+     * messages through {@link AsyncAPIUtils#operationMessages}/{@link AsyncAPIUtils#channelMessages}
+     * instead and never read this property. It may be removed in a future release.
+     */
+    @Deprecated
+    private void setDeprecatedXMessages(Map apiModel, Map operation) {
         if (operation != null) {
-            Map message = (Map) operation.get("message");
-            List messages = new ArrayList();
-            if (message.containsKey("oneOf")) {
-                messages.addAll((List) message.get("oneOf"));
-            } else {
-                messages.add(message);
+            String operationId = (String) operation.get("operationId");
+            if (operationId != null) {
+                operation.put("x--messages", AsyncAPIUtils.operationMessages(apiModel, operationId));
             }
-            operation.put("x--messages", messages);
+        }
+    }
+
+    /** @deprecated see {@link #setDeprecatedXMessages}. */
+    @Deprecated
+    private void setDeprecatedXMessagesForChannel(Map apiModel, Map channel, String channelId) {
+        if (channel != null) {
+            channel.put("x--messages", AsyncAPIUtils.channelMessages(apiModel, channelId));
         }
     }
 

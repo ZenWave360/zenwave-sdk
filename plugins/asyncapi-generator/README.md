@@ -203,24 +203,17 @@ Overlay files are applied in order. This is intended for local files and file-ba
             <artifactId>asyncapi-generator</artifactId>
             <version>${zenwave.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.avro</groupId>
-            <artifactId>avro-compiler</artifactId>
-            <version>${avro.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
 </plugin>
 ```
+
+> **Note on Avro:** `asyncapi-generator` always includes Avro compilation support in its generation
+> chain, even for JSON-Schema-only specifications, so `org.apache.avro:avro-compiler` is a regular
+> (`compile`-scope) dependency of the artifact and is resolved automatically — you don't need to
+> declare it yourself. Its transitive `jackson-core`/`jackson-databind` are excluded to avoid
+> conflicting with the Jackson version managed by your own project/Spring Boot BOM. If you need a
+> different Avro version, override it via `<dependencyManagement>` in your POM rather than
+> redeclaring the dependency here.
 
 ## Gradle Usage
 

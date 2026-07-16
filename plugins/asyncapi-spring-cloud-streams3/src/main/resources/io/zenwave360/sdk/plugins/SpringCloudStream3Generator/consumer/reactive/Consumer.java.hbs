@@ -35,7 +35,7 @@ public class {{consumerName operation.x--operationIdCamelCase}} implements Consu
     public void accept(Flux<Message<{{messageType operation}}>> messageFlux) {
         messageFlux.subscribe(m -> {
             log.debug("Received message: {}", m);
-        {{#each operation.x--messages as |message|}}
+        {{#each (operationMessages operation.operationId) as |message|}}
             if(m.getPayload() instanceof {{message.x--javaType}}) {
             {{~#if exposeMessage}}
                 service.{{operation.operationId}}{{methodSuffix message operation}}(Flux.just(MessageBuilder.<{{message.x--javaType}}>createMessage(({{message.x--javaType}}) m.getPayload(), m.getHeaders())));

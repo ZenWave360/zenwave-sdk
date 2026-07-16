@@ -35,7 +35,7 @@
         <avro.version>1.11.1</avro.version>
         <zenwave-modulith-events-scs.version>1.1.0</zenwave-modulith-events-scs.version>
 
-        <zenwave.version>2.3.0</zenwave.version>
+        <zenwave.version>2.6.0-SNAPSHOT</zenwave.version>
         <openapi-generator-maven-plugin.version>7.18.0</openapi-generator-maven-plugin.version>
 
         <jakarta.validation-api.version>3.1.1</jakarta.validation-api.version>
@@ -420,27 +420,38 @@
                             </configOptions>
                         </configuration>
                     </execution>
+                    <!-- TEMPORARY, for bug-reproduction purposes only (review in progress): this project has no
+                         real consumer service to point at, so it self-consumes its own spec with role=client to
+                         force generation of consumerByChannelTemplates (IServiceByChannel.java + Headers partial),
+                         which no other e2e fixture exercises for the asyncapi-generator plugin. Remove once the
+                         IServiceByChannel/Headers.hbs bug is fixed and verified, or replace with a real cross-service
+                         client wiring if this is kept permanently. -->
+                    <execution>
+                        <id>generate-asyncapi-self-client-repro</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generatorName>AsyncAPIGenerator</generatorName>
+                            <configOptions>
+                                <role>client</role>
+                                <templates>SpringCloudStream</templates>
+                                <modelPackage>${asyncApiModelPackage}</modelPackage>
+                                <producerApiPackage>${asyncApiProducerApiPackage}.selfClientRepro.producer</producerApiPackage>
+                                <consumerApiPackage>${asyncApiConsumerApiPackage}.selfClientRepro.consumer</consumerApiPackage>
+                                <jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
+                                <jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
+                                <jsonschema2pojo.includeAdditionalProperties>true</jsonschema2pojo.includeAdditionalProperties>
+                            </configOptions>
+                        </configuration>
+                    </execution>
                 </executions>
                 <dependencies>
                     <dependency>
                         <groupId>io.zenwave360.sdk.plugins</groupId>
                         <artifactId>asyncapi-generator</artifactId>
                         <version>${zenwave.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.avro</groupId>
-                        <artifactId>avro-compiler</artifactId>
-                        <version>${avro.version}</version>
-                        <exclusions>
-                            <exclusion>
-                                <groupId>com.fasterxml.jackson.core</groupId>
-                                <artifactId>jackson-core</artifactId>
-                            </exclusion>
-                            <exclusion>
-                                <groupId>com.fasterxml.jackson.core</groupId>
-                                <artifactId>jackson-databind</artifactId>
-                            </exclusion>
-                        </exclusions>
                     </dependency>
                 </dependencies>
             </plugin>
