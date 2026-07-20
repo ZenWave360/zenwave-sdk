@@ -4,6 +4,11 @@ info:
   title: "{{clientModel.title}}"
   version: {{clientModel.version}}
   description: "{{clientModel.description}}"
+
+{{~#if applicationExtensions}}
+{{{applicationExtensions}}}
+{{~/if}}
+
 {{#if clientModel.channels}}
 channels:
 {{#each clientModel.channels as |channel|}}

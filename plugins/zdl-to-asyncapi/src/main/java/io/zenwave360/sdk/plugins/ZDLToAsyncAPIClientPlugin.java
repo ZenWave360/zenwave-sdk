@@ -11,6 +11,7 @@ public class ZDLToAsyncAPIClientPlugin extends Plugin {
 
     public ZDLToAsyncAPIClientPlugin() {
         super();
-        withChain(ZDLParser.class, ZDLProcessor.class, ZDLToAsyncAPIClientGenerator.class, TemplateFileWriter.class);
+        withChain(ZDLParser.class, ZDLProcessor.class, ZDLToAsyncAPIClientGenerator.class,
+                AsyncAPIOverlayProcessor.class, TemplateFileWriter.class);
     }
 }
