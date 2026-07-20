@@ -346,6 +346,46 @@ public class AsyncAPIOpsIntentProcessorTest {
     }
 
     @Test
+    public void test_retry_suffixes_override_numbered_suffixes() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+
+        Map<String, Object> errorTopics = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka.x-error-topics");
+        errorTopics.put("retrySuffixes", List.of("retry-5s", "retry-30s", "retry-5m"));
+
+        context = buildIntent("staging", context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+        List<String> retryTopicNames = intent.topics.stream()
+                .filter(t -> t.isRetryOrDlq && !t.topicName.endsWith(".dlq"))
+                .map(t -> t.topicName)
+                .toList();
+
+        Assertions.assertEquals(3, retryTopicNames.size());
+        Assertions.assertTrue(retryTopicNames.stream().anyMatch(name -> name.endsWith(".retry-5s")));
+        Assertions.assertTrue(retryTopicNames.stream().anyMatch(name -> name.endsWith(".retry-30s")));
+        Assertions.assertTrue(retryTopicNames.stream().anyMatch(name -> name.endsWith(".retry-5m")));
+        Assertions.assertFalse(retryTopicNames.stream().anyMatch(name -> name.matches(".*\\.retry-\\d+$")));
+    }
+
+    @Test
+    public void test_invalid_retry_suffixes_fail_generation() throws Exception {
+        IllegalArgumentException invalidType = assertInvalidRetrySuffixes("retry-5s", 3, false);
+        Assertions.assertTrue(invalidType.getMessage().contains("array of strings"));
+
+        IllegalArgumentException wrongLengthWithoutRetry = assertInvalidRetrySuffixes(List.of("retry-5s"), 3, true);
+        Assertions.assertTrue(wrongLengthWithoutRetry.getMessage().contains("length must equal retryTopics"));
+
+        IllegalArgumentException nonString = assertInvalidRetrySuffixes(List.of("retry-5s", 30, "retry-5m"), 3, false);
+        Assertions.assertTrue(nonString.getMessage().contains("only strings"));
+
+        IllegalArgumentException blank = assertInvalidRetrySuffixes(List.of("retry-5s", " ", "retry-5m"), 3, false);
+        Assertions.assertTrue(blank.getMessage().contains("blank values"));
+
+        IllegalArgumentException duplicate = assertInvalidRetrySuffixes(List.of("retry-5s", "retry-5s", "retry-5m"), 3, false);
+        Assertions.assertTrue(duplicate.getMessage().contains("values must be unique"));
+    }
+
+    @Test
     public void test_defaults_are_sourced_from_base_config_when_overrides_are_absent() throws Exception {
         Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
         Model api = getApis(context).get(0);
@@ -507,6 +547,18 @@ public class AsyncAPIOpsIntentProcessorTest {
         AsyncAPIOpsIntentProcessor intentProcessor = new AsyncAPIOpsIntentProcessor();
         intentProcessor.server = server;
         return intentProcessor.process(context);
+    }
+
+    private IllegalArgumentException assertInvalidRetrySuffixes(Object retrySuffixes, int retryTopics, boolean removeRetry) throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+        Map<String, Object> errorTopics = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka.x-error-topics");
+        errorTopics.put("retryTopics", retryTopics);
+        errorTopics.put("retrySuffixes", retrySuffixes);
+        if (removeRetry) {
+            errorTopics.remove("retry");
+        }
+        return Assertions.assertThrows(IllegalArgumentException.class, () -> buildIntent("staging", context));
     }
 
     @SuppressWarnings("unchecked")

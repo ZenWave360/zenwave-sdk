@@ -240,6 +240,7 @@ operations:
         x-error-topics:
           addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
           retryTopics: 3
+          retrySuffixes: [retry-5s, retry-30s, retry-5m]
           retry:
             partitions: 1
             replicas: 2
@@ -264,9 +265,11 @@ The `addressTemplate` variables are:
 |----------|-------|
 | `${groupId}` | The consumer group id |
 | `${channel.address}` | The Kafka topic address of the consumed channel |
-| `${suffix}` | `retry-0` … `retry-N`, `dlq` |
+| `${suffix}` | `retry-0` … `retry-{N-1}` by default, the corresponding `retrySuffixes` value when configured, or `dlq` |
 
 In this example we use `.__.` as a separator between the consumer group and original topic unambiguously recoverable from the address.
+
+`retrySuffixes` optionally gives retry topics explicit suffixes in order. When omitted, `retryTopics: N` keeps generating `retry-0` through `retry-{N-1}`. When present, `retrySuffixes` must be an array of non-blank strings, contain exactly `retryTopics` entries, and contain no duplicates. Invalid values fail generation, even when the `retry` configuration is absent.
 
 If `x-error-topics`/`error-topics` is not present, no retry or DLQ topics are generated. If a retry or DLQ config does not define env overrides for the selected server, the base retry/DLQ config is used.
 

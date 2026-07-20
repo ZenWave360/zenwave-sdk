@@ -11,10 +11,12 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -257,19 +259,22 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
     }
 
     private void expandErrorTopics(Map errorTopics, String groupId, String topicAddress, String principal, AsyncAPIOpsIntent intent) {
+        int retryTopics = intValue(errorTopics, "retryTopics", 0);
+        List<String> retrySuffixes = validateRetrySuffixes(errorTopics, retryTopics);
+
         String addressTemplate = (String) errorTopics.get("addressTemplate");
         if (addressTemplate == null) {
             log.warn("x-error-topics.addressTemplate is missing for groupId='{}' topic='{}' — skipping", groupId, topicAddress);
             return;
         }
 
-        int retryTopics = intValue(errorTopics, "retryTopics", 0);
         Map retryConfig = (Map) errorTopics.get("retry");
         Map dlqConfig = (Map) errorTopics.get("dlq");
 
         if (retryConfig != null) {
             for (int i = 0; i < retryTopics; i++) {
-                String topicName = expandTemplate(addressTemplate, groupId, topicAddress, "retry-" + i);
+                String suffix = retrySuffixes == null ? "retry-" + i : retrySuffixes.get(i);
+                String topicName = expandTemplate(addressTemplate, groupId, topicAddress, suffix);
                 intent.topics.add(buildErrorTopic(topicName, retryConfig));
                 addErrorTopicAcl(topicName, principal, intent);
             }
@@ -280,6 +285,36 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
             intent.topics.add(buildErrorTopic(topicName, dlqConfig));
             addErrorTopicAcl(topicName, principal, intent);
         }
+    }
+
+    private List<String> validateRetrySuffixes(Map errorTopics, int retryTopics) {
+        if (!errorTopics.containsKey("retrySuffixes")) {
+            return null;
+        }
+
+        Object value = errorTopics.get("retrySuffixes");
+        if (!(value instanceof List<?> suffixes)) {
+            throw new IllegalArgumentException("x-error-topics.retrySuffixes must be an array of strings");
+        }
+        if (suffixes.size() != retryTopics) {
+            throw new IllegalArgumentException("x-error-topics.retrySuffixes length must equal retryTopics");
+        }
+
+        List<String> validatedSuffixes = new ArrayList<>(suffixes.size());
+        Set<String> uniqueSuffixes = new HashSet<>();
+        for (Object suffix : suffixes) {
+            if (!(suffix instanceof String stringSuffix)) {
+                throw new IllegalArgumentException("x-error-topics.retrySuffixes must contain only strings");
+            }
+            if (stringSuffix.isBlank()) {
+                throw new IllegalArgumentException("x-error-topics.retrySuffixes must not contain blank values");
+            }
+            if (!uniqueSuffixes.add(stringSuffix)) {
+                throw new IllegalArgumentException("x-error-topics.retrySuffixes values must be unique");
+            }
+            validatedSuffixes.add(stringSuffix);
+        }
+        return validatedSuffixes;
     }
 
     private void addErrorTopicAcl(String topicName, String principal, AsyncAPIOpsIntent intent) {
