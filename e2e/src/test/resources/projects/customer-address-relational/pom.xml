@@ -18,7 +18,7 @@
 		<spring-boot.version>${project.parent.version}</spring-boot.version>
 		<spring-cloud.version>2025.1.0</spring-cloud.version>
 
-		<zenwave.version>2.5.0-SNAPSHOT</zenwave.version>
+		<zenwave.version>2.6.0-SNAPSHOT</zenwave.version>
 
 		<jakarta.validation-api.version>3.1.1</jakarta.validation-api.version>
 		<mapstruct.version>1.6.3</mapstruct.version>
@@ -192,24 +192,7 @@
 					<addTestCompileSourceRoot>true</addTestCompileSourceRoot>
 				</configuration>
 				<executions>
-					<!-- DTOs -->
-					<execution>
-						<id>generate-asyncapi-dtos</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-						<configuration>
-							<generatorName>jsonschema2pojo</generatorName>
-							<configOptions>
-								<modelPackage>io.zenwave360.example.core.outbound.events.dtos</modelPackage>
-<!--								<jsonschema2pojo.includeTypeInfo>true</jsonschema2pojo.includeTypeInfo>-->
-								<jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
-								<jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
-							</configOptions>
-						</configuration>
-					</execution>
-					<!-- Generate PROVIDER -->
+					<!-- Generate PROVIDER (AsyncAPIGenerator's chain includes jsonschema2pojo DTO generation internally) -->
 					<execution>
 						<id>generate-asyncapi</id>
 						<phase>generate-sources</phase>
@@ -217,14 +200,16 @@
 							<goal>generate</goal>
 						</goals>
 						<configuration>
-							<generatorName>spring-cloud-streams3</generatorName>
+							<generatorName>AsyncAPIGenerator</generatorName>
 							<configOptions>
 								<role>provider</role>
-								<style>imperative</style>
+								<templates>SpringCloudStream</templates>
 <!--								<transactionalOutbox>mongodb</transactionalOutbox>-->
 								<modelPackage>io.zenwave360.example.core.outbound.events.dtos</modelPackage>
 								<producerApiPackage>io.zenwave360.example.core.outbound.events</producerApiPackage>
 								<consumerApiPackage>io.zenwave360.example.adapters.commands</consumerApiPackage>
+								<jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
+								<jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
 							</configOptions>
 						</configuration>
 					</execution>
@@ -232,12 +217,7 @@
 				<dependencies>
 					<dependency>
 						<groupId>io.zenwave360.sdk.plugins</groupId>
-						<artifactId>asyncapi-spring-cloud-streams3</artifactId>
-						<version>${zenwave.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>io.zenwave360.sdk.plugins</groupId>
-						<artifactId>asyncapi-jsonschema2pojo</artifactId>
+						<artifactId>asyncapi-generator</artifactId>
 						<version>${zenwave.version}</version>
 					</dependency>
 				</dependencies>

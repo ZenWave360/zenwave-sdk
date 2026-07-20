@@ -89,6 +89,11 @@
           <version>${json-schema-ref-parser-kmp.version}</version>
       </dependency>
       <dependency>
+          <groupId>io.zenwave360.asyncapi</groupId>
+          <artifactId>asyncapi-parser-kmp-jvm</artifactId>
+          <version>${asyncapi-parser-kmp.version}</version>
+      </dependency>
+      <dependency>
           <groupId>commons-io</groupId>
           <artifactId>commons-io</artifactId>
           <version>2.20.0</version>

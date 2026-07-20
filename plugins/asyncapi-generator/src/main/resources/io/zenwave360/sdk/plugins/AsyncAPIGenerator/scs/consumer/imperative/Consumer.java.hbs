@@ -68,7 +68,7 @@ public class {{consumerName (camelCase channelName)}} implements Consumer<Messag
             Object payload = {{#if (hasEnterpriseEnvelope operations)}}unwrap(message.getPayload()){{else}}message.getPayload(){{/if}};
         {{~initVisited 'messageType'}}
         {{~#each operations as |operation|}}
-            {{~#each operation.x--messages as |message|}}
+            {{~#each (operationMessages operation.operationId) as |message|}}
             {{~#unless (isVisited 'messageType' message.x--javaType register=true)}}
             if(payload instanceof {{message.x--javaType}}) {
                 {{~#if exposeMessage}}

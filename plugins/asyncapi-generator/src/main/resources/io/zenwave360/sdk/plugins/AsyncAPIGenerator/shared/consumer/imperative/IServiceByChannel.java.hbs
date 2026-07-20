@@ -16,7 +16,7 @@ import {{modelPackage}}.*;
 public interface {{consumerServiceInterfaceName (camelCase channelName)}} {
 
 {{~#each operations as |operation|}}
-    {{~#each operation.x--messages as |message|}}
+    {{~#each (operationMessages operation.operationId) as |message|}}
     /**
      * {{{operation.summary}}}
      */
@@ -44,7 +44,7 @@ public interface {{consumerServiceInterfaceName (camelCase channelName)}} {
 
 {{~initVisited 'messageType'}}
 {{~#each operations as |operation|}}
-    {{~#each operation.x--messages as |message|}}
+    {{~#each (operationMessages operation.operationId) as |message|}}
     {{~#unless (isVisited 'messageType' message.x--javaType register=true)}}
     {{~> (partial '../../common/Headers') isProducer=false}}
     {{~/unless}}

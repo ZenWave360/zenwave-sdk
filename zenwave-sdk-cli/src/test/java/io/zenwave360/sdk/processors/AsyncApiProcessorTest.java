@@ -19,6 +19,7 @@ import com.jayway.jsonpath.Option;
 
 import io.zenwave360.sdk.parsers.DefaultYamlParser;
 import io.zenwave360.sdk.parsers.Model;
+import io.zenwave360.sdk.utils.AsyncAPIUtils;
 
 public class AsyncApiProcessorTest {
 
@@ -88,38 +89,40 @@ public class AsyncApiProcessorTest {
     }
 
     @Test
-    public void testCollectChannelMessagesV3() throws Exception {
+    public void testNavigateChannelMessagesV3() throws Exception {
         Map<String, Object> model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v3/customer-address.yml");
 
         AsyncApiProcessor processor = new AsyncApiProcessor();
         Model processed = (Model) processor.process(model).get(targetProperty);
-        List<List> channeldWithMessages = get(processed, "$.channels..x--messages");
-        Assertions.assertEquals(3, channeldWithMessages.size());
-        Assertions.assertEquals(1, channeldWithMessages.get(0).size());
-        Assertions.assertEquals(1, channeldWithMessages.get(1).size());
-        Assertions.assertEquals(3, channeldWithMessages.get(2).size());
+        Assertions.assertEquals(1, AsyncAPIUtils.channelMessages(processed, "createCustomerChannel").size());
+        Assertions.assertEquals(1, AsyncAPIUtils.channelMessages(processed, "customerEventChannel").size());
+        Assertions.assertEquals(3, AsyncAPIUtils.channelMessages(processed, "customerEventsChannel").size());
+
+        // x--messages is deprecated but still populated (from the same standard-location navigation) for
+        // backward compatibility with custom templates that read it directly.
+        List<List> channelsWithMessages = get(processed, "$.channels..x--messages");
+        Assertions.assertEquals(3, channelsWithMessages.size());
+        Assertions.assertEquals(1, channelsWithMessages.get(0).size());
+        Assertions.assertEquals(1, channelsWithMessages.get(1).size());
+        Assertions.assertEquals(3, channelsWithMessages.get(2).size());
     }
 
     @Test
-    public void testCollectMessagesOneOf() throws Exception {
+    public void testNavigateMessagesOneOf() throws Exception {
         Map<String, Object> model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-shoping-cart.yml");
 
         AsyncApiProcessor processor = new AsyncApiProcessor();
         Model processed = (Model) processor.process(model).get(targetProperty);
-        List<List> messages = get(processed, "$.channels..x--messages");
-        Assertions.assertEquals(1, messages.size());
-        Assertions.assertEquals(3, messages.get(0).size());
+        Assertions.assertEquals(3, AsyncAPIUtils.operationMessages(processed, "onCartEvent").size());
     }
 
     @Test
-    public void testCollectMessagesSingleMessage() throws Exception {
+    public void testNavigateSingleMessage() throws Exception {
         Map<String, Object> model = loadAsyncapiModelFromResource("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-circular-refs.yml");
 
         AsyncApiProcessor processor = new AsyncApiProcessor();
         Model processed = (Model) processor.process(model).get(targetProperty);
-        List<List> messages = get(processed, "$.channels..x--messages");
-        Assertions.assertEquals(1, messages.size());
-        Assertions.assertEquals(1, messages.get(0).size());
+        Assertions.assertEquals(1, AsyncAPIUtils.operationMessages(processed, "doCreateProduct").size());
     }
 
     @Test
@@ -128,7 +131,9 @@ public class AsyncApiProcessorTest {
 
         AsyncApiProcessor processor = new AsyncApiProcessor();
         Model processed = (Model) processor.process(model).get(targetProperty);
-        List<String> paramTypes = get(processed, "$..x--messages..x--javaType");
+        List<String> paramTypes = AsyncAPIUtils.operationMessages(processed, "onCartEvent").stream()
+                .map(message -> (String) message.get("x--javaType"))
+                .toList();
         Assertions.assertEquals(3, paramTypes.size());
     }
 
@@ -138,7 +143,9 @@ public class AsyncApiProcessorTest {
 
         AsyncApiProcessor processor = new AsyncApiProcessor();
         Model processed = (Model) processor.process(model).get(targetProperty);
-        List<String> paramTypes = get(processed, "$..x--messages..x--javaType");
+        List<String> paramTypes = AsyncAPIUtils.operationMessages(processed, "onCartEvent").stream()
+                .map(message -> (String) message.get("x--javaType"))
+                .toList();
         Assertions.assertEquals(4, paramTypes.size());
         Assertions.assertEquals("org.asyncapi.tools.example.event.cart.v1.LinesAddedEvent", paramTypes.get(0));
         Assertions.assertEquals("ProductPayload", paramTypes.get(1));

@@ -74,7 +74,7 @@ public class {{consumerName (camelCase channelName)}} {
             Object unwrappedPayload = {{#if (hasEnterpriseEnvelope operations)}}unwrap(payload.value()){{else}}payload.value(){{/if}};
         {{~initVisited 'messageType'}}
         {{~#each operations as |operation|}}
-            {{~#each operation.x--messages as |message|}}
+            {{~#each (operationMessages operation.operationId) as |message|}}
             {{~#unless (isVisited 'messageType' message.x--javaType register=true)}}
             if(unwrappedPayload instanceof {{message.x--javaType}}) {
                 {{~#if exposeMessage}}
