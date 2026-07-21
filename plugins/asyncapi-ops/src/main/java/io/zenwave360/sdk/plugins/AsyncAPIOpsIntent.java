@@ -14,9 +14,26 @@ public class AsyncAPIOpsIntent {
     public List<SchemaIntent> schemas = new ArrayList<>();
     public List<AclIntent> acls = new ArrayList<>();
     public List<RoleBindingIntent> roleBindings = new ArrayList<>();
+    public List<PrincipalIntent> principals = new ArrayList<>();
 
     private final Set<String> aclKeys = new LinkedHashSet<>();
     private final Set<String> roleBindingKeys = new LinkedHashSet<>();
+    private final Set<String> principalNames = new LinkedHashSet<>();
+    private final Map<String, String> principalNamesByResourceName = new LinkedHashMap<>();
+
+    public void addPrincipal(String name, String resourceName) {
+        String existingName = principalNamesByResourceName.putIfAbsent(resourceName, name);
+        if (existingName != null && !existingName.equals(name)) {
+            throw new IllegalArgumentException("Principal resource name collision: '" + existingName
+                    + "' and '" + name + "' both sanitize to '" + resourceName + "'");
+        }
+        if (principalNames.add(name)) {
+            PrincipalIntent principal = new PrincipalIntent();
+            principal.name = name;
+            principal.resourceName = resourceName;
+            principals.add(principal);
+        }
+    }
 
     public void addAcl(AclIntent acl) {
         String key = acl.resourceType + "|" + acl.kafkaResourceName + "|" + acl.patternType + "|" + acl.principal + "|" + acl.operation;
@@ -58,6 +75,13 @@ public class AsyncAPIOpsIntent {
         public String sourceSchemaUri;
     }
 
+    public static class PrincipalIntent {
+        /** Provider-neutral authenticated account or service-account name from AsyncAPI */
+        public String name;
+        /** Snake_case Terraform identifier derived from {@link #name} */
+        public String resourceName;
+    }
+
     public static class AclIntent {
         /** Snake_case Terraform resource identifier */
         public String resourceName;
@@ -68,8 +92,10 @@ public class AsyncAPIOpsIntent {
         public String kafkaResourceType = "Topic";
         public String patternType = "LITERAL";
         public String kafkaPatternType = "Literal";
-        /** e.g. User:merchandising.inventory.inventory-adjustment.baas */
+        /** Provider-neutral principal name from AsyncAPI */
         public String principal;
+        /** Terraform identifier used to reference the provider-specific principal lookup */
+        public String principalResourceName;
         /** Read, Write, or Describe */
         public String operation;
         public String permissionType = "Allow";
@@ -78,8 +104,10 @@ public class AsyncAPIOpsIntent {
     public static class RoleBindingIntent {
         /** Snake_case Terraform resource identifier */
         public String resourceName;
-        /** e.g. User:merchandising.inventory.inventory-adjustment.baas */
+        /** Provider-neutral principal name from AsyncAPI */
         public String principal;
+        /** Terraform identifier used to reference the provider-specific principal lookup */
+        public String principalResourceName;
         public String roleName;
         public String crnPattern;
     }

@@ -5,7 +5,7 @@
 resource "kafka_acl" "{{acl.resourceName}}" {
   resource_name       = "{{acl.kafkaResourceName}}"
   resource_type       = "{{acl.kafkaResourceType}}"
-  acl_principal       = "{{acl.principal}}"
+  acl_principal       = "User:{{acl.principal}}"
   acl_host            = "*"
   acl_operation       = "{{acl.operation}}"
   acl_permission_type = "{{acl.permissionType}}"

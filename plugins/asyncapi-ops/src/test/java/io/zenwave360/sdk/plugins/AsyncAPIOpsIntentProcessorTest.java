@@ -72,8 +72,18 @@ public class AsyncAPIOpsIntentProcessorTest {
         // ACLs from provider operations + error topic ACLs
         Assertions.assertFalse(intent.acls.isEmpty());
         intent.acls.forEach(acl -> {
-            Assertions.assertTrue(acl.principal.startsWith("User:"));
+            Assertions.assertFalse(acl.principal.startsWith("User:"));
+            Assertions.assertEquals(acl.principal.replace('.', '_').replace('-', '_'), acl.principalResourceName);
+            Assertions.assertFalse(acl.resourceName.contains("_User_"));
             Assertions.assertTrue(acl.operation.equals("Read") || acl.operation.equals("Write") || acl.operation.equals("Describe"));
+        });
+        Assertions.assertEquals(1, intent.principals.size(), "Provider operations share one logical principal");
+        Assertions.assertEquals("merchandising.inventory.inventory-adjustment", intent.principals.get(0).name);
+        Assertions.assertEquals("merchandising_inventory_inventory_adjustment", intent.principals.get(0).resourceName);
+        intent.roleBindings.forEach(roleBinding -> {
+            Assertions.assertEquals("merchandising.inventory.inventory-adjustment", roleBinding.principal);
+            Assertions.assertEquals("merchandising_inventory_inventory_adjustment", roleBinding.principalResourceName);
+            Assertions.assertFalse(roleBinding.resourceName.contains("_User_"));
         });
         long mainTopicDescribeAcls = intent.acls.stream()
                 .filter(a -> "merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0".equals(a.topicName))
@@ -292,8 +302,8 @@ public class AsyncAPIOpsIntentProcessorTest {
                 .orElseThrow();
         Assertions.assertEquals(7, ownedTopic.partitions, "x-env-server-overrides must win over env-server-overrides");
 
-        Assertions.assertTrue(intent.acls.stream().anyMatch(a -> "User:extension.principal".equals(a.principal)));
-        Assertions.assertFalse(intent.acls.stream().anyMatch(a -> "User:standard.principal".equals(a.principal)));
+        Assertions.assertTrue(intent.acls.stream().anyMatch(a -> "extension.principal".equals(a.principal)));
+        Assertions.assertFalse(intent.acls.stream().anyMatch(a -> "standard.principal".equals(a.principal)));
         Assertions.assertTrue(intent.topics.stream().anyMatch(t -> t.isRetryOrDlq && t.topicName.startsWith("extension.group.__.")),
                 "x-groupId must win over schema groupId");
     }
@@ -327,6 +337,24 @@ public class AsyncAPIOpsIntentProcessorTest {
         Assertions.assertTrue(intent.roleBindings.stream().anyMatch(r ->
                 "DeveloperRead".equals(r.roleName)
                         && r.crnPattern.contains("/subject=merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0-ReserveStockCommand-value")));
+    }
+
+    @Test
+    public void test_principals_are_deduplicated_and_sanitized_name_collisions_fail_generation() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+
+        Map<String, Object> receiveBinding = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka");
+        Map<String, Object> sendBinding = JSONPath.get(api, "$.operations['onReserveStockResponse'].bindings.kafka");
+        receiveBinding.put("x-principal", "sales.orders");
+        sendBinding.put("x-principal", "sales_orders");
+
+        IllegalArgumentException collision = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> buildIntent("staging", context));
+        Assertions.assertTrue(collision.getMessage().contains("sales.orders"));
+        Assertions.assertTrue(collision.getMessage().contains("sales_orders"));
+        Assertions.assertTrue(collision.getMessage().contains("both sanitize to 'sales_orders'"));
     }
 
     @Test

@@ -105,6 +105,7 @@ This plugin has been tested in the following setups:
 | `authentication` | Authentication configuration values for fetching remote resources.                                                                                                           | List     | `[]`             |                               |
 | `server`         | Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Used to merge `x-env-server-overrides`/`env-server-overrides` from channel and error-topic bindings. | String   | `null`           |                               |
 | `templates`      | Templates to use for code generation.                                                                                                                                        | String   | `TerraformKafka` | TerraformKafka, TerraformConfluent, TerraformConfluentHybrid, FQ Class Name |
+| `serviceAccountMode` | Resolve existing Confluent service accounts by display name, or provision them as managed Terraform resources.                                                         | String   | `existing`       | existing, managed             |
 | `targetFolder`   | Output directory for `.tf` files.                                                                                                                                            | File     | `null`           |                               |
 
 ## What it generates
@@ -219,6 +220,30 @@ Pass `server=staging` to the generator and the staging overrides are deep-merged
 ### Operation bindings: error topics and ACLs
 
 ACLs are derived from operation bindings. `x-principal` wins over `principal`. `send` operations get topic WRITE + DESCRIBE. `receive` operations get topic READ + DESCRIBE and consumer group READ when a group id can be resolved. Every operation principal also gets Schema Registry `DeveloperRead` access for the Avro subjects used by the operation channel.
+
+`x-principal` is the provider-neutral authenticated account or service-account name and must not include the Kafka `User:` prefix or an environment-specific opaque Confluent `sa-...` id:
+
+```yaml
+x-principal: sales.orders.checkout
+```
+
+- With `TerraformKafka`, the value is the authenticated account name and the template renders `User:sales.orders.checkout`.
+- With `TerraformConfluent` and `TerraformConfluentHybrid`, the value must exactly match a Confluent service account's `display_name`. Human Confluent users are out of scope.
+
+Confluent service-account handling is controlled by `serviceAccountMode`:
+
+- `existing` (default) generates one deduplicated `data "confluent_service_account"` lookup per principal. A missing or ambiguous display name fails during Terraform plan/apply.
+- `managed` generates one deduplicated `confluent_service_account` resource per principal. This is useful for fresh forks and demos such as Arcadia:
+
+```shell
+jbang zw -p AsyncAPIOpsGeneratorPlugin \
+  apiFile=asyncapi.yml \
+  templates=TerraformConfluent \
+  serviceAccountMode=managed \
+  targetFolder=terraform/out
+```
+
+Both modes use the resolved service-account id for Confluent Kafka ACLs. `TerraformConfluent` also uses it for Schema Registry role bindings; `TerraformConfluentHybrid` does not generate Confluent role bindings because its Schema Registry is self-hosted. Application API-key provisioning remains a separate concern.
 
 Retry and DLQ topics are provisioned from the `x-error-topics` extension on `receive` operations. The generator also accepts `error-topics` without the `x-` prefix.
 The consumer group id is resolved from `x-groupId` first, then standard `groupId`. `x-groupId` is a plain string. Standard `groupId` must be a schema with `enum`, string `const`, or string-array `const`; the first string value is used.

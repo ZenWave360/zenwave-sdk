@@ -30,15 +30,3 @@ resource "confluent_kafka_acl" "{{acl.resourceName}}" {
 }
 
 {{/each}}
-{{#each intent.roleBindings as |roleBinding|}}
-resource "confluent_role_binding" "{{roleBinding.resourceName}}" {
-{{#if ../managedConfluentServiceAccounts}}
-  principal   = "User:${confluent_service_account.{{roleBinding.principalResourceName}}.id}"
-{{else}}
-  principal   = "User:${data.confluent_service_account.{{roleBinding.principalResourceName}}.id}"
-{{/if}}
-  role_name   = "{{roleBinding.roleName}}"
-  crn_pattern = "{{{roleBinding.crnPattern}}}"
-}
-
-{{/each}}

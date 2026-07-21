@@ -15,6 +15,7 @@ import io.zenwave360.sdk.writers.TemplateFileWriter;
             "avroImports",
             "server",
             "templates",
+            "serviceAccountMode",
             "targetFolder",
         },
         hiddenOptions = {"layout", "apiFiles", "zdlFile", "zdlFiles", "style"})
@@ -25,6 +26,9 @@ public class AsyncAPIOpsGeneratorPlugin extends Plugin {
 
     @DocumentedOption(description = "Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Applies x-env-server-overrides/env-server-overrides from channel and error-topic bindings.")
     public String server;
+
+    @DocumentedOption(description = "How Confluent service accounts are resolved: existing looks them up by display name; managed provisions them.", values = {"existing", "managed"})
+    public String serviceAccountMode = "existing";
 
     public AsyncAPIOpsGeneratorPlugin() {
         super();

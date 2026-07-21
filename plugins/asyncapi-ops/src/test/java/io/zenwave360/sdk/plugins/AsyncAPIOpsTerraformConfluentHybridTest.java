@@ -44,11 +44,31 @@ public class AsyncAPIOpsTerraformConfluentHybridTest {
         Assertions.assertTrue(new File(targetFolder + "/asyncapi/avro/ReserveStockCommand.avsc").exists());
 
         String acls = Files.readString(Path.of(targetFolder + "/acls.tf"));
+        Assertions.assertTrue(acls.contains("data \"confluent_service_account\" \"merchandising_inventory_inventory_adjustment\""));
+        Assertions.assertTrue(acls.contains("principal     = \"User:${data.confluent_service_account.merchandising_inventory_inventory_adjustment.id}\""));
         Assertions.assertTrue(acls.contains("resource \"confluent_kafka_acl\""));
         Assertions.assertTrue(acls.contains("operation     = \"READ\""));
         Assertions.assertTrue(acls.contains("operation     = \"WRITE\""));
         Assertions.assertTrue(acls.contains("operation     = \"DESCRIBE\""));
         Assertions.assertTrue(acls.contains("permission    = \"ALLOW\""));
+        Assertions.assertFalse(acls.contains("confluent_role_binding"));
+    }
+
+    @Test
+    public void test_managed_service_account_generation_has_no_role_bindings() throws Exception {
+        String targetFolder = "target/out/test_confluent_hybrid_managed_service_account_generation";
+        new MainGenerator().generate(new AsyncAPIOpsGeneratorPlugin()
+                .withApiFile(ASYNCAPI_PROVIDER)
+                .withOption("templates", "TerraformConfluentHybrid")
+                .withOption("serviceAccountMode", "managed")
+                .withTargetFolder(targetFolder)
+                .withOption("skipFormatting", true));
+
+        String acls = Files.readString(Path.of(targetFolder + "/acls.tf"));
+        Assertions.assertTrue(acls.contains("resource \"confluent_service_account\" \"merchandising_inventory_inventory_adjustment\""));
+        Assertions.assertFalse(acls.contains("data \"confluent_service_account\""));
+        Assertions.assertTrue(acls.contains("principal     = \"User:${confluent_service_account.merchandising_inventory_inventory_adjustment.id}\""));
+        Assertions.assertFalse(acls.contains("confluent_role_binding"));
     }
 
     @Test

@@ -11,6 +11,6 @@ public class TerraformConfluentHybridTemplates extends AsyncAPIOpsGenerator.Temp
         addTemplate(commonTemplates, "TerraformConfluentHybrid/versions.tf", "versions.tf", OutputFormatType.YAML, null, false);
         addTemplate(commonTemplates, "TerraformConfluent/topics.tf", "topics.tf", OutputFormatType.YAML, null, false);
         addTemplate(commonTemplates, "TerraformKafka/schemas.tf", "schemas.tf", OutputFormatType.YAML, null, false);
-        addTemplate(commonTemplates, "TerraformConfluent/acls.tf", "acls.tf", OutputFormatType.YAML, null, false);
+        addTemplate(commonTemplates, "TerraformConfluentHybrid/acls.tf", "acls.tf", OutputFormatType.YAML, null, false);
     }
 }

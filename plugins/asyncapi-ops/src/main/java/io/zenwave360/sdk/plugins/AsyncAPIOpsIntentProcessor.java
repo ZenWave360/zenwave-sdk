@@ -344,6 +344,9 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
     }
 
     private void addKafkaAcl(String resourceType, String kafkaResourceName, String patternType, String principal, String operation, AsyncAPIOpsIntent intent) {
+        String principalResourceName = toTerraformId(principal);
+        intent.addPrincipal(principal, principalResourceName);
+
         AsyncAPIOpsIntent.AclIntent acl = new AsyncAPIOpsIntent.AclIntent();
         acl.resourceType = resourceType;
         acl.kafkaResourceType = kafkaResourceType(resourceType);
@@ -351,9 +354,10 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
         acl.kafkaPatternType = kafkaPatternType(patternType);
         acl.kafkaResourceName = kafkaResourceName;
         acl.topicName = "TOPIC".equals(resourceType) ? kafkaResourceName : null;
-        acl.principal = "User:" + principal;
+        acl.principal = principal;
+        acl.principalResourceName = principalResourceName;
         acl.operation = operation;
-        acl.resourceName = toTerraformId(resourceType + "_" + kafkaResourceName + "_User_" + principal + "_" + operation + "_" + patternType);
+        acl.resourceName = toTerraformId(resourceType + "_" + kafkaResourceName + "_" + principal + "_" + operation + "_" + patternType);
         intent.addAcl(acl);
     }
 
@@ -384,11 +388,15 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
     }
 
     private void addSchemaRegistryReadBinding(String subject, String principal, AsyncAPIOpsIntent intent) {
+        String principalResourceName = toTerraformId(principal);
+        intent.addPrincipal(principal, principalResourceName);
+
         AsyncAPIOpsIntent.RoleBindingIntent roleBinding = new AsyncAPIOpsIntent.RoleBindingIntent();
-        roleBinding.principal = "User:" + principal;
+        roleBinding.principal = principal;
+        roleBinding.principalResourceName = principalResourceName;
         roleBinding.roleName = "DeveloperRead";
         roleBinding.crnPattern = "${var.schema_registry_crn}/subject=" + subject;
-        roleBinding.resourceName = toTerraformId("schema_registry_" + subject + "_User_" + principal + "_DeveloperRead");
+        roleBinding.resourceName = toTerraformId("schema_registry_" + subject + "_" + principal + "_DeveloperRead");
         intent.addRoleBinding(roleBinding);
     }
 
