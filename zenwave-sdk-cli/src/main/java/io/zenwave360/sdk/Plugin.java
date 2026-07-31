@@ -230,6 +230,9 @@ public class Plugin {
         if (value instanceof String && field != null && List.class.isAssignableFrom(field.getType())) {
             value = List.of(value);
         }
+        if (value instanceof String && field != null) {
+            value = coerceStringToFieldType((String) value, field.getType());
+        }
         nestedTempObject.put(lastPath, value);
 
         try {
@@ -243,6 +246,26 @@ public class Plugin {
             throw new RuntimeException(e);
         }
         return this;
+    }
+
+    private Object coerceStringToFieldType(String value, Class<?> fieldType) {
+        try {
+            if (fieldType == Boolean.class || fieldType == boolean.class) {
+                return Boolean.parseBoolean(value);
+            }
+            if (fieldType == Integer.class || fieldType == int.class) {
+                return Integer.parseInt(value);
+            }
+            if (fieldType == Long.class || fieldType == long.class) {
+                return Long.parseLong(value);
+            }
+            if (fieldType == Double.class || fieldType == double.class) {
+                return Double.parseDouble(value);
+            }
+        } catch (NumberFormatException e) {
+            // leave value as String; downstream field assignment will surface the error
+        }
+        return value;
     }
 
     private Object normalizeOptionValue(Object value) {
