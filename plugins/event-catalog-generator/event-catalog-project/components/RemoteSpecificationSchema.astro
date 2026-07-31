@@ -1,0 +1,78 @@
+---
+import JSONSchemaViewer from '@components/SchemaExplorer/JSONSchemaViewer';
+import AvroSchemaViewer from '@components/SchemaExplorer/AvroSchemaViewer';
+import {
+  loadRemoteSpecificationSchema,
+  resolveFailOnError,
+  sanitizeRemoteSchemaError,
+  type LoadOptions,
+} from './lib/remote-specification-schema';
+
+type Props = LoadOptions & {
+  title?: string;
+  maxHeight?: string;
+  expand?: boolean | string;
+  search?: boolean | string;
+  showRequired?: boolean | string;
+  failOnError?: boolean;
+};
+
+const {
+  title,
+  maxHeight = '500',
+  expand = false,
+  search = true,
+  showRequired = false,
+  failOnError,
+  ...loadOptions
+} = Astro.props as Props;
+
+let resolved: Awaited<ReturnType<typeof loadRemoteSpecificationSchema>> | undefined;
+let error: string | undefined;
+
+try {
+  resolved = await loadRemoteSpecificationSchema(loadOptions);
+} catch (cause) {
+  error = sanitizeRemoteSchemaError(cause);
+  if (resolveFailOnError(failOnError)) {
+    throw new Error(
+      `RemoteSpecificationSchema failed (${loadOptions.message ?? loadOptions.schema ?? loadOptions.operationId ?? loadOptions.jsonPath ?? 'no selector'}): ${error}`
+    );
+  }
+}
+
+const rawContent = resolved ? JSON.stringify(resolved.schema, null, 2) : '';
+const rawMaxHeight = /^\d+(?:\.\d+)?$/.test(maxHeight) ? `${maxHeight}px` : maxHeight;
+---
+
+<div class="not-prose my-4">
+  {
+    error ? (
+      <div class="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100">
+        <strong class="block font-semibold">Remote schema could not be loaded</strong>
+        <span class="mt-1 block text-sm">{error}</span>
+      </div>
+    ) : resolved ? (
+      <section>
+        {title && <h2 class="mb-2 mt-0! text-2xl font-bold">{title}</h2>}
+        {resolved.format === 'avro' ? (
+          <AvroSchemaViewer
+            client:load
+            schema={resolved.schema}
+            maxHeight={maxHeight}
+            expand={expand}
+            search={search}
+            showRequired={showRequired}
+          />
+        ) : resolved.format === 'jsonschema' ? (
+          <JSONSchemaViewer client:load schema={resolved.schema} maxHeight={maxHeight} expand={expand} search={search} />
+        ) : (
+          <pre
+            class="overflow-auto rounded-md border border-[rgb(var(--ec-page-border))] bg-[rgb(var(--ec-content-hover))] p-4 text-sm text-[rgb(var(--ec-page-text))]"
+            style={`max-height: ${rawMaxHeight};`}
+          ><code>{rawContent}</code></pre>
+        )}
+      </section>
+    ) : null
+  }
+</div>

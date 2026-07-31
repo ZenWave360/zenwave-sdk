@@ -3,6 +3,12 @@ package io.zenwave360.sdk.plugins;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.zenwave360.manifest.BlockingZenWaveManifestLoader;
+import io.zenwave360.manifest.ManifestArtifact;
+import io.zenwave360.manifest.ManifestDomain;
+import io.zenwave360.manifest.ManifestService;
+import io.zenwave360.manifest.ManifestSubdomain;
+import io.zenwave360.manifest.ZenWaveManifest;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -100,10 +106,10 @@ class EventCatalogAdvancedFrontmatterTest {
                 "repository", tempDir.toString(),
                 "docs", map("content", "SERVICE.md", "missing", "MISSING.md"),
                 "artifacts", List.of(
-                        map("type", "zdl", "path", "domain-model.zdl"),
-                        map("type", "asyncapi", "path", "asyncapi.yml", "headers", map("X-API-Key", "secret", "ignored", null)),
+                        map("type", "zdl", "path", "domain-model.zdl", "version", "1.2.0"),
+                        map("type", "asyncapi", "path", "asyncapi.yml", "version", "1.2.0", "headers", map("X-API-Key", "secret", "ignored", null)),
                         map("type", "openapi"),
-                        map("type", "graphql", "buildPath", tempDir.resolve("schema.yml").toString())),
+                        map("type", "graphql", "path", "schema.yml", "version", "1.2.0", "buildPath", tempDir.resolve("schema.yml").toString())),
                 "_sends", List.of(event.get("id"), map("id", fallbackEvent.get("id")), 17),
                 "_receives", command.get("id"),
                 "_events", List.of(map("name", "Ignored missing id"), event, fallbackEvent),
@@ -135,17 +141,41 @@ class EventCatalogAdvancedFrontmatterTest {
                 "subdomain", "raw",
                 "version", "1.0.0");
 
+        subdomain.put("services", map("billing", billing, "observer", observer));
+        domain.put("services", map("support", direct));
+        Map<String, Object> externalSubdomain = map(
+                "id", "raw",
+                "services", map("external", unknownDomain));
+        Map<String, Object> externalDomain = map(
+                "id", "external",
+                "subdomains", map("raw", externalSubdomain));
         Map<String, Object> architecture = map(
-                "config", Map.of(),
-                "domains", map("commerce-key", domain),
-                "services", map(
-                        "billing", billing,
-                        "observer", observer,
-                        "support", direct,
-                        "external", unknownDomain));
+                "config", map("sources", map("workspace", map("basePathExpression", "."))),
+                "domains", map("commerce-key", domain, "external", externalDomain));
+
+        BlockingZenWaveManifestLoader manifestRuntime = new BlockingZenWaveManifestLoader();
+        ZenWaveManifest manifest = manifestRuntime.parse(
+                tempDir.resolve("zenwave-architecture.yml").toUri(),
+                YAML.writeValueAsString(architecture));
+        EventCatalogModel eventCatalog = new EventCatalogModel(manifest);
+        ManifestDomain commerce = manifest.getDomains().stream()
+                .filter(value -> "commerce-key".equals(value.getKey()))
+                .findFirst().orElseThrow();
+        ManifestSubdomain orders = commerce.getSubdomains().stream()
+                .filter(value -> "orders".equals(value.getKey()))
+                .findFirst().orElseThrow();
+        eventCatalog.domainData(commerce).putAll(domain);
+        eventCatalog.subdomainData(commerce, orders).putAll(subdomain);
+        enrichService(manifest, eventCatalog, "commerce-key/orders/billing", billing);
+        enrichService(manifest, eventCatalog, "commerce-key/orders/observer", observer);
+        enrichService(manifest, eventCatalog, "commerce-key/support", direct);
+        enrichService(manifest, eventCatalog, "external/raw/external", unknownDomain);
 
         EventCatalogGenerator generator = new EventCatalogGenerator();
-        Map<String, TemplateOutput> outputs = generator.generate(map("architecture", architecture)).singleFiles.stream()
+        Map<String, TemplateOutput> outputs = generator.generate(map(
+                        "manifest", manifest,
+                        "manifestRuntime", manifestRuntime,
+                        "eventCatalog", eventCatalog)).singleFiles.stream()
                 .collect(Collectors.toMap(TemplateOutput::getTargetFile, Function.identity()));
 
         String domainPage = content(outputs, "domains/commerce/index.mdx");
@@ -171,7 +201,7 @@ class EventCatalogAdvancedFrontmatterTest {
         assertEquals("secret", mapValue(maps(serviceFrontmatter.get("specifications")).get(0).get("headers")).get("X-API-Key"));
 
         assertTrue(outputs.containsKey("domains/commerce/services/commerce.support/index.mdx"));
-        assertTrue(outputs.containsKey("domains/external/subdomains/raw/services/external.raw-service/index.mdx"));
+        assertTrue(outputs.containsKey("domains/external/subdomains/external.raw/services/external.raw-service/index.mdx"));
         assertFalse(outputs.keySet().stream().anyMatch(path -> path.contains("Ignored missing id")));
 
         String eventPage = content(outputs,
@@ -218,6 +248,33 @@ class EventCatalogAdvancedFrontmatterTest {
             result.put(entries[i].toString(), entries[i + 1]);
         }
         return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void enrichService(ZenWaveManifest manifest, EventCatalogModel eventCatalog,
+                               String serviceRef, Map<String, Object> source) {
+        ManifestService service = manifest.findService(serviceRef);
+        if (service == null) {
+            throw new IllegalArgumentException("Unknown service " + serviceRef);
+        }
+        for (Map.Entry<String, Object> entry : source.entrySet()) {
+            if (!List.of("id", "version", "name", "description", "repository", "docs", "artifacts").contains(entry.getKey())) {
+                eventCatalog.serviceData(service).put(entry.getKey(), entry.getValue());
+            }
+        }
+        List<Map<String, Object>> sourceArtifacts = (List<Map<String, Object>>) source.getOrDefault("artifacts", List.of());
+        for (ManifestArtifact artifact : service.getArtifacts()) {
+            Map<String, Object> sourceArtifact = sourceArtifacts.stream()
+                    .filter(candidate -> artifact.getType().equals(candidate.get("type")))
+                    .filter(candidate -> artifact.getPath().equals(candidate.get("path")))
+                    .findFirst()
+                    .orElse(Map.of());
+            for (Map.Entry<String, Object> entry : sourceArtifact.entrySet()) {
+                if (!List.of("name", "artifactId", "type", "path", "version").contains(entry.getKey())) {
+                    eventCatalog.artifactData(service, artifact).put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")

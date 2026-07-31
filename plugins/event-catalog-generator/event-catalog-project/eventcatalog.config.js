@@ -10,7 +10,8 @@ export default {
   // Supports static or server. Static renders a static site, server renders a server side rendered site
   // large catalogs may benefit from server side rendering
   output: 'static',
-contentDir: '../event-catalog-content/',
+  outDir: process.env.EVENTCATALOG_OUTPUT_DIR || 'dist',
+  contentDir: '../event-catalog-content/',
   // By default set to false, add true to get urls ending in /
   trailingSlash: false,
   // Change to make the base url of the site different, by default https://{website}.com/docs,

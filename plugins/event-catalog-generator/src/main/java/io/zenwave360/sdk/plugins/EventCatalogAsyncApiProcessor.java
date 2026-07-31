@@ -2,17 +2,20 @@ package io.zenwave360.sdk.plugins;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.zenwave360.manifest.BlockingZenWaveManifestLoader;
 import io.zenwave360.manifest.ManifestArtifact;
 import io.zenwave360.manifest.ManifestLoadOptions;
+import io.zenwave360.manifest.ManifestResolvedResource;
 import io.zenwave360.manifest.ManifestService;
 import io.zenwave360.manifest.ZenWaveManifest;
-import io.zenwave360.manifest.ZenWaveManifestLoader;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.processors.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -21,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Parses AsyncAPI artifacts declared in each service entry and augments the service map
+ * Parses AsyncAPI artifacts declared by typed manifest services and augments the EventCatalog model
  * with extracted events, commands, sends, receives, version, and channels.
  */
 public class EventCatalogAsyncApiProcessor implements Processor {
@@ -37,47 +40,43 @@ public class EventCatalogAsyncApiProcessor implements Processor {
     public String linkSource;
 
     @Override
-    @SuppressWarnings("unchecked")
     public Map<String, Object> process(Map<String, Object> contextModel) {
-        Map<String, Object> architecture = (Map<String, Object>) contextModel.get("architecture");
         ZenWaveManifest manifest = (ZenWaveManifest) contextModel.get("manifest");
-        ZenWaveManifestLoader manifestLoader = (ZenWaveManifestLoader) contextModel.get("manifestLoader");
-        if (architecture == null || manifest == null || manifestLoader == null) return contextModel;
+        EventCatalogModel eventCatalog = (EventCatalogModel) contextModel.get("eventCatalog");
+        BlockingZenWaveManifestLoader manifestRuntime =
+                (BlockingZenWaveManifestLoader) contextModel.get("manifestRuntime");
+        if (manifest == null || eventCatalog == null || manifestRuntime == null) return contextModel;
 
-        Map<String, Object> services = (Map<String, Object>) architecture.getOrDefault("services", Map.of());
         Map<String, Map<String, String>> channelAddressIndex = new LinkedHashMap<>();
-        ManifestLoadOptions contentOptions = ManifestRuntimeSupport.contentOptions(preferredSource, allowFallback);
+        ManifestLoadOptions contentOptions = new ManifestLoadOptions()
+                .withPreferredSource(preferredSource)
+                .withFallback(allowFallback == null || allowFallback);
 
-        for (Map.Entry<String, Object> entry : services.entrySet()) {
-            Map<String, Object> serviceMap = (Map<String, Object>) entry.getValue();
-            ManifestService service = ManifestRuntimeSupport.findService(manifest, serviceMap);
-            if (service == null) {
-                continue;
-            }
-            String serviceId = str(serviceMap, "id", entry.getKey());
-            processPublicArtifact(manifestLoader, manifest, service, serviceMap, serviceId, contentOptions, channelAddressIndex);
+        for (ManifestService service : manifest.getServices()) {
+            Map<String, Object> serviceData = eventCatalog.serviceData(service);
+            processPublicArtifact(
+                    manifestRuntime, manifest, eventCatalog, service, serviceData,
+                    eventCatalog.catalogServiceId(service), contentOptions, channelAddressIndex);
         }
 
-        for (Map.Entry<String, Object> entry : services.entrySet()) {
-            Map<String, Object> serviceMap = (Map<String, Object>) entry.getValue();
-            ManifestService service = ManifestRuntimeSupport.findService(manifest, serviceMap);
-            if (service == null) {
-                continue;
-            }
-            processClientArtifact(manifestLoader, manifest, service, serviceMap, contentOptions, channelAddressIndex);
+        for (ManifestService service : manifest.getServices()) {
+            processClientArtifact(
+                    manifestRuntime, manifest, service, eventCatalog.serviceData(service),
+                    contentOptions, channelAddressIndex);
         }
 
         return contextModel;
     }
 
-    private void processPublicArtifact(ZenWaveManifestLoader manifestLoader, ZenWaveManifest manifest,
-                                       ManifestService manifestService, Map<String, Object> serviceMap, String serviceId,
+    private void processPublicArtifact(BlockingZenWaveManifestLoader manifestRuntime, ZenWaveManifest manifest,
+                                       EventCatalogModel eventCatalog, ManifestService manifestService,
+                                       Map<String, Object> serviceData, String serviceId,
                                        ManifestLoadOptions contentOptions,
                                        Map<String, Map<String, String>> channelAddressIndex) {
-        for (ManifestArtifact artifact : ManifestRuntimeSupport.findArtifacts(manifestService, "asyncapi")) {
+        for (ManifestArtifact artifact : manifestService.findArtifacts("asyncapi")) {
             String specText;
             try {
-                specText = ManifestRuntimeSupport.loadArtifactText(manifestLoader, manifest, manifestService, artifact, contentOptions);
+                specText = manifestRuntime.loadArtifactText(manifest, manifestService, artifact, contentOptions);
             } catch (Exception e) {
                 log.warn("AsyncAPI artifact could not be loaded for {}: {}", manifestService.getServiceRef(), e.getMessage());
                 continue;
@@ -87,15 +86,19 @@ public class EventCatalogAsyncApiProcessor implements Processor {
             if (model == null) continue;
 
             String version = str(map(model.get("info")), "version", null);
-            if (version != null && serviceMap.get("_version") == null) {
-                serviceMap.put("_version", version);
+            if (version != null && serviceData.get("_version") == null) {
+                serviceData.put("_version", version);
             }
 
-            annotateArtifactLink(manifestLoader, manifest, manifestService, serviceMap, artifact, contentOptions);
+            annotateArtifactLink(manifestRuntime, manifest, eventCatalog, manifestService, artifact, contentOptions);
 
             Map<String, Object> channels = map(model.get("channels"));
             Map<String, Object> operations = map(model.get("operations"));
+            Map<String, Object> componentMessages = map(map(model.get("components")).get("messages"));
             List<String> protocols = uniqueStrings(values(map(model.get("servers"))), "protocol");
+            String specificationUrl = manifestRuntime.getDelegate().artifactReferenceUri(
+                    manifest, manifestService, artifact, null,
+                    new ManifestLoadOptions(linkSource, false));
 
             Map<String, String> addressToChannelKey = new LinkedHashMap<>();
             for (Map.Entry<String, Object> channelEntry : channels.entrySet()) {
@@ -108,7 +111,7 @@ public class EventCatalogAsyncApiProcessor implements Processor {
                 channelArtifact.put("id", channelId);
                 channelArtifact.put("name", str(channel, "summary", channelKey));
                 channelArtifact.put("summary", str(channel, "description", str(channel, "summary", null)));
-                channelArtifact.put("version", version != null ? version : str(serviceMap, "version", "0.0.1"));
+                channelArtifact.put("version", version != null ? version : serviceVersion(manifestService));
                 if (address != null) {
                     channelArtifact.put("address", address);
                     addressToChannelKey.put(address, channelKey);
@@ -120,7 +123,7 @@ public class EventCatalogAsyncApiProcessor implements Processor {
                 if (!protocols.isEmpty()) {
                     channelArtifact.put("protocols", protocols);
                 }
-                addToList(serviceMap, "_channels", channelArtifact);
+                addToList(serviceData, "_channels", channelArtifact);
             }
 
             for (Object operationValue : operations.values()) {
@@ -144,33 +147,40 @@ public class EventCatalogAsyncApiProcessor implements Processor {
                 message.put("id", messageId);
                 message.put("name", str(channel, "summary", channelKey));
                 message.put("summary", str(channel, "description", str(channel, "summary", null)));
-                message.put("version", version != null ? version : str(serviceMap, "version", "0.0.1"));
+                message.put("version", version != null ? version : serviceVersion(manifestService));
                 message.put("channelId", channelId);
 
-                String schemaPath = resolveSchemaLink(manifestLoader, manifest, manifestService, artifact, channel);
+                MessageSelection messageSelection = resolveMessageSelection(operation, channel, componentMessages);
+                String schemaPath = resolveSchemaLink(
+                        manifestRuntime, manifest, manifestService, artifact, messageSelection);
                 if (schemaPath != null) {
                     message.put("schemaPath", schemaPath);
                 }
+                if (isHttpUrl(specificationUrl)
+                        && messageSelection != null && messageSelection.messageSelector != null) {
+                    message.put("_remoteSchemaUrl", specificationUrl);
+                    message.put("_remoteSchemaMessage", messageSelection.messageSelector);
+                }
 
                 if ("send".equals(action)) {
-                    addToList(serviceMap, "_events", message);
-                    addToList(serviceMap, "_sends", messageId);
+                    addToList(serviceData, "_events", message);
+                    addToList(serviceData, "_sends", messageId);
                 } else if ("receive".equals(action)) {
-                    addToList(serviceMap, "_commands", message);
-                    addToList(serviceMap, "_receives", messageId);
+                    addToList(serviceData, "_commands", message);
+                    addToList(serviceData, "_receives", messageId);
                 }
             }
         }
     }
 
-    private void processClientArtifact(ZenWaveManifestLoader manifestLoader, ZenWaveManifest manifest,
-                                       ManifestService manifestService, Map<String, Object> serviceMap,
+    private void processClientArtifact(BlockingZenWaveManifestLoader manifestRuntime, ZenWaveManifest manifest,
+                                       ManifestService manifestService, Map<String, Object> serviceData,
                                        ManifestLoadOptions contentOptions,
                                        Map<String, Map<String, String>> channelAddressIndex) {
-        for (ManifestArtifact artifact : ManifestRuntimeSupport.findArtifacts(manifestService, "asyncapi-client")) {
+        for (ManifestArtifact artifact : manifestService.findArtifacts("asyncapi-client")) {
             String specText;
             try {
-                specText = ManifestRuntimeSupport.loadArtifactText(manifestLoader, manifest, manifestService, artifact, contentOptions);
+                specText = manifestRuntime.loadArtifactText(manifest, manifestService, artifact, contentOptions);
             } catch (Exception e) {
                 log.warn("AsyncAPI client artifact could not be loaded for {}: {}", manifestService.getServiceRef(), e.getMessage());
                 continue;
@@ -210,35 +220,28 @@ public class EventCatalogAsyncApiProcessor implements Processor {
                 }
 
                 if ("send".equals(action)) {
-                    addToList(serviceMap, "_sends", messageId);
+                    addToList(serviceData, "_sends", messageId);
                 } else if ("receive".equals(action)) {
-                    addToList(serviceMap, "_receives", messageId);
+                    addToList(serviceData, "_receives", messageId);
                 }
             }
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private void annotateArtifactLink(ZenWaveManifestLoader manifestLoader, ZenWaveManifest manifest,
-                                      ManifestService manifestService, Map<String, Object> serviceMap,
+    private void annotateArtifactLink(BlockingZenWaveManifestLoader manifestRuntime, ZenWaveManifest manifest,
+                                      EventCatalogModel eventCatalog, ManifestService manifestService,
                                       ManifestArtifact artifact, ManifestLoadOptions contentOptions) {
-        List<Map<String, Object>> artifacts = (List<Map<String, Object>>) serviceMap.get("artifacts");
-        if (artifacts == null) {
-            return;
+        Map<String, Object> artifactData = eventCatalog.artifactData(manifestService, artifact);
+        String linkUri = manifestRuntime.getDelegate().artifactReferenceUri(
+                manifest, manifestService, artifact, null,
+                new ManifestLoadOptions(linkSource, false));
+        if (linkUri != null) {
+            artifactData.put("linkUri", linkUri);
         }
-        for (Map<String, Object> artifactMap : artifacts) {
-            if (artifact.getPath().equals(artifactMap.get("path")) && artifact.getType().equals(artifactMap.get("type"))) {
-                String linkUri = ManifestRuntimeSupport.resolveLinkUri(
-                        manifestLoader, manifest, manifestService, artifact, artifact.getPath(), linkSource);
-                if (linkUri != null) {
-                    artifactMap.put("linkUri", linkUri);
-                }
-                String buildPath = ManifestRuntimeSupport.resolveContentPath(
-                        manifestLoader, manifest, manifestService, artifact, contentOptions);
-                if (buildPath != null) {
-                    artifactMap.put("buildPath", buildPath);
-                }
-            }
+        String buildPath = resolvedContentPath(
+                manifestRuntime.resolveArtifact(manifest, manifestService, artifact, contentOptions));
+        if (buildPath != null) {
+            artifactData.put("buildPath", buildPath);
         }
     }
 
@@ -265,22 +268,115 @@ public class EventCatalogAsyncApiProcessor implements Processor {
         return map(channels.get(ref.substring(prefix.length())));
     }
 
-    private String resolveSchemaLink(ZenWaveManifestLoader manifestLoader, ZenWaveManifest manifest, ManifestService manifestService,
-                                     ManifestArtifact artifact, Map<String, Object> channel) {
-        Map<String, Object> messages = map(channel.get("messages"));
-        for (Object messageValue : messages.values()) {
-            Map<String, Object> message = map(messageValue);
-            String ref = str(map(map(message.get("payload")).get("schema")), "$ref", null);
-            if (ref == null) {
-                continue;
-            }
+    private String resolveSchemaLink(BlockingZenWaveManifestLoader manifestRuntime, ZenWaveManifest manifest, ManifestService manifestService,
+                                     ManifestArtifact artifact, MessageSelection messageSelection) {
+        if (messageSelection == null) {
+            return null;
+        }
+        String ref = str(map(map(messageSelection.message.get("payload")).get("schema")), "$ref", null);
+        if (ref != null) {
             String filePart = ref.contains("#") ? ref.substring(0, ref.indexOf('#')) : ref;
             if (!filePart.isBlank()) {
-                return ManifestRuntimeSupport.resolveLinkUri(
-                        manifestLoader, manifest, manifestService, artifact, filePart, linkSource);
+                return manifestRuntime.getDelegate().artifactReferenceUri(
+                        manifest, manifestService, artifact, filePart,
+                        new ManifestLoadOptions(linkSource, false));
             }
         }
         return null;
+    }
+
+    private String resolvedContentPath(ManifestResolvedResource resource) {
+        if (resource == null || resource.getUri() == null) {
+            return null;
+        }
+        URI uri = URI.create(resource.getUri());
+        return "file".equalsIgnoreCase(uri.getScheme())
+                ? Path.of(uri).toString()
+                : resource.referenceUri();
+    }
+
+    private boolean isHttpUrl(String value) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+        try {
+            String scheme = URI.create(value).getScheme();
+            return "http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme);
+        } catch (IllegalArgumentException ignored) {
+            return false;
+        }
+    }
+
+    private String serviceVersion(ManifestService service) {
+        String version = service.documentVersion();
+        return version != null && !version.isBlank() ? version : "0.0.1";
+    }
+
+    private MessageSelection resolveMessageSelection(Map<String, Object> operation, Map<String, Object> channel,
+                                                     Map<String, Object> componentMessages) {
+        Object operationMessages = operation.get("messages");
+        if (operationMessages instanceof Collection<?> collection) {
+            for (Object messageValue : collection) {
+                MessageSelection selection = resolveMessage(null, messageValue, componentMessages);
+                if (selection != null) {
+                    return selection;
+                }
+            }
+        }
+
+        for (Map.Entry<String, Object> messageEntry : map(channel.get("messages")).entrySet()) {
+            MessageSelection selection = resolveMessage(messageEntry.getKey(), messageEntry.getValue(), componentMessages);
+            if (selection != null) {
+                return selection;
+            }
+        }
+        return null;
+    }
+
+    private MessageSelection resolveMessage(String channelMessageName, Object messageValue,
+                                            Map<String, Object> componentMessages) {
+        Map<String, Object> message = map(messageValue);
+        String ref = str(message, "$ref", null);
+        String prefix = "#/components/messages/";
+        if (ref != null && ref.startsWith(prefix)) {
+            String componentName = decodeJsonPointerSegment(ref.substring(prefix.length()));
+            Map<String, Object> componentMessage = map(componentMessages.get(componentName));
+            return componentMessage.isEmpty() ? null : new MessageSelection(
+                    preferredMessageSelector(componentName, componentMessage), componentMessage);
+        }
+        if (message.isEmpty()) {
+            return null;
+        }
+
+        if (channelMessageName != null && componentMessages.containsKey(channelMessageName)) {
+            Map<String, Object> componentMessage = map(componentMessages.get(channelMessageName));
+            return new MessageSelection(preferredMessageSelector(channelMessageName, componentMessage), componentMessage);
+        }
+        for (Map.Entry<String, Object> componentEntry : componentMessages.entrySet()) {
+            if (messageValue == componentEntry.getValue()) {
+                return new MessageSelection(preferredMessageSelector(componentEntry.getKey(), message), message);
+            }
+        }
+        return new MessageSelection(channelMessageName, message);
+    }
+
+    private String preferredMessageSelector(String componentName, Map<String, Object> message) {
+        String messageName = str(message, "name", null);
+        return messageName != null && !messageName.isBlank() ? messageName : componentName;
+    }
+
+    private String decodeJsonPointerSegment(String value) {
+        return value.replace("~1", "/").replace("~0", "~");
+    }
+
+    private static final class MessageSelection {
+        private final String messageSelector;
+        private final Map<String, Object> message;
+
+        private MessageSelection(String messageSelector, Map<String, Object> message) {
+            this.messageSelector = messageSelector;
+            this.message = message;
+        }
     }
 
     @SuppressWarnings("unchecked")

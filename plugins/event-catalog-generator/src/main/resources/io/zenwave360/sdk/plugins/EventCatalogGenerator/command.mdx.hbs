@@ -1,0 +1,17 @@
+{{~#if hasRemoteSchema}}import RemoteSpecificationSchema from '@catalog/components/RemoteSpecificationSchema.astro';
+
+{{~/if}}## Overview
+
+{{{summary}}}
+
+<NodeGraph />
+
+{{~#if hasRemoteSchema}}## Schema
+
+<RemoteSpecificationSchema url="{{{remoteSchemaUrl}}}" message="{{{remoteSchemaMessage}}}" />
+
+{{~else}}{{~#if schemaPath}}## Schema
+
+<SchemaViewer file="{{{schemaPath}}}" />
+
+{{~/if}}{{~/if}}

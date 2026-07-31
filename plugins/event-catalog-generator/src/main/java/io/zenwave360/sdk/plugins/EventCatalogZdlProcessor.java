@@ -1,10 +1,10 @@
 package io.zenwave360.sdk.plugins;
 
+import io.zenwave360.manifest.BlockingZenWaveManifestLoader;
 import io.zenwave360.manifest.ManifestArtifact;
 import io.zenwave360.manifest.ManifestLoadOptions;
 import io.zenwave360.manifest.ManifestService;
 import io.zenwave360.manifest.ZenWaveManifest;
-import io.zenwave360.manifest.ZenWaveManifestLoader;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.processors.Processor;
@@ -18,7 +18,7 @@ import java.nio.file.Files;
 import java.util.*;
 
 /**
- * Parses ZDL artifacts declared in each service entry and augments the service map
+ * Parses ZDL artifacts declared by typed manifest services and augments the EventCatalog model
  * with extracted entities and aggregates.
  */
 public class EventCatalogZdlProcessor implements Processor {
@@ -30,36 +30,33 @@ public class EventCatalogZdlProcessor implements Processor {
     @DocumentedOption(description = "Allow source fallback for build-time content loading.")
     public Boolean allowFallback;
     @Override
-    @SuppressWarnings("unchecked")
     public Map<String, Object> process(Map<String, Object> contextModel) {
-        Map<String, Object> architecture = (Map<String, Object>) contextModel.get("architecture");
         ZenWaveManifest manifest = (ZenWaveManifest) contextModel.get("manifest");
-        ZenWaveManifestLoader manifestLoader = (ZenWaveManifestLoader) contextModel.get("manifestLoader");
-        if (architecture == null || manifest == null || manifestLoader == null) return contextModel;
+        EventCatalogModel eventCatalog = (EventCatalogModel) contextModel.get("eventCatalog");
+        BlockingZenWaveManifestLoader manifestRuntime =
+                (BlockingZenWaveManifestLoader) contextModel.get("manifestRuntime");
+        if (manifest == null || eventCatalog == null || manifestRuntime == null) return contextModel;
 
-        Map<String, Object> services = (Map<String, Object>) architecture.getOrDefault("services", Map.of());
-        ManifestLoadOptions contentOptions = ManifestRuntimeSupport.contentOptions(preferredSource, allowFallback);
+        ManifestLoadOptions contentOptions = new ManifestLoadOptions()
+                .withPreferredSource(preferredSource)
+                .withFallback(allowFallback == null || allowFallback);
 
-        for (Map.Entry<String, Object> entry : services.entrySet()) {
-            Map<String, Object> serviceMap = (Map<String, Object>) entry.getValue();
-            ManifestService service = ManifestRuntimeSupport.findService(manifest, serviceMap);
-            if (service == null) {
-                continue;
-            }
-            String serviceId = str(serviceMap, "id", entry.getKey());
-            processZdlArtifacts(manifestLoader, manifest, service, serviceMap, serviceId, contentOptions);
+        for (ManifestService service : manifest.getServices()) {
+            processZdlArtifacts(
+                    manifestRuntime, manifest, service, eventCatalog.serviceData(service),
+                    eventCatalog.catalogServiceId(service), contentOptions);
         }
 
         return contextModel;
     }
 
-    private void processZdlArtifacts(ZenWaveManifestLoader manifestLoader, ZenWaveManifest manifest,
-                                     ManifestService manifestService, Map<String, Object> serviceMap,
+    private void processZdlArtifacts(BlockingZenWaveManifestLoader manifestRuntime, ZenWaveManifest manifest,
+                                     ManifestService manifestService, Map<String, Object> serviceData,
                                      String serviceId, ManifestLoadOptions contentOptions) {
-        for (ManifestArtifact artifact : ManifestRuntimeSupport.findArtifacts(manifestService, "zdl")) {
+        for (ManifestArtifact artifact : manifestService.findArtifacts("zdl")) {
             String zdlText;
             try {
-                zdlText = ManifestRuntimeSupport.loadArtifactText(manifestLoader, manifest, manifestService, artifact, contentOptions);
+                zdlText = manifestRuntime.loadArtifactText(manifest, manifestService, artifact, contentOptions);
             } catch (Exception e) {
                 log.warn("ZDL artifact could not be loaded for {}: {}", manifestService.getServiceRef(), e.getMessage());
                 continue;
@@ -68,7 +65,7 @@ public class EventCatalogZdlProcessor implements Processor {
             Map<String, Object> zdlModel = parseSpec(artifact, zdlText);
             if (zdlModel == null) continue;
 
-            String version = str(serviceMap, "_version", str(serviceMap, "version", "0.0.1"));
+            String version = str(serviceData, "_version", serviceVersion(manifestService));
 
             Map<String, Object> aggregates = JSONPath.get(zdlModel, "$.aggregates", Map.of());
             Set<String> aggregateRootNames = new LinkedHashSet<>();
@@ -99,7 +96,7 @@ public class EventCatalogZdlProcessor implements Processor {
                 List<Map<String, Object>> properties = buildProperties(entity, zdlModel);
                 if (!properties.isEmpty()) entityArtifact.put("properties", properties);
 
-                addToList(serviceMap, "_entities", entityArtifact);
+                addToList(serviceData, "_entities", entityArtifact);
             }
         }
     }
@@ -129,6 +126,11 @@ public class EventCatalogZdlProcessor implements Processor {
     private String toKebabCase(String name) {
         if (name == null || name.isBlank()) return name;
         return name.replaceAll("([a-z])([A-Z])", "$1-$2").toLowerCase();
+    }
+
+    private String serviceVersion(ManifestService service) {
+        String version = service.documentVersion();
+        return version != null && !version.isBlank() ? version : "0.0.1";
     }
 
     @SuppressWarnings("unchecked")

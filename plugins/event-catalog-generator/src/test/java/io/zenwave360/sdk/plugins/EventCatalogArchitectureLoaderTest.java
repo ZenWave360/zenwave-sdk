@@ -1,5 +1,9 @@
 package io.zenwave360.sdk.plugins;
 
+import io.zenwave360.manifest.ManifestDomain;
+import io.zenwave360.manifest.ManifestService;
+import io.zenwave360.manifest.ManifestSubdomain;
+import io.zenwave360.manifest.ZenWaveManifest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -10,7 +14,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EventCatalogArchitectureLoaderTest {
 
@@ -18,8 +21,7 @@ class EventCatalogArchitectureLoaderTest {
     Path tempDir;
 
     @Test
-    @SuppressWarnings("unchecked")
-    void loadsDirectDomainAndSubdomainServicesIntoNestedAndFlattenedMaps() throws Exception {
+    void loadsDirectDomainAndSubdomainServicesAsTypedManifestModels() throws Exception {
         Path manifest = writeManifest("""
                 domains:
                   orders:
@@ -32,29 +34,26 @@ class EventCatalogArchitectureLoaderTest {
                           shipping-api:
                 """);
 
-        Map<String, Object> architecture = loadArchitecture(manifest);
+        Map<String, Object> context = loadContext(manifest);
+        ZenWaveManifest loaded = (ZenWaveManifest) context.get("manifest");
+        EventCatalogModel eventCatalog = (EventCatalogModel) context.get("eventCatalog");
 
-        Map<String, Object> domains = (Map<String, Object>) architecture.get("domains");
-        Map<String, Object> orders = (Map<String, Object>) domains.get("orders");
-        Map<String, Object> directServices = (Map<String, Object>) orders.get("services");
-        assertNotNull(directServices.get("orders-api"));
+        ManifestService orders = loaded.findService("orders/orders-api");
+        ManifestService shipping = loaded.findService("fulfillment/shipping/shipping-api");
+        assertNotNull(orders);
+        assertNotNull(shipping);
+        assertEquals("orders.orders-api", eventCatalog.catalogServiceId(orders));
+        assertEquals("fulfillment.shipping.shipping-api", eventCatalog.catalogServiceId(shipping));
 
-        Map<String, Object> fulfillment = (Map<String, Object>) domains.get("fulfillment");
-        Map<String, Object> subdomains = (Map<String, Object>) fulfillment.get("subdomains");
-        Map<String, Object> shipping = (Map<String, Object>) subdomains.get("shipping");
-        Map<String, Object> nestedServices = (Map<String, Object>) shipping.get("services");
-        assertNotNull(nestedServices.get("shipping-api"));
-
-        Map<String, Object> flattenedServices = (Map<String, Object>) architecture.get("services");
-        assertTrue(flattenedServices.containsKey("orders.orders-api"));
-        assertTrue(flattenedServices.containsKey("fulfillment.shipping.shipping-api"));
-
-        Map<String, Object> ordersService = (Map<String, Object>) flattenedServices.get("orders.orders-api");
-        assertEquals("orders/orders-api", ordersService.get("serviceRef"));
+        ManifestDomain fulfillment = loaded.getDomains().stream()
+                .filter(domain -> "fulfillment".equals(domain.getKey()))
+                .findFirst()
+                .orElseThrow();
+        ManifestSubdomain shippingSubdomain = fulfillment.getSubdomains().get(0);
+        assertEquals("fulfillment.shipping", eventCatalog.catalogSubdomainId(fulfillment, shippingSubdomain));
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void resolvesPathDocsArtifactsAndNormalizesConsumers() throws Exception {
         Path repos = tempDir.resolve("repos");
         Path ordersApi = repos.resolve("orders-api");
@@ -105,21 +104,15 @@ class EventCatalogArchitectureLoaderTest {
                         id: notifications.notifications-api
                 """);
 
-        Map<String, Object> architecture = loadArchitecture(manifest);
-        Map<String, Object> services = (Map<String, Object>) architecture.get("services");
-        Map<String, Object> ordersService = (Map<String, Object>) services.get("orders.orders-api");
+        ZenWaveManifest loaded = (ZenWaveManifest) loadContext(manifest).get("manifest");
+        ManifestService ordersService = loaded.findService("orders/orders-api");
+        assertNotNull(ordersService);
 
-        assertEquals("orders/orders-api", ordersService.get("serviceRef"));
-
-        Map<String, Object> docs = (Map<String, Object>) ordersService.get("docs");
-        assertEquals("SUMMARY.md", docs.get("summary"));
-
-        List<Map<String, Object>> artifacts = (List<Map<String, Object>>) ordersService.get("artifacts");
-        assertEquals("domain-model.zdl", artifacts.get(0).get("path"));
-        assertEquals("asyncapi.yml", artifacts.get(1).get("path"));
-
-        List<String> consumers = (List<String>) ordersService.get("consumers");
-        assertEquals(List.of("orders.notifications-api", "payments.payments-api"), consumers);
+        assertEquals("orders/orders-api", ordersService.getServiceRef());
+        assertEquals("SUMMARY.md", ordersService.getDocs().get("summary"));
+        assertEquals("domain-model.zdl", ordersService.getArtifacts().get(0).getPath());
+        assertEquals("asyncapi.yml", ordersService.getArtifacts().get(1).getPath());
+        assertEquals(List.of("orders/notifications-api", "payments/payments-api"), ordersService.getConsumers());
     }
 
     private Path writeManifest(String content) throws Exception {
@@ -128,11 +121,9 @@ class EventCatalogArchitectureLoaderTest {
         return manifest;
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> loadArchitecture(Path manifest) {
+    private Map<String, Object> loadContext(Path manifest) {
         EventCatalogArchitectureLoader loader = new EventCatalogArchitectureLoader();
-        loader.inputFile = manifest.toString();
-        Map<String, Object> context = loader.process(new java.util.LinkedHashMap<>());
-        return (Map<String, Object>) context.get("architecture");
+        loader.inputFile = manifest.toUri();
+        return loader.process(new java.util.LinkedHashMap<>());
     }
 }

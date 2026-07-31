@@ -13,7 +13,7 @@ import io.zenwave360.sdk.doc.DocumentedPlugin;
 public class EventCatalogPlugin extends Plugin {
 
     // Chain:
-    // 0 = EventCatalogArchitectureLoader  — loads zenwave-architecture.yml → "architecture"
+    // 0 = EventCatalogArchitectureLoader  — loads the typed manifest and EventCatalog enrichment model
     // 1 = EventCatalogAsyncApiProcessor   — enriches services with events/commands/sends/receives
     // 2 = EventCatalogOpenApiProcessor    — enriches services with queries
     // 3 = EventCatalogZdlProcessor        — enriches services with entities
@@ -53,6 +53,10 @@ public class EventCatalogPlugin extends Plugin {
 
     @Override
     public <T extends Plugin> T processOptions() {
+        if (inputFile != null) {
+            // Match Plugin.withApiFile: keep Windows paths URI-bindable for the loader processor.
+            withOption("inputFile", inputFile.replace('\\', '/'));
+        }
         if (!getOptions().containsKey("targetFolder") && getOptions().containsKey("outputFolder")) {
             withOption("targetFolder", getOptions().get("outputFolder"));
         }

@@ -2,10 +2,13 @@ package io.zenwave360.sdk.plugins;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.zenwave360.manifest.BlockingZenWaveManifestLoader;
+import io.zenwave360.manifest.ManifestArtifact;
+import io.zenwave360.manifest.ManifestDomain;
 import io.zenwave360.manifest.ManifestLoadOptions;
 import io.zenwave360.manifest.ManifestService;
+import io.zenwave360.manifest.ManifestSubdomain;
 import io.zenwave360.manifest.ZenWaveManifest;
-import io.zenwave360.manifest.ZenWaveManifestLoader;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.plugins.frontmatter.ChannelFrontmatter;
@@ -24,8 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -40,13 +41,23 @@ import java.util.function.Predicate;
 /**
  * Generates EventCatalog {@code index.mdx} pages for domains, subdomains, and services.
  *
- * <p>Phase 1 scope: structural skeleton only (no events, commands, queries, or entities).
- * Reads the {@code "architecture"} map produced by {@link EventCatalogArchitectureLoader}.
+ * <p>Reads the typed manifest and EventCatalog enrichment model produced by
+ * {@link EventCatalogArchitectureLoader}.
  */
 public class EventCatalogGenerator extends Generator {
 
     private static final String DEFAULT_DOCS_TEMPLATE =
             "io/zenwave360/sdk/plugins/EventCatalogGenerator/docs.md";
+    private static final String TEMPLATES_ROOT =
+            "io/zenwave360/sdk/plugins/EventCatalogGenerator";
+    private static final String DOMAIN_TEMPLATE = TEMPLATES_ROOT + "/domain.mdx";
+    private static final String SUBDOMAIN_TEMPLATE = TEMPLATES_ROOT + "/subdomain.mdx";
+    private static final String SERVICE_TEMPLATE = TEMPLATES_ROOT + "/service.mdx";
+    private static final String CHANNEL_TEMPLATE = TEMPLATES_ROOT + "/channel.mdx";
+    private static final String EVENT_TEMPLATE = TEMPLATES_ROOT + "/event.mdx";
+    private static final String COMMAND_TEMPLATE = TEMPLATES_ROOT + "/command.mdx";
+    private static final String QUERY_TEMPLATE = TEMPLATES_ROOT + "/query.mdx";
+    private static final String ENTITY_TEMPLATE = TEMPLATES_ROOT + "/entity.mdx";
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -64,46 +75,55 @@ public class EventCatalogGenerator extends Generator {
     @Override
     @SuppressWarnings("unchecked")
     public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
-        Map<String, Object> architecture = (Map<String, Object>) contextModel.get("architecture");
+        ZenWaveManifest manifest = (ZenWaveManifest) contextModel.get("manifest");
+        EventCatalogModel eventCatalog = (EventCatalogModel) contextModel.get("eventCatalog");
+        if (manifest == null || eventCatalog == null) {
+            return new GeneratedProjectFiles();
+        }
+
         GeneratedProjectFiles files = new GeneratedProjectFiles();
 
-        String configVersion = configVersion(architecture);
-        Map<String, Object> services = (Map<String, Object>) architecture.getOrDefault("services", Map.of());
+        String configVersion = manifest.getConfig().getVersion() != null
+                ? manifest.getConfig().getVersion()
+                : "0.0.1";
+        Map<String, Object> services = serviceViews(manifest, eventCatalog);
 
         // Domains and their subdomains
-        Map<String, Object> domains = (Map<String, Object>) architecture.getOrDefault("domains", Map.of());
-        for (Map.Entry<String, Object> domainEntry : domains.entrySet()) {
-            Map<String, Object> domain = (Map<String, Object>) domainEntry.getValue();
-            String domainId = str(domain, "id", domainEntry.getKey());
-            List<Map<String, Object>> domainServices = domainServices(services, domainId, domains);
-            List<Map<String, Object>> childDomains = childDomains(domain);
+        for (ManifestDomain manifestDomain : manifest.getDomains()) {
+            Map<String, Object> domain = domainView(eventCatalog, manifestDomain);
+            String domainId = manifestDomain.getId();
+            List<Map<String, Object>> domainServices = manifestDomain.getServices().stream()
+                    .map(service -> serviceView(manifest, eventCatalog, service))
+                    .toList();
+            List<Map<String, Object>> childDomains = manifestDomain.getSubdomains().stream()
+                    .map(subdomain -> subdomainView(eventCatalog, manifestDomain, subdomain))
+                    .toList();
 
             files.singleFiles.add(mdxPage(
                     "domains/" + domainId + "/index.mdx",
                     domainFrontmatter(domainId, domain, configVersion, domainServices, childDomains),
-                    domainBody(domain, domainServices, childDomains, renderDocs(domain, contextModel))));
+                    domainBody(DOMAIN_TEMPLATE, domain, domainServices, childDomains, "")));
 
-            Map<String, Object> subdomains = (Map<String, Object>) domain.getOrDefault("subdomains", Map.of());
-            for (Map.Entry<String, Object> subEntry : subdomains.entrySet()) {
-                Map<String, Object> subdomain = (Map<String, Object>) subEntry.getValue();
-                String subdomainId = str(subdomain, "id", subEntry.getKey());
-                List<Map<String, Object>> subdomainServices = subdomainServices(services, domains, domainId, subdomainId);
+            for (ManifestSubdomain manifestSubdomain : manifestDomain.getSubdomains()) {
+                Map<String, Object> subdomain = subdomainView(eventCatalog, manifestDomain, manifestSubdomain);
+                String subdomainId = eventCatalog.catalogSubdomainId(manifestDomain, manifestSubdomain);
+                List<Map<String, Object>> subdomainServices = manifestSubdomain.getServices().stream()
+                        .map(service -> serviceView(manifest, eventCatalog, service))
+                        .toList();
 
                 files.singleFiles.add(mdxPage(
                         "domains/" + domainId + "/subdomains/" + subdomainId + "/index.mdx",
                         domainFrontmatter(subdomainId, subdomain, configVersion, subdomainServices, List.of()),
-                        domainBody(subdomain, subdomainServices, List.of(), renderDocs(subdomain, contextModel))));
+                        domainBody(SUBDOMAIN_TEMPLATE, subdomain, subdomainServices, List.of(), "")));
             }
         }
 
         // Services, events, and commands
-        for (Map.Entry<String, Object> serviceEntry : services.entrySet()) {
-            Map<String, Object> service = (Map<String, Object>) serviceEntry.getValue();
-            String serviceId = str(service, "id", serviceEntry.getKey());
-            String domainId = str(service, "domain", null);
-            String subdomainKey = str(service, "subdomain", null);
-
-            String subdomainId = resolveSubdomainId(domains, domainId, subdomainKey);
+        for (ManifestService manifestService : manifest.getServices()) {
+            Map<String, Object> service = serviceView(manifest, eventCatalog, manifestService);
+            String serviceId = eventCatalog.catalogServiceId(manifestService);
+            String domainId = manifestService.getDomainId();
+            String subdomainId = catalogSubdomainId(manifestService);
             String serviceBase = subdomainId != null && !subdomainId.isBlank()
                     ? "domains/" + domainId + "/subdomains/" + subdomainId + "/services/" + serviceId
                     : "domains/" + domainId + "/services/" + serviceId;
@@ -111,7 +131,7 @@ public class EventCatalogGenerator extends Generator {
             files.singleFiles.add(mdxPage(
                     serviceBase + "/index.mdx",
                     serviceFrontmatter(serviceId, service, configVersion, serviceBase + "/index.mdx"),
-                    serviceBody(service, renderDocs(service, contextModel))));
+                    serviceBody(service, renderDocs(manifestService, contextModel))));
 
             List<Map<String, Object>> channels = (List<Map<String, Object>>) service.getOrDefault("_channels", List.of());
             String channelBase = subdomainId != null && !subdomainId.isBlank()
@@ -278,170 +298,117 @@ public class EventCatalogGenerator extends Generator {
     // Docs rendering
     // -------------------------------------------------------------------------
 
-    @SuppressWarnings("unchecked")
-    private String renderDocs(Map<String, Object> entry, Map<String, Object> contextModel) {
+    private String renderDocs(ManifestService manifestService, Map<String, Object> contextModel) {
         ZenWaveManifest manifest = (ZenWaveManifest) contextModel.get("manifest");
-        ZenWaveManifestLoader manifestLoader = (ZenWaveManifestLoader) contextModel.get("manifestLoader");
-        ManifestService manifestService = manifest != null ? ManifestRuntimeSupport.findService(manifest, entry) : null;
-        if (manifest != null && manifestLoader != null && manifestService != null && !manifestService.getDocs().isEmpty()) {
+        BlockingZenWaveManifestLoader manifestRuntime =
+                (BlockingZenWaveManifestLoader) contextModel.get("manifestRuntime");
+        if (manifest != null && manifestRuntime != null && manifestService != null && !manifestService.getDocs().isEmpty()) {
             try {
-                ManifestLoadOptions contentOptions = ManifestRuntimeSupport.contentOptions(preferredSource, allowFallback);
-                Map<String, String> resolvedDocs = ManifestRuntimeSupport.loadServiceDocs(
-                        manifestLoader, manifest, manifestService, contentOptions);
+                ManifestLoadOptions contentOptions = new ManifestLoadOptions()
+                        .withPreferredSource(preferredSource)
+                        .withFallback(allowFallback == null || allowFallback);
+                Map<String, String> resolvedDocs =
+                        manifestRuntime.loadAvailableServiceDocs(manifest, manifestService, contentOptions);
                 return renderDocsTemplate(resolvedDocs);
             } catch (Exception e) {
                 log.warn("Cannot load docs for {}: {}", manifestService.getServiceRef(), e.getMessage());
             }
         }
-
-        Object docsObj = entry.get("docs");
-        if (!(docsObj instanceof Map<?,?> docsMap)) {
-            return "";
-        }
-
-        String repository = str(entry, "repository", ".");
-        Map<String, String> resolvedDocs = new LinkedHashMap<>();
-        for (Map.Entry<?, ?> docEntry : docsMap.entrySet()) {
-            String key = docEntry.getKey().toString();
-            String fileName = docEntry.getValue().toString();
-            File docFile = new File(fileName);
-            if (!docFile.isAbsolute()) {
-                docFile = new File(repository, fileName);
-            }
-            if (docFile.exists()) {
-                try {
-                    resolvedDocs.put(key, Files.readString(docFile.toPath()));
-                } catch (IOException e) {
-                    log.warn("Cannot read doc file {}: {}", docFile.getAbsolutePath(), e.getMessage());
-                }
-            } else {
-                log.warn("Doc file not found: {}", docFile.getAbsolutePath());
-            }
-        }
-
-        return renderDocsTemplate(resolvedDocs);
+        return "";
     }
 
     // -------------------------------------------------------------------------
     // Page body rendering
     // -------------------------------------------------------------------------
 
-    private String domainBody(Map<String, Object> entry, List<Map<String, Object>> services,
+    private String domainBody(String template, Map<String, Object> entry, List<Map<String, Object>> services,
                               List<Map<String, Object>> childDomains, String docsBody) {
-        StringBuilder sb = new StringBuilder();
-        appendParagraph(sb, str(entry, "summary", str(entry, "description", null)));
-        sb.append("## Overview\n\n");
-        sb.append("This page is generated from the ZenWave architecture model and EventCatalog frontmatter.\n\n");
-        sb.append("<NodeGraph />\n\n");
-        sb.append("<MessageTable format=\"all\" limit={8} showChannels={true} title=\"Messages in and out\" />\n\n");
-        if (hasEntities(services)) {
-            sb.append("## Entity Map\n\n");
-            sb.append("<EntityMap />\n\n");
-        }
-        if (!childDomains.isEmpty() || !services.isEmpty()) {
-            sb.append("## Related Resources\n\n");
-            sb.append("<ResourceGroupTable id=\"related-resources\" limit={8} showOwners={true} title=\"Core resources\" />\n\n");
-        }
-        appendDocsBody(sb, docsBody);
-        return sb.toString();
+        Map<String, Object> model = new LinkedHashMap<>();
+        model.put("entry", entry);
+        model.put("services", services);
+        model.put("childDomains", childDomains);
+        model.put("summary", str(entry, "summary", str(entry, "description", null)));
+        model.put("hasEntities", hasEntities(services));
+        model.put("hasRelatedResources", !childDomains.isEmpty() || !services.isEmpty());
+        model.put("docsBody", docsBody);
+        return renderBodyTemplate(template, model);
     }
 
     private String serviceBody(Map<String, Object> service, String docsBody) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("## Overview\n\n");
-        appendParagraph(sb, str(service, "summary", str(service, "description", null)));
-        sb.append("<NodeGraph />\n\n");
-        if (hasMessages(service)) {
-            sb.append("## Message Flow\n\n");
-            sb.append("<MessageTable format=\"all\" limit={8} showChannels={true} />\n\n");
-        }
-        if (!listOfMaps(service.get("_entities")).isEmpty()) {
-            sb.append("## Domain Model\n\n");
-            sb.append("<EntityMap />\n\n");
-        }
-        if (hasSpecifications(service)) {
-            sb.append("## Specifications\n\n");
-            sb.append("The linked specifications in the frontmatter drive EventCatalog reference views for this service.\n\n");
-        }
-        appendDocsBody(sb, docsBody);
-        return sb.toString();
+        Map<String, Object> model = new LinkedHashMap<>();
+        model.put("service", service);
+        model.put("summary", str(service, "summary", str(service, "description", null)));
+        model.put("hasMessages", hasMessages(service));
+        model.put("hasEntities", !listOfMaps(service.get("_entities")).isEmpty());
+        model.put("hasSpecifications", hasSpecifications(service));
+        model.put("docsBody", docsBody);
+        return renderBodyTemplate(SERVICE_TEMPLATE, model);
     }
 
     private String messageBody(String resourceType, Map<String, Object> resource) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("## Overview\n\n");
+        String remoteSchemaUrl = str(resource, "_remoteSchemaUrl", null);
+        String remoteSchemaMessage = str(resource, "_remoteSchemaMessage", null);
+        boolean hasRemoteSchema = remoteSchemaUrl != null && !remoteSchemaUrl.isBlank()
+                && remoteSchemaMessage != null && !remoteSchemaMessage.isBlank();
         String summary = str(resource, "summary", null);
-        if (summary != null && !summary.isBlank()) {
-            sb.append(summary).append("\n\n");
-        } else {
-            sb.append("Generated ").append(resourceType).append(" reference page.\n\n");
-        }
-        sb.append("<NodeGraph />\n\n");
-        String schemaPath = str(resource, "schemaPath", null);
-        if (schemaPath != null && !schemaPath.isBlank()) {
-            sb.append("## Schema\n\n");
-            sb.append("<SchemaViewer file=\"").append(escapeAttribute(schemaPath)).append("\" />\n\n");
-        }
-        return sb.toString();
+        Map<String, Object> model = new LinkedHashMap<>();
+        model.put("resource", resource);
+        model.put("resourceType", resourceType);
+        model.put("summary", summary != null && !summary.isBlank()
+                ? summary
+                : "Generated " + resourceType + " reference page.");
+        model.put("hasRemoteSchema", hasRemoteSchema);
+        model.put("remoteSchemaUrl", hasRemoteSchema ? escapeAttribute(remoteSchemaUrl) : null);
+        model.put("remoteSchemaMessage", hasRemoteSchema ? escapeAttribute(remoteSchemaMessage) : null);
+        model.put("schemaPath", escapeNullableAttribute(str(resource, "schemaPath", null)));
+        return renderBodyTemplate("command".equals(resourceType) ? COMMAND_TEMPLATE : EVENT_TEMPLATE, model);
     }
 
     private String queryBody(Map<String, Object> query) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("## Overview\n\n");
+        String remoteSchemaUrl = str(query, "_remoteSchemaUrl", null);
+        String operationId = str(query, "_remoteSchemaOperationId", null);
+        boolean hasRemoteSchema = remoteSchemaUrl != null && !remoteSchemaUrl.isBlank()
+                && operationId != null && !operationId.isBlank();
         String summary = str(query, "summary", null);
-        if (summary != null && !summary.isBlank()) {
-            sb.append(summary).append("\n\n");
-        } else {
-            sb.append("Generated query reference page.\n\n");
-        }
-        sb.append("<NodeGraph />\n\n");
-        String schemaPath = str(query, "schemaPath", null);
-        if (schemaPath != null && !schemaPath.isBlank()) {
-            sb.append("## Response Schema\n\n");
-            sb.append("<SchemaViewer file=\"").append(escapeAttribute(schemaPath)).append("\" />\n\n");
-        }
-        return sb.toString();
+        Map<String, Object> model = new LinkedHashMap<>();
+        model.put("query", query);
+        model.put("summary", summary != null && !summary.isBlank()
+                ? summary
+                : "Generated query reference page.");
+        model.put("hasRemoteSchema", hasRemoteSchema);
+        model.put("remoteSchemaUrl", hasRemoteSchema ? escapeAttribute(remoteSchemaUrl) : null);
+        model.put("operationId", hasRemoteSchema ? escapeAttribute(operationId) : null);
+        model.put("operationTarget", escapeNullableAttribute(str(query, "_remoteSchemaOperationTarget", "response")));
+        model.put("statusCode", escapeNullableAttribute(str(query, "_remoteSchemaStatusCode", null)));
+        model.put("mediaType", escapeNullableAttribute(str(query, "_remoteSchemaMediaType", null)));
+        model.put("schemaPath", escapeNullableAttribute(str(query, "schemaPath", null)));
+        return renderBodyTemplate(QUERY_TEMPLATE, model);
     }
 
     private String entityBody(Map<String, Object> entity) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("## Overview\n\n");
-        appendParagraph(sb, str(entity, "summary", null));
-        sb.append("### Entity Properties\n\n");
-        sb.append("<EntityPropertiesTable />\n\n");
-        if (hasRelationships(entity)) {
-            sb.append("## Relationships\n\n");
-            sb.append("This entity includes references to related entities captured in the generated frontmatter properties.\n\n");
-        }
-        return sb.toString();
+        Map<String, Object> model = new LinkedHashMap<>();
+        model.put("entity", entity);
+        model.put("summary", str(entity, "summary", null));
+        model.put("hasRelationships", hasRelationships(entity));
+        return renderBodyTemplate(ENTITY_TEMPLATE, model);
     }
 
     private String channelBody(Map<String, Object> channel, Map<String, Object> service) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("## Overview\n\n");
-        appendParagraph(sb, str(channel, "summary", "Generated channel reference page."));
-        sb.append("<NodeGraph />\n\n");
-        if (channelMessages(channel, service) != null) {
-            sb.append("## Messages\n\n");
-            sb.append("<MessageTable format=\"all\" limit={8} showChannels={true} />\n\n");
-        }
-        return sb.toString();
+        Map<String, Object> model = new LinkedHashMap<>();
+        model.put("channel", channel);
+        model.put("service", service);
+        model.put("summary", str(channel, "summary", "Generated channel reference page."));
+        model.put("hasMessages", channelMessages(channel, service) != null);
+        return renderBodyTemplate(CHANNEL_TEMPLATE, model);
     }
 
-    private void appendParagraph(StringBuilder sb, String text) {
-        if (text == null || text.isBlank()) {
-            return;
-        }
-        sb.append(text).append("\n\n");
-    }
-
-    private void appendDocsBody(StringBuilder sb, String docsBody) {
-        if (docsBody != null && !docsBody.isBlank()) {
-            sb.append(docsBody);
-            if (!docsBody.endsWith("\n")) {
-                sb.append("\n");
-            }
-        }
+    private String renderBodyTemplate(String templatePath, Map<String, Object> bodyModel) {
+        Map<String, Object> model = new LinkedHashMap<>(asConfigurationMap());
+        model.putAll(bodyModel);
+        TemplateOutput output = getTemplateEngine().processTemplate(
+                model,
+                new TemplateInput(templatePath, "body"));
+        return output != null ? output.getContent() : "";
     }
 
     private boolean hasSpecifications(Map<String, Object> service) {
@@ -463,6 +430,10 @@ public class EventCatalogGenerator extends Generator {
 
     private String escapeAttribute(String value) {
         return value.replace("&", "&amp;").replace("\"", "&quot;");
+    }
+
+    private String escapeNullableAttribute(String value) {
+        return value != null && !value.isBlank() ? escapeAttribute(value) : null;
     }
 
     // -------------------------------------------------------------------------
@@ -499,33 +470,89 @@ public class EventCatalogGenerator extends Generator {
     // Helpers
     // -------------------------------------------------------------------------
 
-    private String configVersion(Map<String, Object> architecture) {
-        Object config = architecture.get("config");
-        if (config instanceof Map<?,?> configMap) {
-            Object version = configMap.get("version");
-            if (version != null) return version.toString();
+    private Map<String, Object> serviceViews(ZenWaveManifest manifest, EventCatalogModel eventCatalog) {
+        Map<String, Object> services = new LinkedHashMap<>();
+        for (ManifestService service : manifest.getServices()) {
+            services.put(eventCatalog.catalogServiceId(service), serviceView(manifest, eventCatalog, service));
         }
-        return "0.0.1";
+        return services;
     }
 
-    @SuppressWarnings("unchecked")
-    private String resolveSubdomainId(Map<String, Object> domains, String domainId, String subdomainKey) {
-        if (domainId == null || subdomainKey == null) return subdomainKey;
-        Object domainObj = domains.get(domainId);
-        if (!(domainObj instanceof Map<?, ?>)) {
-            domainObj = domains.values().stream()
-                    .filter(Map.class::isInstance)
-                    .map(Map.class::cast)
-                    .filter(domain -> domainId.equals(str(domain, "id", null)))
-                    .findFirst()
-                    .orElse(null);
+    private Map<String, Object> serviceView(ZenWaveManifest manifest, EventCatalogModel eventCatalog,
+                                            ManifestService service) {
+        Map<String, Object> view = new LinkedHashMap<>();
+        view.put("id", eventCatalog.catalogServiceId(service));
+        view.put("serviceRef", service.getServiceRef());
+        putIfNotNull(view, "version", service.documentVersion());
+        putIfNotNull(view, "name", service.getName());
+        putIfNotNull(view, "description", service.getDescription());
+        view.put("domain", service.getDomainId());
+        putIfNotNull(view, "subdomain", catalogSubdomainId(service));
+        if (!service.getDocs().isEmpty()) {
+            view.put("docs", new LinkedHashMap<>(service.getDocs()));
         }
-        if (!(domainObj instanceof Map<?,?> domain)) return subdomainKey;
-        Object subdomainsObj = ((Map<String, Object>) domain).get("subdomains");
-        if (!(subdomainsObj instanceof Map<?,?> subdomains)) return subdomainKey;
-        Object subdomainObj = ((Map<String, Object>) subdomains).get(subdomainKey);
-        if (!(subdomainObj instanceof Map<?,?> subdomain)) return subdomainKey;
-        return str((Map<String, Object>) subdomain, "id", subdomainKey);
+        if (!service.getArtifacts().isEmpty()) {
+            List<Map<String, Object>> artifacts = new ArrayList<>();
+            for (ManifestArtifact artifact : service.getArtifacts()) {
+                Map<String, Object> artifactView = new LinkedHashMap<>();
+                putIfNotNull(artifactView, "name", artifact.getName());
+                putIfNotNull(artifactView, "artifactId", artifact.getArtifactId());
+                artifactView.put("type", artifact.getType());
+                artifactView.put("path", artifact.getPath());
+                putIfNotNull(artifactView, "version", artifact.getVersion());
+                artifactView.putAll(eventCatalog.artifactData(service, artifact));
+                artifacts.add(artifactView);
+            }
+            view.put("artifacts", artifacts);
+        }
+        if (!service.getConsumers().isEmpty()) {
+            view.put("consumers", service.getConsumers().stream()
+                    .map(reference -> {
+                        ManifestService consumer = manifest.findService(reference);
+                        return consumer != null
+                                ? eventCatalog.catalogServiceId(consumer)
+                                : reference.replace('/', '.');
+                    })
+                    .toList());
+        }
+        view.putAll(eventCatalog.serviceData(service));
+        return view;
+    }
+
+    private Map<String, Object> domainView(EventCatalogModel eventCatalog, ManifestDomain domain) {
+        Map<String, Object> view = new LinkedHashMap<>();
+        view.put("id", domain.getId());
+        putIfNotNull(view, "version", domain.getVersion());
+        putIfNotNull(view, "name", domain.getName());
+        putIfNotNull(view, "description", domain.getDescription());
+        view.putAll(eventCatalog.domainData(domain));
+        return view;
+    }
+
+    private Map<String, Object> subdomainView(EventCatalogModel eventCatalog, ManifestDomain domain,
+                                              ManifestSubdomain subdomain) {
+        Map<String, Object> view = new LinkedHashMap<>();
+        view.put("id", eventCatalog.catalogSubdomainId(domain, subdomain));
+        putIfNotNull(view, "version", subdomain.getVersion());
+        putIfNotNull(view, "name", subdomain.getName());
+        putIfNotNull(view, "description", subdomain.getDescription());
+        view.putAll(eventCatalog.subdomainData(domain, subdomain));
+        return view;
+    }
+
+    private String catalogSubdomainId(ManifestService service) {
+        if (service.getSubdomainKey() == null) {
+            return null;
+        }
+        return service.getSubdomainId().equals(service.getSubdomainKey())
+                ? service.getDomainId() + "." + service.getSubdomainId()
+                : service.getSubdomainId();
+    }
+
+    private void putIfNotNull(Map<String, Object> map, String key, Object value) {
+        if (value != null) {
+            map.put(key, value);
+        }
     }
 
     private String str(Map<String, Object> map, String key, String defaultValue) {
@@ -624,30 +651,6 @@ public class EventCatalogGenerator extends Generator {
         model.put("docs", resolvedDocs);
         TemplateOutput output = getTemplateEngine().processTemplate(model, templateInput);
         return output != null ? output.getContent() : "";
-    }
-
-    private List<Map<String, Object>> domainServices(Map<String, Object> services, String domainId, Map<String, Object> domains) {
-        return filterServices(services, service -> domainId.equals(str(service, "domain", null))
-                && resolveSubdomainId(domains, domainId, str(service, "subdomain", null)) == null);
-    }
-
-    private List<Map<String, Object>> subdomainServices(Map<String, Object> services, Map<String, Object> domains,
-                                                        String domainId, String subdomainId) {
-        return filterServices(services, service -> domainId.equals(str(service, "domain", null))
-                && subdomainId.equals(resolveSubdomainId(domains, domainId, str(service, "subdomain", null))));
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<Map<String, Object>> childDomains(Map<String, Object> domain) {
-        Object subdomains = domain.get("subdomains");
-        if (!(subdomains instanceof Map<?, ?> map)) {
-            return List.of();
-        }
-        return map.values().stream()
-                .filter(Map.class::isInstance)
-                .map(Map.class::cast)
-                .map(value -> (Map<String, Object>) value)
-                .toList();
     }
 
     @SuppressWarnings("unchecked")

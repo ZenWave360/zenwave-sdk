@@ -26,6 +26,24 @@ class EventCatalogRichArtifactsTest {
     Path tempDir;
 
     @Test
+    void remoteSpecificationComponentsAreGeneratedOnlyForHttpUrlsAndUseTheSmartMessageName() throws Exception {
+        var method = EventCatalogGenerator.class.getDeclaredMethod("messageBody", String.class, Map.class);
+        method.setAccessible(true);
+        String body = (String) method.invoke(new EventCatalogGenerator(), "event", Map.of(
+                "summary", "Order created",
+                "schemaPath", "https://contracts.example.com/OrderCreated.avsc",
+                "_remoteSchemaUrl", "https://contracts.example.com/asyncapi.yml",
+                "_remoteSchemaMessage", "OrderCreated"));
+
+        assertTrue(body.contains(
+                "import RemoteSpecificationSchema from '@catalog/components/RemoteSpecificationSchema.astro';"));
+        assertTrue(body.contains(
+                "<RemoteSpecificationSchema url=\"https://contracts.example.com/asyncapi.yml\" message=\"OrderCreated\" />"));
+        assertFalse(body.contains("<SchemaViewer"),
+                "A remote schema must have exactly one viewer usage");
+    }
+
+    @Test
     void generatesCatalogFromRichArtifactsAndSkipsMalformedOptionalInputs() throws Exception {
         Path serviceDir = tempDir.resolve("sales/orders/order-service");
         Files.createDirectories(serviceDir.resolve("schemas"));
@@ -39,6 +57,15 @@ class EventCatalogRichArtifactsTest {
         write(serviceDir.resolve("malformed-openapi.yml"), "paths: [not-a-map");
         write(serviceDir.resolve("malformed-domain-model.zdl"), "entity Broken {");
         write(serviceDir.resolve("schemas/Order.yaml"), "type: object\nproperties: {}\n");
+        write(serviceDir.resolve("schemas/OrderCreated.avsc"), """
+                {
+                  "type": "record",
+                  "name": "OrderCreated",
+                  "fields": [
+                    { "name": "orderId", "type": "string" }
+                  ]
+                }
+                """);
 
         Path output = tempDir.resolve("catalog");
         new MainGenerator().generate(new EventCatalogPlugin()
@@ -66,6 +93,13 @@ class EventCatalogRichArtifactsTest {
         assertFalse(frontmatter(listOrders).containsKey("schemaPath"));
         assertTrue(frontmatter(getOrder).get("schemaPath").toString().endsWith("schemas/Order.yaml"));
         assertFalse(frontmatter(inlineOrder).containsKey("schemaPath"));
+        String getOrderContent = Files.readString(getOrder);
+        assertTrue(getOrderContent.contains("<SchemaViewer"));
+        assertFalse(getOrderContent.contains("RemoteSpecificationSchema"),
+                "Local file specifications must keep using the legacy local schema viewer");
+        String inlineOrderContent = Files.readString(inlineOrder);
+        assertFalse(inlineOrderContent.contains("RemoteSpecificationSchema"),
+                "Local file specifications must not be passed to build-time HTTP fetching");
 
         Map<String, Object> order = frontmatter(serviceBase.resolve("entities/sales.orders.order-service.order/index.mdx"));
         assertEquals("orderNumber", order.get("identifier"));
@@ -85,10 +119,16 @@ class EventCatalogRichArtifactsTest {
         assertEquals("Profile", property(maps(user.get("properties")), "profile").get("references"));
 
         Path event = serviceBase.resolve("events/sales.orders.order-service.order-created/index.mdx");
-        assertTrue(frontmatter(event).get("schemaPath").toString().endsWith("schemas/Order.yaml"));
-        assertTrue(Files.readString(event).contains("<SchemaViewer"));
+        assertTrue(frontmatter(event).get("schemaPath").toString().endsWith("schemas/OrderCreated.avsc"));
+        String eventContent = Files.readString(event);
+        assertTrue(eventContent.contains("<SchemaViewer"));
+        assertFalse(eventContent.contains("RemoteSpecificationSchema"),
+                "Local file specifications must keep using the legacy local schema viewer");
         Path command = serviceBase.resolve("commands/sales.orders.order-service.create-order/index.mdx");
         assertFalse(frontmatter(command).containsKey("schemaPath"));
+        String commandContent = Files.readString(command);
+        assertFalse(commandContent.contains("RemoteSpecificationSchema"),
+                "Local inline schemas must not be passed to build-time HTTP fetching");
     }
 
     private String manifest() {
@@ -147,17 +187,13 @@ class EventCatalogRichArtifactsTest {
                     address: sales.orders.order-created
                     messages:
                       OrderCreated:
-                        payload:
-                          schema:
-                            $ref: './schemas/Order.yaml#/Order'
+                        $ref: '#/components/messages/OrderCreatedMessage'
                   create-order:
                     address: sales.orders.create-order
                     summary: Create Order
                     messages:
                       CreateOrder:
-                        payload:
-                          schema:
-                            $ref: '#/components/schemas/CreateOrder'
+                        $ref: '#/components/messages/CreateOrderMessage'
                   no-address:
                     summary: No Address
                 operations:
@@ -172,9 +208,7 @@ class EventCatalogRichArtifactsTest {
                       summary: Create Order
                       messages:
                         CreateOrder:
-                          payload:
-                            schema:
-                              $ref: '#/components/schemas/CreateOrder'
+                          $ref: '#/components/messages/CreateOrderMessage'
                   missingAction:
                     channel:
                       $ref: '#/channels/order-created'
@@ -191,8 +225,24 @@ class EventCatalogRichArtifactsTest {
                     channel:
                       address: sales.orders.unknown
                 components:
+                  messages:
+                    OrderCreatedMessage:
+                      name: OrderCreated
+                      payload:
+                        schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+                        schema:
+                          $ref: './schemas/OrderCreated.avsc'
+                    CreateOrderMessage:
+                      name: CreateOrder
+                      payload:
+                        type: object
+                        required:
+                          - orderId
+                        properties:
+                          orderId:
+                            type: string
                   schemas:
-                    CreateOrder:
+                    UnusedSchema:
                       type: object
                 """;
     }

@@ -4,6 +4,8 @@ import io.zenwave360.sdk.MainGenerator;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -153,10 +155,42 @@ public class EventCatalogGeneratorTest {
         assertTrue(domainContent.contains("<MessageTable"), "Domain body must include the message table");
 
         String eventContent = readMdx("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/events/merchandising.inventory.inventory-adjustment.inventory-adjusted/index.mdx");
-        assertTrue(eventContent.contains("<SchemaViewer"), "Event body must include the schema viewer");
+        assertTrue(eventContent.contains("<RemoteSpecificationSchema"),
+                "A remote AsyncAPI event body must include the remote schema viewer");
+        assertFalse(eventContent.contains("<SchemaViewer"),
+                "A remote AsyncAPI event must have exactly one schema viewer usage");
 
         String channelContent = readMdx("domains/merchandising/subdomains/merchandising.inventory/channels/merchandising.inventory.inventory-adjustment.inventory-adjusted/index.mdx");
         assertTrue(channelContent.contains("<NodeGraph />"), "Channel body must include the node graph");
+    }
+
+    @Test
+    void servicePageBodyCanBeOverriddenWithTheStandardTemplateFolder() throws Exception {
+        Path override = Path.of(
+                ".zenwave/templates/io/zenwave360/sdk/plugins/EventCatalogGenerator/service.mdx.hbs");
+        byte[] previousContent = Files.exists(override) ? Files.readAllBytes(override) : null;
+        String outputFolder = "target/event-catalog-template-override-test";
+        try {
+            Files.createDirectories(override.getParent());
+            Files.writeString(override, "CUSTOM SERVICE TEMPLATE: {{service.id}}\n");
+
+            runGenerator(outputFolder);
+
+            Path servicePage = Path.of(
+                    outputFolder,
+                    "domains/merchandising/subdomains/merchandising.inventory/services/"
+                            + "merchandising.inventory.inventory-adjustment/index.mdx");
+            String content = Files.readString(servicePage);
+            assertTrue(content.contains(
+                    "CUSTOM SERVICE TEMPLATE: merchandising.inventory.inventory-adjustment"));
+            assertFalse(content.contains("<NodeGraph />"));
+        } finally {
+            if (previousContent != null) {
+                Files.write(override, previousContent);
+            } else {
+                Files.deleteIfExists(override);
+            }
+        }
     }
 
     @Test

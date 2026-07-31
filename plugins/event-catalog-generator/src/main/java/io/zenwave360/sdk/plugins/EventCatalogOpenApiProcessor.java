@@ -2,24 +2,28 @@ package io.zenwave360.sdk.plugins;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.zenwave360.manifest.BlockingZenWaveManifestLoader;
 import io.zenwave360.manifest.ManifestArtifact;
 import io.zenwave360.manifest.ManifestLoadOptions;
+import io.zenwave360.manifest.ManifestResolvedResource;
 import io.zenwave360.manifest.ManifestService;
 import io.zenwave360.manifest.ZenWaveManifest;
-import io.zenwave360.manifest.ZenWaveManifestLoader;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.processors.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Parses OpenAPI artifacts declared in each service entry and augments the service map
+ * Parses OpenAPI artifacts declared by typed manifest services and augments the EventCatalog model
  * with extracted queries and specification links.
  */
 public class EventCatalogOpenApiProcessor implements Processor {
@@ -35,36 +39,34 @@ public class EventCatalogOpenApiProcessor implements Processor {
     public String linkSource;
 
     @Override
-    @SuppressWarnings("unchecked")
     public Map<String, Object> process(Map<String, Object> contextModel) {
-        Map<String, Object> architecture = (Map<String, Object>) contextModel.get("architecture");
         ZenWaveManifest manifest = (ZenWaveManifest) contextModel.get("manifest");
-        ZenWaveManifestLoader manifestLoader = (ZenWaveManifestLoader) contextModel.get("manifestLoader");
-        if (architecture == null || manifest == null || manifestLoader == null) return contextModel;
+        EventCatalogModel eventCatalog = (EventCatalogModel) contextModel.get("eventCatalog");
+        BlockingZenWaveManifestLoader manifestRuntime =
+                (BlockingZenWaveManifestLoader) contextModel.get("manifestRuntime");
+        if (manifest == null || eventCatalog == null || manifestRuntime == null) return contextModel;
 
-        Map<String, Object> services = (Map<String, Object>) architecture.getOrDefault("services", Map.of());
-        ManifestLoadOptions contentOptions = ManifestRuntimeSupport.contentOptions(preferredSource, allowFallback);
+        ManifestLoadOptions contentOptions = new ManifestLoadOptions()
+                .withPreferredSource(preferredSource)
+                .withFallback(allowFallback == null || allowFallback);
 
-        for (Map.Entry<String, Object> entry : services.entrySet()) {
-            Map<String, Object> serviceMap = (Map<String, Object>) entry.getValue();
-            ManifestService service = ManifestRuntimeSupport.findService(manifest, serviceMap);
-            if (service == null) {
-                continue;
-            }
-            String serviceId = str(serviceMap, "id", entry.getKey());
-            processOpenApiArtifacts(manifestLoader, manifest, service, serviceMap, serviceId, contentOptions);
+        for (ManifestService service : manifest.getServices()) {
+            processOpenApiArtifacts(
+                    manifestRuntime, manifest, eventCatalog, service,
+                    eventCatalog.serviceData(service), eventCatalog.catalogServiceId(service), contentOptions);
         }
 
         return contextModel;
     }
 
-    private void processOpenApiArtifacts(ZenWaveManifestLoader manifestLoader, ZenWaveManifest manifest,
-                                         ManifestService manifestService, Map<String, Object> serviceMap, String serviceId,
+    private void processOpenApiArtifacts(BlockingZenWaveManifestLoader manifestRuntime, ZenWaveManifest manifest,
+                                         EventCatalogModel eventCatalog, ManifestService manifestService,
+                                         Map<String, Object> serviceData, String serviceId,
                                          ManifestLoadOptions contentOptions) {
-        for (ManifestArtifact artifact : ManifestRuntimeSupport.findArtifacts(manifestService, "openapi")) {
+        for (ManifestArtifact artifact : manifestService.findArtifacts("openapi")) {
             String specText;
             try {
-                specText = ManifestRuntimeSupport.loadArtifactText(manifestLoader, manifest, manifestService, artifact, contentOptions);
+                specText = manifestRuntime.loadArtifactText(manifest, manifestService, artifact, contentOptions);
             } catch (Exception e) {
                 log.warn("OpenAPI artifact could not be loaded for {}: {}", manifestService.getServiceRef(), e.getMessage());
                 continue;
@@ -74,13 +76,17 @@ public class EventCatalogOpenApiProcessor implements Processor {
             if (model == null) continue;
 
             String version = str(map(model.get("info")), "version", null);
-            if (version != null && serviceMap.get("_version") == null) {
-                serviceMap.put("_version", version);
+            if (version != null && serviceData.get("_version") == null) {
+                serviceData.put("_version", version);
             }
 
-            annotateArtifactLink(manifestLoader, manifest, manifestService, serviceMap, artifact, contentOptions);
+            annotateArtifactLink(manifestRuntime, manifest, eventCatalog, manifestService, artifact, contentOptions);
 
             Map<String, Object> paths = map(model.get("paths"));
+            Map<String, Object> componentResponses = map(map(model.get("components")).get("responses"));
+            String specificationUrl = manifestRuntime.getDelegate().artifactReferenceUri(
+                    manifest, manifestService, artifact, null,
+                    new ManifestLoadOptions(linkSource, false));
             for (Map.Entry<String, Object> pathEntry : paths.entrySet()) {
                 Map<String, Object> pathItem = map(pathEntry.getValue());
                 Map<String, Object> operation = map(pathItem.get("get"));
@@ -93,42 +99,44 @@ public class EventCatalogOpenApiProcessor implements Processor {
 
                 String queryId = serviceId + "." + operationId;
                 String name = str(operation, "summary", operationId);
-                String schemaPath = resolveSchemaLink(manifestLoader, manifest, manifestService, artifact, operation);
+                ResponseSchemaSelection responseSchema = selectResponseSchema(operation, componentResponses);
+                String schemaPath = resolveSchemaLink(
+                        manifestRuntime, manifest, manifestService, artifact, responseSchema);
 
                 Map<String, Object> query = new LinkedHashMap<>();
                 query.put("id", queryId);
                 query.put("name", name);
                 query.put("summary", str(operation, "description", str(operation, "summary", null)));
-                query.put("version", version != null ? version : str(serviceMap, "version", "0.0.1"));
+                query.put("version", version != null ? version : serviceVersion(manifestService));
                 if (schemaPath != null) query.put("schemaPath", schemaPath);
                 query.put("operation", buildOperation(pathEntry.getKey(), operation));
+                if (isHttpUrl(specificationUrl) && responseSchema != null) {
+                    query.put("_remoteSchemaUrl", specificationUrl);
+                    query.put("_remoteSchemaOperationId", operationId);
+                    query.put("_remoteSchemaOperationTarget", "response");
+                    query.put("_remoteSchemaStatusCode", responseSchema.statusCode);
+                    query.put("_remoteSchemaMediaType", responseSchema.mediaType);
+                }
 
-                addToList(serviceMap, "_queries", query);
+                addToList(serviceData, "_queries", query);
             }
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private void annotateArtifactLink(ZenWaveManifestLoader manifestLoader, ZenWaveManifest manifest,
-                                      ManifestService manifestService, Map<String, Object> serviceMap,
+    private void annotateArtifactLink(BlockingZenWaveManifestLoader manifestRuntime, ZenWaveManifest manifest,
+                                      EventCatalogModel eventCatalog, ManifestService manifestService,
                                       ManifestArtifact artifact, ManifestLoadOptions contentOptions) {
-        List<Map<String, Object>> artifacts = (List<Map<String, Object>>) serviceMap.get("artifacts");
-        if (artifacts == null) {
-            return;
+        Map<String, Object> artifactData = eventCatalog.artifactData(manifestService, artifact);
+        String linkUri = manifestRuntime.getDelegate().artifactReferenceUri(
+                manifest, manifestService, artifact, null,
+                new ManifestLoadOptions(linkSource, false));
+        if (linkUri != null) {
+            artifactData.put("linkUri", linkUri);
         }
-        for (Map<String, Object> artifactMap : artifacts) {
-            if (artifact.getPath().equals(artifactMap.get("path")) && artifact.getType().equals(artifactMap.get("type"))) {
-                String linkUri = ManifestRuntimeSupport.resolveLinkUri(
-                        manifestLoader, manifest, manifestService, artifact, artifact.getPath(), linkSource);
-                if (linkUri != null) {
-                    artifactMap.put("linkUri", linkUri);
-                }
-                String buildPath = ManifestRuntimeSupport.resolveContentPath(
-                        manifestLoader, manifest, manifestService, artifact, contentOptions);
-                if (buildPath != null) {
-                    artifactMap.put("buildPath", buildPath);
-                }
-            }
+        String buildPath = resolvedContentPath(
+                manifestRuntime.resolveArtifact(manifest, manifestService, artifact, contentOptions));
+        if (buildPath != null) {
+            artifactData.put("buildPath", buildPath);
         }
     }
 
@@ -153,26 +161,113 @@ public class EventCatalogOpenApiProcessor implements Processor {
         }
     }
 
-    private String resolveSchemaLink(ZenWaveManifestLoader manifestLoader, ZenWaveManifest manifest, ManifestService manifestService,
-                                     ManifestArtifact artifact, Map<String, Object> operation) {
-        Map<String, Object> responses = map(operation.get("responses"));
-        for (Object responseValue : responses.values()) {
-            Map<String, Object> response = map(responseValue);
-            Map<String, Object> content = map(response.get("content"));
-            for (Object mediaTypeValue : content.values()) {
-                Map<String, Object> mediaType = map(mediaTypeValue);
-                String ref = str(map(mediaType.get("schema")), "$ref", null);
-                if (ref == null) {
-                    continue;
-                }
+    private String resolveSchemaLink(BlockingZenWaveManifestLoader manifestRuntime, ZenWaveManifest manifest, ManifestService manifestService,
+                                     ManifestArtifact artifact, ResponseSchemaSelection selection) {
+        if (selection != null) {
+            String ref = str(selection.schema, "$ref", null);
+            if (ref != null) {
                 String filePart = ref.contains("#") ? ref.substring(0, ref.indexOf('#')) : ref;
                 if (!filePart.isBlank()) {
-                    return ManifestRuntimeSupport.resolveLinkUri(
-                            manifestLoader, manifest, manifestService, artifact, filePart, linkSource);
+                    return manifestRuntime.getDelegate().artifactReferenceUri(
+                            manifest, manifestService, artifact, filePart,
+                            new ManifestLoadOptions(linkSource, false));
                 }
             }
         }
         return null;
+    }
+
+    private String resolvedContentPath(ManifestResolvedResource resource) {
+        if (resource == null || resource.getUri() == null) {
+            return null;
+        }
+        URI uri = URI.create(resource.getUri());
+        return "file".equalsIgnoreCase(uri.getScheme())
+                ? Path.of(uri).toString()
+                : resource.referenceUri();
+    }
+
+    private boolean isHttpUrl(String value) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+        try {
+            String scheme = URI.create(value).getScheme();
+            return "http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme);
+        } catch (IllegalArgumentException ignored) {
+            return false;
+        }
+    }
+
+    private String serviceVersion(ManifestService service) {
+        String version = service.documentVersion();
+        return version != null && !version.isBlank() ? version : "0.0.1";
+    }
+
+    private ResponseSchemaSelection selectResponseSchema(Map<String, Object> operation,
+                                                         Map<String, Object> componentResponses) {
+        Map<String, Object> responses = map(operation.get("responses"));
+        String statusCode = preferredStatusCode(responses);
+        if (statusCode == null) {
+            return null;
+        }
+
+        Map<String, Object> response = resolveResponse(responses.get(statusCode), componentResponses);
+        Map<String, Object> content = map(response.get("content"));
+        String mediaType = preferredMediaType(content);
+        if (mediaType == null) {
+            return null;
+        }
+
+        Map<String, Object> schema = map(map(content.get(mediaType)).get("schema"));
+        return schema.isEmpty() ? null : new ResponseSchemaSelection(statusCode, mediaType, schema);
+    }
+
+    private String preferredStatusCode(Map<String, Object> responses) {
+        if (responses.containsKey("200")) {
+            return "200";
+        }
+        String success = responses.keySet().stream()
+                .filter(code -> code.matches("2\\d\\d"))
+                .min(Comparator.naturalOrder())
+                .orElse(null);
+        if (success != null) {
+            return success;
+        }
+        return responses.containsKey("default") ? "default" : null;
+    }
+
+    private String preferredMediaType(Map<String, Object> content) {
+        if (content.containsKey("application/json")) {
+            return "application/json";
+        }
+        return content.keySet().stream().sorted().findFirst().orElse(null);
+    }
+
+    private Map<String, Object> resolveResponse(Object responseValue, Map<String, Object> componentResponses) {
+        Map<String, Object> response = map(responseValue);
+        String ref = str(response, "$ref", null);
+        String prefix = "#/components/responses/";
+        if (ref != null && ref.startsWith(prefix)) {
+            return map(componentResponses.get(decodeJsonPointerSegment(ref.substring(prefix.length()))));
+        }
+        return response;
+    }
+
+    private String decodeJsonPointerSegment(String value) {
+        return value.replace("~1", "/").replace("~0", "~");
+    }
+
+    private static final class ResponseSchemaSelection {
+        private final String statusCode;
+        private final String mediaType;
+        private final Map<String, Object> schema;
+
+        private ResponseSchemaSelection(String statusCode, String mediaType, Map<String, Object> schema) {
+            this.statusCode = statusCode;
+            this.mediaType = mediaType;
+            this.schema = schema;
+        }
     }
 
     @SuppressWarnings("unchecked")

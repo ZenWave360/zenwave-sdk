@@ -13,7 +13,8 @@ Its current responsibility is:
 - Sync those generated files into the EventCatalog project fixture
 - Build the local EventCatalog site with `eventcatalog build`
 
-Right now the generator mainly produces correct structure and frontmatter. The next iteration can focus on the actual Markdown/MDX body content for each generated page type.
+Frontmatter is generated from structured Java types. Each resource body is rendered from its own
+overrideable Handlebars MDX template.
 
 ## Main pipeline
 
@@ -31,19 +32,14 @@ The plugin chain is defined in [EventCatalogPlugin.java](C:/Users/ivangsa/worksp
 [EventCatalogArchitectureLoader.java](C:/Users/ivangsa/workspace/zenwave/zenwave-sdk/plugins/event-catalog-generator/src/main/java/io/zenwave360/sdk/plugins/EventCatalogArchitectureLoader.java) loads the master manifest through `manifest-core` and stores:
 
 - `manifest`
-- `manifestLoader`
-- `manifestFile`
-- a flattened `architecture` map used by the later processors
+- `manifestRuntime`, the Java-friendly blocking JVM facade from `manifest-core`
+- `eventCatalog`, which contains only mutable EventCatalog-specific enrichment
 
-The manifest model now uses:
+Hierarchy, service identity, documents, artifacts, and source resolution remain in the typed
+manifest-core model; the plugin no longer creates a flattened copy of the manifest.
 
-- `path`
-- `docs`
-- `artifacts`
-- `sourcePriority`
-- `sources.http`
-
-instead of the old `repository/specs` shape.
+The manifest model exposes typed domains, subdomains, services, docs, artifacts, diagnostics, and
+configured content sources. URI loading and source fallback are handled by `manifest-core`.
 
 ### 2. AsyncAPI processing
 
@@ -81,7 +77,7 @@ This is the source for entity pages and entity relationships in the catalog.
 
 ### 5. MDX generation
 
-[EventCatalogGenerator.java](C:/Users/ivangsa/workspace/zenwave/zenwave-sdk/plugins/event-catalog-generator/src/main/java/io/zenwave360/sdk/plugins/EventCatalogGenerator.java) converts the enriched architecture model into MDX files.
+[EventCatalogGenerator.java](C:/Users/ivangsa/workspace/zenwave/zenwave-sdk/plugins/event-catalog-generator/src/main/java/io/zenwave360/sdk/plugins/EventCatalogGenerator.java) converts the typed manifest plus EventCatalog-only enrichment into MDX files.
 
 It currently generates:
 
@@ -130,9 +126,9 @@ This is controlled by:
 
 - `preferredSource`
 - `allowFallback`
-- `localRoots`
 
-The runtime helper for this is [ManifestRuntimeSupport.java](C:/Users/ivangsa/workspace/zenwave/zenwave-sdk/plugins/event-catalog-generator/src/main/java/io/zenwave360/sdk/plugins/ManifestRuntimeSupport.java).
+Loading and reference resolution use the public `ZenWaveManifestLoader` API and its
+`BlockingZenWaveManifestLoader` JVM facade from `manifest-core`.
 
 ### Published links
 
@@ -151,12 +147,8 @@ The retail test manifest is here:
 
 [zenwave-architecture.yml](C:/Users/ivangsa/workspace/zenwave/zenwave-sdk/zenwave-sdk-test-resources/src/main/resources/retail-domain-catalog/zenwave-architecture.yml)
 
-It has already been migrated to the new manifest-core model:
-
-- `path` instead of `repository`
-- `artifacts` instead of `specs`
-- `sourcePriority: [file, http]`
-- `sources.http.roots` pointing to GitHub raw files on `develop`
+It uses `contentResolution: [workspace, git]` and a generic Git source pointing to GitHub raw
+content on `develop`.
 
 So the test setup is ready for:
 
@@ -191,26 +183,11 @@ The current state is good for structure and frontmatter:
 - messages, commands, queries, channels, and entities are generated
 - the retail local site builds successfully
 
-## What is still missing
+## Page body extension
 
-The main missing area is page body content.
-
-At the moment most generated pages only contain:
-
-- frontmatter
-- optionally rendered docs content
-- little or no curated MDX body per resource type
-
-That means the next session should focus on the content strategy for each generated page type, for example:
-
-- domain body
-- subdomain body
-- service body
-- event body
-- command body
-- query body
-- entity body
-- channel body
+Built-in `domain`, `subdomain`, `service`, `event`, `command`, `query`, `entity`, and `channel`
+bodies are separate `.mdx.hbs` templates. Copy the same resource-relative template path below
+`.zenwave/templates` to override one page type without changing the generator.
 
 ## Good next-step questions for the next session
 
@@ -225,7 +202,7 @@ If you want to iterate page content next, the useful questions are:
 ## Useful files for the next iteration
 
 - [EventCatalogGenerator.java](C:/Users/ivangsa/workspace/zenwave/zenwave-sdk/plugins/event-catalog-generator/src/main/java/io/zenwave360/sdk/plugins/EventCatalogGenerator.java)
-- [ManifestRuntimeSupport.java](C:/Users/ivangsa/workspace/zenwave/zenwave-sdk/plugins/event-catalog-generator/src/main/java/io/zenwave360/sdk/plugins/ManifestRuntimeSupport.java)
+- [EventCatalogModel.java](C:/Users/ivangsa/workspace/zenwave/zenwave-sdk/plugins/event-catalog-generator/src/main/java/io/zenwave360/sdk/plugins/EventCatalogModel.java)
 - [EventCatalogAsyncApiProcessor.java](C:/Users/ivangsa/workspace/zenwave/zenwave-sdk/plugins/event-catalog-generator/src/main/java/io/zenwave360/sdk/plugins/EventCatalogAsyncApiProcessor.java)
 - [EventCatalogOpenApiProcessor.java](C:/Users/ivangsa/workspace/zenwave/zenwave-sdk/plugins/event-catalog-generator/src/main/java/io/zenwave360/sdk/plugins/EventCatalogOpenApiProcessor.java)
 - [EventCatalogZdlProcessor.java](C:/Users/ivangsa/workspace/zenwave/zenwave-sdk/plugins/event-catalog-generator/src/main/java/io/zenwave360/sdk/plugins/EventCatalogZdlProcessor.java)

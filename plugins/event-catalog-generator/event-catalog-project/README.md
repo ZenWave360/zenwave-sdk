@@ -37,6 +37,82 @@ Use `npm run generate` with [EventCatalog integrations](https://www.eventcatalog
 
 Run generators locally while you work, or in CI so your catalog stays aligned with the systems it describes.
 
+## Render Schemas from Remote Specifications
+
+`RemoteSpecificationSchema` fetches AsyncAPI 3.x and OpenAPI 3.x documents during a static build. The remote contract remains canonical; rebuild the catalog when it changes.
+
+```mdx
+import RemoteSpecificationSchema from '@catalog/components/RemoteSpecificationSchema.astro';
+
+<RemoteSpecificationSchema
+  url="https://raw.githubusercontent.com/acme/orders/main/asyncapi.yml"
+  message="OrderCancelledMessage"
+  title="Order cancelled event"
+/>
+```
+
+The AsyncAPI message selector searches both `components.messages` and every `channels.*.messages` map by key, then by the message `name` and `title`. Duplicate matches fail as ambiguous. It renders inline JSON Schema payloads and inline or referenced Avro payloads.
+
+OpenAPI component schemas and operation request/response bodies are supported:
+
+```mdx
+<RemoteSpecificationSchema url="https://api.example.com/openapi.yml" schema="Order" />
+
+<RemoteSpecificationSchema
+  url="https://api.example.com/openapi.yml"
+  operationId="createOrder"
+  operationTarget="request"
+  mediaType="application/json"
+/>
+
+<RemoteSpecificationSchema
+  url="https://api.example.com/openapi.yml"
+  operationId="createOrder"
+  operationTarget="response"
+  statusCode="201"
+  mediaType="application/json"
+/>
+```
+
+A generic JSONPath selector is also available:
+
+```mdx
+<RemoteSpecificationSchema
+  url="https://api.example.com/asyncapi.yml"
+  jsonPath="$.components.messages.OrderCancelledMessage.payload"
+/>
+```
+
+URLs and header values interpolate environment variables during the build:
+
+```mdx
+<RemoteSpecificationSchema
+  url="https://${CONTRACT_HOST}/asyncapi.yml"
+  message="OrderCancelledMessage"
+  headers={{ Authorization: "Bearer ${EVENTCATALOG_CONTRACT_TOKEN}" }}
+/>
+```
+
+Headers are forwarded to referenced documents on the root specification's origin. Cross-origin references receive no headers unless their exact origin is allowed:
+
+```mdx
+<RemoteSpecificationSchema
+  url="https://contracts.example.com/asyncapi.yml"
+  message="OrderCancelledMessage"
+  headers={{ Authorization: "Bearer ${EVENTCATALOG_CONTRACT_TOKEN}" }}
+  forwardHeadersTo={["https://schemas.example.com"]}
+/>
+```
+
+Missing, unavailable, or invalid remote schemas fail by default. For local development or a deliberately permissive pipeline, use:
+
+```sh
+./start-catalog.sh --allow-missing-remote-schemas
+./start-catalog.sh --build --allow-missing-remote-schemas
+```
+
+In permissive mode, only the affected component becomes a warning panel. The component-level `failOnError={false}` override is also available for exceptional pages. `format="jsonschema"`, `format="avro"`, or `format="raw"` can override automatic format detection. Protobuf is not supported.
+
 ## Use AI with Architecture Context
 
 EventCatalog gives AI tools structured context about your domains, services, messages, schemas, owners, and flows.

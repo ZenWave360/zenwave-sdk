@@ -57,6 +57,15 @@ class EventCatalogFrontmatterTest {
         assertEquals("GET", operation.get("method"));
         assertEquals("/inventory-items/{sku}", operation.get("path"));
         assertTrue(asStringList(operation.get("statusCodes")).contains("200"));
+        assertTrue(query.keySet().stream().noneMatch(key -> key.startsWith("_remoteSchema")),
+                "Internal remote schema metadata must not leak into EventCatalog frontmatter");
+        String queryContent = readContent("domains/merchandising/subdomains/merchandising.inventory/services/"
+                + "merchandising.inventory.inventory-adjustment/queries/"
+                + "merchandising.inventory.inventory-adjustment.getInventoryItem/index.mdx");
+        assertTrue(queryContent.contains(
+                "import RemoteSpecificationSchema from '@catalog/components/RemoteSpecificationSchema.astro';"));
+        assertTrue(queryContent.contains("operationId=\"getInventoryItem\" operationTarget=\"response\""
+                + " statusCode=\"200\" mediaType=\"application/json\""));
 
         Map<String, Object> entity = readFrontmatter("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/entities/merchandising.inventory.inventory-adjustment.inventory-item/index.mdx");
         assertEquals(Boolean.TRUE, entity.get("aggregateRoot"));
@@ -80,6 +89,17 @@ class EventCatalogFrontmatterTest {
         Map<String, Object> event = readFrontmatter("domains/customer-relationship/subdomains/customer-relationship.customer-management/services/customer-relationship.customer-management.customer-profile/events/customer-relationship.customer-management.customer-profile.customer-profile-updated/index.mdx");
         assertTrue(asStringList(event.get("producers")).contains("customer-relationship.customer-management.customer-profile-1.0.0"));
         assertTrue(event.get("schemaPath").toString().startsWith("https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/develop/"));
+        assertTrue(event.keySet().stream().noneMatch(key -> key.startsWith("_remoteSchema")),
+                "Internal remote schema metadata must not leak into EventCatalog frontmatter");
+
+        String eventContent = readContent("domains/customer-relationship/subdomains/customer-relationship.customer-management/services/"
+                + "customer-relationship.customer-management.customer-profile/events/"
+                + "customer-relationship.customer-management.customer-profile.customer-profile-updated/index.mdx");
+        assertTrue(eventContent.contains(
+                "import RemoteSpecificationSchema from '@catalog/components/RemoteSpecificationSchema.astro';"));
+        assertTrue(eventContent.contains("message=\"CustomerProfileUpdatedEvent\""));
+        assertFalse(eventContent.contains("<SchemaViewer"),
+                "A remote AsyncAPI message must have exactly one schema viewer usage");
     }
 
     private void runGenerator() throws Exception {
@@ -114,6 +134,12 @@ class EventCatalogFrontmatterTest {
         assertTrue(secondDelimiter > 4, "Expected closing frontmatter delimiter in " + file.getAbsolutePath());
         String yaml = content.substring(4, secondDelimiter);
         return YAML.readValue(yaml, MAP_TYPE);
+    }
+
+    private String readContent(String relativePath) throws Exception {
+        File file = new File(OUTPUT_FOLDER, relativePath);
+        assertTrue(file.exists(), "Expected MDX file not found: " + file.getAbsolutePath());
+        return Files.readString(file.toPath());
     }
 
     @SuppressWarnings("unchecked")
