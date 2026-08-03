@@ -51,7 +51,20 @@ import RemoteSpecificationSchema from '@catalog/components/RemoteSpecificationSc
 />
 ```
 
-The AsyncAPI message selector searches both `components.messages` and every `channels.*.messages` map by key, then by the message `name` and `title`. Duplicate matches fail as ambiguous. It renders inline JSON Schema payloads and inline or referenced Avro payloads.
+The `message` selector searches both `components.messages` and every `channels.*.messages` map by key, then by the message `name` and `title`. Duplicate matches fail as ambiguous. Generated catalog pages use `channel` and `channelMessage`, preserving the channel message that an operation exposes; `componentMessage` is available for directly authored pages. All message selectors render inline JSON Schema payloads and inline or referenced Avro payloads.
+
+```mdx
+<RemoteSpecificationSchema
+  url="https://raw.githubusercontent.com/acme/orders/main/asyncapi.yml"
+  componentMessage="OrderCancelledMessage"
+/>
+
+<RemoteSpecificationSchema
+  url="https://raw.githubusercontent.com/acme/orders/main/asyncapi.yml"
+  channel="order-events"
+  channelMessage="OrderCancelledMessage"
+/>
+```
 
 OpenAPI component schemas and operation request/response bodies are supported:
 

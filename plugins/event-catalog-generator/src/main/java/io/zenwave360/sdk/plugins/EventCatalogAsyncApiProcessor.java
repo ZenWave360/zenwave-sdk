@@ -150,16 +150,16 @@ public class EventCatalogAsyncApiProcessor implements Processor {
                 message.put("version", version != null ? version : serviceVersion(manifestService));
                 message.put("channelId", channelId);
 
-                MessageSelection messageSelection = resolveMessageSelection(operation, channel, componentMessages);
+                MessageSelection messageSelection = resolveMessageSelection(operation, channel, channelKey, componentMessages);
                 String schemaPath = resolveSchemaLink(
                         manifestRuntime, manifest, manifestService, artifact, messageSelection);
                 if (schemaPath != null) {
                     message.put("schemaPath", schemaPath);
                 }
-                if (isHttpUrl(specificationUrl)
-                        && messageSelection != null && messageSelection.messageSelector != null) {
+                if (isHttpUrl(specificationUrl) && messageSelection != null && messageSelection.hasRemoteSelector()) {
                     message.put("_remoteSchemaUrl", specificationUrl);
-                    message.put("_remoteSchemaMessage", messageSelection.messageSelector);
+                    message.put("_remoteSchemaChannel", messageSelection.channel);
+                    message.put("_remoteSchemaChannelMessage", messageSelection.channelMessage);
                 }
 
                 if ("send".equals(action)) {
@@ -312,57 +312,63 @@ public class EventCatalogAsyncApiProcessor implements Processor {
         return version != null && !version.isBlank() ? version : "0.0.1";
     }
 
-    private MessageSelection resolveMessageSelection(Map<String, Object> operation, Map<String, Object> channel,
-                                                     Map<String, Object> componentMessages) {
+    private MessageSelection resolveMessageSelection(Map<String, Object> operation, Map<String, Object> channel, String channelKey,
+                                                      Map<String, Object> componentMessages) {
+        Map<String, Object> channelMessages = map(channel.get("messages"));
+        if (channelMessages.isEmpty()) {
+            return null;
+        }
         Object operationMessages = operation.get("messages");
         if (operationMessages instanceof Collection<?> collection) {
             for (Object messageValue : collection) {
-                MessageSelection selection = resolveMessage(null, messageValue, componentMessages);
-                if (selection != null) {
-                    return selection;
+                for (Map.Entry<String, Object> channelMessage : channelMessages.entrySet()) {
+                    if (operationMessageMatchesChannelMessage(messageValue, channelKey, channelMessage.getKey(), channelMessage.getValue())) {
+                        return MessageSelection.channel(
+                                channelKey, channelMessage.getKey(), resolveChannelMessage(channelMessage.getValue(), componentMessages));
+                    }
                 }
             }
-        }
-
-        for (Map.Entry<String, Object> messageEntry : map(channel.get("messages")).entrySet()) {
-            MessageSelection selection = resolveMessage(messageEntry.getKey(), messageEntry.getValue(), componentMessages);
-            if (selection != null) {
-                return selection;
-            }
-        }
-        return null;
-    }
-
-    private MessageSelection resolveMessage(String channelMessageName, Object messageValue,
-                                            Map<String, Object> componentMessages) {
-        Map<String, Object> message = map(messageValue);
-        String ref = str(message, "$ref", null);
-        String prefix = "#/components/messages/";
-        if (ref != null && ref.startsWith(prefix)) {
-            String componentName = decodeJsonPointerSegment(ref.substring(prefix.length()));
-            Map<String, Object> componentMessage = map(componentMessages.get(componentName));
-            return componentMessage.isEmpty() ? null : new MessageSelection(
-                    preferredMessageSelector(componentName, componentMessage), componentMessage);
-        }
-        if (message.isEmpty()) {
+            log.warn("AsyncAPI operation messages must be present in channel {}. No remote schema was selected.", channelKey);
             return null;
         }
 
-        if (channelMessageName != null && componentMessages.containsKey(channelMessageName)) {
-            Map<String, Object> componentMessage = map(componentMessages.get(channelMessageName));
-            return new MessageSelection(preferredMessageSelector(channelMessageName, componentMessage), componentMessage);
-        }
-        for (Map.Entry<String, Object> componentEntry : componentMessages.entrySet()) {
-            if (messageValue == componentEntry.getValue()) {
-                return new MessageSelection(preferredMessageSelector(componentEntry.getKey(), message), message);
-            }
-        }
-        return new MessageSelection(channelMessageName, message);
+        Map.Entry<String, Object> firstMessage = channelMessages.entrySet().iterator().next();
+        return MessageSelection.channel(
+                channelKey, firstMessage.getKey(), resolveChannelMessage(firstMessage.getValue(), componentMessages));
     }
 
-    private String preferredMessageSelector(String componentName, Map<String, Object> message) {
-        String messageName = str(message, "name", null);
-        return messageName != null && !messageName.isBlank() ? messageName : componentName;
+    private Map<String, Object> resolveChannelMessage(Object channelMessageValue, Map<String, Object> componentMessages) {
+        Map<String, Object> channelMessage = map(channelMessageValue);
+        String ref = str(channelMessage, "$ref", null);
+        String prefix = "#/components/messages/";
+        if (ref != null && ref.startsWith(prefix)) {
+            Map<String, Object> componentMessage = map(componentMessages.get(decodeJsonPointerSegment(ref.substring(prefix.length()))));
+            if (!componentMessage.isEmpty()) {
+                return componentMessage;
+            }
+        }
+        return channelMessage;
+    }
+
+    private boolean operationMessageMatchesChannelMessage(Object operationMessageValue, String channelKey,
+                                                           String channelMessageName, Object channelMessageValue) {
+        if (operationMessageValue == channelMessageValue) {
+            return true;
+        }
+        String operationRef = str(map(operationMessageValue), "$ref", null);
+        if (operationRef == null) {
+            return false;
+        }
+        String channelRef = str(map(channelMessageValue), "$ref", null);
+        if (operationRef.equals(channelRef)) {
+            return true;
+        }
+        return operationRef.equals("#/channels/" + encodeJsonPointerSegment(channelKey)
+                + "/messages/" + encodeJsonPointerSegment(channelMessageName));
+    }
+
+    private String encodeJsonPointerSegment(String value) {
+        return value.replace("~", "~0").replace("/", "~1");
     }
 
     private String decodeJsonPointerSegment(String value) {
@@ -370,12 +376,22 @@ public class EventCatalogAsyncApiProcessor implements Processor {
     }
 
     private static final class MessageSelection {
-        private final String messageSelector;
+        private final String channel;
+        private final String channelMessage;
         private final Map<String, Object> message;
 
-        private MessageSelection(String messageSelector, Map<String, Object> message) {
-            this.messageSelector = messageSelector;
+        private MessageSelection(String channel, String channelMessage, Map<String, Object> message) {
+            this.channel = channel;
+            this.channelMessage = channelMessage;
             this.message = message;
+        }
+
+        private static MessageSelection channel(String channel, String channelMessage, Map<String, Object> message) {
+            return new MessageSelection(channel, channelMessage, message);
+        }
+
+        private boolean hasRemoteSelector() {
+            return channel != null && channelMessage != null;
         }
     }
 

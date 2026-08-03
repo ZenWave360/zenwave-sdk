@@ -26,21 +26,36 @@ class EventCatalogRichArtifactsTest {
     Path tempDir;
 
     @Test
-    void remoteSpecificationComponentsAreGeneratedOnlyForHttpUrlsAndUseTheSmartMessageName() throws Exception {
+    void remoteSpecificationComponentsAreGeneratedOnlyForHttpUrlsAndUseExplicitChannelMessages() throws Exception {
         var method = EventCatalogGenerator.class.getDeclaredMethod("messageBody", String.class, Map.class);
         method.setAccessible(true);
         String body = (String) method.invoke(new EventCatalogGenerator(), "event", Map.of(
                 "summary", "Order created",
                 "schemaPath", "https://contracts.example.com/OrderCreated.avsc",
                 "_remoteSchemaUrl", "https://contracts.example.com/asyncapi.yml",
-                "_remoteSchemaMessage", "OrderCreated"));
+                "_remoteSchemaChannel", "order-events",
+                "_remoteSchemaChannelMessage", "OrderCreated"));
 
         assertTrue(body.contains(
                 "import RemoteSpecificationSchema from '@catalog/components/RemoteSpecificationSchema.astro';"));
-        assertTrue(body.contains(
-                "<RemoteSpecificationSchema url=\"https://contracts.example.com/asyncapi.yml\" message=\"OrderCreated\" />"));
+        assertTrue(body.contains("channel=\"order-events\""));
+        assertTrue(body.contains("channelMessage=\"OrderCreated\""));
         assertFalse(body.contains("<SchemaViewer"),
                 "A remote schema must have exactly one viewer usage");
+    }
+
+    @Test
+    void remoteSpecificationComponentsGenerateExplicitChannelMessageSelectors() throws Exception {
+        var method = EventCatalogGenerator.class.getDeclaredMethod("messageBody", String.class, Map.class);
+        method.setAccessible(true);
+        String body = (String) method.invoke(new EventCatalogGenerator(), "command", Map.of(
+                "summary", "Create order",
+                "_remoteSchemaUrl", "https://contracts.example.com/asyncapi.yml",
+                "_remoteSchemaChannel", "order-events",
+                "_remoteSchemaChannelMessage", "OrderCreated"));
+
+        assertTrue(body.contains("channel=\"order-events\""));
+        assertTrue(body.contains("channelMessage=\"OrderCreated\""));
     }
 
     @Test

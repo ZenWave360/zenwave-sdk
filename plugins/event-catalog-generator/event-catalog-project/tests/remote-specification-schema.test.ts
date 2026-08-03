@@ -190,6 +190,80 @@ describe('AsyncAPI 3 selection', () => {
     );
   });
 
+  it('selects explicitly located component and channel messages with the same key', async () => {
+    const document = {
+      asyncapi: '3.0.0',
+      info: { title: 'Events', version: '1.0.0' },
+      components: {
+        messages: {
+          FulfillmentFailedMessage: { payload: { type: 'object', properties: { source: { const: 'component' } } } },
+        },
+      },
+      channels: {
+        'fulfillment-failed-event-v1': {
+          messages: {
+            FulfillmentFailedMessage: { payload: { type: 'object', properties: { source: { const: 'channel' } } } },
+          },
+        },
+      },
+    };
+    const fetcher = vi.fn(async () => jsonResponse(document));
+
+    const component = await loadRemoteSpecificationSchema({
+      url: 'https://contracts.example/asyncapi.yml',
+      componentMessage: 'FulfillmentFailedMessage',
+      fetcher,
+    });
+    const channel = await loadRemoteSpecificationSchema({
+      url: 'https://contracts.example/asyncapi.yml',
+      channel: 'fulfillment-failed-event-v1',
+      channelMessage: 'FulfillmentFailedMessage',
+      fetcher,
+    });
+
+    expect(component.schema.properties.source.const).toBe('component');
+    expect(channel.schema.properties.source.const).toBe('channel');
+  });
+
+  it('requires a channel name together with channelMessage', async () => {
+    await expect(
+      loadRemoteSpecificationSchema({
+        url: 'https://contracts.example/asyncapi.yml',
+        channelMessage: 'FulfillmentFailedMessage',
+        fetcher: vi.fn(async () => jsonResponse(asyncApi({}))),
+      })
+    ).rejects.toThrow('channel and channelMessage must be provided together');
+  });
+
+  it('unwraps a schema-format payload selected by channelMessage', async () => {
+    const document = {
+      asyncapi: '3.0.0',
+      info: { title: 'Events', version: '1.0.0' },
+      channels: {
+        orders: {
+          messages: {
+            OrderCreated: {
+              payload: {
+                schemaFormat: 'application/vnd.apache.avro+json;version=1.9.0',
+                schema: { type: 'record', name: 'OrderCreated', fields: [] },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const result = await loadRemoteSpecificationSchema({
+      url: 'https://contracts.example/asyncapi.yml',
+      channel: 'orders',
+      channelMessage: 'OrderCreated',
+      fetcher: vi.fn(async () => jsonResponse(document)),
+    });
+
+    expect(result.format).toBe('avro');
+    expect(result.schema.name).toBe('OrderCreated');
+  });
+
   it('loads a relative external Avro payload', async () => {
     const document = asyncApi({
       Cancelled: {

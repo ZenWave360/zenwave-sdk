@@ -347,9 +347,13 @@ public class EventCatalogGenerator extends Generator {
 
     private String messageBody(String resourceType, Map<String, Object> resource) {
         String remoteSchemaUrl = str(resource, "_remoteSchemaUrl", null);
-        String remoteSchemaMessage = str(resource, "_remoteSchemaMessage", null);
+        String remoteSchemaComponentMessage = str(resource, "_remoteSchemaComponentMessage", null);
+        String remoteSchemaChannel = str(resource, "_remoteSchemaChannel", null);
+        String remoteSchemaChannelMessage = str(resource, "_remoteSchemaChannelMessage", null);
         boolean hasRemoteSchema = remoteSchemaUrl != null && !remoteSchemaUrl.isBlank()
-                && remoteSchemaMessage != null && !remoteSchemaMessage.isBlank();
+                && ((remoteSchemaComponentMessage != null && !remoteSchemaComponentMessage.isBlank())
+                || (remoteSchemaChannel != null && !remoteSchemaChannel.isBlank()
+                && remoteSchemaChannelMessage != null && !remoteSchemaChannelMessage.isBlank()));
         String summary = str(resource, "summary", null);
         Map<String, Object> model = new LinkedHashMap<>();
         model.put("resource", resource);
@@ -359,7 +363,9 @@ public class EventCatalogGenerator extends Generator {
                 : "Generated " + resourceType + " reference page.");
         model.put("hasRemoteSchema", hasRemoteSchema);
         model.put("remoteSchemaUrl", hasRemoteSchema ? escapeAttribute(remoteSchemaUrl) : null);
-        model.put("remoteSchemaMessage", hasRemoteSchema ? escapeAttribute(remoteSchemaMessage) : null);
+        model.put("remoteSchemaComponentMessage", hasRemoteSchema ? escapeNullableAttribute(remoteSchemaComponentMessage) : null);
+        model.put("remoteSchemaChannel", hasRemoteSchema ? escapeNullableAttribute(remoteSchemaChannel) : null);
+        model.put("remoteSchemaChannelMessage", hasRemoteSchema ? escapeNullableAttribute(remoteSchemaChannelMessage) : null);
         model.put("schemaPath", escapeNullableAttribute(str(resource, "schemaPath", null)));
         return renderBodyTemplate("command".equals(resourceType) ? COMMAND_TEMPLATE : EVENT_TEMPLATE, model);
     }

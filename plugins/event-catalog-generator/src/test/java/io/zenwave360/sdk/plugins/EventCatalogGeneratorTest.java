@@ -157,6 +157,12 @@ public class EventCatalogGeneratorTest {
         String eventContent = readMdx("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/events/merchandising.inventory.inventory-adjustment.inventory-adjusted/index.mdx");
         assertTrue(eventContent.contains("<RemoteSpecificationSchema"),
                 "A remote AsyncAPI event body must include the remote schema viewer");
+        assertTrue(eventContent.contains("channel=\"inventory-adjusted\""),
+                "A remote AsyncAPI event must identify its channel");
+        assertTrue(eventContent.contains("channelMessage=\"InventoryAdjustedEvent\""),
+                "A remote AsyncAPI event must select the message from its channel");
+        assertFalse(eventContent.contains("message=\"InventoryAdjustedEvent\""),
+                "A remote AsyncAPI event must not use the ambiguous message selector");
         assertFalse(eventContent.contains("<SchemaViewer"),
                 "A remote AsyncAPI event must have exactly one schema viewer usage");
 

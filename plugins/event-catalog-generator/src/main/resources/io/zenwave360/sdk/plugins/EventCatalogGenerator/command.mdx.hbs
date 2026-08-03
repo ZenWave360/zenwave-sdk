@@ -8,7 +8,7 @@
 
 {{~#if hasRemoteSchema}}## Schema
 
-<RemoteSpecificationSchema url="{{{remoteSchemaUrl}}}" message="{{{remoteSchemaMessage}}}" />
+<RemoteSpecificationSchema url="{{{remoteSchemaUrl}}}"{{#if remoteSchemaComponentMessage}} componentMessage="{{{remoteSchemaComponentMessage}}}"{{else}} channel="{{{remoteSchemaChannel}}}" channelMessage="{{{remoteSchemaChannelMessage}}}"{{/if}} />
 
 {{~else}}{{~#if schemaPath}}## Schema
 

@@ -5,6 +5,9 @@ export type SpecType = 'asyncapi' | 'openapi';
 export type SchemaFormat = 'jsonschema' | 'avro' | 'raw';
 export type Selection = {
   message?: string;
+  componentMessage?: string;
+  channel?: string;
+  channelMessage?: string;
   schema?: string;
   operationId?: string;
   operationTarget?: 'request' | 'response';
@@ -245,14 +248,47 @@ function selectAsyncApiMessage(document: any, requested: string) {
   );
 }
 
+function selectAsyncApiComponentMessage(document: any, requested: string) {
+  const messages = document?.components?.messages;
+  if (!isObject(messages)) throw new Error('The specification does not define AsyncAPI component messages');
+  if (Object.prototype.hasOwnProperty.call(messages, requested)) return messages[requested];
+  throw new Error(
+    `AsyncAPI component message "${requested}" was not found. Available names: ${available(Object.keys(messages))}`
+  );
+}
+
+function selectAsyncApiChannelMessage(document: any, channelName: string, requested: string) {
+  const channels = document?.channels;
+  if (!isObject(channels)) throw new Error('The specification does not define AsyncAPI channels');
+  const channel = channels[channelName];
+  if (!isObject(channel)) {
+    throw new Error(`AsyncAPI channel "${channelName}" was not found. Available names: ${available(Object.keys(channels))}`);
+  }
+  const messages = channel.messages;
+  if (!isObject(messages)) throw new Error(`AsyncAPI channel "${channelName}" does not define messages`);
+  if (Object.prototype.hasOwnProperty.call(messages, requested)) return messages[requested];
+  throw new Error(
+    `AsyncAPI channel message "${requested}" was not found in channel "${channelName}". Available names: ${available(Object.keys(messages))}`
+  );
+}
+
 function selectionMode(selection: Selection) {
   const modes = [
     selection.message !== undefined && 'message',
+    selection.componentMessage !== undefined && 'componentMessage',
+    (selection.channel !== undefined || selection.channelMessage !== undefined) && 'channelMessage',
     selection.schema !== undefined && 'schema',
     (selection.operationId !== undefined || selection.operationTarget !== undefined) && 'operation',
     selection.jsonPath !== undefined && 'jsonPath',
   ].filter(Boolean) as string[];
-  if (modes.length !== 1) throw new Error('Exactly one selection mode is required: message, schema, operationId/operationTarget, or jsonPath');
+  if (modes.length !== 1) {
+    throw new Error(
+      'Exactly one selection mode is required: message, componentMessage, channel/channelMessage, schema, operationId/operationTarget, or jsonPath'
+    );
+  }
+  if (modes[0] === 'channelMessage' && (!selection.channel || !selection.channelMessage)) {
+    throw new Error('channel and channelMessage must be provided together');
+  }
   if (modes[0] === 'operation' && (!selection.operationId || !selection.operationTarget)) {
     throw new Error('operationId and operationTarget must be provided together');
   }
@@ -322,6 +358,24 @@ async function select(document: Document, specType: SpecType, selection: Selecti
       };
     }
     return { value: payload, selector: `message=${selection.message}`, sourceDocument: resolved.sourceDocument };
+  }
+  if (mode === 'componentMessage' || mode === 'channelMessage') {
+    if (specType !== 'asyncapi') throw new Error(`${mode} requires an AsyncAPI 3.x specification`);
+    const message =
+      mode === 'componentMessage'
+        ? selectAsyncApiComponentMessage(document.data, selection.componentMessage!)
+        : selectAsyncApiChannelMessage(document.data, selection.channel!, selection.channelMessage!);
+    const resolved = await resolveValue(message, document, context);
+    const payload = resolved.value?.payload;
+    const label =
+      mode === 'componentMessage'
+        ? `componentMessage=${selection.componentMessage}`
+        : `channel=${selection.channel}, channelMessage=${selection.channelMessage}`;
+    if (payload === undefined) throw new Error(`AsyncAPI ${mode} "${mode === 'componentMessage' ? selection.componentMessage : selection.channelMessage}" has no payload`);
+    if (isObject(payload) && typeof payload.schemaFormat === 'string' && payload.schema !== undefined) {
+      return { value: payload.schema, schemaFormat: payload.schemaFormat, selector: label, sourceDocument: resolved.sourceDocument };
+    }
+    return { value: payload, selector: label, sourceDocument: resolved.sourceDocument };
   }
   if (mode === 'schema') {
     if (specType !== 'openapi') throw new Error('schema requires an OpenAPI 3.x specification');

@@ -97,7 +97,8 @@ class EventCatalogFrontmatterTest {
                 + "customer-relationship.customer-management.customer-profile.customer-profile-updated/index.mdx");
         assertTrue(eventContent.contains(
                 "import RemoteSpecificationSchema from '@catalog/components/RemoteSpecificationSchema.astro';"));
-        assertTrue(eventContent.contains("message=\"CustomerProfileUpdatedEvent\""));
+        assertTrue(eventContent.contains("channel=\"customer-profile-updated\""));
+        assertTrue(eventContent.contains("channelMessage=\"CustomerProfileUpdatedEvent\""));
         assertFalse(eventContent.contains("<SchemaViewer"),
                 "A remote AsyncAPI message must have exactly one schema viewer usage");
     }
