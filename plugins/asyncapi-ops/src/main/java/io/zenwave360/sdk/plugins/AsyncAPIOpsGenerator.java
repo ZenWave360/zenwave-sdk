@@ -35,7 +35,7 @@ public class AsyncAPIOpsGenerator extends Generator {
     @DocumentedOption(description = "How Confluent service accounts are resolved: existing looks them up by display name; managed provisions them.", values = {"existing", "managed"})
     public String serviceAccountMode = "existing";
 
-    @DocumentedOption(description = "Avro schema files or folders available while bundling owned message schemas.")
+    @DocumentedOption(description = "Additional Avro schema files or folders available while bundling owned message schemas. Sibling .avsc files are discovered automatically for local and classpath schemas.")
     public List<String> avroImports = List.of();
 
     @DocumentedOption(description = "Authentication configuration values for fetching remote resources.")

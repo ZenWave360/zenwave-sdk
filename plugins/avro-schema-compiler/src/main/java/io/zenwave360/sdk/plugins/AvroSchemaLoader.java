@@ -107,6 +107,57 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
         return collectAvscFiles(null, imports, List.of("**/*.avsc"), List.of());
     }
 
+    /**
+     * Finds .avsc files beside a local or classpath root schema. Remote URI directories
+     * cannot be listed and therefore continue to require explicit imports.
+     */
+    public List<URI> collectSiblingUris(URI schemaUri) throws IOException {
+        List<URI> siblingUris;
+        if (schemaUri.getScheme() == null || "file".equalsIgnoreCase(schemaUri.getScheme())) {
+            Path schemaPath = schemaUri.getScheme() == null
+                    ? Paths.get(schemaUri.getPath()).toAbsolutePath().normalize()
+                    : Paths.get(schemaUri).toAbsolutePath().normalize();
+            Path parent = schemaPath.getParent();
+            if (parent == null || !Files.isDirectory(parent)) {
+                siblingUris = List.of();
+            } else {
+                try (var paths = Files.list(parent)) {
+                    siblingUris = paths
+                            .filter(Files::isRegularFile)
+                            .filter(path -> path.getFileName().toString().endsWith(".avsc"))
+                            .map(path -> path.toAbsolutePath().normalize())
+                            .filter(path -> !path.equals(schemaPath))
+                            .sorted()
+                            .map(Path::toUri)
+                            .toList();
+                }
+            }
+        } else if ("classpath".equalsIgnoreCase(schemaUri.getScheme())) {
+            String schemaResource = schemaUri.getSchemeSpecificPart().replaceFirst("^/", "");
+            int lastSlash = schemaResource.lastIndexOf('/');
+            if (lastSlash < 0) {
+                siblingUris = List.of();
+            } else {
+                String parentResource = schemaResource.substring(0, lastSlash);
+                siblingUris = collectImportUris(List.of("classpath:" + parentResource)).stream()
+                        .filter(uri -> {
+                            String resource = uri.getSchemeSpecificPart().replaceFirst("^/", "");
+                            int resourceLastSlash = resource.lastIndexOf('/');
+                            return resourceLastSlash >= 0
+                                    && parentResource.equals(resource.substring(0, resourceLastSlash))
+                                    && !schemaResource.equals(resource);
+                        })
+                        .sorted(Comparator.comparing(URI::toString))
+                        .toList();
+            }
+        } else {
+            siblingUris = List.of();
+        }
+
+        log.info("Found {} sibling avsc files for {}: {}", siblingUris.size(), schemaUri, siblingUris);
+        return siblingUris;
+    }
+
     protected List<URI> collectAvscFiles(File sourceFolder, List<String> imports, List<String> includes, List<String> excludes) throws IOException {
         Set<File> avscFiles = new HashSet<>();
         List<URI> importedURIs = new ArrayList<>();
@@ -206,13 +257,16 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
                     throw new IOException("Failed to process import: " + importPath, e);
                 }
             }
-            log.info("Found {} avsc files in imports: {}", importedURIs.size(), importedURIs);
         }
 
         // Combine local file URIs with remote URIs
         List<URI> allURIs = new ArrayList<>();
         allURIs.addAll(avscFiles.stream().map(File::toURI).toList());
         allURIs.addAll(importedURIs);
+
+        if (imports != null) {
+            log.info("Found {} avsc files in imports: {}", allURIs.size(), allURIs);
+        }
 
         return allURIs;
     }

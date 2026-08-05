@@ -101,7 +101,7 @@ This plugin has been tested in the following setups:
 | `apiFile`        | AsyncAPI Specification File                                                                                                                                                  | URI      | `null`           |                               |
 | `apiFiles`       | List of AsyncAPI specs. Supported schemas are local files, http/s and classpath resources.                                                                                   | List     | `[]`             |                               |
 | `apiOverlayFiles` | Ordered list of API overlay YAML files applied to each loaded spec before dereferencing and `allOf` merge.                                                            | List     | `[]`             |                               |
-| `avroImports`    | Avro schema files or folders available while bundling owned message schemas. Supports local files/folders, `classpath:` files/folders and `https://` files.                | List     | `[]`             |                               |
+| `avroImports`    | Additional Avro schema files or folders available while bundling owned message schemas. Sibling `.avsc` files are discovered automatically for local and `classpath:` schemas. Supports local files/folders, `classpath:` files/folders and `https://` files. | List     | `[]`             |                               |
 | `authentication` | Authentication configuration values for fetching remote resources.                                                                                                           | List     | `[]`             |                               |
 | `server`         | Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Used to merge `x-env-server-overrides`/`env-server-overrides` from channel and error-topic bindings. | String   | `null`           |                               |
 | `templates`      | Templates to use for code generation.                                                                                                                                        | String   | `TerraformKafka` | TerraformKafka, TerraformConfluent, TerraformConfluentHybrid, FQ Class Name |
@@ -120,7 +120,7 @@ One run per service. All files land in `targetFolder`.
 | `acls.tf` | `kafka_acl` resources derived from operation bindings across all specs |
 | `<api-name>/.../*.avsc` | Bundled Avro schema files generated per owned message and referenced from `schemas.tf` |
 
-Schema files are generated inside the Terraform module and referenced with `${path.module}`. Each bundled file contains a single fully inlined Avro schema JSON object, built from the owned message schema plus only the required types found in `avroImports`.
+Schema files are generated inside the Terraform module and referenced with `${path.module}`. Each bundled file contains a single fully inlined Avro schema JSON object. For local and `classpath:` roots, types declared in sibling `.avsc` files are discovered automatically; use `avroImports` for additional schemas located elsewhere or for remote schemas.
 
 When multiple AsyncAPI specs are passed together, bundled schemas are namespaced by the sanitized spec basename:
 
