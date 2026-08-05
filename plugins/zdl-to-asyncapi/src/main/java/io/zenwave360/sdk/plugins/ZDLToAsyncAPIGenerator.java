@@ -28,6 +28,18 @@ import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
+    private enum MessageKind {
+        COMMAND("Command"),
+        EVENT("Event"),
+        RESPONSE("Response");
+
+        private final String suffix;
+
+        MessageKind(String suffix) {
+            this.suffix = suffix;
+        }
+    }
+
     ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
     ObjectMapper jsonMapper = new ObjectMapper();
 
@@ -100,6 +112,8 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
             var role = JSONPath.get(model, "$.apis." + api + ".role");
             return role == null || "provider".equals(role);
         }).toList();
+        Set<String> responseEventNames = new HashSet<>();
+        methodsWithCommands.forEach(method -> responseEventNames.addAll(ZDLFindUtils.methodEventsFlatList(method)));
         for (Map<String, Object> method : methodsWithCommands) {
             if (AsyncapiVersionType.v3.equals(asyncapiVersion)) {
                 buildMethodCommand(method, channels, operations, model, messages);
@@ -108,7 +122,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
                 buildCommandChannelV2(method, channels, model, messages);
             }
         }
-        addAllEventsAsMessages(messages, JSONPath.get(model, "$.events", Map.of()));
+        addAllEventsAsMessages(messages, JSONPath.get(model, "$.events", Map.of()), responseEventNames);
 
         var methodsWithEvents = ZDLFindUtils.methodsWithEvents(model);
         for (Map<String, Object> method : methodsWithEvents) {
@@ -120,7 +134,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
                     buildEventChannelV2(method, event, channels);
                 }
                 if (AsyncapiVersionType.v3.equals(asyncapiVersion)) {
-                    buildEventChannel(event, channels);
+                    buildEventChannel(event, channels, responseEventNames);
                     buildEventOperation(method, withEvent, model, operations);
                 }
 
@@ -160,15 +174,21 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         return generatedProjectFiles;
     }
 
-    private void addAllEventsAsMessages(LinkedHashMap<Object, Object> allMessages, Map<String, Map> events) {
+    private void addAllEventsAsMessages(LinkedHashMap<Object, Object> allMessages, Map<String, Map> events, Set<String> responseEventNames) {
         for (Map.Entry<String, Map> event : events.entrySet()) {
             if(JSONPath.get(event.getValue(), "$.options.embedded") != null) {
                 continue;
             }
             var message = new LinkedHashMap<>(event.getValue());
             message.put("summary", firstNonNull(event.getValue().get("javadoc"), event.getKey()));
+            var messageKind = responseEventNames.contains(event.getKey()) ? MessageKind.RESPONSE : MessageKind.EVENT;
+            message.put("messageName", messageName(event.getKey(), messageKind));
             allMessages.put(event.getKey(), message);
         }
+    }
+
+    private String messageName(Object payloadName, MessageKind messageKind) {
+        return asJavaTypeName(String.valueOf(payloadName)) + messageKind.suffix;
     }
 
     private void buildEventOperation(Map<String, Object> method, String eventName, Map<String, Object> model, Map<String, Object> operations) {
@@ -177,14 +197,16 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         operations.put(operationId, Map.of("action", "send","serviceName", method.get("serviceName"), "channel", channelName));
     }
 
-    private void buildEventChannel(Map<String, Object> event, Map<String, Object> channels) {
+    private void buildEventChannel(Map<String, Object> event, Map<String, Object> channels, Set<String> responseEventNames) {
         var channelName = JSONPath.get(event, "$.options.asyncapi.channel", event.get("name") + "Channel");
         var channel = (Map) channels.getOrDefault(channelName, Maps.of("address", "add topic here"));
         var topic = JSONPath.get(event, "$.options.asyncapi.topic");
         if(topic != null) {
             channel.put("address", topic);
         }
-        var messageName = event.get("name") + "Message";
+        var eventName = (String) event.get("name");
+        var messageKind = responseEventNames.contains(eventName) ? MessageKind.RESPONSE : MessageKind.EVENT;
+        var messageName = messageName(eventName, messageKind);
         var channelMessages = (Map) channel.getOrDefault("messages", new HashMap<>());
         channelMessages.put(messageName, Maps.of("$ref", "#/components/messages/" + messageName));
         channel.put("messages", channelMessages);
@@ -207,10 +229,12 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
 
         var hasId = method.get("paramId") != null;
         var commandType = (String) method.get("parameter");
-        var inputEntity = firstNonNull(JSONPath.get(model, "$.inputs['" + commandType + "']"), JSONPath.get(model, "$.entities['" + commandType + "']"));
-        messages.put(commandType, inputEntity);
+        var inputEntity = (Map) firstNonNull(JSONPath.get(model, "$.inputs['" + commandType + "']"), JSONPath.get(model, "$.entities['" + commandType + "']"));
+        var messageName = messageName(commandType, MessageKind.COMMAND);
+        var message = new LinkedHashMap<>(inputEntity);
+        message.put("messageName", messageName);
+        messages.put(commandType, message);
 
-        var messageName = asJavaTypeName(commandType) + "Message";
         var channelMessages = Maps.of(messageName, Map.of("$ref", "#/components/messages/" + messageName));
         channel.put("messages", channelMessages);
         channels.put(channelName, channel);

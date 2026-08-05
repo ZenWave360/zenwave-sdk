@@ -72,6 +72,8 @@ public class ZDLToAsyncAPIGeneratorTest {
 
         Map<String, Object> oasSchema = mapper.readValue(outputTemplates.get(0).getContent(), Map.class);
         Assertions.assertTrue(((List) JSONPath.get(oasSchema, "$.components.schemas.Customer.required")).contains("username"));
+        Assertions.assertNotNull(JSONPath.get(oasSchema, "$.components.messages.CustomerInputMessage"));
+        Assertions.assertNotNull(JSONPath.get(oasSchema, "$.components.messages.CustomerCreatedMessage"));
     }
 
 
@@ -93,6 +95,37 @@ public class ZDLToAsyncAPIGeneratorTest {
 
         Map<String, Object> oasSchema = mapper.readValue(outputTemplates.get(0).getContent(), Map.class);
         Assertions.assertTrue(((List) JSONPath.get(oasSchema, "$.components.schemas.Customer.required")).contains("username"));
+
+        Map<String, Object> commandMessages = JSONPath.get(oasSchema, "$.channels.customerCommandsChannel.messages");
+        Assertions.assertEquals(List.of("CustomerInputCommand"), new ArrayList<>(commandMessages.keySet()));
+        Assertions.assertEquals("#/components/messages/CustomerInputCommand",
+                JSONPath.get(commandMessages, "$.CustomerInputCommand['$ref']"));
+
+        Map<String, Object> eventMessages = JSONPath.get(oasSchema, "$.channels.customerEventsChannel.messages");
+        Assertions.assertTrue(eventMessages.containsKey("CustomerEventResponse"));
+        Assertions.assertTrue(eventMessages.containsKey("CustomerCreatedResponse"));
+        Assertions.assertTrue(eventMessages.containsKey("CustomerCreatedFailedResponse"));
+        Assertions.assertTrue(eventMessages.containsKey("CustomerUpdatedEvent"));
+        Assertions.assertTrue(eventMessages.containsKey("CustomerDeletedEvent"));
+
+        Map<String, Object> componentMessages = JSONPath.get(oasSchema, "$.components.messages");
+        Assertions.assertTrue(componentMessages.containsKey("CustomerInputCommand"));
+        Assertions.assertTrue(componentMessages.containsKey("CustomerEventResponse"));
+        Assertions.assertTrue(componentMessages.containsKey("CustomerCreatedResponse"));
+        Assertions.assertTrue(componentMessages.containsKey("CustomerCreatedFailedResponse"));
+        Assertions.assertTrue(componentMessages.containsKey("CustomerUpdatedEvent"));
+        Assertions.assertTrue(componentMessages.containsKey("CustomerDeletedEvent"));
+        Assertions.assertTrue(componentMessages.keySet().stream().noneMatch(name -> name.endsWith("Message")));
+
+        Map<String, Object> channels = JSONPath.get(oasSchema, "$.channels");
+        for (Object channelValue : channels.values()) {
+            Map<String, Object> messages = JSONPath.get(channelValue, "$.messages", Map.of());
+            for (Object messageValue : messages.values()) {
+                String ref = JSONPath.get(messageValue, "$['$ref']");
+                String componentName = ref.substring("#/components/messages/".length());
+                Assertions.assertTrue(componentMessages.containsKey(componentName), "Missing component for " + ref);
+            }
+        }
     }
 
     @Test

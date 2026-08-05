@@ -42,8 +42,8 @@ operations:
 components:
   messages:
 {{~#each zdlModel.messages as |message|}}
-    {{message.name}}Message:
-      name: {{message.name}}Message
+    {{message.messageName}}:
+      name: {{message.messageName}}
       title: "{{message.javadoc}}"
       summary: "{{message.javadoc}}"
       traits:

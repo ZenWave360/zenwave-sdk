@@ -18,6 +18,7 @@ Draft release notes for the upcoming **2.6.0** release.
 - AsyncAPI v3 operations without an explicit `messages` list now correctly inherit messages declared by their referenced channel.
 - Fixed the by-channel consumer template (`IServiceByChannel.java` + the shared `Headers` partial, used by the `asyncapi-generator` plugin) generating a duplicate, incorrectly-named `Headers` inner class per channel instead of one distinct `<Message>Headers` class per message — this broke compilation for any channel with more than one message type.
 - Fixed several producer templates (`InMemoryEventsProducer`, transactional-outbox `Producer` variants, across `asyncapi-generator` and `asyncapi-spring-cloud-streams3`) silently skipping `processRuntimeHeaders(...)` generation due to passing the wrong context to the `hasRuntimeHeaders` helper.
+- Updated `zdl-to-asyncapi` v3 message names to use `Command`, `Response`, or `Event` suffixes according to their role.
 
 ### Build & Dependencies
 
