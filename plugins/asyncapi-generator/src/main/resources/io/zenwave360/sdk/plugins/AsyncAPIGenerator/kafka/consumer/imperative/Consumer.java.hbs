@@ -64,6 +64,7 @@ public class {{consumerName (camelCase channelName)}} {
 
     @KafkaListener(
             topics = "${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.topic}",
+            autoStartup = "${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.enabled:true}",
             groupId = "${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.groupId:}",
             containerFactory = "${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.containerFactory:}")
     public void listen(@Payload ConsumerRecord payload,
