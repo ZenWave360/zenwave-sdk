@@ -1,4 +1,9 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-io.zenwave360.sdk.plugins:zdl-to-asyncapi,io.zenwave360.sdk.plugins,ZDLToAsyncAPIPlugin,36,0,2,0,6,0,3,0,2,0
-io.zenwave360.sdk.plugins:zdl-to-asyncapi,io.zenwave360.sdk.plugins,ZDLToAsyncAPIGenerator,18,1382,17,63,6,218,17,46,0,23
+io.zenwave360.sdk.plugins:zdl-to-asyncapi,io.zenwave360.sdk.plugins,ZDLToAsyncAPIGenerator.MessageKind,0,32,0,0,0,7,0,2,0,2
+io.zenwave360.sdk.plugins:zdl-to-asyncapi,io.zenwave360.sdk.plugins,ZDLToAsyncAPIClientPlugin,28,0,0,0,3,0,1,0,1,0
+io.zenwave360.sdk.plugins:zdl-to-asyncapi,io.zenwave360.sdk.plugins,ZDLToAsyncAPIClientGenerator.ConsumedChannel,0,27,0,0,0,3,0,3,0,3
+io.zenwave360.sdk.plugins:zdl-to-asyncapi,io.zenwave360.sdk.plugins,ZDLToAsyncAPIGenerator,18,1428,17,67,6,225,17,50,0,25
+io.zenwave360.sdk.plugins:zdl-to-asyncapi,io.zenwave360.sdk.plugins,ZDLToAsyncAPIClientGenerator,41,513,7,27,6,80,7,28,0,18
+io.zenwave360.sdk.plugins:zdl-to-asyncapi,io.zenwave360.sdk.plugins,ZDLToAsyncAPIPlugin,12,28,2,0,3,3,2,1,1,1
 io.zenwave360.sdk.plugins:zdl-to-asyncapi,io.zenwave360.sdk.plugins,ZDLToAsyncAPIGenerator.SchemaFormat,0,15,0,0,0,2,0,1,0,1
+io.zenwave360.sdk.plugins:zdl-to-asyncapi,io.zenwave360.sdk.plugins,AsyncAPIOverlayProcessor,7,65,1,9,1,16,1,9,0,5
