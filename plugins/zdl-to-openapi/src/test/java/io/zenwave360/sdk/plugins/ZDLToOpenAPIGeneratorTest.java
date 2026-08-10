@@ -101,9 +101,13 @@ public class ZDLToOpenAPIGeneratorTest {
     public void test_merge_customer_address_zdl_to_openapi() throws Exception {
         Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
         ZDLToOpenAPIGenerator generator = new ZDLToOpenAPIGenerator();
-        generator.openapiMergeFile = "classpath:io/zenwave360/sdk/resources/openapi/openapi-merger.yml";
 
-        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
+        var generatedProjectFiles = generator.generate(model);
+        OpenAPIOverlayProcessor processor = new OpenAPIOverlayProcessor();
+        processor.openapiMergeFile = "classpath:io/zenwave360/sdk/resources/openapi/openapi-merger.yml";
+        processor.process(generatedProjectFiles);
+
+        List<TemplateOutput> outputTemplates = generatedProjectFiles.getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
 //        System.out.println(outputTemplates.get(0).getContent());
@@ -113,9 +117,13 @@ public class ZDLToOpenAPIGeneratorTest {
     public void test_overlay_customer_address_zdl_to_openapi() throws Exception {
         Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
         ZDLToOpenAPIGenerator generator = new ZDLToOpenAPIGenerator();
-        generator.openapiOverlayFiles = List.of("classpath:/io/zenwave360/sdk/resources/openapi/openapi-overlay.yml");
 
-        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
+        var generatedProjectFiles = generator.generate(model);
+        OpenAPIOverlayProcessor processor = new OpenAPIOverlayProcessor();
+        processor.openapiOverlayFiles = List.of("classpath:/io/zenwave360/sdk/resources/openapi/openapi-overlay.yml");
+        processor.process(generatedProjectFiles);
+
+        List<TemplateOutput> outputTemplates = generatedProjectFiles.getAllTemplateOutputs();
         Assertions.assertEquals(1, outputTemplates.size());
 
 //        System.out.println(outputTemplates.get(0).getContent());

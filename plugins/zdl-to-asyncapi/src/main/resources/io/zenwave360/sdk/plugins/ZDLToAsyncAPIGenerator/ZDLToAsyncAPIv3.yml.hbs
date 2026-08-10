@@ -1,4 +1,7 @@
-asyncapi: 3.0.0
+asyncapi: 3.1.0
+{{~#if id}}
+id: {{{id}}}
+{{~/if}}
 info:
   title: "{{{zdlModel.config.title}}}"
   version: 0.0.1
@@ -7,6 +10,10 @@ info:
   {{~#each zdlModel.serviceNames as |serviceName|}}
     - name: "{{asTagName serviceName}}"
   {{~/each}}
+
+{{~#if applicationExtensions}}
+{{{applicationExtensions}}}
+{{~/if}}
 
 defaultContentType: application/json
 
@@ -35,8 +42,8 @@ operations:
 components:
   messages:
 {{~#each zdlModel.messages as |message|}}
-    {{message.name}}Message:
-      name: {{message.name}}Message
+    {{message.messageName}}:
+      name: {{message.messageName}}
       title: "{{message.javadoc}}"
       summary: "{{message.javadoc}}"
       traits:

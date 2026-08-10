@@ -67,7 +67,7 @@ public class {{producerClassName serviceName operationRoleType}} implements {{pr
 
 
 {{~#each operations as |operation|}}
-    {{#each operation.x--messages as |message|}}
+    {{#each (operationMessages operation.operationId) as |message|}}
     /**
      * {{{operation.summary}}}
      */

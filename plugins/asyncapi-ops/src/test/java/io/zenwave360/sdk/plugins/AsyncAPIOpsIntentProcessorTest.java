@@ -72,8 +72,18 @@ public class AsyncAPIOpsIntentProcessorTest {
         // ACLs from provider operations + error topic ACLs
         Assertions.assertFalse(intent.acls.isEmpty());
         intent.acls.forEach(acl -> {
-            Assertions.assertTrue(acl.principal.startsWith("User:"));
+            Assertions.assertFalse(acl.principal.startsWith("User:"));
+            Assertions.assertEquals(acl.principal.replace('.', '_').replace('-', '_'), acl.principalResourceName);
+            Assertions.assertFalse(acl.resourceName.contains("_User_"));
             Assertions.assertTrue(acl.operation.equals("Read") || acl.operation.equals("Write") || acl.operation.equals("Describe"));
+        });
+        Assertions.assertEquals(1, intent.principals.size(), "Provider operations share one logical principal");
+        Assertions.assertEquals("merchandising.inventory.inventory-adjustment", intent.principals.get(0).name);
+        Assertions.assertEquals("merchandising_inventory_inventory_adjustment", intent.principals.get(0).resourceName);
+        intent.roleBindings.forEach(roleBinding -> {
+            Assertions.assertEquals("merchandising.inventory.inventory-adjustment", roleBinding.principal);
+            Assertions.assertEquals("merchandising_inventory_inventory_adjustment", roleBinding.principalResourceName);
+            Assertions.assertFalse(roleBinding.resourceName.contains("_User_"));
         });
         long mainTopicDescribeAcls = intent.acls.stream()
                 .filter(a -> "merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0".equals(a.topicName))
@@ -88,13 +98,13 @@ public class AsyncAPIOpsIntentProcessorTest {
         Assertions.assertEquals(1, sendTopicDescribeAcls, "Send operations should get Describe on the main topic");
 
         long errorTopicReadAcls = intent.acls.stream()
-                .filter(a -> a.topicName.contains(".__.")  && "Read".equals(a.operation))
+                .filter(a -> a.topicName != null && a.topicName.contains(".__.")  && "Read".equals(a.operation))
                 .count();
         long errorTopicWriteAcls = intent.acls.stream()
-                .filter(a -> a.topicName.contains(".__.")  && "Write".equals(a.operation))
+                .filter(a -> a.topicName != null && a.topicName.contains(".__.")  && "Write".equals(a.operation))
                 .count();
         long errorTopicDescribeAcls = intent.acls.stream()
-                .filter(a -> a.topicName.contains(".__.")  && "Describe".equals(a.operation))
+                .filter(a -> a.topicName != null && a.topicName.contains(".__.")  && "Describe".equals(a.operation))
                 .count();
         Assertions.assertEquals(4, errorTopicReadAcls, "4 Read ACLs for error topics");
         Assertions.assertEquals(4, errorTopicWriteAcls, "4 Write ACLs for error topics");
@@ -150,7 +160,7 @@ public class AsyncAPIOpsIntentProcessorTest {
         Assertions.assertFalse(intent.acls.isEmpty());
         // Verify no duplicate (topicName, principal, operation) triples
         long distinctAcls = intent.acls.stream()
-                .map(a -> a.topicName + "|" + a.principal + "|" + a.operation)
+                .map(a -> a.resourceType + "|" + a.kafkaResourceName + "|" + a.patternType + "|" + a.principal + "|" + a.operation)
                 .distinct().count();
         Assertions.assertEquals(intent.acls.size(), distinctAcls, "ACLs must be deduplicated");
 
@@ -265,6 +275,142 @@ public class AsyncAPIOpsIntentProcessorTest {
 
         long retryDlqTopics = intent.topics.stream().filter(t -> t.isRetryOrDlq).count();
         Assertions.assertEquals(4, retryDlqTopics, "Unprefixed error-topics must still generate retry/DLQ topics");
+    }
+
+    @Test
+    public void test_x_prefixed_values_take_precedence_over_standard_binding_values() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+
+        Map<String, Object> channelBinding = JSONPath.get(api, "$.channels['reserve-stock-command'].bindings.kafka");
+        Map<String, Object> overrides = JSONPath.get(channelBinding, "$.x-env-server-overrides.staging");
+        overrides.put("partitions", 7);
+        channelBinding.put("env-server-overrides", Map.of("staging", Map.of("partitions", 11)));
+
+        Map<String, Object> operationBinding = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka");
+        operationBinding.put("principal", "standard.principal");
+        operationBinding.put("x-principal", "extension.principal");
+        operationBinding.put("x-groupId", "extension.group");
+        operationBinding.put("groupId", Map.of("type", "string", "enum", List.of("schema.group")));
+
+        context = buildIntent("staging", context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+
+        AsyncAPIOpsIntent.TopicIntent ownedTopic = intent.topics.stream()
+                .filter(t -> !t.isRetryOrDlq && "merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0".equals(t.topicName))
+                .findFirst()
+                .orElseThrow();
+        Assertions.assertEquals(7, ownedTopic.partitions, "x-env-server-overrides must win over env-server-overrides");
+
+        Assertions.assertTrue(intent.acls.stream().anyMatch(a -> "extension.principal".equals(a.principal)));
+        Assertions.assertFalse(intent.acls.stream().anyMatch(a -> "standard.principal".equals(a.principal)));
+        Assertions.assertTrue(intent.topics.stream().anyMatch(t -> t.isRetryOrDlq && t.topicName.startsWith("extension.group.__.")),
+                "x-groupId must win over schema groupId");
+    }
+
+    @Test
+    public void test_group_id_schema_shapes_and_transactional_prefix_acls() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+
+        Map<String, Object> receiveBinding = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka");
+        receiveBinding.remove("x-groupId");
+        receiveBinding.put("groupId", Map.of("type", "string", "const", List.of("const-array.group", "ignored.group")));
+
+        Map<String, Object> sendBinding = JSONPath.get(api, "$.operations['onReserveStockResponse'].bindings.kafka");
+        sendBinding.put("transactional", true);
+        sendBinding.put("x-transactional-id-prefix", "inventory-adjustment-tx-");
+
+        context = buildIntent("staging", context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+
+        Assertions.assertTrue(intent.acls.stream().anyMatch(a ->
+                "GROUP".equals(a.resourceType)
+                        && "const-array.group".equals(a.kafkaResourceName)
+                        && "Read".equals(a.operation)));
+        Assertions.assertTrue(intent.topics.stream().anyMatch(t -> t.isRetryOrDlq && t.topicName.startsWith("const-array.group.__.")));
+        Assertions.assertTrue(intent.acls.stream().anyMatch(a ->
+                "TRANSACTIONAL_ID".equals(a.resourceType)
+                        && "PREFIXED".equals(a.patternType)
+                        && "inventory-adjustment-tx-".equals(a.kafkaResourceName)
+                        && "Write".equals(a.operation)));
+        Assertions.assertTrue(intent.roleBindings.stream().anyMatch(r ->
+                "DeveloperRead".equals(r.roleName)
+                        && r.crnPattern.contains("/subject=merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0-ReserveStockCommand-value")));
+    }
+
+    @Test
+    public void test_principals_are_deduplicated_and_sanitized_name_collisions_fail_generation() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+
+        Map<String, Object> receiveBinding = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka");
+        Map<String, Object> sendBinding = JSONPath.get(api, "$.operations['onReserveStockResponse'].bindings.kafka");
+        receiveBinding.put("x-principal", "sales.orders");
+        sendBinding.put("x-principal", "sales_orders");
+
+        IllegalArgumentException collision = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> buildIntent("staging", context));
+        Assertions.assertTrue(collision.getMessage().contains("sales.orders"));
+        Assertions.assertTrue(collision.getMessage().contains("sales_orders"));
+        Assertions.assertTrue(collision.getMessage().contains("both sanitize to 'sales_orders'"));
+    }
+
+    @Test
+    public void test_unsupported_group_id_schema_skips_group_scoped_resources() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+
+        Map<String, Object> receiveBinding = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka");
+        receiveBinding.remove("x-groupId");
+        receiveBinding.put("groupId", Map.of("type", "object", "properties", Map.of()));
+
+        context = buildIntent("staging", context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+
+        Assertions.assertFalse(intent.acls.stream().anyMatch(a -> "GROUP".equals(a.resourceType)));
+        Assertions.assertEquals(0, intent.topics.stream().filter(t -> t.isRetryOrDlq).count(), "unsupported groupId schema must skip retry/dlq expansion");
+    }
+
+    @Test
+    public void test_retry_suffixes_override_numbered_suffixes() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+
+        Map<String, Object> errorTopics = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka.x-error-topics");
+        errorTopics.put("retrySuffixes", List.of("retry-5s", "retry-30s", "retry-5m"));
+
+        context = buildIntent("staging", context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+        List<String> retryTopicNames = intent.topics.stream()
+                .filter(t -> t.isRetryOrDlq && !t.topicName.endsWith(".dlq"))
+                .map(t -> t.topicName)
+                .toList();
+
+        Assertions.assertEquals(3, retryTopicNames.size());
+        Assertions.assertTrue(retryTopicNames.stream().anyMatch(name -> name.endsWith(".retry-5s")));
+        Assertions.assertTrue(retryTopicNames.stream().anyMatch(name -> name.endsWith(".retry-30s")));
+        Assertions.assertTrue(retryTopicNames.stream().anyMatch(name -> name.endsWith(".retry-5m")));
+        Assertions.assertFalse(retryTopicNames.stream().anyMatch(name -> name.matches(".*\\.retry-\\d+$")));
+    }
+
+    @Test
+    public void test_invalid_retry_suffixes_fail_generation() throws Exception {
+        IllegalArgumentException invalidType = assertInvalidRetrySuffixes("retry-5s", 3, false);
+        Assertions.assertTrue(invalidType.getMessage().contains("array of strings"));
+
+        IllegalArgumentException wrongLengthWithoutRetry = assertInvalidRetrySuffixes(List.of("retry-5s"), 3, true);
+        Assertions.assertTrue(wrongLengthWithoutRetry.getMessage().contains("length must equal retryTopics"));
+
+        IllegalArgumentException nonString = assertInvalidRetrySuffixes(List.of("retry-5s", 30, "retry-5m"), 3, false);
+        Assertions.assertTrue(nonString.getMessage().contains("only strings"));
+
+        IllegalArgumentException blank = assertInvalidRetrySuffixes(List.of("retry-5s", " ", "retry-5m"), 3, false);
+        Assertions.assertTrue(blank.getMessage().contains("blank values"));
+
+        IllegalArgumentException duplicate = assertInvalidRetrySuffixes(List.of("retry-5s", "retry-5s", "retry-5m"), 3, false);
+        Assertions.assertTrue(duplicate.getMessage().contains("values must be unique"));
     }
 
     @Test
@@ -429,6 +575,18 @@ public class AsyncAPIOpsIntentProcessorTest {
         AsyncAPIOpsIntentProcessor intentProcessor = new AsyncAPIOpsIntentProcessor();
         intentProcessor.server = server;
         return intentProcessor.process(context);
+    }
+
+    private IllegalArgumentException assertInvalidRetrySuffixes(Object retrySuffixes, int retryTopics, boolean removeRetry) throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+        Map<String, Object> errorTopics = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka.x-error-topics");
+        errorTopics.put("retryTopics", retryTopics);
+        errorTopics.put("retrySuffixes", retrySuffixes);
+        if (removeRetry) {
+            errorTopics.remove("retry");
+        }
+        return Assertions.assertThrows(IllegalArgumentException.class, () -> buildIntent("staging", context));
     }
 
     @SuppressWarnings("unchecked")

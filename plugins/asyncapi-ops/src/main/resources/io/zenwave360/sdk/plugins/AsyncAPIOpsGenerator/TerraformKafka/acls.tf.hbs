@@ -3,12 +3,13 @@
 
 {{#each intent.acls as |acl|}}
 resource "kafka_acl" "{{acl.resourceName}}" {
-  resource_name       = "{{acl.topicName}}"
-  resource_type       = "Topic"
-  acl_principal       = "{{acl.principal}}"
+  resource_name       = "{{acl.kafkaResourceName}}"
+  resource_type       = "{{acl.kafkaResourceType}}"
+  acl_principal       = "User:{{acl.principal}}"
   acl_host            = "*"
   acl_operation       = "{{acl.operation}}"
   acl_permission_type = "{{acl.permissionType}}"
+  resource_pattern_type_filter = "{{acl.kafkaPatternType}}"
 }
 
 {{/each}}

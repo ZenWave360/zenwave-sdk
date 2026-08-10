@@ -1,0 +1,24 @@
+{{~#if summary}}
+{{{summary}}}
+{{~/if}}
+
+## Overview
+
+This page is generated from the ZenWave architecture model and EventCatalog frontmatter.
+
+<NodeGraph />
+
+<MessageTable format="all" limit={8} showChannels={true} title="Messages in and out" />
+
+{{~#if hasEntities}}
+## Entity Map
+<EntityMap />
+{{~/if}}
+
+{{~#if hasRelatedResources}}## Related Resources
+<ResourceGroupTable id="related-resources" limit={8} showOwners={true} title="Core resources" />
+{{~/if}}
+
+{{~#if docsBody}}
+{{{docsBody}}}
+{{~/if}}

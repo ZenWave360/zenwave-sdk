@@ -1,23 +1,23 @@
 package io.zenwave360.sdk.plugins;
 
 import io.zenwave360.sdk.MainGenerator;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 public class EventCatalogGeneratorTest {
 
     private static final String ARCHITECTURE_CLASSPATH = "retail-domain-catalog/zenwave-architecture.yml";
-    private static final String OUTPUT_FOLDER = "target/event-catalog-test";
+    private static final String OUTPUT_FOLDER = "target/event-catalog-output-test";
 
     private static String architectureFilePath() {
         var resource = EventCatalogGeneratorTest.class.getClassLoader().getResource(ARCHITECTURE_CLASSPATH);
-        if (resource != null) {
-            return resource.getFile();
+        if (resource != null && "file".equalsIgnoreCase(resource.getProtocol())) {
+            return new File(resource.getFile()).getAbsolutePath();
         }
         String[] candidates = {
             ARCHITECTURE_CLASSPATH,
@@ -40,6 +40,7 @@ public class EventCatalogGeneratorTest {
 
         var plugin = new EventCatalogPlugin()
                 .withOption("inputFile", inputFile)
+                .withOption("linkSource", "git")
                 .withOption("outputFolder", OUTPUT_FOLDER);
 
         new MainGenerator().generate(plugin);
@@ -49,16 +50,16 @@ public class EventCatalogGeneratorTest {
         assertMdxExists("domains/customer-relationship/index.mdx");
 
         // Subdomains (folder name = full subdomain id)
-        assertMdxExists("domains/merchandising/merchandising.inventory/index.mdx");
-        assertMdxExists("domains/merchandising/merchandising.pricing/index.mdx");
-        assertMdxExists("domains/customer-relationship/customer-relationship.customer-management/index.mdx");
+        assertMdxExists("domains/merchandising/subdomains/merchandising.inventory/index.mdx");
+        assertMdxExists("domains/merchandising/subdomains/merchandising.pricing/index.mdx");
+        assertMdxExists("domains/customer-relationship/subdomains/customer-relationship.customer-management/index.mdx");
 
         // Services
-        assertMdxExists("domains/merchandising/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/index.mdx");
-        assertMdxExists("domains/merchandising/merchandising.inventory/services/merchandising.inventory.stock-replenishment/index.mdx");
-        assertMdxExists("domains/merchandising/merchandising.pricing/services/merchandising.pricing.price-change/index.mdx");
-        assertMdxExists("domains/customer-relationship/customer-relationship.customer-management/services/customer-relationship.customer-management.customer-profile/index.mdx");
-        assertMdxExists("domains/customer-relationship/customer-relationship.customer-management/services/customer-relationship.customer-management.loyalty-management/index.mdx");
+        assertMdxExists("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/index.mdx");
+        assertMdxExists("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.stock-replenishment/index.mdx");
+        assertMdxExists("domains/merchandising/subdomains/merchandising.pricing/services/merchandising.pricing.price-change/index.mdx");
+        assertMdxExists("domains/customer-relationship/subdomains/customer-relationship.customer-management/services/customer-relationship.customer-management.customer-profile/index.mdx");
+        assertMdxExists("domains/customer-relationship/subdomains/customer-relationship.customer-management/services/customer-relationship.customer-management.loyalty-management/index.mdx");
     }
 
     @Test
@@ -66,6 +67,7 @@ public class EventCatalogGeneratorTest {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())
+                        .withOption("linkSource", "git")
                         .withOption("outputFolder", OUTPUT_FOLDER));
 
         String content = readMdx("domains/merchandising/index.mdx");
@@ -80,9 +82,10 @@ public class EventCatalogGeneratorTest {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())
+                        .withOption("linkSource", "git")
                         .withOption("outputFolder", OUTPUT_FOLDER));
 
-        String content = readMdx("domains/merchandising/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/index.mdx");
+        String content = readMdx("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/index.mdx");
         assertTrue(content.contains("\"merchandising.inventory.inventory-adjustment\""));
         assertTrue(content.contains("name:"));
         assertTrue(content.contains("\"1.0.0\""));
@@ -93,12 +96,15 @@ public class EventCatalogGeneratorTest {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())
+                        .withOption("linkSource", "git")
                         .withOption("outputFolder", OUTPUT_FOLDER));
 
         // Service pages have sends/receives populated from AsyncAPI
-        String serviceContent = readMdx("domains/merchandising/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/index.mdx");
+        String serviceContent = readMdx("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/index.mdx");
         assertTrue(serviceContent.contains("sends:") || serviceContent.contains("receives:"),
                 "Service page must contain sends or receives");
+        assertTrue(serviceContent.contains("<NodeGraph />"), "Service body must include the architecture visualiser");
+        assertTrue(serviceContent.contains("<MessageTable"), "Service body must include the message table");
     }
 
     @Test
@@ -106,15 +112,17 @@ public class EventCatalogGeneratorTest {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())
+                        .withOption("linkSource", "git")
                         .withOption("outputFolder", OUTPUT_FOLDER));
 
         // inventory-adjustment has an openapi.yml with GET operations
-        assertMdxExists("domains/merchandising/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/queries/merchandising.inventory.inventory-adjustment.listInventoryItems/index.mdx");
-        assertMdxExists("domains/merchandising/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/queries/merchandising.inventory.inventory-adjustment.getInventoryItem/index.mdx");
+        assertMdxExists("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/queries/merchandising.inventory.inventory-adjustment.listInventoryItems/index.mdx");
+        assertMdxExists("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/queries/merchandising.inventory.inventory-adjustment.getInventoryItem/index.mdx");
 
-        String queryContent = readMdx("domains/merchandising/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/queries/merchandising.inventory.inventory-adjustment.getInventoryItem/index.mdx");
+        String queryContent = readMdx("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/queries/merchandising.inventory.inventory-adjustment.getInventoryItem/index.mdx");
         assertTrue(queryContent.contains("\"Get Inventory Item\""), "Query name must be present");
         assertTrue(queryContent.contains("\"1.0.0\""), "Query version must be present");
+        assertTrue(queryContent.contains("<NodeGraph />"), "Query body must include the node graph");
     }
 
     @Test
@@ -122,14 +130,73 @@ public class EventCatalogGeneratorTest {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())
+                        .withOption("linkSource", "git")
                         .withOption("outputFolder", OUTPUT_FOLDER));
 
         // inventory-adjustment has a domain-model.zdl with InventoryItem entity
-        assertMdxExists("domains/merchandising/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/entities/merchandising.inventory.inventory-adjustment.inventory-item/index.mdx");
+        assertMdxExists("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/entities/merchandising.inventory.inventory-adjustment.inventory-item/index.mdx");
 
-        String entityContent = readMdx("domains/merchandising/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/entities/merchandising.inventory.inventory-adjustment.inventory-item/index.mdx");
+        String entityContent = readMdx("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/entities/merchandising.inventory.inventory-adjustment.inventory-item/index.mdx");
         assertTrue(entityContent.contains("\"InventoryItem\""), "Entity name must be present");
         assertTrue(entityContent.contains("aggregateRoot: true"), "Aggregate root flag must be present");
+        assertTrue(entityContent.contains("<EntityPropertiesTable />"), "Entity body must include the properties table");
+    }
+
+    @Test
+    void generatedPagesContainEventCatalogBodyComponents() throws Exception {
+        new MainGenerator().generate(
+                new EventCatalogPlugin()
+                        .withOption("inputFile", architectureFilePath())
+                        .withOption("linkSource", "git")
+                        .withOption("outputFolder", OUTPUT_FOLDER));
+
+        String domainContent = readMdx("domains/merchandising/index.mdx");
+        assertTrue(domainContent.contains("<NodeGraph />"), "Domain body must include the node graph");
+        assertTrue(domainContent.contains("<MessageTable"), "Domain body must include the message table");
+
+        String eventContent = readMdx("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/events/merchandising.inventory.inventory-adjustment.inventory-adjusted/index.mdx");
+        assertTrue(eventContent.contains("<RemoteSpecificationSchema"),
+                "A remote AsyncAPI event body must include the remote schema viewer");
+        assertTrue(eventContent.contains("channel=\"inventory-adjusted\""),
+                "A remote AsyncAPI event must identify its channel");
+        assertTrue(eventContent.contains("channelMessage=\"InventoryAdjustedEvent\""),
+                "A remote AsyncAPI event must select the message from its channel");
+        assertFalse(eventContent.contains("message=\"InventoryAdjustedEvent\""),
+                "A remote AsyncAPI event must not use the ambiguous message selector");
+        assertFalse(eventContent.contains("<SchemaViewer"),
+                "A remote AsyncAPI event must have exactly one schema viewer usage");
+
+        String channelContent = readMdx("domains/merchandising/subdomains/merchandising.inventory/channels/merchandising.inventory.inventory-adjustment.inventory-adjusted/index.mdx");
+        assertTrue(channelContent.contains("<NodeGraph />"), "Channel body must include the node graph");
+    }
+
+    @Test
+    void servicePageBodyCanBeOverriddenWithTheStandardTemplateFolder() throws Exception {
+        Path override = Path.of(
+                ".zenwave/templates/io/zenwave360/sdk/plugins/EventCatalogGenerator/service.mdx.hbs");
+        byte[] previousContent = Files.exists(override) ? Files.readAllBytes(override) : null;
+        String outputFolder = "target/event-catalog-template-override-test";
+        try {
+            Files.createDirectories(override.getParent());
+            Files.writeString(override, "CUSTOM SERVICE TEMPLATE: {{service.id}}\n");
+
+            runGenerator(outputFolder);
+
+            Path servicePage = Path.of(
+                    outputFolder,
+                    "domains/merchandising/subdomains/merchandising.inventory/services/"
+                            + "merchandising.inventory.inventory-adjustment/index.mdx");
+            String content = Files.readString(servicePage);
+            assertTrue(content.contains(
+                    "CUSTOM SERVICE TEMPLATE: merchandising.inventory.inventory-adjustment"));
+            assertFalse(content.contains("<NodeGraph />"));
+        } finally {
+            if (previousContent != null) {
+                Files.write(override, previousContent);
+            } else {
+                Files.deleteIfExists(override);
+            }
+        }
     }
 
     @Test
@@ -137,10 +204,11 @@ public class EventCatalogGeneratorTest {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())
+                        .withOption("linkSource", "git")
                         .withOption("outputFolder", OUTPUT_FOLDER));
 
         // Check that at least one service with an asyncapi spec has sends or receives
-        String serviceDir = "domains/merchandising/merchandising.inventory/services/merchandising.inventory.inventory-adjustment";
+        String serviceDir = "domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment";
         File serviceIndex = new File(OUTPUT_FOLDER, serviceDir + "/index.mdx");
         if (serviceIndex.exists()) {
             String content = java.nio.file.Files.readString(serviceIndex.toPath());
@@ -172,7 +240,7 @@ public class EventCatalogGeneratorTest {
         runGenerator(OUTPUT_FOLDER);
 
         // Plant a versioned/ archive as if a previous version existed
-        String serviceDir = "domains/merchandising/merchandising.inventory/services/merchandising.inventory.inventory-adjustment";
+        String serviceDir = "domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment";
         File versionedDir = new File(OUTPUT_FOLDER, serviceDir + "/versioned/0.9.0");
         versionedDir.mkdirs();
         File archivedPage = new File(versionedDir, "index.mdx");
@@ -185,7 +253,7 @@ public class EventCatalogGeneratorTest {
 
     @Test
     void servicePageIsArchivedWhenVersionChanges() throws Exception {
-        String serviceDir = "domains/merchandising/merchandising.inventory/services/merchandising.inventory.inventory-adjustment";
+        String serviceDir = "domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment";
         String outputFolder = "target/event-catalog-versioning-test";
 
         // First run — generates version 1.0.0
@@ -212,6 +280,7 @@ public class EventCatalogGeneratorTest {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())
+                        .withOption("linkSource", "git")
                         .withOption("outputFolder", outputFolder));
     }
 

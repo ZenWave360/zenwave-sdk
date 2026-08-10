@@ -1,0 +1,35 @@
+---
+id: "merchandising.pricing"
+name: "Pricing"
+summary: "Pricing strategies and adjustments subdomain"
+version: "0.0.1"
+services:
+- id: "merchandising.pricing.price-change"
+  version: "1.0.0"
+entities:
+- id: "merchandising.pricing.price-change.product-price"
+  version: "1.0.0"
+sends:
+- id: "merchandising.pricing.price-change.recalculate-price-response"
+- id: "merchandising.pricing.price-change.price-changed"
+receives:
+- id: "merchandising.pricing.price-change.recalculate-price-command"
+---
+Pricing strategies and adjustments subdomain
+
+## Overview
+
+This page is generated from the ZenWave architecture model and EventCatalog frontmatter.
+
+<NodeGraph />
+
+<MessageTable format="all" limit={8} showChannels={true} title="Messages in and out" />
+
+## Entity Map
+
+<EntityMap />
+
+## Related Resources
+
+<ResourceGroupTable id="related-resources" limit={8} showOwners={true} title="Core resources" />
+

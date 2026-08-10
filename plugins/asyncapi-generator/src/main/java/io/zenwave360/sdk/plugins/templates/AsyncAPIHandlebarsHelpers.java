@@ -43,8 +43,9 @@ public class AsyncAPIHandlebarsHelpers {
     }
 
     public Object messageType(List<Map<String, Object>> operations, Options options) {
-        List<String> messageTypes = JSONPath.get(operations, "$[*].x--messages[*].x--javaType");
-        List<String> envelopTypes = JSONPath.get(operations, "$[*].x--messages[*]." + generator.envelopeJavaTypeExtensionName);
+        List<Map<String, Object>> messages = generator.operationMessageValues(operations);
+        List<String> messageTypes = JSONPath.get(messages, "$[*].x--javaType");
+        List<String> envelopTypes = JSONPath.get(messages, "$[*]." + generator.envelopeJavaTypeExtensionName);
         List<String> operationEnvelop = JSONPath.get(operations, "$[*]." + generator.envelopeJavaTypeExtensionName);
         if(operationEnvelop != null && !operationEnvelop.isEmpty()) {
             envelopTypes.addAll(operationEnvelop);
@@ -56,8 +57,8 @@ public class AsyncAPIHandlebarsHelpers {
     }
 
     public Object hasEnterpriseEnvelope(Object operation, Options options) {
+        List<String> envelopTypes = JSONPath.get(generator.operationMessageValues(operation), "$[*]." + generator.envelopeJavaTypeExtensionName);
         var arrayPrefix = operation instanceof List? "$[*]." : "$.";
-        List<String> envelopTypes = JSONPath.get(operation, arrayPrefix + "x--messages[*]." + generator.envelopeJavaTypeExtensionName);
         Object operationEnvelop = JSONPath.get(operation, arrayPrefix + generator.envelopeJavaTypeExtensionName);
         if(operationEnvelop instanceof String) {
             envelopTypes.add((String) operationEnvelop);
@@ -84,7 +85,7 @@ public class AsyncAPIHandlebarsHelpers {
         boolean doExposeMessage = "true".equals(String.valueOf(options.hash.get("exposeMessage")));
         boolean isProducer = "true".equals(String.valueOf(options.hash.get("producer")));
         if (doExposeMessage || generator.exposeMessage || generator.style == ProgrammingStyle.reactive) {
-            int messagesCount = JSONPath.get(options.param(0), "$.x--messages.length()", 0);
+            int messagesCount = generator.operationMessageValues(options.param(0)).size();
             if (messagesCount > 1) {
                 String messageJavaType = JSONPath.get(context, "$.x--javaTypeSimpleName");
                 return String.format("%s%s", generator.methodAndMessageSeparator, messageJavaType);
@@ -94,8 +95,10 @@ public class AsyncAPIHandlebarsHelpers {
     }
 
     public Object hasRuntimeHeaders(Object context, Options options) {
-        var path = context instanceof List? "$[*].x--messages[*].headers.properties[*]" : "$.headers.properties[*]";
-        return !JSONPath.get(context, path + generator.runtimeHeadersProperty, Collections.emptyList()).isEmpty();
+        List<Map<String, Object>> messages = generator.operationMessageValues(context);
+        Object target = messages.isEmpty() ? context : messages;
+        var path = target instanceof List? "$[*].headers.properties[*]" : "$.headers.properties[*]";
+        return !JSONPath.get(target, path + generator.runtimeHeadersProperty, Collections.emptyList()).isEmpty();
     }
 
     public Object runtimeHeadersMap(Object message, Options options) {
@@ -186,8 +189,9 @@ public class AsyncAPIHandlebarsHelpers {
         });
 
         handlebarsEngine.getHandlebars().registerHelper("messageType", (operation, options) -> {
-            List<String> messageTypes = JSONPath.get(operation, "$.x--messages[*].x--javaType");
-            List<String> envelopTypes = JSONPath.get(operation, "$.x--messages[*]." + generator.envelopeJavaTypeExtensionName);
+            List<Map<String, Object>> messages = generator.operationMessageValues(operation);
+            List<String> messageTypes = JSONPath.get(messages, "$[*].x--javaType");
+            List<String> envelopTypes = JSONPath.get(messages, "$[*]." + generator.envelopeJavaTypeExtensionName);
             String operationEnvelop = JSONPath.get(operation, "$." + generator.envelopeJavaTypeExtensionName);
             if(operationEnvelop != null) {
                 envelopTypes.add(operationEnvelop);
@@ -199,7 +203,7 @@ public class AsyncAPIHandlebarsHelpers {
         });
 
         handlebarsEngine.getHandlebars().registerHelper("hasEnterpriseEnvelope", (operation, options) -> {
-            List<String> envelopTypes = JSONPath.get(operation, "$.x--messages[*]." + generator.envelopeJavaTypeExtensionName);
+            List<String> envelopTypes = JSONPath.get(generator.operationMessageValues(operation), "$[*]." + generator.envelopeJavaTypeExtensionName);
             String operationEnvelop = JSONPath.get(operation, "$." + generator.envelopeJavaTypeExtensionName);
             if(operationEnvelop != null) {
                 envelopTypes.add(operationEnvelop);
@@ -223,7 +227,7 @@ public class AsyncAPIHandlebarsHelpers {
             boolean doExposeMessage = "true".equals(String.valueOf(options.hash.get("exposeMessage")));
             boolean isProducer = "true".equals(String.valueOf(options.hash.get("producer")));
             if (doExposeMessage || generator.exposeMessage || generator.style == ProgrammingStyle.reactive) {
-                int messagesCount = JSONPath.get(options.param(0), "$.x--messages.length()", 0);
+                int messagesCount = generator.operationMessageValues(options.param(0)).size();
                 if (messagesCount > 1) {
                     String messageJavaType = JSONPath.get(context, "$.x--javaTypeSimpleName");
                     return String.format("%s%s", generator.methodAndMessageSeparator, messageJavaType);
@@ -233,8 +237,10 @@ public class AsyncAPIHandlebarsHelpers {
         });
 
         handlebarsEngine.getHandlebars().registerHelper("hasRuntimeHeaders", (context, options) -> {
-            var path = context instanceof List? "$[*].x--messages[*].headers.properties[*]" : "$.headers.properties[*]";
-            return !JSONPath.get(context, path + generator.runtimeHeadersProperty, Collections.emptyList()).isEmpty();
+            List<Map<String, Object>> messages = generator.operationMessageValues(context);
+            Object target = messages.isEmpty() ? context : messages;
+            var path = target instanceof List? "$[*].headers.properties[*]" : "$.headers.properties[*]";
+            return !JSONPath.get(target, path + generator.runtimeHeadersProperty, Collections.emptyList()).isEmpty();
         });
 
         handlebarsEngine.getHandlebars().registerHelper("runtimeHeadersMap", (message, options) -> {

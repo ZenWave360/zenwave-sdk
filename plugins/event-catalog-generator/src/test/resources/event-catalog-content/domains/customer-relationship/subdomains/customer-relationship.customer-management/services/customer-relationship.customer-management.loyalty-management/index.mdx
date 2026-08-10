@@ -1,0 +1,63 @@
+---
+id: customer-relationship.customer-management.loyalty-management
+name: Loyalty Management
+summary: ARTS Service Domain - Handles loyalty programs and points
+version: 1.0.0
+specifications:
+  - type: asyncapi
+    path: >-
+      ../../../../../../../../../zenwave-sdk-test-resources/src/main/resources/retail-domain-catalog/customer-relationship/customer-management/loyalty-management/asyncapi.yml
+    name: asyncapi
+sends:
+  - id: >-
+      customer-relationship.customer-management.loyalty-management.refresh-customer-tier-response
+    to:
+      - id: >-
+          customer-relationship.customer-management.loyalty-management.refresh-customer-tier-response
+  - id: >-
+      customer-relationship.customer-management.loyalty-management.loyalty-tier-updated
+    to:
+      - id: >-
+          customer-relationship.customer-management.loyalty-management.loyalty-tier-updated
+receives:
+  - id: >-
+      customer-relationship.customer-management.loyalty-management.refresh-customer-tier-command
+    from:
+      - id: >-
+          customer-relationship.customer-management.loyalty-management.refresh-customer-tier-command
+entities:
+  - id: >-
+      customer-relationship.customer-management.loyalty-management.loyalty-account
+    version: 1.0.0
+---
+## Overview
+
+ARTS Service Domain - Handles loyalty programs and points
+
+<NodeGraph />
+
+## Message Flow
+
+<MessageTable format="all" limit={8} showChannels={true} />
+
+## Domain Model
+
+<EntityMap />
+
+## Specifications
+
+The linked specifications in the frontmatter drive EventCatalog reference views for this service.
+
+# Loyalty Management Service
+
+ARTS Service Domain - Handles loyalty programs and points
+
+
+# Loyalty Management Service
+
+ARTS Service Domain - Handles loyalty programs and points
+
+
+# Changelog
+
+

@@ -64,6 +64,7 @@ public class {{consumerName (camelCase channelName)}} {
 
     @KafkaListener(
             topics = "${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.topic}",
+            autoStartup = "${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.enabled:true}",
             groupId = "${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.groupId:}",
             containerFactory = "${app.kafka.topics.{{componentPrefix}}{{kebabCase channelName}}.containerFactory:}")
     public void listen(@Payload ConsumerRecord payload,
@@ -74,7 +75,7 @@ public class {{consumerName (camelCase channelName)}} {
             Object unwrappedPayload = {{#if (hasEnterpriseEnvelope operations)}}unwrap(payload.value()){{else}}payload.value(){{/if}};
         {{~initVisited 'messageType'}}
         {{~#each operations as |operation|}}
-            {{~#each operation.x--messages as |message|}}
+            {{~#each (operationMessages operation.operationId) as |message|}}
             {{~#unless (isVisited 'messageType' message.x--javaType register=true)}}
             if(unwrappedPayload instanceof {{message.x--javaType}}) {
                 {{~#if exposeMessage}}

@@ -3,7 +3,7 @@ package io.zenwave360.sdk.generators;
 import java.util.*;
 import java.util.function.Function;
 
-import io.zenwave360.sdk.templating.HandlebarsEngine;
+import io.zenwave360.sdk.templating.AsyncapiHandlebarsHelpers;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.templating.TemplateOutput;
@@ -72,7 +72,12 @@ public abstract class AbstractAsyncapiGenerator extends Generator {
     @DocumentedOption(description = "Operation ids to exclude in code generation. Skips code generation if is not included or is excluded.")
     public List<String> excludeOperationIds = new ArrayList<>();
 
-    private final HandlebarsEngine handlebarsEngine = new HandlebarsEngine();
+    private Model apiModel;
+    private final AsyncapiHandlebarsHelpers asyncapiHandlebarsHelpers = new AsyncapiHandlebarsHelpers(() -> apiModel);
+
+    protected AbstractAsyncapiGenerator() {
+        getTemplateEngine().registerHelpers(asyncapiHandlebarsHelpers);
+    }
 
     protected Model getApiModel(Map<String, Object> contextModel) {
         return (Model) contextModel.get(sourceProperty);
@@ -84,7 +89,7 @@ public abstract class AbstractAsyncapiGenerator extends Generator {
     public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
         Templates templates = configureTemplates();
 
-        Model apiModel = getApiModel(contextModel);
+        apiModel = getApiModel(contextModel);
         Map<String, List<Map<String, Object>>> subscribeOperations = getSubscribeOperationsGroupedByTag(apiModel);
         Map<String, List<Map<String, Object>>> publishOperations = getPublishOperationsGroupedByTag(apiModel);
         Map<String, Map<String, Object>> producerServicesMap = new HashMap<>();
@@ -119,7 +124,7 @@ public abstract class AbstractAsyncapiGenerator extends Generator {
         boolean isProducer = operationRoleType.isProducer();
         var serviceName = operationsByTag.getKey();
         var operations = operationsByTag.getValue();
-        var messages = new HashSet(JSONPath.get(operations, "$[*].x--messages[*]"));
+        var messages = operationMessageValues(operations);
 
         List<TemplateOutput> templateOutputList = new ArrayList<>();
         templateOutputList.addAll(generateTemplateOutput(contextModel, isProducer? templates.producerByServiceTemplates : templates.consumerByServiceTemplates,
@@ -127,7 +132,7 @@ public abstract class AbstractAsyncapiGenerator extends Generator {
 
         Map<String, List<Map<String, Object>>> operationsByChannel = new HashMap<>();
         for (Map<String, Object> operation : operations) {
-            messages = new HashSet(JSONPath.get(operation, "$.x--messages[*]"));
+            messages = operationMessageValues(operation);
             templateOutputList.addAll(generateTemplateOutput(contextModel, isProducer? templates.producerByOperationTemplates : templates.consumerByOperationTemplates,
                     Map.of("serviceName", serviceName, "operation", operation, "messages", messages, "operationRoleType", operationRoleType)));
 
@@ -137,7 +142,6 @@ public abstract class AbstractAsyncapiGenerator extends Generator {
 
         operationsByChannel.forEach((channelName, channelOperations) -> {
             var channel = JSONPath.get(getApiModel(contextModel), "$.channels['" + channelName + "']");
-//            var messageList = JSONPath.getFirst(channel, "$[*].x--messages[*]", "$.x--messages[*]");
             templateOutputList.addAll(generateTemplateOutput(contextModel, isProducer? templates.producerByChannelTemplates : templates.consumerByChannelTemplates,
                     Map.of("serviceName", serviceName, "channelName", channelName, "channel", channel, "operations", channelOperations,"operationRoleType", operationRoleType)));
 
@@ -151,6 +155,32 @@ public abstract class AbstractAsyncapiGenerator extends Generator {
         var serviceName = operationsByTag.getKey();
         var operations = operationsByTag.getValue();
         servicesMap.put(serviceName, Map.of("operations", operations, "operationRoleType", operationRoleType));
+    }
+
+    public List<Map<String, Object>> operationMessages(Object operationId) {
+        return asyncapiHandlebarsHelpers.operationMessages(operationId, null);
+    }
+
+    public List<Map<String, Object>> operationMessageValues(Object operationOrOperations) {
+        List<Map<String, Object>> values = new ArrayList<>();
+        Set<Map<String, Object>> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+        if (operationOrOperations instanceof Collection<?> operations) {
+            for (Object operation : operations) {
+                addOperationMessageValues(operation, values, seen);
+            }
+        } else {
+            addOperationMessageValues(operationOrOperations, values, seen);
+        }
+        return values;
+    }
+
+    private void addOperationMessageValues(Object operation, List<Map<String, Object>> values, Set<Map<String, Object>> seen) {
+        Object operationId = operation instanceof Map<?, ?> ? ((Map<?, ?>) operation).get("operationId") : operation;
+        for (Map<String, Object> message : operationMessages(operationId)) {
+            if (seen.add(message)) {
+                values.add(message);
+            }
+        }
     }
 
     public Map<String, List<Map<String, Object>>> getPublishOperationsGroupedByTag(Model apiModel) {

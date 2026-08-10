@@ -11,10 +11,12 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -188,7 +190,8 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
 
     private void processOperation(Map operation, AsyncAPIOpsIntent intent) {
         String action = (String) operation.get("action");
-        String principal = JSONPath.get(operation, "$.bindings.kafka.x-principal");
+        Map kafkaBinding = JSONPath.get(operation, "$.bindings.kafka", Collections.emptyMap());
+        String principal = getStringFirst(kafkaBinding, "x-principal", "principal");
 
         Map operationChannel = JSONPath.get(operation, "$.channel");
         if (operationChannel == null) {
@@ -201,19 +204,25 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
         }
 
         boolean isSend = "send".equals(action);
+        boolean isReceive = "receive".equals(action);
 
         // ACLs for the main topic
         if (isSend) {
             addTopicAcl(topicAddress, principal, "Write", intent);
             addTopicAcl(topicAddress, principal, "Describe", intent);
-        } else {
+            addTransactionalAclIfNeeded(kafkaBinding, principal, intent);
+        } else if (isReceive) {
             addTopicAcl(topicAddress, principal, "Read", intent);
             addTopicAcl(topicAddress, principal, "Describe", intent);
         }
+        addSchemaRegistryReadBindings(operationChannel, principal, intent);
 
         // Error topics for receive operations
-        if (!isSend) {
-            String groupId = getGroupId(operation);
+        if (isReceive) {
+            String groupId = getGroupId(kafkaBinding);
+            if (groupId != null) {
+                addGroupAcl(groupId, principal, "Read", intent);
+            }
             Map errorTopics = getErrorTopicsConfig(operation);
             if (errorTopics != null && groupId != null) {
                 expandErrorTopics(errorTopics, groupId, topicAddress, principal, intent);
@@ -221,29 +230,51 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
         }
     }
 
-    private String getGroupId(Map operation) {
-        // Standard Kafka binding field takes precedence; x-groupId is the legacy fallback
-        String groupId = JSONPath.get(operation, "$.bindings.kafka.groupId");
+    private String getGroupId(Map kafkaBinding) {
+        String extensionGroupId = getString(kafkaBinding.get("x-groupId"));
+        if (extensionGroupId != null) {
+            return extensionGroupId;
+        }
+        Object groupIdSchema = kafkaBinding.get("groupId");
+        if (groupIdSchema == null) {
+            return null;
+        }
+        String groupId = firstStringFromSchema(groupIdSchema);
         if (groupId == null) {
-            groupId = JSONPath.get(operation, "$.bindings.kafka.x-groupId");
+            log.warn("Kafka operation binding groupId must be a schema with enum, string const, or string-array const. Skipping group-scoped resources.");
         }
         return groupId;
     }
 
+    private String firstStringFromSchema(Object schema) {
+        if (!(schema instanceof Map map)) {
+            return null;
+        }
+        Object constValue = map.get("const");
+        String constString = firstString(constValue);
+        if (constString != null) {
+            return constString;
+        }
+        return firstString(map.get("enum"));
+    }
+
     private void expandErrorTopics(Map errorTopics, String groupId, String topicAddress, String principal, AsyncAPIOpsIntent intent) {
+        int retryTopics = intValue(errorTopics, "retryTopics", 0);
+        List<String> retrySuffixes = validateRetrySuffixes(errorTopics, retryTopics);
+
         String addressTemplate = (String) errorTopics.get("addressTemplate");
         if (addressTemplate == null) {
             log.warn("x-error-topics.addressTemplate is missing for groupId='{}' topic='{}' — skipping", groupId, topicAddress);
             return;
         }
 
-        int retryTopics = intValue(errorTopics, "retryTopics", 0);
         Map retryConfig = (Map) errorTopics.get("retry");
         Map dlqConfig = (Map) errorTopics.get("dlq");
 
         if (retryConfig != null) {
             for (int i = 0; i < retryTopics; i++) {
-                String topicName = expandTemplate(addressTemplate, groupId, topicAddress, "retry-" + i);
+                String suffix = retrySuffixes == null ? "retry-" + i : retrySuffixes.get(i);
+                String topicName = expandTemplate(addressTemplate, groupId, topicAddress, suffix);
                 intent.topics.add(buildErrorTopic(topicName, retryConfig));
                 addErrorTopicAcl(topicName, principal, intent);
             }
@@ -256,6 +287,36 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
         }
     }
 
+    private List<String> validateRetrySuffixes(Map errorTopics, int retryTopics) {
+        if (!errorTopics.containsKey("retrySuffixes")) {
+            return null;
+        }
+
+        Object value = errorTopics.get("retrySuffixes");
+        if (!(value instanceof List<?> suffixes)) {
+            throw new IllegalArgumentException("x-error-topics.retrySuffixes must be an array of strings");
+        }
+        if (suffixes.size() != retryTopics) {
+            throw new IllegalArgumentException("x-error-topics.retrySuffixes length must equal retryTopics");
+        }
+
+        List<String> validatedSuffixes = new ArrayList<>(suffixes.size());
+        Set<String> uniqueSuffixes = new HashSet<>();
+        for (Object suffix : suffixes) {
+            if (!(suffix instanceof String stringSuffix)) {
+                throw new IllegalArgumentException("x-error-topics.retrySuffixes must contain only strings");
+            }
+            if (stringSuffix.isBlank()) {
+                throw new IllegalArgumentException("x-error-topics.retrySuffixes must not contain blank values");
+            }
+            if (!uniqueSuffixes.add(stringSuffix)) {
+                throw new IllegalArgumentException("x-error-topics.retrySuffixes values must be unique");
+            }
+            validatedSuffixes.add(stringSuffix);
+        }
+        return validatedSuffixes;
+    }
+
     private void addErrorTopicAcl(String topicName, String principal, AsyncAPIOpsIntent intent) {
         addTopicAcl(topicName, principal, "Read", intent);
         addTopicAcl(topicName, principal, "Write", intent);
@@ -263,12 +324,80 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
     }
 
     private void addTopicAcl(String topicName, String principal, String operation, AsyncAPIOpsIntent intent) {
+        addKafkaAcl("TOPIC", topicName, "LITERAL", principal, operation, intent);
+    }
+
+    private void addGroupAcl(String groupId, String principal, String operation, AsyncAPIOpsIntent intent) {
+        addKafkaAcl("GROUP", groupId, "LITERAL", principal, operation, intent);
+    }
+
+    private void addTransactionalAclIfNeeded(Map kafkaBinding, String principal, AsyncAPIOpsIntent intent) {
+        if (!Boolean.TRUE.equals(kafkaBinding.get("transactional"))) {
+            return;
+        }
+        String transactionalIdPrefix = getStringFirst(kafkaBinding, "x-transactional-id-prefix", "transactional-id-prefix");
+        if (transactionalIdPrefix == null) {
+            log.warn("Kafka send operation is transactional but x-transactional-id-prefix is missing. Skipping transactional id ACL.");
+            return;
+        }
+        addKafkaAcl("TRANSACTIONAL_ID", transactionalIdPrefix, "PREFIXED", principal, "Write", intent);
+    }
+
+    private void addKafkaAcl(String resourceType, String kafkaResourceName, String patternType, String principal, String operation, AsyncAPIOpsIntent intent) {
+        String principalResourceName = toTerraformId(principal);
+        intent.addPrincipal(principal, principalResourceName);
+
         AsyncAPIOpsIntent.AclIntent acl = new AsyncAPIOpsIntent.AclIntent();
-        acl.topicName = topicName;
-        acl.principal = "User:" + principal;
+        acl.resourceType = resourceType;
+        acl.kafkaResourceType = kafkaResourceType(resourceType);
+        acl.patternType = patternType;
+        acl.kafkaPatternType = kafkaPatternType(patternType);
+        acl.kafkaResourceName = kafkaResourceName;
+        acl.topicName = "TOPIC".equals(resourceType) ? kafkaResourceName : null;
+        acl.principal = principal;
+        acl.principalResourceName = principalResourceName;
         acl.operation = operation;
-        acl.resourceName = toTerraformId(topicName + "_User_" + principal + "_" + operation);
+        acl.resourceName = toTerraformId(resourceType + "_" + kafkaResourceName + "_" + principal + "_" + operation + "_" + patternType);
         intent.addAcl(acl);
+    }
+
+    private String kafkaResourceType(String resourceType) {
+        return switch (resourceType) {
+            case "GROUP" -> "Group";
+            case "TRANSACTIONAL_ID" -> "TransactionalID";
+            default -> "Topic";
+        };
+    }
+
+    private String kafkaPatternType(String patternType) {
+        return "PREFIXED".equals(patternType) ? "Prefixed" : "Literal";
+    }
+
+    private void addSchemaRegistryReadBindings(Map operationChannel, String principal, AsyncAPIOpsIntent intent) {
+        String topicAddress = (String) operationChannel.get("address");
+        Map<String, Map> messages = JSONPath.get(operationChannel, "$.messages", Collections.emptyMap());
+        for (Map.Entry<String, Map> entry : messages.entrySet()) {
+            Map message = entry.getValue();
+            String schemaFormat = JSONPath.get(message, "$.payload.schemaFormat");
+            if (schemaFormat == null || !schemaFormat.toLowerCase().contains("avro")) {
+                continue;
+            }
+            String subject = topicAddress + "-" + entry.getKey() + "-value";
+            addSchemaRegistryReadBinding(subject, principal, intent);
+        }
+    }
+
+    private void addSchemaRegistryReadBinding(String subject, String principal, AsyncAPIOpsIntent intent) {
+        String principalResourceName = toTerraformId(principal);
+        intent.addPrincipal(principal, principalResourceName);
+
+        AsyncAPIOpsIntent.RoleBindingIntent roleBinding = new AsyncAPIOpsIntent.RoleBindingIntent();
+        roleBinding.principal = principal;
+        roleBinding.principalResourceName = principalResourceName;
+        roleBinding.roleName = "DeveloperRead";
+        roleBinding.crnPattern = "${var.schema_registry_crn}/subject=" + subject;
+        roleBinding.resourceName = toTerraformId("schema_registry_" + subject + "_" + principal + "_DeveloperRead");
+        intent.addRoleBinding(roleBinding);
     }
 
     private String expandTemplate(String template, String groupId, String channelAddress, String suffix) {
@@ -322,6 +451,35 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
         return JSONPath.getFirst(config,
                 "$.x-env-server-overrides." + server,
                 "$.env-server-overrides." + server);
+    }
+
+    private String getStringFirst(Map map, String... keys) {
+        for (String key : keys) {
+            String value = getString(map.get(key));
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    private String getString(Object value) {
+        return value instanceof String s && !s.isBlank() ? s : null;
+    }
+
+    private String firstString(Object value) {
+        if (value instanceof String s && !s.isBlank()) {
+            return s;
+        }
+        if (value instanceof List<?> list) {
+            return list.stream()
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast)
+                    .filter(s -> !s.isBlank())
+                    .findFirst()
+                    .orElse(null);
+        }
+        return null;
     }
 
     private Map<String, String> buildTopicConfig(Map<String, Object> binding) {

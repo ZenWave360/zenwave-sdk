@@ -96,8 +96,9 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
             return String.format("%s%s%s", consumerPrefix, context, consumerSuffix);
         });
         handlebarsEngine.getHandlebars().registerHelper("messageType", (operation, options) -> {
-            List<String> messageTypes = JSONPath.get(operation, "$.x--messages[*].x--javaType");
-            List<String> envelopTypes = JSONPath.get(operation, "$.x--messages[*]." + envelopeJavaTypeExtensionName);
+            List<Map<String, Object>> messages = operationMessageValues(operation);
+            List<String> messageTypes = JSONPath.get(messages, "$[*].x--javaType");
+            List<String> envelopTypes = JSONPath.get(messages, "$[*]." + envelopeJavaTypeExtensionName);
             String operationEnvelop = JSONPath.get(operation, "$." + envelopeJavaTypeExtensionName);
             if(operationEnvelop != null) {
                 envelopTypes.add(operationEnvelop);
@@ -108,7 +109,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
             return messageTypes.size() == 1 ? messageTypes.get(0) : "Object";
         });
         handlebarsEngine.getHandlebars().registerHelper("hasEnterpriseEnvelope", (operation, options) -> {
-            List<String> envelopTypes = JSONPath.get(operation, "$.x--messages[*]." + envelopeJavaTypeExtensionName);
+            List<String> envelopTypes = JSONPath.get(operationMessageValues(operation), "$[*]." + envelopeJavaTypeExtensionName);
             String operationEnvelop = JSONPath.get(operation, "$." + envelopeJavaTypeExtensionName);
             if(operationEnvelop != null) {
                 envelopTypes.add(operationEnvelop);
@@ -128,7 +129,7 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
             boolean doExposeMessage = "true".equals(String.valueOf(options.hash.get("exposeMessage")));
             boolean isProducer = "true".equals(String.valueOf(options.hash.get("producer")));;
             if (doExposeMessage || exposeMessage || style == ProgrammingStyle.reactive) {
-                int messagesCount = JSONPath.get(options.param(0), "$.x--messages.length()", 0);
+                int messagesCount = operationMessageValues(options.param(0)).size();
                 if (messagesCount > 1) {
                     String messageJavaType = JSONPath.get(context, "$.x--javaTypeSimpleName");
                     return String.format("%s%s", methodAndMessageSeparator, messageJavaType);
@@ -137,9 +138,10 @@ public class SpringCloudStreams3Generator extends AbstractAsyncapiGenerator {
             return null;
         });
         handlebarsEngine.getHandlebars().registerHelper("hasRuntimeHeaders", (context, options) -> {
-            // operations[] or message
-            var path = context instanceof List? "$[*].x--messages[*].headers.properties[*]" : "$.headers.properties[*]";
-            return !JSONPath.get(context, path + runtimeHeadersProperty, Collections.emptyList()).isEmpty();
+            List<Map<String, Object>> messages = operationMessageValues(context);
+            Object target = messages.isEmpty() ? context : messages;
+            var path = target instanceof List? "$[*].headers.properties[*]" : "$.headers.properties[*]";
+            return !JSONPath.get(target, path + runtimeHeadersProperty, Collections.emptyList()).isEmpty();
         });
         handlebarsEngine.getHandlebars().registerHelper("runtimeHeadersMap", (message, options) -> {
             List<String> runtimeHeaders = new ArrayList<>();

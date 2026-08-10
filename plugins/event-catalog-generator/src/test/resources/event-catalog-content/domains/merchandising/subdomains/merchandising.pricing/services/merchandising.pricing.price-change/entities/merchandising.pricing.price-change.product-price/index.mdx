@@ -1,0 +1,35 @@
+---
+id: "merchandising.pricing.price-change.product-price"
+name: "ProductPrice"
+summary: "Product Price aggregate"
+version: "1.0.0"
+aggregateRoot: true
+properties:
+- name: "sku"
+  type: "String"
+  required: true
+- name: "productName"
+  type: "String"
+  required: true
+- name: "currentPrice"
+  type: "BigDecimal"
+  required: true
+- name: "currency"
+  type: "String"
+  required: true
+- name: "effectiveDate"
+  type: "Instant"
+  required: true
+services:
+- "merchandising.pricing.price-change-1.0.0"
+domains:
+- "merchandising.pricing-0.0.1"
+---
+## Overview
+
+Product Price aggregate
+
+### Entity Properties
+
+<EntityPropertiesTable />
+

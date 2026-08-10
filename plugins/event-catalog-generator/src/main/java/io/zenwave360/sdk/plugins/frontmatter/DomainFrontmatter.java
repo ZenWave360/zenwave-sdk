@@ -1,20 +1,25 @@
 package io.zenwave360.sdk.plugins.frontmatter;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import io.zenwave360.sdk.plugins.frontmatter.FrontmatterTypes.CommonFrontmatter;
+import io.zenwave360.sdk.plugins.frontmatter.FrontmatterTypes.DomainDetailsPanelFrontmatter;
+import io.zenwave360.sdk.plugins.frontmatter.FrontmatterTypes.MessagePointerFrontmatter;
+import io.zenwave360.sdk.plugins.frontmatter.FrontmatterTypes.ResourcePointerFrontmatter;
 
-/** Typed frontmatter for domain and subdomain {@code index.mdx} pages. */
-public class DomainFrontmatter {
+import java.util.List;
 
-    public String id;
-    public String name;
-    public String version;
-
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("id", id);
-        map.put("name", name);
-        map.put("version", version);
-        return map;
-    }
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public record DomainFrontmatter(
+        @JsonUnwrapped CommonFrontmatter base,
+        List<ResourcePointerFrontmatter> services,
+        List<ResourcePointerFrontmatter> agents,
+        List<ResourcePointerFrontmatter> domains,
+        @JsonProperty("data-products") List<ResourcePointerFrontmatter> dataProducts,
+        List<ResourcePointerFrontmatter> entities,
+        List<ResourcePointerFrontmatter> flows,
+        List<MessagePointerFrontmatter> sends,
+        List<MessagePointerFrontmatter> receives,
+        DomainDetailsPanelFrontmatter detailsPanel) implements Frontmatter {
 }

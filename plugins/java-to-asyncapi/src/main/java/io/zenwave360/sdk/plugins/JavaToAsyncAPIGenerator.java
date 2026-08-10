@@ -151,10 +151,13 @@ public class JavaToAsyncAPIGenerator {
         generator.schemaFormat = ZDLToAsyncAPIGenerator.SchemaFormat.valueOf(schemaFormat.name());
         generator.includeKafkaCommonHeaders = includeKafkaCommonHeaders;
         generator.includeCloudEventsHeaders = includeCloudEventsHeaders;
-        generator.asyncapiMergeFile = asyncapiMergeFile;
-        generator.asyncapiOverlayFiles = asyncapiOverlayFiles;
 
-        var templates = generator.generate(model).getAllTemplateOutputs();
+        var generatedProjectFiles = generator.generate(model);
+        AsyncAPIOverlayProcessor overlayProcessor = new AsyncAPIOverlayProcessor();
+        overlayProcessor.asyncapiMergeFile = asyncapiMergeFile;
+        overlayProcessor.asyncapiOverlayFiles = asyncapiOverlayFiles;
+        overlayProcessor.process(generatedProjectFiles);
+        var templates = generatedProjectFiles.getAllTemplateOutputs();
 
         if (targetFile != null) {
             new TemplateFileWriter()

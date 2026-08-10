@@ -12,7 +12,8 @@ public class ZDLToOpenAPIPlugin extends Plugin {
 
     public ZDLToOpenAPIPlugin() {
         super();
-        withChain(ZDLParser.class, ZDLProcessor.class, PathsProcessor.class, ZDLToOpenAPIGenerator.class, TemplateFileWriter.class);
+        withChain(ZDLParser.class, ZDLProcessor.class, PathsProcessor.class, ZDLToOpenAPIGenerator.class,
+                OpenAPIOverlayProcessor.class, TemplateFileWriter.class);
     }
 
     @Override

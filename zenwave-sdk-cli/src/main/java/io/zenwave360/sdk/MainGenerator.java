@@ -2,11 +2,11 @@ package io.zenwave360.sdk;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.zenwave360.sdk.formatters.Formatter;
 import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.parsers.Parser;
 import io.zenwave360.sdk.parsers.WithProjectClassLoader;
 import io.zenwave360.sdk.plugins.ConfigurationProvider;
+import io.zenwave360.sdk.processors.GeneratedFilesProcessor;
 import io.zenwave360.sdk.processors.Processor;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
 import io.zenwave360.sdk.utils.CommaSeparatedCollectionDeserializationHandler;
@@ -60,8 +60,8 @@ public class MainGenerator {
             if (plugin instanceof Generator) {
                 generatedProjectFiles.addAll(((Generator) plugin).generate(model));
             }
-            if (plugin instanceof Formatter) {
-                ((Formatter) plugin).format(generatedProjectFiles);
+            if (plugin instanceof GeneratedFilesProcessor) {
+                ((GeneratedFilesProcessor) plugin).process(generatedProjectFiles);
             }
             if (plugin instanceof TemplateWriter) {
                 ((TemplateWriter) plugin).write(generatedProjectFiles.getAllTemplateOutputs());

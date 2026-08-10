@@ -248,4 +248,5 @@ public class CustomHandlebarsHelpers {
         var spaces = (int) options.hash("spaces", 0);
         return text.lines().map(l -> repeat(" ", spaces) + l).collect(Collectors.joining("\n"));
     }
+
 }

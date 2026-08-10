@@ -1,0 +1,25 @@
+# Code owners for files that can alter the release pipeline or execute code
+# while release/publication credentials are present.
+#
+# IMPORTANT: CODEOWNERS has no effect unless the 'main' branch ruleset requires
+# a pull request with "Require review from Code Owners" enabled. As a solo
+# maintainer you cannot approve your own PRs, so enable code-owner review only
+# once the project has a second trusted maintainer. Until then this file still
+# documents ownership and triggers review requests. See docs/release-security.md.
+
+# CI/CD workflows, this file, and repository automation
+/.github/                       @ivangsa
+
+# Maven build definitions: plugins and lifecycle scripts declared here execute
+# during release builds and snapshot publication.
+pom.xml                         @ivangsa
+**/pom.xml                      @ivangsa
+
+# Release notes consumed verbatim by the release workflow.
+/release-notes/                 @ivangsa
+
+# Release security documentation.
+/docs/release-security.md       @ivangsa
+
+# Distribution catalog (points users at published artifacts).
+/jbang-catalog.json             @ivangsa

@@ -1,0 +1,20 @@
+## Overview
+
+{{~#if summary}}{{{summary}}}
+
+{{~/if}}<NodeGraph />
+
+{{~#if hasMessages}}## Message Flow
+
+<MessageTable format="all" limit={8} showChannels={true} />
+
+{{~/if}}{{~#if hasEntities}}## Domain Model
+
+<EntityMap />
+
+{{~/if}}{{~#if hasSpecifications}}## Specifications
+
+The linked specifications in the frontmatter drive EventCatalog reference views for this service.
+
+{{~/if}}{{~#if docsBody}}{{{docsBody}}}
+{{~/if}}

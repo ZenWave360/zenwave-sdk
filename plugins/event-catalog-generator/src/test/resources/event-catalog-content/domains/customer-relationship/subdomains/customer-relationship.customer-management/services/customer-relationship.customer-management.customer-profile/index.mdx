@@ -1,0 +1,63 @@
+---
+id: customer-relationship.customer-management.customer-profile
+name: Customer Profile
+summary: ARTS Service Domain - Maintains customer profiles and data
+version: 1.0.0
+specifications:
+  - type: asyncapi
+    path: >-
+      ../../../../../../../../../zenwave-sdk-test-resources/src/main/resources/retail-domain-catalog/customer-relationship/customer-management/customer-profile/asyncapi.yml
+    name: asyncapi
+sends:
+  - id: >-
+      customer-relationship.customer-management.customer-profile.enroll-loyalty-member-response
+    to:
+      - id: >-
+          customer-relationship.customer-management.customer-profile.enroll-loyalty-member-response
+  - id: >-
+      customer-relationship.customer-management.customer-profile.customer-profile-updated
+    to:
+      - id: >-
+          customer-relationship.customer-management.customer-profile.customer-profile-updated
+receives:
+  - id: >-
+      customer-relationship.customer-management.customer-profile.enroll-loyalty-member-command
+    from:
+      - id: >-
+          customer-relationship.customer-management.customer-profile.enroll-loyalty-member-command
+entities:
+  - id: >-
+      customer-relationship.customer-management.customer-profile.customer-profile
+    version: 1.0.0
+---
+## Overview
+
+ARTS Service Domain - Maintains customer profiles and data
+
+<NodeGraph />
+
+## Message Flow
+
+<MessageTable format="all" limit={8} showChannels={true} />
+
+## Domain Model
+
+<EntityMap />
+
+## Specifications
+
+The linked specifications in the frontmatter drive EventCatalog reference views for this service.
+
+# Customer Profile Service
+
+ARTS Service Domain - Maintains customer profiles and data
+
+
+# Customer Profile Service
+
+ARTS Service Domain - Maintains customer profiles and data
+
+
+# Changelog
+
+

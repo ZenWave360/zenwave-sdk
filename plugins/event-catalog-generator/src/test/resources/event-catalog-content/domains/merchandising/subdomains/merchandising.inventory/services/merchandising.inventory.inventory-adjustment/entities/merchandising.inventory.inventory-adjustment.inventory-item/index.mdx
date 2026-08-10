@@ -1,0 +1,34 @@
+---
+id: "merchandising.inventory.inventory-adjustment.inventory-item"
+name: "InventoryItem"
+summary: "Inventory Item aggregate"
+version: "1.0.0"
+aggregateRoot: true
+properties:
+- name: "sku"
+  type: "String"
+  required: true
+- name: "productName"
+  type: "String"
+  required: true
+- name: "quantity"
+  type: "Integer"
+  required: true
+- name: "location"
+  type: "String"
+  required: true
+- name: "lastAdjustedAt"
+  type: "Instant"
+services:
+- "merchandising.inventory.inventory-adjustment-1.0.0"
+domains:
+- "merchandising.inventory-0.0.1"
+---
+## Overview
+
+Inventory Item aggregate
+
+### Entity Properties
+
+<EntityPropertiesTable />
+

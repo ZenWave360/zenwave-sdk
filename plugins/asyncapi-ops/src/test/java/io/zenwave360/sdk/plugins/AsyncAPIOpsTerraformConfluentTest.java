@@ -30,6 +30,7 @@ public class AsyncAPIOpsTerraformConfluentTest {
         Assertions.assertFalse(versions.contains("cultureamp/schemaregistry"));
         Assertions.assertTrue(versions.contains("variable \"default_partitions\""));
         Assertions.assertTrue(versions.contains("variable \"default_topic_config\""));
+        Assertions.assertTrue(versions.contains("variable \"schema_registry_crn\""));
 
         String topics = Files.readString(Path.of(targetFolder + "/topics.tf"));
         Assertions.assertTrue(topics.contains("resource \"confluent_kafka_topic\""));
@@ -47,11 +48,39 @@ public class AsyncAPIOpsTerraformConfluentTest {
         Assertions.assertTrue(new File(targetFolder + "/asyncapi/avro/ReserveStockCommand.avsc").exists());
 
         String acls = Files.readString(Path.of(targetFolder + "/acls.tf"));
+        String principalResourceName = "merchandising_inventory_inventory_adjustment";
+        Assertions.assertEquals(1, occurrencesOf(acls, "data \"confluent_service_account\" \"" + principalResourceName + "\""));
+        Assertions.assertTrue(acls.contains("display_name = \"merchandising.inventory.inventory-adjustment\""));
+        Assertions.assertTrue(acls.contains("principal     = \"User:${data.confluent_service_account." + principalResourceName + ".id}\""));
+        Assertions.assertTrue(acls.contains("principal   = \"User:${data.confluent_service_account." + principalResourceName + ".id}\""));
         Assertions.assertTrue(acls.contains("resource \"confluent_kafka_acl\""));
         Assertions.assertTrue(acls.contains("operation     = \"READ\""));
         Assertions.assertTrue(acls.contains("operation     = \"WRITE\""));
         Assertions.assertTrue(acls.contains("operation     = \"DESCRIBE\""));
+        Assertions.assertTrue(acls.contains("resource_type = \"GROUP\""));
+        Assertions.assertTrue(acls.contains("resource \"confluent_role_binding\""));
+        Assertions.assertTrue(acls.contains("role_name   = \"DeveloperRead\""));
+        Assertions.assertTrue(acls.contains("${var.schema_registry_crn}/subject="));
         Assertions.assertTrue(acls.contains("permission    = \"ALLOW\""));
+    }
+
+    @Test
+    public void test_managed_service_account_generation() throws Exception {
+        String targetFolder = "target/out/test_confluent_managed_service_account_generation";
+        new MainGenerator().generate(new AsyncAPIOpsGeneratorPlugin()
+                .withApiFile(ASYNCAPI_PROVIDER)
+                .withOption("templates", "TerraformConfluent")
+                .withOption("serviceAccountMode", "managed")
+                .withTargetFolder(targetFolder)
+                .withOption("skipFormatting", true));
+
+        String acls = Files.readString(Path.of(targetFolder + "/acls.tf"));
+        String principalResourceName = "merchandising_inventory_inventory_adjustment";
+        Assertions.assertEquals(1, occurrencesOf(acls, "resource \"confluent_service_account\" \"" + principalResourceName + "\""));
+        Assertions.assertFalse(acls.contains("data \"confluent_service_account\""));
+        Assertions.assertTrue(acls.contains("description  = \"Managed from AsyncAPI principal merchandising.inventory.inventory-adjustment\""));
+        Assertions.assertTrue(acls.contains("principal     = \"User:${confluent_service_account." + principalResourceName + ".id}\""));
+        Assertions.assertTrue(acls.contains("principal   = \"User:${confluent_service_account." + principalResourceName + ".id}\""));
     }
 
     @Test
@@ -87,5 +116,15 @@ public class AsyncAPIOpsTerraformConfluentTest {
         String topics = Files.readString(Path.of(targetFolder + "/topics.tf"));
         Assertions.assertTrue(topics.contains("partitions_count = var.default_partitions"));
         Assertions.assertTrue(topics.contains("config = length(var.default_topic_config) > 0 ? var.default_topic_config : null"));
+    }
+
+    private int occurrencesOf(String content, String token) {
+        int count = 0;
+        int index = 0;
+        while ((index = content.indexOf(token, index)) >= 0) {
+            count++;
+            index += token.length();
+        }
+        return count;
     }
 }

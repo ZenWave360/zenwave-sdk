@@ -33,6 +33,7 @@ class AsyncAPIOpsAvroBundler {
 
             List<URI> allUris = new ArrayList<>();
             allUris.add(rootSchemaUri);
+            allUris.addAll(loader.collectSiblingUris(rootSchemaUri));
             allUris.addAll(loader.collectImportUris(avroImports));
 
             List<Map<String, Object>> sortedSchemas = loader.sortSchemas(loader.loadSchemas(distinct(allUris)));

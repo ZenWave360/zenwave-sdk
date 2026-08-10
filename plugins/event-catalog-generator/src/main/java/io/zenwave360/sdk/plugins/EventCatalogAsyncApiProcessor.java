@@ -1,256 +1,399 @@
 package io.zenwave360.sdk.plugins;
 
-import io.zenwave360.sdk.parsers.DefaultYamlParser;
-import io.zenwave360.sdk.processors.AsyncApiProcessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.zenwave360.manifest.BlockingZenWaveManifestLoader;
+import io.zenwave360.manifest.ManifestArtifact;
+import io.zenwave360.manifest.ManifestLoadOptions;
+import io.zenwave360.manifest.ManifestResolvedResource;
+import io.zenwave360.manifest.ManifestService;
+import io.zenwave360.manifest.ZenWaveManifest;
+import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.processors.Processor;
-import io.zenwave360.sdk.utils.JSONPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Parses AsyncAPI specs declared in each service entry and augments the service map
- * with extracted events, commands, sends, receives, version, and specifications.
- *
- * <p>Two-pass processing:
- * <ol>
- *   <li><b>Pass 1</b> — public {@code asyncapi} specs: generates event/command pages,
- *       builds a channel-address index ({@code address → [serviceId, channelKey]}).</li>
- *   <li><b>Pass 2</b> — {@code asyncapi-client} specs: resolves sends/receives against
- *       the index; no event/command pages generated.</li>
- * </ol>
- *
- * <p>Augmented keys written to each service map (prefixed with {@code _}):
- * <ul>
- *   <li>{@code _version} — String from {@code asyncapi info.version}</li>
- *   <li>{@code _events} — List&lt;Map&gt; one entry per send operation</li>
- *   <li>{@code _commands} — List&lt;Map&gt; one entry per receive operation</li>
- *   <li>{@code _sends} — List&lt;String&gt; event/command ids this service sends</li>
- *   <li>{@code _receives} — List&lt;String&gt; event/command ids this service receives</li>
- *   <li>{@code _specifications} — List&lt;String&gt; absolute paths to asyncapi spec files</li>
- * </ul>
+ * Parses AsyncAPI artifacts declared by typed manifest services and augments the EventCatalog model
+ * with extracted events, commands, sends, receives, version, and channels.
  */
 public class EventCatalogAsyncApiProcessor implements Processor {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
+    private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+
+    @DocumentedOption(description = "Preferred artifact source for build-time content loading.")
+    public String preferredSource;
+    @DocumentedOption(description = "Allow source fallback for build-time content loading.")
+    public Boolean allowFallback;
+    @DocumentedOption(description = "Preferred source for generated frontmatter links.")
+    public String linkSource;
 
     @Override
-    @SuppressWarnings("unchecked")
     public Map<String, Object> process(Map<String, Object> contextModel) {
-        Map<String, Object> architecture = (Map<String, Object>) contextModel.get("architecture");
-        if (architecture == null) return contextModel;
+        ZenWaveManifest manifest = (ZenWaveManifest) contextModel.get("manifest");
+        EventCatalogModel eventCatalog = (EventCatalogModel) contextModel.get("eventCatalog");
+        BlockingZenWaveManifestLoader manifestRuntime =
+                (BlockingZenWaveManifestLoader) contextModel.get("manifestRuntime");
+        if (manifest == null || eventCatalog == null || manifestRuntime == null) return contextModel;
 
-        Map<String, Object> services = (Map<String, Object>) architecture.getOrDefault("services", Map.of());
+        Map<String, Map<String, String>> channelAddressIndex = new LinkedHashMap<>();
+        ManifestLoadOptions contentOptions = new ManifestLoadOptions()
+                .withPreferredSource(preferredSource)
+                .withFallback(allowFallback == null || allowFallback);
 
-        // address → [serviceId, channelKey] — built from public asyncapi specs
-        Map<String, String[]> channelAddressIndex = new LinkedHashMap<>();
-
-        // Pass 1: public asyncapi specs
-        for (Map.Entry<String, Object> entry : services.entrySet()) {
-            Map<String, Object> service = (Map<String, Object>) entry.getValue();
-            String serviceId = str(service, "id", entry.getKey());
-            processPublicSpec(service, serviceId, channelAddressIndex);
+        for (ManifestService service : manifest.getServices()) {
+            Map<String, Object> serviceData = eventCatalog.serviceData(service);
+            processPublicArtifact(
+                    manifestRuntime, manifest, eventCatalog, service, serviceData,
+                    eventCatalog.catalogServiceId(service), contentOptions, channelAddressIndex);
         }
 
-        // Pass 2: asyncapi-client specs (resolved against the index)
-        for (Map.Entry<String, Object> entry : services.entrySet()) {
-            Map<String, Object> service = (Map<String, Object>) entry.getValue();
-            processClientSpec(service, channelAddressIndex);
+        for (ManifestService service : manifest.getServices()) {
+            processClientArtifact(
+                    manifestRuntime, manifest, service, eventCatalog.serviceData(service),
+                    contentOptions, channelAddressIndex);
         }
 
         return contextModel;
     }
 
-    // -------------------------------------------------------------------------
-    // Pass 1: public asyncapi specs
-    // -------------------------------------------------------------------------
-
-    @SuppressWarnings("unchecked")
-    private void processPublicSpec(Map<String, Object> service, String serviceId,
-                                   Map<String, String[]> channelAddressIndex) {
-        List<Map<String, Object>> specs = (List<Map<String, Object>>) service.getOrDefault("specs", List.of());
-        String repository = str(service, "repository", ".");
-
-        for (Map<String, Object> spec : specs) {
-            if (!"asyncapi".equals(spec.get("type"))) continue;
-
-            String specPath = repository + File.separator + spec.get("path");
-            File specFile = new File(specPath);
-            if (!specFile.exists()) {
-                log.warn("AsyncAPI spec not found: {}", specFile.getAbsolutePath());
+    private void processPublicArtifact(BlockingZenWaveManifestLoader manifestRuntime, ZenWaveManifest manifest,
+                                       EventCatalogModel eventCatalog, ManifestService manifestService,
+                                       Map<String, Object> serviceData, String serviceId,
+                                       ManifestLoadOptions contentOptions,
+                                       Map<String, Map<String, String>> channelAddressIndex) {
+        for (ManifestArtifact artifact : manifestService.findArtifacts("asyncapi")) {
+            String specText;
+            try {
+                specText = manifestRuntime.loadArtifactText(manifest, manifestService, artifact, contentOptions);
+            } catch (Exception e) {
+                log.warn("AsyncAPI artifact could not be loaded for {}: {}", manifestService.getServiceRef(), e.getMessage());
                 continue;
             }
 
-            Map<String, Object> model = parseSpec(specFile);
+            Map<String, Object> model = parseSpec(specText, manifestService.getServiceRef(), artifact.getPath());
             if (model == null) continue;
 
-            String version = JSONPath.get(model, "$.info.version");
-            if (version != null && service.get("_version") == null) {
-                service.put("_version", version);
+            String version = str(map(model.get("info")), "version", null);
+            if (version != null && serviceData.get("_version") == null) {
+                serviceData.put("_version", version);
             }
 
-            addToList(service, "_specifications", specFile.getAbsolutePath());
+            annotateArtifactLink(manifestRuntime, manifest, eventCatalog, manifestService, artifact, contentOptions);
 
-            Map<String, Map> channels = JSONPath.get(model, "$.channels", Map.of());
-            Map<String, Map> operations = JSONPath.get(model, "$.operations", Map.of());
+            Map<String, Object> channels = map(model.get("channels"));
+            Map<String, Object> operations = map(model.get("operations"));
+            Map<String, Object> componentMessages = map(map(model.get("components")).get("messages"));
+            List<String> protocols = uniqueStrings(values(map(model.get("servers"))), "protocol");
+            String specificationUrl = manifestRuntime.getDelegate().artifactReferenceUri(
+                    manifest, manifestService, artifact, null,
+                    new ManifestLoadOptions(linkSource, false));
 
-            // Build address → channelKey index for owned channels
             Map<String, String> addressToChannelKey = new LinkedHashMap<>();
-            for (Map.Entry<String, Map> ch : channels.entrySet()) {
-                String address = str(ch.getValue(), "address", null);
+            for (Map.Entry<String, Object> channelEntry : channels.entrySet()) {
+                Map<String, Object> channel = map(channelEntry.getValue());
+                String channelKey = channelEntry.getKey();
+                String channelId = serviceId + "." + channelKey;
+                String address = str(channel, "address", null);
+
+                Map<String, Object> channelArtifact = new LinkedHashMap<>();
+                channelArtifact.put("id", channelId);
+                channelArtifact.put("name", str(channel, "summary", channelKey));
+                channelArtifact.put("summary", str(channel, "description", str(channel, "summary", null)));
+                channelArtifact.put("version", version != null ? version : serviceVersion(manifestService));
                 if (address != null) {
-                    addressToChannelKey.put(address, ch.getKey());
-                    channelAddressIndex.put(address, new String[]{serviceId, ch.getKey()});
+                    channelArtifact.put("address", address);
+                    addressToChannelKey.put(address, channelKey);
+                    channelAddressIndex.put(address, Map.of(
+                            "serviceId", serviceId,
+                            "channelKey", channelKey,
+                            "channelId", channelId));
                 }
+                if (!protocols.isEmpty()) {
+                    channelArtifact.put("protocols", protocols);
+                }
+                addToList(serviceData, "_channels", channelArtifact);
             }
 
-            // Classify operations
-            for (Map<?, ?> operation : operations.values()) {
+            for (Object operationValue : operations.values()) {
+                Map<String, Object> operation = map(operationValue);
                 String action = str(operation, "action", null);
-                Map<?, ?> channel = (Map<?, ?>) operation.get("channel");
-                if (action == null || channel == null) continue;
+                Map<String, Object> channel = resolveChannel(operation.get("channel"), channels);
+                if (action == null || channel.isEmpty()) {
+                    continue;
+                }
 
                 String address = str(channel, "address", null);
                 String channelKey = addressToChannelKey.get(address);
-                if (channelKey == null) continue;
+                if (channelKey == null) {
+                    continue;
+                }
 
-                String eventId = serviceId + "." + channelKey;
-                String name = str(channel, "summary", channelKey);
-                String schemaPath = resolveSchemaPath(specFile, channel);
+                String messageId = serviceId + "." + channelKey;
+                String channelId = serviceId + "." + channelKey;
 
-                Map<String, String> artifact = new LinkedHashMap<>();
-                artifact.put("id", eventId);
-                artifact.put("name", name);
-                artifact.put("version", version != null ? version : str(service, "version", "0.0.1"));
-                if (schemaPath != null) artifact.put("schemaPath", schemaPath);
+                Map<String, Object> message = new LinkedHashMap<>();
+                message.put("id", messageId);
+                message.put("name", str(channel, "summary", channelKey));
+                message.put("summary", str(channel, "description", str(channel, "summary", null)));
+                message.put("version", version != null ? version : serviceVersion(manifestService));
+                message.put("channelId", channelId);
+
+                MessageSelection messageSelection = resolveMessageSelection(operation, channel, channelKey, componentMessages);
+                String schemaPath = resolveSchemaLink(
+                        manifestRuntime, manifest, manifestService, artifact, messageSelection);
+                if (schemaPath != null) {
+                    message.put("schemaPath", schemaPath);
+                }
+                if (isHttpUrl(specificationUrl) && messageSelection != null && messageSelection.hasRemoteSelector()) {
+                    message.put("_remoteSchemaUrl", specificationUrl);
+                    message.put("_remoteSchemaChannel", messageSelection.channel);
+                    message.put("_remoteSchemaChannelMessage", messageSelection.channelMessage);
+                }
 
                 if ("send".equals(action)) {
-                    addToList(service, "_events", artifact);
-                    addToList(service, "_sends", eventId);
+                    addToList(serviceData, "_events", message);
+                    addToList(serviceData, "_sends", messageId);
                 } else if ("receive".equals(action)) {
-                    addToList(service, "_commands", artifact);
-                    addToList(service, "_receives", eventId);
+                    addToList(serviceData, "_commands", message);
+                    addToList(serviceData, "_receives", messageId);
                 }
             }
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Pass 2: asyncapi-client specs — sends/receives only, no pages
-    // -------------------------------------------------------------------------
-
-    @SuppressWarnings("unchecked")
-    private void processClientSpec(Map<String, Object> service, Map<String, String[]> channelAddressIndex) {
-        List<Map<String, Object>> specs = (List<Map<String, Object>>) service.getOrDefault("specs", List.of());
-        String repository = str(service, "repository", ".");
-
-        for (Map<String, Object> spec : specs) {
-            if (!"asyncapi-client".equals(spec.get("type"))) continue;
-
-            String specPath = repository + File.separator + spec.get("path");
-            File specFile = new File(specPath);
-            if (!specFile.exists()) {
-                log.warn("asyncapi-client spec not found: {}", specFile.getAbsolutePath());
+    private void processClientArtifact(BlockingZenWaveManifestLoader manifestRuntime, ZenWaveManifest manifest,
+                                       ManifestService manifestService, Map<String, Object> serviceData,
+                                       ManifestLoadOptions contentOptions,
+                                       Map<String, Map<String, String>> channelAddressIndex) {
+        for (ManifestArtifact artifact : manifestService.findArtifacts("asyncapi-client")) {
+            String specText;
+            try {
+                specText = manifestRuntime.loadArtifactText(manifest, manifestService, artifact, contentOptions);
+            } catch (Exception e) {
+                log.warn("AsyncAPI client artifact could not be loaded for {}: {}", manifestService.getServiceRef(), e.getMessage());
                 continue;
             }
 
-            Map<String, Object> model = parseSpec(specFile);
+            Map<String, Object> model = parseSpec(specText, manifestService.getServiceRef(), artifact.getPath());
             if (model == null) continue;
 
-            Map<String, Map> channels = JSONPath.get(model, "$.channels", Map.of());
-            Map<String, Map> operations = JSONPath.get(model, "$.operations", Map.of());
+            Map<String, Object> channels = map(model.get("channels"));
+            Map<String, Object> operations = map(model.get("operations"));
 
-            // Build address index for this client file
             Map<String, String> addressToChannelKey = new LinkedHashMap<>();
-            for (Map.Entry<String, Map> ch : channels.entrySet()) {
-                String address = str(ch.getValue(), "address", null);
+            for (Map.Entry<String, Object> channelEntry : channels.entrySet()) {
+                String address = str(map(channelEntry.getValue()), "address", null);
                 if (address != null) {
-                    addressToChannelKey.put(address, ch.getKey());
+                    addressToChannelKey.put(address, channelEntry.getKey());
                 }
             }
 
-            for (Map<?, ?> operation : operations.values()) {
+            for (Object operationValue : operations.values()) {
+                Map<String, Object> operation = map(operationValue);
                 String action = str(operation, "action", null);
-                Map<?, ?> channel = (Map<?, ?>) operation.get("channel");
-                if (action == null || channel == null) continue;
-
+                Map<String, Object> channel = resolveChannel(operation.get("channel"), channels);
                 String address = str(channel, "address", null);
-                if (address == null) continue;
+                if (action == null || address == null) {
+                    continue;
+                }
 
-                // Look up the owning service + channel key from the index
-                String[] ownerInfo = channelAddressIndex.get(address);
-                String eventId;
+                Map<String, String> ownerInfo = channelAddressIndex.get(address);
+                String messageId;
                 if (ownerInfo != null) {
-                    eventId = ownerInfo[0] + "." + ownerInfo[1];  // externalServiceId.channelKey
+                    messageId = ownerInfo.get("serviceId") + "." + ownerInfo.get("channelKey");
                 } else {
-                    // Fallback: use channel key from client file (address not in index yet)
                     String channelKey = addressToChannelKey.get(address);
-                    eventId = channelKey != null ? channelKey : address;
-                    log.warn("Channel address '{}' not found in index — using fallback id '{}'", address, eventId);
+                    messageId = channelKey != null ? channelKey : address;
+                    log.warn("Channel address '{}' not found in index — using fallback id '{}'", address, messageId);
                 }
 
                 if ("send".equals(action)) {
-                    addToList(service, "_sends", eventId);
+                    addToList(serviceData, "_sends", messageId);
                 } else if ("receive".equals(action)) {
-                    addToList(service, "_receives", eventId);
+                    addToList(serviceData, "_receives", messageId);
                 }
             }
         }
     }
 
-    // -------------------------------------------------------------------------
-    // AsyncAPI parsing
-    // -------------------------------------------------------------------------
+    private void annotateArtifactLink(BlockingZenWaveManifestLoader manifestRuntime, ZenWaveManifest manifest,
+                                      EventCatalogModel eventCatalog, ManifestService manifestService,
+                                      ManifestArtifact artifact, ManifestLoadOptions contentOptions) {
+        Map<String, Object> artifactData = eventCatalog.artifactData(manifestService, artifact);
+        String linkUri = manifestRuntime.getDelegate().artifactReferenceUri(
+                manifest, manifestService, artifact, null,
+                new ManifestLoadOptions(linkSource, false));
+        if (linkUri != null) {
+            artifactData.put("linkUri", linkUri);
+        }
+        String buildPath = resolvedContentPath(
+                manifestRuntime.resolveArtifact(manifest, manifestService, artifact, contentOptions));
+        if (buildPath != null) {
+            artifactData.put("buildPath", buildPath);
+        }
+    }
 
-    private Map<String, Object> parseSpec(File specFile) {
-        String tempKey = "_ec_asyncapi_" + System.nanoTime();
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> parseSpec(String specText, String serviceRef, String pathExpression) {
         try {
-            var parsed = new DefaultYamlParser()
-                    .withApiFile(specFile)
-                    .withTargetProperty(tempKey)
-                    .parse();
-
-            var processor = new AsyncApiProcessor();
-            processor.targetProperty = tempKey;
-            var processed = processor.process(parsed);
-
-            return (Map<String, Object>) processed.get(tempKey);
-        } catch (Exception e) {
-            log.warn("Failed to parse AsyncAPI spec {}: {}", specFile.getAbsolutePath(), e.getMessage());
+            return yamlMapper.readValue(specText, Map.class);
+        } catch (IOException e) {
+            log.warn("Failed to parse AsyncAPI artifact {} for {}: {}", pathExpression, serviceRef, e.getMessage());
             return null;
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Schema path resolution
-    // -------------------------------------------------------------------------
+    private Map<String, Object> resolveChannel(Object channelRef, Map<String, Object> channels) {
+        Map<String, Object> channel = map(channelRef);
+        String ref = str(channel, "$ref", null);
+        if (ref == null) {
+            return channel;
+        }
+        String prefix = "#/channels/";
+        if (!ref.startsWith(prefix)) {
+            return Map.of();
+        }
+        return map(channels.get(ref.substring(prefix.length())));
+    }
 
-    @SuppressWarnings("unchecked")
-    private String resolveSchemaPath(File specFile, Map<?, ?> channel) {
-        Map<String, Map> messages = JSONPath.get(channel, "$.messages", Map.of());
-        for (Map message : messages.values()) {
-            Map schema = JSONPath.get(message, "$.payload.schema");
-            if (schema == null) continue;
-
-            String originalRef = (String) schema.get("x--original-$ref");
-            if (originalRef != null) {
-                // Strip fragment (#/...) if present
-                String filePart = originalRef.contains("#") ? originalRef.substring(0, originalRef.indexOf('#')) : originalRef;
-                if (!filePart.isBlank()) {
-                    Path resolved = specFile.getParentFile().toPath().resolve(filePart).normalize();
-                    return resolved.toAbsolutePath().toString();
-                }
+    private String resolveSchemaLink(BlockingZenWaveManifestLoader manifestRuntime, ZenWaveManifest manifest, ManifestService manifestService,
+                                     ManifestArtifact artifact, MessageSelection messageSelection) {
+        if (messageSelection == null) {
+            return null;
+        }
+        String ref = str(map(map(messageSelection.message.get("payload")).get("schema")), "$ref", null);
+        if (ref != null) {
+            String filePart = ref.contains("#") ? ref.substring(0, ref.indexOf('#')) : ref;
+            if (!filePart.isBlank()) {
+                return manifestRuntime.getDelegate().artifactReferenceUri(
+                        manifest, manifestService, artifact, filePart,
+                        new ManifestLoadOptions(linkSource, false));
             }
         }
         return null;
     }
 
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
+    private String resolvedContentPath(ManifestResolvedResource resource) {
+        if (resource == null || resource.getUri() == null) {
+            return null;
+        }
+        URI uri = URI.create(resource.getUri());
+        return "file".equalsIgnoreCase(uri.getScheme())
+                ? Path.of(uri).toString()
+                : resource.referenceUri();
+    }
+
+    private boolean isHttpUrl(String value) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+        try {
+            String scheme = URI.create(value).getScheme();
+            return "http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme);
+        } catch (IllegalArgumentException ignored) {
+            return false;
+        }
+    }
+
+    private String serviceVersion(ManifestService service) {
+        String version = service.documentVersion();
+        return version != null && !version.isBlank() ? version : "0.0.1";
+    }
+
+    private MessageSelection resolveMessageSelection(Map<String, Object> operation, Map<String, Object> channel, String channelKey,
+                                                      Map<String, Object> componentMessages) {
+        Map<String, Object> channelMessages = map(channel.get("messages"));
+        if (channelMessages.isEmpty()) {
+            return null;
+        }
+        Object operationMessages = operation.get("messages");
+        if (operationMessages instanceof Collection<?> collection) {
+            for (Object messageValue : collection) {
+                for (Map.Entry<String, Object> channelMessage : channelMessages.entrySet()) {
+                    if (operationMessageMatchesChannelMessage(messageValue, channelKey, channelMessage.getKey(), channelMessage.getValue())) {
+                        return MessageSelection.channel(
+                                channelKey, channelMessage.getKey(), resolveChannelMessage(channelMessage.getValue(), componentMessages));
+                    }
+                }
+            }
+            log.warn("AsyncAPI operation messages must be present in channel {}. No remote schema was selected.", channelKey);
+            return null;
+        }
+
+        Map.Entry<String, Object> firstMessage = channelMessages.entrySet().iterator().next();
+        return MessageSelection.channel(
+                channelKey, firstMessage.getKey(), resolveChannelMessage(firstMessage.getValue(), componentMessages));
+    }
+
+    private Map<String, Object> resolveChannelMessage(Object channelMessageValue, Map<String, Object> componentMessages) {
+        Map<String, Object> channelMessage = map(channelMessageValue);
+        String ref = str(channelMessage, "$ref", null);
+        String prefix = "#/components/messages/";
+        if (ref != null && ref.startsWith(prefix)) {
+            Map<String, Object> componentMessage = map(componentMessages.get(decodeJsonPointerSegment(ref.substring(prefix.length()))));
+            if (!componentMessage.isEmpty()) {
+                return componentMessage;
+            }
+        }
+        return channelMessage;
+    }
+
+    private boolean operationMessageMatchesChannelMessage(Object operationMessageValue, String channelKey,
+                                                           String channelMessageName, Object channelMessageValue) {
+        if (operationMessageValue == channelMessageValue) {
+            return true;
+        }
+        String operationRef = str(map(operationMessageValue), "$ref", null);
+        if (operationRef == null) {
+            return false;
+        }
+        String channelRef = str(map(channelMessageValue), "$ref", null);
+        if (operationRef.equals(channelRef)) {
+            return true;
+        }
+        return operationRef.equals("#/channels/" + encodeJsonPointerSegment(channelKey)
+                + "/messages/" + encodeJsonPointerSegment(channelMessageName));
+    }
+
+    private String encodeJsonPointerSegment(String value) {
+        return value.replace("~", "~0").replace("/", "~1");
+    }
+
+    private String decodeJsonPointerSegment(String value) {
+        return value.replace("~1", "/").replace("~0", "~");
+    }
+
+    private static final class MessageSelection {
+        private final String channel;
+        private final String channelMessage;
+        private final Map<String, Object> message;
+
+        private MessageSelection(String channel, String channelMessage, Map<String, Object> message) {
+            this.channel = channel;
+            this.channelMessage = channelMessage;
+            this.message = message;
+        }
+
+        private static MessageSelection channel(String channel, String channelMessage, Map<String, Object> message) {
+            return new MessageSelection(channel, channelMessage, message);
+        }
+
+        private boolean hasRemoteSelector() {
+            return channel != null && channelMessage != null;
+        }
+    }
 
     @SuppressWarnings("unchecked")
     private <T> void addToList(Map<String, Object> map, String key, T value) {
@@ -261,5 +404,25 @@ public class EventCatalogAsyncApiProcessor implements Processor {
     private String str(Map<?, ?> map, String key, String defaultValue) {
         Object value = map.get(key);
         return value != null ? value.toString() : defaultValue;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> map(Object value) {
+        return value instanceof Map<?, ?> map ? (Map<String, Object>) map : Map.of();
+    }
+
+    private Collection<Object> values(Map<String, Object> map) {
+        return map.values();
+    }
+
+    private List<String> uniqueStrings(Collection<Object> values, String key) {
+        LinkedHashSet<String> result = new LinkedHashSet<>();
+        for (Object value : values) {
+            String string = str(map(value), key, null);
+            if (string != null) {
+                result.add(string);
+            }
+        }
+        return List.copyOf(result);
     }
 }

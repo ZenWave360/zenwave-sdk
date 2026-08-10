@@ -1,0 +1,37 @@
+name: Release
+
+run-name: "Release v${{ inputs.version }} from main"
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Semantic version to release, without a v prefix (e.g. 2.6.0 or 2.6.0-rc.1)"
+        required: true
+        type: string
+      developmentVersion:
+        description: "Next development version (e.g. 2.6.1-SNAPSHOT). Leave empty to auto-derive the next patch SNAPSHOT."
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: release-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    uses: ZenWave360/release-workflows/.github/workflows/release-maven.yml@main
+    with:
+      version: ${{ inputs.version }}
+      development-version: ${{ inputs.developmentVersion }}
+    secrets:
+      CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+      CENTRAL_TOKEN: ${{ secrets.CENTRAL_TOKEN }}
+      SIGN_KEY: ${{ secrets.SIGN_KEY }}
+      SIGN_KEY_PASS: ${{ secrets.SIGN_KEY_PASS }}

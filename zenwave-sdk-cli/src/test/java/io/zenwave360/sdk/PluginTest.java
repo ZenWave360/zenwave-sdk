@@ -48,4 +48,40 @@ public class PluginTest {
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> Plugin.of("io.zenwave360.sdk.plugins.NotFoundPlugin"));
         Assertions.assertEquals("Plugin not found: 'io.zenwave360.sdk.plugins.NotFoundPlugin'. Check the plugin name or use --help to list available plugins.", exception.getMessage());
     }
+
+    @Test
+    public void testMultilineStringOptionsAreTrimmed() {
+        Plugin config = new Plugin();
+
+        config.withOption("applicationExtensions",
+                "\n"
+                        + "            x-application-bindings:\n"
+                        + "              x-principal: payments_processing\n"
+                        + "              x-clientId: payments_processing\n"
+                        + "              x-groupId: payments_processing\n"
+                        + "            ");
+
+        Assertions.assertEquals(
+                "x-application-bindings:\n"
+                        + "  x-principal: payments_processing\n"
+                        + "  x-clientId: payments_processing\n"
+                        + "  x-groupId: payments_processing",
+                config.getOptions().get("applicationExtensions"));
+    }
+
+    @Test
+    public void testTripleQuotedMultilineStringOptionsAreTrimmed() {
+        Plugin config = new Plugin();
+
+        config.withOption("applicationExtensions",
+                "\"\"\"\n"
+                        + "            x-application-bindings:\n"
+                        + "              x-principal: payments_processing\n"
+                        + "            \"\"\"");
+
+        Assertions.assertEquals(
+                "x-application-bindings:\n"
+                        + "  x-principal: payments_processing",
+                config.getOptions().get("applicationExtensions"));
+    }
 }

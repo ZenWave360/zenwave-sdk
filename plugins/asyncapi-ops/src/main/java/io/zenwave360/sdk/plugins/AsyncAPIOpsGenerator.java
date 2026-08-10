@@ -32,7 +32,10 @@ public class AsyncAPIOpsGenerator extends Generator {
     @DocumentedOption(description = "Templates to use for code generation.", values = {"TerraformKafka", "TerraformConfluent", "TerraformConfluentHybrid", "FQ Class Name"})
     public String templates = "TerraformKafka";
 
-    @DocumentedOption(description = "Avro schema files or folders available while bundling owned message schemas.")
+    @DocumentedOption(description = "How Confluent service accounts are resolved: existing looks them up by display name; managed provisions them.", values = {"existing", "managed"})
+    public String serviceAccountMode = "existing";
+
+    @DocumentedOption(description = "Additional Avro schema files or folders available while bundling owned message schemas. Sibling .avsc files are discovered automatically for local and classpath schemas.")
     public List<String> avroImports = List.of();
 
     @DocumentedOption(description = "Authentication configuration values for fetching remote resources.")
@@ -44,6 +47,9 @@ public class AsyncAPIOpsGenerator extends Generator {
     public String sourceProperty = "api";
 
     @Override public GeneratedProjectFiles generate(Map<String, Object> contextModel) {
+        if (!"existing".equals(serviceAccountMode) && !"managed".equals(serviceAccountMode)) {
+            throw new IllegalArgumentException("serviceAccountMode must be either 'existing' or 'managed'");
+        }
         Model apiModel = (Model) contextModel.get(sourceProperty);
         Templates templates = configureTemplates();
 
@@ -55,6 +61,7 @@ public class AsyncAPIOpsGenerator extends Generator {
         if (intent != null) {
             commonExtModel.put("intent", intent);
         }
+        commonExtModel.put("managedConfluentServiceAccounts", "managed".equals(serviceAccountMode));
         outputList.addAll(generateTemplateOutput(contextModel, templates.commonTemplates, commonExtModel));
         outputList.addAll(generateBundledSchemaOutputs((AsyncAPIOpsIntent) intent));
 

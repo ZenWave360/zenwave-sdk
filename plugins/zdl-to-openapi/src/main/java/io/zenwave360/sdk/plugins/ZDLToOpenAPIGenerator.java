@@ -11,7 +11,6 @@ import com.github.jknack.handlebars.Handlebars;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.EntitiesToSchemasConverter;
 import io.zenwave360.sdk.generators.Generator;
-import io.zenwave360.sdk.processors.YamlOverlyMerger;
 import io.zenwave360.sdk.utils.AntStyleMatcher;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
@@ -37,12 +36,6 @@ public class ZDLToOpenAPIGenerator extends Generator {
 
     @DocumentedOption(description = "Target file")
     public String targetFile = "openapi.yml";
-
-    @DocumentedOption(description = "Overlay Spec file to apply on top of generated OpenAPI file")
-    public List<String> openapiOverlayFiles;
-
-    @DocumentedOption(description = "OpenAPI file to be merged on top of generated OpenAPI file")
-    public String openapiMergeFile;
 
     @DocumentedOption(description = "JsonSchema type for id fields and parameters.")
     public String idType = "string";
@@ -174,8 +167,6 @@ public class ZDLToOpenAPIGenerator extends Generator {
         openAPISchemasString = openAPISchemasString.substring(openAPISchemasString.indexOf("\n") + 1);
 
         var template = generateTemplateOutput(contextModel, zdlToOpenAPITemplate, zdlModel, openAPISchemasString);
-        var templateContent = YamlOverlyMerger.mergeAndOverlay(template.getContent(), openapiMergeFile, openapiOverlayFiles);
-        template = new TemplateOutput(template.getTargetFile(), templateContent, template.getMimeType(), template.isSkipOverwrite());
 
         var generatedProjectFiles = new GeneratedProjectFiles();
         generatedProjectFiles.singleFiles.add(template);

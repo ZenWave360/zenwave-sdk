@@ -101,10 +101,11 @@ This plugin has been tested in the following setups:
 | `apiFile`        | AsyncAPI Specification File                                                                                                                                                  | URI      | `null`           |                               |
 | `apiFiles`       | List of AsyncAPI specs. Supported schemas are local files, http/s and classpath resources.                                                                                   | List     | `[]`             |                               |
 | `apiOverlayFiles` | Ordered list of API overlay YAML files applied to each loaded spec before dereferencing and `allOf` merge.                                                            | List     | `[]`             |                               |
-| `avroImports`    | Avro schema files or folders available while bundling owned message schemas. Supports local files/folders, `classpath:` files/folders and `https://` files.                | List     | `[]`             |                               |
+| `avroImports`    | Additional Avro schema files or folders available while bundling owned message schemas. Sibling `.avsc` files are discovered automatically for local and `classpath:` schemas. Supports local files/folders, `classpath:` files/folders and `https://` files. | List     | `[]`             |                               |
 | `authentication` | Authentication configuration values for fetching remote resources.                                                                                                           | List     | `[]`             |                               |
 | `server`         | Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Used to merge `x-env-server-overrides`/`env-server-overrides` from channel and error-topic bindings. | String   | `null`           |                               |
 | `templates`      | Templates to use for code generation.                                                                                                                                        | String   | `TerraformKafka` | TerraformKafka, TerraformConfluent, TerraformConfluentHybrid, FQ Class Name |
+| `serviceAccountMode` | Resolve existing Confluent service accounts by display name, or provision them as managed Terraform resources.                                                         | String   | `existing`       | existing, managed             |
 | `targetFolder`   | Output directory for `.tf` files.                                                                                                                                            | File     | `null`           |                               |
 
 ## What it generates
@@ -119,7 +120,7 @@ One run per service. All files land in `targetFolder`.
 | `acls.tf` | `kafka_acl` resources derived from operation bindings across all specs |
 | `<api-name>/.../*.avsc` | Bundled Avro schema files generated per owned message and referenced from `schemas.tf` |
 
-Schema files are generated inside the Terraform module and referenced with `${path.module}`. Each bundled file contains a single fully inlined Avro schema JSON object, built from the owned message schema plus only the required types found in `avroImports`.
+Schema files are generated inside the Terraform module and referenced with `${path.module}`. Each bundled file contains a single fully inlined Avro schema JSON object. For local and `classpath:` roots, types declared in sibling `.avsc` files are discovered automatically; use `avroImports` for additional schemas located elsewhere or for remote schemas.
 
 When multiple AsyncAPI specs are passed together, bundled schemas are namespaced by the sanitized spec basename:
 
@@ -191,7 +192,7 @@ Run it once per service, passing both the provider spec and the client spec. The
 
 ### Channel bindings: topic configuration
 
-Channel bindings follow the standard [AsyncAPI Kafka binding](https://github.com/asyncapi/bindings/blob/master/kafka/README.md) with one addition: `x-env-server-overrides` for per-environment tuning. The generator also accepts `env-server-overrides` without the `x-` prefix.
+Channel bindings follow the standard [AsyncAPI Kafka binding](https://github.com/asyncapi/bindings/blob/master/kafka/README.md) with one addition: `x-env-server-overrides` for per-environment tuning. The generator also accepts `env-server-overrides` without the `x-` prefix. If both are present, `x-env-server-overrides` wins.
 
 This extension was proposed in [AsyncAPI Bindings #292](https://github.com/asyncapi/bindings/issues/292).
 
@@ -218,10 +219,36 @@ Pass `server=staging` to the generator and the staging overrides are deep-merged
 
 ### Operation bindings: error topics and ACLs
 
-ACLs are derived from `x-principal` on operation bindings (`send` → Write, `receive` → Read).
+ACLs are derived from operation bindings. `x-principal` wins over `principal`. `send` operations get topic WRITE + DESCRIBE. `receive` operations get topic READ + DESCRIBE and consumer group READ when a group id can be resolved. Every operation principal also gets Schema Registry `DeveloperRead` access for the Avro subjects used by the operation channel.
+
+`x-principal` is the provider-neutral authenticated account or service-account name and must not include the Kafka `User:` prefix or an environment-specific opaque Confluent `sa-...` id:
+
+```yaml
+x-principal: sales.orders.checkout
+```
+
+- With `TerraformKafka`, the value is the authenticated account name and the template renders `User:sales.orders.checkout`.
+- With `TerraformConfluent` and `TerraformConfluentHybrid`, the value must exactly match a Confluent service account's `display_name`. Human Confluent users are out of scope.
+
+Confluent service-account handling is controlled by `serviceAccountMode`:
+
+- `existing` (default) generates one deduplicated `data "confluent_service_account"` lookup per principal. A missing or ambiguous display name fails during Terraform plan/apply.
+- `managed` generates one deduplicated `confluent_service_account` resource per principal. This is useful for fresh forks and demos such as Arcadia:
+
+```shell
+jbang zw -p AsyncAPIOpsGeneratorPlugin \
+  apiFile=asyncapi.yml \
+  templates=TerraformConfluent \
+  serviceAccountMode=managed \
+  targetFolder=terraform/out
+```
+
+Both modes use the resolved service-account id for Confluent Kafka ACLs. `TerraformConfluent` also uses it for Schema Registry role bindings; `TerraformConfluentHybrid` does not generate Confluent role bindings because its Schema Registry is self-hosted. Application API-key provisioning remains a separate concern.
 
 Retry and DLQ topics are provisioned from the `x-error-topics` extension on `receive` operations. The generator also accepts `error-topics` without the `x-` prefix.
-The consumer group id is read from `x-groupId` (ZenWave extension, plain string). If `groupId` is present it takes precedence — note that in standard AsyncAPI Kafka bindings `groupId` is a schema object, not a plain string; using it as a plain string is a ZenWave-specific interpretation.
+The consumer group id is resolved from `x-groupId` first, then standard `groupId`. `x-groupId` is a plain string. Standard `groupId` must be a schema with `enum`, string `const`, or string-array `const`; the first string value is used.
+
+Transactional producers can request a transactional id prefix ACL with `transactional: true` and `x-transactional-id-prefix`. The Confluent template renders this as a `TRANSACTIONAL_ID` ACL with `PREFIXED` pattern and WRITE operation.
 
 ```yaml
 operations:
@@ -232,10 +259,13 @@ operations:
     bindings:
       kafka:
         x-principal: "merchandising.inventory.inventory-adjustment"
-        x-groupId: "merchandising.inventory.inventory-adjustment"
+        groupId:
+          type: string
+          enum: ["merchandising.inventory.inventory-adjustment"]
         x-error-topics:
           addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
           retryTopics: 3
+          retrySuffixes: [retry-5s, retry-30s, retry-5m]
           retry:
             partitions: 1
             replicas: 2
@@ -260,9 +290,11 @@ The `addressTemplate` variables are:
 |----------|-------|
 | `${groupId}` | The consumer group id |
 | `${channel.address}` | The Kafka topic address of the consumed channel |
-| `${suffix}` | `retry-0` … `retry-N`, `dlq` |
+| `${suffix}` | `retry-0` … `retry-{N-1}` by default, the corresponding `retrySuffixes` value when configured, or `dlq` |
 
 In this example we use `.__.` as a separator between the consumer group and original topic unambiguously recoverable from the address.
+
+`retrySuffixes` optionally gives retry topics explicit suffixes in order. When omitted, `retryTopics: N` keeps generating `retry-0` through `retry-{N-1}`. When present, `retrySuffixes` must be an array of non-blank strings, contain exactly `retryTopics` entries, and contain no duplicates. Invalid values fail generation, even when the `retry` configuration is absent.
 
 If `x-error-topics`/`error-topics` is not present, no retry or DLQ topics are generated. If a retry or DLQ config does not define env overrides for the selected server, the base retry/DLQ config is used.
 
@@ -325,7 +357,7 @@ The precedence order is:
 **AsyncAPI value → Terraform variable → provider or broker default**
 
 1. An explicit value in the AsyncAPI spec is always used as-is.
-2. A per-environment override from `x-env-server-overrides` / `env-server-overrides` is applied on top of the AsyncAPI value before rendering.
+2. A per-environment override from `x-env-server-overrides` / `env-server-overrides` is applied on top of the AsyncAPI value before rendering. If both are present, the `x-` extension wins.
 3. If the AsyncAPI spec omits a setting, the generator renders the corresponding Terraform variable (`var.default_partitions`, `var.default_replication_factor`, `var.default_topic_config`).
 4. If the Terraform variable is also unset (`null`), the target provider applies its own default, or the Kafka broker applies its cluster-wide default.
 
@@ -352,6 +384,15 @@ variable "default_topic_config" {
 }
 ```
 
+Confluent templates also emit this variable for generated Schema Registry role bindings:
+
+```hcl
+variable "schema_registry_crn" {
+  type    = string
+  default = null
+}
+```
+
 Set these in a `terraform.tfvars` file or pass them through your CI/CD pipeline. Topics that specify values in AsyncAPI will override these variables for that specific resource.
 
 For topic configuration maps, the generator merges AsyncAPI values on top of the variable:
@@ -371,6 +412,7 @@ The exact behavior when a setting is unset depends on the selected template. Cho
 - **Partitions**: required by the provider. If AsyncAPI omits `partitions`, the generator renders `var.default_partitions`. If that variable is also `null`, Terraform fails at plan time — you must set `default_partitions`.
 - **Replication factor**: required by the provider, but the provider accepts `-1` to delegate to the broker. If AsyncAPI omits `replicas`, the generator renders `coalesce(var.default_replication_factor, -1)`, which falls back to the broker cluster default when the variable is unset.
 - **Topic config**: follows `AsyncAPI → var.default_topic_config → broker default`. If the resulting map is empty, the generator renders `null` so the provider treats the setting as unset.
+- **ACLs**: broker ACLs are rendered with `kafka_acl` for topic, group, and transactional-id resources. Transactional-id prefixes use `resource_type = "TransactionalID"` and `resource_pattern_type_filter = "Prefixed"`. Schema Registry permissions are not rendered by this template because they are not Kafka broker ACLs.
 
 #### `TerraformConfluent` (`confluentinc/confluent`)
 

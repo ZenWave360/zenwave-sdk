@@ -203,6 +203,7 @@ public class Plugin {
     }
 
     public Plugin withOption(String name, Object value) {
+        value = normalizeOptionValue(value);
         var field = FieldUtils.getField(this.getClass(), name);
 
         String lastPath = name;
@@ -223,11 +224,14 @@ public class Plugin {
                 }
             }
         }
-        if (value instanceof String && ((String) value).contains(",")) {
+        if (value instanceof String && ((String) value).contains(",") && !containsLineBreak((String) value)) {
             value = Arrays.stream(((String) value).split(",")).map(String::trim).toList();
         }
         if (value instanceof String && field != null && List.class.isAssignableFrom(field.getType())) {
             value = List.of(value);
+        }
+        if (value instanceof String && field != null) {
+            value = coerceStringToFieldType((String) value, field.getType());
         }
         nestedTempObject.put(lastPath, value);
 
@@ -242,6 +246,91 @@ public class Plugin {
             throw new RuntimeException(e);
         }
         return this;
+    }
+
+    private Object coerceStringToFieldType(String value, Class<?> fieldType) {
+        try {
+            if (fieldType == Boolean.class || fieldType == boolean.class) {
+                return Boolean.parseBoolean(value);
+            }
+            if (fieldType == Integer.class || fieldType == int.class) {
+                return Integer.parseInt(value);
+            }
+            if (fieldType == Long.class || fieldType == long.class) {
+                return Long.parseLong(value);
+            }
+            if (fieldType == Double.class || fieldType == double.class) {
+                return Double.parseDouble(value);
+            }
+        } catch (NumberFormatException e) {
+            // leave value as String; downstream field assignment will surface the error
+        }
+        return value;
+    }
+
+    private Object normalizeOptionValue(Object value) {
+        if (value instanceof String stringValue) {
+            return trimMultilineString(unquoteTripleMultilineString(stringValue));
+        }
+        return value;
+    }
+
+    private String unquoteTripleMultilineString(String value) {
+        if (value.length() >= 6 && value.startsWith("\"\"\"") && value.endsWith("\"\"\"")) {
+            return value.substring(3, value.length() - 3);
+        }
+        return value;
+    }
+
+    private String trimMultilineString(String value) {
+        if (!containsLineBreak(value)) {
+            return value;
+        }
+        String normalized = value.replace("\r\n", "\n").replace('\r', '\n');
+        String[] lines = normalized.split("\n", -1);
+
+        int firstLine = 0;
+        while (firstLine < lines.length && lines[firstLine].isBlank()) {
+            firstLine++;
+        }
+
+        int lastLine = lines.length - 1;
+        while (lastLine >= firstLine && lines[lastLine].isBlank()) {
+            lastLine--;
+        }
+
+        if (firstLine > lastLine) {
+            return "";
+        }
+
+        int commonIndent = Integer.MAX_VALUE;
+        for (int i = firstLine; i <= lastLine; i++) {
+            if (!lines[i].isBlank()) {
+                commonIndent = Math.min(commonIndent, leadingWhitespace(lines[i]));
+            }
+        }
+
+        StringBuilder result = new StringBuilder();
+        for (int i = firstLine; i <= lastLine; i++) {
+            if (i > firstLine) {
+                result.append('\n');
+            }
+            int start = Math.min(commonIndent, lines[i].length());
+            result.append(lines[i].substring(start));
+        }
+        return result.toString();
+    }
+
+    private boolean containsLineBreak(String value) {
+        return value.indexOf('\n') >= 0 || value.indexOf('\r') >= 0;
+    }
+
+    private int leadingWhitespace(String line) {
+        int count = 0;
+        while (count < line.length() && Character.isWhitespace(line.charAt(count))) {
+            count++;
+        }
+        return count;
     }
 
     public Plugin withOptions(Map<String, Object> options) {

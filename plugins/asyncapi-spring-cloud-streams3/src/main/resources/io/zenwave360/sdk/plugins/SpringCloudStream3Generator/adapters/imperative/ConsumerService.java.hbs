@@ -5,7 +5,7 @@ import {{modelPackage}}.*;
 {{~/if}}
 {{#if consumerApiPackage~}}
 import {{consumerApiPackage}}.*;
-{{~#each operation.x--messages as |message|}}
+{{~#each (operationMessages operation.operationId) as |message|}}
 import {{consumerApiPackage}}.{{consumerServiceInterfaceName operation.x--operationIdCamelCase}}.{{message.x--javaType}}Headers;
 {{~/each}}
 {{~/if}}
@@ -23,7 +23,7 @@ public class {{consumerServiceName operation.x--operationIdCamelCase}} implement
     private EventsMapper mapper = EventsMapper.INSTANCE;
     // TODO: private EntityService service;
 
-{{#each operation.x--messages as |message|}}
+{{#each (operationMessages operation.operationId) as |message|}}
     {{~#assign "methodName"}}{{operation.operationId}}{{methodSuffix message operation}}{{/assign}}
     /**
      * {{{operation.summary}}}

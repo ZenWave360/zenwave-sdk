@@ -6,7 +6,7 @@ import {{modelPackage}}.*;
 {{#if consumerApiPackage~}}
 import {{consumerApiPackage}}.*;
 {{~/if}}
-{{~#each operation.x--messages as |message|}}
+{{~#each (operationMessages operation.operationId) as |message|}}
 import {{consumerApiPackage}}.{{consumerServiceInterfaceName operation.x--operationIdCamelCase}}.{{message.x--javaType}}Headers;
 {{~/each}}
 import {{baseTestClassPackage}}.{{baseTestClassName}};
@@ -22,7 +22,7 @@ public class {{consumerServiceName operation.x--operationIdCamelCase}}{{testSuff
     @Autowired
     public {{consumerServiceInterfaceName operation.x--operationIdCamelCase}} consumerService;
 
-    {{#each operation.x--messages as |message|}}
+    {{#each (operationMessages operation.operationId) as |message|}}
     /**
      * Test for {{{operation.operationId}}}: {{methodSuffix message operation exposeMessage=true}}
      */

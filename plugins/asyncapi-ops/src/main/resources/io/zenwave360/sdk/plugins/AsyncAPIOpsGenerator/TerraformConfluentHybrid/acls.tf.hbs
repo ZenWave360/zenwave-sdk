@@ -1,0 +1,32 @@
+# Generated from asyncapi.yml{{#if intent.server}} for environment: {{intent.server}}{{/if}}
+# Command: jbang zw -p AsyncAPIToTerraform{{#if intent.server}} server={{intent.server}}{{/if}}
+
+{{#each intent.principals as |principal|}}
+{{#if ../managedConfluentServiceAccounts}}
+resource "confluent_service_account" "{{principal.resourceName}}" {
+  display_name = "{{principal.name}}"
+  description  = "Managed from AsyncAPI principal {{principal.name}}"
+}
+{{else}}
+data "confluent_service_account" "{{principal.resourceName}}" {
+  display_name = "{{principal.name}}"
+}
+{{/if}}
+
+{{/each}}
+{{#each intent.acls as |acl|}}
+resource "confluent_kafka_acl" "{{acl.resourceName}}" {
+  resource_type = "{{acl.resourceType}}"
+  resource_name = "{{acl.kafkaResourceName}}"
+  pattern_type  = "{{acl.patternType}}"
+{{#if ../managedConfluentServiceAccounts}}
+  principal     = "User:${confluent_service_account.{{acl.principalResourceName}}.id}"
+{{else}}
+  principal     = "User:${data.confluent_service_account.{{acl.principalResourceName}}.id}"
+{{/if}}
+  host          = "*"
+  operation     = "{{upper acl.operation}}"
+  permission    = "{{upper acl.permissionType}}"
+}
+
+{{/each}}

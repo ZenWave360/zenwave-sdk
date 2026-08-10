@@ -1,0 +1,28 @@
+{
+  "name": "event-catalog-forked",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "eventcatalog dev",
+    "editor": "npx @eventcatalog/editor@latest",
+    "build": "eventcatalog build",
+    "start": "eventcatalog start",
+    "preview": "eventcatalog preview",
+    "generate": "eventcatalog generate",
+    "export": "eventcatalog export",
+    "lint": "eventcatalog-linter",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@eventcatalog/core": "link:../../../../../../../archcatalog/packages/core",
+    "@eventcatalog/linter": "link:../../../../../../../archcatalog/packages/linter",
+    "@eventcatalog/sdk": "link:../../../../../../../archcatalog/packages/sdk",
+    "@eventcatalog/visualiser": "link:../../../../../../../archcatalog/packages/visualiser",
+    "js-yaml": "^4.2.0",
+    "jsonpath-plus": "^10.4.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "vitest": "^3.2.4"
+  }
+}

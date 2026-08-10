@@ -1,0 +1,20 @@
+asyncapi: 3.0.0
+info:
+  title: Transactional Producer Sample
+  version: 1.0.0
+channels:
+  outbound-events:
+    address: sample.outbound.events.v1
+    messages: {}
+    bindings:
+      kafka: {}
+operations:
+  publishOutboundEvent:
+    action: send
+    channel:
+      $ref: '#/channels/outbound-events'
+    bindings:
+      kafka:
+        x-principal: sample.producer
+        transactional: true
+        x-transactional-id-prefix: sample-producer-

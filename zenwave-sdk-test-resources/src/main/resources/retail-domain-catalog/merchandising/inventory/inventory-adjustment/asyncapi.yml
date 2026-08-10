@@ -76,7 +76,9 @@ operations:
     bindings:
       kafka:
         x-principal: "merchandising.inventory.inventory-adjustment"
-        groupId: "merchandising.inventory.inventory-adjustment"
+        groupId:
+          type: "string"
+          enum: ["merchandising.inventory.inventory-adjustment"]
         x-error-topics:
           addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
           retryTopics: 3

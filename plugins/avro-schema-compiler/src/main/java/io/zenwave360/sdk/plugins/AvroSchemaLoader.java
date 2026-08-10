@@ -1,8 +1,9 @@
 package io.zenwave360.sdk.plugins;
 
+import io.zenwave360.jsonrefparser.AuthenticationValue;
 import io.zenwave360.jsonrefparser.$RefParser;
 import io.zenwave360.jsonrefparser.$RefParserOptions;
-import io.zenwave360.jsonrefparser.AuthenticationValue;
+import io.zenwave360.jsonrefparser.$RefParserOptions.OnMissing;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.parsers.Parser;
 import io.zenwave360.sdk.utils.AntStyleMatcher;
@@ -60,7 +61,7 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
         List<URI> avroFileURIs = null;
         if(avroFiles != null && !avroFiles.isEmpty()) {
             log.info("Using {} avro files: {}", avroFiles.size(), avroFiles);
-            avroFileURIs = avroFiles.stream().map(URI::create).toList();
+            avroFileURIs = avroFiles.stream().map(this::toInputUri).toList();
         }
         else {
             avroFileURIs = collectAvscFiles(avroCompilerProperties);
@@ -76,8 +77,8 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
             $RefParser parser = new $RefParser(uri)
                     .withResourceClassLoader(this.projectClassLoader)
                     .withAuthenticationValues(authentication)
-                    .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing($RefParserOptions.OnMissing.FAIL));
-            Object schema = parser.parse().getRefs().jsonContext.json();
+                    .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing(OnMissing.FAIL));
+            Object schema = parser.parse().getRefs().schema();
             if(schema instanceof List) {
                 schemas.addAll((List<Map<String, Object>>) schema);
             } else {
@@ -91,12 +92,70 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
         return avroSchemasAsList(avroFileURIs);
     }
 
+    private URI toInputUri(String value) {
+        if (value.startsWith("classpath:") || value.startsWith("http://") || value.startsWith("https://") || value.startsWith("file:")) {
+            return URI.create(value);
+        }
+        return new File(value).toURI();
+    }
+
     protected List<URI> collectAvscFiles(AvroCompilerProperties avroCompilerProperties) throws IOException {
         return collectAvscFiles(avroCompilerProperties.sourceDirectory, avroCompilerProperties.imports, avroCompilerProperties.includes, avroCompilerProperties.excludes);
     }
 
     public List<URI> collectImportUris(List<String> imports) throws IOException {
         return collectAvscFiles(null, imports, List.of("**/*.avsc"), List.of());
+    }
+
+    /**
+     * Finds .avsc files beside a local or classpath root schema. Remote URI directories
+     * cannot be listed and therefore continue to require explicit imports.
+     */
+    public List<URI> collectSiblingUris(URI schemaUri) throws IOException {
+        List<URI> siblingUris;
+        if (schemaUri.getScheme() == null || "file".equalsIgnoreCase(schemaUri.getScheme())) {
+            Path schemaPath = schemaUri.getScheme() == null
+                    ? Paths.get(schemaUri.getPath()).toAbsolutePath().normalize()
+                    : Paths.get(schemaUri).toAbsolutePath().normalize();
+            Path parent = schemaPath.getParent();
+            if (parent == null || !Files.isDirectory(parent)) {
+                siblingUris = List.of();
+            } else {
+                try (var paths = Files.list(parent)) {
+                    siblingUris = paths
+                            .filter(Files::isRegularFile)
+                            .filter(path -> path.getFileName().toString().endsWith(".avsc"))
+                            .map(path -> path.toAbsolutePath().normalize())
+                            .filter(path -> !path.equals(schemaPath))
+                            .sorted()
+                            .map(Path::toUri)
+                            .toList();
+                }
+            }
+        } else if ("classpath".equalsIgnoreCase(schemaUri.getScheme())) {
+            String schemaResource = schemaUri.getSchemeSpecificPart().replaceFirst("^/", "");
+            int lastSlash = schemaResource.lastIndexOf('/');
+            if (lastSlash < 0) {
+                siblingUris = List.of();
+            } else {
+                String parentResource = schemaResource.substring(0, lastSlash);
+                siblingUris = collectImportUris(List.of("classpath:" + parentResource)).stream()
+                        .filter(uri -> {
+                            String resource = uri.getSchemeSpecificPart().replaceFirst("^/", "");
+                            int resourceLastSlash = resource.lastIndexOf('/');
+                            return resourceLastSlash >= 0
+                                    && parentResource.equals(resource.substring(0, resourceLastSlash))
+                                    && !schemaResource.equals(resource);
+                        })
+                        .sorted(Comparator.comparing(URI::toString))
+                        .toList();
+            }
+        } else {
+            siblingUris = List.of();
+        }
+
+        log.info("Found {} sibling avsc files for {}: {}", siblingUris.size(), schemaUri, siblingUris);
+        return siblingUris;
     }
 
     protected List<URI> collectAvscFiles(File sourceFolder, List<String> imports, List<String> includes, List<String> excludes) throws IOException {
@@ -198,13 +257,16 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
                     throw new IOException("Failed to process import: " + importPath, e);
                 }
             }
-            log.info("Found {} avsc files in imports: {}", importedURIs.size(), importedURIs);
         }
 
         // Combine local file URIs with remote URIs
         List<URI> allURIs = new ArrayList<>();
         allURIs.addAll(avscFiles.stream().map(File::toURI).toList());
         allURIs.addAll(importedURIs);
+
+        if (imports != null) {
+            log.info("Found {} avsc files in imports: {}", allURIs.size(), allURIs);
+        }
 
         return allURIs;
     }
