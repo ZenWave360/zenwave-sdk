@@ -61,7 +61,7 @@
         <asyncapi-parser-kmp.version>0.6.0</asyncapi-parser-kmp.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <dsl-jvm.version>1.8.0</dsl-jvm.version>
-        <manifest-core.version>0.9.1</manifest-core.version>
+        <manifest-core.version>1.0.0-SNAPSHOT</manifest-core.version>
         <kotlinx-coroutines.version>1.8.1</kotlinx-coroutines.version>
         <graphql-java.version>19.2</graphql-java.version>
         <google-java-format.version>1.33.0</google-java-format.version>
