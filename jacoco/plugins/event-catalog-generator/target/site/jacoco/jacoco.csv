@@ -72,7 +72,7 @@ io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,Even
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogFileWriter.new SimpleFileVisitor() {...},0,44,0,6,0,12,0,7,0,4
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogImporterGenerator.FrontmatterBlock,0,9,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogAsyncApiProcessor,138,1037,41,97,28,195,37,54,2,20
-io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogGenerator,154,3287,76,260,29,550,68,174,1,73
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogGenerator,150,3291,75,261,28,551,67,175,1,73
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogAsyncApiProcessor.MessageSelection,1,28,2,2,0,7,2,3,0,3
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogPlugin,0,65,3,3,0,8,3,2,0,2
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogOpenApiProcessor.ResponseSchemaSelection,0,12,0,0,0,5,0,1,0,1
