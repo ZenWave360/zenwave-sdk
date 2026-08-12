@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.zenwave360.manifest.BlockingZenWaveManifestLoader;
 import io.zenwave360.manifest.ManifestArtifact;
+import io.zenwave360.manifest.ManifestConsumerReference;
 import io.zenwave360.manifest.ManifestLoadOptions;
 import io.zenwave360.manifest.ManifestResolvedResource;
 import io.zenwave360.manifest.ManifestService;
@@ -21,7 +22,9 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Parses AsyncAPI artifacts declared by typed manifest services and augments the EventCatalog model
@@ -59,10 +62,13 @@ public class EventCatalogAsyncApiProcessor implements Processor {
                     eventCatalog.catalogServiceId(service), contentOptions, channelAddressIndex);
         }
 
+        Set<String> edgeManagedConsumerServices = qualifiedConsumerServiceRefs(manifest);
         for (ManifestService service : manifest.getServices()) {
-            processClientArtifact(
-                    manifestRuntime, manifest, service, eventCatalog.serviceData(service),
-                    contentOptions, channelAddressIndex);
+            if (!edgeManagedConsumerServices.contains(service.getServiceRef())) {
+                processClientArtifact(
+                        manifestRuntime, manifest, service, eventCatalog.serviceData(service),
+                        contentOptions, channelAddressIndex);
+            }
         }
 
         return contextModel;
@@ -101,6 +107,8 @@ public class EventCatalogAsyncApiProcessor implements Processor {
                     new ManifestLoadOptions(linkSource, false));
 
             Map<String, String> addressToChannelKey = new LinkedHashMap<>();
+            Map<String, Object> channelIndex = new LinkedHashMap<>();
+            eventCatalog.artifactRuntimeData(manifestService, artifact).put("channelIndex", channelIndex);
             for (Map.Entry<String, Object> channelEntry : channels.entrySet()) {
                 Map<String, Object> channel = map(channelEntry.getValue());
                 String channelKey = channelEntry.getKey();
@@ -124,19 +132,40 @@ public class EventCatalogAsyncApiProcessor implements Processor {
                     channelArtifact.put("protocols", protocols);
                 }
                 addToList(serviceData, "_channels", channelArtifact);
+
+                Map<String, Object> indexedChannel = new LinkedHashMap<>();
+                indexedChannel.put("channelKey", channelKey);
+                indexedChannel.put("channelId", channelId);
+                indexedChannel.put("messageId", channelId);
+                if (address != null) indexedChannel.put("address", address);
+                indexedChannel.put("operations", new ArrayList<Map<String, Object>>());
+                channelIndex.put(channelKey, indexedChannel);
             }
 
-            for (Object operationValue : operations.values()) {
-                Map<String, Object> operation = map(operationValue);
+            Map<String, LinkedHashSet<String>> channelActions = new LinkedHashMap<>();
+            for (Map.Entry<String, Object> operationEntry : operations.entrySet()) {
+                Map<String, Object> operation = map(operationEntry.getValue());
                 String action = str(operation, "action", null);
-                Map<String, Object> channel = resolveChannel(operation.get("channel"), channels);
-                if (action == null || channel.isEmpty()) {
+                String channelKey = resolveChannelKey(operation.get("channel"), channels, addressToChannelKey);
+                if (!("send".equals(action) || "receive".equals(action)) || channelKey == null) {
                     continue;
                 }
+                channelActions.computeIfAbsent(channelKey, ignored -> new LinkedHashSet<>()).add(action);
+                Map<String, Object> indexedChannel = map(channelIndex.get(channelKey));
+                if (!indexedChannel.isEmpty()) {
+                    Map<String, Object> indexedOperation = new LinkedHashMap<>();
+                    indexedOperation.put("operationId", operationEntry.getKey());
+                    indexedOperation.put("action", action);
+                    addToList(indexedChannel, "operations", indexedOperation);
+                }
+            }
 
-                String address = str(channel, "address", null);
-                String channelKey = addressToChannelKey.get(address);
-                if (channelKey == null) {
+            for (Map.Entry<String, Object> operationEntry : operations.entrySet()) {
+                Map<String, Object> operation = map(operationEntry.getValue());
+                String action = str(operation, "action", null);
+                String channelKey = resolveChannelKey(operation.get("channel"), channels, addressToChannelKey);
+                Map<String, Object> channel = channelKey != null ? map(channels.get(channelKey)) : Map.of();
+                if (!("send".equals(action) || "receive".equals(action)) || channelKey == null || channel.isEmpty()) {
                     continue;
                 }
 
@@ -162,15 +191,72 @@ public class EventCatalogAsyncApiProcessor implements Processor {
                     message.put("_remoteSchemaChannelMessage", messageSelection.channelMessage);
                 }
 
-                if ("send".equals(action)) {
-                    addToList(serviceData, "_events", message);
-                    addToList(serviceData, "_sends", messageId);
-                } else if ("receive".equals(action)) {
-                    addToList(serviceData, "_commands", message);
-                    addToList(serviceData, "_receives", messageId);
+                boolean eventChannel = classifyMessage(
+                        channelKey, channel, componentMessages,
+                        channelActions.getOrDefault(channelKey, new LinkedHashSet<>())) == MessageKind.EVENT;
+                addMessageById(serviceData, eventChannel ? "_events" : "_commands", message);
+                addToList(serviceData, "send".equals(action) ? "_sends" : "_receives", messageId);
+            }
+        }
+    }
+
+    private Set<String> qualifiedConsumerServiceRefs(ZenWaveManifest manifest) {
+        Set<String> result = new LinkedHashSet<>();
+        for (ManifestService provider : manifest.getServices()) {
+            for (String rawReference : provider.getConsumers()) {
+                if (!rawReference.contains("#")) continue;
+                try {
+                    ManifestConsumerReference reference = ManifestConsumerReference.parse(rawReference);
+                    ManifestService consumer = manifest.findService(reference.getServiceReference());
+                    if (consumer == null) {
+                        consumer = manifest.findService(provider.getDomainKey() + "/" + reference.getServiceReference());
+                    }
+                    if (consumer != null) result.add(consumer.getServiceRef());
+                } catch (IllegalArgumentException ignored) {
+                    // ManifestConsumerIndex reports malformed qualified references later in the chain.
                 }
             }
         }
+        return result;
+    }
+
+    /** Explicit extension, then naming convention, then provider direction. */
+    private MessageKind classifyMessage(String channelKey, Map<String, Object> channel,
+                                        Map<String, Object> componentMessages, Set<String> actions) {
+        MessageKind channelType = messageKind(channel.get("x-message-type"));
+        if (channelType != null) return channelType;
+
+        LinkedHashSet<MessageKind> messageTypes = new LinkedHashSet<>();
+        for (Object message : map(channel.get("messages")).values()) {
+            MessageKind messageType = messageKind(
+                    resolveChannelMessage(message, componentMessages).get("x-message-type"));
+            if (messageType != null) messageTypes.add(messageType);
+        }
+        if (messageTypes.size() == 1) return messageTypes.iterator().next();
+        if (messageTypes.size() > 1) {
+            log.warn("Channel {} declares conflicting x-message-type values; falling back to its name and direction",
+                    channelKey);
+        }
+
+        String normalizedKey = channelKey.toLowerCase(Locale.ROOT);
+        boolean eventName = normalizedKey.contains("event");
+        boolean commandName = normalizedKey.contains("command");
+        if (eventName != commandName) return eventName ? MessageKind.EVENT : MessageKind.COMMAND;
+        return actions.contains("send") ? MessageKind.EVENT : MessageKind.COMMAND;
+    }
+
+    private MessageKind messageKind(Object value) {
+        if (value == null) return null;
+        return switch (value.toString().trim().toLowerCase(Locale.ROOT)) {
+            case "event" -> MessageKind.EVENT;
+            case "command" -> MessageKind.COMMAND;
+            default -> null;
+        };
+    }
+
+    private enum MessageKind {
+        EVENT,
+        COMMAND
     }
 
     private void processClientArtifact(BlockingZenWaveManifestLoader manifestRuntime, ZenWaveManifest manifest,
@@ -210,14 +296,11 @@ public class EventCatalogAsyncApiProcessor implements Processor {
                 }
 
                 Map<String, String> ownerInfo = channelAddressIndex.get(address);
-                String messageId;
-                if (ownerInfo != null) {
-                    messageId = ownerInfo.get("serviceId") + "." + ownerInfo.get("channelKey");
-                } else {
-                    String channelKey = addressToChannelKey.get(address);
-                    messageId = channelKey != null ? channelKey : address;
-                    log.warn("Channel address '{}' not found in index — using fallback id '{}'", address, messageId);
+                if (ownerInfo == null) {
+                    log.warn("Legacy AsyncAPI client channel address '{}' was not found in a provider contract", address);
+                    continue;
                 }
+                String messageId = ownerInfo.get("serviceId") + "." + ownerInfo.get("channelKey");
 
                 if ("send".equals(action)) {
                     addToList(serviceData, "_sends", messageId);
@@ -266,6 +349,19 @@ public class EventCatalogAsyncApiProcessor implements Processor {
             return Map.of();
         }
         return map(channels.get(ref.substring(prefix.length())));
+    }
+
+    private String resolveChannelKey(Object channelRef, Map<String, Object> channels,
+                                     Map<String, String> addressToChannelKey) {
+        Map<String, Object> channel = map(channelRef);
+        String ref = str(channel, "$ref", null);
+        String prefix = "#/channels/";
+        if (ref != null && ref.startsWith(prefix)) {
+            String key = decodeJsonPointerSegment(ref.substring(prefix.length()));
+            return channels.containsKey(key) ? key : null;
+        }
+        String address = str(channel, "address", null);
+        return address != null ? addressToChannelKey.get(address) : null;
     }
 
     private String resolveSchemaLink(BlockingZenWaveManifestLoader manifestRuntime, ZenWaveManifest manifest, ManifestService manifestService,
@@ -398,7 +494,16 @@ public class EventCatalogAsyncApiProcessor implements Processor {
     @SuppressWarnings("unchecked")
     private <T> void addToList(Map<String, Object> map, String key, T value) {
         List<T> list = (List<T>) map.computeIfAbsent(key, k -> new ArrayList<>());
-        list.add(value);
+        if (!list.contains(value)) list.add(value);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void addMessageById(Map<String, Object> map, String key, Map<String, Object> message) {
+        List<Map<String, Object>> list = (List<Map<String, Object>>) map.computeIfAbsent(key, ignored -> new ArrayList<>());
+        String id = str(message, "id", null);
+        if (list.stream().noneMatch(existing -> id != null && id.equals(str(existing, "id", null)))) {
+            list.add(message);
+        }
     }
 
     private String str(Map<?, ?> map, String key, String defaultValue) {

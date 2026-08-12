@@ -17,13 +17,15 @@ class ArcadiaEditionsEventCatalogGeneratorTest {
             "target", "arcadia-event-catalog-output-test");
 
     @Test
-    void generatesEventCatalogContentFromHttpArchitecture() throws Exception {
+    void generatesEventCatalogContentFromArcadiaArchitecture() throws Exception {
+        String architecture = System.getProperty("arcadia.architecture", ARCHITECTURE_URL);
+        boolean workspaceArchitecture = !architecture.startsWith("http://") && !architecture.startsWith("https://");
         new MainGenerator().generate(
                 new EventCatalogPlugin()
-                        .withOption("inputFile", ARCHITECTURE_URL)
-                        .withOption("preferredSource", "git")
+                        .withOption("inputFile", architecture)
+                        .withOption("preferredSource", workspaceArchitecture ? "workspace" : "git")
                         .withOption("allowFallback", false)
-                        .withOption("linkSource", "git")
+                        .withOption("linkSource", workspaceArchitecture ? "workspace" : "git")
                         .withOption("outputFolder", OUTPUT_FOLDER.toString()));
 
         assertTrue(Files.isDirectory(OUTPUT_FOLDER), "EventCatalog output folder must be created");

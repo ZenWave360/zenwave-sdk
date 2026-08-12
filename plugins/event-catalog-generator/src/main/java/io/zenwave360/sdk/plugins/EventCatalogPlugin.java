@@ -17,8 +17,9 @@ public class EventCatalogPlugin extends Plugin {
     // 1 = EventCatalogAsyncApiProcessor   — enriches services with events/commands/sends/receives
     // 2 = EventCatalogOpenApiProcessor    — enriches services with queries
     // 3 = EventCatalogZdlProcessor        — enriches services with entities
-    // 4 = EventCatalogGenerator           — generates MDX pages
-    // 5 = EventCatalogFileWriter          — cleans output, versions service pages, writes files
+    // 4 = EventCatalogConsumerProcessor   — resolves declared consumer artifacts and operations
+    // 5 = EventCatalogGenerator           — generates MDX pages
+    // 6 = EventCatalogFileWriter          — cleans output, versions service pages, writes files
 
     @DocumentedOption(description = "Path to the zenwave-architecture.yml master file.")
     public String inputFile;
@@ -47,8 +48,9 @@ public class EventCatalogPlugin extends Plugin {
                 EventCatalogAsyncApiProcessor.class,    // 1
                 EventCatalogOpenApiProcessor.class,     // 2
                 EventCatalogZdlProcessor.class,         // 3
-                EventCatalogGenerator.class,            // 4
-                EventCatalogFileWriter.class);          // 5
+                EventCatalogConsumerProcessor.class,    // 4
+                EventCatalogGenerator.class,            // 5
+                EventCatalogFileWriter.class);          // 6
     }
 
     @Override

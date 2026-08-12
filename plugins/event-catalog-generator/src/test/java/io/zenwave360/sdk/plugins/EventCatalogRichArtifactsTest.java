@@ -94,9 +94,9 @@ class EventCatalogRichArtifactsTest {
         assertTrue(Files.readString(serviceBase.resolve("index.mdx")).contains("Owns the order lifecycle."));
 
         Map<String, Object> service = frontmatter(serviceBase.resolve("index.mdx"));
-        assertTrue(pointerIds(service.get("sends")).contains("external-order-events"),
-                "An unowned client channel should use its stable channel-key fallback");
-        assertTrue(pointerIds(service.get("receives")).contains("external-order-commands"));
+        assertFalse(pointerIds(service.get("sends")).contains("external-order-events"),
+                "A client channel without a resolved provider must not fabricate a message relationship");
+        assertFalse(pointerIds(service.get("receives")).contains("external-order-commands"));
 
         Path listOrders = serviceBase.resolve("queries/sales.orders.order-service.listOrders/index.mdx");
         Path getOrder = serviceBase.resolve("queries/sales.orders.order-service.getOrder/index.mdx");
