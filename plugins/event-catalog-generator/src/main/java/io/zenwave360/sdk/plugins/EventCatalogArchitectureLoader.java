@@ -1,6 +1,10 @@
 package io.zenwave360.sdk.plugins;
 
 import io.zenwave360.manifest.BlockingZenWaveManifestLoader;
+import io.zenwave360.manifest.BlockingManifestApiConsumptions;
+import io.zenwave360.manifest.ApiConsumptionOptions;
+import io.zenwave360.manifest.ManifestApiConsumptions;
+import io.zenwave360.manifest.ManifestLoadOptions;
 import io.zenwave360.manifest.ZenWaveManifest;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.processors.Processor;
@@ -20,6 +24,10 @@ public class EventCatalogArchitectureLoader implements Processor {
 
     @DocumentedOption(description = "URI of the zenwave-architecture.yml master file.")
     public URI inputFile;
+    @DocumentedOption(description = "Preferred artifact source for build-time content loading.")
+    public String preferredSource;
+    @DocumentedOption(description = "Allow source fallback for build-time content loading.")
+    public Boolean allowFallback;
 
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
@@ -36,9 +44,22 @@ public class EventCatalogArchitectureLoader implements Processor {
         contextModel.put("manifest", manifest);
         contextModel.put("manifestRuntime", manifestRuntime);
         contextModel.put("eventCatalog", new EventCatalogModel(manifest));
+        ManifestLoadOptions loadOptions = new ManifestLoadOptions()
+                .withPreferredSource(preferredSource)
+                .withFallback(allowFallback == null || allowFallback);
+        ManifestApiConsumptions apiConsumptions = BlockingManifestApiConsumptions.build(
+                manifest,
+                manifestRuntime.getDelegate(),
+                new ApiConsumptionOptions().withLoadOptions(loadOptions));
+        contextModel.put("apiConsumptions", apiConsumptions);
 
         manifest.getDiagnostics().forEach(diagnostic ->
                 log.warn("Manifest diagnostic [{}] at {}: {}",
+                        diagnostic.getCode(),
+                        diagnostic.getLocation(),
+                        diagnostic.getMessage()));
+        apiConsumptions.getDiagnostics().forEach(diagnostic ->
+                log.warn("API consumption diagnostic [{}] at {}: {}",
                         diagnostic.getCode(),
                         diagnostic.getLocation(),
                         diagnostic.getMessage()));

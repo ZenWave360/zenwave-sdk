@@ -21,7 +21,6 @@ final class EventCatalogModel {
     private final Map<String, Map<String, Object>> subdomainData = new LinkedHashMap<>();
     private final Map<String, Map<String, Object>> serviceData = new LinkedHashMap<>();
     private final Map<String, Map<ManifestArtifact, Map<String, Object>>> artifactData = new LinkedHashMap<>();
-    private final Map<String, Map<ManifestArtifact, Map<String, Object>>> artifactRuntimeData = new LinkedHashMap<>();
 
     EventCatalogModel(ZenWaveManifest manifest) {
         for (ManifestDomain domain : manifest.getDomains()) {
@@ -33,7 +32,6 @@ final class EventCatalogModel {
         for (ManifestService service : manifest.getServices()) {
             serviceData.put(service.getServiceRef(), new LinkedHashMap<>());
             artifactData.put(service.getServiceRef(), new LinkedHashMap<>());
-            artifactRuntimeData.put(service.getServiceRef(), new LinkedHashMap<>());
         }
     }
 
@@ -51,12 +49,6 @@ final class EventCatalogModel {
 
     Map<String, Object> artifactData(ManifestService service, ManifestArtifact artifact) {
         return artifactData
-                .computeIfAbsent(service.getServiceRef(), ignored -> new LinkedHashMap<>())
-                .computeIfAbsent(artifact, ignored -> new LinkedHashMap<>());
-    }
-
-    Map<String, Object> artifactRuntimeData(ManifestService service, ManifestArtifact artifact) {
-        return artifactRuntimeData
                 .computeIfAbsent(service.getServiceRef(), ignored -> new LinkedHashMap<>())
                 .computeIfAbsent(artifact, ignored -> new LinkedHashMap<>());
     }
