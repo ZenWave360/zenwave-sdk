@@ -1,0 +1,28 @@
+asyncapi: 3.0.0
+info:
+  title: Orders API
+  version: 1.2.0
+channels:
+  start-order-checkout-command:
+    address: orders.start.command
+    summary: Start Order Checkout Command
+    messages:
+      StartOrderCheckoutCommand:
+        payload:
+          type: object
+  order-created-event-v1:
+    address: orders.created.event.v1
+    summary: Order Created Event
+    messages:
+      OrderCreatedEvent:
+        payload:
+          type: object
+operations:
+  receiveStartOrderCheckout:
+    action: receive
+    channel:
+      $ref: '#/channels/start-order-checkout-command'
+  sendOrderCreated:
+    action: send
+    channel:
+      $ref: '#/channels/order-created-event-v1'

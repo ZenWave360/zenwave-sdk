@@ -141,6 +141,11 @@ class EventCatalogRichArtifactsTest {
                 "Local file specifications must keep using the legacy local schema viewer");
         Path command = serviceBase.resolve("commands/sales.orders.order-service.create-order/index.mdx");
         assertFalse(frontmatter(command).containsKey("schemaPath"));
+        Map<String, Object> restCommandFrontmatter = frontmatter(serviceBase.resolve(
+                "commands/sales.orders.order-service.createOrder/index.mdx"));
+        assertEquals("POST", ((Map<?, ?>) restCommandFrontmatter.get("operation")).get("method"));
+        assertFalse(frontmatter(command).containsKey("operation"),
+                "Unmodeled AsyncAPI and OpenAPI resources must not merge merely because their names are similar");
         String commandContent = Files.readString(command);
         assertFalse(commandContent.contains("RemoteSpecificationSchema"),
                 "Local inline schemas must not be passed to build-time HTTP fetching");

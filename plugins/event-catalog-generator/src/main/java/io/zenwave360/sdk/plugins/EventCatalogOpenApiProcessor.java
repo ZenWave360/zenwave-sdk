@@ -8,6 +8,7 @@ import io.zenwave360.manifest.ManifestLoadOptions;
 import io.zenwave360.manifest.ManifestResolvedResource;
 import io.zenwave360.manifest.ManifestService;
 import io.zenwave360.manifest.ZenWaveManifest;
+import io.zenwave360.manifest.graph.ArchitectureGraphIds;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.processors.Processor;
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -27,6 +29,9 @@ import java.util.Map;
  * with extracted queries and specification links.
  */
 public class EventCatalogOpenApiProcessor implements Processor {
+
+    private static final List<String> HTTP_METHODS =
+            List.of("get", "head", "post", "put", "patch", "delete");
 
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
@@ -87,38 +92,45 @@ public class EventCatalogOpenApiProcessor implements Processor {
             String specificationUrl = manifestRuntime.getDelegate().artifactReferenceUri(
                     manifest, manifestService, artifact, null,
                     new ManifestLoadOptions(linkSource, false));
+            String resolvedArtifactId = manifestRuntime.getDelegate()
+                    .artifactResolutionContext(manifest, manifestService, artifact).getArtifactId();
             for (Map.Entry<String, Object> pathEntry : paths.entrySet()) {
                 Map<String, Object> pathItem = map(pathEntry.getValue());
-                Map<String, Object> operation = map(pathItem.get("get"));
-                if (operation.isEmpty()) {
-                    continue;
+                for (String method : HTTP_METHODS) {
+                    Map<String, Object> operation = map(pathItem.get(method));
+                    if (operation.isEmpty()) continue;
+
+                    String operationId = str(operation, "operationId", null);
+                    if (operationId == null) continue;
+
+                    String operationResourceId = serviceId + "." + operationId;
+                    String name = str(operation, "summary", operationId);
+                    ResponseSchemaSelection responseSchema = selectResponseSchema(operation, componentResponses);
+                    String schemaPath = resolveSchemaLink(
+                            manifestRuntime, manifest, manifestService, artifact, responseSchema);
+
+                    Map<String, Object> candidate = new LinkedHashMap<>();
+                    candidate.put("id", operationResourceId);
+                    candidate.put("operationId", operationId);
+                    candidate.put("name", name);
+                    candidate.put("summary", str(operation, "description", str(operation, "summary", null)));
+                    candidate.put("version", version != null ? version : serviceVersion(manifestService));
+                    candidate.put("_bindingTransport", "openapi");
+                    candidate.put("_graphResourceNodeId", ArchitectureGraphIds.apiOperation(
+                            manifestService.getServiceRef(), resolvedArtifactId, operationId));
+                    candidate.put("_graphBindingTransport", "openapi");
+                    if (schemaPath != null) candidate.put("schemaPath", schemaPath);
+                    candidate.put("operation", buildOperation(method, pathEntry.getKey(), operation));
+                    if (isQueryMethod(method) && isHttpUrl(specificationUrl) && responseSchema != null) {
+                        candidate.put("_remoteSchemaUrl", specificationUrl);
+                        candidate.put("_remoteSchemaOperationId", operationId);
+                        candidate.put("_remoteSchemaOperationTarget", "response");
+                        candidate.put("_remoteSchemaStatusCode", responseSchema.statusCode);
+                        candidate.put("_remoteSchemaMediaType", responseSchema.mediaType);
+                    }
+
+                    addToList(serviceData, isQueryMethod(method) ? "_queries" : "_restCommands", candidate);
                 }
-
-                String operationId = str(operation, "operationId", null);
-                if (operationId == null) continue;
-
-                String queryId = serviceId + "." + operationId;
-                String name = str(operation, "summary", operationId);
-                ResponseSchemaSelection responseSchema = selectResponseSchema(operation, componentResponses);
-                String schemaPath = resolveSchemaLink(
-                        manifestRuntime, manifest, manifestService, artifact, responseSchema);
-
-                Map<String, Object> query = new LinkedHashMap<>();
-                query.put("id", queryId);
-                query.put("name", name);
-                query.put("summary", str(operation, "description", str(operation, "summary", null)));
-                query.put("version", version != null ? version : serviceVersion(manifestService));
-                if (schemaPath != null) query.put("schemaPath", schemaPath);
-                query.put("operation", buildOperation(pathEntry.getKey(), operation));
-                if (isHttpUrl(specificationUrl) && responseSchema != null) {
-                    query.put("_remoteSchemaUrl", specificationUrl);
-                    query.put("_remoteSchemaOperationId", operationId);
-                    query.put("_remoteSchemaOperationTarget", "response");
-                    query.put("_remoteSchemaStatusCode", responseSchema.statusCode);
-                    query.put("_remoteSchemaMediaType", responseSchema.mediaType);
-                }
-
-                addToList(serviceData, "_queries", query);
             }
         }
     }
@@ -140,15 +152,19 @@ public class EventCatalogOpenApiProcessor implements Processor {
         }
     }
 
-    private Map<String, Object> buildOperation(String path, Map<String, Object> operation) {
+    private Map<String, Object> buildOperation(String method, String path, Map<String, Object> operation) {
         Map<String, Object> result = new LinkedHashMap<>();
-        result.put("method", "GET");
+        result.put("method", method.toUpperCase(Locale.ROOT));
         result.put("path", path);
         List<String> statusCodes = new ArrayList<>(map(operation.get("responses")).keySet());
         if (!statusCodes.isEmpty()) {
             result.put("statusCodes", statusCodes);
         }
         return result;
+    }
+
+    private boolean isQueryMethod(String method) {
+        return "get".equals(method) || "head".equals(method);
     }
 
     @SuppressWarnings("unchecked")

@@ -1,0 +1,56 @@
+config:
+  version: 1.2.0
+  contentResolution:
+    - workspace
+  sources:
+    workspace:
+      basePathExpression: "."
+
+domains:
+  architecture:
+    id: architecture
+    name: Architecture
+    repository: "."
+    artifacts:
+      - artifactId: place-order-flow
+        type: zfl
+        path: flows/place-order.zfl
+        version: 1.2.0
+
+  orders:
+    id: orders
+    name: Orders
+    services:
+      checkout:
+        id: orders.checkout
+        name: Orders Checkout
+        repository: "."
+        version: 1.2.0
+        artifacts:
+          - artifactId: orders-model
+            type: zdl
+            path: orders/domain-model.zdl
+            version: 1.2.0
+          - artifactId: orders-asyncapi
+            type: asyncapi
+            path: orders/asyncapi.yml
+            version: 1.2.0
+
+  payments:
+    id: payments
+    name: Payments
+    services:
+      processing:
+        id: payments.processing
+        name: Payments Processing
+        repository: "."
+        version: 1.2.0
+        artifacts:
+          - artifactId: payments-model
+            type: zdl
+            path: payments/domain-model.zdl
+            version: 1.2.0
+          - artifactId: payments-asyncapi
+            type: asyncapi
+            path: payments/asyncapi.yml
+            version: 1.2.0

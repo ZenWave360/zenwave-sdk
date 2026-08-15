@@ -6,7 +6,9 @@ import io.zenwave360.manifest.ManifestService;
 import io.zenwave360.manifest.ManifestSubdomain;
 import io.zenwave360.manifest.ZenWaveManifest;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,6 +23,7 @@ final class EventCatalogModel {
     private final Map<String, Map<String, Object>> subdomainData = new LinkedHashMap<>();
     private final Map<String, Map<String, Object>> serviceData = new LinkedHashMap<>();
     private final Map<String, Map<ManifestArtifact, Map<String, Object>>> artifactData = new LinkedHashMap<>();
+    private final List<Map<String, Object>> flows = new ArrayList<>();
 
     EventCatalogModel(ZenWaveManifest manifest) {
         for (ManifestDomain domain : manifest.getDomains()) {
@@ -53,6 +56,14 @@ final class EventCatalogModel {
                 .computeIfAbsent(artifact, ignored -> new LinkedHashMap<>());
     }
 
+    void addFlow(Map<String, Object> flow) {
+        flows.add(flow);
+    }
+
+    List<Map<String, Object>> flows() {
+        return List.copyOf(flows);
+    }
+
     String catalogServiceId(ManifestService service) {
         return service.getId().equals(service.getServiceKey())
                 ? service.getServiceRef().replace('/', '.')
@@ -63,6 +74,29 @@ final class EventCatalogModel {
         return subdomain.getId().equals(subdomain.getKey())
                 ? domain.getId() + "." + subdomain.getId()
                 : subdomain.getId();
+    }
+
+    String effectiveServiceVersion(ManifestService service) {
+        Object enrichedVersion = serviceData(service).get("_version");
+        if (enrichedVersion != null && !enrichedVersion.toString().isBlank()) {
+            return enrichedVersion.toString();
+        }
+        String documentVersion = service.documentVersion();
+        return documentVersion != null && !documentVersion.isBlank() ? documentVersion : "0.0.1";
+    }
+
+    @SuppressWarnings("unchecked")
+    Map<String, Object> operation(ManifestService service, String graphOperationId) {
+        Object raw = serviceData(service).get("_operations");
+        if (!(raw instanceof List<?> operations)) return null;
+        for (Object candidate : operations) {
+            if (!(candidate instanceof Map<?, ?> map)) continue;
+            Object id = map.get("graphOperationId");
+            if (id != null && id.toString().equals(graphOperationId)) {
+                return (Map<String, Object>) map;
+            }
+        }
+        return null;
     }
 
     private String subdomainKey(ManifestDomain domain, ManifestSubdomain subdomain) {

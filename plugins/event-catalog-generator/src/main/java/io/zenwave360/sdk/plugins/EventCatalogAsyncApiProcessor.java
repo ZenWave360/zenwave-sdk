@@ -14,6 +14,7 @@ import io.zenwave360.manifest.ManifestLoadOptions;
 import io.zenwave360.manifest.ManifestResolvedResource;
 import io.zenwave360.manifest.ManifestService;
 import io.zenwave360.manifest.ZenWaveManifest;
+import io.zenwave360.manifest.graph.ArchitectureGraphIds;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.processors.Processor;
 import org.slf4j.Logger;
@@ -102,10 +103,14 @@ public class EventCatalogAsyncApiProcessor implements Processor {
         String specificationUrl = manifestRuntime.getDelegate().artifactReferenceUri(
                 manifest, manifestService, artifact, null,
                 new ManifestLoadOptions(linkSource, false));
+        String resolvedArtifactId = manifestRuntime.getDelegate()
+                .artifactResolutionContext(manifest, manifestService, artifact).getArtifactId();
 
         for (AsyncApiChannel typedChannel : channelIndex.getChannels().values()) {
             String channelKey = typedChannel.getChannelKey();
             String channelId = serviceId + "." + channelKey;
+            String graphResourceNodeId = ArchitectureGraphIds.channel(
+                    manifestService.getServiceRef(), resolvedArtifactId, channelKey);
             Map<String, Object> channel = map(channels.get(channelKey));
 
             Map<String, Object> channelArtifact = new java.util.LinkedHashMap<>();
@@ -115,6 +120,8 @@ public class EventCatalogAsyncApiProcessor implements Processor {
                     ? typedChannel.getDescription()
                     : typedChannel.getSummary());
             channelArtifact.put("version", version != null ? version : serviceVersion(manifestService));
+            channelArtifact.put("_graphResourceNodeId", graphResourceNodeId);
+            channelArtifact.put("_graphBindingTransport", "asyncapi");
             if (typedChannel.getAddress() != null) channelArtifact.put("address", typedChannel.getAddress());
             if (!channelIndex.getProtocols().isEmpty()) channelArtifact.put("protocols", channelIndex.getProtocols());
             addToList(serviceData, "_channels", channelArtifact);
@@ -129,6 +136,11 @@ public class EventCatalogAsyncApiProcessor implements Processor {
                         : typedChannel.getSummary());
                 message.put("version", version != null ? version : serviceVersion(manifestService));
                 message.put("channelId", channelId);
+                message.put("_bindingTransport", "asyncapi");
+                message.put("_bindingRole", typedChannel.getMessageKind() == AsyncApiMessageKind.EVENT
+                        ? "emission" : "invocation");
+                message.put("_graphResourceNodeId", graphResourceNodeId);
+                message.put("_graphBindingTransport", "asyncapi");
 
                 MessageSelection messageSelection = resolveMessageSelection(operation, channel, channelKey, componentMessages);
                 String schemaPath = resolveSchemaLink(

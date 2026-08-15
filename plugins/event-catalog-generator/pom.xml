@@ -24,6 +24,11 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>io.zenwave360.manifest</groupId>
+            <artifactId>manifest-graph-jvm</artifactId>
+            <version>${manifest-core.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>

@@ -19,6 +19,7 @@ import io.zenwave360.sdk.plugins.frontmatter.FrontmatterTypes;
 import io.zenwave360.sdk.plugins.frontmatter.DomainFrontmatter;
 import io.zenwave360.sdk.plugins.frontmatter.EntityFrontmatter;
 import io.zenwave360.sdk.plugins.frontmatter.EventFrontmatter;
+import io.zenwave360.sdk.plugins.frontmatter.FlowFrontmatter;
 import io.zenwave360.sdk.plugins.frontmatter.QueryFrontmatter;
 import io.zenwave360.sdk.plugins.frontmatter.ServiceFrontmatter;
 import io.zenwave360.sdk.templating.TemplateInput;
@@ -59,6 +60,7 @@ public class EventCatalogGenerator extends Generator {
     private static final String COMMAND_TEMPLATE = TEMPLATES_ROOT + "/command.mdx";
     private static final String QUERY_TEMPLATE = TEMPLATES_ROOT + "/query.mdx";
     private static final String ENTITY_TEMPLATE = TEMPLATES_ROOT + "/entity.mdx";
+    private static final String FLOW_TEMPLATE = TEMPLATES_ROOT + "/flow.mdx";
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -117,6 +119,17 @@ public class EventCatalogGenerator extends Generator {
                         domainFrontmatter(subdomainId, subdomain, configVersion, subdomainServices, List.of()),
                         domainBody(SUBDOMAIN_TEMPLATE, subdomain, subdomainServices, List.of(), "")));
             }
+        }
+
+        // Domain-owned and cross-domain business flows
+        for (Map<String, Object> flow : eventCatalog.flows()) {
+            String flowId = str(flow, "id", null);
+            String domainId = str(flow, "domainId", null);
+            if (flowId == null || domainId == null) continue;
+            files.singleFiles.add(mdxPage(
+                    "domains/" + domainId + "/flows/" + flowId + "/index.mdx",
+                    flowFrontmatter(flow),
+                    flowBody(flow)));
         }
 
         // Services, events, and commands
@@ -295,6 +308,21 @@ public class EventCatalogGenerator extends Generator {
                 null);
     }
 
+    @SuppressWarnings("unchecked")
+    private Frontmatter flowFrontmatter(Map<String, Object> flow) {
+        return new FlowFrontmatter(
+                commonFrontmatter(
+                        flow,
+                        str(flow, "id", null),
+                        str(flow, "name", str(flow, "id", null)),
+                        str(flow, "version", "0.0.1"),
+                        str(flow, "summary", null),
+                        null,
+                        null),
+                (List<FrontmatterTypes.FlowStepFrontmatter>) flow.getOrDefault("steps", List.of()),
+                null);
+    }
+
     // -------------------------------------------------------------------------
     // Docs rendering
     // -------------------------------------------------------------------------
@@ -347,6 +375,10 @@ public class EventCatalogGenerator extends Generator {
         model.put("apiConsumers", apiConsumers);
         model.put("docsBody", docsBody);
         return renderBodyTemplate(SERVICE_TEMPLATE, model);
+    }
+
+    private String flowBody(Map<String, Object> flow) {
+        return renderBodyTemplate(FLOW_TEMPLATE, Map.of("flow", flow));
     }
 
     /**
