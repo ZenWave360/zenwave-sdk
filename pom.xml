@@ -60,7 +60,7 @@
         <json-schema-ref-parser-kmp.version>0.9.23</json-schema-ref-parser-kmp.version>
         <asyncapi-parser-kmp.version>0.6.0</asyncapi-parser-kmp.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
-        <dsl-jvm.version>1.8.0</dsl-jvm.version>
+        <dsl-jvm.version>1.9.0-SNAPSHOT</dsl-jvm.version>
         <manifest-core.version>1.0.0-SNAPSHOT</manifest-core.version>
         <kotlinx-coroutines.version>1.8.1</kotlinx-coroutines.version>
         <graphql-java.version>19.2</graphql-java.version>
