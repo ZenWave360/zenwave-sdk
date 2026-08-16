@@ -8,8 +8,7 @@ import io.zenwave360.sdk.doc.DocumentedPlugin;
         title = "Event Catalog Generator",
         summary = "Generates an EventCatalog source tree from a zenwave-architecture.yml master file.",
         mainOptions = {"inputFile", "outputFolder", "docsTemplate"},
-        hiddenOptions = {"layout", "apiFile", "apiFiles", "zdlFile", "zdlFiles", "style", "targetFolder",
-                "preferredSource", "allowFallback", "linkSource", "publishInternalOperations"})
+        hiddenOptions = {"layout", "apiFile", "apiFiles", "zdlFile", "zdlFiles", "style"})
 public class EventCatalogPlugin extends Plugin {
 
     // Chain:
