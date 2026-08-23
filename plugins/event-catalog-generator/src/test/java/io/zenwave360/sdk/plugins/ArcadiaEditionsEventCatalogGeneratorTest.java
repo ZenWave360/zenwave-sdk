@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.zenwave360.sdk.MainGenerator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,6 +25,8 @@ class ArcadiaEditionsEventCatalogGeneratorTest {
             "target", "arcadia-event-catalog-output-test");
 
     @Test
+    @EnabledIfSystemProperty(named = "arcadia.integration", matches = "true",
+            disabledReason = "Manual test: depends on the external Arcadia Editions architecture")
     void generatesEventCatalogContentFromArcadiaArchitecture() throws Exception {
         String architecture = System.getProperty("arcadia.architecture", ARCHITECTURE_URL);
         boolean workspaceArchitecture = !architecture.startsWith("http://") && !architecture.startsWith("https://");

@@ -6,7 +6,8 @@ Use this file as an index for finding the changes included in each published ver
 
 ## Releases
 
-- [2.6.0](release-notes/release-notes.v2.6.0.md) - Unreleased
+- [2.7.0](release-notes/release-notes.v2.7.0.md) - Unreleased
+- [2.6.0](release-notes/release-notes.v2.6.0.md)
 - [2.5.3](release-notes/release-notes.v2.5.3.md) - 2026-06-20
 - [2.5.2](release-notes/release-notes.v2.5.2.md) - 2026-06-02
 - [2.5.1](release-notes/release-notes.v2.5.1.md) - 2026-05-14

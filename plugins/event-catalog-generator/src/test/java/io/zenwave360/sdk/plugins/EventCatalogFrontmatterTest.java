@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.zenwave360.sdk.MainGenerator;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -21,10 +22,13 @@ class EventCatalogFrontmatterTest {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
 
+    @BeforeAll
+    static void generateCatalogOnce() throws Exception {
+        runGenerator();
+    }
+
     @Test
     void generatesStructuredDomainAndServiceFrontmatter() throws Exception {
-        runGenerator();
-
         Map<String, Object> domain = readFrontmatter("domains/merchandising/subdomains/merchandising.inventory/index.mdx");
         assertEquals("merchandising.inventory", domain.get("id"));
         assertTrue(domain.containsKey("services"));
@@ -49,8 +53,6 @@ class EventCatalogFrontmatterTest {
 
     @Test
     void generatesEnrichedQueryEntityAndChannelFrontmatter() throws Exception {
-        runGenerator();
-
         Map<String, Object> query = readFrontmatter("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/queries/merchandising.inventory.inventory-adjustment.getInventoryItem/index.mdx");
         assertEquals("Returns a single inventory item by SKU", query.get("summary"));
         Map<String, Object> operation = asMap(query.get("operation"));
@@ -84,8 +86,6 @@ class EventCatalogFrontmatterTest {
 
     @Test
     void generatesAstroReferencesForMessageParticipants() throws Exception {
-        runGenerator();
-
         Map<String, Object> event = readFrontmatter("domains/customer-relationship/subdomains/customer-relationship.customer-management/services/customer-relationship.customer-management.customer-profile/events/customer-relationship.customer-management.customer-profile.customer-profile-updated/index.mdx");
         assertTrue(asStringList(event.get("producers")).contains("customer-relationship.customer-management.customer-profile-1.0.0"));
         assertTrue(event.get("schemaPath").toString().startsWith("https://raw.githubusercontent.com/ZenWave360/zenwave-sdk/develop/"));
@@ -103,7 +103,7 @@ class EventCatalogFrontmatterTest {
                 "A remote AsyncAPI message must have exactly one schema viewer usage");
     }
 
-    private void runGenerator() throws Exception {
+    private static void runGenerator() throws Exception {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())

@@ -1,0 +1,34 @@
+config {
+    basePackage "io.zenwave360.example.payments"
+}
+
+@aggregate
+entity Payment {
+    paymentId String required
+    orderId String required
+}
+
+input AuthorizePaymentInput {
+    paymentId String required
+    orderId String required
+}
+
+service PaymentsService for (Payment) {
+    authorizePayment(AuthorizePaymentInput) Payment withEvents PaymentAuthorized
+    declinePayment(AuthorizePaymentInput) Payment withEvents [PaymentDeclined | PaymentVoided]
+}
+
+event PaymentAuthorized {
+    paymentId String
+    orderId String
+}
+
+event PaymentDeclined {
+    paymentId String
+    orderId String
+}
+
+event PaymentVoided {
+    paymentId String
+    orderId String
+}

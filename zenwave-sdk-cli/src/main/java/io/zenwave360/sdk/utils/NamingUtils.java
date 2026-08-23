@@ -10,7 +10,7 @@ public class NamingUtils {
     }
 
     public static String asJavaTypeName(String name) {
-        return RegExUtils.removePattern(camelCase(name), "^(\\d+)");
+        return RegExUtils.removePattern((CharSequence) camelCase(name), "^(\\d+)");
     }
 
     public static String asInstanceName(String name) {

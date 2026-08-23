@@ -69,38 +69,22 @@
 						<addTestCompileSourceRoot>true</addTestCompileSourceRoot>
 					</configuration>
 					<executions>
-						<!-- DTOs -->
-						<execution>
-							<id>generate-asyncapi-provider-dtos</id>
-							<phase>generate-sources</phase>
-							<goals>
-								<goal>generate</goal>
-							</goals>
-							<configuration>
-								<inputSpec>${project.basedir}/src/main/resources/apis/asyncapi.yml</inputSpec>
-								<generatorName>jsonschema2pojo</generatorName>
-								<configOptions>
-									<modelPackage>${basePackage}.core.outbound.events.dtos</modelPackage>
-									<jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
-									<jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
-                                    <generatedAnnotationClass>org.springframework.aot.generate.Generated</generatedAnnotationClass>
-								</configOptions>
-							</configuration>
-						</execution>
-						<!-- Generate PROVIDER -->
+						<!-- Generate PROVIDER (including DTOs) -->
 						<execution>
 							<id>generate-asyncapi-provider-implementation</id>
 							<phase>generate-sources</phase>
 							<goals><goal>generate</goal></goals>
 							<configuration>
-								<generatorName>spring-cloud-streams3</generatorName>
+								<inputSpec>${project.basedir}/src/main/resources/apis/asyncapi.yml</inputSpec>
+								<generatorName>AsyncAPIGenerator</generatorName>
 								<configOptions>
-									<inputSpec>${project.basedir}/src/main/resources/apis/asyncapi.yml</inputSpec>
 									<role>provider</role>
-									<style>imperative</style>
+									<templates>SpringCloudStream</templates>
 									<modelPackage>${basePackage}.core.outbound.events.dtos</modelPackage>
 									<producerApiPackage>${basePackage}.core.outbound.events</producerApiPackage>
 									<consumerApiPackage>${basePackage}.adapters.commands</consumerApiPackage>
+									<jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
+									<jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
                                     <generatedAnnotationClass>org.springframework.aot.generate.Generated</generatedAnnotationClass>
 								</configOptions>
 							</configuration>
@@ -109,12 +93,7 @@
 					<dependencies>
 						<dependency>
 							<groupId>io.zenwave360.sdk.plugins</groupId>
-							<artifactId>asyncapi-spring-cloud-streams3</artifactId>
-							<version>${zenwave.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>io.zenwave360.sdk.plugins</groupId>
-							<artifactId>asyncapi-jsonschema2pojo</artifactId>
+							<artifactId>asyncapi-generator</artifactId>
 							<version>${zenwave.version}</version>
 						</dependency>
 					</dependencies>

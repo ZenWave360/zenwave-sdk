@@ -10,6 +10,8 @@ import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 import io.zenwave360.sdk.zdl.model.JavaZdlModel;
 import io.zenwave360.sdk.zdl.utils.ZDLAnnotator;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
+import io.zenwave360.sdk.zdl.utils.ZDLListenerUtils;
+import io.zenwave360.sdk.utils.Maps;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -67,7 +69,7 @@ public class ZDLProjectGenerator extends AbstractZDLGenerator {
             }
         }
 
-        // include all events not annotated with @asyncapi
+        // @asyncapi payload DTOs are generated from the AsyncAPI contract by asyncapi-generator.
         domainEvents.addAll((List) JSONPath.get(apiModel, "$.events[*][?(!@.options.asyncapi && !@.options.embedded)]", List.of()));
         // include all events referenced by fields
         JSONPath.get(new ArrayList(domainEvents), "$..fields[*].type", List.of()).stream()
@@ -198,6 +200,37 @@ public class ZDLProjectGenerator extends AbstractZDLGenerator {
             }
         }
 
+
+        // @listener groups: one per referenced zdl api, one per service for same-module bindings.
+        // Resolved only when the plugin registered listener templates, so other generators never pay
+        // the resolution/validation cost.
+        if (templates.shouldGenerateListeners() && !templates.listenersByApiTemplates.isEmpty()) {
+            ClassLoader projectClassLoader = configuration != null ? configuration.getProjectClassLoader() : null;
+            Map<String, Object> listenerOptions = new LinkedHashMap<>(asConfigurationMap());
+            // A processed layout here belongs to the consuming module. Keep only the raw CLI layout
+            // overrides; the referenced ZDL selects and processes its own ProjectLayout.
+            listenerOptions.remove("layout");
+            if (configuration != null) {
+                Maps.deepMerge(listenerOptions, Maps.copy(configuration.getOptions()));
+            }
+            for (Map<String, Object> listenerGroup : ZDLListenerUtils.listenerGroups(
+                    apiModel, projectClassLoader, listenerOptions)) {
+                Map<String, Object> listenerTemplateModel = new LinkedHashMap<>();
+                listenerTemplateModel.put("listenerGroup", listenerGroup);
+                String apiId = (String) listenerGroup.get("apiId");
+                if (configuration != null && apiId != null && !apiId.isBlank()) {
+                    Map<String, Object> layoutOptions = Maps.copy(configuration.getOptions());
+                    layoutOptions.put("apiId", apiId);
+                    ProjectLayout listenerLayout = configuration.layout.processedLayout(layoutOptions);
+                    listenerTemplateModel.put("apiId", apiId);
+                    listenerTemplateModel.put("layout", listenerLayout.asMap());
+                }
+                for (TemplateInput template : templates.listenersByApiTemplates) {
+                    generatedProjectFiles.listeners.addAll((String) listenerGroup.get("name"),
+                            generateTemplateOutput(contextModel, template, listenerTemplateModel));
+                }
+            }
+        }
 
         for (TemplateInput template : templates.singleTemplates) {
             generatedProjectFiles.singleFiles.addAll(generateTemplateOutput(contextModel, template, Collections.emptyMap()));

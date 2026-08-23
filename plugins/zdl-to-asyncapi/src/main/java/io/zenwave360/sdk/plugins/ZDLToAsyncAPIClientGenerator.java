@@ -1,10 +1,11 @@
 package io.zenwave360.sdk.plugins;
 
+import org.apache.commons.lang3.Strings;
+
 import static io.zenwave360.sdk.utils.NamingUtils.asJavaTypeName;
 import static io.zenwave360.sdk.utils.NamingUtils.humanReadable;
 import static io.zenwave360.sdk.utils.NamingUtils.kebabCase;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
-import static org.apache.commons.lang3.StringUtils.removeEnd;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 import java.net.URI;
@@ -74,7 +75,7 @@ public class ZDLToAsyncAPIClientGenerator extends AbstractZDLGenerator {
 
         var serviceTitle = serviceTitle(model);
         var serviceName = serviceName(model);
-        var asyncApiServiceName = removeEnd(serviceName, "Service");
+        var asyncApiServiceName = Strings.CS.removeEnd(serviceName, "Service");
         return Maps.of(
                 "id",
                 firstNonNull(trimToNull(id), "urn:arcadiaeditions:asyncapi:" + kebabCase(asyncApiServiceName) + ":client"),
@@ -148,8 +149,8 @@ public class ZDLToAsyncAPIClientGenerator extends AbstractZDLGenerator {
 
     private void putOperation(Map<String, Object> operations, ConsumedChannel consumedChannel, boolean duplicateChannel) {
         var operationName = duplicateChannel
-                ? "on" + removeEnd(asJavaTypeName(consumedChannel.apiName), "Api") + asJavaTypeName(consumedChannel.methodName)
-                : "on" + removeEnd(asJavaTypeName(consumedChannel.channelName), "Channel");
+                ? "on" + Strings.CS.removeEnd(asJavaTypeName(consumedChannel.apiName), "Api") + asJavaTypeName(consumedChannel.methodName)
+                : "on" + Strings.CS.removeEnd(asJavaTypeName(consumedChannel.channelName), "Channel");
         if (operations.containsKey(operationName)) {
             throw new IllegalArgumentException("Duplicate AsyncAPI client operation name: " + operationName);
         }
@@ -168,7 +169,7 @@ public class ZDLToAsyncAPIClientGenerator extends AbstractZDLGenerator {
         if (configTitle != null) {
             return configTitle;
         }
-        return asTitle(removeEnd(serviceName(model), "Service"));
+        return asTitle(Strings.CS.removeEnd(serviceName(model), "Service"));
     }
 
     private String asTitle(String value) {

@@ -37,6 +37,7 @@ public class TestMonolithClinicalProject {
             "idType", "integer",
             "idTypeFormat", "int64",
             "useLombok", true,
+            "implementEventListeners", true,
             "includeEmitEventsImplementation", false,
             "haltOnFailFormatting", false
     );

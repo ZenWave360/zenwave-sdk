@@ -163,7 +163,7 @@ public class JavaZdlModel {
         var parameterType = (String) method.get("parameter");
         var parameterEntity = (Map) JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + parameterType);
         if(JSONPath.get(method, "parameter") != null) {
-            var isInline = JSONPath.get(parameterEntity, "$.options.inline", false);
+            var isInline = Boolean.TRUE.equals(JSONPath.get(parameterEntity, "$.options.inline", false));
             var fields = (Map<String, Map>) JSONPath.get(parameterEntity, "$.fields");
             if (isInline && fields != null && !fields.isEmpty()) {
                 for (var field : fields.values()) {

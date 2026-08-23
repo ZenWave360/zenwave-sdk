@@ -229,7 +229,27 @@ Use: "jbang zw -p <plugin | short-code> -h" to get help on a specific plugin
 
 You can include any **custom plugin** jars in the `--deps` option.
 
-JBang will use you maven settings for repository resolution, but you can also specify a custom maven repository in the `--repos` option.
+`--deps` is resolved by ZenWave using JBang's Maven resolver. Extra repositories come from, in order:
+
+1. `zw --repos` / `-r` (`id=url` or a JBang alias such as `central`)
+2. Silent JBang defaults: `run.repos` or `repos` in `jbang.properties` (project directory walking up, then `~/.jbang/jbang.properties`)
+3. Maven Central and Sonatype snapshots
+
+`~/.m2/settings.xml` is used for **credentials** (matching the repository id), not for extra repository URLs.
+
+To use GitHub Packages without passing `--repos` on every command:
+
+```shell
+jbang config set run.repos central,github=https://maven.pkg.github.com/OWNER/REPO
+```
+
+Or drop a project-local `jbang.properties` next to your `.zw` scripts:
+
+```properties
+run.repos=central,github=https://maven.pkg.github.com/OWNER/REPO
+```
+
+GitHub Packages requires authentication even for public packages. Use a `~/.m2/settings.xml` `<server>` whose `<id>` matches the repo id (`github` in the examples above), or `GITHUB_TOKEN` / `~/.netrc` host auth for `maven.pkg.github.com`.
 
 
 NOTE: it will list any available plugin, standard or custom, inside any of these root java packages "io", "com" or "org".

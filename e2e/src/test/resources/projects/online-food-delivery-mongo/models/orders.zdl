@@ -38,33 +38,22 @@ config {
             openApiModelNameSuffix DTO
         }
 
-        SpringCloudStreams3AdaptersPlugin {
-            apiId "restaurants"
-            role client
-            specFile "modules/restaurants/src/main/resources/apis/asyncapi.yml"
-            modelPackage "{{basePackage}}.client.{{apiId}}.events.dtos"
-            consumerApiPackage "{{basePackage}}.client.{{apiId}}.events.consumer"
-        }
-        SpringCloudStreams3AdaptersPlugin {
-            apiId "delivery"
-            role client
-            specFile "modules/delivery/src/main/resources/apis/asyncapi.yml"
-            modelPackage "{{basePackage}}.client.{{apiId}}.events.dtos"
-            consumerApiPackage "{{basePackage}}.client.{{apiId}}.events.consumer"
-        }
-
     }
 }
 
 apis {
     asyncapi(provider) default {
-        uri "orders/src/main/resources/apis/asyncapi.yml"
+        uri "../modules/orders/src/main/resources/apis/asyncapi.yml"
     }
     asyncapi(client) RestaurantsAsyncAPI {
-        uri "restaurants/src/main/resources/apis/asyncapi.yml"
+        uri "../modules/restaurants/src/main/resources/apis/asyncapi.yml"
+        modelPackage "{{basePackage}}.adapters.events.restaurants.dtos"
+        consumerApiPackage "{{basePackage}}.adapters.events.restaurants"
     }
     asyncapi(client) DeliveryAsyncAPI {
-        uri "delivery/src/main/resources/apis/asyncapi.yml"
+        uri "../modules/delivery/src/main/resources/apis/asyncapi.yml"
+        modelPackage "{{basePackage}}.adapters.events.delivery.dtos"
+        consumerApiPackage "{{basePackage}}.adapters.events.delivery"
     }
 }
 

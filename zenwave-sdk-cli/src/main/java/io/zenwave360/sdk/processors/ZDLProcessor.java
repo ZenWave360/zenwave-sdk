@@ -3,7 +3,7 @@ package io.zenwave360.sdk.processors;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
 import io.zenwave360.sdk.zdl.model.JavaZdlModel;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -198,12 +198,12 @@ public class ZDLProcessor extends AbstractBaseProcessor {
             relationshipMap.put("isMapsIdParent", isMapsId || isMapsIdLegacy);
             relationshipMap.put("isCollection", relationship.get("type").toString().endsWith("Many"));
             if(relationship.get("injectedFieldInFrom") != null) {
-                var fillInjectedFieldInFrom = StringUtils.replace((String) relationship.get("injectedFieldInFrom"), ")","").split("\\(");
+                var fillInjectedFieldInFrom = Strings.CS.replace((String) relationship.get("injectedFieldInFrom"), ")","").split("\\(");
                 relationshipMap.put("fieldName", fillInjectedFieldInFrom[0]);
                 relationshipMap.put("required", relationship.getOrDefault("isInjectedFieldInFromRequired", false));
             }
             if(relationship.get("injectedFieldInTo") != null) {
-                var fillInjectedFieldInFrom = StringUtils.replace((String) relationship.get("injectedFieldInTo"), ")","").split("\\(");
+                var fillInjectedFieldInFrom = Strings.CS.replace((String) relationship.get("injectedFieldInTo"), ")","").split("\\(");
                 relationshipMap.put("otherEntityFieldName", fillInjectedFieldInFrom[0]);
             }
         } else {
@@ -215,12 +215,12 @@ public class ZDLProcessor extends AbstractBaseProcessor {
             relationshipMap.put("mapsId", isMapsId);
             relationshipMap.put("isCollection", relationship.get("type").toString().startsWith("Many"));
             if(relationship.get("injectedFieldInTo") != null) {
-                var fillInjectedFieldInFrom = StringUtils.replace((String) relationship.get("injectedFieldInTo"), ")","").split("\\(");
+                var fillInjectedFieldInFrom = Strings.CS.replace((String) relationship.get("injectedFieldInTo"), ")","").split("\\(");
                 relationshipMap.put("fieldName", fillInjectedFieldInFrom[0]);
                 relationshipMap.put("required", relationship.getOrDefault("isInjectedFieldInToRequired", false));
             }
             if(relationship.get("injectedFieldInFrom") != null) {
-                var fillInjectedFieldInFrom = StringUtils.replace((String) relationship.get("injectedFieldInFrom"), ")","").split("\\(");
+                var fillInjectedFieldInFrom = Strings.CS.replace((String) relationship.get("injectedFieldInFrom"), ")","").split("\\(");
                 relationshipMap.put("otherEntityFieldName", fillInjectedFieldInFrom[0]);
             }
         }

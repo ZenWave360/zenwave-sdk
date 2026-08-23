@@ -39,8 +39,13 @@ service DocumentService for (DocumentInfo) {
 
     @post({path: "/upload", status: 201})
     @fileupload("file")
-    uploadDocument(DocumentInfo) DocumentInfo
+    uploadDocument(DocumentInfo) DocumentInfo withEvents DocumentSignatureRequested
 
     @delete({path: "/{id}", status: 204})
     deleteDocumentInfo(id)
+}
+
+event DocumentSignatureRequested {
+    patientId Long
+    documentInfoId Long
 }

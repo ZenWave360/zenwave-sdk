@@ -77,7 +77,7 @@ public class HexagonalProjectLayout extends ProjectLayout {
         adaptersWebMappersPackage = "{{adaptersWebPackage}}.mappers";
         adaptersCommandsPackage = "{{adaptersPackage}}.commands";
         adaptersCommandsMappersPackage = "{{adaptersCommandsPackage}}.mappers";
-        adaptersEventsPackage = "{{adaptersPackage}}.events";
+        adaptersEventsPackage = "{{adaptersPackage}}.events{{#if apiId}}.{{apiId}}{{/if}}";
         adaptersEventsMappersPackage = "{{adaptersEventsPackage}}.mappers";
 
         // openapi generated packages

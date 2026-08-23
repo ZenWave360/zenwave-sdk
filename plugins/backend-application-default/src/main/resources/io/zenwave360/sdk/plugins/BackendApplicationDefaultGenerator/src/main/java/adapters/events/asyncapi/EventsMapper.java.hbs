@@ -1,0 +1,26 @@
+package {{layout.adaptersEventsPackage}};
+
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.TimeZone;
+import org.mapstruct.factory.Mappers;
+
+/**
+ * Regenerated mapping contract containing only mappings proven safe by the adapter planner.
+ */
+public interface EventsMapper {
+
+    EventsMapper INSTANCE = Mappers.getMapper(EventsMapStructMapper.class);
+
+{{#each generatedMappings as |mapping|}}
+    {{mapping.targetType}} {{mapping.mapperMethodName}}({{mapping.sourceType}} event);
+{{/each}}
+
+    default Instant asInstant(OffsetDateTime date) {
+        return date != null ? date.toInstant() : null;
+    }
+
+    default OffsetDateTime asOffsetDateTime(Instant date) {
+        return date != null ? OffsetDateTime.ofInstant(date, TimeZone.getTimeZone("UTC").toZoneId()) : null;
+    }
+}

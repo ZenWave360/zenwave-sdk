@@ -1,0 +1,21 @@
+config {}
+
+@aggregate
+entity Order {
+    orderNumber String required
+}
+
+input OrderCreatedInput {
+    orderNumber String required
+}
+
+service OrdersService for (Order) {
+    createOrder(Order) Order withEvents OrderCreated
+
+    @listener({event: OrderCreated})
+    handleOrderCreatedWithMapping(OrderCreatedInput)
+}
+
+event OrderCreated {
+    orderNumber String required
+}

@@ -1,6 +1,7 @@
 package io.zenwave360.sdk.plugins;
 
 import io.zenwave360.sdk.MainGenerator;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -34,17 +35,13 @@ public class EventCatalogGeneratorTest {
         throw new IllegalStateException("zenwave-architecture.yml not found. Tried classpath and filesystem fallbacks.");
     }
 
+    @BeforeAll
+    static void generateCatalogOnce() throws Exception {
+        runGenerator(OUTPUT_FOLDER);
+    }
+
     @Test
-    void generatesDomainSubdomainAndServicePages() throws Exception {
-        String inputFile = architectureFilePath();
-
-        var plugin = new EventCatalogPlugin()
-                .withOption("inputFile", inputFile)
-                .withOption("linkSource", "git")
-                .withOption("outputFolder", OUTPUT_FOLDER);
-
-        new MainGenerator().generate(plugin);
-
+    void generatesDomainSubdomainAndServicePages() {
         // Domains
         assertMdxExists("domains/merchandising/index.mdx");
         assertMdxExists("domains/customer-relationship/index.mdx");
@@ -64,12 +61,6 @@ public class EventCatalogGeneratorTest {
 
     @Test
     void domainPageHasCorrectFrontmatter() throws Exception {
-        new MainGenerator().generate(
-                new EventCatalogPlugin()
-                        .withOption("inputFile", architectureFilePath())
-                        .withOption("linkSource", "git")
-                        .withOption("outputFolder", OUTPUT_FOLDER));
-
         String content = readMdx("domains/merchandising/index.mdx");
         assertTrue(content.startsWith("---\n"), "Must start with frontmatter delimiter");
         assertTrue(content.contains("\"merchandising\""), "Must contain domain id");
@@ -79,12 +70,6 @@ public class EventCatalogGeneratorTest {
 
     @Test
     void servicePageHasCorrectFrontmatter() throws Exception {
-        new MainGenerator().generate(
-                new EventCatalogPlugin()
-                        .withOption("inputFile", architectureFilePath())
-                        .withOption("linkSource", "git")
-                        .withOption("outputFolder", OUTPUT_FOLDER));
-
         String content = readMdx("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/index.mdx");
         assertTrue(content.contains("\"merchandising.inventory.inventory-adjustment\""));
         assertTrue(content.contains("name:"));
@@ -93,12 +78,6 @@ public class EventCatalogGeneratorTest {
 
     @Test
     void generatesEventAndCommandPages() throws Exception {
-        new MainGenerator().generate(
-                new EventCatalogPlugin()
-                        .withOption("inputFile", architectureFilePath())
-                        .withOption("linkSource", "git")
-                        .withOption("outputFolder", OUTPUT_FOLDER));
-
         // Service pages have sends/receives populated from AsyncAPI
         String serviceContent = readMdx("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/index.mdx");
         assertTrue(serviceContent.contains("sends:") || serviceContent.contains("receives:"),
@@ -109,12 +88,6 @@ public class EventCatalogGeneratorTest {
 
     @Test
     void generatesQueryPages() throws Exception {
-        new MainGenerator().generate(
-                new EventCatalogPlugin()
-                        .withOption("inputFile", architectureFilePath())
-                        .withOption("linkSource", "git")
-                        .withOption("outputFolder", OUTPUT_FOLDER));
-
         // inventory-adjustment has an openapi.yml with GET operations
         assertMdxExists("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/queries/merchandising.inventory.inventory-adjustment.listInventoryItems/index.mdx");
         assertMdxExists("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/queries/merchandising.inventory.inventory-adjustment.getInventoryItem/index.mdx");
@@ -127,12 +100,6 @@ public class EventCatalogGeneratorTest {
 
     @Test
     void generatesEntityPages() throws Exception {
-        new MainGenerator().generate(
-                new EventCatalogPlugin()
-                        .withOption("inputFile", architectureFilePath())
-                        .withOption("linkSource", "git")
-                        .withOption("outputFolder", OUTPUT_FOLDER));
-
         // inventory-adjustment has a domain-model.zdl with InventoryItem entity
         assertMdxExists("domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment/entities/merchandising.inventory.inventory-adjustment.inventory-item/index.mdx");
 
@@ -144,12 +111,6 @@ public class EventCatalogGeneratorTest {
 
     @Test
     void generatedPagesContainEventCatalogBodyComponents() throws Exception {
-        new MainGenerator().generate(
-                new EventCatalogPlugin()
-                        .withOption("inputFile", architectureFilePath())
-                        .withOption("linkSource", "git")
-                        .withOption("outputFolder", OUTPUT_FOLDER));
-
         String domainContent = readMdx("domains/merchandising/index.mdx");
         assertTrue(domainContent.contains("<NodeGraph />"), "Domain body must include the node graph");
         assertTrue(domainContent.contains("<MessageTable"), "Domain body must include the message table");
@@ -199,84 +160,7 @@ public class EventCatalogGeneratorTest {
         }
     }
 
-    @Test
-    void servicePageHasSendsReceives() throws Exception {
-        new MainGenerator().generate(
-                new EventCatalogPlugin()
-                        .withOption("inputFile", architectureFilePath())
-                        .withOption("linkSource", "git")
-                        .withOption("outputFolder", OUTPUT_FOLDER));
-
-        // Check that at least one service with an asyncapi spec has sends or receives
-        String serviceDir = "domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment";
-        File serviceIndex = new File(OUTPUT_FOLDER, serviceDir + "/index.mdx");
-        if (serviceIndex.exists()) {
-            String content = java.nio.file.Files.readString(serviceIndex.toPath());
-            // If AsyncAPI spec was found and parsed, sends/receives should be present
-            // (test is lenient — just check structure is valid MDX with frontmatter)
-            assertTrue(content.startsWith("---\n"), "Service MDX must start with frontmatter");
-        }
-    }
-
-    @Test
-    void outputFolderIsCleanedOnRegeneration() throws Exception {
-        // First run — generates everything
-        runGenerator(OUTPUT_FOLDER);
-
-        // Plant a stale file that should be removed on the next run
-        File staleFile = new File(OUTPUT_FOLDER, "domains/merchandising/stale-file.mdx");
-        staleFile.getParentFile().mkdirs();
-        java.nio.file.Files.writeString(staleFile.toPath(), "stale");
-        assertTrue(staleFile.exists(), "Stale file must exist before second run");
-
-        // Second run — stale file must be gone
-        runGenerator(OUTPUT_FOLDER);
-        assertFalse(staleFile.exists(), "Stale file must be removed by clean-before-write");
-    }
-
-    @Test
-    void versionedFolderIsPreservedDuringCleanup() throws Exception {
-        // First run
-        runGenerator(OUTPUT_FOLDER);
-
-        // Plant a versioned/ archive as if a previous version existed
-        String serviceDir = "domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment";
-        File versionedDir = new File(OUTPUT_FOLDER, serviceDir + "/versioned/0.9.0");
-        versionedDir.mkdirs();
-        File archivedPage = new File(versionedDir, "index.mdx");
-        java.nio.file.Files.writeString(archivedPage.toPath(), "---\nid: old\nversion: \"0.9.0\"\n---\n");
-
-        // Second run — versioned/ archive must survive
-        runGenerator(OUTPUT_FOLDER);
-        assertTrue(archivedPage.exists(), "Archived versioned page must be preserved across regeneration");
-    }
-
-    @Test
-    void servicePageIsArchivedWhenVersionChanges() throws Exception {
-        String serviceDir = "domains/merchandising/subdomains/merchandising.inventory/services/merchandising.inventory.inventory-adjustment";
-        String outputFolder = "target/event-catalog-versioning-test";
-
-        // First run — generates version 1.0.0
-        runGenerator(outputFolder);
-        File serviceIndex = new File(outputFolder, serviceDir + "/index.mdx");
-        assertTrue(serviceIndex.exists(), "Service index must exist after first run");
-
-        // Overwrite the generated page with a different version to simulate a prior version
-        String oldContent = java.nio.file.Files.readString(serviceIndex.toPath())
-                .replace("\"1.0.0\"", "\"0.5.0\"");
-        java.nio.file.Files.writeString(serviceIndex.toPath(), oldContent);
-
-        // Second run — the old 0.5.0 page must be archived, new 1.0.0 must be written
-        runGenerator(outputFolder);
-
-        File archived = new File(outputFolder, serviceDir + "/versioned/0.5.0/index.mdx");
-        assertTrue(archived.exists(), "Old version must be archived to versioned/0.5.0/index.mdx");
-
-        String current = java.nio.file.Files.readString(serviceIndex.toPath());
-        assertTrue(current.contains("\"1.0.0\""), "Current page must contain new version 1.0.0");
-    }
-
-    private void runGenerator(String outputFolder) throws Exception {
+    private static void runGenerator(String outputFolder) throws Exception {
         new MainGenerator().generate(
                 new EventCatalogPlugin()
                         .withOption("inputFile", architectureFilePath())

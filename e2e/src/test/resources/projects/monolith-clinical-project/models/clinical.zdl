@@ -5,6 +5,10 @@ config {
     layout CleanHexagonalProjectLayout
 }
 
+apis {
+    zdl client DocumentsModule "documents.zdl"
+}
+
 @aggregate
 entity Hospital {
     name String required unique maxlength(254)
@@ -241,7 +245,7 @@ service PatientsService for (Patient, ProvisionalPatient) {
     @entityForId(Patient)
     requestOptOut(id)
 
-    @listener({model: "models/documents.zdl", event: DocumentSignatureRequested})
+    @listener(zdl: DocumentsModule, event: DocumentSignatureRequested)
     associateDocumentWithPatient(DocumentSignatureRequestedInput)
 }
 

@@ -1,10 +1,10 @@
 package io.zenwave360.sdk.plugins;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
-import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.plugins.annotators.AnnotationHelper;
 import io.zenwave360.sdk.plugins.annotators.JSpecifyAnnotator;
+import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.CleanArchitectureProjectLayout;
@@ -33,6 +33,13 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
     public PersistenceType persistence = PersistenceType.mongodb;
 
     public boolean includeEmitEventsImplementation = true;
+
+    public boolean implementEventListeners = false;
+
+    @Override
+    public boolean shouldGenerateListeners() {
+        return implementEventListeners;
+    }
 
     protected Function<Map<String, Object>, Boolean> skipEntityRepository = (model) -> is(model, "persistence") // if polyglot persistence -> skip
             || !(is(model, "aggregate") || is(model, "lifecycle") || ZDLFindUtils.isAggregateRoot(JSONPath.get(model, "zdl"), JSONPath.get(model, "$.entity.name")));
@@ -76,6 +83,8 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
     protected Function<Map<String, Object>, Boolean> skipInput = (model) -> is(model, "inline");
 
     protected Function<Map<String, Object>,Boolean> skipModulith = (model) -> !useSpringModulith;
+    protected Function<Map<String, Object>,Boolean> skipListenerMappers = (model) ->
+            JSONPath.get(model, "$.listenerGroup.mapperBindings", List.of()).isEmpty();
     protected Function<Map<String, Object>,Boolean> skipModulithCommonModule = (model) ->
         !useSpringModulith || layout.commonPackage.equals(layout.moduleBasePackage);
 
@@ -83,15 +92,6 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
 
     protected Function<Map<String, Object>,Boolean> skipInfrastructurePackageInfo = (model) ->
             layout.moduleBasePackage.equals(layout.infrastructurePackage);
-
-    @Override
-    public List<Object> getTemplateHelpers(Generator generator) {
-        var helpers = new ArrayList<>(super.getTemplateHelpers(generator));
-        helpers.add(new BackendApplicationDefaultHelpers((BackendApplicationDefaultGenerator) generator));
-        helpers.add(new BackendApplicationDefaultJpaHelpers((BackendApplicationDefaultGenerator) generator));
-        helpers.add(AnnotationHelper.class);
-        return helpers;
-    }
 
     @Override
     public List<ZDLAnnotator> getZDLAnnotators() {
@@ -103,6 +103,8 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
     }
 
     public BackendApplicationProjectTemplates() {
+        addTemplateHelpers(null, AnnotationHelper.class);
+
         setTemplatesFolder("io/zenwave360/sdk/plugins/BackendApplicationDefaultGenerator");
 
         var layoutNames = new ProjectLayout(); // layoutNames
@@ -152,6 +154,24 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
                 layoutNames.inboundPackage, "{{service.name}}.java", JAVA, null, false);
         this.addTemplate(this.serviceTemplates, "src/main/java", "core/implementation/{{style}}/ServiceImpl.java",
                 layoutNames.coreImplementationPackage, "{{service.name}}Impl.java", JAVA, null, true);
+        this.addTemplate(this.listenersByApiTemplates, "src/main/java", "adapters/events/EventListeners.java",
+                layoutNames.adaptersEventsPackage, "{{listenerGroup.className}}.java", JAVA, null, true);
+        this.addTemplate(this.listenersByApiTemplates, "src/main/java", "adapters/events/EventListenersMapper.java",
+                layoutNames.adaptersEventsMappersPackage, "{{listenerGroup.className}}Mapper.java", JAVA, skipListenerMappers, false);
+        this.addTemplate(this.listenersByApiTemplates, "src/main/java", "adapters/events/EventListenersMapStructMapper.java",
+                layoutNames.adaptersEventsMappersPackage, "{{listenerGroup.className}}MapStructMapper.java", JAVA, skipListenerMappers, true);
+        this.asyncApiAdapterByApiTemplates.add(new TemplateInput(
+                joinPath(getTemplatesFolder(), "src/main/java", "adapters/events/asyncapi/EventsMapper.java"),
+                "{{asyncapiAdaptersModulePrefix}}src/main/java/" + layoutNames.adaptersEventsPackage + "/EventsMapper.java",
+                JAVA));
+        this.asyncApiAdapterByApiTemplates.add(new TemplateInput(
+                joinPath(getTemplatesFolder(), "src/main/java", "adapters/events/asyncapi/EventsMapStructMapper.java"),
+                "{{asyncapiAdaptersModulePrefix}}src/main/java/" + layoutNames.adaptersEventsPackage + "/EventsMapStructMapper.java",
+                JAVA).withSkipOverwrite(true));
+        this.asyncApiAdapterByChannelTemplates.add(new TemplateInput(
+                joinPath(getTemplatesFolder(), "src/main/java", "adapters/events/asyncapi/imperative/ConsumerService.java"),
+                "{{asyncapiAdaptersModulePrefix}}src/main/java/" + layoutNames.adaptersEventsPackage + "/{{consumerServiceName}}.java",
+                JAVA).withSkipOverwrite(true));
         this.addTemplate(this.singleTemplates, "src/main/java", "core/implementation/mappers/BaseMapper.java",
                 layoutNames.coreImplementationMappersCommonPackage, "BaseMapper.java", JAVA, null, true);
         this.addTemplate(this.serviceTemplates, "src/main/java", "core/implementation/mappers/ServiceMapper.java",

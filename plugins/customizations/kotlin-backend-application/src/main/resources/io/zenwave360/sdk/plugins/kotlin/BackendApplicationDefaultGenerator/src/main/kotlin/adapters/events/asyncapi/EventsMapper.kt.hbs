@@ -1,0 +1,24 @@
+package {{layout.adaptersEventsPackage}}
+
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import org.mapstruct.factory.Mappers
+
+/**
+ * Regenerated mapping contract containing only mappings proven safe by the adapter planner.
+ */
+interface EventsMapper {
+
+    companion object {
+        val INSTANCE: EventsMapper = Mappers.getMapper(EventsMapStructMapper::class.java)
+    }
+
+{{#each generatedMappings as |mapping|}}
+    fun {{mapping.mapperMethodName}}(event: {{mapping.sourceType}}): {{mapping.targetType}}
+{{/each}}
+
+    fun asInstant(date: OffsetDateTime?): Instant? = date?.toInstant()
+
+    fun asOffsetDateTime(date: Instant?): OffsetDateTime? = date?.atOffset(ZoneOffset.UTC)
+}

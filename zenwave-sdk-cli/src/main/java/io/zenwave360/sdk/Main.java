@@ -30,7 +30,7 @@ public class Main implements Callable<Integer> {
     @Option(names = {"-d", "--deps"}, split = ",", description = "Dependencies to include in classpath")
     List<String> deps;
 
-    @Option(names = {"-r", "--repos"}, split = ",", description = "Repositories to search for extra dependencies")
+    @Option(names = {"-r", "--repos"}, split = ",", description = "Extra Maven repositories for --deps (id=url). Also reads JBang run.repos / repos from jbang.properties")
     List<String> repos;
 
     @Option(names = {"-f", "--force"}, description = "Force overwrite", defaultValue = "false")

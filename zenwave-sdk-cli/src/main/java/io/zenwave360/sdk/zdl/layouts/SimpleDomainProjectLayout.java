@@ -61,7 +61,7 @@ public class SimpleDomainProjectLayout extends ProjectLayout {
         adaptersWebMappersPackage = "{{adaptersWebPackage}}.mappers";
         adaptersCommandsPackage = "{{adaptersPackage}}";
         adaptersCommandsMappersPackage = "{{adaptersCommandsPackage}}.mappers";
-        adaptersEventsPackage = "{{adaptersPackage}}";
+        adaptersEventsPackage = "{{adaptersPackage}}{{#if apiId}}.{{apiId}}{{/if}}";
         adaptersEventsMappersPackage = "{{adaptersEventsPackage}}.mappers";
 
         // openapi generated packages

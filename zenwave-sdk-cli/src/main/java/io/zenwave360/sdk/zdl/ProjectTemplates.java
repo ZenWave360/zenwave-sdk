@@ -67,8 +67,33 @@ public class ProjectTemplates {
         return options;
     }
 
+    /**
+     * Helpers keyed by generator type. A {@code null} key means generic helpers available to every
+     * generator that uses this {@code ProjectTemplates} instance.
+     */
+    private final Map<Class<? extends Generator>, List<Object>> templateHelpers = new LinkedHashMap<>();
+
+    /**
+     * Registers a helper for {@code generatorType} and its subclasses.
+     * Pass {@code null} for generic helpers shared by every generator using these templates.
+     */
+    public void addTemplateHelpers(Class<? extends Generator> generatorType, Object helper) {
+        templateHelpers.computeIfAbsent(generatorType, key -> new ArrayList<>()).add(helper);
+    }
+
+    /**
+     * Returns helpers registered for {@code generator}'s type (or a superclass) plus generic helpers
+     * registered with a {@code null} generator type.
+     */
     public List<Object> getTemplateHelpers(Generator generator) {
-        return List.of();
+        var helpers = new ArrayList<Object>();
+        for (var entry : templateHelpers.entrySet()) {
+            Class<? extends Generator> type = entry.getKey();
+            if (type == null || (generator != null && type.isInstance(generator))) {
+                helpers.addAll(entry.getValue());
+            }
+        }
+        return helpers;
     }
 
     public List<ZDLAnnotator> getZDLAnnotators() { return List.of(); }
@@ -85,6 +110,23 @@ public class ProjectTemplates {
     public List<TemplateInput> eventEnumTemplates = new ArrayList<>();
     public List<TemplateInput> outputTemplates = new ArrayList<>();
     public List<TemplateInput> serviceTemplates = new ArrayList<>();
+
+    /** Applied once per {@code @listener} group (one group per referenced zdl api, one per service for same-module bindings). */
+    public List<TemplateInput> listenersByApiTemplates = new ArrayList<>();
+
+    /** Applied once per referenced AsyncAPI after its consumer mappings have been planned. */
+    public List<TemplateInput> asyncApiAdapterByApiTemplates = new ArrayList<>();
+
+    /** Applied once per consumed AsyncAPI channel after its operations have been planned. */
+    public List<TemplateInput> asyncApiAdapterByChannelTemplates = new ArrayList<>();
+
+    /**
+     * Whether listener templates should be evaluated. Generators that expose listener implementation
+     * as an option override this independently from their other framework-specific options.
+     */
+    public boolean shouldGenerateListeners() {
+        return true;
+    }
 
     public List<TemplateInput> externalEventsTemplates = new ArrayList<>();
     public List<TemplateInput> producerTemplates = new ArrayList<>();

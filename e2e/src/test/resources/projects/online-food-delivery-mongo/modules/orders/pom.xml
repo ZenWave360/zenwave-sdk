@@ -12,8 +12,8 @@
 
     <properties>
         <basePackage>io.zenwave360.example.orders</basePackage><!-- used by openapi and asyncapi plugins in parent -->
-        <asyncapiRestaurantsClientPackage>${basePackage}.client.restaurants</asyncapiRestaurantsClientPackage>
-        <asyncapiDeliveryClientPackage>${basePackage}.client.delivery</asyncapiDeliveryClientPackage>
+        <asyncapiRestaurantsClientPackage>${basePackage}.adapters.events.restaurants</asyncapiRestaurantsClientPackage>
+        <asyncapiDeliveryClientPackage>${basePackage}.adapters.events.delivery</asyncapiDeliveryClientPackage>
     </properties>
 
     <build>
@@ -26,12 +26,6 @@
                     <!-- Generates AsyncAPI PROVIDER (own API) -->
                     <!-- (Config is inherited from parent) -->
                     <execution>
-                        <id>generate-asyncapi-provider-dtos</id>
-                        <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/apis/asyncapi.yml</inputSpec>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>generate-asyncapi-provider-implementation</id>
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/apis/asyncapi.yml</inputSpec>
@@ -40,68 +34,44 @@
 
                     <!-- Generate AsyncAPI CLIENT for Restaurants API -->
                     <execution>
-                        <id>generate-asyncapi-restaurants-dtos</id>
-                        <phase>generate-sources</phase>
-                        <goals><goal>generate</goal></goals>
-                        <configuration>
-                            <inputSpec>${project.basedir}/../restaurants/src/main/resources/apis/asyncapi.yml</inputSpec>
-                            <generatorName>jsonschema2pojo</generatorName>
-                            <configOptions>
-                                <modelPackage>${asyncapiRestaurantsClientPackage}.events.dtos</modelPackage>
-                                <jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
-                                <jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
-                            </configOptions>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>generate-asyncapi-restaurants-client</id>
                         <phase>generate-sources</phase>
                         <goals><goal>generate</goal></goals>
                         <configuration>
                             <inputSpec>${project.basedir}/../restaurants/src/main/resources/apis/asyncapi.yml</inputSpec>
-                            <generatorName>spring-cloud-streams3</generatorName>
+                            <generatorName>AsyncAPIGenerator</generatorName>
                             <configOptions>
                                 <role>client</role>
-                                <style>imperative</style>
-                                <bindingPrefix>restaurants_</bindingPrefix>
+                                <templates>SpringCloudStream</templates>
+                                <componentPrefix>restaurants_</componentPrefix>
                                 <operationIds>onKitchenOrderStatusUpdated</operationIds>
-                                <modelPackage>${asyncapiRestaurantsClientPackage}.events.dtos</modelPackage>
-                                <producerApiPackage>${asyncapiRestaurantsClientPackage}.events.producer</producerApiPackage>
-                                <consumerApiPackage>${asyncapiRestaurantsClientPackage}.events.consumer</consumerApiPackage>
+                                <modelPackage>${asyncapiRestaurantsClientPackage}.dtos</modelPackage>
+                                <producerApiPackage>${asyncapiRestaurantsClientPackage}.producer</producerApiPackage>
+                                <consumerApiPackage>${asyncapiRestaurantsClientPackage}</consumerApiPackage>
+                                <jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
+                                <jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
                             </configOptions>
                         </configuration>
                     </execution>
 
                     <!-- Generate AsyncAPI CLIENT for Delivery API -->
                     <execution>
-                        <id>generate-asyncapi-delivery-dtos</id>
-                        <phase>generate-sources</phase>
-                        <goals><goal>generate</goal></goals>
-                        <configuration>
-                            <inputSpec>${project.basedir}/../delivery/src/main/resources/apis/asyncapi.yml</inputSpec>
-                            <generatorName>jsonschema2pojo</generatorName>
-                            <configOptions>
-                                <modelPackage>${asyncapiDeliveryClientPackage}.events.dtos</modelPackage>
-                                <jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
-                                <jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
-                            </configOptions>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>generate-asyncapi-delivery-client</id>
                         <phase>generate-sources</phase>
                         <goals><goal>generate</goal></goals>
                         <configuration>
                             <inputSpec>${project.basedir}/../delivery/src/main/resources/apis/asyncapi.yml</inputSpec>
-                            <generatorName>spring-cloud-streams3</generatorName>
+                            <generatorName>AsyncAPIGenerator</generatorName>
                             <configOptions>
                                 <role>client</role>
-                                <style>imperative</style>
-                                <bindingPrefix>delivery_</bindingPrefix>
+                                <templates>SpringCloudStream</templates>
+                                <componentPrefix>delivery_</componentPrefix>
                                 <operationIds>onDeliveryStatusUpdated</operationIds>
-                                <modelPackage>${asyncapiDeliveryClientPackage}.events.dtos</modelPackage>
-                                <producerApiPackage>${asyncapiDeliveryClientPackage}.events.producer</producerApiPackage>
-                                <consumerApiPackage>${asyncapiDeliveryClientPackage}.events.consumer</consumerApiPackage>
+                                <modelPackage>${asyncapiDeliveryClientPackage}.dtos</modelPackage>
+                                <producerApiPackage>${asyncapiDeliveryClientPackage}.producer</producerApiPackage>
+                                <consumerApiPackage>${asyncapiDeliveryClientPackage}</consumerApiPackage>
+                                <jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
+                                <jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
                             </configOptions>
                         </configuration>
                     </execution>

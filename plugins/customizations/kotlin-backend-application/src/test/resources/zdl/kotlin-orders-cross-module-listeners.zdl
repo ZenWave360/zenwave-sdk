@@ -1,0 +1,40 @@
+config {
+    basePackage "io.zenwave360.example.orders"
+}
+
+apis {
+    zdl client PaymentsProcessingZdl "kotlin-payments-processing.zdl"
+}
+
+@aggregate
+entity Order {
+    orderId String required
+}
+
+input PaymentAuthorized {
+    orderId String required
+}
+
+input CancelOrderInput {
+    orderId String required
+}
+
+input OrderConfirmedInput {
+    orderId String required
+}
+
+service OrdersService for (Order) {
+    @listener(zdl: PaymentsProcessingZdl, event: PaymentAuthorized)
+    confirmOrder(PaymentAuthorized) Order withEvents OrderConfirmed
+
+    @listener(zdl: PaymentsProcessingZdl, event: PaymentDeclined)
+    @listener(zdl: PaymentsProcessingZdl, event: PaymentVoided)
+    cancelOrder(CancelOrderInput) Order
+
+    @listener({event: OrderConfirmed})
+    handleOrderConfirmed(OrderConfirmedInput)
+}
+
+event OrderConfirmed {
+    orderId String
+}

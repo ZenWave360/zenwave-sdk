@@ -96,10 +96,6 @@ public class MainGenerator {
             if(templates instanceof ProjectTemplates projectTemplates) {
                 mapper.updateValue(templates, options);
                 projectTemplates.setLayout(layout);
-                if (plugin instanceof Generator generator) {
-                    projectTemplates.getTemplateHelpers(generator)
-                            .forEach(helper -> generator.getTemplateEngine().registerHelpers(helper));
-                }
             }
         }
 
@@ -111,6 +107,14 @@ public class MainGenerator {
             plugin.getClass().getMethod("onPropertiesSet").invoke(plugin);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             // ignore
+        }
+
+        if (templatesField != null && plugin instanceof Generator generator) {
+            var templates = templatesField.get(plugin);
+            if (templates instanceof ProjectTemplates projectTemplates) {
+                projectTemplates.getTemplateHelpers(generator)
+                        .forEach(helper -> generator.getTemplateEngine().registerHelpers(helper));
+            }
         }
     }
 

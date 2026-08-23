@@ -1,11 +1,9 @@
 package io.zenwave360.sdk.plugins;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
-import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -30,14 +28,5 @@ public class OpenAPIControllersTemplates extends ProjectTemplates {
                 layoutNames.adaptersWebPackage, "{{serviceName}}ApiController.java", JAVA, null, false);
         this.addTemplate(this.serviceTemplates, "src/test/java", "web/{{webFlavor}}/ServiceApiControllerTest.java",
                 layoutNames.adaptersWebPackage, "{{serviceName}}ApiControllerTest.java", JAVA, skipControllerTests, true);
-
-    }
-
-    @Override
-    public List<Object> getTemplateHelpers(Generator generator) {
-        if (generator instanceof OpenAPIControllersGenerator) {
-            return List.of(new OpenAPIControllersHelpers(((OpenAPIControllersGenerator) generator).openApiModelNamePrefix, ((OpenAPIControllersGenerator) generator).openApiModelNameSuffix));
-        }
-        throw new RuntimeException("OpenAPIControllersTemplates only supports OpenAPIControllersGenerator");
     }
 }

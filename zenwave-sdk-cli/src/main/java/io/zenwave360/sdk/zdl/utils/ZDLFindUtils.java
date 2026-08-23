@@ -3,7 +3,7 @@ package io.zenwave360.sdk.zdl.utils;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,7 +28,7 @@ public class ZDLFindUtils {
         var returnType = (String) method.get("returnType");
         var service = JSONPath.get(zdl, "$.services." + method.get("serviceName"));
         var aggregates = JSONPath.get(service, "aggregates", Collections.emptyList());
-        if(aggregates.size() == 1 && StringUtils.equals(returnType, aggregates.get(0).toString())) {
+        if(aggregates.size() == 1 && Strings.CS.equals(returnType, aggregates.get(0).toString())) {
             return JSONPath.get(zdl, "$.entities." + returnType);
         }
         return null;
