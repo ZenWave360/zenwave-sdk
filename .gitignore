@@ -25,6 +25,9 @@ local.properties
 .settings/
 .loadpath
 .factorypath
+.codex
+.serena
+.vscode
 
 # External tool builders
 .externalToolBuilders/
