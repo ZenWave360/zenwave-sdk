@@ -259,7 +259,7 @@ public abstract class AbstractAsyncapiGenerator extends Generator {
         if (bindingTypes == null || bindingTypes.isEmpty()) {
             return true;
         }
-        Map<String, Object> bindings = ObjectUtils.defaultIfNull((Map<String, Object>) operation.get("bindings"), Collections.emptyMap());
+        Map<String, Object> bindings = ObjectUtils.getIfNull((Map<String, Object>) operation.get("bindings"), Collections.emptyMap());
         Set<String> bindingNames = bindings.keySet();
         for (String bindingName : bindingNames) {
             if (bindingTypes.contains(bindingName)) {

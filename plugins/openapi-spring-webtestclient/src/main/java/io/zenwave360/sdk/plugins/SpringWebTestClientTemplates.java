@@ -1,11 +1,8 @@
 package io.zenwave360.sdk.plugins;
 
-import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
-
-import java.util.List;
 
 import static io.zenwave360.sdk.templating.OutputFormatType.JAVA;
 
@@ -54,13 +51,5 @@ public class SpringWebTestClientTemplates extends ProjectTemplates {
                 .withTargetFile(joinPath("src/test/java", "{{asPackageFolder testsPackage}}/{{serviceName}}/{{asJavaTypeName operationId}}{{testSuffix}}.java"))
                 .withMimeType(JAVA)
                 .withSkipOverwrite(false);
-    }
-
-    @Override
-    public List<Object> getTemplateHelpers(Generator generator) {
-        if (generator instanceof SpringWebTestClientGenerator gen) {
-            return List.of(new SpringWebTestClientHelpers(gen.openApiModelNamePrefix, gen.openApiModelNameSuffix));
-        }
-        throw new RuntimeException("SpringWebTestClientTemplates only supports SpringWebTestClientGenerator");
     }
 }

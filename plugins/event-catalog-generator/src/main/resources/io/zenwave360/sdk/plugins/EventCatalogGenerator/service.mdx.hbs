@@ -16,5 +16,13 @@
 
 The linked specifications in the frontmatter drive EventCatalog reference views for this service.
 
-{{~/if}}{{~#if docsBody}}{{{docsBody}}}
-{{~/if}}
+{{/if}}{{#if hasApiConsumers}}
+## Declared API consumers
+
+{{#each apiConsumers}}
+- `{{this}}`
+{{/each}}
+
+{{/if}}{{#if docsBody}}
+{{{docsBody}}}
+{{/if}}

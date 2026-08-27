@@ -77,6 +77,8 @@ public class SpringWebTestClientGenerator extends AbstractOpenAPIGenerator {
                 this.baseTestClassPackage = testsPackage;
             }
         }
+        templates.addTemplateHelpers(SpringWebTestClientGenerator.class,
+                new SpringWebTestClientHelpers(openApiModelNamePrefix, openApiModelNameSuffix));
         templates.getTemplateHelpers(this)
                 .forEach(helper -> handlebarsEngine.getHandlebars().registerHelpers(helper));
     }

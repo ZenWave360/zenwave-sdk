@@ -94,9 +94,9 @@ class EventCatalogRichArtifactsTest {
         assertTrue(Files.readString(serviceBase.resolve("index.mdx")).contains("Owns the order lifecycle."));
 
         Map<String, Object> service = frontmatter(serviceBase.resolve("index.mdx"));
-        assertTrue(pointerIds(service.get("sends")).contains("external-order-events"),
-                "An unowned client channel should use its stable channel-key fallback");
-        assertTrue(pointerIds(service.get("receives")).contains("external-order-commands"));
+        assertFalse(pointerIds(service.get("sends")).contains("external-order-events"),
+                "A client channel without a resolved provider must not fabricate a message relationship");
+        assertFalse(pointerIds(service.get("receives")).contains("external-order-commands"));
 
         Path listOrders = serviceBase.resolve("queries/sales.orders.order-service.listOrders/index.mdx");
         Path getOrder = serviceBase.resolve("queries/sales.orders.order-service.getOrder/index.mdx");
@@ -141,6 +141,11 @@ class EventCatalogRichArtifactsTest {
                 "Local file specifications must keep using the legacy local schema viewer");
         Path command = serviceBase.resolve("commands/sales.orders.order-service.create-order/index.mdx");
         assertFalse(frontmatter(command).containsKey("schemaPath"));
+        Map<String, Object> restCommandFrontmatter = frontmatter(serviceBase.resolve(
+                "commands/sales.orders.order-service.createOrder/index.mdx"));
+        assertEquals("POST", ((Map<?, ?>) restCommandFrontmatter.get("operation")).get("method"));
+        assertFalse(frontmatter(command).containsKey("operation"),
+                "Unmodeled AsyncAPI and OpenAPI resources must not merge merely because their names are similar");
         String commandContent = Files.readString(command);
         assertFalse(commandContent.contains("RemoteSpecificationSchema"),
                 "Local inline schemas must not be passed to build-time HTTP fetching");

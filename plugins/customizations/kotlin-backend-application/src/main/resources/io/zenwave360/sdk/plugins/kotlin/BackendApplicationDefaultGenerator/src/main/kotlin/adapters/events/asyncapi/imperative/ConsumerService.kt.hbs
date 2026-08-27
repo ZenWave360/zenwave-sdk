@@ -1,0 +1,35 @@
+package {{layout.adaptersEventsPackage}}
+
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Component
+
+/**
+ * Developer-owned AsyncAPI adapter. This file is generated once.
+ */
+@Component
+class {{consumerServiceName}}(
+{{#each serviceDependencies as |dependency|}}
+    private val {{dependency.serviceVariable}}: {{dependency.serviceType}}{{#unless @last}},{{/unless}}
+{{/each}}
+) : {{consumerServiceInterfaceType}} {
+
+    private val log: Logger = LoggerFactory.getLogger(javaClass)
+{{#if hasGeneratedMappings}}
+    private val eventsMapper: EventsMapper = EventsMapper.INSTANCE
+{{/if}}
+
+{{#each operations as |operation|}}
+{{#each operation.adapterMessages as |message|}}
+    override fun {{message.x--adapterMethodName}}(payload: {{message.x--adapterJavaType}}, headers: {{message.x--adapterHeadersType}}) {
+        log.debug("Received command request for {{message.x--adapterMethodName}}: {} with headers {}", payload, headers)
+    {{~#if operation.adapterPlan.generated}}
+        {{operation.adapterPlan.serviceVariable}}.{{operation.adapterPlan.serviceMethodName}}(eventsMapper.{{operation.adapterPlan.mapperMethodName}}(payload))
+    {{~else}}
+        // TODO CUSTOM_REQUIRED: {{operation.adapterPlan.reason}}.
+        throw UnsupportedOperationException("Customize {{message.x--adapterMethodName}} for the current AsyncAPI contract")
+    {{~/if}}
+    }
+{{/each}}
+{{/each}}
+}

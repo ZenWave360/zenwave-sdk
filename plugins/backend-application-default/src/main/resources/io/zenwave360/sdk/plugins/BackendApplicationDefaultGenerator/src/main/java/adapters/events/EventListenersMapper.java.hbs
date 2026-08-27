@@ -1,0 +1,15 @@
+package {{layout.adaptersEventsMappersPackage}};
+
+import {{layout.domainEventsPackage}}.*;
+import {{layout.inboundDtosPackage}}.*;
+
+/**
+ * Regenerated mapping contract for {{listenerGroup.className}}. Customize the mappings in the
+ * generated-once {{listenerGroup.className}}MapStructMapper.
+ */
+public interface {{listenerGroup.className}}Mapper {
+
+{{#each listenerGroup.mapperBindings as |binding|}}
+    {{@root.layout.inboundDtosPackage}}.{{binding.inputType}} {{binding.mapperMethodName}}({{binding.eventType}} event);
+{{/each}}
+}

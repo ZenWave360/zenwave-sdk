@@ -1,0 +1,84 @@
+config {
+    version "1.2.0"
+}
+
+systems {
+    @zdl("orders/domain-model.zdl")
+    Orders {
+        service OrdersService {
+            commands: startOrderCheckout, finalizeOrder
+        }
+    }
+
+    @zdl("payments/domain-model.zdl")
+    Payments {
+        service PaymentsService {
+            commands: authorizePayment, retryPayment
+        }
+    }
+
+    Unmapped {
+        service MissingService {
+            commands: notifyOps
+        }
+    }
+}
+
+/** Place an order and authorize its payment. */
+flow PlaceOrderFlow {
+    @actor(Customer)
+    start StartOrderCheckout {
+        orderId String
+    }
+
+    when StartOrderCheckout do startOrderCheckout {
+        service Orders.OrdersService
+        emits OrderCreated
+    }
+
+    when OrderCreated do authorizePayment {
+        service Payments.PaymentsService
+        @outcome(authorized)
+        emits PaymentAuthorized
+        @outcome(failed)
+        emits PaymentFailed
+    }
+
+    when PaymentFailed do retryPayment {
+        service Payments.PaymentsService
+        @outcome(retried)
+        emits PaymentRetried
+        @outcome(exhausted)
+        emits PaymentRetryExhausted
+    }
+
+    when PaymentRetried do authorizePayment {
+        service Payments.PaymentsService
+        @outcome(authorized)
+        emits PaymentAuthorized
+        @outcome(failed)
+        emits PaymentFailed
+    }
+
+    /** Records the completed payment as an internal order operation. */
+    when PaymentAuthorized do finalizeOrder {
+        service Orders.OrdersService
+        emits OrderFinalized
+    }
+
+    when PaymentRetryExhausted do notifyOps {
+        service Unmapped.MissingService
+        emits OpsNotified
+    }
+
+    @actor(Scheduler)
+    @time("10 minutes after OrderCreated and not PaymentAuthorized")
+    start ReservationExpired {
+        orderId String
+    }
+
+    end {
+        completed: OrderFinalized
+        exhausted: OpsNotified
+    }
+}

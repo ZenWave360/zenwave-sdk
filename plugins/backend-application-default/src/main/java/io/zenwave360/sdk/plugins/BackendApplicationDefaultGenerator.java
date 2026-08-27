@@ -39,6 +39,9 @@ public class BackendApplicationDefaultGenerator extends ZDLProjectGenerator {
     @DocumentedOption(description = "Whether to add AsyncAPI/ApplicationEventPublisher as service dependencies. Depends on the naming convention of zenwave-asyncapi plugin to work.")
     public boolean includeEmitEventsImplementation = true;
 
+    @DocumentedOption(description = "Whether to generate internal @listener classes and inbound @asyncapi adapter implementations")
+    public boolean implementEventListeners = false;
+
     @DocumentedOption(description = "Controls whether to add a read/write relationship by id when mapping relationships between aggregate (not recommended) keeping the relationship by object readonly.")
     public boolean addRelationshipsById = false;
 
@@ -47,6 +50,13 @@ public class BackendApplicationDefaultGenerator extends ZDLProjectGenerator {
 
     {
         templates = new BackendApplicationProjectTemplates();
+    }
+
+    @Override
+    public void onPropertiesSet() {
+        super.onPropertiesSet();
+        templates.addTemplateHelpers(BackendApplicationDefaultGenerator.class, new BackendApplicationDefaultHelpers(this));
+        templates.addTemplateHelpers(BackendApplicationDefaultGenerator.class, new BackendApplicationDefaultJpaHelpers(this));
     }
 
     @Override

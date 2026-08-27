@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 public class TextUtils {
 
@@ -17,6 +17,6 @@ public class TextUtils {
     }
 
     public static String fixMultilineRegex(String text) {
-        return StringUtils.replace(text, "\r\n", "\\n").replace("\n", "\\r?\\n");
+        return Strings.CS.replace(text, "\r\n", "\\n").replace("\n", "\\r?\\n");
     }
 }

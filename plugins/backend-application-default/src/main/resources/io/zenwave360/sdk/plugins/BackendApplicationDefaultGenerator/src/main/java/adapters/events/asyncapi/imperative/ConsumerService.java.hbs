@@ -1,0 +1,44 @@
+package {{layout.adaptersEventsPackage}};
+
+import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Developer-owned AsyncAPI adapter. This file is generated once.
+ */
+@Component
+public class {{consumerServiceName}} implements {{consumerServiceInterfaceType}} {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
+{{#if hasGeneratedMappings}}
+    private final EventsMapper eventsMapper = EventsMapper.INSTANCE;
+{{/if}}
+
+{{#each serviceDependencies as |dependency|}}
+    private final {{dependency.serviceType}} {{dependency.serviceVariable}};
+{{/each}}
+
+{{#if hasConstructorDependencies}}
+    public {{consumerServiceName}}({{#each serviceDependencies as |dependency|}}{{dependency.serviceType}} {{dependency.serviceVariable}}{{#unless @last}}, {{/unless}}{{/each}}) {
+{{#each serviceDependencies as |dependency|}}
+        this.{{dependency.serviceVariable}} = {{dependency.serviceVariable}};
+{{/each}}
+    }
+{{/if}}
+
+{{#each operations as |operation|}}
+{{#each operation.adapterMessages as |message|}}
+    @Override
+    public void {{message.x--adapterMethodName}}({{message.x--adapterJavaType}} payload, {{message.x--adapterHeadersType}} headers) {
+        log.debug("Received command request for {{message.x--adapterMethodName}}: {} with headers {}", payload, headers);
+    {{~#if operation.adapterPlan.generated}}
+        {{operation.adapterPlan.serviceVariable}}.{{operation.adapterPlan.serviceMethodName}}(eventsMapper.{{operation.adapterPlan.mapperMethodName}}(payload));
+    {{~else}}
+        // TODO CUSTOM_REQUIRED: {{operation.adapterPlan.reason}}.
+        throw new UnsupportedOperationException("Customize {{message.x--adapterMethodName}} for the current AsyncAPI contract");
+    {{~/if}}
+    }
+{{/each}}
+{{/each}}
+}

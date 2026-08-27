@@ -51,6 +51,8 @@ public class OpenAPIControllersGenerator extends AbstractOpenAPIGenerator {
     public void onPropertiesSet() {
         super.onPropertiesSet();
         templates.setLayout(layout);
+        templates.addTemplateHelpers(OpenAPIControllersGenerator.class,
+                new OpenAPIControllersHelpers(openApiModelNamePrefix, openApiModelNameSuffix));
         templates.getTemplateHelpers(this)
                 .forEach(helper -> handlebarsEngine.getHandlebars().registerHelpers(helper));
     }

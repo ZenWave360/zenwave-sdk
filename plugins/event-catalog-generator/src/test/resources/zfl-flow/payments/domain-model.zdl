@@ -1,0 +1,20 @@
+apis {
+    asyncapi provider PaymentsApi "payments/asyncapi.yml"
+}
+
+@aggregate
+entity Payment {
+    id String required
+}
+
+service PaymentsService for (Payment) {
+    @asyncapi({api: PaymentsApi, channel: "authorize-payment-command"})
+    authorizePayment(id)
+    @asyncapi({api: PaymentsApi, channel: "retry-payment-command"})
+    retryPayment(id)
+}
+
+@asyncapi({channel: "payment-authorized-event-v1"}) event PaymentAuthorized { id String }
+@asyncapi({channel: "payment-failed-event-v1"}) event PaymentFailed { id String }
+@asyncapi({channel: "payment-retried-event-v1"}) event PaymentRetried { id String }
+@asyncapi({channel: "payment-retry-exhausted-event-v1"}) event PaymentRetryExhausted { id String }

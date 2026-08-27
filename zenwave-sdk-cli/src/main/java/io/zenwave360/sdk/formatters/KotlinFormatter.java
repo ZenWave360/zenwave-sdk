@@ -2,6 +2,7 @@ package io.zenwave360.sdk.formatters;
 
 import com.facebook.ktfmt.format.Formatter;
 import com.facebook.ktfmt.format.FormattingOptions;
+import com.facebook.ktfmt.format.TrailingCommaManagementStrategy;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateOutput;
@@ -21,7 +22,8 @@ public class KotlinFormatter implements io.zenwave360.sdk.formatters.Formatter {
     @DocumentedOption(description = "Halt on formatting errors")
     public boolean haltOnFailFormatting = true;
 
-    private final FormattingOptions formattingOptions = new FormattingOptions(120, 4, 4, true, true, false);
+    private final FormattingOptions formattingOptions = new FormattingOptions(
+            120, 4, 4, TrailingCommaManagementStrategy.COMPLETE, true, false);
 
     public void format(GeneratedProjectFiles generatedProjectFiles) {
         generatedProjectFiles.getAllTemplateOutputs()

@@ -1,0 +1,112 @@
+/**
+ * Customer-Address compile fixture.
+ *
+ * Two services in one model:
+ * - CustomerService for a rich aggregate with command transitions
+ * - AddressService for a plain entity with service-method transitions
+ */
+config {
+    title "Customer Address Aggregate and Entity Lifecycle"
+    basePackage "io.zenwave360.example"
+    persistence jpa
+    haltOnFailFormatting false
+}
+
+@lifecycle(field: status, initial: PENDING)
+aggregate CustomerAggregate(Customer) {
+    createCustomer(CustomerInput) withEvents CustomerCreated
+    @transition(from: PENDING, to: ACTIVE)
+    activateCustomer() withEvents CustomerActivated
+    @transition(from: [PENDING, ACTIVE], to: SUSPENDED)
+    suspendCustomer() withEvents CustomerSuspended
+}
+
+entity Customer {
+    username String required unique minlength(3)
+    email String required unique
+    status CustomerStatus
+}
+
+enum CustomerStatus {
+    PENDING, ACTIVE, SUSPENDED
+}
+
+enum AddressType {
+    HOME, WORK
+}
+
+@aggregate
+@lifecycle(field: status, initial: UNVERIFIED)
+entity Address {
+    street String
+    city String
+    state String
+    zip String
+    type AddressType
+    status AddressStatus
+}
+
+enum AddressStatus {
+    UNVERIFIED, VERIFIED, ARCHIVED
+}
+
+relationship OneToMany {
+    Customer{addresses} to Address{customer}
+}
+
+input CustomerInput {
+    username String required unique
+    email String required unique
+}
+
+input AddressInput {
+    street String
+    city String
+    state String
+    zip String
+    type AddressType
+}
+
+@rest("/customers")
+service CustomerService for (CustomerAggregate) {
+    @post
+    createCustomer(CustomerInput) Customer withEvents CustomerCreated
+
+    @put("/{customerId}/activate")
+    activateCustomer(id) Customer withEvents CustomerActivated
+
+    @put("/{customerId}/suspend")
+    suspendCustomer(id) Customer withEvents CustomerSuspended
+
+    @get("/{customerId}")
+    getCustomer(id) Customer?
+}
+
+@rest("/addresses")
+service AddressService for (Address) {
+    @post
+    createAddress(AddressInput) Address
+
+    @put("/{addressId}/verify")
+    @transition(from: UNVERIFIED, to: VERIFIED)
+    verifyAddress(id) Address
+
+    @put("/{addressId}/archive")
+    @transition(from: [UNVERIFIED, VERIFIED], to: ARCHIVED)
+    archiveAddress(id) Address?
+
+    @get("/{addressId}")
+    getAddress(id) Address?
+}
+
+event CustomerCreated {
+    customerId String
+}
+
+event CustomerActivated {
+    customerId String
+}
+
+event CustomerSuspended {
+    customerId String
+}

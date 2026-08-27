@@ -12,7 +12,7 @@
 
     <properties>
         <basePackage>io.zenwave360.example.delivery</basePackage><!-- used by openapi and asyncapi plugins in parent -->
-        <asyncapiOrdersClientPackage>${basePackage}.client.orders</asyncapiOrdersClientPackage>
+        <asyncapiOrdersClientPackage>${basePackage}.adapters.events.orders</asyncapiOrdersClientPackage>
     </properties>
 
     <build>
@@ -25,12 +25,6 @@
                     <!-- Generates AsyncAPI PROVIDER (own API) -->
                     <!-- (Config is inherited from parent) -->
                     <execution>
-                        <id>generate-asyncapi-provider-dtos</id>
-                        <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/apis/asyncapi.yml</inputSpec>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>generate-asyncapi-provider-implementation</id>
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/apis/asyncapi.yml</inputSpec>
@@ -39,33 +33,21 @@
 
                     <!-- Generate AsyncAPI CLIENT for Orders API -->
                     <execution>
-                        <id>generate-asyncapi-orders-dtos</id>
-                        <phase>generate-sources</phase>
-                        <goals><goal>generate</goal></goals>
-                        <configuration>
-                            <inputSpec>${project.basedir}/../orders/src/main/resources/apis/asyncapi.yml</inputSpec>
-                            <generatorName>jsonschema2pojo</generatorName>
-                            <configOptions>
-                                <modelPackage>${asyncapiOrdersClientPackage}.events.dtos</modelPackage>
-                                <jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
-                                <jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
-                            </configOptions>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>generate-asyncapi-orders-client</id>
                         <phase>generate-sources</phase>
                         <goals><goal>generate</goal></goals>
                         <configuration>
                             <inputSpec>${project.basedir}/../orders/src/main/resources/apis/asyncapi.yml</inputSpec>
-                            <generatorName>spring-cloud-streams3</generatorName>
+                            <generatorName>AsyncAPIGenerator</generatorName>
                             <configOptions>
                                 <role>client</role>
-                                <style>imperative</style>
-                                <bindingPrefix>delivery_</bindingPrefix>
-                                <modelPackage>${asyncapiOrdersClientPackage}.events.dtos</modelPackage>
-                                <producerApiPackage>${asyncapiOrdersClientPackage}.events.producer</producerApiPackage>
-                                <consumerApiPackage>${asyncapiOrdersClientPackage}.events.consumer</consumerApiPackage>
+                                <templates>SpringCloudStream</templates>
+                                <componentPrefix>delivery_</componentPrefix>
+                                <modelPackage>${asyncapiOrdersClientPackage}.dtos</modelPackage>
+                                <producerApiPackage>${asyncapiOrdersClientPackage}.producer</producerApiPackage>
+                                <consumerApiPackage>${asyncapiOrdersClientPackage}</consumerApiPackage>
+                                <jsonschema2pojo.isUseJakartaValidation>true</jsonschema2pojo.isUseJakartaValidation>
+                                <jsonschema2pojo.useLongIntegers>true</jsonschema2pojo.useLongIntegers>
                             </configOptions>
                         </configuration>
                     </execution>

@@ -1,17 +1,38 @@
 package io.zenwave360.sdk.formatters;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class KotlinFormatterTest {
 
     private KotlinFormatter formatter;
+
+    private static Logger formatterLogger;
+    private static Level originalLevel;
+
+    @BeforeAll
+    static void muteFormatterLogging() {
+        // some tests feed ktfmt invalid kotlin on purpose: keep their expected stack traces out of the build output
+        formatterLogger = (Logger) LoggerFactory.getLogger(KotlinFormatter.class);
+        originalLevel = formatterLogger.getLevel();
+        formatterLogger.setLevel(Level.OFF);
+    }
+
+    @AfterAll
+    static void restoreFormatterLogging() {
+        formatterLogger.setLevel(originalLevel);
+    }
 
     @BeforeEach
     void setUp() {

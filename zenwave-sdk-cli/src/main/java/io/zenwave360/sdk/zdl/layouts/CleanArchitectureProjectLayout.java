@@ -74,8 +74,8 @@ public class CleanArchitectureProjectLayout extends ProjectLayout {
         adaptersWebMappersPackage = "{{moduleBasePackage}}.adapters.web.mappers";
         adaptersCommandsPackage = "{{moduleBasePackage}}.adapters.commands";
         adaptersCommandsMappersPackage = "{{moduleBasePackage}}.adapters.commands.mappers";
-        adaptersEventsPackage = "{{moduleBasePackage}}.adapters.events";
-        adaptersEventsMappersPackage = "{{moduleBasePackage}}.adapters.events.mappers";
+        adaptersEventsPackage = "{{moduleBasePackage}}.adapters.events{{#if apiId}}.{{apiId}}{{/if}}";
+        adaptersEventsMappersPackage = "{{adaptersEventsPackage}}.mappers";
 
         // openapi generated packages
         openApiApiPackage = "{{adaptersWebPackage}}";

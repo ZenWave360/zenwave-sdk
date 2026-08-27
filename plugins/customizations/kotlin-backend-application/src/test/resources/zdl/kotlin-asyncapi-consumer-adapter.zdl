@@ -1,0 +1,29 @@
+config {
+    basePackage "io.example.customer"
+}
+
+apis {
+    asyncapi(provider) CustomerAPI {
+        uri "classpath:io/zenwave360/sdk/resources/asyncapi/v3/customer-address.yml"
+        apiId "customer"
+        modelPackage "io.example.customer.contract.model"
+        consumerApiPackage "io.example.customer.contract.consumer"
+    }
+}
+
+input CustomerInput {
+    username String required
+    email String required
+    tags String[]
+}
+
+@aggregate
+entity Customer {
+    username String required
+    email String required
+}
+
+service CustomerService for (Customer) {
+    @asyncapi({api: CustomerAPI, operationId: "doCreateCustomer", channel: "createCustomerChannel"})
+    createCustomer(CustomerInput)
+}

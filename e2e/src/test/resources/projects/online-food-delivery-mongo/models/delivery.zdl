@@ -38,25 +38,20 @@ config {
             openApiModelNameSuffix DTO
         }
 
-        SpringCloudStreams3AdaptersPlugin {
-            apiId "orders"
-            role client
-            apiFile "modules/orders/src/main/resources/apis/asyncapi.yml"
-            modelPackage "{{basePackage}}.client.{{apiId}}.events.dtos"
-            consumerApiPackage "{{basePackage}}.client.{{apiId}}.events.consumer"
-        }
     }
 }
 
 apis {
     asyncapi(provider) default {
-        uri "delivery/src/main/resources/apis/asyncapi.yml"
+        uri "../modules/delivery/src/main/resources/apis/asyncapi.yml"
     }
-    asyncapi(client) RestaurantsAsyncAPI {
-        uri "restaurants/src/main/resources/apis/asyncapi.yml"
+    asyncapi client RestaurantsAsyncAPI "../modules/restaurants/src/main/resources/apis/asyncapi.yml" {
+        modelPackage "{{basePackage}}.adapters.events.restaurants.dtos"
+        consumerApiPackage "{{basePackage}}.adapters.events.restaurants"
     }
-    asyncapi(client) OrdersAsyncAPI {
-        uri "orders/src/main/resources/apis/asyncapi.yml"
+    asyncapi client OrdersAsyncAPI "../modules/orders/src/main/resources/apis/asyncapi.yml" {
+        modelPackage "{{basePackage}}.adapters.events.orders.dtos"
+        consumerApiPackage "{{basePackage}}.adapters.events.orders"
     }
 }
 

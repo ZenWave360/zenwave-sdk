@@ -1,0 +1,52 @@
+package {{layout.adaptersEventsPackage}};
+
+import {{layout.domainEventsPackage}}.*;
+import {{layout.inboundPackage}}.*;
+import {{layout.inboundDtosPackage}}.*;
+{{~#if listenerGroup.mapperBindings}}
+import {{layout.adaptersEventsMappersPackage}}.{{listenerGroup.className}}Mapper;
+{{~/if}}
+import org.springframework.modulith.events.ApplicationModuleListener;
+import org.springframework.stereotype.Component;
+
+/**
+ * Internal domain event listeners for {{listenerGroup.name}}.
+ *
+ * This class is generated once and can be customized safely.
+ */
+@Component
+public class {{listenerGroup.className}} {
+
+{{~#each listenerGroup.services as |listenerService|}}
+    private final {{listenerService.name}} {{listenerService.instanceName}};
+{{~/each}}
+{{~#if listenerGroup.mapperBindings}}
+    private final {{listenerGroup.className}}Mapper mapper;
+{{~/if}}
+
+    public {{listenerGroup.className}}(
+            {{~#each listenerGroup.services as |listenerService|~}}
+                {{listenerService.name}} {{listenerService.instanceName}}{{#unless @last}}, {{/unless}}
+            {{~/each~}}
+            {{~#if listenerGroup.mapperBindings}}, {{listenerGroup.className}}Mapper mapper{{/if}}) {
+{{~#each listenerGroup.services as |listenerService|}}
+        this.{{listenerService.instanceName}} = {{listenerService.instanceName}};
+{{~/each}}
+{{~#if listenerGroup.mapperBindings}}
+        this.mapper = mapper;
+{{~/if}}
+    }
+
+{{~#each listenerGroup.bindings as |binding|}}
+
+    @ApplicationModuleListener
+    public void {{binding.listenerMethodName}}({{binding.eventType}} event) {
+        {{~#if (eq binding.mode "MAPPER")}}
+        {{binding.serviceInstanceName}}.{{binding.methodName}}(mapper.{{binding.mapperMethodName}}(event));
+        {{~else}}
+        // TODO CUSTOM_REQUIRED: map {{binding.eventName}} to the service method input and invoke {{binding.serviceInstanceName}}.{{binding.methodName}}(...)
+        throw new UnsupportedOperationException("Customize listener {{listenerGroup.className}}.{{binding.listenerMethodName}}");
+        {{~/if}}
+    }
+{{~/each}}
+}

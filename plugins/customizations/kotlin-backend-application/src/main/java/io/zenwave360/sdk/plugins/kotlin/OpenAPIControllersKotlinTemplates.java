@@ -3,11 +3,11 @@ package io.zenwave360.sdk.plugins.kotlin;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.plugins.OpenAPIControllersGenerator;
-import io.zenwave360.sdk.plugins.OpenAPIControllersHelpers;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -38,16 +38,15 @@ public class OpenAPIControllersKotlinTemplates extends ProjectTemplates {
                 layoutNames.adaptersWebPackage, "{{serviceName}}ApiController.kt", KOTLIN, null, false);
         this.addTemplate(this.serviceTemplates, "src/test/kotlin", "web/{{webFlavor}}/ServiceApiControllerTest.kt",
                 layoutNames.adaptersWebPackage, "{{serviceName}}ApiControllerTest.kt", KOTLIN, skipControllerTests, true);
-
     }
 
     @Override
     public List<Object> getTemplateHelpers(Generator generator) {
+        var helpers = new ArrayList<>(super.getTemplateHelpers(generator));
         if (generator instanceof OpenAPIControllersGenerator openAPIControllersGenerator) {
-            return List.of(
-                    new OpenAPIControllersHelpers(openAPIControllersGenerator.openApiModelNamePrefix, openAPIControllersGenerator.openApiModelNameSuffix),
-                    new OpenAPIControllersKotlinHelpers(openAPIControllersGenerator.openApiModelNamePrefix, openAPIControllersGenerator.openApiModelNameSuffix));
+            helpers.add(new OpenAPIControllersKotlinHelpers(
+                    openAPIControllersGenerator.openApiModelNamePrefix, openAPIControllersGenerator.openApiModelNameSuffix));
         }
-        throw new RuntimeException("OpenAPIControllersKotlinTemplates only supports OpenAPIControllersGenerator");
+        return helpers;
     }
 }

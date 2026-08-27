@@ -67,6 +67,8 @@ public class EventCatalogZdlProcessor implements Processor {
 
             String version = str(serviceData, "_version", serviceVersion(manifestService));
 
+            collectLogicalOperations(zdlModel, serviceData, serviceId, version);
+
             Map<String, Object> aggregates = JSONPath.get(zdlModel, "$.aggregates", Map.of());
             Set<String> aggregateRootNames = new LinkedHashSet<>();
             for (Map.Entry<String, Object> aggEntry : aggregates.entrySet()) {
@@ -99,6 +101,51 @@ public class EventCatalogZdlProcessor implements Processor {
                 addToList(serviceData, "_entities", entityArtifact);
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void collectLogicalOperations(Map<String, Object> zdlModel, Map<String, Object> serviceData,
+                                          String serviceId, String version) {
+        Map<String, Object> services = JSONPath.get(zdlModel, "$.services", Map.of());
+        for (Map.Entry<String, Object> serviceEntry : services.entrySet()) {
+            if (!(serviceEntry.getValue() instanceof Map<?, ?> rawService)) continue;
+            Map<String, Object> zdlService = (Map<String, Object>) rawService;
+            Map<String, Object> methods = JSONPath.get(zdlService, "$.methods", Map.of());
+            for (Map.Entry<String, Object> methodEntry : methods.entrySet()) {
+                if (!(methodEntry.getValue() instanceof Map<?, ?> rawMethod)) continue;
+                Map<String, Object> method = (Map<String, Object>) rawMethod;
+                String methodName = str(method, "name", methodEntry.getKey());
+                Map<String, Object> options = method.get("options") instanceof Map<?, ?> rawOptions
+                        ? (Map<String, Object>) rawOptions : Map.of();
+
+                Map<String, Object> operation = new LinkedHashMap<>();
+                operation.put("id", serviceId + "." + serviceEntry.getKey() + "." + methodName);
+                operation.put("name", methodName);
+                operation.put("service", serviceEntry.getKey());
+                operation.put("intent", isQuery(options) ? "query" : "command");
+                operation.put("visibility", "internal");
+                operation.put("version", version);
+                String description = str(method, "javadoc", str(method, "comment", null));
+                if (description != null && !description.isBlank()) operation.put("summary", description);
+                addOperation(serviceData, operation);
+            }
+        }
+    }
+
+    private boolean isQuery(Map<String, Object> options) {
+        return truthy(options.get("get")) || truthy(options.get("query"));
+    }
+
+    private boolean truthy(Object value) {
+        return Boolean.TRUE.equals(value) || "true".equalsIgnoreCase(String.valueOf(value));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void addOperation(Map<String, Object> serviceData, Map<String, Object> operation) {
+        List<Map<String, Object>> operations =
+                (List<Map<String, Object>>) serviceData.computeIfAbsent("_operations", ignored -> new ArrayList<>());
+        String id = operation.get("id").toString();
+        if (operations.stream().noneMatch(existing -> id.equals(existing.get("id")))) operations.add(operation);
     }
 
     private Map<String, Object> parseSpec(ManifestArtifact artifact, String zdlText) {

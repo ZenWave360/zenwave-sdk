@@ -147,7 +147,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
     protected List<SchemaRoot> extractSchemaRoots(Model apiModel, Map<String, Object> message, String defaultSchemaFormat) {
         List<SchemaRoot> roots = new ArrayList<>();
-        String messageName = (String) ObjectUtils.defaultIfNull(message.get("name"), "Message");
+        String messageName = (String) ObjectUtils.getIfNull(message.get("name"), "Message");
 
         String payloadSchemaFormat = AsyncAPIUtils.isV3(apiModel)
                 ? JSONPath.get(message, "$.payload.schemaFormat", defaultSchemaFormat)
@@ -186,7 +186,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
         Map<String, Object> schema = nestedSchema instanceof Map<?, ?>
                 ? (Map<String, Object>) nestedSchema
                 : container;
-        String schemaFormat = (String) ObjectUtils.defaultIfNull(container.get("schemaFormat"), defaultSchemaFormat);
+        String schemaFormat = (String) ObjectUtils.getIfNull(container.get("schemaFormat"), defaultSchemaFormat);
         roots.add(new SchemaRoot(schema, schemaFormat, fallbackName, generateScalarSchema));
     }
 

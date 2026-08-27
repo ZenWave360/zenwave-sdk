@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.zenwave360.manifest.BlockingZenWaveManifestLoader;
 import io.zenwave360.manifest.ManifestArtifact;
+import io.zenwave360.manifest.ManifestConsumerReference;
 import io.zenwave360.manifest.ManifestDomain;
 import io.zenwave360.manifest.ManifestLoadOptions;
 import io.zenwave360.manifest.ManifestService;
@@ -18,6 +19,7 @@ import io.zenwave360.sdk.plugins.frontmatter.FrontmatterTypes;
 import io.zenwave360.sdk.plugins.frontmatter.DomainFrontmatter;
 import io.zenwave360.sdk.plugins.frontmatter.EntityFrontmatter;
 import io.zenwave360.sdk.plugins.frontmatter.EventFrontmatter;
+import io.zenwave360.sdk.plugins.frontmatter.FlowFrontmatter;
 import io.zenwave360.sdk.plugins.frontmatter.QueryFrontmatter;
 import io.zenwave360.sdk.plugins.frontmatter.ServiceFrontmatter;
 import io.zenwave360.sdk.templating.TemplateInput;
@@ -58,6 +60,7 @@ public class EventCatalogGenerator extends Generator {
     private static final String COMMAND_TEMPLATE = TEMPLATES_ROOT + "/command.mdx";
     private static final String QUERY_TEMPLATE = TEMPLATES_ROOT + "/query.mdx";
     private static final String ENTITY_TEMPLATE = TEMPLATES_ROOT + "/entity.mdx";
+    private static final String FLOW_TEMPLATE = TEMPLATES_ROOT + "/flow.mdx";
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -118,6 +121,17 @@ public class EventCatalogGenerator extends Generator {
             }
         }
 
+        // Domain-owned and cross-domain business flows
+        for (Map<String, Object> flow : eventCatalog.flows()) {
+            String flowId = str(flow, "id", null);
+            String domainId = str(flow, "domainId", null);
+            if (flowId == null || domainId == null) continue;
+            files.singleFiles.add(mdxPage(
+                    "domains/" + domainId + "/flows/" + flowId + "/index.mdx",
+                    flowFrontmatter(flow),
+                    flowBody(flow)));
+        }
+
         // Services, events, and commands
         for (ManifestService manifestService : manifest.getServices()) {
             Map<String, Object> service = serviceView(manifest, eventCatalog, manifestService);
@@ -154,7 +168,7 @@ public class EventCatalogGenerator extends Generator {
                 files.singleFiles.add(mdxPage(
                         serviceBase + "/events/" + eventId + "/index.mdx",
                         eventFrontmatter(event, services),
-                        messageBody("event", event)));
+                        messageBody("event", event, service)));
             }
 
             // Command pages
@@ -165,7 +179,7 @@ public class EventCatalogGenerator extends Generator {
                 files.singleFiles.add(mdxPage(
                         serviceBase + "/commands/" + commandId + "/index.mdx",
                         commandFrontmatter(command, services),
-                        messageBody("command", command)));
+                        messageBody("command", command, service)));
             }
 
             // Query pages (from OpenAPI GET operations)
@@ -294,6 +308,21 @@ public class EventCatalogGenerator extends Generator {
                 null);
     }
 
+    @SuppressWarnings("unchecked")
+    private Frontmatter flowFrontmatter(Map<String, Object> flow) {
+        return new FlowFrontmatter(
+                commonFrontmatter(
+                        flow,
+                        str(flow, "id", null),
+                        str(flow, "name", str(flow, "id", null)),
+                        str(flow, "version", "0.0.1"),
+                        str(flow, "summary", null),
+                        null,
+                        null),
+                (List<FrontmatterTypes.FlowStepFrontmatter>) flow.getOrDefault("steps", List.of()),
+                null);
+    }
+
     // -------------------------------------------------------------------------
     // Docs rendering
     // -------------------------------------------------------------------------
@@ -341,11 +370,26 @@ public class EventCatalogGenerator extends Generator {
         model.put("hasMessages", hasMessages(service));
         model.put("hasEntities", !listOfMaps(service.get("_entities")).isEmpty());
         model.put("hasSpecifications", hasSpecifications(service));
+        List<String> apiConsumers = strings(service.get("_apiConsumers"));
+        model.put("hasApiConsumers", !apiConsumers.isEmpty());
+        model.put("apiConsumers", apiConsumers);
         model.put("docsBody", docsBody);
         return renderBodyTemplate(SERVICE_TEMPLATE, model);
     }
 
+    private String flowBody(Map<String, Object> flow) {
+        return renderBodyTemplate(FLOW_TEMPLATE, Map.of("flow", flow));
+    }
+
+    /**
+     * Kept for compatibility with integrations that render an isolated message without
+     * the owning service context. Consumer-operation evidence is unavailable in that case.
+     */
     private String messageBody(String resourceType, Map<String, Object> resource) {
+        return messageBody(resourceType, resource, Map.of());
+    }
+
+    private String messageBody(String resourceType, Map<String, Object> resource, Map<String, Object> service) {
         String remoteSchemaUrl = str(resource, "_remoteSchemaUrl", null);
         String remoteSchemaComponentMessage = str(resource, "_remoteSchemaComponentMessage", null);
         String remoteSchemaChannel = str(resource, "_remoteSchemaChannel", null);
@@ -367,6 +411,12 @@ public class EventCatalogGenerator extends Generator {
         model.put("remoteSchemaChannel", hasRemoteSchema ? escapeNullableAttribute(remoteSchemaChannel) : null);
         model.put("remoteSchemaChannelMessage", hasRemoteSchema ? escapeNullableAttribute(remoteSchemaChannelMessage) : null);
         model.put("schemaPath", escapeNullableAttribute(str(resource, "schemaPath", null)));
+        String messageId = str(resource, "id", null);
+        List<Map<String, Object>> consumptions = listOfMaps(service.get("_consumptions")).stream()
+                .filter(consumption -> messageId != null && messageId.equals(str(consumption, "messageId", null)))
+                .toList();
+        model.put("hasConsumptions", !consumptions.isEmpty());
+        model.put("consumptions", consumptions);
         return renderBodyTemplate("command".equals(resourceType) ? COMMAND_TEMPLATE : EVENT_TEMPLATE, model);
     }
 
@@ -514,15 +564,29 @@ public class EventCatalogGenerator extends Generator {
         if (!service.getConsumers().isEmpty()) {
             view.put("consumers", service.getConsumers().stream()
                     .map(reference -> {
-                        ManifestService consumer = manifest.findService(reference);
+                        ManifestService consumer = resolveConsumerService(manifest, service, reference);
                         return consumer != null
                                 ? eventCatalog.catalogServiceId(consumer)
-                                : reference.replace('/', '.');
+                                : reference.substring(0, reference.indexOf('#') >= 0
+                                        ? reference.indexOf('#') : reference.length()).replace('/', '.');
                     })
                     .toList());
         }
         view.putAll(eventCatalog.serviceData(service));
         return view;
+    }
+
+    private ManifestService resolveConsumerService(ZenWaveManifest manifest, ManifestService declaringService,
+                                                    String rawReference) {
+        try {
+            ManifestConsumerReference reference = ManifestConsumerReference.parse(rawReference);
+            ManifestService consumer = manifest.findService(reference.getServiceReference());
+            return consumer != null
+                    ? consumer
+                    : manifest.findService(declaringService.getDomainKey() + "/" + reference.getServiceReference());
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
     }
 
     private Map<String, Object> domainView(EventCatalogModel eventCatalog, ManifestDomain domain) {

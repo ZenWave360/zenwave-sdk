@@ -112,6 +112,7 @@ public class TestOnlineFoodDeliveryProject {
                 .withOption("persistence", PersistenceType.mongodb)
                 .withOption("style", ProgrammingStyle.imperative)
                 .withOption("useLombok", true)
+                .withOption("implementEventListeners", true)
                 .withOption("includeEmitEventsImplementation", true)
                 .withOption("forceOverwrite", true)
                 .withOption("haltOnFailFormatting", false);

@@ -8,8 +8,7 @@ import io.zenwave360.sdk.doc.DocumentedPlugin;
         title = "Event Catalog Generator",
         summary = "Generates an EventCatalog source tree from a zenwave-architecture.yml master file.",
         mainOptions = {"inputFile", "outputFolder", "docsTemplate"},
-        hiddenOptions = {"layout", "apiFile", "apiFiles", "zdlFile", "zdlFiles", "style", "targetFolder",
-                "preferredSource", "allowFallback", "linkSource"})
+        hiddenOptions = {"layout", "apiFile", "apiFiles", "zdlFile", "zdlFiles", "style"})
 public class EventCatalogPlugin extends Plugin {
 
     // Chain:
@@ -17,8 +16,11 @@ public class EventCatalogPlugin extends Plugin {
     // 1 = EventCatalogAsyncApiProcessor   — enriches services with events/commands/sends/receives
     // 2 = EventCatalogOpenApiProcessor    — enriches services with queries
     // 3 = EventCatalogZdlProcessor        — enriches services with entities
-    // 4 = EventCatalogGenerator           — generates MDX pages
-    // 5 = EventCatalogFileWriter          — cleans output, versions service pages, writes files
+    // 4 = EventCatalogOperationProcessor  — reconciles logical operations and transport bindings
+    // 5 = EventCatalogConsumerProcessor   — resolves declared consumer artifacts and operations
+    // 6 = EventCatalogZflProcessor         — projects manifest-graph ZFL flows into EventCatalog
+    // 7 = EventCatalogGenerator           — generates MDX pages
+    // 8 = EventCatalogFileWriter          — cleans output, versions service pages, writes files
 
     @DocumentedOption(description = "Path to the zenwave-architecture.yml master file.")
     public String inputFile;
@@ -40,6 +42,9 @@ public class EventCatalogPlugin extends Plugin {
     @DocumentedOption(description = "Preferred active manifest source for generated frontmatter links, such as git.")
     public String linkSource;
 
+    @DocumentedOption(description = "Publish unbound ZDL operations as synthesized EventCatalog resources.")
+    public Boolean publishInternalOperations;
+
     public EventCatalogPlugin() {
         super();
         withChain(
@@ -47,8 +52,11 @@ public class EventCatalogPlugin extends Plugin {
                 EventCatalogAsyncApiProcessor.class,    // 1
                 EventCatalogOpenApiProcessor.class,     // 2
                 EventCatalogZdlProcessor.class,         // 3
-                EventCatalogGenerator.class,            // 4
-                EventCatalogFileWriter.class);          // 5
+                EventCatalogOperationProcessor.class,   // 4
+                EventCatalogConsumerProcessor.class,    // 5
+                EventCatalogZflProcessor.class,         // 6
+                EventCatalogGenerator.class,            // 7
+                EventCatalogFileWriter.class);          // 8
     }
 
     @Override

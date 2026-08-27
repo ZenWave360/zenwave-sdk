@@ -1,0 +1,17 @@
+apis {
+    asyncapi provider OrdersApi "orders/asyncapi.yml"
+}
+
+@aggregate
+entity Order {
+    id String required
+}
+
+service OrdersService for (Order) {
+    @asyncapi({api: OrdersApi, channel: "start-order-checkout-command"})
+    startOrderCheckout(id)
+    finalizeOrder(id)
+}
+
+@asyncapi({channel: "order-created-event-v1"})
+event OrderCreated { id String }

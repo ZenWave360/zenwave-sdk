@@ -20,6 +20,7 @@ public class GeneratedProjectFiles {
     public TemplateOutputListMap eventEnums = new TemplateOutputListMap();
     public TemplateOutputListMap outputs = new TemplateOutputListMap();
     public TemplateOutputListMap services = new TemplateOutputListMap();
+    public TemplateOutputListMap listeners = new TemplateOutputListMap();
     public TemplateOutputListMap events = new TemplateOutputListMap();
 
     public List<TemplateOutput> allEntities = new ArrayList<>();
@@ -42,6 +43,7 @@ public class GeneratedProjectFiles {
         eventEnums.values().forEach(templateOutputList::addAll);
         outputs.values().forEach(templateOutputList::addAll);
         services.values().forEach(templateOutputList::addAll);
+        listeners.values().forEach(templateOutputList::addAll);
         events.values().forEach(templateOutputList::addAll);
         templateOutputList.addAll(allEntities);
         templateOutputList.addAll(allDomainEvents);
@@ -64,6 +66,7 @@ public class GeneratedProjectFiles {
         eventEnums.putAll(other.eventEnums);
         outputs.putAll(other.outputs);
         services.putAll(other.services);
+        listeners.putAll(other.listeners);
         events.putAll(other.events);
         allEntities.addAll(other.allEntities);
         allDomainEvents.addAll(other.allDomainEvents);

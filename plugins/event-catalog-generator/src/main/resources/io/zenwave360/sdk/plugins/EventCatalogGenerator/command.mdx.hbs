@@ -6,12 +6,21 @@
 
 <NodeGraph />
 
-{{~#if hasRemoteSchema}}## Schema
+{{#if hasConsumptions}}
+## Consumer-artifact operations
+
+{{#each consumptions}}
+- `{{consumerServiceId}}.{{operationId}}` (`{{action}}`, matched by {{matchKind}})
+{{/each}}
+
+{{/if}}
+
+{{#if hasRemoteSchema}}## Schema
 
 <RemoteSpecificationSchema url="{{{remoteSchemaUrl}}}"{{#if remoteSchemaComponentMessage}} componentMessage="{{{remoteSchemaComponentMessage}}}"{{else}} channel="{{{remoteSchemaChannel}}}" channelMessage="{{{remoteSchemaChannelMessage}}}"{{/if}} />
 
-{{~else}}{{~#if schemaPath}}## Schema
+{{else}}{{#if schemaPath}}## Schema
 
 <SchemaViewer file="{{{schemaPath}}}" />
 
-{{~/if}}{{~/if}}
+{{/if}}{{/if}}

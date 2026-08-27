@@ -4,8 +4,7 @@ import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
 import io.zenwave360.sdk.options.PersistenceType;
 import io.zenwave360.sdk.plugins.BackendApplicationDefaultGenerator;
-import io.zenwave360.sdk.plugins.BackendApplicationDefaultHelpers;
-import io.zenwave360.sdk.plugins.BackendApplicationDefaultJpaHelpers;
+import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.CleanHexagonalProjectLayout;
@@ -30,6 +29,14 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
 
     @DocumentedOption(description = "Whether to add AsyncAPI/ApplicationEventPublisher as service dependencies. Depends on the naming convention of zenwave-asyncapi plugin to work.")
     public boolean includeEmitEventsImplementation = true;
+
+    @DocumentedOption(description = "Whether to generate implementations for ZDL @listener and referenced AsyncAPI consumer methods")
+    public boolean implementEventListeners = false;
+
+    @Override
+    public boolean shouldGenerateListeners() {
+        return implementEventListeners;
+    }
 
     protected Function<Map<String, Object>, Boolean> skipEntityRepository = (model) -> is(model, "persistence") // if polyglot persistence -> skip
             || !(is(model, "aggregate") || is(model, "lifecycle") || ZDLFindUtils.isAggregateRoot(JSONPath.get(model, "zdl"), JSONPath.get(model, "$.entity.name")));
@@ -79,6 +86,8 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
     protected Function<Map<String, Object>, Boolean> skipInput = (model) -> is(model, "inline");
 
     protected Function<Map<String, Object>,Boolean> skipModulith = (model) -> !useSpringModulith;
+    protected Function<Map<String, Object>,Boolean> skipListenerMappers = (model) ->
+            JSONPath.get(model, "$.listenerGroup.mapperBindings", List.of()).isEmpty();
     protected Function<Map<String, Object>,Boolean> skipModulithCommonModule = (model) ->
             !useSpringModulith || layout.commonPackage.equals(layout.moduleBasePackage);
 
@@ -91,9 +100,9 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
     @Override
     public List<Object> getTemplateHelpers(Generator generator) {
         var helpers = new ArrayList<>(super.getTemplateHelpers(generator));
-        helpers.add(new BackendApplicationDefaultHelpers((BackendApplicationDefaultGenerator) generator));
-        helpers.add(new BackendApplicationDefaultJpaHelpers((BackendApplicationDefaultGenerator) generator));
-        helpers.add(new BackendApplicationKotlinHelpers((BackendApplicationDefaultGenerator) generator));
+        if (generator instanceof BackendApplicationDefaultGenerator backendGenerator) {
+            helpers.add(new BackendApplicationKotlinHelpers(backendGenerator));
+        }
         return helpers;
     }
 
@@ -147,6 +156,24 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
                 layoutNames.inboundPackage, "{{service.name}}.kt", KOTLIN, null, false);
         this.addTemplate(this.serviceTemplates, "src/main/kotlin", "core/implementation/{{style}}/ServiceImpl.kt",
                 layoutNames.coreImplementationPackage, "{{service.name}}Impl.kt", KOTLIN, null, true);
+        this.addTemplate(this.listenersByApiTemplates, "src/main/kotlin", "adapters/events/EventListeners.kt",
+                layoutNames.adaptersEventsPackage, "{{listenerGroup.className}}.kt", KOTLIN, null, true);
+        this.addTemplate(this.listenersByApiTemplates, "src/main/kotlin", "adapters/events/EventListenersMapper.kt",
+                layoutNames.adaptersEventsMappersPackage, "{{listenerGroup.className}}Mapper.kt", KOTLIN, skipListenerMappers, false);
+        this.addTemplate(this.listenersByApiTemplates, "src/main/kotlin", "adapters/events/EventListenersMapStructMapper.kt",
+                layoutNames.adaptersEventsMappersPackage, "{{listenerGroup.className}}MapStructMapper.kt", KOTLIN, skipListenerMappers, true);
+        this.asyncApiAdapterByApiTemplates.add(new TemplateInput(
+                joinPath(getTemplatesFolder(), "src/main/kotlin", "adapters/events/asyncapi/EventsMapper.kt"),
+                "{{asyncapiAdaptersModulePrefix}}src/main/kotlin/" + layoutNames.adaptersEventsPackage + "/EventsMapper.kt",
+                KOTLIN));
+        this.asyncApiAdapterByApiTemplates.add(new TemplateInput(
+                joinPath(getTemplatesFolder(), "src/main/kotlin", "adapters/events/asyncapi/EventsMapStructMapper.kt"),
+                "{{asyncapiAdaptersModulePrefix}}src/main/kotlin/" + layoutNames.adaptersEventsPackage + "/EventsMapStructMapper.kt",
+                KOTLIN).withSkipOverwrite(true));
+        this.asyncApiAdapterByChannelTemplates.add(new TemplateInput(
+                joinPath(getTemplatesFolder(), "src/main/kotlin", "adapters/events/asyncapi/imperative/ConsumerService.kt"),
+                "{{asyncapiAdaptersModulePrefix}}src/main/kotlin/" + layoutNames.adaptersEventsPackage + "/{{consumerServiceName}}.kt",
+                KOTLIN).withSkipOverwrite(true));
         this.addTemplate(this.singleTemplates, "src/main/kotlin", "core/implementation/mappers/BaseMapper.kt",
                 layoutNames.coreImplementationMappersCommonPackage, "BaseMapper.kt", KOTLIN, null, true);
         this.addTemplate(this.serviceTemplates, "src/main/kotlin", "core/implementation/mappers/ServiceMapper.kt",

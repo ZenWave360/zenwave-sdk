@@ -1,0 +1,38 @@
+package {{layout.adaptersEventsPackage}}
+
+import {{layout.domainEventsPackage}}.*
+import {{layout.inboundPackage}}.*
+{{~#if listenerGroup.mapperBindings}}
+import {{layout.adaptersEventsMappersPackage}}.{{listenerGroup.className}}Mapper
+{{~/if}}
+import org.springframework.modulith.events.ApplicationModuleListener
+import org.springframework.stereotype.Component
+
+/**
+ * Internal domain event listeners for {{listenerGroup.name}}.
+ *
+ * This class is generated once and can be customized safely.
+ */
+@Component
+class {{listenerGroup.className}}(
+{{~#each listenerGroup.services as |listenerService|}}
+    private val {{listenerService.instanceName}}: {{listenerService.name}}{{#unless @last}},{{/unless}}
+{{~/each}}
+{{~#if listenerGroup.mapperBindings}}
+    {{~#if listenerGroup.services}},{{/if}}
+    private val mapper: {{listenerGroup.className}}Mapper
+{{~/if}}
+) {
+{{~#each listenerGroup.bindings as |binding|}}
+
+    @ApplicationModuleListener
+    fun {{binding.listenerMethodName}}(event: {{binding.eventType}}) {
+        {{~#if (eq binding.mode "MAPPER")}}
+        {{binding.serviceInstanceName}}.{{binding.methodName}}(mapper.{{binding.mapperMethodName}}(event))
+        {{~else}}
+        // TODO CUSTOM_REQUIRED: map {{binding.eventName}} to the service method input and invoke {{binding.serviceInstanceName}}.{{binding.methodName}}(...)
+        throw UnsupportedOperationException("Customize listener {{listenerGroup.className}}.{{binding.listenerMethodName}}")
+        {{~/if}}
+    }
+{{~/each}}
+}

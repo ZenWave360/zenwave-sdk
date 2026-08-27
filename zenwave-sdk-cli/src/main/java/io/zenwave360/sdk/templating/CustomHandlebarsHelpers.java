@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import com.github.jknack.handlebars.Options;
 
@@ -106,7 +107,7 @@ public class CustomHandlebarsHelpers {
 
     public static boolean eq(Object first, Options options) throws IOException {
         Object second = options.param(0);
-        return StringUtils.equals(String.valueOf(first), String.valueOf(second));
+        return Strings.CS.equals(String.valueOf(first), String.valueOf(second));
     }
 
     public static boolean neq(Object first, Options options) throws IOException {
@@ -115,18 +116,18 @@ public class CustomHandlebarsHelpers {
 
     public static boolean startsWith(String first, Options options) throws IOException {
         String second = options.param(0);
-        return StringUtils.startsWith(first, second);
+        return Strings.CS.startsWith(first, second);
     }
 
     public static boolean endsWith(String first, Options options) throws IOException {
         String second = options.param(0);
-        return StringUtils.endsWith(first, second);
+        return Strings.CS.endsWith(first, second);
     }
 
     public static boolean contains(String first, Options options) throws IOException {
         String second = options.param(0);
         boolean ignoreCase = options.hash("ignoreCase", false);
-        return ignoreCase? StringUtils.containsIgnoreCase(first, second) : StringUtils.contains(first, second);
+        return ignoreCase? Strings.CI.contains(first, second) : Strings.CS.contains(first, second);
     }
 
 

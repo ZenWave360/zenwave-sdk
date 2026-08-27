@@ -1,0 +1,72 @@
+asyncapi: 3.0.0
+info:
+  title: Payments API
+  version: 1.2.0
+channels:
+  authorize-payment-command:
+    address: payments.authorize.command
+    summary: Authorize Payment Command
+    messages:
+      AuthorizePaymentCommand:
+        payload:
+          type: object
+  retry-payment-command:
+    address: payments.retry.command
+    summary: Retry Payment Command
+    messages:
+      RetryPaymentCommand:
+        payload:
+          type: object
+  payment-authorized-event-v1:
+    address: payments.authorized.event.v1
+    summary: Payment Authorized Event
+    messages:
+      PaymentAuthorizedEvent:
+        payload:
+          type: object
+  payment-failed-event-v1:
+    address: payments.failed.event.v1
+    summary: Payment Failed Event
+    messages:
+      PaymentFailedEvent:
+        payload:
+          type: object
+  payment-retried-event-v1:
+    address: payments.retried.event.v1
+    summary: Payment Retried Event
+    messages:
+      PaymentRetriedEvent:
+        payload:
+          type: object
+  payment-retry-exhausted-event-v1:
+    address: payments.retry-exhausted.event.v1
+    summary: Payment Retry Exhausted Event
+    messages:
+      PaymentRetryExhaustedEvent:
+        payload:
+          type: object
+operations:
+  receiveAuthorizePayment:
+    action: receive
+    channel:
+      $ref: '#/channels/authorize-payment-command'
+  receiveRetryPayment:
+    action: receive
+    channel:
+      $ref: '#/channels/retry-payment-command'
+  sendPaymentAuthorized:
+    action: send
+    channel:
+      $ref: '#/channels/payment-authorized-event-v1'
+  sendPaymentFailed:
+    action: send
+    channel:
+      $ref: '#/channels/payment-failed-event-v1'
+  sendPaymentRetried:
+    action: send
+    channel:
+      $ref: '#/channels/payment-retried-event-v1'
+  sendPaymentRetryExhausted:
+    action: send
+    channel:
+      $ref: '#/channels/payment-retry-exhausted-event-v1'
