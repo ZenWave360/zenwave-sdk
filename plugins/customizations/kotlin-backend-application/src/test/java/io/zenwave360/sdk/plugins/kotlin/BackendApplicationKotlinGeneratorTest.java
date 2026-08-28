@@ -156,7 +156,7 @@ public class BackendApplicationKotlinGeneratorTest {
                 "Aggregate transitions should derive current state from the lifecycle field");
 
         var serviceFile = new java.io.File(targetFolder,
-                "src/main/kotlin/io/zenwave360/examples/kotlin/core/implementation/AddressServiceImpl.kt");
+                "src/main/kotlin/io/zenwave360/examples/kotlin/core/application/AddressServiceImpl.kt");
         var entityTransitionsFile = new java.io.File(targetFolder,
                 "src/main/kotlin/io/zenwave360/examples/kotlin/core/domain/AddressTransitions.kt");
         Assertions.assertTrue(serviceFile.exists(), "Address service impl file should exist");

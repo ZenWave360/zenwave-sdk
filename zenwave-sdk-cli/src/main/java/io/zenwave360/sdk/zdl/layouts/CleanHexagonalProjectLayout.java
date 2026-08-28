@@ -21,7 +21,7 @@ package io.zenwave360.sdk.zdl.layouts;
  *        |     |  └─ *RepositoryInterface (spring-data interface)
  *        |     └─ jpa
  *        |        └─ *RepositoryInterface (spring-data interface)
- *        └─ 📦 implementation
+ *        └─ 📦 application
  *              ├─ mappers/
  *              └─ ServiceImplementation (inbound service implementation)
  *    📦 infrastructure
@@ -60,9 +60,9 @@ public class CleanHexagonalProjectLayout extends ProjectLayout {
         // asyncapi events dtos
         outboundEventsModelPackage = "{{moduleBasePackage}}.core.outbound.events.dtos";
 
-        // core implementation / inner ring
-        coreImplementationPackage = "{{moduleBasePackage}}.core.implementation";
-        coreImplementationMappersPackage = "{{moduleBasePackage}}.core.implementation.mappers";
+        // core application / inner ring
+        coreImplementationPackage = "{{moduleBasePackage}}.core.application";
+        coreImplementationMappersPackage = "{{moduleBasePackage}}.core.application.mappers";
 
         // infrastructure / secondary adapters
         infrastructurePackage = "{{moduleBasePackage}}.infrastructure";
@@ -90,8 +90,8 @@ public class CleanHexagonalProjectLayout extends ProjectLayout {
         // common packages (for base classes in monolithic projects)
         entitiesCommonPackage = "{{commonPackage}}.core.domain";
         domainEventsCommonPackage = "{{commonPackage}}.core.domain.events";
-        coreImplementationCommonPackage = "{{commonPackage}}.core.implementation";
-        coreImplementationMappersCommonPackage = "{{commonPackage}}.core.implementation.mappers";
+        coreImplementationCommonPackage = "{{commonPackage}}.core.application";
+        coreImplementationMappersCommonPackage = "{{commonPackage}}.core.application.mappers";
         infrastructureRepositoryCommonPackage = "{{commonPackage}}.infrastructure.{{persistence}}";
         infrastructureEventsCommonPackage = "{{commonPackage}}.infrastructure.events";
         adaptersWebCommonPackage = "{{commonPackage}}.adapters.web";

@@ -69,7 +69,7 @@ public class TestCustomerAddressPostgresJsonProject {
 
         new MainGenerator().generate(plugin);
 
-        TextUtils.replaceInFile(new File(targetFolder + "/src/main/java/io/zenwave360/example/core/implementation/mappers/EventsMapper.java"),
+        TextUtils.replaceInFile(new File(targetFolder + "/src/main/java/io/zenwave360/example/core/application/mappers/EventsMapper.java"),
                 "io.zenwave360.example.core.outbound.events.dtos.Customer asCustomer\\(Customer customer\\);",
                 """
                         	@org.mapstruct.Mapping(target = "extraProperties", ignore = true)

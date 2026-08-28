@@ -50,7 +50,7 @@ public class LoggingAspectConfiguration {
         /**
          * Pointcut that matches all Spring beans in the application's main packages.
          */
-        @Pointcut("within(com.example.clinical.core.implementation..*)"
+        @Pointcut("within(com.example.clinical.core.application..*)"
                 + " || within(com.example.clinical.infrastructure..*)" + " || within(com.example.clinical.adapters..*)")
         public void applicationPackagePointcut() {
             // Method is empty as this is just a Pointcut, the implementations are in the
