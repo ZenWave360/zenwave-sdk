@@ -11,7 +11,7 @@ import com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage
 import com.tngtech.archunit.library.Architectures.layeredArchitecture
 import com.tngtech.archunit.library.Architectures.onionArchitecture
 
-@AnalyzeClasses(packages = ["{{moduleBasePackage}}"], importOptions = [DoNotIncludeTests::class])
+@AnalyzeClasses(packages = ["{{layout.moduleBasePackage}}"], importOptions = [DoNotIncludeTests::class])
 class ArchitectureTest {
 
     /**
@@ -27,7 +27,7 @@ class ArchitectureTest {
      */
     @ArchTest
     val respectsLayersForHexagonalArchitecture: ArchRule = layeredArchitecture()
-        .consideringOnlyDependenciesInAnyPackage("{{moduleBasePackage}}..")
+        .consideringOnlyDependenciesInAnyPackage("{{layout.moduleBasePackage}}..")
         .layer("Any").definedBy("..")
         .optionalLayer("Config").definedBy("..config..")
         .layer("Core").definedBy("..core..")

@@ -26,6 +26,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 @lombok.Getter @lombok.Setter
 {{~/if}}
 {{#unless (skipEntityId entity)~}}@Document(collection = "{{entity.tableName}}"){{/unless~}}
+{{annotate "domain.entity" entity.javaEntity entity}}
 public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}} implements Serializable {
 
     @java.io.Serial
@@ -33,6 +34,7 @@ public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}}
 
 {{#unless (skipEntityId entity)~}}
     @Id
+    {{annotate "domain.entity" entity.javaEntity.idField}}
     private {{idJavaType}} id;
     @Version
     private Integer version;

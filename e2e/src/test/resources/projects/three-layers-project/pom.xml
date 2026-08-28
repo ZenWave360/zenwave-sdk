@@ -18,9 +18,10 @@
 		<spring-boot.version>${project.parent.version}</spring-boot.version>
 		<spring-cloud.version>2025.1.0</spring-cloud.version>
 
-		<zenwave.version>2.6.0-SNAPSHOT</zenwave.version>
+		<zenwave.version>2.7.0-SNAPSHOT</zenwave.version>
 
 		<jakarta.validation-api.version>3.1.1</jakarta.validation-api.version>
+		<jmolecules-bom.version>2025.0.2</jmolecules-bom.version>
 		<mapstruct.version>1.6.3</mapstruct.version>
 		<archunit-junit5.version>1.4.0</archunit-junit5.version>
 		<spring-cloud-stream-schema.version>2.2.1.RELEASE</spring-cloud-stream-schema.version>
@@ -28,6 +29,13 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.jmolecules</groupId>
+				<artifactId>jmolecules-bom</artifactId>
+				<version>${jmolecules-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
@@ -39,6 +47,24 @@
 	</dependencyManagement>
 
 	<dependencies>
+		<!-- jMolecules annotations, generated when useJMolecules is enabled -->
+		<dependency>
+			<groupId>org.jmolecules</groupId>
+			<artifactId>jmolecules-ddd</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jmolecules</groupId>
+			<artifactId>jmolecules-events</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jmolecules</groupId>
+			<artifactId>jmolecules-layered-architecture</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jmolecules.integrations</groupId>
+			<artifactId>jmolecules-archunit</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>

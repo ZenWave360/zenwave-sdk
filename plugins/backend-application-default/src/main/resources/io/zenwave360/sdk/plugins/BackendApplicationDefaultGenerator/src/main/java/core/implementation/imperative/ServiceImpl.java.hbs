@@ -42,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 {{~#if useSpringModulith}}
 @org.springframework.modulith.NamedInterface("{{service.name}}")
 {{~/if}}
-{{annotate service.javaService service}}
+{{annotate "application.service-impl" service.javaService service}}
 public class {{service.name}}Impl implements {{service.name}} {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -87,7 +87,7 @@ public class {{service.name}}Impl implements {{service.name}} {
 
 {{#each service.methods as |method|}}
     {{~> (partial '../partials/' persistence '/methodAnnotations')~}}
-    {{~> (partial '../partials/serviceMethodSignature')}} {
+    {{~> (partial '../partials/serviceMethodSignature') artifactType="application.service-impl"}} {
         {{~> (partial '../partials/' persistence '/methodBody')~}}
     }
 {{/each}}

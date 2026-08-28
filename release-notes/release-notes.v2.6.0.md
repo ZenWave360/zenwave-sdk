@@ -49,4 +49,4 @@ Draft release notes for the upcoming **2.6.0** release.
     - Preserve versioned EventCatalog content during regeneration.
   - Import an EventCatalog content tree into a `zenwave-architecture.yml` manifest.
 
-**Full Changelog**: https://github.com/ZenWave360/zenwave-sdk/compare/v2.5.4...HEAD
+**Full Changelog**: https://github.com/ZenWave360/zenwave-sdk/compare/v2.5.4...v2.6.0

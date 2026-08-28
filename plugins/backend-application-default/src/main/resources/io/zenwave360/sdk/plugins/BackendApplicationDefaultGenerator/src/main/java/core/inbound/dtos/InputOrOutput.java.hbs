@@ -13,6 +13,7 @@ import jakarta.validation.constraints.*;
 {{~#if useLombok}}
 @lombok.Getter @lombok.Setter
 {{~/if}}
+{{annotate "inbound.dto"}}
 public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}} implements Serializable {
 
 {{#each entity.fields as |field|}}

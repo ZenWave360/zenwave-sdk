@@ -17,12 +17,13 @@ import java.util.Optional
 {{~#if useSpringModulith}}
 @org.springframework.modulith.NamedInterface("{{service.name}}")
 {{~/if}}
+{{annotate "inbound.service-port" service.javaService service}}
 interface {{service.name}} {
 
 {{#each service.methods as |method|}}
     {{assign "isInterface" true}}
     {{~> (partial '../implementation/partials/serviceMethodJavadoc')}}
-    {{~> (partial '../implementation/partials/serviceMethodSignature')}}
+    {{~> (partial '../implementation/partials/serviceMethodSignature') artifactType="inbound.service-port"}}
 {{/each}}
 
 }

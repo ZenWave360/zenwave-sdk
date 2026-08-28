@@ -9,6 +9,7 @@ import jakarta.validation.constraints.*
 /**
  * {{defaultIfEmpty entity.description entity.name}}.
  */
+{{annotate "inbound.dto"}}
 data class {{entity.className}}(
 {{#each entity.fields as |field|}}
     {{{fieldValidationAnnotations field}}}

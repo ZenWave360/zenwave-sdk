@@ -35,7 +35,7 @@
         <avro.version>1.11.1</avro.version>
         <zenwave-modulith-events-scs.version>1.1.0</zenwave-modulith-events-scs.version>
 
-        <zenwave.version>2.6.0-SNAPSHOT</zenwave.version>
+        <zenwave.version>2.7.0-SNAPSHOT</zenwave.version>
         <openapi-generator-maven-plugin.version>7.18.0</openapi-generator-maven-plugin.version>
 
         <jakarta.validation-api.version>3.1.1</jakarta.validation-api.version>

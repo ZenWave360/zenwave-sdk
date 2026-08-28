@@ -25,6 +25,9 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
     @DocumentedOption(description = "Whether to use Spring Modulith annotations and features")
     public boolean useSpringModulith = false;
 
+    /** Bound from the flat 'useJMolecules' option, the same one ZDLProcessor reads. */
+    public boolean useJMolecules = false;
+
     public PersistenceType persistence = PersistenceType.mongodb;
 
     @DocumentedOption(description = "Whether to add AsyncAPI/ApplicationEventPublisher as service dependencies. Depends on the naming convention of zenwave-asyncapi plugin to work.")
@@ -86,6 +89,7 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
     protected Function<Map<String, Object>, Boolean> skipInput = (model) -> is(model, "inline");
 
     protected Function<Map<String, Object>,Boolean> skipModulith = (model) -> !useSpringModulith;
+    protected Function<Map<String, Object>,Boolean> skipJMolecules = (model) -> !useJMolecules;
     protected Function<Map<String, Object>,Boolean> skipListenerMappers = (model) ->
             JSONPath.get(model, "$.listenerGroup.mapperBindings", List.of()).isEmpty();
     protected Function<Map<String, Object>,Boolean> skipModulithCommonModule = (model) ->
@@ -215,5 +219,8 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
 
         this.addTemplate(this.singleTemplates, "src/test/kotlin", "ArchitectureTest.kt",
                 layoutNames.moduleBasePackage, "ArchitectureTest.kt", KOTLIN, skipCleanArchitecture, true);
+        // annotation driven, so unlike ArchitectureTest it is not tied to one layout
+        this.addTemplate(this.singleTemplates, "src/test/kotlin", "JMoleculesArchitectureTest.kt",
+                layoutNames.moduleBasePackage, "JMoleculesArchitectureTest.kt", KOTLIN, skipJMolecules, true);
     }
 }

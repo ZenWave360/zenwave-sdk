@@ -1,6 +1,24 @@
 ## What's Changed
 
-Draft release notes for the upcoming **2.8.0** release.
+Release notes for the **2.7.1** release.
+
+## What's New
+
+### ZDL Annotation Framework and jMolecules
+
+ZenWave SDK now includes an artifact-aware annotation framework that lets generators add Java
+annotations without hard-coding annotation libraries into Handlebars templates. Templates identify
+the artifact they generate, while annotators decide which annotations apply to each model element
+and generated artifact.
+
+jMolecules is the first built-in implementation of this framework. Generated Java and Kotlin code
+can now express DDD building blocks and Hexagonal or Layered Architecture concepts, including
+aggregate roots, entities, identities, repositories, domain events, ports, adapters, applications,
+and layers. Annotation contribution is idempotent and works across generator chains and custom
+templates.
+
+See [ZDL Annotator Framework](../docs/zdl-annotators-framework.md) for the design, extension points,
+and jMolecules mapping details.
 
 ## Minor Breaking Changes
 
@@ -48,4 +66,4 @@ Generated Java and Kotlin infrastructure package documentation now links to the 
 outbound package instead of assuming `core.outbound`, so it remains correct for every project
 layout.
 
-**Full Changelog**: https://github.com/ZenWave360/zenwave-sdk/compare/v2.7.0...HEAD
+**Full Changelog**: https://github.com/ZenWave360/zenwave-sdk/compare/v2.7.0...v2.7.1

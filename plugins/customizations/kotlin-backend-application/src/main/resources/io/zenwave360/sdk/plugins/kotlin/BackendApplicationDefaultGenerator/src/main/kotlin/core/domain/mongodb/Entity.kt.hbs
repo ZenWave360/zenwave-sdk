@@ -23,6 +23,7 @@ import org.springframework.data.annotation.LastModifiedDate
 * {{entity.comment}}
 */
 {{#unless (skipEntityId entity)~}}@Document(collection = "{{entity.tableName}}"){{/unless~}}
+{{annotate "domain.entity" entity.javaEntity entity}}
 data class {{entity.className}}(
 {{#unless (skipEntityId entity)~}}
     @Id

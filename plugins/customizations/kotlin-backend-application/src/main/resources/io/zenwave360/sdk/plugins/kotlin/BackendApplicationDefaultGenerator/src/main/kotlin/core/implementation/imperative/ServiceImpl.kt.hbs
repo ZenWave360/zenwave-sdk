@@ -36,6 +36,7 @@ import java.util.Optional
  */
 @Service
 @Transactional
+{{annotate "application.service-impl" service.javaService service}}
 open class {{service.name}}Impl(
 {{#each entities as |entity|}}
     {{~#unless (skipEntityRepository this)}}
@@ -62,7 +63,7 @@ open class {{service.name}}Impl(
 
 {{#each service.methods as |method|}}
     {{~> (partial '../partials/' persistence '/methodAnnotations')~}}
-    {{~> (partial '../partials/serviceMethodSignature')}} {
+    {{~> (partial '../partials/serviceMethodSignature') artifactType="application.service-impl"}} {
         {{~> (partial '../partials/' persistence '/methodBody')~}}
     }
 {{/each}}

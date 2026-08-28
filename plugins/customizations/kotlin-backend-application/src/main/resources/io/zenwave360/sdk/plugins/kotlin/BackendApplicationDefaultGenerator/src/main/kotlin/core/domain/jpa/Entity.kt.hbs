@@ -31,6 +31,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 {{~/if}}
 {{~#if entity.options.auditing}}@EntityListeners(AuditingEntityListener::class){{~/if}}
+{{annotate "domain.entity" entity.javaEntity entity}}
 data class {{entity.className}}(
 {{#unless (skipEntityId entity)~}}
     {{~> (partial 'partials/id' databaseType)}}

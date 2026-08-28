@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository
  */
 @Suppress("unused")
 @Repository
+{{annotate "outbound.repository-port" entity.javaEntity entity}}
 interface {{entity.className}}Repository : MongoRepository<{{entity.className}}, String> {
 
 {{~#if aggregate}}

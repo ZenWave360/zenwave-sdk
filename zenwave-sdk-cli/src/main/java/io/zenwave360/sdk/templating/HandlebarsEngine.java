@@ -39,6 +39,7 @@ public class HandlebarsEngine implements TemplateEngine {
                 })
                 .build();
         handlebars.registerHelpers(CustomHandlebarsHelpers.class);
+        handlebars.registerHelpers(AnnotationHelper.class);
         handlebars.registerHelpers(StringHelpers.class);
         handlebars.registerHelpers(new VisitedHelper());
     }

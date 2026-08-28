@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component
  * This class is generated once and can be customized safely.
  */
 @Component
+{{annotate "adapter.event-listener"}}
 class {{listenerGroup.className}}(
 {{~#each listenerGroup.services as |listenerService|}}
     private val {{listenerService.instanceName}}: {{listenerService.name}}{{#unless @last}},{{/unless}}

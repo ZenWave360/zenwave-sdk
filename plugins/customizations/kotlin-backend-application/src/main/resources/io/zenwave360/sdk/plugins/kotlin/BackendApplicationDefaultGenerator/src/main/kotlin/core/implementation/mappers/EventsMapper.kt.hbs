@@ -25,7 +25,7 @@ interface EventsMapper {
     {{~#if pair.entity}}
     fun as{{{pair.event.name}}}({{asInstanceName pair.entity.name}}: {{pair.entity.className}}): {{eventPackage}}.{{pair.event.name}}
     {{~else}}
-    fun as{{{pair.event.name}}}({{{methodParametersSignature method}}}): {{eventPackage}}.{{pair.event.name}}
+    fun as{{{pair.event.name}}}({{{methodParametersSignature "application.events-mapper" method}}}): {{eventPackage}}.{{pair.event.name}}
     {{~/if}}
 {{~/each}}
 

@@ -17,6 +17,7 @@ import {{layout.entitiesPackage}}.*;
 {{~#if useSpringModulith}}
 @org.springframework.modulith.NamedInterface("events.{{event.className}}")
 {{~/if}}
+{{annotate "domain.event" event.javaEvent event}}
 public {{abstractClass event}} class {{event.className}} {{addExtends event}} implements Serializable {
 
     @java.io.Serial
