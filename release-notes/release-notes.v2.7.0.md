@@ -47,4 +47,4 @@ Plugin tests no longer compile a full generated Spring Boot project for every ZD
 
 Other generator tests still generate and assert sources. Full compilation of layouts, persistence flavors, and Kotlin Mongo remains in e2e.
 
-**Full Changelog**: https://github.com/ZenWave360/zenwave-sdk/compare/v2.6.0...HEAD
+**Full Changelog**: https://github.com/ZenWave360/zenwave-sdk/compare/v2.6.0...v2.7.0

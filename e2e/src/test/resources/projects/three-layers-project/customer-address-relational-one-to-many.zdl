@@ -12,6 +12,9 @@ config {
     layout.outboundEventsPackage io.zenwave360.example.customer.events
     layout.outboundEventsModelPackage io.zenwave360.example.customer.events.dtos
 
+    // jMolecules annotations: applies to every plugin whose chain includes ZDLProcessor
+    useJMolecules true
+
     plugins {
 
         ZDLToOpenAPIPlugin {

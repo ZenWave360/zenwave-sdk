@@ -95,6 +95,14 @@ public class ZDLJavaSignatureUtils {
     }
 
     public static String methodParametersSignature(String idJavaType, Map method, Map zdl) {
+        return methodParametersSignature(null, idJavaType, method, zdl);
+    }
+
+    /**
+     * @param artifactType the artifact the current template generates, so parameter annotations can
+     *                     be scoped to it. Null renders only artifact independent annotations.
+     */
+    public static String methodParametersSignature(String artifactType, String idJavaType, Map method, Map zdl) {
         var params = new ArrayList<String>();
         var javaServiceMethod = (JavaZdlModel.ServiceMethod) method.get("javaServiceMethod");
         for (var parameter : javaServiceMethod.parameters()) {
@@ -102,13 +110,17 @@ public class ZDLJavaSignatureUtils {
             if(parameter.isArray()) {
                 type = "List<" + type + ">";
             }
-            var annotations = parameter.annotations().stream().map(a -> "@" + a.name()).collect(Collectors.joining(" "));
+            var annotations = annotations(parameter.annotations(), artifactType);
             params.add((annotations + " " + type + " " + parameter.name()).trim());
         }
         return StringUtils.join(params, ", ");
     }
 
     public static String kotlinMethodParametersSignature(String idJavaType, Map method, Map zdl) {
+        return kotlinMethodParametersSignature(null, idJavaType, method, zdl);
+    }
+
+    public static String kotlinMethodParametersSignature(String artifactType, String idJavaType, Map method, Map zdl) {
         var params = new ArrayList<String>();
         var javaServiceMethod = (JavaZdlModel.ServiceMethod) method.get("javaServiceMethod");
         for (var parameter : javaServiceMethod.parameters()) {
@@ -119,10 +131,29 @@ public class ZDLJavaSignatureUtils {
             if(parameter.isArray()) {
                 type = "List<" + type + ">";
             }
-            var annotations = parameter.annotations().stream().map(a -> "@" + a.name()).collect(Collectors.joining(" "));
+            var annotations = annotations(parameter.annotations(), artifactType);
             params.add((annotations + " " + parameter.name() + ": " + type + (parameter.isOptional() ? "?" : "")).trim());
         }
         return StringUtils.join(params, ", ").trim();
+    }
+
+    /** Renders the annotations of a signature element that apply to the given artifact type. */
+    public static String annotations(List<JavaZdlModel.Annotation> annotations, String artifactType) {
+        return annotations.stream()
+                .filter(annotation -> annotation.appliesTo(artifactType))
+                .map(annotation -> annotation.value() != null
+                        ? "@" + annotation.name() + "(" + annotation.value() + ")"
+                        : "@" + annotation.name())
+                .distinct()
+                .collect(Collectors.joining(" "));
+    }
+
+    /** Method return type, prefixed with any return type annotations scoped to this artifact. */
+    public static String methodReturnType(String artifactType, Map method) {
+        var javaServiceMethod = (JavaZdlModel.ServiceMethod) method.get("javaServiceMethod");
+        var returnType = javaServiceMethod != null ? javaServiceMethod.returnType() : null;
+        var annotations = returnType != null ? annotations(returnType.annotations(), artifactType) : "";
+        return (annotations + " " + methodReturnType(method)).trim();
     }
 
     public static String toKotlinMethodSignature(String signature) {

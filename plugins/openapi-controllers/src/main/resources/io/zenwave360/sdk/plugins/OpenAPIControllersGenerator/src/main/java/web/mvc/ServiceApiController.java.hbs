@@ -36,6 +36,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  */
 @RestController
 @RequestMapping("/api")
+{{annotate "adapter.web-controller"}}
 public class {{serviceName}}ApiController implements {{serviceName}}Api {
 
     private final Logger log = LoggerFactory.getLogger(getClass());

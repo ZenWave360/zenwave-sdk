@@ -8,6 +8,9 @@ config {
     databaseType postgresql
 //    haltOnFailFormatting false
 
+    // jMolecules annotations: applies to every plugin whose chain includes ZDLProcessor
+    useJMolecules true
+
     plugins {
 
         ZDLToOpenAPIPlugin {

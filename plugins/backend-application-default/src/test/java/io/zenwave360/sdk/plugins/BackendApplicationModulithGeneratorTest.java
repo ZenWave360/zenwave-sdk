@@ -61,8 +61,8 @@ public class BackendApplicationModulithGeneratorTest {
 
         Path rawEvent = Path.of(targetFolder, "src/main/java/io/zenwave360/example/domain/signals/OrderCreated.java");
         Path listener = Path.of(targetFolder, "src/main/java/io/zenwave360/example/adapters/internal/OrdersServiceEventsListener.java");
-        Path service = Path.of(targetFolder, "src/main/java/io/zenwave360/example/core/implementation/OrdersServiceImpl.java");
-        Path mapper = Path.of(targetFolder, "src/main/java/io/zenwave360/example/core/implementation/mappers/EventsMapper.java");
+        Path service = Path.of(targetFolder, "src/main/java/io/zenwave360/example/core/application/OrdersServiceImpl.java");
+        Path mapper = Path.of(targetFolder, "src/main/java/io/zenwave360/example/core/application/mappers/EventsMapper.java");
         Assertions.assertTrue(Files.exists(rawEvent));
         String listenerSource = Files.readString(listener);
         Assertions.assertTrue(listenerSource.contains("import io.zenwave360.example.domain.signals.*;"));

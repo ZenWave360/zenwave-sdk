@@ -50,9 +50,12 @@ public class BackendApplicationKotlinHelpers {
     }
 
 
-    public String methodParametersSignature(Map<String, Object> method, Options options) {
+    /** Accepts both {@code {{methodParametersSignature "artifact.type" method}}} and the legacy {@code {{methodParametersSignature method}}}. */
+    public String methodParametersSignature(Object artifactTypeOrMethod, Options options) {
         var zdl = (Map) options.get("zdl");
-        return ZDLJavaSignatureUtils.kotlinMethodParametersSignature(generator.getIdJavaType(), method, zdl);
+        var artifactType = artifactTypeOrMethod instanceof String type ? type : null;
+        var method = (Map<String, Object>) (artifactType != null ? options.param(0) : artifactTypeOrMethod);
+        return ZDLJavaSignatureUtils.kotlinMethodParametersSignature(artifactType, generator.getIdJavaType(), method, zdl);
     }
 
     public String mapperInputSignature(String inputType, Options options) {
@@ -67,8 +70,11 @@ public class BackendApplicationKotlinHelpers {
                 .collect(Collectors.joining("\n"));
     }
 
-    public String returnType(Map<String, Object> method, Options options) {
-        return ZDLJavaSignatureUtils.methodReturnType(method)
+    /** Accepts both {@code {{returnType "artifact.type" method}}} and the legacy {@code {{returnType method}}} / {@code {{returnType}}}. */
+    public String returnType(Object artifactTypeOrMethod, Options options) {
+        var artifactType = artifactTypeOrMethod instanceof String type ? type : null;
+        var method = (Map<String, Object>) (artifactType != null ? options.param(0) : artifactTypeOrMethod);
+        return ZDLJavaSignatureUtils.methodReturnType(artifactType, method)
                 .replace("void", "Unit")
                 .replaceAll("Optional<(.+)>", "$1?");
     }

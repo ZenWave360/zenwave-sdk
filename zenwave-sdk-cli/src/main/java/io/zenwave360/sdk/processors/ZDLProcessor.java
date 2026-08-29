@@ -2,7 +2,12 @@ package io.zenwave360.sdk.processors;
 
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
+import io.zenwave360.sdk.doc.DocumentedOption;
+import io.zenwave360.sdk.zdl.annotators.JMoleculesAnnotator;
+import io.zenwave360.sdk.zdl.annotators.JSpecifyAnnotator;
+import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 import io.zenwave360.sdk.zdl.model.JavaZdlModel;
+import io.zenwave360.sdk.zdl.utils.ZDLAnnotator;
 import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +22,16 @@ public class ZDLProcessor extends AbstractBaseProcessor {
     }
 
     private Logger log = LoggerFactory.getLogger(getClass());
+
+    @DocumentedOption(description = "Whether to add JSpecify nullability annotations to generated code")
+    public boolean useJSpecify = false;
+
+    @DocumentedOption(description = "Whether to add jMolecules DDD and architecture annotations to generated code")
+    public boolean useJMolecules = false;
+
+    /** Injected by {@code MainGenerator.applyConfiguration}, like on any other chain element. */
+    public ProjectLayout layout;
+
 
     public Map<String, Object> process(Map<String, Object> contextModel) {
         Map<String, Object> zdlModel = targetProperty != null ? (Map) contextModel.get(targetProperty) : (Map) contextModel;
@@ -46,7 +61,26 @@ public class ZDLProcessor extends AbstractBaseProcessor {
         var zdlJavaModel = new JavaZdlModel(zdlModel);
         zdlModel.put("javaModel", zdlJavaModel);
 
+        for (ZDLAnnotator annotator : zdlAnnotators()) {
+            annotator.annotate(zdlJavaModel, zdlModel);
+        }
+
         return contextModel;
+    }
+
+    /**
+     * Annotators run here, once, so every generator downstream renders an already annotated model.
+     * Contribution is idempotent, so ZDLProjectGenerator may also run its ProjectTemplates annotators.
+     */
+    protected List<ZDLAnnotator> zdlAnnotators() {
+        var annotators = new ArrayList<ZDLAnnotator>();
+        if (useJSpecify) {
+            annotators.add(new JSpecifyAnnotator());
+        }
+        if (useJMolecules) {
+            annotators.add(new JMoleculesAnnotator(JMoleculesAnnotator.architectureOf(layout)));
+        }
+        return annotators;
     }
 
     public void processMethodEntity(Map<String, Object> zdlModel) {

@@ -9,7 +9,7 @@ import io.zenwave360.sdk.processors.ZDLProcessor;
 import io.zenwave360.sdk.writers.TemplateFileWriter;
 
 @DocumentedPlugin(summary = "Generates a full backend application using the provided 'layout' property",
-        mainOptions = { "layout", "zdlFile", "basePackage", "persistence", "databaseType", "style", "useLombok", "addRelationshipsById", "idJavaType", "includeEmitEventsImplementation", "implementEventListeners", "consumerApiPackage", "modelPackage" },
+        mainOptions = { "layout", "zdlFile", "basePackage", "persistence", "databaseType", "style", "useLombok", "useJSpecify", "useJMolecules", "addRelationshipsById", "idJavaType", "includeEmitEventsImplementation", "implementEventListeners", "consumerApiPackage", "modelPackage" },
         hiddenOptions = { "apiFile", "apiFiles" },
         description = """
 Sample configuration:

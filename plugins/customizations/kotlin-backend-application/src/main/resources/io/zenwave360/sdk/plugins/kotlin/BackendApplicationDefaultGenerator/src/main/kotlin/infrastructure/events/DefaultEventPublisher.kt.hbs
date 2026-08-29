@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 
 @Component
+{{annotate "infrastructure.event-publisher"}}
 class DefaultEventPublisher(
     private val applicationEventPublisher: ApplicationEventPublisher
 ) : EventPublisher {

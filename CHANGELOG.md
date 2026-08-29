@@ -6,13 +6,15 @@ Use this file as an index for finding the changes included in each published ver
 
 ## Releases
 
-- [2.7.0](release-notes/release-notes.v2.7.0.md) - Unreleased
-- [2.6.0](release-notes/release-notes.v2.6.0.md)
+- [2.7.1](release-notes/release-notes.v2.7.1.md) - 2026-08-29
+- [2.7.0](release-notes/release-notes.v2.7.0.md) - 2026-08-27
+- [2.6.0](release-notes/release-notes.v2.6.0.md) - 2026-08-10
+- [2.5.4](release-notes/release-notes.v2.5.4.md) - 2026-07-06
 - [2.5.3](release-notes/release-notes.v2.5.3.md) - 2026-06-20
 - [2.5.2](release-notes/release-notes.v2.5.2.md) - 2026-06-02
 - [2.5.1](release-notes/release-notes.v2.5.1.md) - 2026-05-14
 - [2.5.0](release-notes/release-notes.v2.5.0.md) - 2026-05-09
-- [2.4.0](release-notes/release-notes.v2.4.0.md) - 2026-03-28
+- [2.4.0](release-notes/release-notes.v2.4.0.md) - 2026-03-27
 - [2.3.0](release-notes/release-notes.v2.3.0.md) - 2026-01-18
 - [2.2.2](release-notes/release-notes.v2.2.2.md) - 2026-01-18
 - [2.2.1](release-notes/release-notes.v2.2.1.md) - 2025-12-15

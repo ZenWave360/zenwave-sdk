@@ -1,32 +1,34 @@
 package io.zenwave360.sdk.zdl.layouts;
 
 /**
- * CleanArchitectureProjectLayout project layout.
+ * Clean Architecture, using the ring vocabulary of Robert C. Martin's "Clean Architecture" (2017):
+ * Entities, Use Cases (Input/Output Boundaries + Interactors), and Interface Adapters
+ * (Controllers, Listeners, Handlers, and Gateways).
  *
  * <pre>
  * 📦 {{basePackage}}
- *    📦 domain                        # Core business entities and aggregates (Domain Layer)
- *        └─ *Entities
- *
- *    📦 application                   # Application layer (Use Cases)
- *        ├─ services/
- *        |   └─ *UseCase (service interfaces with input/output models)
- *        └─ dtos/
- *
- *    📦 adapters                      # Interface Adapters
- *        ├─ web                      # Web Adapter (Controllers)
- *        |   └─ RestControllers
- *        ├─ events                   # Event-driven Adapter
- *        |   └─ *EventListeners
- *        └─ persistence              # Persistence Adapter
- *            ├─ mongodb/
- *            |   ├─ MongoRepositoryInterface
- *            |   └─ MongoRepositoryImpl
- *            └─ jpa/
- *                ├─ JpaRepositoryInterface
- *                └─ JpaRepositoryImpl
- *
- *    📦 config                  # Spring Boot configuration, security, etc.
+ *    📦 domain                             # Entities ring: Enterprise Business Rules
+ *        └─ 📦 event                       # Domain events
+ *    📦 usecase                            # Use Cases ring: Application Business Rules
+ *        ├─ 📦 boundary
+ *        |     ├─ 📦 input                 # Input Boundary (service interfaces)
+ *        |     |     └─ 📦 dto             # Request models
+ *        |     └─ 📦 output                # Output Boundary / Data Access Interfaces
+ *        |           ├─ 📦 {{persistence}} # Repository interfaces (Spring Data)
+ *        |           └─ 📦 event           # EventPublisher interface
+ *        |                 └─ 📦 dto       # AsyncAPI payloads
+ *        └─ 📦 interactor                  # Use case implementations
+ *              └─ 📦 mapper
+ *    📦 adapter                            # Interface Adapters ring
+ *        ├─ 📦 controller                  # REST controllers
+ *        |     ├─ 📦 dto
+ *        |     └─ 📦 mapper
+ *        ├─ 📦 listener                    # Event listeners
+ *        ├─ 📦 handler                     # AsyncAPI command handlers
+ *        └─ 📦 gateway                     # Database / messaging gateways
+ *              ├─ 📦 {{persistence}}       # Custom repository implementations
+ *              └─ 📦 event                 # EventPublisher implementation
+ *    📦 config                             # Spring Boot wiring
  * </pre>
  */
 public class CleanArchitectureProjectLayout extends ProjectLayout {
@@ -42,63 +44,59 @@ public class CleanArchitectureProjectLayout extends ProjectLayout {
         moduleBasePackage = "{{basePackage}}";
         moduleConfigPackage = "{{moduleBasePackage}}.config";
 
-        // domain entities and events
-        entitiesPackage = "{{moduleBasePackage}}.domain.entities";
-        domainEventsPackage = "{{moduleBasePackage}}.domain.events";
+        // Entities ring
+        entitiesPackage = "{{moduleBasePackage}}.domain";
+        domainEventsPackage = "{{entitiesPackage}}.event";
 
-        // inbound services / primary ports (use cases)
-        inboundPackage = "{{moduleBasePackage}}.application.usecases";
-        inboundDtosPackage = "{{moduleBasePackage}}.application.usecases.dtos";
+        // Use Cases ring: Input Boundary
+        inboundPackage = "{{moduleBasePackage}}.usecase.boundary.input";
+        inboundDtosPackage = "{{inboundPackage}}.dto";
 
-        // outbound / secondary ports (interfaces)
-        outboundPackage = "{{moduleBasePackage}}.application.ports";
-        outboundRepositoryPackage = "{{moduleBasePackage}}.application.ports.{{persistence}}";
-        // outbound / secondary ports for events (internal and asyncapi)
-        outboundEventsPackage = "{{moduleBasePackage}}.application.ports.events";
-        // asyncapi events dtos
-        outboundEventsModelPackage = "{{moduleBasePackage}}.application.ports.events.dtos";
+        // Use Cases ring: Output Boundary / Data Access Interfaces
+        outboundPackage = "{{moduleBasePackage}}.usecase.boundary.output";
+        outboundRepositoryPackage = "{{outboundPackage}}.{{persistence}}";
+        outboundEventsPackage = "{{outboundPackage}}.event";
+        outboundEventsModelPackage = "{{outboundEventsPackage}}.dto";
 
-        // core implementation (use case implementations)
-        coreImplementationPackage = "{{moduleBasePackage}}.application.services";
-        coreImplementationMappersPackage = "{{moduleBasePackage}}.application.mappers";
+        // Use Cases ring: Interactors
+        coreImplementationPackage = "{{moduleBasePackage}}.usecase.interactor";
+        coreImplementationMappersPackage = "{{coreImplementationPackage}}.mapper";
 
-        // infrastructure / secondary adapters
-        infrastructurePackage = "{{moduleBasePackage}}.infrastructure";
-        infrastructureRepositoryPackage = "{{moduleBasePackage}}.infrastructure.{{persistence}}";
-        // infrastructure / secondary adapters for events
-        infrastructureEventsPackage = "{{moduleBasePackage}}.infrastructure.events";
+        // Interface Adapters ring: Gateways
+        infrastructurePackage = "{{moduleBasePackage}}.adapter.gateway";
+        infrastructureRepositoryPackage = "{{infrastructurePackage}}.{{persistence}}";
+        infrastructureEventsPackage = "{{infrastructurePackage}}.event";
 
-        // primary adapters (web, events, commands)
-        adaptersPackage = "{{moduleBasePackage}}.adapters";
-        adaptersWebPackage = "{{moduleBasePackage}}.adapters.web";
-        adaptersWebMappersPackage = "{{moduleBasePackage}}.adapters.web.mappers";
-        adaptersCommandsPackage = "{{moduleBasePackage}}.adapters.commands";
-        adaptersCommandsMappersPackage = "{{moduleBasePackage}}.adapters.commands.mappers";
-        adaptersEventsPackage = "{{moduleBasePackage}}.adapters.events{{#if apiId}}.{{apiId}}{{/if}}";
-        adaptersEventsMappersPackage = "{{adaptersEventsPackage}}.mappers";
+        // Interface Adapters ring: Controllers, Listeners, Handlers
+        adaptersPackage = "{{moduleBasePackage}}.adapter";
+        adaptersWebPackage = "{{adaptersPackage}}.controller";
+        adaptersWebMappersPackage = "{{adaptersWebPackage}}.mapper";
+        adaptersCommandsPackage = "{{adaptersPackage}}.handler";
+        adaptersCommandsMappersPackage = "{{adaptersCommandsPackage}}.mapper";
+        adaptersEventsPackage = "{{adaptersPackage}}.listener{{#if apiId}}.{{apiId}}{{/if}}";
+        adaptersEventsMappersPackage = "{{adaptersEventsPackage}}.mapper";
 
         // openapi generated packages
         openApiApiPackage = "{{adaptersWebPackage}}";
-        openApiModelPackage = "{{adaptersWebPackage}}.dtos";
-        // asyncapi generated packages (not in use yet)
-        asyncApiModelPackage = "{{moduleBasePackage}}.application.ports.events.dtos"; // right now is outboundEventsModelPackage
-        asyncApiProducerApiPackage = "{{moduleBasePackage}}.application.ports.events"; // right now is outboundEventsPackage
-        asyncApiConsumerApiPackage = "{{moduleBasePackage}}.adapters.commands"; // right now is adaptersCommandsPackage
+        openApiModelPackage = "{{adaptersWebPackage}}.dto";
+        // asyncapi generated packages
+        asyncApiModelPackage = "{{outboundEventsModelPackage}}";
+        asyncApiProducerApiPackage = "{{outboundEventsPackage}}";
+        asyncApiConsumerApiPackage = "{{adaptersCommandsPackage}}";
 
-        // common packages (for base classes in monolithic projects)
-        entitiesCommonPackage = "{{commonPackage}}.domain.entities";
-        domainEventsCommonPackage = "{{commonPackage}}.domain.events";
-        coreImplementationCommonPackage = "{{commonPackage}}.application.services";
-        coreImplementationMappersCommonPackage = "{{commonPackage}}.application.mappers";
-        infrastructureRepositoryCommonPackage = "{{commonPackage}}.infrastructure.{{persistence}}";
-        infrastructureEventsCommonPackage = "{{commonPackage}}.infrastructure.events";
-        adaptersWebCommonPackage = "{{commonPackage}}.adapters.web";
-        adaptersWebMappersCommonPackage = "{{commonPackage}}.adapters.web.mappers";
-        adaptersCommandsCommonPackage = "{{commonPackage}}.adapters.commands";
-        adaptersCommandsMappersCommonPackage = "{{commonPackage}}.adapters.commands.mappers";
-        adaptersEventsCommonPackage = "{{commonPackage}}.adapters.events";
-        adaptersEventsMappersCommonPackage = "{{commonPackage}}.adapters.events.mappers";
-
+        // common packages (for base classes in modular projects)
+        entitiesCommonPackage = "{{commonPackage}}.domain";
+        domainEventsCommonPackage = "{{entitiesCommonPackage}}.event";
+        coreImplementationCommonPackage = "{{commonPackage}}.usecase.interactor";
+        coreImplementationMappersCommonPackage = "{{coreImplementationCommonPackage}}.mapper";
+        infrastructureRepositoryCommonPackage = "{{commonPackage}}.adapter.gateway.{{persistence}}";
+        infrastructureEventsCommonPackage = "{{commonPackage}}.adapter.gateway.event";
+        adaptersWebCommonPackage = "{{commonPackage}}.adapter.controller";
+        adaptersWebMappersCommonPackage = "{{adaptersWebCommonPackage}}.mapper";
+        adaptersCommandsCommonPackage = "{{commonPackage}}.adapter.handler";
+        adaptersCommandsMappersCommonPackage = "{{adaptersCommandsCommonPackage}}.mapper";
+        adaptersEventsCommonPackage = "{{commonPackage}}.adapter.listener";
+        adaptersEventsMappersCommonPackage = "{{adaptersEventsCommonPackage}}.mapper";
     }
 
 }

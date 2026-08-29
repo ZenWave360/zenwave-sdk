@@ -171,9 +171,16 @@ public class BackendApplicationDefaultHelpers {
         return ZDLJavaSignatureUtils.methodParameterType(method, zdl);
     }
 
-    public String methodParametersSignature(Map<String, Object> method, Options options) {
+    /**
+     * {@code {{methodParametersSignature "inbound.service-port" method}}} scopes parameter
+     * annotations to the artifact the template generates. The legacy {@code {{methodParametersSignature method}}}
+     * form still works and renders artifact independent annotations only.
+     */
+    public String methodParametersSignature(Object artifactTypeOrMethod, Options options) {
         var zdl = (Map) options.get("zdl");
-        return ZDLJavaSignatureUtils.methodParametersSignature(generator.getIdJavaType(), method, zdl);
+        var artifactType = artifactTypeOrMethod instanceof String type ? type : null;
+        var method = (Map<String, Object>) (artifactType != null ? options.param(0) : artifactTypeOrMethod);
+        return ZDLJavaSignatureUtils.methodParametersSignature(artifactType, generator.getIdJavaType(), method, zdl);
     }
 
     public String methodParametersCallSignature(Map<String, Object> method, Options options) {
@@ -436,8 +443,15 @@ public class BackendApplicationDefaultHelpers {
         return MapperSupport.wrapWithMapper(method, entity, returnType);
     }
 
-    public String returnType(Map<String, Object> method, Options options) {
-        return ZDLJavaSignatureUtils.methodReturnType(method);
+    /**
+     * {@code {{returnType "inbound.service-port" method}}} scopes return type annotations to the
+     * artifact the template generates. The legacy {@code {{returnType method}}} and bare
+     * {@code {{returnType}}} forms still work and render artifact independent annotations only.
+     */
+    public String returnType(Object artifactTypeOrMethod, Options options) {
+        var artifactType = artifactTypeOrMethod instanceof String type ? type : null;
+        var method = (Map<String, Object>) (artifactType != null ? options.param(0) : artifactTypeOrMethod);
+        return ZDLJavaSignatureUtils.methodReturnType(artifactType, method);
     }
 
     public String fieldType(Map field, Options options) {

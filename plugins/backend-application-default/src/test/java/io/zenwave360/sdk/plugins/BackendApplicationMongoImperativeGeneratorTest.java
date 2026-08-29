@@ -49,7 +49,7 @@ public class BackendApplicationMongoImperativeGeneratorTest {
 
         List<String> logs = logCaptor.getLogs();
         Assertions.assertTrue(logs.contains("Writing template with targetFile: customer-address-domain/src/main/java/io/zenwave360/example/core/domain/Customer.java"));
-        Assertions.assertTrue(logs.contains("Writing template with targetFile: customer-address-core-impl/src/main/java/io/zenwave360/example/core/implementation/CustomerServiceImpl.java"));
+        Assertions.assertTrue(logs.contains("Writing template with targetFile: customer-address-core-impl/src/main/java/io/zenwave360/example/core/application/CustomerServiceImpl.java"));
     }
 
     @Test
@@ -152,7 +152,7 @@ public class BackendApplicationMongoImperativeGeneratorTest {
 
         // Verify service uses typed results and explicit publishing
         var serviceFile = new java.io.File(targetFolder,
-                "src/main/java/io/zenwave360/example/core/implementation/OrdersServiceImpl.java");
+                "src/main/java/io/zenwave360/example/core/application/OrdersServiceImpl.java");
         Assertions.assertTrue(serviceFile.exists(), "Service file should exist");
         var serviceContent = new String(java.nio.file.Files.readAllBytes(serviceFile.toPath()));
         Assertions.assertTrue(serviceContent.contains("var result = customerOrderAggregate."),
@@ -257,7 +257,7 @@ public class BackendApplicationMongoImperativeGeneratorTest {
         new MainGenerator().generate(plugin);
 
         var serviceFile = new java.io.File(targetFolder,
-                "src/main/java/io/zenwave360/example/core/implementation/OrderServiceImpl.java");
+                "src/main/java/io/zenwave360/example/core/application/OrderServiceImpl.java");
         var transitionsFile = new java.io.File(targetFolder,
                 "src/main/java/io/zenwave360/example/core/domain/OrderTransitions.java");
         Assertions.assertTrue(serviceFile.exists(), "Service impl file should exist");

@@ -2,18 +2,14 @@ package io.zenwave360.sdk.plugins;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.options.PersistenceType;
-import io.zenwave360.sdk.plugins.annotators.AnnotationHelper;
-import io.zenwave360.sdk.plugins.annotators.JSpecifyAnnotator;
 import io.zenwave360.sdk.templating.TemplateInput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.CleanArchitectureProjectLayout;
 import io.zenwave360.sdk.zdl.layouts.CleanHexagonalProjectLayout;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
-import io.zenwave360.sdk.zdl.utils.ZDLAnnotator;
 import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +23,8 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
     @DocumentedOption(description = "Whether to use Spring Modulith annotations and features")
     public boolean useSpringModulith = false;
 
-    @DocumentedOption(description = "Whether to use JSpecify for nullability annotations")
-    public boolean useJSpecify = false;
+    /** Bound from the flat 'useJMolecules' option, the same one ZDLProcessor reads. */
+    public boolean useJMolecules = false;
 
     public PersistenceType persistence = PersistenceType.mongodb;
 
@@ -83,6 +79,7 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
     protected Function<Map<String, Object>, Boolean> skipInput = (model) -> is(model, "inline");
 
     protected Function<Map<String, Object>,Boolean> skipModulith = (model) -> !useSpringModulith;
+    protected Function<Map<String, Object>,Boolean> skipJMolecules = (model) -> !useJMolecules;
     protected Function<Map<String, Object>,Boolean> skipListenerMappers = (model) ->
             JSONPath.get(model, "$.listenerGroup.mapperBindings", List.of()).isEmpty();
     protected Function<Map<String, Object>,Boolean> skipModulithCommonModule = (model) ->
@@ -93,17 +90,7 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
     protected Function<Map<String, Object>,Boolean> skipInfrastructurePackageInfo = (model) ->
             layout.moduleBasePackage.equals(layout.infrastructurePackage);
 
-    @Override
-    public List<ZDLAnnotator> getZDLAnnotators() {
-        var annotators = new ArrayList<>(super.getZDLAnnotators());
-        if(useJSpecify) {
-            annotators.add(new JSpecifyAnnotator());
-        }
-        return annotators;
-    }
-
     public BackendApplicationProjectTemplates() {
-        addTemplateHelpers(null, AnnotationHelper.class);
 
         setTemplatesFolder("io/zenwave360/sdk/plugins/BackendApplicationDefaultGenerator");
 
@@ -213,5 +200,8 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
 
         this.addTemplate(this.singleTemplates, "src/test/java", "ArchitectureTest.java",
                 layoutNames.moduleBasePackage, "ArchitectureTest.java", JAVA, skipCleanArchitecture, true);
+        // annotation driven, so unlike ArchitectureTest it is not tied to one layout
+        this.addTemplate(this.singleTemplates, "src/test/java", "JMoleculesArchitectureTest.java",
+                layoutNames.moduleBasePackage, "JMoleculesArchitectureTest.java", JAVA, skipJMolecules, true);
     }
 }

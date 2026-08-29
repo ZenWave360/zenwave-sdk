@@ -120,7 +120,7 @@ public class BackendApplicationJpaImperativeGeneratorTest {
                 "Aggregate transitions should derive current state from the lifecycle field");
 
         var serviceFile = new java.io.File(targetFolder,
-                "src/main/java/io/zenwave360/example/core/implementation/AddressServiceImpl.java");
+                "src/main/java/io/zenwave360/example/core/application/AddressServiceImpl.java");
         var entityTransitionsFile = new java.io.File(targetFolder,
                 "src/main/java/io/zenwave360/example/core/domain/AddressTransitions.java");
         Assertions.assertTrue(serviceFile.exists(), "Address service impl file should exist");
@@ -157,7 +157,7 @@ public class BackendApplicationJpaImperativeGeneratorTest {
         new MainGenerator().generate(plugin);
 
         var serviceFile = new java.io.File(targetFolder,
-                "src/main/java/io/zenwave360/example/core/implementation/OrderServiceImpl.java");
+                "src/main/java/io/zenwave360/example/core/application/OrderServiceImpl.java");
         var transitionsFile = new java.io.File(targetFolder,
                 "src/main/java/io/zenwave360/example/core/domain/OrderTransitions.java");
         Assertions.assertTrue(serviceFile.exists(), "Service impl file should exist");

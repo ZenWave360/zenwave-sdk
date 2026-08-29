@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
  */
 @SuppressWarnings("unused")
 @Repository
+{{annotate "outbound.repository-port" entity.javaEntity entity}}
 public interface {{entity.className}}Repository extends JpaRepository<{{entity.className}}, {{idJavaType}}> {
 
 {{~#if aggregate}}

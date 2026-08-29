@@ -42,7 +42,7 @@ public class SpringWebTestClientGeneratorTest {
         };
 
         for (String openapi : openapis) {
-            int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/pom.xml", targetFolder(openapi), "openapi.yml=" + OPENAPI_RESOURCES + openapi);
+            int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/webtestclient-pom.xml", targetFolder(openapi), "openapi.yml=" + OPENAPI_RESOURCES + openapi);
             Assertions.assertEquals(0, exitCode, "Compilation failed for " + openapi);
         }
     }
@@ -120,7 +120,7 @@ public class SpringWebTestClientGeneratorTest {
         String testPackageFolder = testPackage.replaceAll("\\.", "/");
         Assertions.assertEquals("src/test/java/" + testPackageFolder + "/" + camelCase(operationIds.replaceAll(",", "_")) +".java", templateOutputList.get(0).getTargetFile());
 
-//        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
+//        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/webtestclient-pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
 //        Assertions.assertEquals(0, exitCode);
     }
 
@@ -152,7 +152,7 @@ public class SpringWebTestClientGeneratorTest {
             Assertions.assertTrue(file.exists(), "File " + file.getAbsolutePath() + " does not exist");
         });
 
-//        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
+//        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/webtestclient-pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
 //        Assertions.assertEquals(0, exitCode);
     }
 
@@ -184,7 +184,7 @@ public class SpringWebTestClientGeneratorTest {
             Assertions.assertTrue(file.exists(), "File " + file.getAbsolutePath() + " does not exist");
         });
 
-//        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
+//        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/webtestclient-pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
 //        Assertions.assertEquals(0, exitCode);
     }
 
@@ -217,7 +217,7 @@ public class SpringWebTestClientGeneratorTest {
             Assertions.assertTrue(file.exists(), "File " + file.getAbsolutePath() + " does not exist");
         });
 
-//        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
+//        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/webtestclient-pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
 //        Assertions.assertEquals(0, exitCode);
     }
 
@@ -247,7 +247,7 @@ public class SpringWebTestClientGeneratorTest {
             Assertions.assertTrue(file.exists(), "File " + file.getAbsolutePath() + " does not exist");
         });
 
-//        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
+//        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/webtestclient-pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
 //        Assertions.assertEquals(0, exitCode);
     }
 
@@ -277,7 +277,7 @@ public class SpringWebTestClientGeneratorTest {
             Assertions.assertTrue(file.exists(), "File " + file.getAbsolutePath() + " does not exist");
         });
 
-//        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
+//        int exitCode = MavenCompiler.copyPomAndCompile("src/test/resources/webtestclient-pom.xml", targetFolder, "openapi.yml=" + OPENAPI_RESOURCES + openapi);
 //        Assertions.assertEquals(0, exitCode);
     }
 

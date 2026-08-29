@@ -10,6 +10,9 @@ config {
 
     layout HexagonalProjectLayout
 
+    // jMolecules annotations: applies to every plugin whose chain includes ZDLProcessor
+    useJMolecules true
+
     plugins {
 
         ZDLToOpenAPIPlugin {

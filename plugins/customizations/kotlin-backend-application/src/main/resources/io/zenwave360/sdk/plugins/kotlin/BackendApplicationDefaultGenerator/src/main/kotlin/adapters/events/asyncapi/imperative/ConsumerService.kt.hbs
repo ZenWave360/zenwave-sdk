@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component
  * Developer-owned AsyncAPI adapter. This file is generated once.
  */
 @Component
+{{annotate "adapter.asyncapi-consumer"}}
 class {{consumerServiceName}}(
 {{#each serviceDependencies as |dependency|}}
     private val {{dependency.serviceVariable}}: {{dependency.serviceType}}{{#unless @last}},{{/unless}}

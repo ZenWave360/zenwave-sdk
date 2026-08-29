@@ -17,6 +17,7 @@ import java.util.Optional;
  */
 @SuppressWarnings("unused")
 @Repository
+{{annotate "outbound.repository-port" entity.javaEntity entity}}
 public interface {{entity.className}}Repository extends MongoRepository<{{entity.className}}, String> {
 
 {{~#if aggregate}}

@@ -9,6 +9,7 @@ import jakarta.validation.constraints.*
 /**
 * {{entity.comment}}
 */
+{{annotate "domain.entity" entity.javaEntity entity}}
 data class {{entity.className}}(
 {{#each entity.fields as |field|}}
     {{#each field.validations as |validation|~}}
