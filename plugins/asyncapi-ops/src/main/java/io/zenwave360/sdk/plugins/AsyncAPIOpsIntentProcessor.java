@@ -37,12 +37,18 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
     @DocumentedOption(description = "Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Used to merge x-env-server-overrides/env-server-overrides from channel and error-topic bindings.")
     public String server;
 
+    @DocumentedOption(description = "Selects which values a channel address parameter expands to, as parameterValues.<name>=v1,v2 (every channel using that name, enum required) or parameterValues.<channelKey>.<name>=v1 (that channel only, also accepted for parameters with no enum). Values are validated against each channel's own enum.")
+    public Map<String, Object> parameterValues = new LinkedHashMap<>();
+
     @DocumentedOption(description = "Context key holding the list of AsyncAPI models loaded by AsyncAPIOpsSpecLoader.")
     public String sourceProperty = "apis";
+
+    private AsyncAPIOpsChannelAddressResolver addressResolver;
 
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
         List<Model> apis = (List<Model>) contextModel.getOrDefault(sourceProperty, List.of());
+        addressResolver = new AsyncAPIOpsChannelAddressResolver(parameterValues);
 
         if (apis.isEmpty()) {
             log.warn("No AsyncAPI models found under context key '{}'. Intent will be empty.", sourceProperty);
@@ -56,6 +62,8 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
             processModel(apiModel, apiNamespaces.get(apiModel), intent);
         }
 
+        addressResolver.warnUnusedParameterValues();
+
         contextModel.put("intent", intent);
         return contextModel;
     }
@@ -65,9 +73,18 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
         Map<String, Map> operations = JSONPath.get(apiModel, "$.operations", Collections.emptyMap());
 
         for (Map.Entry<String, Map> entry : channels.entrySet()) {
+            // Resolved for every channel, owned or external, so a skipped one is reported even
+            // when no operation references it.
+            var resolution = addressResolver.resolve(entry.getKey(), entry.getValue());
+            if (resolution.isSkipped()) {
+                intent.addSkippedChannel(entry.getKey(), (String) entry.getValue().get("address"), resolution.unresolvedParameter());
+                continue;
+            }
             if (isOwnedChannel(entry.getValue())) {
-                intent.topics.add(buildOwnedTopic(entry.getKey(), entry.getValue()));
-                intent.schemas.addAll(buildSchemas(apiModel, apiNamespace, entry.getKey(), entry.getValue()));
+                for (String address : resolution.addresses()) {
+                    intent.topics.add(buildOwnedTopic(address, entry.getValue()));
+                    intent.schemas.addAll(buildSchemas(apiModel, apiNamespace, entry.getKey(), entry.getValue(), address));
+                }
             }
         }
 
@@ -93,9 +110,9 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
     // Topics
     // -------------------------------------------------------------------------
 
-    private AsyncAPIOpsIntent.TopicIntent buildOwnedTopic(String channelName, Map channel) {
+    /** @param address the channel address with all parameter expressions already resolved */
+    private AsyncAPIOpsIntent.TopicIntent buildOwnedTopic(String address, Map channel) {
         AsyncAPIOpsIntent.TopicIntent topic = new AsyncAPIOpsIntent.TopicIntent();
-        String address = (String) channel.get("address");
         topic.topicName = address;
         topic.resourceName = toTerraformId(address);
 
@@ -127,10 +144,9 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
     // Schemas (owned channels only)
     // -------------------------------------------------------------------------
 
-    private List<AsyncAPIOpsIntent.SchemaIntent> buildSchemas(Model apiModel, String apiNamespace, String channelName, Map channel) {
+    private List<AsyncAPIOpsIntent.SchemaIntent> buildSchemas(Model apiModel, String apiNamespace, String channelName, Map channel, String topicAddress) {
         List<AsyncAPIOpsIntent.SchemaIntent> result = new ArrayList<>();
         Map<String, Map> messages = JSONPath.get(channel, "$.messages", Collections.emptyMap());
-        String topicAddress = (String) channel.get("address");
 
         for (Map.Entry<String, Map> entry : messages.entrySet()) {
             String messageName = entry.getKey();
@@ -198,24 +214,40 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
             return;
         }
 
-        String topicAddress = (String) operationChannel.get("address");
-        if (topicAddress == null || principal == null) {
+        String channelAddress = (String) operationChannel.get("address");
+        if (channelAddress == null || principal == null) {
             return;
         }
+
+        String channelKey = (String) operationChannel.get("x--channel");
+        var resolution = addressResolver.resolve(channelKey, operationChannel);
+        if (resolution.isSkipped()) {
+            // Unbounded parameter: no concrete topic exists anywhere, so there is nothing to grant
+            // access to. A PREFIXED grant is not safe here — sibling channels can share the stem.
+            intent.addSkippedChannel(channelKey, channelAddress, resolution.unresolvedParameter());
+            return;
+        }
+        List<String> topicAddresses = resolution.addresses();
 
         boolean isSend = "send".equals(action);
         boolean isReceive = "receive".equals(action);
 
-        // ACLs for the main topic
-        if (isSend) {
-            addTopicAcl(topicAddress, principal, "Write", intent);
-            addTopicAcl(topicAddress, principal, "Describe", intent);
-            addTransactionalAclIfNeeded(kafkaBinding, principal, intent);
-        } else if (isReceive) {
-            addTopicAcl(topicAddress, principal, "Read", intent);
-            addTopicAcl(topicAddress, principal, "Describe", intent);
+        // ACLs for the main topic — one set per resolved address
+        for (String topicAddress : topicAddresses) {
+            if (isSend) {
+                addTopicAcl(topicAddress, principal, "Write", intent);
+                addTopicAcl(topicAddress, principal, "Describe", intent);
+            } else if (isReceive) {
+                addTopicAcl(topicAddress, principal, "Read", intent);
+                addTopicAcl(topicAddress, principal, "Describe", intent);
+            }
+            addSchemaRegistryReadBindings(operationChannel, topicAddress, principal, intent);
         }
-        addSchemaRegistryReadBindings(operationChannel, principal, intent);
+
+        // Transactional id is address-independent
+        if (isSend) {
+            addTransactionalAclIfNeeded(kafkaBinding, principal, intent);
+        }
 
         // Error topics for receive operations
         if (isReceive) {
@@ -225,7 +257,9 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
             }
             Map errorTopics = getErrorTopicsConfig(operation);
             if (errorTopics != null && groupId != null) {
-                expandErrorTopics(errorTopics, groupId, topicAddress, principal, intent);
+                for (String topicAddress : topicAddresses) {
+                    expandErrorTopics(errorTopics, groupId, topicAddress, principal, intent);
+                }
             }
         }
     }
@@ -373,8 +407,7 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
         return "PREFIXED".equals(patternType) ? "Prefixed" : "Literal";
     }
 
-    private void addSchemaRegistryReadBindings(Map operationChannel, String principal, AsyncAPIOpsIntent intent) {
-        String topicAddress = (String) operationChannel.get("address");
+    private void addSchemaRegistryReadBindings(Map operationChannel, String topicAddress, String principal, AsyncAPIOpsIntent intent) {
         Map<String, Map> messages = JSONPath.get(operationChannel, "$.messages", Collections.emptyMap());
         for (Map.Entry<String, Map> entry : messages.entrySet()) {
             Map message = entry.getValue();

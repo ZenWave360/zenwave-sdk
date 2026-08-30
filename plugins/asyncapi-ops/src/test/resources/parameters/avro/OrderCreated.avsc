@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "OrderCreated",
+  "namespace": "io.zenwave360.parameters",
+  "fields": [
+    {
+      "name": "orderId",
+      "type": "string"
+    }
+  ]
+}

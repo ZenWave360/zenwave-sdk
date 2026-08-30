@@ -104,6 +104,7 @@ This plugin has been tested in the following setups:
 | `avroImports`    | Additional Avro schema files or folders available while bundling owned message schemas. Sibling `.avsc` files are discovered automatically for local and `classpath:` schemas. Supports local files/folders, `classpath:` files/folders and `https://` files. | List     | `[]`             |                               |
 | `authentication` | Authentication configuration values for fetching remote resources.                                                                                                           | List     | `[]`             |                               |
 | `server`         | Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Used to merge `x-env-server-overrides`/`env-server-overrides` from channel and error-topic bindings. | String   | `null`           |                               |
+| `parameterValues` | Selects which values a channel address parameter expands to. `parameterValues.<name>=v1,v2` restricts every channel using that parameter name to a subset of its declared `enum`; `parameterValues.<channelKey>.<name>=v1` overrides a single channel and is also the only form that can supply values for a parameter with no `enum`. Validated against each channel's own `enum`. | Map      | `{}`             |                               |
 | `templates`      | Templates to use for code generation.                                                                                                                                        | String   | `TerraformKafka` | TerraformKafka, TerraformConfluent, TerraformConfluentHybrid, FQ Class Name |
 | `serviceAccountMode` | Resolve existing Confluent service accounts by display name, or provision them as managed Terraform resources.                                                         | String   | `existing`       | existing, managed             |
 | `targetFolder`   | Output directory for `.tf` files.                                                                                                                                            | File     | `null`           |                               |
@@ -187,6 +188,84 @@ channels:
 ACLs follow the operation direction: `send` gets WRITE + DESCRIBE, `receive` gets READ + DESCRIBE. Every operation gets ACLs regardless of ownership.
 
 Run it once per service, passing both the provider spec and the client spec. The right resources come out the other side.
+
+## Channel Address Parameters
+
+Channel addresses can contain `{parameter}` expressions. How the generator resolves them depends on whether the AsyncAPI [Parameter Object](https://www.asyncapi.com/docs/reference/specification/v3.0.0#parameterObject) declares an `enum`.
+
+### Enumerable parameters → one resource set per value
+
+When `parameters.<name>.enum` is present, the spec is the source of truth and no CLI input is required. One topic (plus its Schema Registry subjects, ACLs and retry/DLQ topics) is generated per declared value:
+
+```yaml
+channels:
+  orderCreated:
+    address: 'orders.{region}.created'
+    parameters:
+      region:
+        enum: [eu, us, apac]
+        default: eu
+```
+
+```hcl
+resource "kafka_topic" "orders_eu_created"   { name = "orders.eu.created"   ... }
+resource "kafka_topic" "orders_us_created"   { name = "orders.us.created"   ... }
+resource "kafka_topic" "orders_apac_created" { name = "orders.apac.created" ... }
+```
+
+`default` is not used for selection — it is a runtime hint, not a provisioning instruction. Terraform resource names are derived from the full resolved address, so every expansion is unique.
+
+Several enumerable parameters on one address expand as a cross product: `orders.{region}.{tenant}.shipped` with 3 regions and 2 tenants provisions 6 topics. Address-independent resources are not multiplied — the consumer group and transactional-id ACLs are still emitted once per operation.
+
+### Restricting the expansion per invocation: `parameterValues`
+
+Use `parameterValues` to generate only a subset of the declared `enum` for a given run, following the same dotted CLI convention as `authentication.key`:
+
+```shell
+jbang zw -p AsyncAPIOpsGeneratorPlugin \
+  apiFile=asyncapi.yml \
+  server=staging \
+  parameterValues.region=eu,us \
+  parameterValues.orderCreated.region=eu \
+  targetFolder=terraform/orders
+```
+
+- `parameterValues.<name>` — applies to every channel parameter with that name, whether it is inlined per channel or a `$ref` to `components.parameters`
+- `parameterValues.<channelKey>.<name>` — applies to that channel only, and overrides the bare form for it
+
+Most specific wins: channel-scoped value → bare value → the channel's full `enum`. Selected values are emitted in `enum` declaration order, so the generated Terraform is stable regardless of the order they were typed.
+
+Validation is **per channel**, never global. Every supplied value must belong to that channel's own `enum`, and two channels using the same parameter name are never assumed to share allowed values:
+
+```
+parameterValues.region=us is not valid for channel userSignedUp (allowed: dev, staging)
+```
+
+### Unbounded parameters → channel skipped by default
+
+A parameter without an `enum` (`{streetlightId}`, `{userId}`, `{orderId}`) only has values at runtime. By default that channel is not provisionable and is skipped with a warning naming the channel and the parameter:
+
+- **No topic or schema** — Kafka topics need concrete literal names; there is no way to provision "all possible values".
+- **No ACLs either.** A `PREFIXED` pattern was considered and rejected: `orders.{regionId}.created` and `orders.{customerId}.cancelled` share the stem `orders.`, so an automatically-derived prefix grant could hand one principal access to a sibling channel's topics. This goes one step further than external channels, which still get ACLs because their topic is provisioned elsewhere — here there is no concrete topic anywhere to grant access to.
+- The rest of the run is unaffected; generation does not fail.
+
+### Provisioning an unbounded parameter anyway
+
+Naming the channel explicitly supplies the values the spec does not declare, and the channel is then generated like any other:
+
+```shell
+jbang zw -p AsyncAPIOpsGeneratorPlugin \
+  apiFile=asyncapi.yml \
+  parameterValues.streetlightMeasured.streetlightId=1,2,3 \
+  targetFolder=terraform/streetlights
+```
+
+**Only the channel-scoped form works here.** A bare `parameterValues.streetlightId=1,2,3` is ignored for parameters without an `enum` — it would reach every channel using that name across every spec in the run, and there is no `enum` to catch a mistake. Naming the channel means you meant that channel.
+
+Two things follow from there being no declared `enum`:
+
+- Supplied values are **not validated** — a typo becomes a real topic. The values are emitted in the order given, since there is no declaration order to fall back to.
+- The value set lives in the pipeline invocation, not in the spec, so two pipelines can generate different topic sets from the same file. Where that matters, prefer putting the truth in the spec: convert the parameter to an `enum`, or override the address to a literal value with `apiOverlayFiles`.
 
 ## AsyncAPI extensions used
 
