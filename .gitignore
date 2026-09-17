@@ -54,3 +54,6 @@ local.properties
 /_site/
 /.claude/settings.local.json
 /.m2*
+
+# Local Serena HTTP client wiring (localhost ports; do not commit)
+.grok/config.toml
