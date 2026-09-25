@@ -58,6 +58,13 @@ public class BackendApplicationKotlinHelpers {
         return ZDLJavaSignatureUtils.kotlinMethodParametersSignature(artifactType, generator.getIdJavaType(), method, zdl);
     }
 
+    public String nullableMethodParametersSignature(Object artifactTypeOrMethod, Options options) {
+        var zdl = (Map) options.get("zdl");
+        var artifactType = artifactTypeOrMethod instanceof String type ? type : null;
+        var method = (Map<String, Object>) (artifactType != null ? options.param(0) : artifactTypeOrMethod);
+        return ZDLJavaSignatureUtils.kotlinNullableMethodParametersSignature(artifactType, generator.getIdJavaType(), method, zdl);
+    }
+
     public String mapperInputSignature(String inputType, Options options) {
         var zdl = (Map) options.get("zdl");
         return ZDLJavaSignatureUtils.kotlinMapperInputSignature(inputType, zdl);

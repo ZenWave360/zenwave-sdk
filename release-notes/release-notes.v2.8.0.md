@@ -49,6 +49,14 @@ Two notes on scope: the check covers only the specs loaded in one invocation —
 
 ## Fixes
 
+### Kotlin event emission and MapStruct mapper generation
+
+Kotlin backend application generation now emits events from nullable update and patch results directly
+inside the existing `?.also { ... }` block, instead of generating Java `Optional.isPresent()` and
+`.get()` calls that produced invalid Kotlin. Event-mapper parameters are also nullable so Kotlin
+primitive types such as `Long` use boxed types in kapt stubs, allowing MapStruct to generate mappings
+for events emitted from service method parameters such as an entity id.
+
 ### Multi-word ACL operations on the Confluent templates
 
 `TerraformConfluent` and `TerraformConfluentHybrid` rendered ACL operations with `{{upper acl.operation}}`, which is correct only for single-word operations: `AlterConfigs` uppercased to `ALTERCONFIGS` instead of the required `ALTER_CONFIGS`. The bug was latent because every operation emitted until now (`Read`, `Write`, `Describe`) is a single word; `ALTER_CONFIGS` is the first multi-word operation to reach a template.

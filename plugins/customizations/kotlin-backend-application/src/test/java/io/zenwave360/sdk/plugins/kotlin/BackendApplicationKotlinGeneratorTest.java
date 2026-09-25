@@ -32,6 +32,35 @@ public class BackendApplicationKotlinGeneratorTest {
     }
 
     @Test
+    public void test_generator_kotlin_project_with_events_uses_kotlin_nullability() throws Exception {
+        String targetFolder = "target/projects/kustomer-events-jpa";
+        Plugin plugin = new BackendApplicationDefaultPlugin()
+                .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address-relational.zdl")
+                .withTargetFolder(targetFolder)
+                .withOption("templates", "new " + BackendApplicationKotlinTemplates.class.getName())
+                .withOption("basePackage", "io.zenwave360.examples.kotlin")
+                .withOption("persistence", PersistenceType.jpa)
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("projectName", "customer-address")
+                .withOption("includeEmitEventsImplementation", true)
+                .withOption("forceOverwrite", true)
+                .withOption("haltOnFailFormatting", false);
+
+        new MainGenerator().generate(plugin);
+
+        var serviceFile = java.nio.file.Path.of(targetFolder,
+                "src/main/kotlin/io/zenwave360/examples/kotlin/core/application/CustomerServiceImpl.kt");
+        var serviceContent = java.nio.file.Files.readString(serviceFile);
+        Assertions.assertTrue(serviceContent.contains("eventsMapper.asCustomerEvent(it)"));
+        Assertions.assertFalse(serviceContent.contains(".isPresent()"));
+        Assertions.assertFalse(serviceContent.contains(".get()"));
+
+        var eventsMapperFile = serviceFile.resolveSibling("mappers").resolve("EventsMapper.kt");
+        var eventsMapperContent = java.nio.file.Files.readString(eventsMapperFile);
+        Assertions.assertTrue(eventsMapperContent.contains("fun asCustomerDeleted(id: Long?):"));
+    }
+
+    @Test
     @Disabled("Mongo compilation is not covered by e2e for Kotlin; enable locally to verify persistence-specific templates")
     public void test_generator_kotlin_project_mongodb() throws Exception {
         String targetFolder = "target/projects/kustomer-address-mongodb";
