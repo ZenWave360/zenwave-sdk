@@ -119,8 +119,10 @@ public class AsyncAPIOpsIntent {
         public String principal;
         /** Terraform identifier used to reference the provider-specific principal lookup */
         public String principalResourceName;
-        /** Read, Write, or Describe */
+        /** Mongey/kafka spelling: Read, Write, Describe, Create, Delete, Alter, AlterConfigs */
         public String operation;
+        /** confluentinc/confluent spelling of {@link #operation}: READ, WRITE, ALTER_CONFIGS, ... */
+        public String confluentOperation;
         public String permissionType = "Allow";
     }
 

@@ -427,6 +427,105 @@ x-error-topics:
     $ref: 'master/kafka-bindings.yml#/components/x-error-topics/dlq/compliance'
 ```
 
+### Document root: Kafka Streams internal topics
+
+A Kafka Streams application creates its own internal topics — changelog, repartition and join-window store topics — at startup with its own `AdminClient`, independently of the broker's `auto.create.topics.enable`. `x-kafka-streams-applications` authorizes that, scoped to a namespace the application owns exclusively, without modelling each internal topic as a channel.
+
+> Design and background notes, including the rationale for each modelling decision and what is deliberately *not* modelled: [docs/x-kafka-streams.md](docs/x-kafka-streams.md).
+
+The extension is declared at the **document root**, alongside `channels` and `operations`, because `application.id` belongs to the whole topology rather than to a single `send`/`receive` edge.
+
+```yaml
+x-kafka-streams-applications:
+  merchandising.inventory.inventory-adjustment.streams-app:
+    x-principal: "merchandising.inventory.inventory-adjustment"
+    x-transactionalIdPrefix: "merchandising.inventory.inventory-adjustment.streams-app-"
+```
+
+The map key **is** the `application.id`. In Kafka Streams `application.id` and `group.id` are the same value, so the key must match the effective `groupId`/`x-groupId` of a `receive` operation somewhere in the same generator run — the same `x-groupId` over `groupId` precedence used for retry/DLQ topics.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `x-principal` | string | Yes | Service account to authorize. Rendered as `User:<x-principal>`. |
+| `x-transactionalIdPrefix` | string | No | Only for `processing.guarantee=exactly_once_v2`. Its value is the `TRANSACTIONAL_ID` prefix to authorize. |
+| `topics` | array\<string\> | No | Explicit internal topic names. Replaces the prefix grant with one literal grant per name. |
+
+#### Unprefixed aliases
+
+The unprefixed spellings are **supported public aliases**, not accidental leniency. These names were proposed upstream for the official AsyncAPI Kafka bindings; the `x-` forms are what you use until that proposal is accepted, and the unprefixed forms are accepted now so that specs written against the standardized names work here already — before and after adoption, without a generator change.
+
+| Documented name | Also accepted |
+|---|---|
+| `x-kafka-streams-applications` (document root) | `kafka-streams-applications` |
+| `x-principal` | `principal` |
+| `x-transactionalIdPrefix` | `x-transactional-id-prefix`, `transactionalIdPrefix` |
+| `topics` | — already unprefixed; it is a field of the extension object, not a binding-level extension, so it takes no `x-` form |
+
+Where both a prefixed and an unprefixed spelling are present, the `x-` form wins — the same precedence `x-principal`/`principal` and `x-groupId`/`groupId` already follow on operation bindings. Prefer the `x-` forms today: they are unambiguously valid AsyncAPI vendor extensions, and this README documents them as the primary spelling for that reason.
+
+Each entry generates:
+
+| Resource | Pattern | Name | Operations | Condition |
+|----------|---------|------|------------|-----------|
+| `TOPIC` | `PREFIXED` | `<application.id>-` | `Create`, `Delete`, `Alter`, `AlterConfigs`, `Describe`, `Read`, `Write` | Only when `topics` is absent |
+| `TOPIC` | `LITERAL` | each entry of `topics` | `Create`, `Delete`, `Alter`, `AlterConfigs`, `Describe`, `Read`, `Write` | Only when `topics` is present |
+| `GROUP` | `LITERAL` | `<application.id>` | `Read` | Always |
+| `TRANSACTIONAL_ID` | `PREFIXED` | `x-transactionalIdPrefix` | `Write`, `Describe` | Only when `x-transactionalIdPrefix` is present |
+
+The two `TOPIC` rows are mutually exclusive — `topics` is an alternative mode, not an addition on top of the prefix grant. All grants go to `x-principal`.
+
+This is an authorization-only extension. It provisions no `kafka_topic` resources: partitions are computed by Kafka Streams from the upstream source topic's partition count (already declared on `channel.bindings.kafka.partitions`), and replication factor comes from the application's own `StreamsConfig` or the broker default. Neither is a value this generator could make authoritative.
+
+A single `PREFIXED` grant also means a topology refactor — a renamed `Materialized.as(...)`, a new `KStream.join(...)` — never forces a contract change, since internal topic names are implementation details of the topology.
+
+#### Auditing a closed list instead of a prefix
+
+Where governance prefers a closed, auditable list over an open-ended prefix grant, list the names explicitly:
+
+```yaml
+x-kafka-streams-applications:
+  merchandising.inventory.inventory-adjustment.streams-app:
+    x-principal: "merchandising.inventory.inventory-adjustment"
+    topics:
+      - merchandising.inventory.inventory-adjustment.streams-app-by-sku-store-changelog
+      - merchandising.inventory.inventory-adjustment.streams-app-by-sku-repartition
+```
+
+- **`topics` absent** — default: one `PREFIXED` grant on `<application.id>-`.
+- **`topics` present** — one `LITERAL` grant per name, same operation set, and *no* prefix grant. The two modes are mutually exclusive.
+- **`topics: []`** — no `TOPIC` ACL at all; the `GROUP` and `TRANSACTIONAL_ID` grants are still generated. Useful when internal topic management is handled entirely outside this extension.
+
+This does not pre-create the topics — Kafka Streams still creates them itself. If a topology change introduces an unlisted internal topic, Kafka Streams fails fast at startup with a `TopicAuthorizationException` naming exactly what needs to be added, rather than surfacing later as a partition-count mismatch.
+
+#### Validations
+
+Generation fails when:
+
+- The `application.id` matches no `receive` operation's effective group id in the run — an orphaned entry.
+- `x-principal` is missing or blank.
+- `x-transactionalIdPrefix` is present but not a non-blank string.
+- A `topics` entry falls outside `<application.id>-`, or the same internal topic is listed under two applications.
+- The granted prefix `<application.id>-` overlaps any other topic name known to the generator run (see below).
+
+Kafka matches `PREFIXED` ACLs by plain string prefix with no separator awareness, and the grant includes `Create`, `Alter` and `Delete` — so anything falling inside the prefix can be altered or deleted by the streams principal. The collision check therefore covers **every topic name the generator knows about, not only resolved channel addresses**:
+
+| Checked against | Why |
+|---|---|
+| Owned and external channel addresses | Ordinary business topics belonging to this or another service |
+| Generated retry/DLQ topic names | Equally real topics, provisioned by this same run |
+| `<other application.id>-` of every other declared application, in either direction | `orders-` and `orders-rebuild-` overlap: names exist that start with both, so one application's grant would cover the other's changelog topics |
+| The explicit `topics` of every other declared application | A listed internal topic must not fall inside a different application's prefix |
+| The literal stem of an unresolved channel address, in either direction | `orders-{tenant}` has no concrete address yet, but some expansion could land inside the namespace, so overlap is rejected conservatively |
+
+Two notes on the comparison:
+
+- It uses `<application.id>-`, the string actually granted, not the bare `application.id`. An `application.id` that shares a dot-separated stem with its own channels (`merchandising.inventory.inventory-adjustment` alongside `merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0`) is **not** a collision, since the address continues with `.` rather than `-`.
+- An application using explicit `topics` issues `LITERAL` grants only, so it has no prefix to over-match and is exempt from this check — but its namespace and its listed topics are still protected from other applications' prefixes.
+
+The unresolved-address check is conservative and can reject a spec that would in practice never collide; declaring the internal topics explicitly with `topics` is the escape hatch. An address that *begins* with a parameter expression has no literal stem to compare, so that case is logged rather than failing every application in the run.
+
+The collision check is necessarily scoped to the specs loaded in one generator invocation. Detecting the same clash against an `application.id` chosen in an unrelated repository needs a platform-level naming registry, not a provisioning-time check.
+
 ## Topic Configuration Defaults
 
 Kafka topic settings: partitions, replication factor, and topic configuration, can be defined at three levels. This section explains how the generator resolves them and what ends up in the generated Terraform.

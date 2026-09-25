@@ -1,0 +1,33 @@
+asyncapi: 3.0.0
+info:
+  title: Inventory Adjustment Stock Count Contract
+  version: 1.0.0
+  description: |
+    A second contract fed by the same Kafka Streams topology. Declares the same
+    x-kafka-streams-applications entry, which must be collected once rather than
+    generating a duplicate or conflicting set of grants.
+
+x-kafka-streams-applications:
+  merchandising.inventory.inventory-adjustment.streams-app:
+    x-principal: "merchandising.inventory.inventory-adjustment"
+    x-transactionalIdPrefix: "merchandising.inventory.inventory-adjustment.streams-app-"
+
+channels:
+  stock-count-event:
+    address: merchandising.inventory.stock-count.event.avro.v0
+    summary: Stock Count Event
+    messages: {}
+    bindings:
+      kafka:
+        partitions: 3
+        replicas: 3
+
+operations:
+  processStockCounts:
+    action: receive
+    channel:
+      $ref: '#/channels/stock-count-event'
+    bindings:
+      kafka:
+        x-principal: "merchandising.inventory.inventory-adjustment"
+        x-groupId: "merchandising.inventory.inventory-adjustment.streams-app"

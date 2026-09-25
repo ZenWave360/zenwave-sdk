@@ -5,6 +5,7 @@ import io.zenwave360.sdk.parsers.Model;
 import io.zenwave360.sdk.processors.Processor;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
+import io.zenwave360.sdk.utils.NamingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -58,9 +60,14 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
         intent.server = server;
 
         Map<Model, String> apiNamespaces = createApiNamespaces(apis);
+        StreamsScope streamsScope = new StreamsScope();
         for (Model apiModel : apis) {
-            processModel(apiModel, apiNamespaces.get(apiModel), intent);
+            processModel(apiModel, apiNamespaces.get(apiModel), streamsScope, intent);
         }
+
+        // Emitted after every spec is processed: the validations are cross-spec, and appending last
+        // keeps streams ACLs grouped at the end of the generated acls.tf.
+        processStreamsApplications(apis, streamsScope, intent);
 
         addressResolver.warnUnusedParameterValues();
 
@@ -68,7 +75,7 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
         return contextModel;
     }
 
-    private void processModel(Model apiModel, String apiNamespace, AsyncAPIOpsIntent intent) {
+    private void processModel(Model apiModel, String apiNamespace, StreamsScope streamsScope, AsyncAPIOpsIntent intent) {
         Map<String, Map> channels = JSONPath.get(apiModel, "$.channels", Collections.emptyMap());
         Map<String, Map> operations = JSONPath.get(apiModel, "$.operations", Collections.emptyMap());
 
@@ -80,6 +87,7 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
                 intent.addSkippedChannel(entry.getKey(), (String) entry.getValue().get("address"), resolution.unresolvedParameter());
                 continue;
             }
+            streamsScope.channelAddresses.addAll(resolution.addresses());
             if (isOwnedChannel(entry.getValue())) {
                 for (String address : resolution.addresses()) {
                     intent.topics.add(buildOwnedTopic(address, entry.getValue()));
@@ -89,7 +97,7 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
         }
 
         for (Map.Entry<String, Map> entry : operations.entrySet()) {
-            processOperation(entry.getValue(), intent);
+            processOperation(entry.getValue(), streamsScope, intent);
         }
     }
 
@@ -204,10 +212,20 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
     // Operations → ACLs + error topics
     // -------------------------------------------------------------------------
 
-    private void processOperation(Map operation, AsyncAPIOpsIntent intent) {
+    private void processOperation(Map operation, StreamsScope streamsScope, AsyncAPIOpsIntent intent) {
         String action = (String) operation.get("action");
         Map kafkaBinding = JSONPath.get(operation, "$.bindings.kafka", Collections.emptyMap());
         String principal = getStringFirst(kafkaBinding, "x-principal", "principal");
+
+        boolean isSend = "send".equals(action);
+        boolean isReceive = "receive".equals(action);
+
+        // Resolved above the early returns below, so an x-kafka-streams-applications entry is matched
+        // against every receive group in the run — including operations that contribute no ACLs.
+        String groupId = isReceive ? getGroupId(kafkaBinding) : null;
+        if (groupId != null) {
+            streamsScope.receiveGroupIds.add(groupId);
+        }
 
         Map operationChannel = JSONPath.get(operation, "$.channel");
         if (operationChannel == null) {
@@ -229,9 +247,6 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
         }
         List<String> topicAddresses = resolution.addresses();
 
-        boolean isSend = "send".equals(action);
-        boolean isReceive = "receive".equals(action);
-
         // ACLs for the main topic — one set per resolved address
         for (String topicAddress : topicAddresses) {
             if (isSend) {
@@ -251,7 +266,6 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
 
         // Error topics for receive operations
         if (isReceive) {
-            String groupId = getGroupId(kafkaBinding);
             if (groupId != null) {
                 addGroupAcl(groupId, principal, "Read", intent);
             }
@@ -391,6 +405,7 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
         acl.principal = principal;
         acl.principalResourceName = principalResourceName;
         acl.operation = operation;
+        acl.confluentOperation = NamingUtils.snakeCase(operation).toUpperCase();
         acl.resourceName = toTerraformId(resourceType + "_" + kafkaResourceName + "_" + principal + "_" + operation + "_" + patternType);
         intent.addAcl(acl);
     }
@@ -405,6 +420,288 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
 
     private String kafkaPatternType(String patternType) {
         return "PREFIXED".equals(patternType) ? "Prefixed" : "Literal";
+    }
+
+    // -------------------------------------------------------------------------
+    // x-kafka-streams-applications → internal topic / group / transactional id ACLs
+    // -------------------------------------------------------------------------
+
+    /**
+     * Cross-spec facts the {@code x-kafka-streams-applications} validations need: every resolved
+     * channel address in the run and every consumer group backing a receive operation.
+     */
+    private static class StreamsScope {
+        final Set<String> channelAddresses = new LinkedHashSet<>();
+        final Set<String> receiveGroupIds = new LinkedHashSet<>();
+    }
+
+    /**
+     * Fixed operation set granted on a Kafka Streams application's own internal topics
+     * (changelog, repartition and join-window store topics). Not configurable per entry.
+     */
+    private static final List<String> STREAMS_TOPIC_OPERATIONS =
+            List.of("Create", "Delete", "Alter", "AlterConfigs", "Describe", "Read", "Write");
+
+    /**
+     * Authorizes each declared Kafka Streams application to manage the internal topics it creates
+     * itself at startup, scoped to the namespace derived from its own {@code application.id}.
+     * This is an authorization-only extension: it declares no topics, partitions or replicas.
+     *
+     * <p>Every entry is parsed and validated before any ACL is emitted, because the collision checks
+     * compare each application's namespace against the other declared applications.
+     */
+    private void processStreamsApplications(List<Model> apis, StreamsScope streamsScope, AsyncAPIOpsIntent intent) {
+        List<StreamsApplication> applications = parseStreamsApplications(apis, streamsScope);
+        validateNoNamespaceCollisions(applications, streamsScope, intent);
+
+        for (StreamsApplication application : applications) {
+            if (application.grantsPrefix()) {
+                for (String operation : STREAMS_TOPIC_OPERATIONS) {
+                    addKafkaAcl("TOPIC", application.namespace(), "PREFIXED", application.principal, operation, intent);
+                }
+            } else {
+                for (String topic : application.topics) {
+                    for (String operation : STREAMS_TOPIC_OPERATIONS) {
+                        addKafkaAcl("TOPIC", topic, "LITERAL", application.principal, operation, intent);
+                    }
+                }
+            }
+
+            // Usually a duplicate of the grant the matching receive operation already produced;
+            // addAcl() dedupes, and emitting it keeps the extension self-describing.
+            addKafkaAcl("GROUP", application.id, "LITERAL", application.principal, "Read", intent);
+
+            if (application.transactionalIdPrefix != null) {
+                addKafkaAcl("TRANSACTIONAL_ID", application.transactionalIdPrefix, "PREFIXED",
+                        application.principal, "Write", intent);
+                addKafkaAcl("TRANSACTIONAL_ID", application.transactionalIdPrefix, "PREFIXED",
+                        application.principal, "Describe", intent);
+            }
+        }
+    }
+
+    /** One validated {@code x-kafka-streams-applications} entry. */
+    private static class StreamsApplication {
+        final String id;
+        final String principal;
+        /** Explicit internal topic names, or {@code null} when the entry declares no {@code topics} key. */
+        final List<String> topics;
+        final String transactionalIdPrefix;
+
+        StreamsApplication(String id, String principal, List<String> topics, String transactionalIdPrefix) {
+            this.id = id;
+            this.principal = principal;
+            this.topics = topics;
+            this.transactionalIdPrefix = transactionalIdPrefix;
+        }
+
+        /** The exact string a PREFIXED grant is issued on, and the stem of every internal topic. */
+        String namespace() {
+            return id + "-";
+        }
+
+        boolean grantsPrefix() {
+            return topics == null;
+        }
+    }
+
+    private List<StreamsApplication> parseStreamsApplications(List<Model> apis, StreamsScope streamsScope) {
+        Map<String, Map<String, Object>> declared = collectStreamsApplications(apis);
+        Map<String, String> applicationsByInternalTopic = new LinkedHashMap<>();
+        List<StreamsApplication> applications = new ArrayList<>();
+
+        for (Map.Entry<String, Map<String, Object>> entry : declared.entrySet()) {
+            String applicationId = entry.getKey();
+            Map<String, Object> application = entry.getValue();
+
+            String principal = getStringFirst(application, "x-principal", "principal");
+            if (principal == null) {
+                throw new IllegalArgumentException("x-kafka-streams-applications['" + applicationId
+                        + "'] is missing a non-blank x-principal");
+            }
+
+            // application.id and group.id are the same value in Kafka Streams, so an entry matching no
+            // receive operation is orphaned — provisioning it would grant access nothing consumes.
+            if (!streamsScope.receiveGroupIds.contains(applicationId)) {
+                throw new IllegalArgumentException("x-kafka-streams-applications['" + applicationId
+                        + "'] does not match the groupId/x-groupId of any receive operation. Resolved receive groups: "
+                        + streamsScope.receiveGroupIds);
+            }
+
+            List<String> topics = validateStreamsTopics(applicationId, application);
+            if (topics != null) {
+                for (String topic : topics) {
+                    String owner = applicationsByInternalTopic.putIfAbsent(topic, applicationId);
+                    if (owner != null) {
+                        throw new IllegalArgumentException("Internal topic '" + topic + "' is listed under both"
+                                + " x-kafka-streams-applications['" + owner + "'] and ['" + applicationId
+                                + "']. Each internal topic belongs to exactly one application.");
+                    }
+                }
+            }
+
+            applications.add(new StreamsApplication(applicationId, principal, topics,
+                    validateTransactionalIdPrefix(applicationId, application)));
+        }
+        return applications;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Map<String, Object>> collectStreamsApplications(List<Model> apis) {
+        Map<String, Map<String, Object>> applications = new LinkedHashMap<>();
+        for (Model apiModel : apis) {
+            Map<String, Object> declared = JSONPath.getFirst(apiModel,
+                    "$.x-kafka-streams-applications", "$.kafka-streams-applications");
+            if (declared == null) {
+                continue;
+            }
+            for (Map.Entry<String, Object> entry : declared.entrySet()) {
+                if (!(entry.getValue() instanceof Map)) {
+                    throw new IllegalArgumentException("x-kafka-streams-applications['" + entry.getKey()
+                            + "'] must be an object keyed by application.id");
+                }
+                Map<String, Object> application = (Map<String, Object>) entry.getValue();
+                Map<String, Object> existing = applications.putIfAbsent(entry.getKey(), application);
+                if (existing != null && !existing.equals(application)) {
+                    throw new IllegalArgumentException("x-kafka-streams-applications['" + entry.getKey()
+                            + "'] is declared with conflicting values in more than one spec");
+                }
+            }
+        }
+        return applications;
+    }
+
+    /**
+     * @return the validated explicit topic list, or {@code null} when the entry declares no
+     *         {@code topics} key at all. An empty list is returned as-is and suppresses the TOPIC ACL.
+     */
+    private List<String> validateStreamsTopics(String applicationId, Map<String, Object> application) {
+        if (!application.containsKey("topics")) {
+            return null;
+        }
+        Object value = application.get("topics");
+        if (!(value instanceof List<?> topics)) {
+            throw new IllegalArgumentException("x-kafka-streams-applications['" + applicationId
+                    + "'].topics must be an array of strings");
+        }
+        String namespace = applicationId + "-";
+        List<String> validated = new ArrayList<>(topics.size());
+        for (Object topic : topics) {
+            if (!(topic instanceof String name) || name.isBlank()) {
+                throw new IllegalArgumentException("x-kafka-streams-applications['" + applicationId
+                        + "'].topics must contain only non-blank strings");
+            }
+            // Kafka Streams always prefixes internal topics with application.id plus a separator;
+            // anything else is a transcription error or an unrelated grant smuggled through.
+            if (!name.startsWith(namespace)) {
+                throw new IllegalArgumentException("x-kafka-streams-applications['" + applicationId
+                        + "'].topics entry '" + name + "' is outside the application namespace '" + namespace + "'");
+            }
+            validated.add(name);
+        }
+        return validated;
+    }
+
+    private String validateTransactionalIdPrefix(String applicationId, Map<String, Object> application) {
+        for (String key : List.of("x-transactionalIdPrefix", "x-transactional-id-prefix", "transactionalIdPrefix")) {
+            if (!application.containsKey(key)) {
+                continue;
+            }
+            String prefix = getString(application.get(key));
+            if (prefix == null) {
+                throw new IllegalArgumentException("x-kafka-streams-applications['" + applicationId + "']." + key
+                        + " must be a non-blank string when present");
+            }
+            return prefix;
+        }
+        return null;
+    }
+
+    /**
+     * PREFIXED ACL matching in Kafka is plain string-prefix matching with no separator awareness, so
+     * every name starting with the granted {@code <application.id>-} falls inside the grant — and the
+     * granted operations include CREATE, ALTER and DELETE.
+     *
+     * <p>Checked against every topic name this generator run knows about, not only resolved channel
+     * addresses: owned and external channel addresses, generated retry/DLQ topics, the internal topic
+     * namespaces of the other declared applications, and their explicitly listed internal topics.
+     *
+     * <p>Necessarily scoped to the specs loaded in one generator invocation. Detecting the same
+     * collision against application ids chosen in unrelated repositories requires a platform-level
+     * naming registry, not a provisioning-time check.
+     */
+    private void validateNoNamespaceCollisions(List<StreamsApplication> applications, StreamsScope streamsScope,
+            AsyncAPIOpsIntent intent) {
+        // intent.topics covers owned channels and every generated retry/DLQ topic; channelAddresses adds
+        // external channels, which contribute ACLs but no TopicIntent.
+        Set<String> knownTopicNames = new LinkedHashSet<>(streamsScope.channelAddresses);
+        intent.topics.forEach(topic -> knownTopicNames.add(topic.topicName));
+
+        for (StreamsApplication application : applications) {
+            // topics mode issues LITERAL grants only, so there is no prefix that could over-match.
+            if (!application.grantsPrefix()) {
+                continue;
+            }
+            String namespace = application.namespace();
+
+            for (String topicName : knownTopicNames) {
+                if (topicName.startsWith(namespace)) {
+                    throw namespaceCollision(application.id, namespace, "topic '" + topicName + "'");
+                }
+            }
+
+            for (StreamsApplication other : applications) {
+                if (other == application) {
+                    continue;
+                }
+                // Overlap in either direction is a collision: whichever namespace is the shorter one,
+                // names exist that start with both — e.g. 'orders-' also matches 'orders-rebuild-x'.
+                // This also covers the other application's explicitly listed topics: every such name is
+                // validated to start with its own namespace, so a name falling inside this prefix makes
+                // the two namespaces comparable and the condition below already rejects it.
+                if (other.namespace().startsWith(namespace) || namespace.startsWith(other.namespace())) {
+                    throw namespaceCollision(application.id, namespace, "the internal topic namespace '"
+                            + other.namespace() + "' of application '" + other.id + "'");
+                }
+            }
+
+            validateNoUnresolvedAddressOverlap(application.id, namespace, intent);
+        }
+    }
+
+    /**
+     * An unbounded address parameter resolves to no concrete name, so the literal stem before the
+     * parameter is compared instead and any overlap is rejected: some expansion of the parameter could
+     * land inside the namespace. A blank stem — an address starting with a parameter expression — says
+     * nothing about the concrete names, so it is reported rather than failing every application.
+     */
+    private void validateNoUnresolvedAddressOverlap(String applicationId, String namespace, AsyncAPIOpsIntent intent) {
+        for (AsyncAPIOpsIntent.SkippedChannelIntent skipped : intent.skippedChannels) {
+            String stem = literalAddressStem(skipped.address);
+            if (stem.isBlank()) {
+                log.warn("Channel '{}' address '{}' starts with a parameter expression, so it cannot be checked for a"
+                        + " prefix collision with x-kafka-streams-applications['{}']",
+                        skipped.channelKey, skipped.address, applicationId);
+                continue;
+            }
+            if (stem.startsWith(namespace) || namespace.startsWith(stem)) {
+                throw namespaceCollision(applicationId, namespace,
+                        "unresolved channel address '" + skipped.address + "'");
+            }
+        }
+    }
+
+    private IllegalArgumentException namespaceCollision(String applicationId, String namespace, String collidesWith) {
+        return new IllegalArgumentException("x-kafka-streams-applications['" + applicationId
+                + "'] would grant a PREFIXED ACL on '" + namespace + "', which also matches " + collidesWith
+                + ". The grant includes Create/Alter/Delete, so choose a non-overlapping application.id, or list the"
+                + " internal topics explicitly with 'topics'.");
+    }
+
+    /** The part of a channel address before its first parameter expression. */
+    private String literalAddressStem(String address) {
+        int parameterStart = address.indexOf('{');
+        return parameterStart >= 0 ? address.substring(0, parameterStart) : address;
     }
 
     private void addSchemaRegistryReadBindings(Map operationChannel, String topicAddress, String principal, AsyncAPIOpsIntent intent) {
