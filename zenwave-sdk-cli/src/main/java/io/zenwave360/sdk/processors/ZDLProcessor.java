@@ -8,6 +8,7 @@ import io.zenwave360.sdk.zdl.annotators.JSpecifyAnnotator;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
 import io.zenwave360.sdk.zdl.model.JavaZdlModel;
 import io.zenwave360.sdk.zdl.utils.ZDLAnnotator;
+import io.zenwave360.sdk.zdl.utils.ZDLCallsUtils;
 import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,7 @@ public class ZDLProcessor extends AbstractBaseProcessor {
         processServiceName(zdlModel);
         processServiceAsyncMethods(zdlModel);
         processMethodEntity(zdlModel);
+        ZDLCallsUtils.resolveCalls(zdlModel);
 
         contextModel = new ZDL2JDLProcessor().process(contextModel); // FIXME: why here in the middle of the process?
 

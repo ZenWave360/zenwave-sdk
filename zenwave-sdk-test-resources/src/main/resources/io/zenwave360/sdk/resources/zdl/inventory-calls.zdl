@@ -1,0 +1,28 @@
+config {
+    basePackage "io.zenwave360.example.inventory"
+}
+
+@aggregate
+entity Inventory {
+    id Long
+}
+
+input ReserveStockInput {
+    orderId String
+}
+
+output StockReservedResult {
+    reservationId String
+}
+
+event OrderCreated {
+    orderId String
+}
+
+event StockUnavailable {
+    orderId String
+}
+
+service InventoryService for (Inventory) {
+    reserveStock(ReserveStockInput) StockReservedResult withEvents [OrderCreated | StockUnavailable]
+}
