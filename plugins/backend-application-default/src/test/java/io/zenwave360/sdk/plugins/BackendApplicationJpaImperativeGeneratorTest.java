@@ -11,6 +11,29 @@ import io.zenwave360.sdk.testutils.MavenCompiler;
 public class BackendApplicationJpaImperativeGeneratorTest {
 
     @Test
+    public void generatesCallsTodoInServiceImplementation() throws Exception {
+        String targetFolder = "target/zdl/test_generator_calls_todo";
+        Plugin plugin = new BackendApplicationDefaultPlugin()
+                .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/orders-calls.zdl")
+                .withTargetFolder(targetFolder)
+                .withOption("basePackage", "io.zenwave360.example.orders")
+                .withOption("persistence", PersistenceType.jpa)
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("forceOverwrite", true)
+                .withOption("includeEmitEventsImplementation", false)
+                .withOption("haltOnFailFormatting", false);
+
+        new MainGenerator().generate(plugin);
+
+        var serviceImpl = java.nio.file.Path.of(targetFolder,
+                "src/main/java/io/zenwave360/example/orders/core/application/OrdersServiceImpl.java");
+        String source = java.nio.file.Files.readString(serviceImpl);
+        Assertions.assertTrue(source.contains(
+                "// TODO: call CatalogInventoryZdl InventoryService.reserveStock(ReserveStockInput) -> StockReservedResult"));
+        Assertions.assertTrue(source.contains("//       then emit one of: OrderCreated | StockUnavailable"));
+    }
+
+    @Test
     public void test_generator_hexagonal_jpa() throws Exception {
         String targetFolder = "target/zdl/test_generator_hexagonal_jpa_customer_address";
         Plugin plugin = new BackendApplicationDefaultPlugin()

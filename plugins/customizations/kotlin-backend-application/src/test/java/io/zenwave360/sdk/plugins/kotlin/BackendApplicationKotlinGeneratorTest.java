@@ -11,6 +11,30 @@ import org.junit.jupiter.api.*;
 public class BackendApplicationKotlinGeneratorTest {
 
     @Test
+    public void generatesCallsTodoInServiceImplementation() throws Exception {
+        String targetFolder = "target/projects/kotlin-calls-todo";
+        Plugin plugin = new BackendApplicationDefaultPlugin()
+                .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/orders-calls.zdl")
+                .withTargetFolder(targetFolder)
+                .withOption("templates", "new " + BackendApplicationKotlinTemplates.class.getName())
+                .withOption("basePackage", "io.zenwave360.examples.kotlin")
+                .withOption("persistence", PersistenceType.jpa)
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("forceOverwrite", true)
+                .withOption("includeEmitEventsImplementation", false)
+                .withOption("haltOnFailFormatting", false);
+
+        new MainGenerator().generate(plugin);
+
+        var serviceImpl = java.nio.file.Path.of(targetFolder,
+                "src/main/kotlin/io/zenwave360/examples/kotlin/core/application/OrdersServiceImpl.kt");
+        String source = java.nio.file.Files.readString(serviceImpl);
+        Assertions.assertTrue(source.contains(
+                "// TODO: call CatalogInventoryZdl InventoryService.reserveStock(ReserveStockInput) -> StockReservedResult"));
+        Assertions.assertTrue(source.contains("//       then emit one of: OrderCreated | StockUnavailable"));
+    }
+
+    @Test
     public void test_generator_kotlin_project_jpa() throws Exception {
         String targetFolder = "target/projects/kustomer-address-jpa";
         Plugin plugin = new BackendApplicationDefaultPlugin()
