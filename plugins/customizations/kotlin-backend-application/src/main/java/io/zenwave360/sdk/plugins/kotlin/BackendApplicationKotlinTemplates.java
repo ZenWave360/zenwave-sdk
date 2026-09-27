@@ -45,6 +45,10 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
             || !(is(model, "aggregate") || is(model, "lifecycle") || ZDLFindUtils.isAggregateRoot(JSONPath.get(model, "zdl"), JSONPath.get(model, "$.entity.name")));
     protected Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo", "input", "abstract");
     protected Function<Map<String, Object>, Boolean> skipEntity = (model) -> is(model, "vo", "input");
+    protected Function<Map<String, Object>, Boolean> skipNonAggregateTestData = (model) ->
+            is(model, "embedded")
+                    || !(is(model, "aggregate") || is(model, "lifecycle")
+                    || ZDLFindUtils.isAggregateRoot(JSONPath.get(model, "zdl"), JSONPath.get(model, "$.entity.name")));
     protected Function<Map<String, Object>, Boolean> skipAggregateTransitions = (model) -> {
         var aggregate = (Map<String, Object>) model.get("aggregate");
         if (aggregate == null && model.get("aggregateRoot") != null) {
@@ -142,7 +146,7 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
                 layoutNames.infrastructureRepositoryPackage, "inmemory/InMemory{{capitalizeFirst persistence}}Repository.kt", KOTLIN, skipEntityRepository, true);
 
         this.addTemplate(this.entityTemplates, "src/test/resources", "data/{{persistence}}/entity/1.json",
-                "", "data/{{persistence}}/{{entity.name}}/1.json", JSON, skipEntity, true);
+                "", "data/{{persistence}}/{{entity.name}}/1.json", JSON, skipNonAggregateTestData, true);
 
         this.addTemplate(this.enumTemplates, "src/main/kotlin", "core/domain/common/DomainEnum.kt",
                 layoutNames.entitiesPackage, "{{enum.name}}.kt", KOTLIN, null, false);

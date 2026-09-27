@@ -1,6 +1,7 @@
 package io.zenwave360.sdk.plugins;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.zenwave360.sdk.MainGenerator;
 import io.zenwave360.sdk.Plugin;
@@ -51,6 +52,29 @@ public class BackendApplicationJpaImperativeGeneratorTest {
 
         Assertions.assertTrue(new java.io.File(targetFolder,
                 "src/main/java/io/zenwave360/example/core/domain/Customer.java").exists());
+    }
+
+    @Test
+    public void generatesTestDataOnlyForAggregates(@TempDir java.nio.file.Path tempDir) throws Exception {
+        Plugin plugin = new BackendApplicationDefaultPlugin()
+                .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
+                .withTargetFolder(tempDir.toString())
+                .withOption("basePackage", "io.zenwave360.example")
+                .withOption("persistence", PersistenceType.jpa)
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("includeEmitEventsImplementation", false)
+                .withOption("haltOnFailFormatting", false);
+
+        new MainGenerator().generate(plugin);
+
+        Assertions.assertTrue(java.nio.file.Files.exists(
+                tempDir.resolve("src/main/java/io/zenwave360/example/core/domain/Address.java")),
+                "Embedded domain types should still be generated");
+        Assertions.assertTrue(java.nio.file.Files.exists(
+                tempDir.resolve("src/test/resources/data/jpa/Customer/1.json")));
+        Assertions.assertFalse(java.nio.file.Files.exists(
+                tempDir.resolve("src/test/resources/data/jpa/Address/1.json")),
+                "Embedded types should not get standalone test-data fixtures");
     }
 
     @Test
