@@ -1,13 +1,22 @@
 package {{layout.adaptersEventsMappersPackage}}
 
+import {{layout.coreImplementationMappersCommonPackage}}.BaseMapper
 import {{layout.domainEventsPackage}}.*
 
-/**
- * Regenerated mapping contract for {{listenerGroup.className}}. Customize the mappings in the
- * generated-once {{listenerGroup.className}}MapStructMapper.
- */
+import org.mapstruct.Mapper
+import org.mapstruct.Mapping
+import org.mapstruct.factory.Mappers
+
+@Mapper(uses = [BaseMapper::class])
 interface {{listenerGroup.className}}Mapper {
+
+    companion object {
+        val INSTANCE: {{listenerGroup.className}}Mapper = Mappers.getMapper({{listenerGroup.className}}Mapper::class.java)
+    }
+
 {{#each listenerGroup.mapperBindings as |binding|}}
+    /** Add `@Mapping` here when MapStruct cannot infer the conversion. */
+    @Mapping(target = "copy", ignore = true)
     fun {{binding.mapperMethodName}}(event: {{binding.eventType}}): {{@root.layout.inboundDtosPackage}}.{{binding.inputType}}
 {{/each}}
 }

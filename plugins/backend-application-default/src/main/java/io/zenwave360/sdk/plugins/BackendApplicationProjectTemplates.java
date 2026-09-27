@@ -144,16 +144,10 @@ public class BackendApplicationProjectTemplates extends ProjectTemplates {
         this.addTemplate(this.listenersByApiTemplates, "src/main/java", "adapters/events/EventListeners.java",
                 layoutNames.adaptersEventsPackage, "{{listenerGroup.className}}.java", JAVA, null, true);
         this.addTemplate(this.listenersByApiTemplates, "src/main/java", "adapters/events/EventListenersMapper.java",
-                layoutNames.adaptersEventsMappersPackage, "{{listenerGroup.className}}Mapper.java", JAVA, skipListenerMappers, false);
-        this.addTemplate(this.listenersByApiTemplates, "src/main/java", "adapters/events/EventListenersMapStructMapper.java",
-                layoutNames.adaptersEventsMappersPackage, "{{listenerGroup.className}}MapStructMapper.java", JAVA, skipListenerMappers, true);
+                layoutNames.adaptersEventsMappersPackage, "{{listenerGroup.className}}Mapper.java", JAVA, skipListenerMappers, true);
         this.asyncApiAdapterByApiTemplates.add(new TemplateInput(
                 joinPath(getTemplatesFolder(), "src/main/java", "adapters/events/asyncapi/EventsMapper.java"),
                 "{{asyncapiAdaptersModulePrefix}}src/main/java/" + layoutNames.adaptersEventsPackage + "/EventsMapper.java",
-                JAVA));
-        this.asyncApiAdapterByApiTemplates.add(new TemplateInput(
-                joinPath(getTemplatesFolder(), "src/main/java", "adapters/events/asyncapi/EventsMapStructMapper.java"),
-                "{{asyncapiAdaptersModulePrefix}}src/main/java/" + layoutNames.adaptersEventsPackage + "/EventsMapStructMapper.java",
                 JAVA).withSkipOverwrite(true));
         this.asyncApiAdapterByChannelTemplates.add(new TemplateInput(
                 joinPath(getTemplatesFolder(), "src/main/java", "adapters/events/asyncapi/imperative/ConsumerService.java"),

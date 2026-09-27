@@ -15,15 +15,15 @@ import org.springframework.stereotype.Component
  */
 @Component
 {{annotate "adapter.event-listener"}}
-class {{listenerGroup.className}}(
+class {{listenerGroup.className}}{{#if listenerGroup.services}}(
 {{~#each listenerGroup.services as |listenerService|}}
     private val {{listenerService.instanceName}}: {{listenerService.name}}{{#unless @last}},{{/unless}}
 {{~/each}}
+){{/if}} {
 {{~#if listenerGroup.mapperBindings}}
-    {{~#if listenerGroup.services}},{{/if}}
-    private val mapper: {{listenerGroup.className}}Mapper
+
+    private val mapper: {{listenerGroup.className}}Mapper = {{listenerGroup.className}}Mapper.INSTANCE
 {{~/if}}
-) {
 {{~#each listenerGroup.bindings as |binding|}}
 
     @ApplicationModuleListener

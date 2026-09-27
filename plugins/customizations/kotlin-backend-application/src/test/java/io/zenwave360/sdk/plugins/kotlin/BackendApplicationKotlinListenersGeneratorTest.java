@@ -60,9 +60,12 @@ class BackendApplicationKotlinListenersGeneratorTest {
                 "event: io.zenwave360.example.payments.core.domain.events.PaymentDeclined"));
         Assertions.assertTrue(mapperSource.contains(
                 "io.zenwave360.example.orders.core.inbound.dtos.CancelOrderInput"));
-
-        Path mapStructMapper = mapper.resolveSibling("PaymentsProcessingEventsListenerMapStructMapper.kt");
-        Assertions.assertTrue(Files.readString(mapStructMapper).contains("@Mapper(componentModel = \"spring\")"));
+        Assertions.assertTrue(mapperSource.contains("@Mapper(uses = [BaseMapper::class])"));
+        Assertions.assertTrue(mapperSource.contains(
+                "Mappers.getMapper(PaymentsProcessingEventsListenerMapper::class.java)"));
+        Assertions.assertTrue(mapperSource.contains("@Mapping(target = \"copy\", ignore = true)"));
+        Assertions.assertTrue(listenerSource.contains(
+                "private val mapper: PaymentsProcessingEventsListenerMapper = PaymentsProcessingEventsListenerMapper.INSTANCE"));
 
         Path sameModuleListener = targetFolder.resolve(
                 "src/main/kotlin/io/zenwave360/example/orders/adapters/events/orders/OrdersServiceEventsListener.kt");
@@ -70,10 +73,10 @@ class BackendApplicationKotlinListenersGeneratorTest {
                 "fun handleOrderConfirmed(event: OrderConfirmed)"));
 
         Files.writeString(listener, "// developer-owned Kotlin listener\n");
-        Files.writeString(mapStructMapper, Files.readString(mapStructMapper) + "\n// developer mapper customization\n");
+        Files.writeString(mapper, Files.readString(mapper) + "\n// developer mapper customization\n");
         new MainGenerator().generate(ordersPlugin);
         Assertions.assertEquals("// developer-owned Kotlin listener\n", Files.readString(listener));
-        Assertions.assertTrue(Files.readString(mapStructMapper).contains("// developer mapper customization"));
+        Assertions.assertTrue(Files.readString(mapper).contains("// developer mapper customization"));
     }
 
     @Test
@@ -102,7 +105,6 @@ class BackendApplicationKotlinListenersGeneratorTest {
         Path packageFolder = targetFolder.resolve(
                 "src/main/kotlin/io/example/customer/adapters/events/customer");
         Path mapper = packageFolder.resolve("EventsMapper.kt");
-        Path mapStructMapper = packageFolder.resolve("EventsMapStructMapper.kt");
         Path adapter = packageFolder.resolve("CreateCustomerChannelConsumerService.kt");
 
         String mapperSource = normalized(mapper);
@@ -112,9 +114,9 @@ class BackendApplicationKotlinListenersGeneratorTest {
         Assertions.assertTrue(mapperSource.contains(
                 "io.example.customer.core.inbound.dtos.CustomerInput"));
         Assertions.assertTrue(mapperSource.contains(
-                "Mappers.getMapper(EventsMapStructMapper::class.java)"));
-        Assertions.assertFalse(mapperSource.contains("@Mapper"));
-        Assertions.assertTrue(Files.readString(mapStructMapper).contains("@Mapper"));
+                "Mappers.getMapper(EventsMapper::class.java)"));
+        Assertions.assertTrue(mapperSource.contains("@Mapper(uses = [BaseMapper::class])"));
+        Assertions.assertTrue(mapperSource.contains("@Mapping(target = \"copy\", ignore = true)"));
 
         String adapterSource = normalized(adapter);
         Assertions.assertTrue(adapterSource.contains(
@@ -131,8 +133,10 @@ class BackendApplicationKotlinListenersGeneratorTest {
         Assertions.assertTrue(adapterSource.contains(
                 "customerService.createCustomer(eventsMapper.createCustomerInput(payload))"));
 
+        Files.writeString(mapper, Files.readString(mapper) + "\n// developer mapper customization\n");
         Files.writeString(adapter, Files.readString(adapter) + "\n// developer adapter customization\n");
         new MainGenerator().generate(plugin);
+        Assertions.assertTrue(Files.readString(mapper).contains("// developer mapper customization"));
         Assertions.assertTrue(Files.readString(adapter).contains("// developer adapter customization"));
     }
 

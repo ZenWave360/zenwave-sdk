@@ -163,16 +163,10 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
         this.addTemplate(this.listenersByApiTemplates, "src/main/kotlin", "adapters/events/EventListeners.kt",
                 layoutNames.adaptersEventsPackage, "{{listenerGroup.className}}.kt", KOTLIN, null, true);
         this.addTemplate(this.listenersByApiTemplates, "src/main/kotlin", "adapters/events/EventListenersMapper.kt",
-                layoutNames.adaptersEventsMappersPackage, "{{listenerGroup.className}}Mapper.kt", KOTLIN, skipListenerMappers, false);
-        this.addTemplate(this.listenersByApiTemplates, "src/main/kotlin", "adapters/events/EventListenersMapStructMapper.kt",
-                layoutNames.adaptersEventsMappersPackage, "{{listenerGroup.className}}MapStructMapper.kt", KOTLIN, skipListenerMappers, true);
+                layoutNames.adaptersEventsMappersPackage, "{{listenerGroup.className}}Mapper.kt", KOTLIN, skipListenerMappers, true);
         this.asyncApiAdapterByApiTemplates.add(new TemplateInput(
                 joinPath(getTemplatesFolder(), "src/main/kotlin", "adapters/events/asyncapi/EventsMapper.kt"),
                 "{{asyncapiAdaptersModulePrefix}}src/main/kotlin/" + layoutNames.adaptersEventsPackage + "/EventsMapper.kt",
-                KOTLIN));
-        this.asyncApiAdapterByApiTemplates.add(new TemplateInput(
-                joinPath(getTemplatesFolder(), "src/main/kotlin", "adapters/events/asyncapi/EventsMapStructMapper.kt"),
-                "{{asyncapiAdaptersModulePrefix}}src/main/kotlin/" + layoutNames.adaptersEventsPackage + "/EventsMapStructMapper.kt",
                 KOTLIN).withSkipOverwrite(true));
         this.asyncApiAdapterByChannelTemplates.add(new TemplateInput(
                 joinPath(getTemplatesFolder(), "src/main/kotlin", "adapters/events/asyncapi/imperative/ConsumerService.kt"),

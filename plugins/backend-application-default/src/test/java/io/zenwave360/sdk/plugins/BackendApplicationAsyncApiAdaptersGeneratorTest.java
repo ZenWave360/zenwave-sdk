@@ -25,17 +25,12 @@ class BackendApplicationAsyncApiAdaptersGeneratorTest {
         Path packageFolder = targetFolder.resolve(
                 "src/main/java/io/example/customer/adapters/events/customer");
         Path mapperContract = packageFolder.resolve("EventsMapper.java");
-        Path mapStructExtension = packageFolder.resolve("EventsMapStructMapper.java");
         Path adapterImplementation = packageFolder.resolve("CreateCustomerChannelConsumerService.java");
 
         String mapperSource = Files.readString(mapperContract).replaceAll("\\s+", " ");
         Assertions.assertTrue(mapperSource.contains(
                 "io.example.customer.core.inbound.dtos.CustomerInput createCustomerInput(io.example.customer.contract.model.Customer event)"));
-        Assertions.assertFalse(mapperSource.contains("@Mapper"));
-        Assertions.assertTrue(Files.readString(mapStructExtension)
-                .contains("@Mapper"));
-        Assertions.assertFalse(Files.readString(mapStructExtension)
-                .contains("componentModel"));
+        Assertions.assertTrue(mapperSource.contains("@Mapper(uses = { BaseMapper.class })"));
 
         Assertions.assertFalse(Files.exists(
                 packageFolder.resolve("GeneratedCreateCustomerChannelConsumerServiceBase.java")));
@@ -48,7 +43,7 @@ class BackendApplicationAsyncApiAdaptersGeneratorTest {
         Assertions.assertTrue(adapterSource.contains(
                 "private final io.example.customer.core.inbound.CustomerService customerService"));
         Assertions.assertTrue(mapperSource.contains(
-                "EventsMapper INSTANCE = Mappers.getMapper(EventsMapStructMapper.class)"));
+                "EventsMapper INSTANCE = Mappers.getMapper(EventsMapper.class)"));
         Assertions.assertTrue(adapterSource.contains(
                 "private final EventsMapper eventsMapper = EventsMapper.INSTANCE"));
         Assertions.assertTrue(adapterSource.contains(
@@ -56,10 +51,10 @@ class BackendApplicationAsyncApiAdaptersGeneratorTest {
         Assertions.assertTrue(adapterSource.contains(
                 "customerService.createCustomer(eventsMapper.createCustomerInput(payload))"));
 
-        Files.writeString(mapStructExtension, Files.readString(mapStructExtension) + "\n// developer customization\n");
+        Files.writeString(mapperContract, Files.readString(mapperContract) + "\n// developer customization\n");
         Files.writeString(adapterImplementation, Files.readString(adapterImplementation) + "\n// developer customization\n");
         new MainGenerator().generate(plugin);
-        Assertions.assertTrue(Files.readString(mapStructExtension).contains("// developer customization"));
+        Assertions.assertTrue(Files.readString(mapperContract).contains("// developer customization"));
         Assertions.assertTrue(Files.readString(adapterImplementation).contains("// developer customization"));
     }
 

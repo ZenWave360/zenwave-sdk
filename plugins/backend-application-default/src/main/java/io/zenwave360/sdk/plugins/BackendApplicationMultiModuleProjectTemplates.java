@@ -60,9 +60,7 @@ public class BackendApplicationMultiModuleProjectTemplates extends BackendApplic
         this.addTemplate(this.listenersByApiTemplates, "src/main/java", "adapters/events/EventListeners.java", "{{mavenModulesPrefix}}-core-impl",
                 layoutNames.adaptersEventsPackage, "{{listenerGroup.className}}.java", JAVA, null, true);
         this.addTemplate(this.listenersByApiTemplates, "src/main/java", "adapters/events/EventListenersMapper.java", "{{mavenModulesPrefix}}-core-impl",
-                layoutNames.adaptersEventsMappersPackage, "{{listenerGroup.className}}Mapper.java", JAVA, skipListenerMappers, false);
-        this.addTemplate(this.listenersByApiTemplates, "src/main/java", "adapters/events/EventListenersMapStructMapper.java", "{{mavenModulesPrefix}}-core-impl",
-                layoutNames.adaptersEventsMappersPackage, "{{listenerGroup.className}}MapStructMapper.java", JAVA, skipListenerMappers, true);
+                layoutNames.adaptersEventsMappersPackage, "{{listenerGroup.className}}Mapper.java", JAVA, skipListenerMappers, true);
         this.addTemplate(this.singleTemplates, "src/main/java", "core/implementation/mappers/BaseMapper.java", "{{mavenModulesPrefix}}-domain",
                 layoutNames.coreImplementationMappersCommonPackage, "BaseMapper.java", JAVA, null, true);
         this.addTemplate(this.serviceTemplates, "src/main/java", "core/implementation/mappers/ServiceMapper.java", "{{mavenModulesPrefix}}-core-impl",

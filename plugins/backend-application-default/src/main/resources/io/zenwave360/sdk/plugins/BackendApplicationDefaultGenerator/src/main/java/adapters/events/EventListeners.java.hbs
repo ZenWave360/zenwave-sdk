@@ -22,20 +22,16 @@ public class {{listenerGroup.className}} {
     private final {{listenerService.name}} {{listenerService.instanceName}};
 {{~/each}}
 {{~#if listenerGroup.mapperBindings}}
-    private final {{listenerGroup.className}}Mapper mapper;
+    private final {{listenerGroup.className}}Mapper mapper = {{listenerGroup.className}}Mapper.INSTANCE;
 {{~/if}}
 
     public {{listenerGroup.className}}(
             {{~#each listenerGroup.services as |listenerService|~}}
                 {{listenerService.name}} {{listenerService.instanceName}}{{#unless @last}}, {{/unless}}
-            {{~/each~}}
-            {{~#if listenerGroup.mapperBindings}}, {{listenerGroup.className}}Mapper mapper{{/if}}) {
+            {{~/each~}}) {
 {{~#each listenerGroup.services as |listenerService|}}
         this.{{listenerService.instanceName}} = {{listenerService.instanceName}};
 {{~/each}}
-{{~#if listenerGroup.mapperBindings}}
-        this.mapper = mapper;
-{{~/if}}
     }
 
 {{~#each listenerGroup.bindings as |binding|}}

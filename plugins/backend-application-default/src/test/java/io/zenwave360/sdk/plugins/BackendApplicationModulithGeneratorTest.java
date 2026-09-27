@@ -72,11 +72,14 @@ public class BackendApplicationModulithGeneratorTest {
 
         Path listenerMapper = Path.of(targetFolder,
                 "src/main/java/io/zenwave360/example/adapters/internal/mappers/OrdersServiceEventsListenerMapper.java");
-        Path listenerMapStructMapper = Path.of(targetFolder,
-                "src/main/java/io/zenwave360/example/adapters/internal/mappers/OrdersServiceEventsListenerMapStructMapper.java");
         String listenerMapperSource = Files.readString(listenerMapper).replaceAll("\\s+", " ");
         Assertions.assertTrue(listenerMapperSource.contains("OrderCreatedInput asOrderCreatedInput(OrderCreated event)"));
-        Assertions.assertTrue(Files.readString(listenerMapStructMapper).contains("@Mapper(componentModel = \"spring\")"));
+        Assertions.assertTrue(listenerMapperSource.contains("@Mapper(uses ="));
+        Assertions.assertTrue(listenerMapperSource.contains("BaseMapper.class"));
+        Assertions.assertTrue(listenerMapperSource.contains(
+                "OrdersServiceEventsListenerMapper INSTANCE = Mappers.getMapper(OrdersServiceEventsListenerMapper.class)"));
+        Assertions.assertTrue(listenerSource.contains(
+                "private final OrdersServiceEventsListenerMapper mapper = OrdersServiceEventsListenerMapper.INSTANCE"));
 
         String serviceSource = Files.readString(service);
         Assertions.assertTrue(serviceSource.contains("eventPublisher.onOrderCreated(orderCreated);"));
@@ -87,8 +90,10 @@ public class BackendApplicationModulithGeneratorTest {
                 "io.zenwave360.example.domain.signals.OrderCreated asOrderCreated(Order order)"));
 
         Files.writeString(listener, "// developer-owned listener\n");
+        Files.writeString(listenerMapper, Files.readString(listenerMapper) + "\n// developer mapper customization\n");
         new MainGenerator().generate(plugin);
         Assertions.assertEquals("// developer-owned listener\n", Files.readString(listener));
+        Assertions.assertTrue(Files.readString(listenerMapper).contains("// developer mapper customization"));
     }
 
     @Test

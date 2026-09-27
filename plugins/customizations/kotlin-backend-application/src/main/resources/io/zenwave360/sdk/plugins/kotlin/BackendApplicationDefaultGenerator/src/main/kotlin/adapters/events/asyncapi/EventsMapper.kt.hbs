@@ -1,20 +1,24 @@
 package {{layout.adaptersEventsPackage}}
 
+import {{layout.coreImplementationMappersCommonPackage}}.BaseMapper
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+
+import org.mapstruct.Mapper
+import org.mapstruct.Mapping
 import org.mapstruct.factory.Mappers
 
-/**
- * Regenerated mapping contract containing only mappings proven safe by the adapter planner.
- */
+@Mapper(uses = [BaseMapper::class])
 interface EventsMapper {
 
     companion object {
-        val INSTANCE: EventsMapper = Mappers.getMapper(EventsMapStructMapper::class.java)
+        val INSTANCE: EventsMapper = Mappers.getMapper(EventsMapper::class.java)
     }
 
 {{#each generatedMappings as |mapping|}}
+    /** Add `@Mapping` here when MapStruct cannot infer the conversion. */
+    @Mapping(target = "copy", ignore = true)
     fun {{mapping.mapperMethodName}}(event: {{mapping.sourceType}}): {{mapping.targetType}}
 {{/each}}
 
