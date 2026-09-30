@@ -16,7 +16,6 @@ interface {{listenerGroup.className}}Mapper {
 
 {{#each listenerGroup.mapperBindings as |binding|}}
     /** Add `@Mapping` here when MapStruct cannot infer the conversion. */
-    @Mapping(target = "copy", ignore = true)
     fun {{binding.mapperMethodName}}(event: {{binding.eventType}}): {{@root.layout.inboundDtosPackage}}.{{binding.inputType}}
 {{/each}}
 }

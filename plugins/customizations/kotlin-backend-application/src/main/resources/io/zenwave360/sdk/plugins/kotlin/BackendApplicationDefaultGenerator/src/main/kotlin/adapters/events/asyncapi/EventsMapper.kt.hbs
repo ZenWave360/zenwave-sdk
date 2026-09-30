@@ -18,7 +18,6 @@ interface EventsMapper {
 
 {{#each generatedMappings as |mapping|}}
     /** Add `@Mapping` here when MapStruct cannot infer the conversion. */
-    @Mapping(target = "copy", ignore = true)
     fun {{mapping.mapperMethodName}}(event: {{mapping.sourceType}}): {{mapping.targetType}}
 {{/each}}
 

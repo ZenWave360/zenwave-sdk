@@ -63,7 +63,7 @@ class BackendApplicationKotlinListenersGeneratorTest {
         Assertions.assertTrue(mapperSource.contains("@Mapper(uses = [BaseMapper::class])"));
         Assertions.assertTrue(mapperSource.contains(
                 "Mappers.getMapper(PaymentsProcessingEventsListenerMapper::class.java)"));
-        Assertions.assertTrue(mapperSource.contains("@Mapping(target = \"copy\", ignore = true)"));
+        Assertions.assertFalse(mapperSource.contains("\"copy\""), mapperSource);
         Assertions.assertTrue(listenerSource.contains(
                 "private val mapper: PaymentsProcessingEventsListenerMapper = PaymentsProcessingEventsListenerMapper.INSTANCE"));
 
@@ -116,7 +116,7 @@ class BackendApplicationKotlinListenersGeneratorTest {
         Assertions.assertTrue(mapperSource.contains(
                 "Mappers.getMapper(EventsMapper::class.java)"));
         Assertions.assertTrue(mapperSource.contains("@Mapper(uses = [BaseMapper::class])"));
-        Assertions.assertTrue(mapperSource.contains("@Mapping(target = \"copy\", ignore = true)"));
+        Assertions.assertFalse(mapperSource.contains("\"copy\""), mapperSource);
 
         String adapterSource = normalized(adapter);
         Assertions.assertTrue(adapterSource.contains(
