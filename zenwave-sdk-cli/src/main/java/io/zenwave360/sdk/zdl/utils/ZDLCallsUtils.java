@@ -77,7 +77,8 @@ public final class ZDLCallsUtils {
             if (targetModel == null) {
                 throw new IllegalArgumentException("@calls on method '" + methodLabel(method)
                         + "' references zdl api '" + apiName + "' whose model could not be loaded from: "
-                        + api.get("uri"));
+                        + api.get("uri")
+                        + (api.get(ZDLParser.REFERENCED_API_ERROR_PROPERTY) != null ? " (" + api.get(ZDLParser.REFERENCED_API_ERROR_PROPERTY) + ")" : ""));
             }
         }
 

@@ -63,30 +63,44 @@ public final class ZDLListenerUtils {
 
     private static List<Map<String, Object>> listenerOccurrences(Map<String, Object> method) {
         var occurrences = new ArrayList<Map<String, Object>>();
-        List<Map<String, Object>> optionsList = JSONPath.get(method, "$.optionsList[*]", List.of());
-        for (Map<String, Object> option : optionsList) {
-            if ("listener".equals(option.get("name"))) {
-                occurrences.add(asOccurrenceMap(method, option.get("value")));
-            }
-        }
-        if (occurrences.isEmpty() && JSONPath.get(method, "$.options.listener") != null) {
-            occurrences.add(asOccurrenceMap(method, JSONPath.get(method, "$.options.listener")));
+        for (Object value : rawListenerOccurrences(method)) {
+            occurrences.add(asOccurrenceMap((String) method.get("name"), value));
         }
         return occurrences;
     }
 
-    private static Map<String, Object> asOccurrenceMap(Map<String, Object> method, Object value) {
+    /** Raw {@code @listener} values of a method, one per occurrence, before any validation. */
+    public static List<Object> rawListenerOccurrences(Map<String, Object> method) {
+        var occurrences = new ArrayList<Object>();
+        List<Map<String, Object>> optionsList = JSONPath.get(method, "$.optionsList[*]", List.of());
+        for (Map<String, Object> option : optionsList) {
+            if ("listener".equals(option.get("name"))) {
+                occurrences.add(option.get("value"));
+            }
+        }
+        if (occurrences.isEmpty() && JSONPath.get(method, "$.options.listener") != null) {
+            occurrences.add(JSONPath.get(method, "$.options.listener"));
+        }
+        return occurrences;
+    }
+
+    private static Map<String, Object> asOccurrenceMap(String methodLabel, Object value) {
         if (value instanceof Map<?, ?> map) {
             return (Map<String, Object>) map;
         }
-        throw new IllegalArgumentException("@listener on method '" + method.get("name")
+        throw new IllegalArgumentException("@listener on method '" + methodLabel
                 + "' requires named parameters, e.g. @listener(zdl: SomeApi, event: SomeEvent)");
     }
 
-    private static Map<String, Object> buildBinding(Map<String, Object> zdlModel, Map<String, Object> service,
-            Map<String, Object> method, Map<String, Object> occurrence, ClassLoader projectClassLoader,
-            Map<String, Object> generatorOptions) {
-        var methodLabel = service.get("name") + "." + method.get("name");
+    /**
+     * Validates one {@code @listener} occurrence and returns the event it consumes, from this model or from the
+     * referenced {@code zdl} api. Shared by generators and linters so both enforce the same rules.
+     *
+     * @throws IllegalArgumentException when the occurrence is malformed or its event cannot be resolved
+     */
+    public static Map<String, Object> resolveListenerEvent(Map<String, Object> zdlModel, String methodLabel,
+            Object rawOccurrence) {
+        Map<String, Object> occurrence = asOccurrenceMap(methodLabel, rawOccurrence);
         if (occurrence.get("channel") != null || occurrence.get("topic") != null) {
             throw new IllegalArgumentException("@listener on '" + methodLabel
                     + "' must not restate channel or topic; they are publisher metadata on the event");
@@ -96,6 +110,43 @@ public final class ZDLListenerUtils {
             throw new IllegalArgumentException("@listener on '" + methodLabel + "' is missing the 'event' parameter");
         }
         String apiName = trimToNull((String) occurrence.get("zdl"));
+        if (apiName == null) {
+            Map<String, Object> event = JSONPath.get(zdlModel, "$.events['" + eventName + "']");
+            if (event == null) {
+                throw new IllegalArgumentException("@listener on '" + methodLabel + "' references event '" + eventName
+                        + "' not found in this model");
+            }
+            return event;
+        }
+        Map<String, Object> api = JSONPath.get(zdlModel, "$.apis['" + apiName + "']");
+        if (api == null) {
+            throw new IllegalArgumentException("@listener on '" + methodLabel + "' references undeclared zdl api: " + apiName);
+        }
+        if (!"zdl".equals(api.get("type"))) {
+            throw new IllegalArgumentException("@listener on '" + methodLabel + "' references api '" + apiName
+                    + "' of type '" + api.get("type") + "' (must be a zdl api; use @asyncapi for asyncapi apis)");
+        }
+        Map<String, Object> referencedModel = ZDLParser.getReferencedZdlModel(api);
+        if (referencedModel == null) {
+            throw new IllegalArgumentException("@listener on '" + methodLabel + "' references zdl api '" + apiName
+                    + "' whose model could not be loaded from: " + api.get("uri")
+                    + (api.get(ZDLParser.REFERENCED_API_ERROR_PROPERTY) != null ? " (" + api.get(ZDLParser.REFERENCED_API_ERROR_PROPERTY) + ")" : ""));
+        }
+        Map<String, Object> event = JSONPath.get(referencedModel, "$.events['" + eventName + "']");
+        if (event == null) {
+            throw new IllegalArgumentException("@listener on '" + methodLabel + "' references event '" + eventName
+                    + "' not found in zdl api '" + apiName + "'");
+        }
+        return event;
+    }
+
+    private static Map<String, Object> buildBinding(Map<String, Object> zdlModel, Map<String, Object> service,
+            Map<String, Object> method, Map<String, Object> occurrence, ClassLoader projectClassLoader,
+            Map<String, Object> generatorOptions) {
+        var methodLabel = service.get("name") + "." + method.get("name");
+        Map<String, Object> event = resolveListenerEvent(zdlModel, methodLabel, occurrence);
+        String eventName = trimToNull((String) occurrence.get("event"));
+        String apiName = trimToNull((String) occurrence.get("zdl"));
 
         var binding = new LinkedHashMap<String, Object>();
         binding.put("serviceName", service.get("name"));
@@ -104,26 +155,9 @@ public final class ZDLListenerUtils {
         binding.put("methodName", method.get("name"));
         binding.put("eventName", eventName);
 
-        Map<String, Object> event;
         if (apiName != null) {
             Map<String, Object> api = JSONPath.get(zdlModel, "$.apis['" + apiName + "']");
-            if (api == null) {
-                throw new IllegalArgumentException("@listener on '" + methodLabel + "' references undeclared zdl api: " + apiName);
-            }
-            if (!"zdl".equals(api.get("type"))) {
-                throw new IllegalArgumentException("@listener on '" + methodLabel + "' references api '" + apiName
-                        + "' of type '" + api.get("type") + "' (must be a zdl api; use @asyncapi for asyncapi apis)");
-            }
             Map<String, Object> referencedModel = ZDLParser.getReferencedZdlModel(api);
-            if (referencedModel == null) {
-                throw new IllegalArgumentException("@listener on '" + methodLabel + "' references zdl api '" + apiName
-                        + "' whose model could not be loaded from: " + api.get("uri"));
-            }
-            event = JSONPath.get(referencedModel, "$.events['" + eventName + "']");
-            if (event == null) {
-                throw new IllegalArgumentException("@listener on '" + methodLabel + "' references event '" + eventName
-                        + "' not found in zdl api '" + apiName + "'");
-            }
             var eventClassName = eventClassName(event, eventName);
             binding.put("groupKey", "zdl:" + apiName);
             binding.put("apiName", apiName);
@@ -134,11 +168,6 @@ public final class ZDLListenerUtils {
                     + "." + eventClassName);
             binding.put("listenerMethodName", "on" + eventClassName);
         } else {
-            event = JSONPath.get(zdlModel, "$.events['" + eventName + "']");
-            if (event == null) {
-                throw new IllegalArgumentException("@listener on '" + methodLabel + "' references event '" + eventName
-                        + "' not found in this model");
-            }
             binding.put("groupKey", "local:" + service.get("name"));
             binding.put("apiId", localApiId(zdlModel, generatorOptions));
             binding.put("groupName", (String) service.get("name"));

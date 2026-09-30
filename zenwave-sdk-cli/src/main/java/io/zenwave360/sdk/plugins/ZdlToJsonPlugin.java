@@ -10,6 +10,7 @@ import io.zenwave360.sdk.doc.DocumentedPlugin;
 import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.processors.Processor;
 import io.zenwave360.sdk.processors.ZDLProcessor;
+import io.zenwave360.sdk.utils.CliOutput;
 
 @DocumentedPlugin(summary = "Prints to StdOut ZDL Model as JSON")
 public class ZdlToJsonPlugin extends Plugin implements Processor {
@@ -25,7 +26,7 @@ public class ZdlToJsonPlugin extends Plugin implements Processor {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             var json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(zdl);
-            System.out.println(json);
+            CliOutput.stdout().println(json);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

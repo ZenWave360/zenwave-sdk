@@ -6,6 +6,24 @@ Adds Kafka Streams internal-topic authorization to the AsyncAPI Ops (Terraform) 
 
 ## What's New
 
+### `Lint` plugin — CI-friendly ZDL validation
+
+Linting is a regular plugin, for terminals, agents, and CI (one ZDL file per run; see `jbang zw -p Lint -h`):
+
+```shell
+jbang zw -p Lint zdlFile=<file.zdl> [format=text|json|sarif] [output=<file>] [strict=true] [root=<dir>] [linters=<Linter,...>]
+```
+
+The report goes to stdout, or to `output=` as UTF-8 (PowerShell 5.1 redirects as UTF-16). Text is `file:line:column: severity ruleId message`; JSON is a versioned envelope (`schemaVersion: "1"`, `summary`, `diagnostics`, `toolFailures`); SARIF is 2.1.0 with `%SRCROOT%`, `rules[]`, `partialFingerprints` and invocation `exitCode`. Positions are 1-based.
+
+`linters` takes an ordered list of `io.zenwave360.sdk.lint.Linter` classes (fully qualified or built-in short names), loaded from the project classpath so custom linters ship in jars added with `--deps`. The default set checks parser problems (including `@lifecycle` / `@transition` states), unresolved `zdl client` / `asyncapi client` references, `@calls` targets, and `@listener` events (plus mixed `@asyncapi`/`@listener` bindings and required-input lineage warnings). Presets are `LintPlugin` subclasses with a different default `linters`. Syntax errors come from `dsl-kotlin` 1.10 as a single problem, and semantic linters are skipped after one, so there are no cascading false errors.
+
+Exit codes are now CLI-wide: `0` success, `1` findings (errors, or warnings with `strict=true`), `2` tool failure. Plugins signal a code by throwing `ZenWaveException(message, exitCode)`; any other exception now exits `2` (previously `1`).
+
+The CLI is now agent-friendly for all plugins: while a plugin runs, `System.out` is redirected to stderr and only deliberate results (the lint report, `ZdlToJson`, template stdout output) reach stdout.
+
+Deprecated: joining several ZDL files into one model (`zdlFiles`) now prints a warning on stderr. Use `zdlFile` and reference other models with `apis { zdl ... }`.
+
 ### `x-kafka-streams-applications` — Kafka Streams Internal Topic ACLs
 
 `asyncapi-ops` can now authorize a Kafka Streams application to manage the internal topics it creates for itself at startup — changelog, repartition and join-window store topics — without modelling each one as an AsyncAPI channel and without granting the application open-ended topic-creation rights. Full reference: [plugins/asyncapi-ops/docs/x-kafka-streams.md](../plugins/asyncapi-ops/docs/x-kafka-streams.md).

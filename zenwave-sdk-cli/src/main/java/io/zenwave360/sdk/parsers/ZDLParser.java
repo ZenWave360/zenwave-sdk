@@ -19,6 +19,8 @@ public class ZDLParser implements Parser, ConfigurationProvider {
 
     public static final List blobTypes = List.of("Blob", "AnyBlob", "ImageBlob", "byte");
     public static final String REFERENCED_API_MODEL_PROPERTY = "model";
+    /** Set on an {@code apis} entry, when {@code continueOnZdlError} is on, with the reason its model failed to load. */
+    public static final String REFERENCED_API_ERROR_PROPERTY = "modelLoadError";
 
     public List<String> zdlFiles = List.of();
     private String content;
@@ -40,6 +42,11 @@ public class ZDLParser implements Parser, ConfigurationProvider {
         }
     }
 
+    /**
+     * @deprecated Parsing several files joined into one model is deprecated: one run parses one ZDL file.
+     *             Reference other models with {@code apis { zdl ... }} instead.
+     */
+    @Deprecated
     public void setZdlFiles(List<String> zdlFiles) {
         this.zdlFiles = zdlFiles;
     }
@@ -76,6 +83,10 @@ public class ZDLParser implements Parser, ConfigurationProvider {
             SpecResourceLoader loader = new SpecResourceLoader()
                     .withProjectClassLoader(projectClassLoader)
                     .withAuthentication(authentication);
+            if (zdlFiles.size() > 1) {
+                System.err.println("ZDL WARNING: joining several ZDL files into one model is deprecated "
+                        + "and will be removed; parse one file and reference others with 'apis { zdl ... }': " + zdlFiles);
+            }
             StringBuilder zdlContent = new StringBuilder();
             for (String zdlFile : zdlFiles) {
                 zdlContent.append(loader.load(zdlFile));
@@ -121,14 +132,17 @@ public class ZDLParser implements Parser, ConfigurationProvider {
             if (apiUri == null || apiUri.isBlank()) {
                 continue;
             }
-            URI resolvedApiUri = loader.resolve(apiUri, declaringDocument);
+            URI resolvedApiUri = null;
             try {
+                resolvedApiUri = loader.resolve(apiUri, declaringDocument);
                 api.put(REFERENCED_API_MODEL_PROPERTY, parseReferencedApi(api, resolvedApiUri, loader));
             } catch (Exception e) {
                 if (!continueOnZdlError) {
                     throw e instanceof IOException ioException ? ioException : new IOException(e.getMessage(), e);
                 }
-                log.warn("Unable to load referenced API '{}' from {}: {}", api.get("name"), resolvedApiUri, e.getMessage());
+                api.put(REFERENCED_API_ERROR_PROPERTY, rootMessage(e));
+                log.warn("Unable to load referenced API '{}' from {}: {}", api.get("name"),
+                        resolvedApiUri != null ? resolvedApiUri : apiUri, e.getMessage());
             }
         }
     }
@@ -146,11 +160,24 @@ public class ZDLParser implements Parser, ConfigurationProvider {
             Map<String, Object> referencedZdlModel = new ZdlParser().parseModel(loader.load(resolvedApiUri));
             var problems = JSONPath.get(referencedZdlModel, "$.problems", List.of());
             if (!problems.isEmpty()) {
-                throw new IOException("Referenced ZDL '" + api.get("name") + "' has " + problems.size() + " parse problems");
+                // Same policy as the primary model: report problems, and only fail when continueOnZdlError is off.
+                for (Object problem : problems) {
+                    System.err.printf("ZDL ERROR [%s] in referenced '%s' (%s): %s%n", JSONPath.get(problem, "path"),
+                            api.get("name"), resolvedApiUri, JSONPath.get(problem, "message"));
+                }
+                if (!continueOnZdlError) {
+                    throw new IOException("Referenced ZDL '" + api.get("name") + "' has " + problems.size() + " parse problems");
+                }
             }
             return referencedZdlModel;
         }
         return loader.parse(resolvedApiUri);
+    }
+
+    private static String rootMessage(Throwable error) {
+        Throwable current = error;
+        while (current.getCause() != null) current = current.getCause();
+        return current.getMessage() != null ? current.getMessage() : current.getClass().getSimpleName();
     }
 
     private String apiUri(Map<String, Object> api) {
