@@ -2,9 +2,12 @@
 {{~#if includeEmitEventsImplementation}}
     {{~#if method.returnTypeIsOptional}} if({{_entity.instanceName}}.isPresent()) { {{~/if}}
         // emit events
+        {{~#if eachVar}}
+        {{eachVar}}.forEach(eventSource -> {
+        {{~/if}}
         {{~#each (methodEvents method) as |event|}}
             {{~#if (methodEntity method)}}
-            var {{asInstanceName event.name}} = eventsMapper.as{{event.name}}({{_entity.instanceName}}{{#if method.returnTypeIsOptional~}} .get() {{~/if}});
+            var {{asInstanceName event.name}} = eventsMapper.as{{event.name}}({{#if eachVar}}eventSource{{else}}{{_entity.instanceName}}{{/if}}{{#if method.returnTypeIsOptional~}} .get() {{~/if}});
             {{~else}}
             var {{asInstanceName event.name}} = eventsMapper.as{{event.name}}({{{methodParametersCallSignature method}}});
             {{~/if}}
@@ -14,6 +17,9 @@
             eventPublisher.on{{event.className}}({{asInstanceName event.name}});
             {{~/if}}
         {{~/each}}
+        {{~#if eachVar}}
+        });
+        {{~/if}}
     {{~#if method.returnTypeIsOptional}} } {{~/if}}
 {{~else}}
 // TODO emit events: {{method.withEvents}}

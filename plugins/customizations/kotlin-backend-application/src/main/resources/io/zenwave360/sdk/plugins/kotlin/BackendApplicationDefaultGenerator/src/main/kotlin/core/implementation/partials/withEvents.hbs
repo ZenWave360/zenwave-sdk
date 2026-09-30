@@ -1,9 +1,12 @@
 {{~#if method.withEvents}}
 {{~#if includeEmitEventsImplementation}}
         // emit events
+        {{~#if eachVar}}
+        {{eachVar}}.forEach { eventSource ->
+        {{~/if}}
         {{~#each (methodEvents method) as |event|}}
             {{~#if (methodEntity method)}}
-                {{~#assign 'eventsMapperCall'}} eventsMapper.as{{event.name}}({{varName}}){{/assign}}
+                {{~#assign 'eventsMapperCall'}} eventsMapper.as{{event.name}}({{#if eachVar}}eventSource{{else}}{{varName}}{{/if}}){{/assign}}
             {{~else}}
                 {{~#assign 'eventsMapperCall'}} eventsMapper.as{{event.name}}({{{methodParametersCallSignature method}}}){{/assign}}
             {{~/if}}
@@ -13,6 +16,9 @@
             eventPublisher.on{{event.className}}({{{eventsMapperCall}}})
             {{~/if}}
         {{~/each}}
+        {{~#if eachVar}}
+        }
+        {{~/if}}
 {{~else}}
 // TODO emit events: {{method.withEvents}}
 // set 'includeEmitEventsImplementation' to generate this
