@@ -160,6 +160,51 @@ class BackendApplicationKotlinListenersGeneratorTest {
         Assertions.assertFalse(Files.exists(packageFolder.resolve("EventsMapper.kt")));
     }
 
+    // ---- spec sdk-listener-generation: id placeholder in Kotlin listeners ----
+
+    private String generateKotlinIdListener(String name) throws Exception {
+        Path targetFolder = tempDir.resolve(name);
+        new MainGenerator().generate(kotlinPlugin(
+                "classpath:zdl/kotlin-payments-processing.zdl", targetFolder, "io.zenwave360.example.payments", false));
+        new MainGenerator().generate(kotlinPlugin(
+                "classpath:zdl/kotlin-orders-cross-module-listeners.zdl", targetFolder,
+                "io.zenwave360.example.orders", true));
+        return normalized(targetFolder.resolve(
+                "src/main/kotlin/io/zenwave360/example/orders/adapters/events/payments/PaymentsProcessingEventsListener.kt"));
+    }
+
+    @Test
+    void kotlinListenerWithIdAndBeanInputDeclaresTodoIdPlaceholder() throws Exception {
+        String listener = generateKotlinIdListener("kotlin-listener-id-input");
+        Assertions.assertTrue(listener.contains(
+                "val id: Long = TODO(\"CUSTOM_REQUIRED: resolve the id for PaymentDeclined\") "
+                        + "ordersService.holdOrder(id, mapper.asCancelOrderInput(event))"), listener);
+    }
+
+    @Test
+    void kotlinListenerWithIdOnlyDeclaresTodoIdPlaceholder() throws Exception {
+        String listener = generateKotlinIdListener("kotlin-listener-id-only");
+        Assertions.assertTrue(listener.contains(
+                "val id: Long = TODO(\"CUSTOM_REQUIRED: resolve the id for PaymentVoided\") "
+                        + "ordersService.archiveOrder(id)"), listener);
+    }
+
+    @Test
+    void kotlinListenerUnsupportedShapesKeepThrowingCustomRequiredBody() throws Exception {
+        String listener = generateKotlinIdListener("kotlin-listener-unsupported");
+        Assertions.assertTrue(listener.contains("fun onPaymentAuthorizedSearchOrders("), listener);
+        Assertions.assertTrue(listener.contains("fun onPaymentAuthorizedSearchOrdersById("), listener);
+        Assertions.assertEquals(2, listener.split("throw UnsupportedOperationException\\(", -1).length - 1, listener);
+    }
+
+    @Test
+    void kotlinListenerWithoutIdIsUnchanged() throws Exception {
+        String listener = generateKotlinIdListener("kotlin-listener-no-id");
+        Assertions.assertTrue(listener.contains(
+                "fun onPaymentAuthorized(event: io.zenwave360.example.payments.core.domain.events.PaymentAuthorized) "
+                        + "{ ordersService.confirmOrder(mapper.asPaymentAuthorized(event)) }"), listener);
+    }
+
     private Plugin kotlinPlugin(String zdlFile, Path targetFolder, String basePackage,
             boolean implementEventListeners) throws Exception {
         // The backend plugin is provided-scoped for this customization module.

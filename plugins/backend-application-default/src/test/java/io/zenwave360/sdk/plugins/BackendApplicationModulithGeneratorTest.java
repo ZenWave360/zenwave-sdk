@@ -214,4 +214,92 @@ public class BackendApplicationModulithGeneratorTest {
         Assertions.assertTrue(listenerSource.contains("@ApplicationModuleListener"));
         Assertions.assertFalse(listenerSource.contains("org.springframework.context.event.EventListener"));
     }
+
+    // ---- spec sdk-listener-generation: id placeholder in listeners ----
+
+    private static final String ORDERS_LISTENER_PACKAGE = "src/main/java/io/zenwave360/example/orders/adapters/events/payments/";
+
+    private String generateIdListeners(String name) throws Exception {
+        String targetFolder = tempDir.resolve(name).toString();
+        new MainGenerator().generate(new BackendApplicationDefaultPlugin()
+                .withZdlFile("classpath:zdl/payments-processing.zdl")
+                .withTargetFolder(targetFolder)
+                .withOption("basePackage", "io.zenwave360.example.payments")
+                .withOption("persistence", PersistenceType.jpa)
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("useSpringModulith", true)
+                .withOption("includeEmitEventsImplementation", true)
+                .withOption("haltOnFailFormatting", false));
+        new MainGenerator().generate(new BackendApplicationDefaultPlugin()
+                .withZdlFile("classpath:zdl/orders-cross-module-listeners.zdl")
+                .withTargetFolder(targetFolder)
+                .withOption("basePackage", "io.zenwave360.example.orders")
+                .withOption("persistence", PersistenceType.jpa)
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("useSpringModulith", true)
+                .withOption("implementEventListeners", true)
+                .withOption("includeEmitEventsImplementation", true)
+                .withOption("haltOnFailFormatting", false));
+        return targetFolder;
+    }
+
+    /** Body of one generated listener method, whitespace-normalised. */
+    private static String listenerMethod(String listenerSource, String methodName) {
+        String normalized = listenerSource.replaceAll("\\s+", " ");
+        int start = normalized.indexOf("public void " + methodName + "(");
+        Assertions.assertTrue(start >= 0, "missing listener method " + methodName);
+        int end = normalized.indexOf("@ApplicationModuleListener", start);
+        return normalized.substring(start, end < 0 ? normalized.length() : end);
+    }
+
+    @Test
+    public void listenerWithIdAndBeanInputDeclaresNullIdPlaceholderAndCompiles() throws Exception {
+        String targetFolder = generateIdListeners("listener-id-input");
+        String listener = Files.readString(Path.of(targetFolder, ORDERS_LISTENER_PACKAGE, "PaymentsProcessingEventsListener.java"));
+        String method = listenerMethod(listener, "onPaymentDeclinedHoldOrder");
+        Assertions.assertTrue(method.contains("// TODO CUSTOM_REQUIRED: resolve the Order id for PaymentDeclined"), method);
+        Assertions.assertTrue(method.contains("Long id = null; ordersService.holdOrder(id, mapper.asCancelOrderInput(event));"), method);
+
+        String mapper = Files.readString(Path.of(targetFolder, ORDERS_LISTENER_PACKAGE, "mappers/PaymentsProcessingEventsListenerMapper.java"))
+                .replaceAll("\\s+", " ");
+        Assertions.assertTrue(mapper.contains("CancelOrderInput asCancelOrderInput("), mapper);
+        Assertions.assertTrue(mapper.contains("io.zenwave360.example.payments.core.domain.events.PaymentDeclined event)"), mapper);
+
+        Assertions.assertEquals(0, MavenCompiler.copyPomAndCompile("src/test/resources/jpa-pom.xml", targetFolder));
+    }
+
+    @Test
+    public void listenerWithIdOnlyDeclaresNullIdPlaceholderAndEmitsNoMapperMethod() throws Exception {
+        String targetFolder = generateIdListeners("listener-id-only");
+        String listener = Files.readString(Path.of(targetFolder, ORDERS_LISTENER_PACKAGE, "PaymentsProcessingEventsListener.java"));
+        String method = listenerMethod(listener, "onPaymentVoidedArchiveOrder");
+        Assertions.assertTrue(method.contains("// TODO CUSTOM_REQUIRED: resolve the Order id for PaymentVoided"), method);
+        Assertions.assertTrue(method.contains("Long id = null; ordersService.archiveOrder(id);"), method);
+        Assertions.assertFalse(method.contains("mapper."), method);
+
+        String mapper = Files.readString(Path.of(targetFolder, ORDERS_LISTENER_PACKAGE, "mappers/PaymentsProcessingEventsListenerMapper.java"));
+        Assertions.assertFalse(mapper.contains("archiveOrder"));
+        Assertions.assertFalse(mapper.contains("PaymentVoided event) ;"));
+    }
+
+    @Test
+    public void listenerUnsupportedShapesKeepThrowingCustomRequiredBody() throws Exception {
+        String targetFolder = generateIdListeners("listener-unsupported");
+        String listener = Files.readString(Path.of(targetFolder, ORDERS_LISTENER_PACKAGE, "PaymentsProcessingEventsListener.java"));
+        for (String name : new String[] { "onPaymentAuthorizedSearchOrders", "onPaymentAuthorizedSearchOrdersById" }) {
+            String method = listenerMethod(listener, name);
+            Assertions.assertTrue(method.contains("TODO CUSTOM_REQUIRED: map PaymentAuthorized"), method);
+            Assertions.assertTrue(method.contains("throw new UnsupportedOperationException("), method);
+            Assertions.assertFalse(method.contains("id = null"), method);
+        }
+    }
+
+    @Test
+    public void listenerWithoutIdIsUnchanged() throws Exception {
+        String targetFolder = generateIdListeners("listener-no-id");
+        String listener = Files.readString(Path.of(targetFolder, ORDERS_LISTENER_PACKAGE, "PaymentsProcessingEventsListener.java"));
+        String method = listenerMethod(listener, "onPaymentAuthorized");
+        Assertions.assertTrue(method.contains("{ ordersService.confirmOrder(mapper.asPaymentAuthorized(event)); }"), method);
+        Assertions.assertFalse(method.contains("TODO"), method);
+    }
 }

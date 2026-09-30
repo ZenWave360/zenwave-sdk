@@ -28,6 +28,8 @@ import static org.apache.commons.lang3.StringUtils.trimToNull;
 public final class ZDLListenerUtils {
 
     public static final String MODE_MAPPER = "MAPPER";
+    /** {@code (id)}: delegates with the id placeholder only, no mapper method. */
+    public static final String MODE_ID_ONLY = "ID_ONLY";
     public static final String MODE_CUSTOM = "CUSTOM_REQUIRED";
 
     private ZDLListenerUtils() {
@@ -175,22 +177,31 @@ public final class ZDLListenerUtils {
             binding.put("listenerMethodName", method.get("name"));
         }
         binding.put("eventClassName", eventClassName(event, eventName));
-        classifyBinding(zdlModel, method, binding);
+        classifyBinding(zdlModel, method, binding, generatorOptions);
         return binding;
     }
 
     /**
-     * A listener event is always mapped into the consuming module's local input object. Methods that do not
-     * take exactly one local bean input remain compiling developer-owned customization points.
+     * A listener event is always mapped into the consuming module's local input object. Supported shapes are
+     * {@code (Input)}, {@code (id, Input)} and {@code (id)}; for the id shapes the listener declares a placeholder
+     * id marked {@code TODO CUSTOM_REQUIRED}. Anything else remains a compiling developer-owned customization point.
      */
     private static void classifyBinding(Map<String, Object> zdlModel, Map<String, Object> method,
-            Map<String, Object> binding) {
+            Map<String, Object> binding, Map<String, Object> generatorOptions) {
         String parameterType = trimToNull((String) method.get("parameter"));
-        boolean simpleShape = method.get("paramId") == null
-                && JSONPath.get(method, "$.options.paginated") == null
+        boolean hasId = method.get("paramId") != null;
+        boolean supportedShape = JSONPath.get(method, "$.options.paginated") == null
                 && !JSONPath.get(method, "$.parameterIsArray", false);
 
-        if (simpleShape && parameterType != null) {
+        // Same id type the generated service interface signature uses (the generator's idJavaType,
+        // see ZDLJavaSignatureUtils.methodParametersSignature). Natural ids span several parameters and
+        // an unresolved type cannot be declared, so those stay CUSTOM_REQUIRED.
+        String idJavaType = generatorOptions != null ? trimToNull((String) generatorOptions.get("idJavaType")) : null;
+        if (hasId && (idJavaType == null || JSONPath.get(method, "naturalId", false))) {
+            supportedShape = false;
+        }
+
+        if (supportedShape && parameterType != null) {
             Map<String, Object> parameterEntity = JSONPath.get(zdlModel, "$.inputs['" + parameterType + "']");
             boolean beanTarget = parameterEntity != null
                     && parameterEntity.get("fields") instanceof Map<?, ?>
@@ -200,10 +211,25 @@ public final class ZDLListenerUtils {
                 binding.put("mode", MODE_MAPPER);
                 binding.put("inputType", parameterType);
                 binding.put("mapperMethodName", "as" + NamingUtils.asJavaTypeName(parameterType));
+                putIdPlaceholder(binding, method, hasId, idJavaType);
                 return;
             }
         }
+        if (supportedShape && hasId && parameterType == null) {
+            binding.put("mode", MODE_ID_ONLY);
+            putIdPlaceholder(binding, method, true, idJavaType);
+            return;
+        }
         binding.put("mode", MODE_CUSTOM);
+    }
+
+    private static void putIdPlaceholder(Map<String, Object> binding, Map<String, Object> method, boolean hasId,
+            String idJavaType) {
+        if (hasId) {
+            binding.put("idPlaceholder", true);
+            binding.put("idParamName", method.get("paramId"));
+            binding.put("idJavaType", idJavaType);
+        }
     }
 
     private static String referencedDomainEventsPackage(Map<String, Object> api, Map<String, Object> referencedModel,

@@ -29,7 +29,15 @@ class {{listenerGroup.className}}{{#if listenerGroup.services}}(
     @ApplicationModuleListener
     fun {{binding.listenerMethodName}}(event: {{binding.eventType}}) {
         {{~#if (eq binding.mode "MAPPER")}}
+        {{~#if binding.idPlaceholder}}
+        val {{binding.idParamName}}: {{binding.idJavaType}} = TODO("CUSTOM_REQUIRED: resolve the id for {{binding.eventName}}")
+        {{binding.serviceInstanceName}}.{{binding.methodName}}({{binding.idParamName}}, mapper.{{binding.mapperMethodName}}(event))
+        {{~else}}
         {{binding.serviceInstanceName}}.{{binding.methodName}}(mapper.{{binding.mapperMethodName}}(event))
+        {{~/if}}
+        {{~else if (eq binding.mode "ID_ONLY")}}
+        val {{binding.idParamName}}: {{binding.idJavaType}} = TODO("CUSTOM_REQUIRED: resolve the id for {{binding.eventName}}")
+        {{binding.serviceInstanceName}}.{{binding.methodName}}({{binding.idParamName}})
         {{~else}}
         // TODO CUSTOM_REQUIRED: map {{binding.eventName}} to the service method input and invoke {{binding.serviceInstanceName}}.{{binding.methodName}}(...)
         throw UnsupportedOperationException("Customize listener {{listenerGroup.className}}.{{binding.listenerMethodName}}")

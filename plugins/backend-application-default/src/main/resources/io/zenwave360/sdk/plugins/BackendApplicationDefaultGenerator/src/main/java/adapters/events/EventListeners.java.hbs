@@ -39,7 +39,17 @@ public class {{listenerGroup.className}} {
     @ApplicationModuleListener
     public void {{binding.listenerMethodName}}({{binding.eventType}} event) {
         {{~#if (eq binding.mode "MAPPER")}}
+        {{~#if binding.idPlaceholder}}
+        // TODO CUSTOM_REQUIRED: resolve the {{#if binding.method.entity}}{{binding.method.entity}} {{/if}}id for {{binding.eventName}} (no event field is assumed to carry it)
+        {{binding.idJavaType}} {{binding.idParamName}} = null;
+        {{binding.serviceInstanceName}}.{{binding.methodName}}({{binding.idParamName}}, mapper.{{binding.mapperMethodName}}(event));
+        {{~else}}
         {{binding.serviceInstanceName}}.{{binding.methodName}}(mapper.{{binding.mapperMethodName}}(event));
+        {{~/if}}
+        {{~else if (eq binding.mode "ID_ONLY")}}
+        // TODO CUSTOM_REQUIRED: resolve the {{#if binding.method.entity}}{{binding.method.entity}} {{/if}}id for {{binding.eventName}} (no event field is assumed to carry it)
+        {{binding.idJavaType}} {{binding.idParamName}} = null;
+        {{binding.serviceInstanceName}}.{{binding.methodName}}({{binding.idParamName}});
         {{~else}}
         // TODO CUSTOM_REQUIRED: map {{binding.eventName}} to the service method input and invoke {{binding.serviceInstanceName}}.{{binding.methodName}}(...)
         throw new UnsupportedOperationException("Customize listener {{listenerGroup.className}}.{{binding.listenerMethodName}}");

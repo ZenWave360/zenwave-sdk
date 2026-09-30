@@ -124,9 +124,15 @@ Listener implementation is controlled independently by `implementEventListeners`
 Per-binding implementation modes:
 
 - `MAPPER` — the service method takes exactly one local bean input: generate the plain mapper contract
-  (regenerated) + generated-once MapStruct extension (decision 2) and delegate through it.
-- `CUSTOM_REQUIRED` — anything else (ids, pagination, arrays, missing types): compiling
-  `UnsupportedOperationException` body with a TODO, in the generated-once class.
+  (regenerated) + generated-once MapStruct extension (decision 2) and delegate through it. When the method also
+  takes an `id` (`(id, Input)`), the listener declares an id placeholder and passes it first: Java
+  `// TODO CUSTOM_REQUIRED: resolve the <Entity> id for <Event>` + `<IdType> id = null;`, Kotlin
+  `val id: <IdType> = TODO("CUSTOM_REQUIRED: resolve the id for <Event>")`. The id type is the one of the generated
+  service interface signature (`idJavaType`).
+- `ID_ONLY` — the service method takes only an `id` (`(id)`): same id placeholder, `svc.method(id)`; no mapper
+  method is emitted.
+- `CUSTOM_REQUIRED` — anything else (pagination, arrays, natural ids, non-bean or missing input types, with or
+  without an id): compiling `UnsupportedOperationException` body with a TODO, in the generated-once class.
 
 ## 7. Work plan / status
 

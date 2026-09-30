@@ -31,6 +31,24 @@ service OrdersService for (Order) {
     @listener(zdl: PaymentsProcessingZdl, event: PaymentVoided)
     cancelOrder(CancelOrderInput) Order
 
+    // (id, Input): mapped input, placeholder id
+    @listener(zdl: PaymentsProcessingZdl, event: PaymentDeclined)
+    holdOrder(id, CancelOrderInput) Order
+
+    // (id): placeholder id only, no mapper method
+    @listener(zdl: PaymentsProcessingZdl, event: PaymentVoided)
+    archiveOrder(id) Order
+
+    // unsupported shape: paginated stays CUSTOM_REQUIRED
+    @listener(zdl: PaymentsProcessingZdl, event: PaymentAuthorized)
+    @paginated
+    searchOrders(CancelOrderInput) Order[]
+
+    // unsupported shape with id: paginated stays CUSTOM_REQUIRED
+    @listener(zdl: PaymentsProcessingZdl, event: PaymentAuthorized)
+    @paginated
+    searchOrdersById(id, CancelOrderInput) Order[]
+
     @listener({event: OrderConfirmed})
     handleOrderConfirmed(OrderConfirmedInput)
 }
