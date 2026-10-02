@@ -23,7 +23,7 @@ The existing EventCatalog flow output shape remains valid:
 flowchart LR
     ZFL["ZFL source"] --> DSL["dsl-kotlin semantic model"]
     DSL --> OCC["Logical operations and occurrences"]
-    OCC --> GRAPH["manifest-graph"]
+    OCC --> GRAPH["architecture-graph"]
 
     ZDL["ZDL methods"] --> GRAPH
     OA["OpenAPI operations"] --> GRAPH
@@ -53,7 +53,7 @@ After migration, the EventCatalog generator must never infer these relationships
 
 ## Phase 0 — Freeze the cross-layer semantic contract
 
-Add a manifest-graph design document and KDoc before changing implementation.
+Add a architecture-graph design document and KDoc before changing implementation.
 
 ### 0.1 Logical operation
 
@@ -83,7 +83,7 @@ Rules:
 Add `ArchitectureEdgeKind.BINDS_TO`.
 
 Although graph attributes remain `Map<String, String>`, their schema must not be duplicated as raw
-string literals across repositories. Publish the keys and allowed wire values from manifest-graph:
+string literals across repositories. Publish the keys and allowed wire values from architecture-graph:
 
 ```kotlin
 object ArchitectureBindingAttributes {
@@ -113,7 +113,7 @@ object ArchitectureBindingValues {
 }
 ```
 
-Expose these as Java-friendly public constants and use them from manifest-graph and the SDK. Also
+Expose these as Java-friendly public constants and use them from architecture-graph and the SDK. Also
 provide a typed `ArchitectureOperationBinding.from(edge)` decoder so consumers normally work with
 enums instead of raw attribute strings. The raw map is the serialization representation, not the
 application API.
@@ -203,7 +203,7 @@ Keep `INVOKES`, `EMITS`, and `TRIGGERS` for their literal meanings.
 
 ### Phase 0 gate
 
-- The semantic contract is documented in manifest-graph.
+- The semantic contract is documented in architecture-graph.
 - Attribute names and allowed values are fixed, published as constants, and covered by Java/Kotlin
   access tests before implementation.
 - The three repositories agree on identity and version ownership.
@@ -398,13 +398,13 @@ Required cases:
 
 ---
 
-## Phase 2 — Add an OpenAPI operation index to manifest-core
+## Phase 2 — Add an OpenAPI operation index to architecture-manifest
 
 Repository: `C:\Users\ivangsa\workspace\zenwave\zenwave-manifest`
 
 Primary file:
 
-- `manifest-core/src/commonMain/kotlin/io/zenwave360/manifest/ManifestApiConsumptions.kt`
+- `architecture-manifest/src/commonMain/kotlin/io/zenwave360/architecture/manifest/ManifestApiConsumptions.kt`
 
 ### 2.1 New model
 
@@ -467,7 +467,7 @@ Every OpenAPI operation needed by ZDL binding resolution is available by exact m
 
 ---
 
-## Phase 3 — Enrich manifest-graph
+## Phase 3 — Enrich architecture-graph
 
 Repository: `C:\Users\ivangsa\workspace\zenwave\zenwave-manifest`
 
@@ -945,12 +945,12 @@ For the Arcadia flow:
 ### 5.1 Commit order
 
 1. `dsl-kotlin`: enrich `ZflCommand` with occurrence semantics.
-2. `zenwave-manifest/manifest-core`: OpenAPI index.
-3. `zenwave-manifest/manifest-graph`: typed bindings, occurrences, outcomes, and strict resolution.
+2. `zenwave-manifest/architecture-manifest`: OpenAPI index.
+3. `zenwave-manifest/architecture-graph`: typed bindings, occurrences, outcomes, and strict resolution.
 4. Publish new dsl-kotlin artifacts.
 5. Update zenwave-manifest to the new dsl-kotlin version.
-6. Publish manifest-core and manifest-graph.
-7. Update `zenwave-sdk`'s `manifest-core.version`.
+6. Publish architecture-manifest and architecture-graph.
+7. Update `zenwave-sdk`'s `architecture-manifest.version`.
 8. Cut the generator over to graph-only reconciliation.
 9. Switch the SDK from the encoded `endOutcomes` attribute to `ZFL_OUTCOME`/`RESULTS_IN`, remove
    the encoded attribute, and flip `ZflGraphAnalyzerTest` to structural assertions.
@@ -1045,7 +1045,7 @@ The boundary is fully removed only when all of these are true:
 
 - `ZFL_OPERATION → RESOLVES_TO → ZDL_METHOD` is present for every resolved operation.
 - Every API relationship is represented by a validated `BINDS_TO` role.
-- Binding attribute producers and consumers use manifest-graph's published constants and typed
+- Binding attribute producers and consumers use architecture-graph's published constants and typed
   decoder.
 - Repeated ZFL operation occurrences have stable graph identities.
 - Responses, failures, compensation, and terminal outcomes are graph-native.
@@ -1061,8 +1061,8 @@ The boundary is fully removed only when all of these are true:
 ## Final deliverables
 
 1. Updated `ZflCommand` semantic model with operation occurrences.
-2. OpenAPI operation index in manifest-core.
-3. Typed operation bindings and occurrence/outcome graph support in manifest-graph.
+2. OpenAPI operation index in architecture-manifest.
+3. Typed operation bindings and occurrence/outcome graph support in architecture-graph.
 4. Strict service and operation resolution diagnostics.
 5. Graph-identity-based EventCatalog reconciliation.
 6. Graph-only ZFL flow projection.

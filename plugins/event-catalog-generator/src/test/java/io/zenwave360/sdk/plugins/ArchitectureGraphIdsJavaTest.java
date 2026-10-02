@@ -1,6 +1,6 @@
 package io.zenwave360.sdk.plugins;
 
-import io.zenwave360.manifest.graph.ArchitectureGraphIds;
+import io.zenwave360.architecture.graph.ArchitectureGraphIds;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

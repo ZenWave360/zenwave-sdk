@@ -1,9 +1,9 @@
 package io.zenwave360.sdk.plugins;
 
-import io.zenwave360.manifest.ManifestDomain;
-import io.zenwave360.manifest.ManifestService;
-import io.zenwave360.manifest.ManifestSubdomain;
-import io.zenwave360.manifest.ZenWaveManifest;
+import io.zenwave360.architecture.manifest.ManifestDomain;
+import io.zenwave360.architecture.manifest.ManifestService;
+import io.zenwave360.architecture.manifest.ManifestSubdomain;
+import io.zenwave360.architecture.manifest.ZenWaveManifest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

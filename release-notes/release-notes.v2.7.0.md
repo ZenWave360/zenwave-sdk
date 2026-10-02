@@ -27,7 +27,7 @@ Includes EventCatalog producer/consumer and business-flow generation, plus ZDL l
 
 #### Manifest-Graph-Based Flow Generation
 
-- Generates EventCatalog business flows from ZFL artifacts resolved through `manifest-graph`.
+- Generates EventCatalog business flows from ZFL artifacts resolved through `architecture-graph`.
 - Projects actors, timers, operations, emitted events, responses, failures, compensation paths, loops, and terminal outcomes while retaining their graph-native identities and semantics.
 - Uses validated graph identities and binding roles to reconcile commands and queries, preventing similarly named resources from being merged accidentally.
 - Keeps operations without an invocation binding visible as internal flow nodes. Set `publishInternalOperations=true` to also publish their command or query pages.

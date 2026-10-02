@@ -7,7 +7,7 @@
 Its current responsibility is:
 
 - Load the retail architecture from `zenwave-architecture.yml`
-- Resolve service docs and artifacts through `manifest-core`
+- Resolve service docs and artifacts through `architecture-manifest`
 - Parse AsyncAPI, OpenAPI, and ZDL inputs
 - Generate EventCatalog MDX files under `target/event-catalog-test`
 - Sync those generated files into the EventCatalog project fixture
@@ -29,17 +29,17 @@ The plugin chain is defined in [EventCatalogPlugin.java](C:/Users/ivangsa/worksp
 
 ### 1. Architecture loading
 
-[EventCatalogArchitectureLoader.java](C:/Users/ivangsa/workspace/zenwave/zenwave-sdk/plugins/event-catalog-generator/src/main/java/io/zenwave360/sdk/plugins/EventCatalogArchitectureLoader.java) loads the master manifest through `manifest-core` and stores:
+[EventCatalogArchitectureLoader.java](C:/Users/ivangsa/workspace/zenwave/zenwave-sdk/plugins/event-catalog-generator/src/main/java/io/zenwave360/sdk/plugins/EventCatalogArchitectureLoader.java) loads the master manifest through `architecture-manifest` and stores:
 
 - `manifest`
-- `manifestRuntime`, the Java-friendly blocking JVM facade from `manifest-core`
+- `manifestRuntime`, the Java-friendly blocking JVM facade from `architecture-manifest`
 - `eventCatalog`, which contains only mutable EventCatalog-specific enrichment
 
 Hierarchy, service identity, documents, artifacts, and source resolution remain in the typed
-manifest-core model; the plugin no longer creates a flattened copy of the manifest.
+architecture-manifest model; the plugin no longer creates a flattened copy of the manifest.
 
 The manifest model exposes typed domains, subdomains, services, docs, artifacts, diagnostics, and
-configured content sources. URI loading and source fallback are handled by `manifest-core`.
+configured content sources. URI loading and source fallback are handled by `architecture-manifest`.
 
 ### 2. AsyncAPI processing
 
@@ -103,7 +103,7 @@ The generator is now aligned with EventCatalog’s expected directory structure:
 
 ## Source hierarchy
 
-The generator now supports hierarchical loading through `manifest-core`.
+The generator now supports hierarchical loading through `architecture-manifest`.
 
 ### Build-time content
 
@@ -128,7 +128,7 @@ This is controlled by:
 - `allowFallback`
 
 Loading and reference resolution use the public `ZenWaveManifestLoader` API and its
-`BlockingZenWaveManifestLoader` JVM facade from `manifest-core`.
+`BlockingZenWaveManifestLoader` JVM facade from `architecture-manifest`.
 
 ### Published links
 
