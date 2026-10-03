@@ -10,10 +10,10 @@ class ArchitectureGraphIdsJavaTest {
     @Test
     void exposesStableAsyncApiAndOpenApiResourceIdsToJavaConsumers() {
         assertEquals(
-                "artifact/orders%002Fcheckout/async%0020api%00231/channel/channels.orders%002F%007Bid%007D",
+                "zw:orders/checkout/channel/orders%2F%7Bid%7D",
                 ArchitectureGraphIds.channel("orders/checkout", "async api#1", "orders/{id}"));
         assertEquals(
-                "artifact/orders%002Fcheckout/open%0020api%00231/api_operation/operations.GET%0020%002Forders%002F%007Bid%007D",
+                "zw:orders/checkout/api-operation/GET%20%2Forders%2F%7Bid%7D",
                 ArchitectureGraphIds.apiOperation("orders/checkout", "open api#1", "GET /orders/{id}"));
     }
 }
