@@ -34,7 +34,7 @@ class DockerComposeInitializer : ApplicationContextInitializer<ConfigurableAppli
     companion object {
         private const val DOCKER_COMPOSE_FILE = "./docker-compose.yml"
         private val SERVICES = listOf(
-            Service("mongodb", 27017, "MONGODB_URI", "mongodb://%s:%s/DATABASENAME?replicaSet=rs0"),
+            Service("mongodb", 27017, "MONGODB_URI", "mongodb://%s:%s/app?replicaSet=rs0"),
             Service("kafka", 9092, "KAFKA_BOOTSTRAP_SERVERS", "%s:%s")
         )
 
