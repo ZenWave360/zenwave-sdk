@@ -41,7 +41,7 @@ public class SimpleDomainProjectLayout extends ProjectLayout {
         outboundPackage = "{{moduleBasePackage}}";
         outboundRepositoryPackage = "{{moduleBasePackage}}";
         // outbound / secondary ports for events (internal and asyncapi)
-        outboundEventsPackage = "{{moduleBasePackage}}.events";
+        outboundEventsPackage = "{{moduleBasePackage}}";
         // asyncapi events dtos
         outboundEventsModelPackage = "{{moduleBasePackage}}.events.dtos";
 
@@ -53,7 +53,7 @@ public class SimpleDomainProjectLayout extends ProjectLayout {
         infrastructurePackage = "{{moduleBasePackage}}";
         infrastructureRepositoryPackage = "{{moduleBasePackage}}";
         // infrastructure / secondary adapters for events
-        infrastructureEventsPackage = "{{moduleBasePackage}}";
+        infrastructureEventsPackage = "{{moduleBasePackage}}.events";
 
         // primary adapters (web, events, commands)
         adaptersPackage = "{{moduleBasePackage}}";
