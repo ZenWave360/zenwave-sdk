@@ -14,6 +14,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.templating.TemplateOutput;
+import io.zenwave360.sdk.utils.JSONPath;
 
 public class ZDLToOpenAPIGeneratorTest {
 
@@ -35,6 +36,33 @@ public class ZDLToOpenAPIGeneratorTest {
         Assertions.assertEquals(1, outputTemplates.size());
 
 //        System.out.println(outputTemplates.get(0).getContent());
+    }
+
+    @Test
+    public void array_minlength_is_emitted_as_minItems() throws Exception {
+        String zdl = """
+                @aggregate
+                entity Order {
+                  items OrderItem[] required minlength(1) {
+                    sku String required
+                  }
+                }
+
+                @rest(\"/orders\")
+                service OrderService for (Order) {
+                  @post(\"/checkout\")
+                  checkout(Order) Order
+                }
+                """;
+        Map<String, Object> model = new ZDLParser().withContent(zdl).parse();
+        model = new ZDLProcessor().process(model);
+        model = new PathsProcessor().process(model);
+
+        String openApi = new ZDLToOpenAPIGenerator().generate(model).getAllTemplateOutputs().get(0).getContent();
+        Map<String, Object> schema = mapper.readValue(openApi, Map.class);
+
+        Assertions.assertEquals(1, JSONPath.get(schema, "$.components.schemas.Order.properties.items.minItems"));
+        Assertions.assertNull(JSONPath.get(schema, "$.components.schemas.Order.properties.items.items.minLength"));
     }
 
     @Test

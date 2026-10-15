@@ -90,6 +90,7 @@ public class EntitiesToSchemasConverter {
         }
         for (Map<String, Object> field : fields) {
             Map<String, Object> property = new LinkedHashMap<>();
+            boolean isArray = Boolean.TRUE.equals(field.get("isArray"));
             boolean isComplexType = JSONPath.get(zdlModel, "$.allEntitiesAndEnums." + field.get("type")) != null
                     || JSONPath.get(zdlModel, "$.events." + field.get("type")) != null;
 
@@ -104,11 +105,11 @@ public class EntitiesToSchemasConverter {
                 requiredProperties.add((String) field.get("name"));
             }
             String minlength = JSONPath.get(field, "$.validations.minlength.value");
-            if (minlength != null) {
+            if (minlength != null && !isArray) {
                 property.put("minLength", asNumber(minlength));
             }
             String maxlength = JSONPath.get(field, "$.validations.maxlength.value");
-            if (maxlength != null) {
+            if (maxlength != null && !isArray) {
                 property.put("maxLength", asNumber(maxlength));
             }
             String pattern = JSONPath.get(field, "$.validations.pattern.value");
@@ -119,8 +120,14 @@ public class EntitiesToSchemasConverter {
                 property.put("description", field.get("comment"));
             }
 
-            if (field.get("isArray") == Boolean.TRUE) {
+            if (isArray) {
                 property = Maps.of("type", "array", "items", property);
+                if (minlength != null) {
+                    property.put("minItems", asNumber(minlength));
+                }
+                if (maxlength != null) {
+                    property.put("maxItems", asNumber(maxlength));
+                }
             }
 
             properties.put((String) field.get("name"), property);
