@@ -93,8 +93,8 @@ io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.model,JavaZdlModel.Servi
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.model,JavaZdlModel.EnumValue,0,15,0,0,0,1,0,1,0,1
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.model,JavaZdlModel.ReturnType,0,15,0,0,0,1,0,1,0,1
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.model,JavaZdlModel.Relationship,0,27,0,0,0,1,0,1,0,1
-io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.model,JavaZdlModel.Enum,0,15,0,0,0,1,0,1,0,1
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.model,JavaZdlModel.Annotated,0,11,0,2,0,3,0,2,0,1
+io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.model,JavaZdlModel.Enum,0,15,0,0,0,1,0,1,0,1
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.model,JavaZdlModel.Field,0,15,0,0,0,1,0,1,0,1
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.model,JavaZdlModel.ServiceMethod,0,18,0,0,0,1,0,1,0,1
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.model,JavaZdlModel.MethodParameter,0,21,0,0,0,1,0,1,0,1
