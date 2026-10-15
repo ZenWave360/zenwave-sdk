@@ -120,7 +120,11 @@ public class AsyncAPIGeneratorAvroTest {
         Plugin plugin = new AsyncAPIGeneratorPlugin()
                 .withApiFile("src/test/resources/asyncapi-avro/asyncapi.yml")
                 .withTargetFolder(targetFolder)
-                .withOption("avroCompilerProperties.imports", "src/test/resources/asyncapi-avro/avro")
+                .withOption("avroCompilerProperties.imports", """
+                        src/test/resources/asyncapi-avro/avro/Address.avsc,
+                        src/test/resources/asyncapi-avro/avro/PaymentMethod.avsc,
+                        src/test/resources/asyncapi-avro/avro/PaymentMethodType.avsc,
+                        """)
                 // .withOption("modelPackage", "io.example.consumers.model")
                 .withOption("producerApiPackage", "io.example.api.producer")
                 .withOption("role", AsyncapiRoleType.provider)
@@ -140,10 +144,10 @@ public class AsyncAPIGeneratorAvroTest {
         Plugin plugin = new AsyncAPIGeneratorPlugin()
                 .withApiFile(baseUrl + "asyncapi-avro/asyncapi.yml")
                 .withTargetFolder(targetFolder)
-                .withOption("avroCompilerProperties.imports", List.of(
-                        baseUrl + "asyncapi-avro/avro/Address.avsc",
-                        baseUrl + "asyncapi-avro/avro/PaymentMethod.avsc",
-                        baseUrl + "asyncapi-avro/avro/PaymentMethodType.avsc"))
+                .withOption("avroCompilerProperties.imports", "\n  "
+                        + baseUrl + "asyncapi-avro/avro/Address.avsc,\n  "
+                        + baseUrl + "asyncapi-avro/avro/PaymentMethod.avsc,\n  "
+                        + baseUrl + "asyncapi-avro/avro/PaymentMethodType.avsc,\n")
                 .withOption("producerApiPackage", "io.example.api.producer")
                 .withOption("role", AsyncapiRoleType.provider)
                 .withOption("style", ProgrammingStyle.imperative)
