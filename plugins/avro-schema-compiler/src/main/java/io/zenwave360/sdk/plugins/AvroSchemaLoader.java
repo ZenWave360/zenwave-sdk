@@ -179,7 +179,13 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
         // Process imports if provided
         if (imports != null) {
             log.info("Collecting avsc files from imports: {}", imports);
-            for (String importPath : imports) {
+            // Maven configOptions can bind a comma-separated value as a single list item,
+            // especially when the XML property spans multiple lines.
+            for (String importPath : imports.stream()
+                    .flatMap(value -> Pattern.compile(",").splitAsStream(value))
+                    .map(String::trim)
+                    .filter(value -> !value.isEmpty())
+                    .toList()) {
                 try {
                     if (importPath.startsWith("classpath:")) {
                         // Handle classpath resources (files only, not directories)

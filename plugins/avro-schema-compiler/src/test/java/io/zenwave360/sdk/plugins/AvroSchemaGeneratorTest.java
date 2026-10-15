@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -71,6 +72,33 @@ public class AvroSchemaGeneratorTest {
         new MainGenerator().generate(plugin);
 
         Assertions.assertTrue(new File("target/zenwave630/customer-event-single/io/zenwave360/example/core/outbound/events/dtos/Address.java").exists());
+    }
+
+    @Test
+    public void test_multiline_comma_separated_avro_imports() throws Exception {
+        String imports = """
+                src/test/resources/avros/customer-event/Address.avsc,
+                src/test/resources/avros/customer-event/PaymentMethodType.avsc,
+                """;
+        Plugin plugin = new AvroSchemaGeneratorPlugin()
+                .withTargetFolder("target/zenwave630/multiline-imports")
+                .withOption("avroCompilerProperties.imports", imports);
+
+        new MainGenerator().generate(plugin);
+
+        Assertions.assertTrue(new File("target/zenwave630/multiline-imports/io/zenwave360/example/core/outbound/events/dtos/Address.java").exists());
+        Assertions.assertTrue(new File("target/zenwave630/multiline-imports/io/zenwave360/example/core/outbound/events/dtos/PaymentMethodType.java").exists());
+    }
+
+    @Test
+    public void test_multiline_http_avro_import_uris() throws Exception {
+        String baseUrl = "https://example.org/avro/";
+        List<URI> uris = new AvroSchemaLoader().collectImportUris(List.of(
+                "\n  " + baseUrl + "Item.avsc,\n  " + baseUrl + "ShoppingCart.avsc,\n"));
+
+        Assertions.assertEquals(List.of(
+                URI.create(baseUrl + "Item.avsc"),
+                URI.create(baseUrl + "ShoppingCart.avsc")), uris);
     }
 
     @Test
