@@ -36,6 +36,7 @@
         <module>jdl-to-asyncapi</module>
         <module>zdl-to-asyncapi</module>
         <module>zdl-to-markdown</module>
+        <module>dsl-docs</module>
         <module>asyncapi-jsonschema2pojo</module>
         <module>avro-schema-compiler</module>
         <module>asyncapi-spring-cloud-streams3</module>
