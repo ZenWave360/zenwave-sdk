@@ -96,6 +96,7 @@ Refer to individual plugin's documentation for more information:
 | [ZDL to OpenAPI](./plugins/zdl-to-openapi/README.md)                                     | ZDL to OpenAPI and OpenAPI to ZDL                                | ZDL, OpenAPI             |
 | [ZDL to AsyncAPI](./plugins/zdl-to-asyncapi/README.md)                                   | ZDL to AsyncAPI                                                  | ZDL, AsyncAPI            |
 | [ZDL to Markdown](./plugins/zdl-to-markdown/README.md)                                   | ZDL to Markdown                                                  | ZDL                      |
+| [DslDocs](./plugins/dsl-docs/README.md)                                                   | Multi-page Markdown documentation with Mermaid diagrams          | ZDL, ZFL, OpenAPI, AsyncAPI |
 | [Java 2 JDL Reverse Engineering](./plugins/java-to-jdl/README.md)                        | Java 2 JDL Reverse Engineering                                   | Java, JDL                |
 | [Java 2 AsyncAPI Reverse Engineering](./plugins/java-to-asyncapi/README.md)              | Java 2 AsyncAPI Reverse Engineering                              | Java                     |
 | [MCP Server](./plugins/zenwave-mcp-server/README.md)                                     | ZenWave MCP Server                                               | ZDL                      |
@@ -207,6 +208,40 @@ lifecycle/transition states), `ZdlReferencesLinter` (unresolvable `zdl`/`asyncap
 (`@calls` targets) and `ZdlListenerLinter` (`@listener` events, mixed `@asyncapi`/`@listener` bindings and
 required-input data-lineage warnings). Syntax errors are reported as a single problem and semantic linters are
 skipped after them. Presets are plugin subclasses of `LintPlugin` with a different default `linters` list.
+
+### Generate documentation
+
+`DslDocs` generates a documentation index plus architecture, module, flow, OpenAPI and AsyncAPI pages from the
+files supplied. Every ZDL file is a separate module; OpenAPI and AsyncAPI files may be mixed because their kind is
+detected from their contents.
+
+```shell
+jbang zw -p DslDocs \
+    zdlFiles=orders.zdl,payments.zdl \
+    zflFiles=place-order.zfl \
+    apiFiles=openapi.yml,asyncapi.yml \
+    targetFolder=docs \
+    title="Arcadia Editions"
+```
+
+| Option | Meaning |
+| --- | --- |
+| `zdlFiles` / `zdlFile` | ZDL module files (comma-separated list or one-file shortcut) |
+| `zflFiles` | ZFL event-flow files, one page per file |
+| `apiFiles` / `apiFile` | Mixed OpenAPI and AsyncAPI files (comma-separated list or one-file shortcut) |
+| `targetFolder` | Output folder; defaults to `docs` |
+| `title`, `version`, `date` | Index-page metadata; title and version default from the first ZDL or API file |
+| `check` | Compare only; do not write files |
+
+Use `check=true` in CI to make stale committed documentation fail with exit code 1:
+
+```shell
+jbang zw -p DslDocs zdlFiles=orders.zdl,payments.zdl targetFolder=docs check=true
+```
+
+Generated pages are recognized by their marker, so hand-written Markdown in the output folder is preserved. A
+generated-page collision, missing/unknown input file, or an out-of-date `check` is exit code `1`; unexpected tool
+failures are exit code `2`.
 
 Use the following jbang format:
 

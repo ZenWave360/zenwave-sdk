@@ -2,6 +2,9 @@
 
 Generates Markdown glossary from Zdl Models
 
+For multi-page module documentation with Mermaid diagrams from ZDL, ZFL, OpenAPI and AsyncAPI, use the SDK CLI's
+`DslDocs` plugin instead.
+
 ```shell
 jbang zw -p io.zenwave360.sdk.plugins.ZdlToMarkdownPlugin \
     specFile=src/main/resources/model/customer-address.zdl \
