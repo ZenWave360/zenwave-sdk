@@ -4,6 +4,12 @@ on:
   push:
     branches: [develop, next]
   workflow_dispatch:
+    inputs:
+      publish-snapshots:
+        description: "Publish the verified SNAPSHOT artifacts to Maven Central"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -16,6 +22,7 @@ jobs:
   publish-snapshot:
     uses: ZenWave360/release-workflows/.github/workflows/publish-snapshots-maven.yml@main
     with:
+      publish-snapshots: ${{ github.event_name == 'workflow_dispatch' && inputs.publish-snapshots }}
       jacoco-csv-files: >
         ./plugins/asyncapi-spring-cloud-streams3/target/site/jacoco/jacoco.csv
         ./plugins/avro-schema-compiler/target/site/jacoco/jacoco.csv
