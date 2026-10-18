@@ -67,6 +67,13 @@ Two notes on scope: the check covers only the specs loaded in one invocation —
 
 ## Fixes
 
+### Published ZenWave library upgrades
+
+- Upgrades ZenWave Architecture to `0.9.5`, including the published
+  `architecture-manifest-jvm` and `architecture-graph-jvm` artifacts.
+- Upgrades `json-schema-ref-parser-kmp` to `0.9.24` and `dsl-kotlin` to
+  `1.10.0`, removing the previous SNAPSHOT dependencies from the SDK build.
+
 ### Kotlin event emission and MapStruct mapper generation
 
 Kotlin backend application generation now emits events from nullable update and patch results directly
