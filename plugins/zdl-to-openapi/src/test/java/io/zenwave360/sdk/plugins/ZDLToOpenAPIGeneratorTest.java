@@ -61,7 +61,7 @@ public class ZDLToOpenAPIGeneratorTest {
         String openApi = new ZDLToOpenAPIGenerator().generate(model).getAllTemplateOutputs().get(0).getContent();
         Map<String, Object> schema = mapper.readValue(openApi, Map.class);
 
-        Assertions.assertEquals(1, JSONPath.get(schema, "$.components.schemas.Order.properties.items.minItems"));
+        Assertions.assertEquals(1, ((Number) JSONPath.get(schema, "$.components.schemas.Order.properties.items.minItems")).intValue());
         Assertions.assertNull(JSONPath.get(schema, "$.components.schemas.Order.properties.items.items.minLength"));
     }
 
