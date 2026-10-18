@@ -85,7 +85,7 @@ public class LintReportWriter implements Processor {
     }
 
     private String text(LintRun run) {
-        boolean color = (output == null || output.isBlank()) && System.console() != null;
+        boolean color = (output == null || output.isBlank()) && System.console() != null && !CliOutput.isResultStreamOverridden();
         var report = new StringBuilder();
         for (LintDiagnostic diagnostic : run.diagnostics()) {
             String severity = diagnostic.severity().name();

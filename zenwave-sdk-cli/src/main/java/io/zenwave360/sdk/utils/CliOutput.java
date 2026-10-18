@@ -13,6 +13,8 @@ public final class CliOutput {
 
     private static PrintStream stdout;
 
+    private static boolean resultStreamOverridden;
+
     private CliOutput() {
     }
 
@@ -29,8 +31,14 @@ public final class CliOutput {
         return stdout != null ? stdout : System.out;
     }
 
+    /** Whether an embedding caller has replaced the result stream (for example, to capture CLI output in a test). */
+    public static synchronized boolean isResultStreamOverridden() {
+        return resultStreamOverridden;
+    }
+
     /** Overrides the result stream, for tests. {@code null} resets it to System.out. */
     public static synchronized void setStdout(PrintStream stream) {
         stdout = stream;
+        resultStreamOverridden = stream != null;
     }
 }
