@@ -13,19 +13,19 @@ io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.fron
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.DataProductContractFrontmatter,12,0,0,0,1,0,1,0,1,0
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,ServiceFrontmatter,0,30,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.ChannelPointerFrontmatter,0,12,0,0,0,1,0,1,0,1
-io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,DiagramFrontmatter,9,0,0,0,1,0,1,0,1,0
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,AgentFrontmatter,30,0,0,0,1,0,1,0,1,0
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,DiagramFrontmatter,9,0,0,0,1,0,1,0,1,0
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,QueryFrontmatter,0,24,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.ResourcePointerFrontmatter,0,12,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.ContainerDetailsPanelFrontmatter,15,0,0,0,1,0,1,0,1,0
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.ChannelDetailsPanelFrontmatter,33,0,0,0,1,0,1,0,1,0
-io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.EntityPropertyItemsFrontmatter,0,6,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.OperationFrontmatter,0,12,0,0,0,1,0,1,0,1
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.EntityPropertyItemsFrontmatter,0,6,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,ChannelFrontmatter,0,30,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.EntityPropertyFrontmatter,0,30,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.DataProductOutputFrontmatter,12,0,0,0,1,0,1,0,1,0
-io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.SidebarFrontmatter,15,0,0,0,1,0,1,0,1,0
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.AgentDetailsPanelFrontmatter,27,0,0,0,1,0,1,0,1,0
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.SidebarFrontmatter,15,0,0,0,1,0,1,0,1,0
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.FlowDetailsPanelFrontmatter,12,0,0,0,1,0,1,0,1,0
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.CommonFrontmatter,0,66,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.FlowStepFrontmatter,0,48,0,0,0,1,0,1,0,1
@@ -35,11 +35,11 @@ io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.fron
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,CommandFrontmatter,0,24,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.DraftFrontmatter,0,9,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,EntityFrontmatter,0,24,0,0,0,1,0,1,0,1
-io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.DeprecatedFrontmatter,0,9,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.MessagePointerFrontmatter,0,21,0,0,0,1,0,1,0,1
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.DeprecatedFrontmatter,0,9,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.ChannelParameterFrontmatter,15,0,0,0,1,0,1,0,1,0
-io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,EventFrontmatter,0,24,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.DiagramDetailsPanelFrontmatter,15,0,0,0,1,0,1,0,1,0
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,EventFrontmatter,0,24,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.FlowExternalSystemFrontmatter,12,0,0,0,1,0,1,0,1,0
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,DataProductFrontmatter,15,0,0,0,1,0,1,0,1,0
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins.frontmatter,FrontmatterTypes.FlowMenuFrontmatter,9,0,0,0,1,0,1,0,1,0
@@ -75,10 +75,10 @@ io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,Even
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogImporterGenerator.ServiceRef,2,88,2,4,0,17,2,4,0,3
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogFileWriter.new SimpleFileVisitor() {...},2,16,1,1,0,6,1,3,0,3
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogFileWriter.new SimpleFileVisitor() {...},0,44,0,6,0,12,0,7,0,4
-io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogImporterGenerator.FrontmatterBlock,0,9,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogFileWriter.new SimpleFileVisitor() {...},11,49,2,6,1,8,2,6,1,3
-io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogFileWriter.new SimpleFileVisitor() {...},0,55,0,0,0,7,0,3,0,3
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogImporterGenerator.FrontmatterBlock,0,9,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogZflProcessor.ProjectedStep,0,149,0,4,0,14,0,9,0,7
+io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogFileWriter.new SimpleFileVisitor() {...},0,55,0,0,0,7,0,3,0,3
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogAsyncApiProcessor,143,806,36,82,23,139,33,48,3,19
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogOperationProcessor,161,870,36,68,21,157,38,45,2,29
 io.zenwave360.sdk.plugins:event-catalog-generator,io.zenwave360.sdk.plugins,EventCatalogGenerator,181,3467,82,272,34,579,72,184,1,78
