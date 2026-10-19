@@ -1,0 +1,8 @@
+components:
+  schemas:
+    Gadget:
+      javaType: Gadget
+      type: object
+      properties:
+        colorKind:
+          $ref: './shade-kind.yml'

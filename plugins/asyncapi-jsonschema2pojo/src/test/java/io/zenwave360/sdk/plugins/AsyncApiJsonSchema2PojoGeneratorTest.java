@@ -336,6 +336,27 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
     }
 
     @Test
+    public void test_generator_generates_whole_file_ref_as_shared_top_level_type() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:whole-file-refs.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.wholefilerefs");
+
+        new MainGenerator().generate(plugin);
+
+        String base = "target/zenwave630/src/main/java/io/example/wholefilerefs/";
+        String shadeKind = FileUtils.readFileToString(new File(base + "ShadeKind.java"), "UTF-8");
+        String widget = FileUtils.readFileToString(new File(base + "Widget.java"), "UTF-8");
+        String gadget = FileUtils.readFileToString(new File(base + "Gadget.java"), "UTF-8");
+
+        Assertions.assertTrue(shadeKind.contains("enum ShadeKind"));
+        Assertions.assertTrue(widget.contains("private ShadeKind colorKind;"));
+        Assertions.assertTrue(gadget.contains("private ShadeKind colorKind;"));
+        Assertions.assertFalse(widget.contains("enum ColorKind"));
+        Assertions.assertFalse(gadget.contains("enum ColorKind"));
+    }
+
+    @Test
     public void test_generator_resolves_same_relative_ref_from_different_folders() throws Exception {
         Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
                 .withApiFile("classpath:ambiguous-refs.yml")

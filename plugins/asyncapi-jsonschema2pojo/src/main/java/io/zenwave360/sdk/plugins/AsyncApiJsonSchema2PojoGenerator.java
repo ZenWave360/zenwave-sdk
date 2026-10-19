@@ -322,7 +322,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
     private void populateJavaTypeFromRefsRecursively(Model apiModel, JsonSchema2PojoConfiguration config, Object original, Object copy, String packageName) {
         var nameHelper = new NameHelper(config);
-        populateJavaTypeFromRefsRecursively(apiModel, nameHelper, original, copy, packageName);
+        populateJavaTypeFromRefsRecursively(apiModel, nameHelper, original, copy, packageName, true);
     }
 
     /**
@@ -330,14 +330,14 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
      * so the $ref each schema was resolved from (and its absolute URI) can be looked up reliably, while javaType is
      * only written to the copy.
      */
-    private void populateJavaTypeFromRefsRecursively(Model apiModel, NameHelper nameHelper, Object original, Object copy, String packageName) {
+    private void populateJavaTypeFromRefsRecursively(Model apiModel, NameHelper nameHelper, Object original, Object copy, String packageName, boolean root) {
         if (copy instanceof Map) {
             Map<String, Object> map = (Map<String, Object>) copy;
             Map<String, Object> originalMap = original instanceof Map ? (Map<String, Object>) original : null;
 
             // Replace $ref and original ref with javaType (if not already present)
             if (!map.containsKey("javaType")) {
-                String className = getRefClassName(apiModel, nameHelper, originalMap, map);
+                String className = getRefClassName(apiModel, nameHelper, originalMap, map, root);
                 if (className != null && claimRefClassName(apiModel, originalMap, packageName + "." + className)) {
                     map.put("javaType", packageName + "." + className);
                 }
@@ -348,14 +348,14 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             // Recursively process all values in the map
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 Object originalValue = originalMap != null ? originalMap.get(entry.getKey()) : null;
-                populateJavaTypeFromRefsRecursively(apiModel, nameHelper, originalValue, entry.getValue(), packageName);
+                populateJavaTypeFromRefsRecursively(apiModel, nameHelper, originalValue, entry.getValue(), packageName, false);
             }
 
         } else if (copy instanceof List) {
             List<Object> list = (List<Object>) copy;
             List<Object> originalList = original instanceof List && ((List<?>) original).size() == list.size() ? (List<Object>) original : null;
             for (int i = 0; i < list.size(); i++) {
-                populateJavaTypeFromRefsRecursively(apiModel, nameHelper, originalList != null ? originalList.get(i) : null, list.get(i), packageName);
+                populateJavaTypeFromRefsRecursively(apiModel, nameHelper, originalList != null ? originalList.get(i) : null, list.get(i), packageName, false);
             }
         }
     }
@@ -365,14 +365,13 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
      * Prefers the identity lookup of the original object (resolved absolute URI) and falls back to the
      * string value of internal refs when the original object is not available.
      */
-    private String getRefClassName(Model apiModel, NameHelper nameHelper, Map<String, Object> original, Map<String, Object> copy) {
+    private String getRefClassName(Model apiModel, NameHelper nameHelper, Map<String, Object> original, Map<String, Object> copy, boolean root) {
         $Ref ref = original != null ? getOriginalRef(apiModel.getRefs(), original) : null;
         if (ref != null) {
-            if (!isSharedRef(ref)) {
+            if (!isSharedRef(ref, root)) {
                 return null;
             }
-            String refValue = ref.getRef();
-            String schemaName = refValue.substring(refValue.lastIndexOf("/") + 1);
+            String schemaName = getRefSchemaName(ref);
             try {
                 return getNormalizedClassName(nameHelper, schemaName, jsonMapper.valueToTree(original));
             } catch (Exception e) {
@@ -420,8 +419,29 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
         return "ref:" + uri;
     }
 
-    private boolean isSharedRef($Ref ref) {
+    /**
+     * Fragment refs ({@code file.yml#/components/schemas/X}) are always shared. Whole-file refs ({@code ./x.yml})
+     * are shared when nested, but a whole-file message payload keeps the class name chosen for the message.
+     */
+    private boolean isSharedRef($Ref ref, boolean root) {
+        return isFragmentRef(ref) || !root;
+    }
+
+    private boolean isFragmentRef($Ref ref) {
         return ref.getRef().contains("#/");
+    }
+
+    /**
+     * Last json-pointer segment for fragment refs, file name without extension(s) for whole-file refs.
+     */
+    private String getRefSchemaName($Ref ref) {
+        String refValue = ref.getRef();
+        if (isFragmentRef(ref)) {
+            return refValue.substring(refValue.lastIndexOf("/") + 1);
+        }
+        String path = refValue.contains("#") ? refValue.substring(0, refValue.indexOf('#')) : refValue;
+        String fileName = path.substring(path.lastIndexOf('/') + 1);
+        return NamingUtils.asJavaTypeName(fileName.contains(".") ? fileName.substring(0, fileName.indexOf('.')) : fileName);
     }
 
     private String getRefClassName(Model apiModel, NameHelper nameHelper, String refValue) {

@@ -17,3 +17,9 @@ References are resolved by their absolute URI, so the same relative `$ref` (for 
 Two different schemas that resolve to the same class name (for example `Status` in `orders.yml` and `Status` in `payments.yml`) no longer silently share one generated class. The first schema owns the top-level class; any other one is generated inline in the class that references it, and a warning names both sources. Set a distinct `javaType` (or `title`) on one of them to get two top-level classes.
 
 Message payloads taken from different schemas of the same external file are now always treated as distinct schemas, and the same external schema referenced through different relative paths is generated only once.
+
+### asyncapi-jsonschema2pojo: whole-file `$ref` schemas generate shared top-level types
+
+Properties that reference a whole schema file (`$ref: './shade-kind.yml'`, no `#/...` fragment) now also generate one shared top-level class, named after the file without its extension (`shade-kind.yml` → `ShadeKind`), unless the schema sets `javaType` or a `title`. **Generated class names may change** for these properties, which used to be inlined with a name derived from the property name.
+
+A whole-file `$ref` used directly as a message payload keeps the class name it had before (derived from the message).
