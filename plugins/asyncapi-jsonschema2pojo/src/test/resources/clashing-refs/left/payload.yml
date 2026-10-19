@@ -1,0 +1,12 @@
+components:
+  schemas:
+    LeftPayload:
+      type: object
+      properties:
+        kind:
+          $ref: './kind.yml#/components/schemas/Kind'
+    LeftOther:
+      type: object
+      properties:
+        name:
+          type: string

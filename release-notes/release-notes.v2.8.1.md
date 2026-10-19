@@ -11,3 +11,9 @@ Schemas referenced from external files (`$ref: './common.yml#/components/schemas
 This applies to every external schema reference, objects and enums alike. **Generated class names may change**: an externally referenced object that used to be inlined with a name derived from the property name (for example `address` → `Address`) is now named after the referenced schema (or its `title` when `useTitleAsClassname` is enabled, or its `javaType`).
 
 References are resolved by their absolute URI, so the same relative `$ref` (for example `./kind.yml#/...`) used from files in different folders now points to the right schema. Previously the first match by raw `$ref` string was used, which could give a property the wrong type.
+
+### asyncapi-jsonschema2pojo: class name clashes are detected for referenced schemas
+
+Two different schemas that resolve to the same class name (for example `Status` in `orders.yml` and `Status` in `payments.yml`) no longer silently share one generated class. The first schema owns the top-level class; any other one is generated inline in the class that references it, and a warning names both sources. Set a distinct `javaType` (or `title`) on one of them to get two top-level classes.
+
+Message payloads taken from different schemas of the same external file are now always treated as distinct schemas, and the same external schema referenced through different relative paths is generated only once.

@@ -356,6 +356,31 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
     }
 
     @Test
+    public void test_generator_inlines_different_external_schemas_with_clashing_class_names() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:clashing-refs.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.clashingrefs");
+
+        new MainGenerator().generate(plugin);
+
+        String base = "target/zenwave630/src/main/java/io/example/clashingrefs/";
+        String kind = FileUtils.readFileToString(new File(base + "Kind.java"), "UTF-8");
+        String leftPayload = FileUtils.readFileToString(new File(base + "LeftPayload.java"), "UTF-8");
+        String rightPayload = FileUtils.readFileToString(new File(base + "RightPayload.java"), "UTF-8");
+
+        // first schema (LeftMessage sorts first) owns the shared top-level class
+        Assertions.assertTrue(kind.contains("LEFT_A"));
+        Assertions.assertFalse(kind.contains("RIGHT_A"));
+        Assertions.assertFalse(leftPayload.contains("enum Kind"));
+        // the clashing schema is inlined instead of reusing the wrong class
+        Assertions.assertTrue(rightPayload.contains("enum Kind"));
+        Assertions.assertTrue(rightPayload.contains("RIGHT_A"));
+        // different schemas from the same external file are distinct sources
+        Assertions.assertTrue(new File(base + "LeftOther.java").exists());
+    }
+
+    @Test
     public void test_generator_for_asyncapi_schemas() throws Exception {
         Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
                 .withApiFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-events.yml")

@@ -1,0 +1,6 @@
+components:
+  schemas:
+    Kind:
+      enum:
+        - RIGHT_A
+        - RIGHT_B

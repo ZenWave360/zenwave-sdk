@@ -72,6 +72,12 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
     private File targetSourceFolder;
 
+    /**
+     * Generated class FQN -> source it was generated from (javaType, resolved $ref URI or inline schema).
+     * Shared by schema roots and nested $ref schemas so two different schemas never silently map to the same class.
+     */
+    private Map<String, String> generatedClassSources = new LinkedHashMap<>();
+
     public String originalRefProperty = "x--original-\\$ref";
 
     public Model getApiModel(Map<String, Object> contextModel) {
@@ -107,7 +113,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
         var asyncapiVersion = JSONPath.get(apiModel, "$.asyncapi");
         var defaultSchemaFormat = AsyncApiProcessor.SchemaFormatType.ASYNCAPI_YAML.getSchemaFormat((String) asyncapiVersion);
         Set<String> generatedSchemaRoots = new LinkedHashSet<>();
-        Map<String, String> generatedClassFqns = new LinkedHashMap<>();
+        generatedClassSources = new LinkedHashMap<>();
 
         // Generate in a stable order so that, when two schema roots resolve to the same class
         // name, the winner is deterministic instead of depending on message hash-set ordering.
@@ -132,8 +138,8 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
                 String className = getClassName(schemaRoot);
                 String classFqn = getClassFqn(schemaRoot, className);
-                String previousSource = generatedClassFqns.putIfAbsent(classFqn, deduplicationKey);
-                if (previousSource != null) {
+                String previousSource = generatedClassSources.putIfAbsent(classFqn, deduplicationKey);
+                if (previousSource != null && !previousSource.equals(deduplicationKey)) {
                     log.warn("Skipping schema '{}': class {} was already generated from '{}'. "
                             + "Rename one of the schemas or set a distinct javaType to avoid the name clash.",
                             deduplicationKey, classFqn, previousSource);
@@ -203,14 +209,14 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             return "javaType:" + javaType;
         }
 
+        $Ref ref = getOriginalRef(apiModel.getRefs(), schemaRoot.schema());
+        if (ref != null) {
+            return getRefSource(ref);
+        }
+
         Object originalRef = schemaRoot.schema().get("x--original-$ref");
         if (originalRef != null) {
             return "ref:" + originalRef;
-        }
-
-        $Ref ref = getOriginalRef(apiModel.getRefs(), schemaRoot.schema());
-        if (ref != null) {
-            return "ref:" + ref.getURI();
         }
         return "inline:" + schemaRoot.fallbackName();
     }
@@ -332,7 +338,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             // Replace $ref and original ref with javaType (if not already present)
             if (!map.containsKey("javaType")) {
                 String className = getRefClassName(apiModel, nameHelper, originalMap, map);
-                if (className != null) {
+                if (className != null && claimRefClassName(apiModel, originalMap, packageName + "." + className)) {
                     map.put("javaType", packageName + "." + className);
                 }
             }
@@ -380,6 +386,38 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             return getRefClassName(apiModel, nameHelper, refValue);
         }
         return null;
+    }
+
+    /**
+     * Registers the class a $ref schema is generated as. When a different schema already owns that class name,
+     * the schema is left inline (as if it had no $ref) instead of silently reusing the other schema's class.
+     */
+    private boolean claimRefClassName(Model apiModel, Map<String, Object> original, String classFqn) {
+        $Ref ref = original != null ? getOriginalRef(apiModel.getRefs(), original) : null;
+        if (ref == null) {
+            return true; // string fallback for internal refs, nothing reliable to compare against
+        }
+        String source = getRefSource(ref);
+        String previousSource = generatedClassSources.putIfAbsent(classFqn, source);
+        if (previousSource != null && !previousSource.equals(source)) {
+            log.warn("Inlining schema '{}': class {} was already generated from '{}'. "
+                    + "Rename one of the schemas or set a distinct javaType to avoid the name clash.",
+                    source, classFqn, previousSource);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Absolute location of the referenced schema: resolved file URI plus the json-pointer fragment.
+     */
+    private String getRefSource($Ref ref) {
+        String uri = String.valueOf(ref.getURI());
+        int fragmentIndex = ref.getRef().indexOf('#');
+        if (fragmentIndex >= 0 && !uri.contains("#")) {
+            uri = uri + ref.getRef().substring(fragmentIndex);
+        }
+        return "ref:" + uri;
     }
 
     private boolean isSharedRef($Ref ref) {

@@ -1,0 +1,40 @@
+asyncapi: 3.1.0
+info:
+  title: clashing class names
+  version: 1.0.0
+channels:
+  sampleChannel:
+    address: sample.topic
+    messages:
+      LeftMessage:
+        $ref: '#/components/messages/LeftMessage'
+      RightMessage:
+        $ref: '#/components/messages/RightMessage'
+      OtherMessage:
+        $ref: '#/components/messages/OtherMessage'
+operations:
+  publishSample:
+    action: send
+    channel:
+      $ref: '#/channels/sampleChannel'
+    messages:
+      - $ref: '#/channels/sampleChannel/messages/LeftMessage'
+      - $ref: '#/channels/sampleChannel/messages/RightMessage'
+      - $ref: '#/channels/sampleChannel/messages/OtherMessage'
+components:
+  messages:
+    LeftMessage:
+      name: LeftMessage
+      contentType: application/json
+      payload:
+        $ref: './clashing-refs/left/payload.yml#/components/schemas/LeftPayload'
+    RightMessage:
+      name: RightMessage
+      contentType: application/json
+      payload:
+        $ref: './clashing-refs/right/payload.yml#/components/schemas/RightPayload'
+    OtherMessage:
+      name: OtherMessage
+      contentType: application/json
+      payload:
+        $ref: './clashing-refs/left/payload.yml#/components/schemas/LeftOther'
