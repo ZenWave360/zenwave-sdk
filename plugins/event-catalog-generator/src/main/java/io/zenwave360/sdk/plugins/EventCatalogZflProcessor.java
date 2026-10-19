@@ -1,17 +1,17 @@
 package io.zenwave360.sdk.plugins;
 
-import io.zenwave360.manifest.ManifestDomain;
-import io.zenwave360.manifest.ManifestService;
-import io.zenwave360.manifest.ZenWaveManifest;
-import io.zenwave360.manifest.graph.ArchitectureBindingRole;
-import io.zenwave360.manifest.graph.ArchitectureDiagnostic;
-import io.zenwave360.manifest.graph.ArchitectureEdge;
-import io.zenwave360.manifest.graph.ArchitectureEdgeKind;
-import io.zenwave360.manifest.graph.ArchitectureGraph;
-import io.zenwave360.manifest.graph.ArchitectureGraphResult;
-import io.zenwave360.manifest.graph.ArchitectureNode;
-import io.zenwave360.manifest.graph.ArchitectureNodeKind;
-import io.zenwave360.manifest.graph.ArchitectureOperationBinding;
+import io.zenwave360.architecture.manifest.ManifestDomain;
+import io.zenwave360.architecture.manifest.ManifestService;
+import io.zenwave360.architecture.manifest.ZenWaveManifest;
+import io.zenwave360.architecture.graph.ArchitectureBindingRole;
+import io.zenwave360.architecture.graph.ArchitectureDiagnostic;
+import io.zenwave360.architecture.graph.ArchitectureEdge;
+import io.zenwave360.architecture.graph.ArchitectureEdgeKind;
+import io.zenwave360.architecture.graph.ArchitectureGraph;
+import io.zenwave360.architecture.graph.ArchitectureGraphResult;
+import io.zenwave360.architecture.graph.ArchitectureNode;
+import io.zenwave360.architecture.graph.ArchitectureNodeKind;
+import io.zenwave360.architecture.graph.ArchitectureOperationBinding;
 import io.zenwave360.sdk.plugins.frontmatter.FrontmatterTypes.FlowActorFrontmatter;
 import io.zenwave360.sdk.plugins.frontmatter.FrontmatterTypes.FlowCustomFrontmatter;
 import io.zenwave360.sdk.plugins.frontmatter.FrontmatterTypes.FlowNextStepFrontmatter;
@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-/** Pure EventCatalog projection of manifest-graph ZFL semantics. */
+/** Pure EventCatalog projection of architecture-graph ZFL semantics. */
 public class EventCatalogZflProcessor implements Processor {
 
     private final Logger log = LoggerFactory.getLogger(getClass());

@@ -1,0 +1,118 @@
+asyncapi: 3.0.0
+id: url:parameters.example
+info:
+  title: Channel Address Parameters
+  version: 1.0.0
+  description: Fixture covering enumerable and unbounded channel address parameters.
+
+servers:
+  staging:
+    host: kafka-staging.example.com
+    protocol: kafka
+
+channels:
+
+  # Enumerable, inlined parameter + Avro message: 3 topics, 3 subjects
+  orderCreated:
+    address: 'orders.{region}.created'
+    parameters:
+      region:
+        enum: [eu, us, apac]
+        default: eu
+    messages:
+      OrderCreated:
+        payload:
+          schemaFormat: 'application/vnd.apache.avro+json;version=1.9.0'
+          schema:
+            $ref: './avro/OrderCreated.avsc'
+    bindings:
+      kafka:
+        partitions: 6
+        replicas: 3
+        x-env-server-overrides:
+          staging:
+            partitions: 2
+
+  # Same parameter name as orderCreated, deliberately different enum:
+  # proves validation is per-channel and never global
+  userSignedUp:
+    address: 'users.{region}.signedup'
+    parameters:
+      region:
+        enum: [dev, staging]
+
+  # Two enumerable parameters on one address: cross product (3 x 2 = 6 topics).
+  # region is a $ref to components.parameters, tenant is inlined.
+  orderShipped:
+    address: 'orders.{region}.{tenant}.shipped'
+    parameters:
+      region:
+        $ref: '#/components/parameters/region'
+      tenant:
+        enum: [acme, globex]
+
+  # Unbounded: no enum, values only exist at runtime. Not provisionable.
+  streetlightMeasured:
+    address: 'streetlight.{streetlightId}.measured'
+    parameters:
+      streetlightId:
+        description: The ID of the streetlight.
+
+  # No parameters at all: unchanged behaviour
+  orderCancelled:
+    address: orders.cancelled
+
+operations:
+
+  onOrderCreated:
+    action: receive
+    channel:
+      $ref: '#/channels/orderCreated'
+    bindings:
+      kafka:
+        x-principal: "sales.orders"
+        x-groupId: "sales.orders"
+        x-error-topics:
+          addressTemplate: "${groupId}.__.${channel.address}.${suffix}"
+          retryTopics: 1
+          retry:
+            partitions: 1
+          dlq:
+            partitions: 1
+
+  onUserSignedUp:
+    action: send
+    channel:
+      $ref: '#/channels/userSignedUp'
+    bindings:
+      kafka:
+        x-principal: "identity.users"
+
+  onOrderShipped:
+    action: send
+    channel:
+      $ref: '#/channels/orderShipped'
+    bindings:
+      kafka:
+        x-principal: "sales.orders"
+
+  onStreetlightMeasured:
+    action: send
+    channel:
+      $ref: '#/channels/streetlightMeasured'
+    bindings:
+      kafka:
+        x-principal: "smartylighting.streetlights"
+
+  onOrderCancelled:
+    action: send
+    channel:
+      $ref: '#/channels/orderCancelled'
+    bindings:
+      kafka:
+        x-principal: "sales.orders"
+
+components:
+  parameters:
+    region:
+      enum: [eu, us, apac]

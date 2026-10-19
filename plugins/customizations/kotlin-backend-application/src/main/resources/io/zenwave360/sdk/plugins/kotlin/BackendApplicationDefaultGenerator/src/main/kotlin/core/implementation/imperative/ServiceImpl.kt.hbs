@@ -64,6 +64,7 @@ open class {{service.name}}Impl(
 {{#each service.methods as |method|}}
     {{~> (partial '../partials/' persistence '/methodAnnotations')~}}
     {{~> (partial '../partials/serviceMethodSignature') artifactType="application.service-impl"}} {
+        {{~> (partial '../partials/callsTodo')~}}
         {{~> (partial '../partials/' persistence '/methodBody')~}}
     }
 {{/each}}

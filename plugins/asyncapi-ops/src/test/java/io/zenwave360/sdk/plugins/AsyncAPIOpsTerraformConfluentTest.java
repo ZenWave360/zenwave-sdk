@@ -13,6 +13,7 @@ public class AsyncAPIOpsTerraformConfluentTest {
 
     static final String ASYNCAPI_PROVIDER = "classpath:retail-domain-catalog/merchandising/inventory/inventory-adjustment/asyncapi.yml";
     static final String ASYNCAPI_CLIENT   = "classpath:retail-domain-catalog/merchandising/inventory/inventory-adjustment/asyncapi-client.yml";
+    static final String ASYNCAPI_STREAMS = "classpath:kafka-streams/asyncapi-streams.yml";
 
     @Test
     public void test_provider_generation() throws Exception {
@@ -126,5 +127,25 @@ public class AsyncAPIOpsTerraformConfluentTest {
             index += token.length();
         }
         return count;
+    }
+
+    @Test
+    public void test_kafka_streams_application_acls() throws Exception {
+        String targetFolder = "target/out/test_confluent_kafka_streams_application_acls";
+        new MainGenerator().generate(new AsyncAPIOpsGeneratorPlugin()
+                .withApiFile(ASYNCAPI_STREAMS)
+                .withOption("templates", "TerraformConfluent")
+                .withTargetFolder(targetFolder)
+                .withOption("skipFormatting", true));
+
+        String acls = Files.readString(Path.of(targetFolder + "/acls.tf"));
+        Assertions.assertTrue(acls.contains("resource_name = \"merchandising.inventory.inventory-adjustment.streams-app-\""));
+        Assertions.assertTrue(acls.contains("pattern_type  = \"PREFIXED\""));
+        Assertions.assertTrue(acls.contains("operation     = \"ALTER_CONFIGS\""), "multi-word operations need the underscore");
+        Assertions.assertFalse(acls.contains("ALTERCONFIGS"), "upper() on PascalCase would drop the underscore");
+        Assertions.assertTrue(acls.contains("operation     = \"CREATE\""));
+        Assertions.assertTrue(acls.contains("operation     = \"READ\""));
+        Assertions.assertTrue(acls.contains("resource_type = \"TRANSACTIONAL_ID\""));
+        Assertions.assertTrue(acls.contains("resource_type = \"GROUP\""));
     }
 }

@@ -7,8 +7,33 @@ import io.zenwave360.sdk.options.ProgrammingStyle;
 import io.zenwave360.sdk.plugins.BackendApplicationDefaultPlugin;
 import io.zenwave360.sdk.testutils.MavenCompiler;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.io.TempDir;
 
 public class BackendApplicationKotlinGeneratorTest {
+
+    @Test
+    public void generatesCallsTodoInServiceImplementation() throws Exception {
+        String targetFolder = "target/projects/kotlin-calls-todo";
+        Plugin plugin = new BackendApplicationDefaultPlugin()
+                .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/orders-calls.zdl")
+                .withTargetFolder(targetFolder)
+                .withOption("templates", "new " + BackendApplicationKotlinTemplates.class.getName())
+                .withOption("basePackage", "io.zenwave360.examples.kotlin")
+                .withOption("persistence", PersistenceType.jpa)
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("forceOverwrite", true)
+                .withOption("includeEmitEventsImplementation", false)
+                .withOption("haltOnFailFormatting", false);
+
+        new MainGenerator().generate(plugin);
+
+        var serviceImpl = java.nio.file.Path.of(targetFolder,
+                "src/main/kotlin/io/zenwave360/examples/kotlin/core/application/OrdersServiceImpl.kt");
+        String source = java.nio.file.Files.readString(serviceImpl);
+        Assertions.assertTrue(source.contains(
+                "// TODO: call CatalogInventoryZdl InventoryService.reserveStock(ReserveStockInput) -> StockReservedResult"));
+        Assertions.assertTrue(source.contains("//       then emit one of: OrderCreated | StockUnavailable"));
+    }
 
     @Test
     public void test_generator_kotlin_project_jpa() throws Exception {
@@ -29,6 +54,59 @@ public class BackendApplicationKotlinGeneratorTest {
 
         Assertions.assertTrue(new java.io.File(targetFolder,
                 "src/main/kotlin/io/zenwave360/examples/kotlin/core/domain/Customer.kt").exists());
+    }
+
+    @Test
+    public void generatesTestDataOnlyForAggregates(@TempDir java.nio.file.Path tempDir) throws Exception {
+        Plugin plugin = new BackendApplicationDefaultPlugin()
+                .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl")
+                .withTargetFolder(tempDir.toString())
+                .withOption("templates", "new " + BackendApplicationKotlinTemplates.class.getName())
+                .withOption("basePackage", "io.zenwave360.examples.kotlin")
+                .withOption("persistence", PersistenceType.jpa)
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("includeEmitEventsImplementation", false)
+                .withOption("haltOnFailFormatting", false);
+
+        new MainGenerator().generate(plugin);
+
+        Assertions.assertTrue(java.nio.file.Files.exists(
+                tempDir.resolve("src/main/kotlin/io/zenwave360/examples/kotlin/core/domain/Address.kt")),
+                "Embedded domain types should still be generated");
+        Assertions.assertTrue(java.nio.file.Files.exists(
+                tempDir.resolve("src/test/resources/data/jpa/Customer/1.json")));
+        Assertions.assertFalse(java.nio.file.Files.exists(
+                tempDir.resolve("src/test/resources/data/jpa/Address/1.json")),
+                "Embedded types should not get standalone test-data fixtures");
+    }
+
+    @Test
+    public void test_generator_kotlin_project_with_events_uses_kotlin_nullability() throws Exception {
+        String targetFolder = "target/projects/kustomer-events-jpa";
+        Plugin plugin = new BackendApplicationDefaultPlugin()
+                .withZdlFile("classpath:io/zenwave360/sdk/resources/zdl/customer-address-relational.zdl")
+                .withTargetFolder(targetFolder)
+                .withOption("templates", "new " + BackendApplicationKotlinTemplates.class.getName())
+                .withOption("basePackage", "io.zenwave360.examples.kotlin")
+                .withOption("persistence", PersistenceType.jpa)
+                .withOption("style", ProgrammingStyle.imperative)
+                .withOption("projectName", "customer-address")
+                .withOption("includeEmitEventsImplementation", true)
+                .withOption("forceOverwrite", true)
+                .withOption("haltOnFailFormatting", false);
+
+        new MainGenerator().generate(plugin);
+
+        var serviceFile = java.nio.file.Path.of(targetFolder,
+                "src/main/kotlin/io/zenwave360/examples/kotlin/core/application/CustomerServiceImpl.kt");
+        var serviceContent = java.nio.file.Files.readString(serviceFile);
+        Assertions.assertTrue(serviceContent.contains("eventsMapper.asCustomerEvent(it)"));
+        Assertions.assertFalse(serviceContent.contains(".isPresent()"));
+        Assertions.assertFalse(serviceContent.contains(".get()"));
+
+        var eventsMapperFile = serviceFile.resolveSibling("mappers").resolve("EventsMapper.kt");
+        var eventsMapperContent = java.nio.file.Files.readString(eventsMapperFile);
+        Assertions.assertTrue(eventsMapperContent.contains("fun asCustomerDeleted(id: Long?):"));
     }
 
     @Test

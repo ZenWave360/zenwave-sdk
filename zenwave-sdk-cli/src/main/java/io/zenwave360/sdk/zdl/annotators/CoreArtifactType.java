@@ -72,11 +72,11 @@ public enum CoreArtifactType implements ArtifactType {
     ADAPTER_WEB_MAPPER("adapter.web-mapper"),
     /** adapters/events/EventListeners.java */
     ADAPTER_EVENT_LISTENER("adapter.event-listener"),
-    /** adapters/events/EventListenersMapper.java, EventListenersMapStructMapper.java */
+    /** adapters/events/EventListenersMapper.java */
     ADAPTER_EVENT_LISTENER_MAPPER("adapter.event-listener-mapper"),
     /** adapters/events/asyncapi/{style}/ConsumerService.java */
     ADAPTER_ASYNCAPI_CONSUMER("adapter.asyncapi-consumer"),
-    /** adapters/events/asyncapi/EventsMapper.java, EventsMapStructMapper.java */
+    /** adapters/events/asyncapi/EventsMapper.java */
     ADAPTER_ASYNCAPI_MAPPER("adapter.asyncapi-mapper"),
 
     // ── package-info ──────────────────────────────────────────────────────────

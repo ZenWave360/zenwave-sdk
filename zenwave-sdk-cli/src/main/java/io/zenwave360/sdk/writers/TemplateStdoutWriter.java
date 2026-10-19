@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.zenwave360.sdk.templating.TemplateOutput;
+import io.zenwave360.sdk.utils.CliOutput;
 
 public class TemplateStdoutWriter implements TemplateWriter {
 
@@ -20,8 +21,8 @@ public class TemplateStdoutWriter implements TemplateWriter {
 
     protected void write(String file, String contents) {
         log.debug("Writting template output to file: {}", file);
-        System.out.println("------- " + file + " ------");
-        System.out.println(contents);
-        System.out.println("--- end: " + file + " -----\n");
+        CliOutput.stdout().println("------- " + file + " ------");
+        CliOutput.stdout().println(contents);
+        CliOutput.stdout().println("--- end: " + file + " -----\n");
     }
 }

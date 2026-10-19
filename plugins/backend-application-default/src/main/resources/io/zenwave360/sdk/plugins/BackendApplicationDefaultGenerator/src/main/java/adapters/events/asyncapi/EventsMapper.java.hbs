@@ -1,18 +1,20 @@
 package {{layout.adaptersEventsPackage}};
 
+import {{layout.coreImplementationMappersCommonPackage}}.BaseMapper;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.TimeZone;
+
+import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-/**
- * Regenerated mapping contract containing only mappings proven safe by the adapter planner.
- */
+@Mapper(uses = { BaseMapper.class })
 public interface EventsMapper {
 
-    EventsMapper INSTANCE = Mappers.getMapper(EventsMapStructMapper.class);
+    EventsMapper INSTANCE = Mappers.getMapper(EventsMapper.class);
 
 {{#each generatedMappings as |mapping|}}
+    /** Add {@code @Mapping} here when MapStruct cannot infer the conversion. */
     {{mapping.targetType}} {{mapping.mapperMethodName}}({{mapping.sourceType}} event);
 {{/each}}
 

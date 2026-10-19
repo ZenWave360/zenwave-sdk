@@ -43,20 +43,20 @@ class EventCatalogZflFlowTest {
         assertFalse(flow.contains("id: \"start-order-checkout-2\""),
                 "A start signal must not be rendered again as a synthetic event");
         assertTrue(flow.contains("id: \"orders.checkout.order-created-event-v1\""));
-        assertTrue(flow.contains("occurrences.authorizePayment%0040when%005BOrderCreated%005D"));
-        assertTrue(flow.contains("occurrences.authorizePayment%0040when%005BPaymentRetried%005D"));
+        assertTrue(flow.contains("occurrences.authorizePayment%40when%5BOrderCreated%5D"));
+        assertTrue(flow.contains("occurrences.authorizePayment%40when%5BPaymentRetried%5D"));
         assertEquals(2, steps(flow).stream()
                 .filter(step -> "Authorize Payment Command".equals(step.get("title")))
                 .count(), "Repeated operation occurrences must retain distinct graph step IDs");
         assertTrue(flow.contains("label: \"authorized\""));
-        assertTrue(flow.contains("zfl_outcome/flows.PlaceOrderFlow.outcomes.completed"));
+        assertTrue(flow.contains("zfl-outcome/flows.PlaceOrderFlow.outcomes.completed"));
         assertTrue(flow.contains("Records the completed payment as an internal order operation."));
         Map<String, Object> finalizeOrder = step(flow,
-                "artifact/architecture/place-order-flow/zfl_step/flows.PlaceOrderFlow.occurrences.finalizeOrder%0040when%005BPaymentAuthorized%005D");
+                "zw:architecture/artifact/place-order-flow/zfl-step/flows.PlaceOrderFlow.occurrences.finalizeOrder%40when%5BPaymentAuthorized%5D");
         assertFalse(finalizeOrder.containsKey("service"),
                 "ArchCatalog flow steps permit only one typed payload");
         Map<String, Object> finalizeOrderServiceStep = step(flow,
-                "artifact/architecture/place-order-flow/zfl_step/flows.PlaceOrderFlow.occurrences.finalizeOrder%0040when%005BPaymentAuthorized%005D:service");
+                "zw:architecture/artifact/place-order-flow/zfl-step/flows.PlaceOrderFlow.occurrences.finalizeOrder%40when%5BPaymentAuthorized%5D:service");
         Map<?, ?> finalizeOrderService = assertInstanceOf(Map.class, finalizeOrderServiceStep.get("service"));
         assertEquals("orders.checkout", finalizeOrderService.get("id"));
         assertEquals("1.2.0", finalizeOrderService.get("version"));

@@ -10,6 +10,10 @@
     val {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.find{{aggregateCommand.aggregate.className}}ById({{method.paramId}})
         ?: throw NoSuchElementException("{{_entity.className}} not found with id: ${{method.paramId}}")
         {{~/if}}
+    {{~else if aggregateCommand.command.transition.from}}
+    // TODO CUSTOM_REQUIRED: load the {{aggregateCommand.aggregate.className}} this transition applies to{{#if method.parameter}}, e.g. by a correlation key in the input{{/if}}
+    val {{asInstanceName aggregateCommand.aggregate.className}}: {{aggregateCommand.aggregate.className}} = emptyList<{{aggregateCommand.aggregate.className}}>().firstOrNull()
+        ?: throw NoSuchElementException("{{aggregateCommand.aggregate.className}} not found")
     {{~else}}
     val {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.aggregate.className}}()
     {{~/if}}
@@ -66,6 +70,10 @@
     val {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.find{{aggregateCommand.aggregate.className}}ById({{method.paramId}})
         ?: throw NoSuchElementException("{{aggregateCommand.entity.className}} not found with id: ${{method.paramId}}")
         {{~/if}}
+    {{~else if aggregateCommand.command.transition.from}}
+    // TODO CUSTOM_REQUIRED: load the {{aggregateCommand.aggregate.className}} this transition applies to{{#if method.parameter}}, e.g. by a correlation key in the input{{/if}}
+    val {{asInstanceName aggregateCommand.aggregate.className}}: {{aggregateCommand.aggregate.className}} = emptyList<{{aggregateCommand.aggregate.className}}>().firstOrNull()
+        ?: throw NoSuchElementException("{{aggregateCommand.aggregate.className}} not found")
     {{~else}}
     val {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.aggregate.className}}()
     {{~/if}}

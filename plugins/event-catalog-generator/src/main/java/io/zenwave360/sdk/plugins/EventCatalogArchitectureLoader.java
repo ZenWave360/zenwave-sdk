@@ -1,15 +1,15 @@
 package io.zenwave360.sdk.plugins;
 
-import io.zenwave360.manifest.BlockingZenWaveManifestLoader;
-import io.zenwave360.manifest.BlockingManifestApiConsumptions;
-import io.zenwave360.manifest.ApiConsumptionOptions;
-import io.zenwave360.manifest.ManifestApiConsumptions;
-import io.zenwave360.manifest.ManifestConsumptionRules;
-import io.zenwave360.manifest.ManifestLoadOptions;
-import io.zenwave360.manifest.ZenWaveManifest;
-import io.zenwave360.manifest.graph.ArchitectureGraphBuildOptions;
-import io.zenwave360.manifest.graph.ArchitectureGraphResult;
-import io.zenwave360.manifest.graph.BlockingArchitectureGraph;
+import io.zenwave360.architecture.manifest.BlockingZenWaveManifestLoader;
+import io.zenwave360.architecture.manifest.BlockingManifestApiConsumptions;
+import io.zenwave360.architecture.manifest.ApiConsumptionOptions;
+import io.zenwave360.architecture.manifest.ManifestApiConsumptions;
+import io.zenwave360.architecture.manifest.ManifestConsumptionRules;
+import io.zenwave360.architecture.manifest.ManifestLoadOptions;
+import io.zenwave360.architecture.manifest.ZenWaveManifest;
+import io.zenwave360.architecture.graph.ArchitectureGraphBuildOptions;
+import io.zenwave360.architecture.graph.ArchitectureGraphResult;
+import io.zenwave360.architecture.graph.BlockingArchitectureGraph;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.processors.Processor;
 import org.slf4j.Logger;
@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Loads {@code zenwave-architecture.yml} through {@code manifest-core}.
+ * Loads {@code zenwave-architecture.yml} through {@code architecture-manifest}.
  */
 public class EventCatalogArchitectureLoader implements Processor {
 

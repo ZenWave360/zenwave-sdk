@@ -18,6 +18,7 @@
         "io.zenwave360.sdk.plugins:zdl-to-asyncapi:RELEASE",
         "io.zenwave360.sdk.plugins:jdl-to-asyncapi:RELEASE",
         "io.zenwave360.sdk.plugins:zdl-to-markdown:RELEASE",
+        "io.zenwave360.sdk.plugins:dsl-docs:RELEASE",
         "io.zenwave360.sdk.plugins:openapi-controllers:RELEASE",
         "io.zenwave360.sdk.plugins:asyncapi-ops:RELEASE",
         "io.zenwave360.sdk.plugins:event-catalog-generator:RELEASE"
@@ -49,6 +50,7 @@
         "io.zenwave360.sdk.plugins:zdl-to-asyncapi:2.8.0-SNAPSHOT",
         "io.zenwave360.sdk.plugins:jdl-to-asyncapi:2.8.0-SNAPSHOT",
         "io.zenwave360.sdk.plugins:zdl-to-markdown:2.8.0-SNAPSHOT",
+        "io.zenwave360.sdk.plugins:dsl-docs:2.8.0-SNAPSHOT",
         "io.zenwave360.sdk.plugins:openapi-controllers:2.8.0-SNAPSHOT",
         "io.zenwave360.sdk.plugins:asyncapi-ops:2.8.0-SNAPSHOT",
         "io.zenwave360.sdk.plugins:event-catalog-generator:2.8.0-SNAPSHOT"

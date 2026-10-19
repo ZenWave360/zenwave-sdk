@@ -104,6 +104,7 @@ This plugin has been tested in the following setups:
 | `avroImports`    | Additional Avro schema files or folders available while bundling owned message schemas. Sibling `.avsc` files are discovered automatically for local and `classpath:` schemas. Supports local files/folders, `classpath:` files/folders and `https://` files. | List     | `[]`             |                               |
 | `authentication` | Authentication configuration values for fetching remote resources.                                                                                                           | List     | `[]`             |                               |
 | `server`         | Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Used to merge `x-env-server-overrides`/`env-server-overrides` from channel and error-topic bindings. | String   | `null`           |                               |
+| `parameterValues` | Selects which values a channel address parameter expands to. `parameterValues.<name>=v1,v2` restricts every channel using that parameter name to a subset of its declared `enum`; `parameterValues.<channelKey>.<name>=v1` overrides a single channel and is also the only form that can supply values for a parameter with no `enum`. Validated against each channel's own `enum`. | Map      | `{}`             |                               |
 | `templates`      | Templates to use for code generation.                                                                                                                                        | String   | `TerraformKafka` | TerraformKafka, TerraformConfluent, TerraformConfluentHybrid, FQ Class Name |
 | `serviceAccountMode` | Resolve existing Confluent service accounts by display name, or provision them as managed Terraform resources.                                                         | String   | `existing`       | existing, managed             |
 | `targetFolder`   | Output directory for `.tf` files.                                                                                                                                            | File     | `null`           |                               |
@@ -187,6 +188,84 @@ channels:
 ACLs follow the operation direction: `send` gets WRITE + DESCRIBE, `receive` gets READ + DESCRIBE. Every operation gets ACLs regardless of ownership.
 
 Run it once per service, passing both the provider spec and the client spec. The right resources come out the other side.
+
+## Channel Address Parameters
+
+Channel addresses can contain `{parameter}` expressions. How the generator resolves them depends on whether the AsyncAPI [Parameter Object](https://www.asyncapi.com/docs/reference/specification/v3.0.0#parameterObject) declares an `enum`.
+
+### Enumerable parameters → one resource set per value
+
+When `parameters.<name>.enum` is present, the spec is the source of truth and no CLI input is required. One topic (plus its Schema Registry subjects, ACLs and retry/DLQ topics) is generated per declared value:
+
+```yaml
+channels:
+  orderCreated:
+    address: 'orders.{region}.created'
+    parameters:
+      region:
+        enum: [eu, us, apac]
+        default: eu
+```
+
+```hcl
+resource "kafka_topic" "orders_eu_created"   { name = "orders.eu.created"   ... }
+resource "kafka_topic" "orders_us_created"   { name = "orders.us.created"   ... }
+resource "kafka_topic" "orders_apac_created" { name = "orders.apac.created" ... }
+```
+
+`default` is not used for selection — it is a runtime hint, not a provisioning instruction. Terraform resource names are derived from the full resolved address, so every expansion is unique.
+
+Several enumerable parameters on one address expand as a cross product: `orders.{region}.{tenant}.shipped` with 3 regions and 2 tenants provisions 6 topics. Address-independent resources are not multiplied — the consumer group and transactional-id ACLs are still emitted once per operation.
+
+### Restricting the expansion per invocation: `parameterValues`
+
+Use `parameterValues` to generate only a subset of the declared `enum` for a given run, following the same dotted CLI convention as `authentication.key`:
+
+```shell
+jbang zw -p AsyncAPIOpsGeneratorPlugin \
+  apiFile=asyncapi.yml \
+  server=staging \
+  parameterValues.region=eu,us \
+  parameterValues.orderCreated.region=eu \
+  targetFolder=terraform/orders
+```
+
+- `parameterValues.<name>` — applies to every channel parameter with that name, whether it is inlined per channel or a `$ref` to `components.parameters`
+- `parameterValues.<channelKey>.<name>` — applies to that channel only, and overrides the bare form for it
+
+Most specific wins: channel-scoped value → bare value → the channel's full `enum`. Selected values are emitted in `enum` declaration order, so the generated Terraform is stable regardless of the order they were typed.
+
+Validation is **per channel**, never global. Every supplied value must belong to that channel's own `enum`, and two channels using the same parameter name are never assumed to share allowed values:
+
+```
+parameterValues.region=us is not valid for channel userSignedUp (allowed: dev, staging)
+```
+
+### Unbounded parameters → channel skipped by default
+
+A parameter without an `enum` (`{streetlightId}`, `{userId}`, `{orderId}`) only has values at runtime. By default that channel is not provisionable and is skipped with a warning naming the channel and the parameter:
+
+- **No topic or schema** — Kafka topics need concrete literal names; there is no way to provision "all possible values".
+- **No ACLs either.** A `PREFIXED` pattern was considered and rejected: `orders.{regionId}.created` and `orders.{customerId}.cancelled` share the stem `orders.`, so an automatically-derived prefix grant could hand one principal access to a sibling channel's topics. This goes one step further than external channels, which still get ACLs because their topic is provisioned elsewhere — here there is no concrete topic anywhere to grant access to.
+- The rest of the run is unaffected; generation does not fail.
+
+### Provisioning an unbounded parameter anyway
+
+Naming the channel explicitly supplies the values the spec does not declare, and the channel is then generated like any other:
+
+```shell
+jbang zw -p AsyncAPIOpsGeneratorPlugin \
+  apiFile=asyncapi.yml \
+  parameterValues.streetlightMeasured.streetlightId=1,2,3 \
+  targetFolder=terraform/streetlights
+```
+
+**Only the channel-scoped form works here.** A bare `parameterValues.streetlightId=1,2,3` is ignored for parameters without an `enum` — it would reach every channel using that name across every spec in the run, and there is no `enum` to catch a mistake. Naming the channel means you meant that channel.
+
+Two things follow from there being no declared `enum`:
+
+- Supplied values are **not validated** — a typo becomes a real topic. The values are emitted in the order given, since there is no declaration order to fall back to.
+- The value set lives in the pipeline invocation, not in the spec, so two pipelines can generate different topic sets from the same file. Where that matters, prefer putting the truth in the spec: convert the parameter to an `enum`, or override the address to a literal value with `apiOverlayFiles`.
 
 ## AsyncAPI extensions used
 
@@ -347,6 +426,105 @@ x-error-topics:
   dlq:
     $ref: 'master/kafka-bindings.yml#/components/x-error-topics/dlq/compliance'
 ```
+
+### Document root: Kafka Streams internal topics
+
+A Kafka Streams application creates its own internal topics — changelog, repartition and join-window store topics — at startup with its own `AdminClient`, independently of the broker's `auto.create.topics.enable`. `x-kafka-streams-applications` authorizes that, scoped to a namespace the application owns exclusively, without modelling each internal topic as a channel.
+
+> Design and background notes, including the rationale for each modelling decision and what is deliberately *not* modelled: [docs/x-kafka-streams.md](docs/x-kafka-streams.md).
+
+The extension is declared at the **document root**, alongside `channels` and `operations`, because `application.id` belongs to the whole topology rather than to a single `send`/`receive` edge.
+
+```yaml
+x-kafka-streams-applications:
+  merchandising.inventory.inventory-adjustment.streams-app:
+    x-principal: "merchandising.inventory.inventory-adjustment"
+    x-transactionalIdPrefix: "merchandising.inventory.inventory-adjustment.streams-app-"
+```
+
+The map key **is** the `application.id`. In Kafka Streams `application.id` and `group.id` are the same value, so the key must match the effective `groupId`/`x-groupId` of a `receive` operation somewhere in the same generator run — the same `x-groupId` over `groupId` precedence used for retry/DLQ topics.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `x-principal` | string | Yes | Service account to authorize. Rendered as `User:<x-principal>`. |
+| `x-transactionalIdPrefix` | string | No | Only for `processing.guarantee=exactly_once_v2`. Its value is the `TRANSACTIONAL_ID` prefix to authorize. |
+| `topics` | array\<string\> | No | Explicit internal topic names. Replaces the prefix grant with one literal grant per name. |
+
+#### Unprefixed aliases
+
+The unprefixed spellings are **supported public aliases**, not accidental leniency. These names were proposed upstream for the official AsyncAPI Kafka bindings; the `x-` forms are what you use until that proposal is accepted, and the unprefixed forms are accepted now so that specs written against the standardized names work here already — before and after adoption, without a generator change.
+
+| Documented name | Also accepted |
+|---|---|
+| `x-kafka-streams-applications` (document root) | `kafka-streams-applications` |
+| `x-principal` | `principal` |
+| `x-transactionalIdPrefix` | `x-transactional-id-prefix`, `transactionalIdPrefix` |
+| `topics` | — already unprefixed; it is a field of the extension object, not a binding-level extension, so it takes no `x-` form |
+
+Where both a prefixed and an unprefixed spelling are present, the `x-` form wins — the same precedence `x-principal`/`principal` and `x-groupId`/`groupId` already follow on operation bindings. Prefer the `x-` forms today: they are unambiguously valid AsyncAPI vendor extensions, and this README documents them as the primary spelling for that reason.
+
+Each entry generates:
+
+| Resource | Pattern | Name | Operations | Condition |
+|----------|---------|------|------------|-----------|
+| `TOPIC` | `PREFIXED` | `<application.id>-` | `Create`, `Delete`, `Alter`, `AlterConfigs`, `Describe`, `Read`, `Write` | Only when `topics` is absent |
+| `TOPIC` | `LITERAL` | each entry of `topics` | `Create`, `Delete`, `Alter`, `AlterConfigs`, `Describe`, `Read`, `Write` | Only when `topics` is present |
+| `GROUP` | `LITERAL` | `<application.id>` | `Read` | Always |
+| `TRANSACTIONAL_ID` | `PREFIXED` | `x-transactionalIdPrefix` | `Write`, `Describe` | Only when `x-transactionalIdPrefix` is present |
+
+The two `TOPIC` rows are mutually exclusive — `topics` is an alternative mode, not an addition on top of the prefix grant. All grants go to `x-principal`.
+
+This is an authorization-only extension. It provisions no `kafka_topic` resources: partitions are computed by Kafka Streams from the upstream source topic's partition count (already declared on `channel.bindings.kafka.partitions`), and replication factor comes from the application's own `StreamsConfig` or the broker default. Neither is a value this generator could make authoritative.
+
+A single `PREFIXED` grant also means a topology refactor — a renamed `Materialized.as(...)`, a new `KStream.join(...)` — never forces a contract change, since internal topic names are implementation details of the topology.
+
+#### Auditing a closed list instead of a prefix
+
+Where governance prefers a closed, auditable list over an open-ended prefix grant, list the names explicitly:
+
+```yaml
+x-kafka-streams-applications:
+  merchandising.inventory.inventory-adjustment.streams-app:
+    x-principal: "merchandising.inventory.inventory-adjustment"
+    topics:
+      - merchandising.inventory.inventory-adjustment.streams-app-by-sku-store-changelog
+      - merchandising.inventory.inventory-adjustment.streams-app-by-sku-repartition
+```
+
+- **`topics` absent** — default: one `PREFIXED` grant on `<application.id>-`.
+- **`topics` present** — one `LITERAL` grant per name, same operation set, and *no* prefix grant. The two modes are mutually exclusive.
+- **`topics: []`** — no `TOPIC` ACL at all; the `GROUP` and `TRANSACTIONAL_ID` grants are still generated. Useful when internal topic management is handled entirely outside this extension.
+
+This does not pre-create the topics — Kafka Streams still creates them itself. If a topology change introduces an unlisted internal topic, Kafka Streams fails fast at startup with a `TopicAuthorizationException` naming exactly what needs to be added, rather than surfacing later as a partition-count mismatch.
+
+#### Validations
+
+Generation fails when:
+
+- The `application.id` matches no `receive` operation's effective group id in the run — an orphaned entry.
+- `x-principal` is missing or blank.
+- `x-transactionalIdPrefix` is present but not a non-blank string.
+- A `topics` entry falls outside `<application.id>-`, or the same internal topic is listed under two applications.
+- The granted prefix `<application.id>-` overlaps any other topic name known to the generator run (see below).
+
+Kafka matches `PREFIXED` ACLs by plain string prefix with no separator awareness, and the grant includes `Create`, `Alter` and `Delete` — so anything falling inside the prefix can be altered or deleted by the streams principal. The collision check therefore covers **every topic name the generator knows about, not only resolved channel addresses**:
+
+| Checked against | Why |
+|---|---|
+| Owned and external channel addresses | Ordinary business topics belonging to this or another service |
+| Generated retry/DLQ topic names | Equally real topics, provisioned by this same run |
+| `<other application.id>-` of every other declared application, in either direction | `orders-` and `orders-rebuild-` overlap: names exist that start with both, so one application's grant would cover the other's changelog topics |
+| The explicit `topics` of every other declared application | A listed internal topic must not fall inside a different application's prefix |
+| The literal stem of an unresolved channel address, in either direction | `orders-{tenant}` has no concrete address yet, but some expansion could land inside the namespace, so overlap is rejected conservatively |
+
+Two notes on the comparison:
+
+- It uses `<application.id>-`, the string actually granted, not the bare `application.id`. An `application.id` that shares a dot-separated stem with its own channels (`merchandising.inventory.inventory-adjustment` alongside `merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0`) is **not** a collision, since the address continues with `.` rather than `-`.
+- An application using explicit `topics` issues `LITERAL` grants only, so it has no prefix to over-match and is exempt from this check — but its namespace and its listed topics are still protected from other applications' prefixes.
+
+The unresolved-address check is conservative and can reject a spec that would in practice never collide; declaring the internal topics explicitly with `topics` is the escape hatch. An address that *begins* with a parameter expression has no literal stem to compare, so that case is logged rather than failing every application in the run.
+
+The collision check is necessarily scoped to the specs loaded in one generator invocation. Detecting the same clash against an `application.id` chosen in an unrelated repository needs a platform-level naming registry, not a provisioning-time check.
 
 ## Topic Configuration Defaults
 

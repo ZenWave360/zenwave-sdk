@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import io.zenwave360.sdk.utils.CliOutput;
 import io.zenwave360.sdk.utils.MavenLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -39,13 +40,35 @@ public class Main implements Callable<Integer> {
     @CommandLine.Parameters
     Map<String, Object> options = new HashMap<>();
 
-    public static void main(String... args) {
-        var main = new Main();
+    /**
+     * Exit codes: {@code 0} success, {@code 1} the input is invalid (a {@link ZenWaveException} with that code, e.g.
+     * lint findings), {@code 2} invalid arguments or any other failure of the tool itself.
+     */
+    public static CommandLine createCommandLine(Main main) {
         CommandLine cmd = new CommandLine(main);
         cmd.setExecutionExceptionHandler((ex, commandLine, parseResult) -> {
-            commandLine.getErr().println(ex.getMessage());
-            return commandLine.getCommandSpec().exitCodeOnExecutionException();
+            commandLine.getErr().println(ex instanceof ZenWaveException ? ex.getMessage() : ex.toString());
+            return exitCode(ex);
         });
+        cmd.setParameterExceptionHandler((ex, args) -> {
+            ex.getCommandLine().getErr().println(ex.getMessage());
+            return ZenWaveException.EXIT_TOOL_FAILURE;
+        });
+        return cmd;
+    }
+
+    static int exitCode(Throwable ex) {
+        for (Throwable current = ex; current != null; current = current.getCause()) {
+            if (current instanceof ZenWaveException zenWaveException) {
+                return zenWaveException.getExitCode();
+            }
+        }
+        return ZenWaveException.EXIT_TOOL_FAILURE;
+    }
+
+    public static void main(String... args) {
+        var main = new Main();
+        CommandLine cmd = createCommandLine(main);
         CommandLine.ParseResult parsed = cmd.parseArgs(args);
 
         boolean noOptions = !parsed.hasMatchedOption("h") && !parsed.hasMatchedOption("p");
@@ -68,6 +91,7 @@ public class Main implements Callable<Integer> {
         }
 
 
+        CliOutput.reserveStdout();
         int returnCode = cmd.execute(args);
         if (returnCode != 0) {
             System.exit(returnCode);

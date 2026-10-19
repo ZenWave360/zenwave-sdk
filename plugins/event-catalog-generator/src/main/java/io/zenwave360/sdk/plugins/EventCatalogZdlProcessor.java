@@ -1,10 +1,10 @@
 package io.zenwave360.sdk.plugins;
 
-import io.zenwave360.manifest.BlockingZenWaveManifestLoader;
-import io.zenwave360.manifest.ManifestArtifact;
-import io.zenwave360.manifest.ManifestLoadOptions;
-import io.zenwave360.manifest.ManifestService;
-import io.zenwave360.manifest.ZenWaveManifest;
+import io.zenwave360.architecture.manifest.BlockingZenWaveManifestLoader;
+import io.zenwave360.architecture.manifest.ManifestArtifact;
+import io.zenwave360.architecture.manifest.ManifestLoadOptions;
+import io.zenwave360.architecture.manifest.ManifestService;
+import io.zenwave360.architecture.manifest.ZenWaveManifest;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.parsers.ZDLParser;
 import io.zenwave360.sdk.processors.Processor;

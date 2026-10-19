@@ -27,6 +27,7 @@ import org.springframework.data.annotation.LastModifiedDate
 data class {{entity.className}}(
 {{#unless (skipEntityId entity)~}}
     @Id
+    {{annotate "domain.entity" entity.javaEntity.idField}}
     var id: {{idJavaType}}? = null,
 
     @Version

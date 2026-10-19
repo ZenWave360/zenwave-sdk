@@ -25,7 +25,7 @@ resource "confluent_kafka_acl" "{{acl.resourceName}}" {
   principal     = "User:${data.confluent_service_account.{{acl.principalResourceName}}.id}"
 {{/if}}
   host          = "*"
-  operation     = "{{upper acl.operation}}"
+  operation     = "{{acl.confluentOperation}}"
   permission    = "{{upper acl.permissionType}}"
 }
 

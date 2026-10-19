@@ -1,0 +1,51 @@
+config {
+    title "Orders (aggregate transitions without id)"
+    basePackage "io.zenwave360.example.orders"
+    persistence jpa
+}
+
+@lifecycle(field: status, initial: RECEIVED)
+aggregate OrderAggregate(CustomerOrder) {
+
+    createOrder(OrderInput) withEvents OrderCreated
+    @transition(from: [RECEIVED], to: CANCELLED)
+    cancelOrder(CancelOrderInput) withEvents OrderCancelled
+    @transition(from: [RECEIVED], to: CANCELLED)
+    cancelOrderById(CancelOrderInput) withEvents OrderCancelled
+}
+
+entity CustomerOrder {
+    customerId String required
+    status OrderStatus
+}
+
+enum OrderStatus {
+    RECEIVED, CANCELLED
+}
+
+input OrderInput {
+    customerId String required
+}
+
+input CancelOrderInput {
+    orderCorrelation String
+    reason String
+}
+
+service OrdersService for (OrderAggregate) {
+    createOrder(OrderInput) CustomerOrder withEvents OrderCreated
+
+    // no id: the aggregate must come from a TODO CUSTOM_REQUIRED lookup
+    cancelOrder(CancelOrderInput) CustomerOrder withEvents OrderCancelled
+
+    // with id: unchanged
+    cancelOrderById(id, CancelOrderInput) CustomerOrder withEvents OrderCancelled
+}
+
+event OrderCreated {
+    id String
+}
+
+event OrderCancelled {
+    id String
+}

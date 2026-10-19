@@ -1,10 +1,10 @@
 package io.zenwave360.sdk.plugins;
 
-import io.zenwave360.manifest.ManifestArtifact;
-import io.zenwave360.manifest.ManifestDomain;
-import io.zenwave360.manifest.ManifestService;
-import io.zenwave360.manifest.ManifestSubdomain;
-import io.zenwave360.manifest.ZenWaveManifest;
+import io.zenwave360.architecture.manifest.ManifestArtifact;
+import io.zenwave360.architecture.manifest.ManifestDomain;
+import io.zenwave360.architecture.manifest.ManifestService;
+import io.zenwave360.architecture.manifest.ManifestSubdomain;
+import io.zenwave360.architecture.manifest.ZenWaveManifest;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Mutable EventCatalog-only enrichment keyed by the typed manifest model.
  *
- * Manifest identity, hierarchy, documents, and artifacts stay in manifest-core. This model
+ * Manifest identity, hierarchy, documents, and artifacts stay in architecture-manifest. This model
  * contains only data derived while parsing those artifacts for EventCatalog.
  */
 final class EventCatalogModel {

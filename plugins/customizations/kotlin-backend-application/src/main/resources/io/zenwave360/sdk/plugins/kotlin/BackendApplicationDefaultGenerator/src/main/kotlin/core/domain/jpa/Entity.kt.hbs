@@ -35,6 +35,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 data class {{entity.className}}(
 {{#unless (skipEntityId entity)~}}
     {{~> (partial 'partials/id' databaseType)}}
+    {{annotate "domain.entity" entity.javaEntity.idField}}
     var id: {{idJavaType}}? = null,
 
     @Version

@@ -40,7 +40,7 @@ public class DockerComposeInitializer implements ApplicationContextInitializer<C
 
 	private static final String DOCKER_COMPOSE_FILE = "./docker-compose.yml";
 	private static final List<Service> SERVICES = List.of(
-		new Service("mongodb", 27017, "MONGODB_URI", "mongodb://%s:%s/DATABASENAME?replicaSet=rs0"),
+		new Service("mongodb", 27017, "MONGODB_URI", "mongodb://%s:%s/app?replicaSet=rs0"),
 		new Service("kafka", 9092, "KAFKA_BOOTSTRAP_SERVERS", "%s:%s")
 	);
 

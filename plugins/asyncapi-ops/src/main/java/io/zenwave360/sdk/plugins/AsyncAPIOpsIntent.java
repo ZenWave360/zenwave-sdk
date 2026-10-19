@@ -15,7 +15,10 @@ public class AsyncAPIOpsIntent {
     public List<AclIntent> acls = new ArrayList<>();
     public List<RoleBindingIntent> roleBindings = new ArrayList<>();
     public List<PrincipalIntent> principals = new ArrayList<>();
+    /** Channels skipped because their address carries an unbounded (non-enum) parameter */
+    public List<SkippedChannelIntent> skippedChannels = new ArrayList<>();
 
+    private final Set<String> skippedChannelKeys = new LinkedHashSet<>();
     private final Set<String> aclKeys = new LinkedHashSet<>();
     private final Set<String> roleBindingKeys = new LinkedHashSet<>();
     private final Set<String> principalNames = new LinkedHashSet<>();
@@ -33,6 +36,17 @@ public class AsyncAPIOpsIntent {
             principal.resourceName = resourceName;
             principals.add(principal);
         }
+    }
+
+    public void addSkippedChannel(String channelKey, String address, String parameterName) {
+        if (!skippedChannelKeys.add(channelKey + "|" + address)) {
+            return;
+        }
+        SkippedChannelIntent skipped = new SkippedChannelIntent();
+        skipped.channelKey = channelKey;
+        skipped.address = address;
+        skipped.parameterName = parameterName;
+        skippedChannels.add(skipped);
     }
 
     public void addAcl(AclIntent acl) {
@@ -59,6 +73,15 @@ public class AsyncAPIOpsIntent {
         public Map<String, String> config = new LinkedHashMap<>();
         /** True for auto-generated retry/DLQ topics — rendered without config block */
         public boolean isRetryOrDlq;
+    }
+
+    public static class SkippedChannelIntent {
+        /** AsyncAPI channel key */
+        public String channelKey;
+        /** Unresolved channel address, still containing the {parameter} expression */
+        public String address;
+        /** Address parameter with no enum declared */
+        public String parameterName;
     }
 
     public static class SchemaIntent {
@@ -96,8 +119,10 @@ public class AsyncAPIOpsIntent {
         public String principal;
         /** Terraform identifier used to reference the provider-specific principal lookup */
         public String principalResourceName;
-        /** Read, Write, or Describe */
+        /** Mongey/kafka spelling: Read, Write, Describe, Create, Delete, Alter, AlterConfigs */
         public String operation;
+        /** confluentinc/confluent spelling of {@link #operation}: READ, WRITE, ALTER_CONFIGS, ... */
+        public String confluentOperation;
         public String permissionType = "Allow";
     }
 

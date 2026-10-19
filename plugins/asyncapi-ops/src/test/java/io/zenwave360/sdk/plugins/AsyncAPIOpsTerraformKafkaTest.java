@@ -18,6 +18,7 @@ public class AsyncAPIOpsTerraformKafkaTest {
     static final String ASYNCAPI_CLIENT   = "classpath:retail-domain-catalog/merchandising/inventory/inventory-adjustment/asyncapi-client.yml";
     static final String ASYNCAPI_COLLISION_ALPHA = "classpath:collision/alpha/asyncapi.yml";
     static final String ASYNCAPI_COLLISION_BETA  = "classpath:collision/beta/asyncapi.yml";
+    static final String ASYNCAPI_STREAMS = "classpath:kafka-streams/asyncapi-streams.yml";
 
     @Test
     public void test_provider_generation() throws Exception {
@@ -182,5 +183,30 @@ public class AsyncAPIOpsTerraformKafkaTest {
             index += token.length();
         }
         return count;
+    }
+
+    @Test
+    public void test_kafka_streams_application_acls() throws Exception {
+        String targetFolder = "target/out/test_kafka_streams_application_acls";
+        new MainGenerator().generate(new AsyncAPIOpsGeneratorPlugin()
+                .withApiFile(ASYNCAPI_STREAMS)
+                .withOption("templates", "TerraformKafka")
+                .withTargetFolder(targetFolder)
+                .withOption("skipFormatting", true));
+
+        String acls = Files.readString(Path.of(targetFolder + "/acls.tf"));
+        Assertions.assertTrue(acls.contains("resource_name       = \"merchandising.inventory.inventory-adjustment.streams-app-\""),
+                "internal topic grant is scoped to the application namespace");
+        Assertions.assertTrue(acls.contains("resource_pattern_type_filter = \"Prefixed\""));
+        Assertions.assertTrue(acls.contains("acl_operation       = \"AlterConfigs\""), "Mongey/kafka spells it AlterConfigs");
+        Assertions.assertTrue(acls.contains("acl_operation       = \"Create\""));
+        Assertions.assertTrue(acls.contains("acl_operation       = \"Delete\""));
+        Assertions.assertTrue(acls.contains("acl_operation       = \"Alter\""));
+        Assertions.assertTrue(acls.contains("resource_type       = \"TransactionalID\""));
+        Assertions.assertFalse(acls.contains("ALTER_CONFIGS"), "Confluent spelling must not leak into the OSS provider");
+
+        // Authorization only: no internal topic resources
+        String topics = Files.readString(Path.of(targetFolder + "/topics.tf"));
+        Assertions.assertFalse(topics.contains("streams-app"), "internal topics are created by Kafka Streams, not Terraform");
     }
 }

@@ -1,0 +1,6 @@
+{{~#each method.calls as |call|}}
+// TODO: call {{#if call.apiName}}{{call.apiName}} {{/if}}{{call.serviceName}}.{{call.commandName}}({{call.parameterType}}) -> {{#if call.returnType}}{{call.returnType}}{{else}}void{{/if}}
+{{~#if call.withEvents}}
+//       then emit one of: {{#each call.withEvents as |event|}}{{event}}{{#unless @last}} | {{/unless}}{{/each}}
+{{~/if}}
+{{~/each}}

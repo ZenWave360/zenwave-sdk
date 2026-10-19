@@ -23,6 +23,7 @@ public final class ServiceMethodBodyPlanner {
         boolean isOptional = Boolean.TRUE.equals(method != null ? method.get("returnTypeIsOptional") : null);
         boolean isArray = Boolean.TRUE.equals(method != null ? method.get("returnTypeIsArray") : null);
         boolean hasTransition = JSONPath.get(method, "$.transition.from") != null || JSONPath.get(method, "$.transition.to") != null;
+        boolean hasFromTransition = JSONPath.get(method, "$.transition.from") != null;
         boolean hasLifecycle = entity != null && JSONPath.get(entity, "lifecycle") != null;
         boolean requiresMapping = hasEntity
                 && hasReturnType
@@ -32,6 +33,13 @@ public final class ServiceMethodBodyPlanner {
         MethodBodyCase bodyCase;
         if (isAsync) {
             bodyCase = MethodBodyCase.ASYNC_DELEGATE;
+        } else if (hasEntity && hasFromTransition && !hasId && hasReturnType && isOptional) {
+            // from-transition without id: entities come from a TODO CUSTOM_REQUIRED lookup, never findAll/new instance
+            bodyCase = MethodBodyCase.ENTITY_TRANSITION_LOOKUP_OPTIONAL;
+        } else if (hasEntity && hasFromTransition && !hasId && hasReturnType && !isArray) {
+            bodyCase = MethodBodyCase.ENTITY_TRANSITION_LOOKUP_REQUIRED;
+        } else if (hasEntity && hasFromTransition && !hasId) {
+            bodyCase = MethodBodyCase.ENTITY_TRANSITION_LOOKUP_LIST;
         } else if (hasEntity && hasLifecycle && hasId && hasInput && hasReturnType && isOptional) {
             bodyCase = MethodBodyCase.ENTITY_LIFECYCLE_UPDATE_OPTIONAL;
         } else if (hasEntity && hasLifecycle && hasId && hasInput && hasReturnType) {

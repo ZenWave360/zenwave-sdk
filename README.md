@@ -96,6 +96,7 @@ Refer to individual plugin's documentation for more information:
 | [ZDL to OpenAPI](./plugins/zdl-to-openapi/README.md)                                     | ZDL to OpenAPI and OpenAPI to ZDL                                | ZDL, OpenAPI             |
 | [ZDL to AsyncAPI](./plugins/zdl-to-asyncapi/README.md)                                   | ZDL to AsyncAPI                                                  | ZDL, AsyncAPI            |
 | [ZDL to Markdown](./plugins/zdl-to-markdown/README.md)                                   | ZDL to Markdown                                                  | ZDL                      |
+| [DslDocs](./plugins/dsl-docs/README.md)                                                   | Multi-page Markdown documentation with Mermaid diagrams          | ZDL, ZFL, OpenAPI, AsyncAPI |
 | [Java 2 JDL Reverse Engineering](./plugins/java-to-jdl/README.md)                        | Java 2 JDL Reverse Engineering                                   | Java, JDL                |
 | [Java 2 AsyncAPI Reverse Engineering](./plugins/java-to-asyncapi/README.md)              | Java 2 AsyncAPI Reverse Engineering                              | Java                     |
 | [MCP Server](./plugins/zenwave-mcp-server/README.md)                                     | ZenWave MCP Server                                               | ZDL                      |
@@ -176,6 +177,71 @@ mvn clean install
 ```
 
 ## Usage
+
+### Lint ZDL models
+
+Lint is a regular plugin, with deterministic output for terminals, agents, and CI. One ZDL file per run:
+
+```shell
+jbang zw -p Lint zdlFile=<file.zdl> [format=text|json|sarif] [output=<file>] [strict=true]                  [root=<dir>] [linters=<Linter,...>]
+```
+
+Run `jbang zw -p Lint -h` for all options; like any plugin they can also be set in a zenwave-scripts `.zw` plugin block.
+
+Text output uses `file:line:column: severity ruleId message`. JSON uses a versioned envelope
+(`schemaVersion`, `tool`, `summary`, `diagnostics`, and `toolFailures` when a linter failed) and SARIF output
+conforms to SARIF 2.1.0 with `%SRCROOT%` locations, `rules[]` derived from the reported rule ids and stable
+partial fingerprints. Positions are one-based; paths are relative to the working directory, or to `root`.
+The report goes to stdout, or to `output=` as UTF-8 (PowerShell 5.1 `>` writes UTF-16).
+
+Exit codes (CLI-wide): `0` success; `1` findings (errors, or warnings with `strict=true`); `2` tool failure
+(invalid arguments, unreadable input, a failing linter, or any other exception). Plugins signal a code by throwing
+`ZenWaveException(message, exitCode)`.
+
+When run from the command line, `System.out` is redirected to stderr during plugin execution, so logs never
+pollute stdout: only deliberate results (the lint report, `ZdlToJson`, template stdout output) reach it.
+
+`linters` is an ordered list of `io.zenwave360.sdk.lint.Linter` implementations (fully qualified names, or short
+names of built-ins such as `ZdlProblems`), loaded from the project classpath so custom linters can ship in jars
+added with `--deps`. The default set is: `ZdlProblemsLinter` (syntax and semantic problems, including
+lifecycle/transition states), `ZdlReferencesLinter` (unresolvable `zdl`/`asyncapi` clients), `ZdlCallsLinter`
+(`@calls` targets) and `ZdlListenerLinter` (`@listener` events, mixed `@asyncapi`/`@listener` bindings and
+required-input data-lineage warnings). Syntax errors are reported as a single problem and semantic linters are
+skipped after them. Presets are plugin subclasses of `LintPlugin` with a different default `linters` list.
+
+### Generate documentation
+
+`DslDocs` generates a documentation index plus architecture, module, flow, OpenAPI and AsyncAPI pages from the
+files supplied. Every ZDL file is a separate module; OpenAPI and AsyncAPI files may be mixed because their kind is
+detected from their contents.
+
+```shell
+jbang zw -p DslDocs \
+    zdlFiles=orders.zdl,payments.zdl \
+    zflFiles=place-order.zfl \
+    apiFiles=openapi.yml,asyncapi.yml \
+    targetFolder=docs \
+    title="Arcadia Editions"
+```
+
+| Option | Meaning |
+| --- | --- |
+| `zdlFiles` / `zdlFile` | ZDL module files (comma-separated list or one-file shortcut) |
+| `zflFiles` | ZFL event-flow files, one page per file |
+| `apiFiles` / `apiFile` | Mixed OpenAPI and AsyncAPI files (comma-separated list or one-file shortcut) |
+| `targetFolder` | Output folder; defaults to `docs` |
+| `title`, `version`, `date` | Index-page metadata; title and version default from the first ZDL or API file |
+| `check` | Compare only; do not write files |
+
+Use `check=true` in CI to make stale committed documentation fail with exit code 1:
+
+```shell
+jbang zw -p DslDocs zdlFiles=orders.zdl,payments.zdl targetFolder=docs check=true
+```
+
+Generated pages are recognized by their marker, so hand-written Markdown in the output folder is preserved. A
+generated-page collision, missing/unknown input file, or an out-of-date `check` is exit code `1`; unexpected tool
+failures are exit code `2`.
 
 Use the following jbang format:
 

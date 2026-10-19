@@ -14,6 +14,7 @@ import io.zenwave360.sdk.writers.TemplateFileWriter;
             "apiOverlayFiles",
             "avroImports",
             "server",
+            "parameterValues",
             "templates",
             "serviceAccountMode",
             "targetFolder",
@@ -26,6 +27,9 @@ public class AsyncAPIOpsGeneratorPlugin extends Plugin {
 
     @DocumentedOption(description = "Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Applies x-env-server-overrides/env-server-overrides from channel and error-topic bindings.")
     public String server;
+
+    @DocumentedOption(description = "Selects which values a channel address parameter expands to. parameterValues.<name>=v1,v2 restricts every channel using that parameter name to a subset of its declared enum; parameterValues.<channelKey>.<name>=v1 overrides a single channel and is also the only form that can supply values for a parameter with no enum. Values are validated against each channel's own enum.")
+    public java.util.Map<String, Object> parameterValues = new java.util.LinkedHashMap<>();
 
     @DocumentedOption(description = "How Confluent service accounts are resolved: existing looks them up by display name; managed provisions them.", values = {"existing", "managed"})
     public String serviceAccountMode = "existing";

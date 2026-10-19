@@ -10,6 +10,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class AsyncAPIOpsIntentProcessorTest {
 
@@ -18,6 +21,9 @@ public class AsyncAPIOpsIntentProcessorTest {
     static final String ASYNCAPI_STOCK    = "classpath:retail-domain-catalog/merchandising/inventory/stock-replenishment/asyncapi.yml";
     static final String ASYNCAPI_COLLISION_ALPHA = "classpath:collision/alpha/asyncapi.yml";
     static final String ASYNCAPI_COLLISION_BETA  = "classpath:collision/beta/asyncapi.yml";
+    static final String ASYNCAPI_STREAMS = "classpath:kafka-streams/asyncapi-streams.yml";
+    static final String ASYNCAPI_STREAMS_SECOND = "classpath:kafka-streams/asyncapi-streams-second.yml";
+    static final String STREAMS_APPLICATION_ID = "merchandising.inventory.inventory-adjustment.streams-app";
 
     @Test
     public void test_provider_intent_generation() throws Exception {
@@ -553,6 +559,326 @@ public class AsyncAPIOpsIntentProcessorTest {
                 .orElseThrow();
         Assertions.assertNull(missingSchema.sourceSchemaUri);
         Assertions.assertNull(missingSchema.schemaFile);
+    }
+
+    // -------------------------------------------------------------------------
+    // x-kafka-streams-applications
+    // -------------------------------------------------------------------------
+
+    @Test
+    public void test_streams_application_grants_prefixed_internal_topic_group_and_transactional_acls() throws Exception {
+        Map<String, Object> context = loadAndBuildIntent(null, ASYNCAPI_STREAMS);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+
+        List<AsyncAPIOpsIntent.AclIntent> internalTopicAcls = intent.acls.stream()
+                .filter(a -> "TOPIC".equals(a.resourceType) && "PREFIXED".equals(a.patternType))
+                .toList();
+
+        Assertions.assertEquals(7, internalTopicAcls.size(), "7 fixed operations on the application's own namespace");
+        Assertions.assertEquals(
+                Set.of("Create", "Delete", "Alter", "AlterConfigs", "Describe", "Read", "Write"),
+                internalTopicAcls.stream().map(a -> a.operation).collect(Collectors.toSet()));
+        internalTopicAcls.forEach(a -> {
+            Assertions.assertEquals(STREAMS_APPLICATION_ID + "-", a.kafkaResourceName, "grant is scoped to <application.id>-");
+            Assertions.assertEquals("merchandising.inventory.inventory-adjustment", a.principal);
+            Assertions.assertEquals("Topic", a.kafkaResourceType);
+            Assertions.assertEquals("Prefixed", a.kafkaPatternType);
+        });
+
+        // Confluent spelling is derived from the Mongey spelling, including the multi-word case
+        Assertions.assertEquals("ALTER_CONFIGS", internalTopicAcls.stream()
+                .filter(a -> "AlterConfigs".equals(a.operation)).findFirst().orElseThrow().confluentOperation);
+        Assertions.assertEquals("READ", internalTopicAcls.stream()
+                .filter(a -> "Read".equals(a.operation)).findFirst().orElseThrow().confluentOperation);
+
+        Assertions.assertTrue(intent.acls.stream().anyMatch(a ->
+                "GROUP".equals(a.resourceType)
+                        && "LITERAL".equals(a.patternType)
+                        && STREAMS_APPLICATION_ID.equals(a.kafkaResourceName)
+                        && "Read".equals(a.operation)));
+
+        List<String> transactionalOperations = intent.acls.stream()
+                .filter(a -> "TRANSACTIONAL_ID".equals(a.resourceType))
+                .peek(a -> {
+                    Assertions.assertEquals("PREFIXED", a.patternType);
+                    Assertions.assertEquals(STREAMS_APPLICATION_ID + "-", a.kafkaResourceName);
+                })
+                .map(a -> a.operation).sorted().toList();
+        Assertions.assertEquals(List.of("Describe", "Write"), transactionalOperations);
+
+        Assertions.assertEquals(1, intent.principals.size(), "streams principal is deduplicated with the operation principal");
+        // Authorization only — the extension declares no internal topics
+        Assertions.assertEquals(1, intent.topics.size(), "only the source channel topic, no internal topics");
+        Assertions.assertEquals("merchandising.inventory.stock-movement.event.avro.v0", intent.topics.get(0).topicName);
+    }
+
+    @Test
+    public void test_streams_topics_mode_replaces_the_prefixed_grant_with_one_literal_grant_per_topic() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_STREAMS);
+        streamsApplication(context, STREAMS_APPLICATION_ID).put("topics", List.of(
+                STREAMS_APPLICATION_ID + "-by-sku-store-changelog",
+                STREAMS_APPLICATION_ID + "-by-sku-repartition"));
+
+        context = buildIntent(null, context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+
+        Assertions.assertFalse(intent.acls.stream().anyMatch(a -> "TOPIC".equals(a.resourceType) && "PREFIXED".equals(a.patternType)),
+                "topics mode is an alternative to the prefix grant, not an addition");
+
+        List<AsyncAPIOpsIntent.AclIntent> literalAcls = intent.acls.stream()
+                .filter(a -> "TOPIC".equals(a.resourceType) && a.kafkaResourceName.startsWith(STREAMS_APPLICATION_ID + "-"))
+                .toList();
+        Assertions.assertEquals(14, literalAcls.size(), "7 operations × 2 explicitly listed topics");
+        literalAcls.forEach(a -> Assertions.assertEquals("LITERAL", a.patternType));
+        Assertions.assertEquals(
+                Set.of(STREAMS_APPLICATION_ID + "-by-sku-store-changelog", STREAMS_APPLICATION_ID + "-by-sku-repartition"),
+                literalAcls.stream().map(a -> a.kafkaResourceName).collect(Collectors.toSet()));
+
+        Assertions.assertTrue(intent.acls.stream().anyMatch(a -> "GROUP".equals(a.resourceType)), "group grant is unaffected");
+    }
+
+    @Test
+    public void test_streams_empty_topics_list_suppresses_topic_acls_but_keeps_group_and_transactional_acls() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_STREAMS);
+        streamsApplication(context, STREAMS_APPLICATION_ID).put("topics", List.of());
+
+        context = buildIntent(null, context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+
+        Assertions.assertFalse(intent.acls.stream().anyMatch(a ->
+                        "TOPIC".equals(a.resourceType) && a.kafkaResourceName.startsWith(STREAMS_APPLICATION_ID)),
+                "an explicit empty list generates no TOPIC ACL at all");
+        Assertions.assertTrue(intent.acls.stream().anyMatch(a -> "GROUP".equals(a.resourceType)));
+        Assertions.assertTrue(intent.acls.stream().anyMatch(a -> "TRANSACTIONAL_ID".equals(a.resourceType)));
+    }
+
+    @Test
+    public void test_streams_application_without_matching_receive_group_fails_generation() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_STREAMS);
+        Map<String, Object> receiveBinding = JSONPath.get(getApis(context).get(0), "$.operations['processStockEvents'].bindings.kafka");
+        receiveBinding.put("x-groupId", "merchandising.inventory.inventory-adjustment.some-other-app");
+
+        IllegalArgumentException orphaned = Assertions.assertThrows(
+                IllegalArgumentException.class, () -> buildIntent(null, context));
+        Assertions.assertTrue(orphaned.getMessage().contains("does not match the groupId/x-groupId of any receive operation"));
+        Assertions.assertTrue(orphaned.getMessage().contains(STREAMS_APPLICATION_ID));
+    }
+
+    @Test
+    public void test_invalid_streams_application_declarations_fail_generation() throws Exception {
+        IllegalArgumentException missingPrincipal = assertInvalidStreamsApplication(app -> app.remove("x-principal"));
+        Assertions.assertTrue(missingPrincipal.getMessage().contains("missing a non-blank x-principal"));
+
+        IllegalArgumentException blankPrefix = assertInvalidStreamsApplication(
+                app -> app.put("x-transactionalIdPrefix", "  "));
+        Assertions.assertTrue(blankPrefix.getMessage().contains("must be a non-blank string when present"));
+
+        IllegalArgumentException topicsNotAList = assertInvalidStreamsApplication(
+                app -> app.put("topics", STREAMS_APPLICATION_ID + "-by-sku-changelog"));
+        Assertions.assertTrue(topicsNotAList.getMessage().contains("must be an array of strings"));
+
+        IllegalArgumentException blankTopic = assertInvalidStreamsApplication(app -> app.put("topics", List.of("  ")));
+        Assertions.assertTrue(blankTopic.getMessage().contains("only non-blank strings"));
+
+        // Kafka Streams always prefixes internal topics with application.id plus a separator
+        IllegalArgumentException outsideNamespace = assertInvalidStreamsApplication(
+                app -> app.put("topics", List.of("merchandising.inventory.stock-movement.event.avro.v0")));
+        Assertions.assertTrue(outsideNamespace.getMessage().contains("is outside the application namespace"));
+    }
+
+    @Test
+    public void test_streams_topic_listed_under_two_applications_fails_generation() throws Exception {
+        String nestedApplicationId = STREAMS_APPLICATION_ID + "-sub";
+        String sharedTopic = nestedApplicationId + "-by-sku-changelog";
+
+        Map<String, Object> context = loadContext(ASYNCAPI_STREAMS);
+        Model api = getApis(context).get(0);
+
+        // A nested application.id keeps the shared topic inside both namespaces, so the ownership
+        // check is what rejects it rather than the namespace check.
+        streamsApplication(context, STREAMS_APPLICATION_ID).put("topics", List.of(sharedTopic));
+        streamsApplications(context).put(nestedApplicationId, new LinkedHashMap<>(Map.of(
+                "x-principal", "merchandising.inventory.inventory-adjustment",
+                "topics", List.of(sharedTopic))));
+        addReceiveOperation(api, "processStockEventsNested", nestedApplicationId);
+
+        IllegalArgumentException duplicateTopic = Assertions.assertThrows(
+                IllegalArgumentException.class, () -> buildIntent(null, context));
+        Assertions.assertTrue(duplicateTopic.getMessage().contains("is listed under both"));
+        Assertions.assertTrue(duplicateTopic.getMessage().contains(sharedTopic));
+    }
+
+    @Test
+    public void test_streams_application_id_prefixing_a_channel_address_fails_generation() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_STREAMS);
+        Model api = getApis(context).get(0);
+
+        // "merchandising.inventory.stock-" also matches the stock-movement channel address
+        String collidingApplicationId = "merchandising.inventory.stock";
+        streamsApplications(context).put(collidingApplicationId, new LinkedHashMap<>(Map.of(
+                "x-principal", "merchandising.inventory.inventory-adjustment")));
+        addReceiveOperation(api, "processStockEventsColliding", collidingApplicationId);
+
+        IllegalArgumentException collision = Assertions.assertThrows(
+                IllegalArgumentException.class, () -> buildIntent(null, context));
+        Assertions.assertTrue(collision.getMessage().contains("would grant a PREFIXED ACL on 'merchandising.inventory.stock-'"));
+        Assertions.assertTrue(collision.getMessage().contains("merchandising.inventory.stock-movement.event.avro.v0"));
+    }
+
+    @Test
+    public void test_streams_application_id_sharing_a_dot_separated_stem_with_channels_is_not_a_collision() throws Exception {
+        // The realistic case: application.id equals the service prefix and every channel address
+        // continues with '.', so the granted 'merchandising.inventory.inventory-adjustment-' prefix
+        // matches none of them.
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+        api.model().put("x-kafka-streams-applications", new LinkedHashMap<>(Map.of(
+                "merchandising.inventory.inventory-adjustment", new LinkedHashMap<>(Map.of(
+                        "x-principal", "merchandising.inventory.inventory-adjustment")))));
+
+        context = buildIntent("staging", context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+
+        Assertions.assertEquals(7, intent.acls.stream()
+                .filter(a -> "TOPIC".equals(a.resourceType) && "PREFIXED".equals(a.patternType))
+                .peek(a -> Assertions.assertEquals("merchandising.inventory.inventory-adjustment-", a.kafkaResourceName))
+                .count());
+    }
+
+    @Test
+    public void test_streams_unprefixed_extension_is_supported() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_STREAMS);
+        Model api = getApis(context).get(0);
+        api.model().put("kafka-streams-applications", api.model().remove("x-kafka-streams-applications"));
+
+        context = buildIntent(null, context);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+
+        Assertions.assertEquals(7, intent.acls.stream()
+                .filter(a -> "TOPIC".equals(a.resourceType) && "PREFIXED".equals(a.patternType)).count());
+    }
+
+    @Test
+    public void test_streams_overlapping_application_namespaces_fail_generation() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_STREAMS);
+        Model api = getApis(context).get(0);
+
+        // 'merchandising...streams-app-' also matches every internal topic of the nested application,
+        // so the first application could delete the second one's changelog topics.
+        String nestedApplicationId = STREAMS_APPLICATION_ID + "-rebuild";
+        streamsApplications(context).put(nestedApplicationId, new LinkedHashMap<>(Map.of(
+                "x-principal", "merchandising.inventory.inventory-adjustment")));
+        addReceiveOperation(api, "processStockEventsRebuild", nestedApplicationId);
+
+        IllegalArgumentException overlap = Assertions.assertThrows(
+                IllegalArgumentException.class, () -> buildIntent(null, context));
+        Assertions.assertTrue(overlap.getMessage().contains("internal topic namespace"));
+        Assertions.assertTrue(overlap.getMessage().contains(nestedApplicationId + "-"));
+        Assertions.assertTrue(overlap.getMessage().contains("Create/Alter/Delete"));
+    }
+
+    @Test
+    public void test_streams_prefix_covering_a_generated_retry_topic_fails_generation() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_STREAMS);
+        Model api = getApis(context).get(0);
+
+        // A '-' separator after ${groupId} puts the generated retry/DLQ topics inside the
+        // application's own internal topic namespace, where Kafka Streams believes it owns every name.
+        Map<String, Object> receiveBinding = JSONPath.get(api, "$.operations['processStockEvents'].bindings.kafka");
+        receiveBinding.put("x-error-topics", new LinkedHashMap<>(Map.of(
+                "addressTemplate", "${groupId}-${suffix}",
+                "retryTopics", 1,
+                "retry", new LinkedHashMap<>(Map.of("partitions", 1)),
+                "dlq", new LinkedHashMap<>(Map.of("partitions", 1)))));
+
+        IllegalArgumentException overlap = Assertions.assertThrows(
+                IllegalArgumentException.class, () -> buildIntent(null, context));
+        Assertions.assertTrue(overlap.getMessage().contains("which also matches topic '"));
+        Assertions.assertTrue(overlap.getMessage().contains(STREAMS_APPLICATION_ID + "-retry-0")
+                        || overlap.getMessage().contains(STREAMS_APPLICATION_ID + "-dlq"),
+                "a generated retry/DLQ topic must be reported: " + overlap.getMessage());
+    }
+
+    @Test
+    public void test_streams_prefix_overlapping_an_unresolved_channel_template_fails_generation() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_STREAMS);
+        Model api = getApis(context).get(0);
+
+        // Unbounded parameter: no concrete address is known, but 'merchandising.inventory.stock-{tenant}'
+        // can expand to names inside a 'merchandising.inventory.stock-' namespace.
+        Map<String, Object> channel = JSONPath.get(api, "$.channels['stock-movement-event']");
+        channel.put("address", "merchandising.inventory.stock-{tenant}");
+        channel.put("parameters", new LinkedHashMap<>(Map.of("tenant", new LinkedHashMap<>())));
+
+        String collidingApplicationId = "merchandising.inventory.stock";
+        streamsApplications(context).put(collidingApplicationId, new LinkedHashMap<>(Map.of(
+                "x-principal", "merchandising.inventory.inventory-adjustment")));
+        addReceiveOperation(api, "processStockEventsTenant", collidingApplicationId);
+
+        IllegalArgumentException overlap = Assertions.assertThrows(
+                IllegalArgumentException.class, () -> buildIntent(null, context));
+        Assertions.assertTrue(overlap.getMessage().contains("unresolved channel address"));
+        Assertions.assertTrue(overlap.getMessage().contains("merchandising.inventory.stock-{tenant}"));
+    }
+
+    @Test
+    public void test_streams_application_declared_identically_in_two_specs_generates_one_set_of_grants() throws Exception {
+        Map<String, Object> context = loadAndBuildIntent(null, ASYNCAPI_STREAMS, ASYNCAPI_STREAMS_SECOND);
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+
+        Assertions.assertEquals(2, intent.topics.size(), "each spec contributes its own source channel topic");
+        Assertions.assertEquals(7, intent.acls.stream()
+                        .filter(a -> "TOPIC".equals(a.resourceType) && "PREFIXED".equals(a.patternType)).count(),
+                "the same application declared in both specs yields one set of internal topic grants");
+        Assertions.assertEquals(1, intent.principals.size());
+    }
+
+    @Test
+    public void test_streams_application_declared_with_conflicting_values_across_specs_fails_generation() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_STREAMS, ASYNCAPI_STREAMS_SECOND);
+        streamsApplication(context, 1, STREAMS_APPLICATION_ID).put("x-principal", "merchandising.inventory.someone-else");
+
+        IllegalArgumentException conflict = Assertions.assertThrows(
+                IllegalArgumentException.class, () -> buildIntent(null, context));
+        Assertions.assertTrue(conflict.getMessage().contains("conflicting values in more than one spec"));
+        Assertions.assertTrue(conflict.getMessage().contains(STREAMS_APPLICATION_ID));
+    }
+
+    private Map<String, Object> streamsApplications(Map<String, Object> context) {
+        return streamsApplications(context, 0);
+    }
+
+    private Map<String, Object> streamsApplications(Map<String, Object> context, int specIndex) {
+        return JSONPath.get(getApis(context).get(specIndex), "$.x-kafka-streams-applications");
+    }
+
+    private Map<String, Object> streamsApplication(Map<String, Object> context, String applicationId) {
+        return streamsApplication(context, 0, applicationId);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> streamsApplication(Map<String, Object> context, int specIndex, String applicationId) {
+        return (Map<String, Object>) streamsApplications(context, specIndex).get(applicationId);
+    }
+
+    /** Applies an invalid mutation to the sole streams application and expects generation to fail. */
+    private IllegalArgumentException assertInvalidStreamsApplication(Consumer<Map<String, Object>> invalidate) throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_STREAMS);
+        invalidate.accept(streamsApplication(context, STREAMS_APPLICATION_ID));
+        return Assertions.assertThrows(IllegalArgumentException.class, () -> buildIntent(null, context));
+    }
+
+    /** Adds a second receive operation on the existing channel, so {@code groupId} resolves in-scope. */
+    @SuppressWarnings("unchecked")
+    private void addReceiveOperation(Model api, String operationId, String groupId) {
+        Map<String, Object> operations = JSONPath.get(api, "$.operations");
+        Map<String, Object> channel = JSONPath.get(api, "$.channels['stock-movement-event']");
+        operations.put(operationId, new LinkedHashMap<>(Map.of(
+                "action", "receive",
+                "channel", channel,
+                "bindings", Map.of("kafka", Map.of(
+                        "x-principal", "merchandising.inventory.inventory-adjustment",
+                        "x-groupId", groupId)))));
     }
 
     // -------------------------------------------------------------------------

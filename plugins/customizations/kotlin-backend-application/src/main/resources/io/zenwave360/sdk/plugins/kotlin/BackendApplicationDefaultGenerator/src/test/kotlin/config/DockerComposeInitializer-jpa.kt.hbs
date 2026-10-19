@@ -34,7 +34,7 @@ class DockerComposeInitializer : ApplicationContextInitializer<ConfigurableAppli
     companion object {
         private const val DOCKER_COMPOSE_FILE = "./docker-compose.yml"
         private val SERVICES = listOf(
-            Service("postgresql", 5432, "DATASOURCE_URL", "jdbc:postgresql://%s:%s/DATABASENAME"),
+            Service("postgresql", 5432, "DATASOURCE_URL", "jdbc:postgresql://%s:%s/app"),
             Service("kafka", 9092, "KAFKA_BOOTSTRAP_SERVERS", "%s:%s")
         )
 

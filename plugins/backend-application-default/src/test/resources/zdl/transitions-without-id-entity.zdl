@@ -1,0 +1,47 @@
+config {
+    title "Inventory (transitions without id)"
+    basePackage "io.zenwave360.example.inventory"
+    persistence jpa
+}
+
+@aggregate
+@lifecycle(field: status, initial: RESERVED)
+entity StockReservation {
+    orderId String required
+    sku String required
+    quantity Integer required
+    status ReservationStatus
+}
+
+enum ReservationStatus {
+    RESERVED, CONFIRMED, RELEASED
+}
+
+input ReleaseStockInput {
+    orderId String required
+    reason String
+}
+
+event StockReleased {
+    orderId String
+}
+
+service InventoryService for (StockReservation) {
+
+    // no id: array, single, optional and no-input variants
+    @transition(from: [RESERVED, CONFIRMED], to: RELEASED)
+    releaseStock(ReleaseStockInput) StockReservation[] withEvents StockReleased
+
+    @transition(from: RESERVED, to: CONFIRMED)
+    confirmOne(ReleaseStockInput) StockReservation
+
+    @transition(from: RESERVED, to: CONFIRMED)
+    confirmMaybe(ReleaseStockInput) StockReservation?
+
+    // with id: must be generated exactly as before
+    @transition(from: [RESERVED, CONFIRMED], to: RELEASED)
+    releaseReservation(id, ReleaseStockInput) StockReservation withEvents StockReleased
+
+    @transition(from: RESERVED, to: CONFIRMED)
+    confirmReservation(id) StockReservation
+}

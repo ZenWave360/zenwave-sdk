@@ -1,0 +1,14 @@
+schema: spec-driven
+
+# Shared planning store, declared as a READ-ONLY reference.
+# Specs and changes that span repos live in zenwave-specs, not here.
+#
+# `references:` = read-only lookup. Deliberately NOT `store:`, which would
+# redirect where new work lands (this repo would stop being its own root).
+#
+# `remote:` is recorded so a fresh clone knows where to fetch the store from:
+#   git clone https://github.com/ZenWave360/zenwave-specs.git
+#   openspec store register <path>
+references:
+  - id: zenwave-specs
+    remote: https://github.com/ZenWave360/zenwave-specs.git

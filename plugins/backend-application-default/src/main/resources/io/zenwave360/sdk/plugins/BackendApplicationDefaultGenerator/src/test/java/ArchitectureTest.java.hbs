@@ -29,7 +29,7 @@ class ArchitectureTest {
     static final ArchRule respectsLayersForHexagonalArchitecture = layeredArchitecture()
         .consideringOnlyDependenciesInAnyPackage("{{layout.moduleBasePackage}}..")
         .layer("Any").definedBy("..")
-        .layer("Config").definedBy("..config..")
+        .optionalLayer("Config").definedBy("..config..")
         .layer("Core").definedBy("..core..")
         .layer("Domain").definedBy("..core.domain..")
         .optionalLayer("Models").definedBy("..core.domain..", "..core.inbound.dtos..")

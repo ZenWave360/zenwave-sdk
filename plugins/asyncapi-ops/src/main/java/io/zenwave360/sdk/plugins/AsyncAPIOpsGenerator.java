@@ -103,7 +103,13 @@ public class AsyncAPIOpsGenerator extends Generator {
         }
         ClassLoader projectClassLoader = configuration != null ? configuration.getProjectClassLoader() : null;
         AsyncAPIOpsAvroBundler bundler = new AsyncAPIOpsAvroBundler(avroImports, authentication, projectClassLoader);
-        return intent.schemas.stream()
+        // Channel address parameter expansion produces one subject per resolved address, all
+        // referencing the same bundled .avsc file: bundle and write each file only once.
+        var schemasByTargetFile = new java.util.LinkedHashMap<String, AsyncAPIOpsIntent.SchemaIntent>();
+        for (AsyncAPIOpsIntent.SchemaIntent schema : intent.schemas) {
+            schemasByTargetFile.putIfAbsent(schema.schemaFile + "|" + schema.sourceSchemaUri, schema);
+        }
+        return schemasByTargetFile.values().stream()
                 .map(bundler::bundle)
                 .toList();
     }

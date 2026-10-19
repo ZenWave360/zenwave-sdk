@@ -13,9 +13,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.zenwave360.manifest</groupId>
-            <artifactId>manifest-core-jvm</artifactId>
-            <version>${manifest-core.version}</version>
+            <groupId>io.zenwave360.architecture</groupId>
+            <artifactId>architecture-manifest-jvm</artifactId>
+            <version>${architecture-manifest.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jetbrains.kotlin</groupId>
@@ -24,9 +24,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>io.zenwave360.manifest</groupId>
-            <artifactId>manifest-graph-jvm</artifactId>
-            <version>${manifest-core.version}</version>
+            <groupId>io.zenwave360.architecture</groupId>
+            <artifactId>architecture-graph-jvm</artifactId>
+            <version>${architecture-manifest.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

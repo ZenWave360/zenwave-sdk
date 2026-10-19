@@ -96,4 +96,46 @@ class ServiceMethodBodyPlannerTest {
         Assertions.assertEquals(MethodBodyCase.ASYNC_DELEGATE, async.bodyCase());
         Assertions.assertEquals(MethodBodyCase.FALLBACK_TODO, fallback.bodyCase());
     }
+
+    private static final Map<String, Object> LIFECYCLE_ENTITY = Map.of("name", "StockReservation", "lifecycle", Map.of("field", "status"));
+
+    private static Map<String, Object> idlessTransition(Map<String, Object> extra) {
+        var method = new java.util.HashMap<String, Object>(extra);
+        method.put("transition", Map.of("from", List.of("RESERVED"), "to", "RELEASED"));
+        return method;
+    }
+
+    @Test
+    void planEntityMethodBody_idlessFromTransitionIsClassifiedAheadOfListAndNewInstanceCases() {
+        var array = ServiceMethodBodyPlanner.planEntityMethodBody(
+                idlessTransition(Map.of("parameter", "ReleaseStockInput", "returnType", "StockReservation", "returnTypeIsArray", true)),
+                LIFECYCLE_ENTITY, LIFECYCLE_ENTITY);
+        var single = ServiceMethodBodyPlanner.planEntityMethodBody(
+                idlessTransition(Map.of("parameter", "ReleaseStockInput", "returnType", "StockReservation")),
+                LIFECYCLE_ENTITY, LIFECYCLE_ENTITY);
+        var optional = ServiceMethodBodyPlanner.planEntityMethodBody(
+                idlessTransition(Map.of("parameter", "ReleaseStockInput", "returnType", "StockReservation", "returnTypeIsOptional", true)),
+                LIFECYCLE_ENTITY, LIFECYCLE_ENTITY);
+        var voidReturn = ServiceMethodBodyPlanner.planEntityMethodBody(
+                idlessTransition(Map.of("parameter", "ReleaseStockInput")), LIFECYCLE_ENTITY, null);
+
+        Assertions.assertEquals(MethodBodyCase.ENTITY_TRANSITION_LOOKUP_LIST, array.bodyCase());
+        Assertions.assertEquals(MethodBodyCase.ENTITY_TRANSITION_LOOKUP_REQUIRED, single.bodyCase());
+        Assertions.assertEquals(MethodBodyCase.ENTITY_TRANSITION_LOOKUP_OPTIONAL, optional.bodyCase());
+        Assertions.assertEquals(MethodBodyCase.ENTITY_TRANSITION_LOOKUP_LIST, voidReturn.bodyCase());
+        Assertions.assertTrue(array.transitionDriven());
+    }
+
+    @Test
+    void planEntityMethodBody_transitionsWithIdOrWithoutFromKeepTheirCases() {
+        var withId = ServiceMethodBodyPlanner.planEntityMethodBody(
+                idlessTransition(Map.of("paramId", "id", "parameter", "ReleaseStockInput", "returnType", "StockReservation")),
+                LIFECYCLE_ENTITY, LIFECYCLE_ENTITY);
+        var onlyTo = ServiceMethodBodyPlanner.planEntityMethodBody(
+                Map.of("returnType", "StockReservation", "returnTypeIsArray", true, "transition", Map.of("to", "RELEASED")),
+                LIFECYCLE_ENTITY, LIFECYCLE_ENTITY);
+
+        Assertions.assertEquals(MethodBodyCase.ENTITY_LIFECYCLE_UPDATE_REQUIRED, withId.bodyCase());
+        Assertions.assertEquals(MethodBodyCase.ENTITY_LIST, onlyTo.bodyCase());
+    }
 }

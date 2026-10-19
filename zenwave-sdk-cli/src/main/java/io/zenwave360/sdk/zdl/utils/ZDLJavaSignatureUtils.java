@@ -121,6 +121,15 @@ public class ZDLJavaSignatureUtils {
     }
 
     public static String kotlinMethodParametersSignature(String artifactType, String idJavaType, Map method, Map zdl) {
+        return kotlinMethodParametersSignature(artifactType, idJavaType, method, zdl, false);
+    }
+
+    public static String kotlinNullableMethodParametersSignature(String artifactType, String idJavaType, Map method, Map zdl) {
+        return kotlinMethodParametersSignature(artifactType, idJavaType, method, zdl, true);
+    }
+
+    private static String kotlinMethodParametersSignature(String artifactType, String idJavaType, Map method, Map zdl,
+            boolean nullable) {
         var params = new ArrayList<String>();
         var javaServiceMethod = (JavaZdlModel.ServiceMethod) method.get("javaServiceMethod");
         for (var parameter : javaServiceMethod.parameters()) {
@@ -132,7 +141,8 @@ public class ZDLJavaSignatureUtils {
                 type = "List<" + type + ">";
             }
             var annotations = annotations(parameter.annotations(), artifactType);
-            params.add((annotations + " " + parameter.name() + ": " + type + (parameter.isOptional() ? "?" : "")).trim());
+            params.add((annotations + " " + parameter.name() + ": " + type
+                    + (nullable || parameter.isOptional() ? "?" : "")).trim());
         }
         return StringUtils.join(params, ", ").trim();
     }

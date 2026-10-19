@@ -1,14 +1,14 @@
 package io.zenwave360.sdk.plugins;
 
-import io.zenwave360.manifest.ManifestService;
-import io.zenwave360.manifest.ZenWaveManifest;
-import io.zenwave360.manifest.graph.ArchitectureBindingRole;
-import io.zenwave360.manifest.graph.ArchitectureEdge;
-import io.zenwave360.manifest.graph.ArchitectureGraph;
-import io.zenwave360.manifest.graph.ArchitectureGraphResult;
-import io.zenwave360.manifest.graph.ArchitectureNode;
-import io.zenwave360.manifest.graph.ArchitectureNodeKind;
-import io.zenwave360.manifest.graph.ArchitectureOperationBinding;
+import io.zenwave360.architecture.manifest.ManifestService;
+import io.zenwave360.architecture.manifest.ZenWaveManifest;
+import io.zenwave360.architecture.graph.ArchitectureBindingRole;
+import io.zenwave360.architecture.graph.ArchitectureEdge;
+import io.zenwave360.architecture.graph.ArchitectureGraph;
+import io.zenwave360.architecture.graph.ArchitectureGraphResult;
+import io.zenwave360.architecture.graph.ArchitectureNode;
+import io.zenwave360.architecture.graph.ArchitectureNodeKind;
+import io.zenwave360.architecture.graph.ArchitectureOperationBinding;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.processors.Processor;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/** Reconciles catalog resources exclusively through validated manifest-graph identities. */
+/** Reconciles catalog resources exclusively through validated architecture-graph identities. */
 public class EventCatalogOperationProcessor implements Processor {
 
     private final Logger log = LoggerFactory.getLogger(getClass());

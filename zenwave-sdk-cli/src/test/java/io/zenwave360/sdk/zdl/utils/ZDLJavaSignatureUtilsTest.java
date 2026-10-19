@@ -92,6 +92,15 @@ public class ZDLJavaSignatureUtilsTest {
     }
 
     @Test
+    void nullableMethodParametersSignatureWithNaturalIdsAndParameter_kotlin() throws IOException {
+        var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/natural-ids.zdl");
+        var method = JSONPath.get(model, "$.services.CustomerService.methods.updateCustomer", Map.of());
+        var signature = ZDLJavaSignatureUtils.kotlinNullableMethodParametersSignature(
+                "application.events-mapper", "String", method, model);
+        Assertions.assertEquals("customerId: Long?, anotherId: String?, input: Customer?", signature);
+    }
+
+    @Test
     void methodParametersSignatureWithInlineParameter_kotlin() throws IOException {
         var model = loadZDL("classpath:io/zenwave360/sdk/resources/zdl/customer-address.zdl");
         var method = JSONPath.get(model, "$.services.CustomerService.methods.addCustomerAddress", Map.of());

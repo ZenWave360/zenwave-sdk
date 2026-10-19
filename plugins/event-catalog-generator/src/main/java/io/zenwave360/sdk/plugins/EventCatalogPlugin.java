@@ -18,7 +18,7 @@ public class EventCatalogPlugin extends Plugin {
     // 3 = EventCatalogZdlProcessor        — enriches services with entities
     // 4 = EventCatalogOperationProcessor  — reconciles logical operations and transport bindings
     // 5 = EventCatalogConsumerProcessor   — resolves declared consumer artifacts and operations
-    // 6 = EventCatalogZflProcessor         — projects manifest-graph ZFL flows into EventCatalog
+    // 6 = EventCatalogZflProcessor         — projects architecture-graph ZFL flows into EventCatalog
     // 7 = EventCatalogGenerator           — generates MDX pages
     // 8 = EventCatalogFileWriter          — cleans output, versions service pages, writes files
 

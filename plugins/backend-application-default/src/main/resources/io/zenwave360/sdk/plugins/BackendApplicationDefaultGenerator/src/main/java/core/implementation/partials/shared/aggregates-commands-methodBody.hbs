@@ -7,6 +7,9 @@
         {{~else}}
     var {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.find{{aggregateCommand.aggregate.className}}ById({{method.paramId}}).orElseThrow();
         {{~/if}}
+    {{~else if aggregateCommand.command.transition.from}}
+    // TODO CUSTOM_REQUIRED: load the {{aggregateCommand.aggregate.className}} this transition applies to{{#if method.parameter}}, e.g. by a correlation key in the input{{/if}}
+    var {{asInstanceName aggregateCommand.aggregate.className}} = Optional.<{{aggregateCommand.aggregate.className}}>empty().orElseThrow();
     {{~else}}
     var {{asInstanceName aggregateCommand.aggregate.className}} = new {{aggregateCommand.aggregate.className}}();
     {{~/if}}
@@ -60,6 +63,9 @@
         {{~else}}
     var {{asInstanceName aggregateCommand.aggregate.className}} = {{aggregateCommand.entity.instanceName}}Repository.find{{aggregateCommand.aggregate.className}}ById({{method.paramId}}).orElseThrow();
         {{~/if}}
+    {{~else if aggregateCommand.command.transition.from}}
+    // TODO CUSTOM_REQUIRED: load the {{aggregateCommand.aggregate.className}} this transition applies to{{#if method.parameter}}, e.g. by a correlation key in the input{{/if}}
+    var {{asInstanceName aggregateCommand.aggregate.className}} = Optional.<{{aggregateCommand.aggregate.className}}>empty().orElseThrow();
     {{~else}}
     var {{asInstanceName aggregateCommand.aggregate.className}} = new {{aggregateCommand.aggregate.className}}();
     {{~/if}}

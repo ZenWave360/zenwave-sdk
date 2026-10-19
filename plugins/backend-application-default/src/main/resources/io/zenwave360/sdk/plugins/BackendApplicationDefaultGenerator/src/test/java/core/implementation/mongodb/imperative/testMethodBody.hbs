@@ -17,8 +17,13 @@
         {{~/each}}
         // assertTrue({{entity.instanceName}}Repository.containsKey(id));
         var {{entity.instanceName}} = {{serviceInstance}}.update{{entity.className}}({{idParamsCallSignature method}}, input);
+        {{~#if method.returnTypeIsOptional}}
         assertTrue({{entity.instanceName}}.isPresent());
         assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}.get()));
+        {{~else}}
+        assertNotNull({{entity.instanceName}});
+        assertTrue({{entity.instanceName}}Repository.containsEntity({{entity.instanceName}}));
+        {{~/if}}
     {{~else if (isCrudMethod 'list' method=method entity=entity) }}
         // var results = {{serviceInstance}}.list{{entity.classNamePlural}}(PageRequest.of(0, 10));
         // assertNotNull(results);

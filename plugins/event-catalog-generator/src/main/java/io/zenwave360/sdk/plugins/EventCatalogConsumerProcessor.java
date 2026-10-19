@@ -1,10 +1,10 @@
 package io.zenwave360.sdk.plugins;
 
-import io.zenwave360.manifest.ApiConsumptionMatch;
-import io.zenwave360.manifest.ApiServiceConsumption;
-import io.zenwave360.manifest.AsyncApiAction;
-import io.zenwave360.manifest.LegacyClientMatch;
-import io.zenwave360.manifest.ManifestApiConsumptions;
+import io.zenwave360.architecture.manifest.ApiConsumptionMatch;
+import io.zenwave360.architecture.manifest.ApiServiceConsumption;
+import io.zenwave360.architecture.manifest.AsyncApiAction;
+import io.zenwave360.architecture.manifest.LegacyClientMatch;
+import io.zenwave360.architecture.manifest.ManifestApiConsumptions;
 import io.zenwave360.sdk.processors.Processor;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/** Projects typed manifest-core API consumption evidence into the EventCatalog view model. */
+/** Projects typed architecture-manifest API consumption evidence into the EventCatalog view model. */
 public class EventCatalogConsumerProcessor implements Processor {
 
     @Override

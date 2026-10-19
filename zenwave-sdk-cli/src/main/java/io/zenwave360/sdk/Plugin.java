@@ -30,7 +30,9 @@ public class Plugin {
     @DocumentedOption(description = "ZDL file to parse")
     public String zdlFile;
 
-    @DocumentedOption(description = "ZDL files to parse (comma separated)")
+    /** @deprecated joining several ZDL files into one model is deprecated; use {@link #zdlFile}. */
+    @Deprecated
+    @DocumentedOption(description = "DEPRECATED: ZDL files joined into one model (comma separated). Use zdlFile and reference other models with 'apis { zdl ... }'")
     public List<String> zdlFiles;
 
     @DocumentedOption(description = "API Spec file to parse")
@@ -169,6 +171,8 @@ public class Plugin {
         return this;
     }
 
+    /** @deprecated joining several ZDL files into one model is deprecated; use {@link #withZdlFile(String)}. */
+    @Deprecated
     public Plugin withZdlFiles(List<String> zdlFiles) {
         if (zdlFiles == null) {
             return this;

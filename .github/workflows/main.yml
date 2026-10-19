@@ -24,6 +24,7 @@ jobs:
         ./plugins/jdl-to-asyncapi/target/site/jacoco/jacoco.csv
         ./plugins/zdl-to-asyncapi/target/site/jacoco/jacoco.csv
         ./plugins/zdl-to-markdown/target/site/jacoco/jacoco.csv
+        ./plugins/dsl-docs/target/site/jacoco/jacoco.csv
         ./plugins/openapi-spring-webtestclient/target/site/jacoco/jacoco.csv
         ./plugins/openapi-karate/target/site/jacoco/jacoco.csv
         ./plugins/asyncapi-ops/target/site/jacoco/jacoco.csv

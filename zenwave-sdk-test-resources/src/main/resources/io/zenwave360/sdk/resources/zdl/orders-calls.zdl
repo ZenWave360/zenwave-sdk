@@ -1,0 +1,21 @@
+config {
+    basePackage "io.zenwave360.example.orders"
+}
+
+apis {
+    zdl client CatalogInventoryZdl "inventory-calls.zdl"
+}
+
+@aggregate
+entity Order {
+    orderId String
+}
+
+input PlaceOrderInput {
+    orderId String
+}
+
+service OrdersService for (Order) {
+    @calls(zdl: CatalogInventoryZdl, command: InventoryService.reserveStock)
+    placeOrder(PlaceOrderInput) Order
+}

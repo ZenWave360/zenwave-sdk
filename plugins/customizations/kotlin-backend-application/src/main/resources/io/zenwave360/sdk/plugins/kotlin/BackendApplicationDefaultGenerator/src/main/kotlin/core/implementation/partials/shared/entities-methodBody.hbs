@@ -4,6 +4,71 @@
 {{!-- @Async --}}
 {{~#if method.options.async}}
     {{#if method.returnType}}return CompletableFuture.completedFuture({{/if}} {{method.name}}Sync({{methodParametersCallSignature method}}){{#if method.returnType}}){{/if}}
+{{!-- from-transition without id: the entities are located by a developer-supplied lookup (never findAll / new instance) --}}
+{{~else if (and _entity method.transition.from (isFalsy method.paramId) method.returnType method.returnTypeIsOptional)}}
+    // TODO CUSTOM_REQUIRED: load the {{_entity.className}} this transition applies to{{#if method.parameter}}, e.g. by a correlation key in the input{{/if}}
+    val found{{_entity.className}}: {{_entity.className}}? = emptyList<{{_entity.className}}>().firstOrNull()
+    return found{{_entity.className}}
+        ?.let { existing{{_entity.className}} ->
+            {{~entityServiceTransitionsClassName _entity}}.{{transitionMethodName method}}(existing{{_entity.className}})
+            {{~#if method.parameter}}
+            {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
+            {{~/if}}
+			{{~#if method.transition.to}}
+			existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{method.transition.to}}
+            {{~/if}}
+            existing{{_entity.className}}
+        }
+        ?.let { {{_entity.instanceName}}Repository.save(it) }
+        {{~#if method.withEvents}}
+        ?.also {
+            {{~> (partial '../withEvents') varName='it' }}
+        }
+        {{~/if}}
+        {{~#unless (eq _entity.name method.returnType)}}
+        ?.let { {{asInstanceName service.name}}Mapper.as{{returnType}}(it) }
+        {{~/unless}}
+{{~else if (and _entity method.transition.from (isFalsy method.paramId) method.returnType (isFalsy method.returnTypeIsArray))}}
+    // TODO CUSTOM_REQUIRED: load the {{_entity.className}} this transition applies to{{#if method.parameter}}, e.g. by a correlation key in the input{{/if}}
+    val found{{_entity.className}}: {{_entity.className}}? = emptyList<{{_entity.className}}>().firstOrNull()
+    return found{{_entity.className}}
+        ?.let { existing{{_entity.className}} ->
+            {{~entityServiceTransitionsClassName _entity}}.{{transitionMethodName method}}(existing{{_entity.className}})
+            {{~#if method.parameter}}
+            {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
+            {{~/if}}
+			{{~#if method.transition.to}}
+			existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{method.transition.to}}
+            {{~/if}}
+            existing{{_entity.className}}
+        }
+        ?.let { {{_entity.instanceName}}Repository.save(it) }
+        {{~#if method.withEvents}}
+        ?.also {
+            {{~> (partial '../withEvents') varName='it' }}
+        }
+        {{~/if}}
+        {{~#unless (eq _entity.name method.returnType)}}
+        ?.let { {{asInstanceName service.name}}Mapper.as{{returnType}}(it) }
+        {{~/unless}}
+        ?: throw NoSuchElementException("{{_entity.className}} not found")
+{{~else if (and _entity method.transition.from (isFalsy method.paramId))}}
+    // TODO CUSTOM_REQUIRED: load the {{_entity.className}}(s) this transition applies to{{#if method.parameter}}, e.g. by a correlation key in the input{{/if}}
+    var {{_entity.instanceNamePlural}}: List<{{_entity.className}}> = emptyList()
+    {{_entity.instanceNamePlural}}.forEach { existing{{_entity.className}} ->
+        {{~entityServiceTransitionsClassName _entity}}.{{transitionMethodName method}}(existing{{_entity.className}})
+        {{~#if method.parameter}}
+        {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
+        {{~/if}}
+		{{~#if method.transition.to}}
+		existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{method.transition.to}}
+        {{~/if}}
+    }
+    {{_entity.instanceNamePlural}} = {{_entity.instanceName}}Repository.saveAll({{_entity.instanceNamePlural}})
+    {{~> (partial '../withEvents') eachVar=_entity.instanceNamePlural }}
+    {{~#if method.returnType}}
+    return {{wrapWithMapper _entity}}
+    {{~/if}}
 {{!-- @delete --}}
 {{~else if (and _entity method.options.delete method.paramId (not (hasEntityLifecycle _entity)))}}
     log.debug("Request to delete {{_entity.className}} : {}", id)

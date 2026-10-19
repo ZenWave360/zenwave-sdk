@@ -15,21 +15,29 @@ import org.springframework.stereotype.Component
  */
 @Component
 {{annotate "adapter.event-listener"}}
-class {{listenerGroup.className}}(
+class {{listenerGroup.className}}{{#if listenerGroup.services}}(
 {{~#each listenerGroup.services as |listenerService|}}
     private val {{listenerService.instanceName}}: {{listenerService.name}}{{#unless @last}},{{/unless}}
 {{~/each}}
+){{/if}} {
 {{~#if listenerGroup.mapperBindings}}
-    {{~#if listenerGroup.services}},{{/if}}
-    private val mapper: {{listenerGroup.className}}Mapper
+
+    private val mapper: {{listenerGroup.className}}Mapper = {{listenerGroup.className}}Mapper.INSTANCE
 {{~/if}}
-) {
 {{~#each listenerGroup.bindings as |binding|}}
 
     @ApplicationModuleListener
     fun {{binding.listenerMethodName}}(event: {{binding.eventType}}) {
         {{~#if (eq binding.mode "MAPPER")}}
+        {{~#if binding.idPlaceholder}}
+        val {{binding.idParamName}}: {{binding.idJavaType}} = TODO("CUSTOM_REQUIRED: resolve the id for {{binding.eventName}}")
+        {{binding.serviceInstanceName}}.{{binding.methodName}}({{binding.idParamName}}, mapper.{{binding.mapperMethodName}}(event))
+        {{~else}}
         {{binding.serviceInstanceName}}.{{binding.methodName}}(mapper.{{binding.mapperMethodName}}(event))
+        {{~/if}}
+        {{~else if (eq binding.mode "ID_ONLY")}}
+        val {{binding.idParamName}}: {{binding.idJavaType}} = TODO("CUSTOM_REQUIRED: resolve the id for {{binding.eventName}}")
+        {{binding.serviceInstanceName}}.{{binding.methodName}}({{binding.idParamName}})
         {{~else}}
         // TODO CUSTOM_REQUIRED: map {{binding.eventName}} to the service method input and invoke {{binding.serviceInstanceName}}.{{binding.methodName}}(...)
         throw UnsupportedOperationException("Customize listener {{listenerGroup.className}}.{{binding.listenerMethodName}}")

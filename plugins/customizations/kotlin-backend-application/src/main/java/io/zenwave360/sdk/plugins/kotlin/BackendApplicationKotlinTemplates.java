@@ -45,6 +45,10 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
             || !(is(model, "aggregate") || is(model, "lifecycle") || ZDLFindUtils.isAggregateRoot(JSONPath.get(model, "zdl"), JSONPath.get(model, "$.entity.name")));
     protected Function<Map<String, Object>, Boolean> skipEntityId = (model) -> is(model, "embedded", "vo", "input", "abstract");
     protected Function<Map<String, Object>, Boolean> skipEntity = (model) -> is(model, "vo", "input");
+    protected Function<Map<String, Object>, Boolean> skipNonAggregateTestData = (model) ->
+            is(model, "embedded")
+                    || !(is(model, "aggregate") || is(model, "lifecycle")
+                    || ZDLFindUtils.isAggregateRoot(JSONPath.get(model, "zdl"), JSONPath.get(model, "$.entity.name")));
     protected Function<Map<String, Object>, Boolean> skipAggregateTransitions = (model) -> {
         var aggregate = (Map<String, Object>) model.get("aggregate");
         if (aggregate == null && model.get("aggregateRoot") != null) {
@@ -142,7 +146,7 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
                 layoutNames.infrastructureRepositoryPackage, "inmemory/InMemory{{capitalizeFirst persistence}}Repository.kt", KOTLIN, skipEntityRepository, true);
 
         this.addTemplate(this.entityTemplates, "src/test/resources", "data/{{persistence}}/entity/1.json",
-                "", "data/{{persistence}}/{{entity.name}}/1.json", JSON, skipEntity, true);
+                "", "data/{{persistence}}/{{entity.name}}/1.json", JSON, skipNonAggregateTestData, true);
 
         this.addTemplate(this.enumTemplates, "src/main/kotlin", "core/domain/common/DomainEnum.kt",
                 layoutNames.entitiesPackage, "{{enum.name}}.kt", KOTLIN, null, false);
@@ -163,16 +167,10 @@ public class BackendApplicationKotlinTemplates extends ProjectTemplates {
         this.addTemplate(this.listenersByApiTemplates, "src/main/kotlin", "adapters/events/EventListeners.kt",
                 layoutNames.adaptersEventsPackage, "{{listenerGroup.className}}.kt", KOTLIN, null, true);
         this.addTemplate(this.listenersByApiTemplates, "src/main/kotlin", "adapters/events/EventListenersMapper.kt",
-                layoutNames.adaptersEventsMappersPackage, "{{listenerGroup.className}}Mapper.kt", KOTLIN, skipListenerMappers, false);
-        this.addTemplate(this.listenersByApiTemplates, "src/main/kotlin", "adapters/events/EventListenersMapStructMapper.kt",
-                layoutNames.adaptersEventsMappersPackage, "{{listenerGroup.className}}MapStructMapper.kt", KOTLIN, skipListenerMappers, true);
+                layoutNames.adaptersEventsMappersPackage, "{{listenerGroup.className}}Mapper.kt", KOTLIN, skipListenerMappers, true);
         this.asyncApiAdapterByApiTemplates.add(new TemplateInput(
                 joinPath(getTemplatesFolder(), "src/main/kotlin", "adapters/events/asyncapi/EventsMapper.kt"),
                 "{{asyncapiAdaptersModulePrefix}}src/main/kotlin/" + layoutNames.adaptersEventsPackage + "/EventsMapper.kt",
-                KOTLIN));
-        this.asyncApiAdapterByApiTemplates.add(new TemplateInput(
-                joinPath(getTemplatesFolder(), "src/main/kotlin", "adapters/events/asyncapi/EventsMapStructMapper.kt"),
-                "{{asyncapiAdaptersModulePrefix}}src/main/kotlin/" + layoutNames.adaptersEventsPackage + "/EventsMapStructMapper.kt",
                 KOTLIN).withSkipOverwrite(true));
         this.asyncApiAdapterByChannelTemplates.add(new TemplateInput(
                 joinPath(getTemplatesFolder(), "src/main/kotlin", "adapters/events/asyncapi/imperative/ConsumerService.kt"),
