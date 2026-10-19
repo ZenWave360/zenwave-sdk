@@ -1,0 +1,7 @@
+components:
+  schemas:
+    Kind:
+      title: LeftKind
+      enum:
+        - LEFT_A
+        - LEFT_B

@@ -1,0 +1,16 @@
+components:
+  schemas:
+    Payload:
+      javaType: SamplePayload
+      type: object
+      properties:
+        widget:
+          $ref: '#/components/schemas/Widget'
+        gadget:
+          $ref: '../common/gadget.yml#/components/schemas/Gadget'
+    Widget:
+      javaType: Widget
+      type: object
+      properties:
+        colorKind:
+          $ref: '../common/color-kind.yml#/components/schemas/ColorKind'

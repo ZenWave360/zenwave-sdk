@@ -1,0 +1,13 @@
+## What's Changed
+
+Draft release notes for the upcoming **2.8.1** release.
+
+## Fixes
+
+### asyncapi-jsonschema2pojo: external `$ref` schemas generate shared top-level types
+
+Schemas referenced from external files (`$ref: './common.yml#/components/schemas/ColorKind'`) are now generated once as top-level classes in the model package and reused by every model that references them, the same way internal `#/components/schemas/...` references already worked. Previously each referencing class got its own inlined copy (for example a nested `enum ColorKind` in every class).
+
+This applies to every external schema reference, objects and enums alike. **Generated class names may change**: an externally referenced object that used to be inlined with a name derived from the property name (for example `address` → `Address`) is now named after the referenced schema (or its `title` when `useTitleAsClassname` is enabled, or its `javaType`).
+
+References are resolved by their absolute URI, so the same relative `$ref` (for example `./kind.yml#/...`) used from files in different folders now points to the right schema. Previously the first match by raw `$ref` string was used, which could give a property the wrong type.
