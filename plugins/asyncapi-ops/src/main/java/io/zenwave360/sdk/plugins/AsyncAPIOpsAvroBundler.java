@@ -64,9 +64,13 @@ class AsyncAPIOpsAvroBundler {
         return (Map<String, Object>) rootMap;
     }
 
-    private String getFullName(Map<String, Object> schema) {
+    /** Avro full name: a dotted name is already fully qualified and ignores {@code namespace}. */
+    static String getFullName(Map<String, Object> schema) {
         String name = (String) schema.get("name");
         String namespace = (String) schema.get("namespace");
+        if (name == null || name.contains(".")) {
+            return name;
+        }
         return namespace != null && !namespace.isBlank() ? namespace + "." + name : name;
     }
 

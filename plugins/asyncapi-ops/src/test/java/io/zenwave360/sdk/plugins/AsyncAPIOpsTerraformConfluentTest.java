@@ -14,6 +14,7 @@ public class AsyncAPIOpsTerraformConfluentTest {
     static final String ASYNCAPI_PROVIDER = "classpath:retail-domain-catalog/merchandising/inventory/inventory-adjustment/asyncapi.yml";
     static final String ASYNCAPI_CLIENT   = "classpath:retail-domain-catalog/merchandising/inventory/inventory-adjustment/asyncapi-client.yml";
     static final String ASYNCAPI_STREAMS = "classpath:kafka-streams/asyncapi-streams.yml";
+    static final String ASYNCAPI_SCHEMA_STRATEGIES = "classpath:schema-strategies/asyncapi.yml";
 
     @Test
     public void test_provider_generation() throws Exception {
@@ -43,7 +44,7 @@ public class AsyncAPIOpsTerraformConfluentTest {
         String schemas = Files.readString(Path.of(targetFolder + "/schemas.tf"));
         Assertions.assertTrue(schemas.contains("resource \"confluent_schema\""));
         Assertions.assertTrue(schemas.contains("resource \"confluent_subject_config\""));
-        Assertions.assertTrue(schemas.contains("subject_name = \"merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0-ReserveStockCommand-value\""));
+        Assertions.assertTrue(schemas.contains("subject_name = \"merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0-com.acme.merchandising.inventory.inventoryadjustment.commands.ReserveStockCommand-value\""));
         Assertions.assertTrue(schemas.contains("format       = \"AVRO\""));
         Assertions.assertTrue(schemas.contains("compatibility_level"));
         Assertions.assertTrue(new File(targetFolder + "/asyncapi/avro/ReserveStockCommand.avsc").exists());
@@ -63,6 +64,32 @@ public class AsyncAPIOpsTerraformConfluentTest {
         Assertions.assertTrue(acls.contains("role_name   = \"DeveloperRead\""));
         Assertions.assertTrue(acls.contains("${var.schema_registry_crn}/subject="));
         Assertions.assertTrue(acls.contains("permission    = \"ALLOW\""));
+    }
+
+    @Test
+    public void test_schema_lookup_strategies_and_compatibility_generation() throws Exception {
+        String targetFolder = "target/out/test_confluent_schema_strategies";
+        new MainGenerator().generate(new AsyncAPIOpsGeneratorPlugin()
+                .withApiFile(ASYNCAPI_SCHEMA_STRATEGIES)
+                .withOption("templates", "TerraformConfluent")
+                .withTargetFolder(targetFolder)
+                .withOption("skipFormatting", true));
+
+        String schemas = Files.readString(Path.of(targetFolder + "/schemas.tf"));
+        Assertions.assertTrue(schemas.contains("subject_name = \"strategy.topic-name-value\""));
+        Assertions.assertTrue(schemas.contains("subject_name = \"strategy.topic-record-com.acme.strategy.TopicRecordEvent-value\""));
+        Assertions.assertTrue(schemas.contains("subject_name = \"com.acme.records.RecordNameEvent\""));
+        Assertions.assertTrue(schemas.contains("subject_name = \"strategy.default-value\""));
+        Assertions.assertTrue(schemas.contains("subject_name         = \"strategy.topic-name-value\"\n  compatibility_level  = \"FORWARD\""));
+        Assertions.assertTrue(schemas.contains("subject_name         = \"strategy.topic-record-com.acme.strategy.TopicRecordEvent-value\"\n  compatibility_level  = \"FORWARD\""));
+        Assertions.assertTrue(schemas.contains("subject_name         = \"com.acme.records.RecordNameEvent\"\n  compatibility_level  = \"BACKWARD\""));
+        Assertions.assertTrue(schemas.contains("subject_name         = \"strategy.default-value\"\n  compatibility_level  = var.default_compatibility"));
+        // two messages on one topic resolve to one TopicNameStrategy subject, emitted once
+        Assertions.assertEquals(1, schemas.split("subject_name = \"strategy.topic-name-value\"", -1).length - 1);
+
+        String acls = Files.readString(Path.of(targetFolder + "/acls.tf"));
+        Assertions.assertEquals(1, acls.split("\\$\\{var.schema_registry_crn}/subject=strategy.topic-name-value\"", -1).length - 1);
+        Assertions.assertTrue(acls.contains("${var.schema_registry_crn}/subject=com.acme.records.RecordNameEvent"));
     }
 
     @Test

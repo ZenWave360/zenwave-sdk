@@ -1,0 +1,1 @@
+{"type":"record","name":"TopicNameEvent","fields":[{"name":"id","type":"string"}]}

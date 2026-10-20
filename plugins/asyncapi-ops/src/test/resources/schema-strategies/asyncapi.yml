@@ -1,0 +1,95 @@
+asyncapi: 3.0.0
+info:
+  title: Schema strategy test API
+  version: 1.0.0
+
+servers:
+  test:
+    host: kafka.example.com
+    protocol: kafka
+
+channels:
+  topic-name:
+    address: strategy.topic-name
+    messages:
+      TopicNameEvent:
+        payload:
+          schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+          schema:
+            $ref: ./avro/TopicNameEvent.avsc
+        bindings:
+          kafka:
+            schemaLookupStrategy: TopicNameStrategy
+            x-compatibility: FORWARD
+      SameSubjectEvent:
+        payload:
+          schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+          schema:
+            $ref: ./avro/TopicNameEvent.avsc
+        bindings:
+          kafka:
+            schemaLookupStrategy: TopicNameStrategy
+            x-compatibility: FORWARD
+  topic-record:
+    address: strategy.topic-record
+    messages:
+      TopicRecordEvent:
+        payload:
+          schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+          schema:
+            $ref: ./avro/TopicRecordEvent.avsc
+        bindings:
+          kafka:
+            schemaLookupStrategy: TopicRecordNameStrategy
+            compatibility: FORWARD
+  record-name:
+    address: strategy.record-name
+    messages:
+      RecordNameEvent:
+        payload:
+          schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+          schema:
+            $ref: ./avro/RecordNameEvent.avsc
+        bindings:
+          kafka:
+            schemaLookupStrategy: RecordNameStrategy
+            x-compatibility: BACKWARD
+            compatibility: FORWARD
+  default:
+    address: strategy.default
+    messages:
+      DefaultStrategyEvent:
+        payload:
+          schemaFormat: application/vnd.apache.avro+json;version=1.9.0
+          schema:
+            $ref: ./avro/DefaultStrategyEvent.avsc
+
+operations:
+  sendTopicName:
+    action: send
+    channel:
+      $ref: '#/channels/topic-name'
+    bindings:
+      kafka:
+        x-principal: schema-strategy-test
+  sendTopicRecord:
+    action: send
+    channel:
+      $ref: '#/channels/topic-record'
+    bindings:
+      kafka:
+        x-principal: schema-strategy-test
+  sendRecordName:
+    action: send
+    channel:
+      $ref: '#/channels/record-name'
+    bindings:
+      kafka:
+        x-principal: schema-strategy-test
+  sendDefault:
+    action: send
+    channel:
+      $ref: '#/channels/default'
+    bindings:
+      kafka:
+        x-principal: schema-strategy-test

@@ -23,6 +23,7 @@ public class AsyncAPIOpsIntent {
     private final Set<String> roleBindingKeys = new LinkedHashSet<>();
     private final Set<String> principalNames = new LinkedHashSet<>();
     private final Map<String, String> principalNamesByResourceName = new LinkedHashMap<>();
+    private final Map<String, SchemaIntent> schemasBySubject = new LinkedHashMap<>();
 
     public void addPrincipal(String name, String resourceName) {
         String existingName = principalNamesByResourceName.putIfAbsent(resourceName, name);
@@ -63,6 +64,31 @@ public class AsyncAPIOpsIntent {
         }
     }
 
+    /**
+     * Adds one Schema Registry subject. Multiple messages may legitimately resolve to the same
+     * subject (for example with TopicNameStrategy), but that subject can have only one schema and
+     * compatibility configuration in the generated Terraform.
+     */
+    public void addSchema(SchemaIntent schema) {
+        SchemaIntent existing = schemasBySubject.putIfAbsent(schema.subject, schema);
+        if (existing == null) {
+            schemas.add(schema);
+            return;
+        }
+        if (!sameSchemaConfiguration(existing, schema)) {
+            throw new IllegalArgumentException("Schema Registry subject '" + schema.subject
+                    + "' resolves to conflicting schema definitions. Use TopicRecordNameStrategy "
+                    + "or RecordNameStrategy, or configure the messages with the same schema and compatibility.");
+        }
+    }
+
+    private boolean sameSchemaConfiguration(SchemaIntent left, SchemaIntent right) {
+        return java.util.Objects.equals(left.schemaType, right.schemaType)
+                && java.util.Objects.equals(left.compatibility, right.compatibility)
+                && java.util.Objects.equals(left.schemaFile, right.schemaFile)
+                && java.util.Objects.equals(left.sourceSchemaUri, right.sourceSchemaUri);
+    }
+
     public static class TopicIntent {
         /** Snake_case Terraform resource identifier */
         public String resourceName;
@@ -87,7 +113,7 @@ public class AsyncAPIOpsIntent {
     public static class SchemaIntent {
         /** Snake_case Terraform resource identifier */
         public String resourceName;
-        /** Schema Registry subject — TopicRecordNameStrategy: {topic}-{MessageName}-value */
+        /** Schema Registry subject resolved from the message Kafka schemaLookupStrategy. */
         public String subject;
         public String schemaType = "AVRO";
         /** BACKWARD, FORWARD, or null (template falls back to var.default_compatibility) */

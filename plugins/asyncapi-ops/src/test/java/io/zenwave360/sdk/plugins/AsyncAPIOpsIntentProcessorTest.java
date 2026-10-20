@@ -342,7 +342,7 @@ public class AsyncAPIOpsIntentProcessorTest {
                         && "Write".equals(a.operation)));
         Assertions.assertTrue(intent.roleBindings.stream().anyMatch(r ->
                 "DeveloperRead".equals(r.roleName)
-                        && r.crnPattern.contains("/subject=merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0-ReserveStockCommand-value")));
+                        && r.crnPattern.contains("/subject=merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0-com.acme.merchandising.inventory.inventoryadjustment.commands.ReserveStockCommand-value")));
     }
 
     @Test
@@ -540,21 +540,21 @@ public class AsyncAPIOpsIntentProcessorTest {
         AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
 
         AsyncAPIOpsIntent.SchemaIntent inlineSchema = intent.schemas.stream()
-                .filter(s -> s.subject.endsWith("ReserveStockCommand-value"))
+                .filter(s -> s.subject.endsWith("-InlineOnly-value"))
                 .findFirst()
                 .orElseThrow();
         Assertions.assertEquals("classpath:retail-domain-catalog/merchandising/inventory/inventory-adjustment/avro/InlineOnly.avsc", inlineSchema.sourceSchemaUri);
         Assertions.assertEquals("asyncapi/avro/InlineOnly.avsc", inlineSchema.schemaFile);
 
         AsyncAPIOpsIntent.SchemaIntent absoluteRefSchema = intent.schemas.stream()
-                .filter(s -> s.subject.endsWith("ReserveStockResponse-value"))
+                .filter(s -> s.subject.endsWith("-ReserveStockResponse-value"))
                 .findFirst()
                 .orElseThrow();
         Assertions.assertEquals("https://schemas.example.com/shared/ReserveStockResponse.avsc", absoluteRefSchema.sourceSchemaUri);
         Assertions.assertEquals("asyncapi/ReserveStockResponse.avsc", absoluteRefSchema.schemaFile);
 
         AsyncAPIOpsIntent.SchemaIntent missingSchema = intent.schemas.stream()
-                .filter(s -> s.subject.endsWith("InventoryAdjustedEvent-value"))
+                .filter(s -> s.subject.endsWith("-InventoryAdjustedEvent-value"))
                 .findFirst()
                 .orElseThrow();
         Assertions.assertNull(missingSchema.sourceSchemaUri);

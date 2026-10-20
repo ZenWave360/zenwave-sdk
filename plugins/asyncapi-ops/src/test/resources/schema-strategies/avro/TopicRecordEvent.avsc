@@ -1,0 +1,1 @@
+{"type":"record","name":"TopicRecordEvent","namespace":"com.acme.strategy","fields":[{"name":"id","type":"string"}]}
