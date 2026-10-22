@@ -314,6 +314,94 @@ public class AsyncApiJsonSchema2PojoGeneratorTest {
     }
 
     @Test
+    public void test_generator_generates_external_enum_as_shared_top_level_type() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:shared-enum.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.sharedenum");
+
+        new MainGenerator().generate(plugin);
+
+        String base = "target/zenwave630/src/main/java/io/example/sharedenum/";
+        String colorKind = FileUtils.readFileToString(new File(base + "ColorKind.java"), "UTF-8");
+        String widget = FileUtils.readFileToString(new File(base + "Widget.java"), "UTF-8");
+        String gadget = FileUtils.readFileToString(new File(base + "Gadget.java"), "UTF-8");
+
+        Assertions.assertTrue(colorKind.contains("enum ColorKind"));
+        Assertions.assertTrue(widget.contains("private ColorKind colorKind;"));
+        Assertions.assertTrue(gadget.contains("private ColorKind colorKind;"));
+        Assertions.assertFalse(widget.contains("enum ColorKind"));
+        Assertions.assertFalse(gadget.contains("enum ColorKind"));
+        Assertions.assertTrue(colorKind.contains("package io.example.sharedenum;"));
+    }
+
+    @Test
+    public void test_generator_generates_whole_file_ref_as_shared_top_level_type() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:whole-file-refs.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.wholefilerefs");
+
+        new MainGenerator().generate(plugin);
+
+        String base = "target/zenwave630/src/main/java/io/example/wholefilerefs/";
+        String shadeKind = FileUtils.readFileToString(new File(base + "ShadeKind.java"), "UTF-8");
+        String widget = FileUtils.readFileToString(new File(base + "Widget.java"), "UTF-8");
+        String gadget = FileUtils.readFileToString(new File(base + "Gadget.java"), "UTF-8");
+
+        Assertions.assertTrue(shadeKind.contains("enum ShadeKind"));
+        Assertions.assertTrue(widget.contains("private ShadeKind colorKind;"));
+        Assertions.assertTrue(gadget.contains("private ShadeKind colorKind;"));
+        Assertions.assertFalse(widget.contains("enum ColorKind"));
+        Assertions.assertFalse(gadget.contains("enum ColorKind"));
+    }
+
+    @Test
+    public void test_generator_resolves_same_relative_ref_from_different_folders() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:ambiguous-refs.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("jsonschema2pojo.useTitleAsClassname", "true")
+                .withOption("modelPackage", "io.example.ambiguousrefs");
+
+        new MainGenerator().generate(plugin);
+
+        String base = "target/zenwave630/src/main/java/io/example/ambiguousrefs/";
+        String leftPayload = FileUtils.readFileToString(new File(base + "LeftPayload.java"), "UTF-8");
+        String rightPayload = FileUtils.readFileToString(new File(base + "RightPayload.java"), "UTF-8");
+
+        Assertions.assertTrue(leftPayload.contains("private LeftKind kind;"));
+        Assertions.assertTrue(rightPayload.contains("private RightKind kind;"));
+        Assertions.assertTrue(FileUtils.readFileToString(new File(base + "LeftKind.java"), "UTF-8").contains("LEFT_A"));
+        Assertions.assertTrue(FileUtils.readFileToString(new File(base + "RightKind.java"), "UTF-8").contains("RIGHT_A"));
+    }
+
+    @Test
+    public void test_generator_inlines_different_external_schemas_with_clashing_class_names() throws Exception {
+        Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
+                .withApiFile("classpath:clashing-refs.yml")
+                .withTargetFolder("target/zenwave630")
+                .withOption("modelPackage", "io.example.clashingrefs");
+
+        new MainGenerator().generate(plugin);
+
+        String base = "target/zenwave630/src/main/java/io/example/clashingrefs/";
+        String kind = FileUtils.readFileToString(new File(base + "Kind.java"), "UTF-8");
+        String leftPayload = FileUtils.readFileToString(new File(base + "LeftPayload.java"), "UTF-8");
+        String rightPayload = FileUtils.readFileToString(new File(base + "RightPayload.java"), "UTF-8");
+
+        // first schema (LeftMessage sorts first) owns the shared top-level class
+        Assertions.assertTrue(kind.contains("LEFT_A"));
+        Assertions.assertFalse(kind.contains("RIGHT_A"));
+        Assertions.assertFalse(leftPayload.contains("enum Kind"));
+        // the clashing schema is inlined instead of reusing the wrong class
+        Assertions.assertTrue(rightPayload.contains("enum Kind"));
+        Assertions.assertTrue(rightPayload.contains("RIGHT_A"));
+        // different schemas from the same external file are distinct sources
+        Assertions.assertTrue(new File(base + "LeftOther.java").exists());
+    }
+
+    @Test
     public void test_generator_for_asyncapi_schemas() throws Exception {
         Plugin plugin = new AsyncApiJsonSchema2PojoPlugin()
                 .withApiFile("classpath:io/zenwave360/sdk/resources/asyncapi/v2/asyncapi-events.yml")

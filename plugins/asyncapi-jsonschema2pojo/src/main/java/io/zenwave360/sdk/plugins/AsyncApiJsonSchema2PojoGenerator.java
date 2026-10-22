@@ -72,6 +72,12 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
     private File targetSourceFolder;
 
+    /**
+     * Generated class FQN -> source it was generated from (javaType, resolved $ref URI or inline schema).
+     * Shared by schema roots and nested $ref schemas so two different schemas never silently map to the same class.
+     */
+    private Map<String, String> generatedClassSources = new LinkedHashMap<>();
+
     public String originalRefProperty = "x--original-\\$ref";
 
     public Model getApiModel(Map<String, Object> contextModel) {
@@ -107,7 +113,7 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
         var asyncapiVersion = JSONPath.get(apiModel, "$.asyncapi");
         var defaultSchemaFormat = AsyncApiProcessor.SchemaFormatType.ASYNCAPI_YAML.getSchemaFormat((String) asyncapiVersion);
         Set<String> generatedSchemaRoots = new LinkedHashSet<>();
-        Map<String, String> generatedClassFqns = new LinkedHashMap<>();
+        generatedClassSources = new LinkedHashMap<>();
 
         // Generate in a stable order so that, when two schema roots resolve to the same class
         // name, the winner is deterministic instead of depending on message hash-set ordering.
@@ -132,8 +138,8 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
                 String className = getClassName(schemaRoot);
                 String classFqn = getClassFqn(schemaRoot, className);
-                String previousSource = generatedClassFqns.putIfAbsent(classFqn, deduplicationKey);
-                if (previousSource != null) {
+                String previousSource = generatedClassSources.putIfAbsent(classFqn, deduplicationKey);
+                if (previousSource != null && !previousSource.equals(deduplicationKey)) {
                     log.warn("Skipping schema '{}': class {} was already generated from '{}'. "
                             + "Rename one of the schemas or set a distinct javaType to avoid the name clash.",
                             deduplicationKey, classFqn, previousSource);
@@ -203,14 +209,14 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
             return "javaType:" + javaType;
         }
 
+        $Ref ref = getOriginalRef(apiModel.getRefs(), schemaRoot.schema());
+        if (ref != null) {
+            return getRefSource(ref);
+        }
+
         Object originalRef = schemaRoot.schema().get("x--original-$ref");
         if (originalRef != null) {
             return "ref:" + originalRef;
-        }
-
-        $Ref ref = getOriginalRef(apiModel.getRefs(), schemaRoot.schema());
-        if (ref != null) {
-            return "ref:" + ref.getURI();
         }
         return "inline:" + schemaRoot.fallbackName();
     }
@@ -310,43 +316,132 @@ public class AsyncApiJsonSchema2PojoGenerator extends AbstractAsyncapiGenerator 
 
     protected String convertToJson(final Model apiModel, final JsonSchema2PojoConfiguration config, final Map<String, Object> payload, final String packageName) throws JsonProcessingException {
         Map<String, Object> payloadCopy = this.jsonMapper.convertValue(payload, Map.class);
-        populateJavaTypeFromRefsRecursively(apiModel, config, payloadCopy, packageName);
+        populateJavaTypeFromRefsRecursively(apiModel, config, payload, payloadCopy, packageName);
         return this.jsonMapper.writeValueAsString(payloadCopy);
     }
 
-    private void populateJavaTypeFromRefsRecursively(Model apiModel, JsonSchema2PojoConfiguration config, Object obj, String packageName) {
+    private void populateJavaTypeFromRefsRecursively(Model apiModel, JsonSchema2PojoConfiguration config, Object original, Object copy, String packageName) {
         var nameHelper = new NameHelper(config);
-        populateJavaTypeFromRefsRecursively(apiModel, nameHelper, obj, packageName);
+        populateJavaTypeFromRefsRecursively(apiModel, nameHelper, original, copy, packageName, true);
     }
 
-    private void populateJavaTypeFromRefsRecursively(Model apiModel, NameHelper nameHelper, Object obj, String packageName) {
-        if (obj instanceof Map) {
-            Map<String, Object> map = (Map<String, Object>) obj;
+    /**
+     * Walks the original (dereferenced) payload and its json copy side by side: the original keeps object identity,
+     * so the $ref each schema was resolved from (and its absolute URI) can be looked up reliably, while javaType is
+     * only written to the copy.
+     */
+    private void populateJavaTypeFromRefsRecursively(Model apiModel, NameHelper nameHelper, Object original, Object copy, String packageName, boolean root) {
+        if (copy instanceof Map) {
+            Map<String, Object> map = (Map<String, Object>) copy;
+            Map<String, Object> originalMap = original instanceof Map ? (Map<String, Object>) original : null;
 
             // Replace $ref and original ref with javaType (if not already present)
             if (!map.containsKey("javaType")) {
-                String refValue = JSONPath.getFirst(map, "$['" + originalRefProperty + "']", "$['$ref']");
-
-                if (refValue != null && refValue.startsWith("#/")) {
-                    String className = getRefClassName(apiModel, nameHelper, refValue);
+                String className = getRefClassName(apiModel, nameHelper, originalMap, map, root);
+                if (className != null && claimRefClassName(apiModel, originalMap, packageName + "." + className)) {
                     map.put("javaType", packageName + "." + className);
                 }
             }
             map.remove("x--original-$ref");
             map.remove("$ref");
 
-
             // Recursively process all values in the map
-            for (Object value : map.values()) {
-                populateJavaTypeFromRefsRecursively(apiModel, nameHelper, value, packageName);
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                Object originalValue = originalMap != null ? originalMap.get(entry.getKey()) : null;
+                populateJavaTypeFromRefsRecursively(apiModel, nameHelper, originalValue, entry.getValue(), packageName, false);
             }
 
-        } else if (obj instanceof List) {
-            List<Object> list = (List<Object>) obj;
-            for (Object item : list) {
-                populateJavaTypeFromRefsRecursively(apiModel, nameHelper, item, packageName);
+        } else if (copy instanceof List) {
+            List<Object> list = (List<Object>) copy;
+            List<Object> originalList = original instanceof List && ((List<?>) original).size() == list.size() ? (List<Object>) original : null;
+            for (int i = 0; i < list.size(); i++) {
+                populateJavaTypeFromRefsRecursively(apiModel, nameHelper, originalList != null ? originalList.get(i) : null, list.get(i), packageName, false);
             }
         }
+    }
+
+    /**
+     * Class name for a schema that was resolved from a $ref, or null if it should stay inline.
+     * Prefers the identity lookup of the original object (resolved absolute URI) and falls back to the
+     * string value of internal refs when the original object is not available.
+     */
+    private String getRefClassName(Model apiModel, NameHelper nameHelper, Map<String, Object> original, Map<String, Object> copy, boolean root) {
+        $Ref ref = original != null ? getOriginalRef(apiModel.getRefs(), original) : null;
+        if (ref != null) {
+            if (!isSharedRef(ref, root)) {
+                return null;
+            }
+            String schemaName = getRefSchemaName(ref);
+            try {
+                return getNormalizedClassName(nameHelper, schemaName, jsonMapper.valueToTree(original));
+            } catch (Exception e) {
+                log.debug("Falling back to legacy ref class naming for ref {}", ref.getURI(), e);
+                return getNormalizedClassName(nameHelper, schemaName, null);
+            }
+        }
+
+        String refValue = JSONPath.getFirst(copy, "$['" + originalRefProperty + "']", "$['$ref']");
+        if (refValue != null && refValue.startsWith("#/")) {
+            return getRefClassName(apiModel, nameHelper, refValue);
+        }
+        return null;
+    }
+
+    /**
+     * Registers the class a $ref schema is generated as. When a different schema already owns that class name,
+     * the schema is left inline (as if it had no $ref) instead of silently reusing the other schema's class.
+     */
+    private boolean claimRefClassName(Model apiModel, Map<String, Object> original, String classFqn) {
+        $Ref ref = original != null ? getOriginalRef(apiModel.getRefs(), original) : null;
+        if (ref == null) {
+            return true; // string fallback for internal refs, nothing reliable to compare against
+        }
+        String source = getRefSource(ref);
+        String previousSource = generatedClassSources.putIfAbsent(classFqn, source);
+        if (previousSource != null && !previousSource.equals(source)) {
+            log.warn("Inlining schema '{}': class {} was already generated from '{}'. "
+                    + "Rename one of the schemas or set a distinct javaType to avoid the name clash.",
+                    source, classFqn, previousSource);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Absolute location of the referenced schema: resolved file URI plus the json-pointer fragment.
+     */
+    private String getRefSource($Ref ref) {
+        String uri = String.valueOf(ref.getURI());
+        int fragmentIndex = ref.getRef().indexOf('#');
+        if (fragmentIndex >= 0 && !uri.contains("#")) {
+            uri = uri + ref.getRef().substring(fragmentIndex);
+        }
+        return "ref:" + uri;
+    }
+
+    /**
+     * Fragment refs ({@code file.yml#/components/schemas/X}) are always shared. Whole-file refs ({@code ./x.yml})
+     * are shared when nested, but a whole-file message payload keeps the class name chosen for the message.
+     */
+    private boolean isSharedRef($Ref ref, boolean root) {
+        return isFragmentRef(ref) || !root;
+    }
+
+    private boolean isFragmentRef($Ref ref) {
+        return ref.getRef().contains("#/");
+    }
+
+    /**
+     * Last json-pointer segment for fragment refs, file name without extension(s) for whole-file refs.
+     */
+    private String getRefSchemaName($Ref ref) {
+        String refValue = ref.getRef();
+        if (isFragmentRef(ref)) {
+            return refValue.substring(refValue.lastIndexOf("/") + 1);
+        }
+        String path = refValue.contains("#") ? refValue.substring(0, refValue.indexOf('#')) : refValue;
+        String fileName = path.substring(path.lastIndexOf('/') + 1);
+        return NamingUtils.asJavaTypeName(fileName.contains(".") ? fileName.substring(0, fileName.indexOf('.')) : fileName);
     }
 
     private String getRefClassName(Model apiModel, NameHelper nameHelper, String refValue) {

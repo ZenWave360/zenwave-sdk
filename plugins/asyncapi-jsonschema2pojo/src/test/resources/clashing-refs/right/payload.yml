@@ -1,0 +1,8 @@
+components:
+  schemas:
+    RightPayload:
+      javaType: RightPayload
+      type: object
+      properties:
+        kind:
+          $ref: './kind.yml#/components/schemas/Kind'

@@ -1,0 +1,1 @@
+{"type":"record","name":"com.acme.records.RecordNameEvent","namespace":"com.acme.ignored","fields":[{"name":"id","type":"string"}]}

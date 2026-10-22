@@ -64,9 +64,9 @@ public class AsyncAPIOpsChannelParametersTest {
 
         // one Schema Registry subject per resolved address, all reusing the same bundled file
         Assertions.assertEquals(
-                List.of("orders.apac.created-OrderCreated-value",
-                        "orders.eu.created-OrderCreated-value",
-                        "orders.us.created-OrderCreated-value"),
+                List.of("orders.apac.created-value",
+                        "orders.eu.created-value",
+                        "orders.us.created-value"),
                 intent.schemas.stream().map(s -> s.subject).sorted().toList());
         Assertions.assertEquals(1, intent.schemas.stream().map(s -> s.schemaFile).distinct().count());
 
@@ -77,7 +77,7 @@ public class AsyncAPIOpsChannelParametersTest {
 
         // role bindings per resolved subject
         Assertions.assertEquals(3, intent.roleBindings.stream()
-                .filter(r -> r.crnPattern.contains("-OrderCreated-value")).count());
+                .filter(r -> r.crnPattern.contains(".created-value")).count());
 
         // ${channel.address} in the error topic template resolves per address: 3 x (1 retry + 1 dlq)
         Assertions.assertEquals(6, intent.topics.stream().filter(t -> t.isRetryOrDlq).count());
@@ -308,8 +308,8 @@ public class AsyncAPIOpsChannelParametersTest {
 
         // one subject per resolved address, all pointing at the same bundled schema file
         String schemas = java.nio.file.Files.readString(java.nio.file.Path.of(targetFolder + "/schemas.tf"));
-        Assertions.assertTrue(schemas.contains("subject             = \"orders.eu.created-OrderCreated-value\""));
-        Assertions.assertTrue(schemas.contains("subject             = \"orders.us.created-OrderCreated-value\""));
+        Assertions.assertTrue(schemas.contains("subject             = \"orders.eu.created-value\""));
+        Assertions.assertTrue(schemas.contains("subject             = \"orders.us.created-value\""));
         Assertions.assertEquals(2, schemas.split("asyncapi-parameters/avro/OrderCreated\\.avsc", -1).length - 1);
         Assertions.assertTrue(new java.io.File(targetFolder + "/asyncapi-parameters/avro/OrderCreated.avsc").exists());
 

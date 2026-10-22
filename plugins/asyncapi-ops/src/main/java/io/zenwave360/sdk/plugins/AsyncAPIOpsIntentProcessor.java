@@ -91,7 +91,8 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
             if (isOwnedChannel(entry.getValue())) {
                 for (String address : resolution.addresses()) {
                     intent.topics.add(buildOwnedTopic(address, entry.getValue()));
-                    intent.schemas.addAll(buildSchemas(apiModel, apiNamespace, entry.getKey(), entry.getValue(), address));
+                    buildSchemas(apiModel, apiNamespace, entry.getKey(), entry.getValue(), address)
+                            .forEach(intent::addSchema);
                 }
             }
         }
@@ -166,9 +167,9 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
             }
 
             AsyncAPIOpsIntent.SchemaIntent schema = new AsyncAPIOpsIntent.SchemaIntent();
-            schema.subject = topicAddress + "-" + messageName + "-value";
+            schema.subject = resolveSchemaSubject(topicAddress, messageName, message);
             schema.resourceName = toTerraformId(schema.subject);
-            schema.compatibility = JSONPath.get(message, "$.bindings.kafka.x-schemaCompatibility");
+            schema.compatibility = resolveSchemaCompatibility(message);
             schema.sourceSchemaUri = resolveSchemaSourceUri(apiModel, message);
             schema.schemaFile = resolveTargetSchemaFile(apiNamespace, message);
 
@@ -178,6 +179,46 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
             result.add(schema);
         }
         return result;
+    }
+
+    /**
+     * Resolves Confluent-compatible value subjects from the AsyncAPI Kafka message binding.
+     * An omitted strategy follows the Confluent TopicNameStrategy default. Record-based strategies use
+     * the Avro full name (namespace.name) of the payload schema, as the Confluent serializers do.
+     */
+    private String resolveSchemaSubject(String topicAddress, String messageName, Map message) {
+        Map kafkaBinding = JSONPath.get(message, "$.bindings.kafka", Collections.emptyMap());
+        String strategy = getString(kafkaBinding.get("schemaLookupStrategy"));
+        if (strategy == null || "TopicNameStrategy".equals(strategy)) {
+            return topicAddress + "-value";
+        }
+        if ("TopicRecordNameStrategy".equals(strategy)) {
+            return topicAddress + "-" + resolveAvroRecordName(messageName, message) + "-value";
+        }
+        if ("RecordNameStrategy".equals(strategy)) {
+            return resolveAvroRecordName(messageName, message);
+        }
+        throw new IllegalArgumentException("Unsupported Kafka schemaLookupStrategy '" + strategy
+                + "'. Supported strategies are TopicNameStrategy, TopicRecordNameStrategy, and RecordNameStrategy.");
+    }
+
+    private String resolveAvroRecordName(String messageName, Map message) {
+        Map schema = JSONPath.get(message, "$.payload.schema");
+        String fullName = schema != null ? getString(AsyncAPIOpsAvroBundler.getFullName(schema)) : null;
+        if (fullName == null) {
+            log.warn("Could not resolve the Avro record name for message '{}'; using the message name for its subject", messageName);
+            return messageName;
+        }
+        return fullName;
+    }
+
+    /**
+     * The vendor extension has precedence over the proposed standard property. The former
+     * x-schemaCompatibility extension remains as a compatibility fallback for existing specs.
+     */
+    private String resolveSchemaCompatibility(Map message) {
+        Map kafkaBinding = JSONPath.get(message, "$.bindings.kafka", Collections.emptyMap());
+        return getStringFirst(kafkaBinding, "x-compatibility", "compatibility", "x-schemaCompatibility");
     }
 
     private String resolveSchemaSourceUri(Model apiModel, Map message) {
@@ -712,7 +753,7 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
             if (schemaFormat == null || !schemaFormat.toLowerCase().contains("avro")) {
                 continue;
             }
-            String subject = topicAddress + "-" + entry.getKey() + "-value";
+            String subject = resolveSchemaSubject(topicAddress, entry.getKey(), message);
             addSchemaRegistryReadBinding(subject, principal, intent);
         }
     }

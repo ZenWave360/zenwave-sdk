@@ -1,0 +1,32 @@
+asyncapi: 3.1.0
+info:
+  title: ambiguous relative refs
+  version: 1.0.0
+channels:
+  sampleChannel:
+    address: sample.topic
+    messages:
+      LeftMessage:
+        $ref: '#/components/messages/LeftMessage'
+      RightMessage:
+        $ref: '#/components/messages/RightMessage'
+operations:
+  publishSample:
+    action: send
+    channel:
+      $ref: '#/channels/sampleChannel'
+    messages:
+      - $ref: '#/channels/sampleChannel/messages/LeftMessage'
+      - $ref: '#/channels/sampleChannel/messages/RightMessage'
+components:
+  messages:
+    LeftMessage:
+      name: LeftMessage
+      contentType: application/json
+      payload:
+        $ref: './ambiguous-refs/left/payload.yml#/components/schemas/LeftPayload'
+    RightMessage:
+      name: RightMessage
+      contentType: application/json
+      payload:
+        $ref: './ambiguous-refs/right/payload.yml#/components/schemas/RightPayload'

@@ -1,0 +1,7 @@
+components:
+  schemas:
+    ColorKind:
+      description: Color kind
+      enum:
+        - RED
+        - BLUE

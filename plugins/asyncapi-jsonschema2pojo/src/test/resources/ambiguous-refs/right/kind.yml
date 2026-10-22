@@ -1,0 +1,7 @@
+components:
+  schemas:
+    Kind:
+      title: RightKind
+      enum:
+        - RIGHT_A
+        - RIGHT_B
