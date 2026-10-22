@@ -213,12 +213,12 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
     }
 
     /**
-     * The vendor extension has precedence over the proposed standard property. The former
-     * x-schemaCompatibility extension remains as a compatibility fallback for existing specs.
+     * The vendor extension has precedence over the proposed standard property, so specs can move
+     * from x-schemaCompatibility to schemaCompatibility once it is part of the Kafka binding.
      */
     private String resolveSchemaCompatibility(Map message) {
         Map kafkaBinding = JSONPath.get(message, "$.bindings.kafka", Collections.emptyMap());
-        return getStringFirst(kafkaBinding, "x-compatibility", "compatibility", "x-schemaCompatibility");
+        return getStringFirst(kafkaBinding, "x-schemaCompatibility", "schemaCompatibility");
     }
 
     private String resolveSchemaSourceUri(Model apiModel, Map message) {

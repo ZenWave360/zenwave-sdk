@@ -135,7 +135,7 @@ For Avro message payloads, `bindings.kafka.schemaLookupStrategy` selects the gen
 
 `<record-full-name>` is the Avro full name of the payload schema (`namespace.name`), matching what the Confluent serializers register; the AsyncAPI message name is used only when the schema name cannot be resolved. The same resolved subject is used for both the schema resource and the generated Confluent Schema Registry `DeveloperRead` role binding. When several messages resolve to one subject, identical schema intents are emitted once; incompatible schema files or compatibility settings fail generation because Terraform cannot manage conflicting definitions for a single subject.
 
-Schema compatibility is resolved from the Kafka message binding in this order: `x-compatibility`, `compatibility`, then the generated Terraform default. `x-schemaCompatibility` remains a legacy fallback for existing specifications.
+Schema compatibility is resolved from the Kafka message binding in this order: `x-schemaCompatibility`, `schemaCompatibility`, then the generated Terraform default.
 
 When multiple AsyncAPI specs are passed together, bundled schemas are namespaced by the sanitized spec basename:
 
