@@ -53,12 +53,48 @@ or if you prefer to use the _next_ experimental/unstable **snapshot** versions:
 jbang alias add --fresh --force --name=zw next@zenwave360/zenwave-sdk
 ```
 
+### Snapshots repository
+
+ZenWave snapshots (`-SNAPSHOT` versions built from `develop`) are published to the Maven repository
+[https://www.zenwave360.io/maven-snapshots/](https://www.zenwave360.io/maven-snapshots/), served from
+[zenwave360/maven-snapshots](https://github.com/zenwave360/maven-snapshots). The `snapshots` alias above already uses it.
+
+To use snapshots from a Maven build, for example the `zenwave-sdk-maven-plugin`, add the repository to your `pom.xml`:
+
+```xml
+<repositories>
+    <repository>
+        <id>zenwave-snapshots</id>
+        <url>https://www.zenwave360.io/maven-snapshots/</url>
+        <releases><enabled>false</enabled></releases>
+        <snapshots><enabled>true</enabled></snapshots>
+    </repository>
+</repositories>
+<pluginRepositories>
+    <pluginRepository>
+        <id>zenwave-snapshots</id>
+        <url>https://www.zenwave360.io/maven-snapshots/</url>
+        <releases><enabled>false</enabled></releases>
+        <snapshots><enabled>true</enabled></snapshots>
+    </pluginRepository>
+</pluginRepositories>
+```
+
+And from Gradle:
+
+```kotlin
+repositories {
+    mavenCentral()
+    maven("https://www.zenwave360.io/maven-snapshots/") { mavenContent { snapshotsOnly() } }
+}
+```
+
 If you plan to use **custom plugins** you can create your own [jbang-catalog.json](jbang-catalog.json) in the current folder where you want to use `jbang zw`or perform a custom instalation with a command in the following format:
 
 ```shell
 jbang alias add --name=zw  --force \
     -m=io.zenwave360.sdk.Main \
-    --repos=mavencentral,snapshots=https://s01.oss.sonatype.org/content/repositories/snapshots \
+    --repos=mavencentral,snapshots=https://www.zenwave360.io/maven-snapshots/ \
     --deps=\
 org.slf4j:slf4j-simple:1.7.36,\
 io.zenwave360.sdk.plugins:asyncapi-spring-cloud-streams3:2.4.0,\
