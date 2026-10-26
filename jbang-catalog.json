@@ -59,7 +59,7 @@
       ],
       "repositories": [
         "mavencentral",
-        "snapshots\u003dhttps://central.sonatype.com/repository/maven-snapshots"
+        "snapshots\u003dhttps://www.zenwave360.io/maven-snapshots/"
       ],
       "main": "io.zenwave360.sdk.Main",
       "java-options": [
