@@ -103,7 +103,7 @@ This plugin has been tested in the following setups:
 | `apiOverlayFiles` | Ordered list of API overlay YAML files applied to each loaded spec before dereferencing and `allOf` merge.                                                            | List     | `[]`             |                               |
 | `avroImports`    | Additional Avro schema files or folders available while bundling owned message schemas. Sibling `.avsc` files are discovered automatically for local and `classpath:` schemas. Supports local files/folders, `classpath:` files/folders and `https://` files. | List     | `[]`             |                               |
 | `authentication` | Authentication configuration values for fetching remote resources.                                                                                                           | List     | `[]`             |                               |
-| `server`         | Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Used to merge `x-env-server-overrides`/`env-server-overrides` from channel and error-topic bindings. | String   | `null`           |                               |
+| `server`         | Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Used to merge `x-env-server-overrides`/`envServerOverrides` from channel and error-topic bindings. | String   | `null`           |                               |
 | `parameterValues` | Selects which values a channel address parameter expands to. `parameterValues.<name>=v1,v2` restricts every channel using that parameter name to a subset of its declared `enum`; `parameterValues.<channelKey>.<name>=v1` overrides a single channel and is also the only form that can supply values for a parameter with no `enum`. Validated against each channel's own `enum`. | Map      | `{}`             |                               |
 | `templates`      | Templates to use for code generation.                                                                                                                                        | String   | `TerraformKafka` | TerraformKafka, TerraformConfluent, TerraformConfluentHybrid, FQ Class Name |
 | `serviceAccountMode` | Resolve existing Confluent service accounts by display name, or provision them as managed Terraform resources.                                                         | String   | `existing`       | existing, managed             |
@@ -285,7 +285,7 @@ Two things follow from there being no declared `enum`:
 
 ### Channel bindings: topic configuration
 
-Channel bindings follow the standard [AsyncAPI Kafka binding](https://github.com/asyncapi/bindings/blob/master/kafka/README.md) with one addition: `x-env-server-overrides` for per-environment tuning. The generator also accepts `env-server-overrides` without the `x-` prefix. If both are present, `x-env-server-overrides` wins.
+Channel bindings follow the standard [AsyncAPI Kafka binding](https://github.com/asyncapi/bindings/blob/master/kafka/README.md) with one addition: `x-env-server-overrides` for per-environment tuning. The generator also accepts `envServerOverrides`, the field name proposed for Kafka binding 0.6.0. If both are present, `x-env-server-overrides` wins. The unprefixed kebab-case `env-server-overrides` is not supported and is ignored with a warning.
 
 This extension was proposed in [AsyncAPI Bindings #292](https://github.com/asyncapi/bindings/issues/292).
 
@@ -338,10 +338,10 @@ jbang zw -p AsyncAPIOpsGeneratorPlugin \
 
 Both modes use the resolved service-account id for Confluent Kafka ACLs. `TerraformConfluent` also uses it for Schema Registry role bindings; `TerraformConfluentHybrid` does not generate Confluent role bindings because its Schema Registry is self-hosted. Application API-key provisioning remains a separate concern.
 
-Retry and DLQ topics are provisioned from the `x-error-topics` extension on `receive` operations. The generator also accepts `error-topics` without the `x-` prefix.
+Retry and DLQ topics are provisioned from the `x-error-topics` extension on `receive` operations. The generator also accepts `errorTopics`, the field name proposed for Kafka binding 0.6.0. The unprefixed kebab-case `error-topics` is not supported and is ignored with a warning.
 The consumer group id is resolved from `x-groupId` first, then standard `groupId`. `x-groupId` is a plain string. Standard `groupId` must be a schema with `enum`, string `const`, or string-array `const`; the first string value is used.
 
-Transactional producers can request a transactional id prefix ACL with `transactional: true` and `x-transactional-id-prefix`. The Confluent template renders this as a `TRANSACTIONAL_ID` ACL with `PREFIXED` pattern and WRITE operation.
+Transactional producers can request a transactional id prefix ACL with `x-transactional-id-prefix` or `transactionalIdPrefix` (the field name proposed for Kafka binding 0.6.0). The prefix alone marks the producer as transactional; `transactional: true` is not needed. The Confluent template renders this as a `TRANSACTIONAL_ID` ACL with `PREFIXED` pattern and WRITE operation.
 
 ```yaml
 operations:
@@ -364,7 +364,7 @@ operations:
             replicas: 2
             topicConfiguration:
               retention.ms: 259200000   # 3 days
-            env-server-overrides:
+            x-env-server-overrides:
               dev:
                 replicas: 1
                 topicConfiguration:
@@ -389,7 +389,7 @@ In this example we use `.__.` as a separator between the consumer group and orig
 
 `retrySuffixes` optionally gives retry topics explicit suffixes in order. When omitted, `retryTopics: N` keeps generating `retry-0` through `retry-{N-1}`. When present, `retrySuffixes` must be an array of non-blank strings, contain exactly `retryTopics` entries, and contain no duplicates. Invalid values fail generation, even when the `retry` configuration is absent.
 
-If `x-error-topics`/`error-topics` is not present, no retry or DLQ topics are generated. If a retry or DLQ config does not define env overrides for the selected server, the base retry/DLQ config is used.
+If `x-error-topics`/`errorTopics` is not present, no retry or DLQ topics are generated. If a retry or DLQ config does not define env overrides for the selected server, the base retry/DLQ config is used.
 
 ### Reusable error topic presets
 
@@ -404,7 +404,7 @@ components:
         replicas: 2
         topicConfiguration:
           retention.ms: 259200000   # 3 days
-        env-server-overrides:
+        x-env-server-overrides:
           dev:
             replicas: 1
             topicConfiguration:
@@ -549,7 +549,7 @@ The precedence order is:
 **AsyncAPI value → Terraform variable → provider or broker default**
 
 1. An explicit value in the AsyncAPI spec is always used as-is.
-2. A per-environment override from `x-env-server-overrides` / `env-server-overrides` is applied on top of the AsyncAPI value before rendering. If both are present, the `x-` extension wins.
+2. A per-environment override from `x-env-server-overrides` / `envServerOverrides` is applied on top of the AsyncAPI value before rendering. If both are present, the `x-` extension wins.
 3. If the AsyncAPI spec omits a setting, the generator renders the corresponding Terraform variable (`var.default_partitions`, `var.default_replication_factor`, `var.default_topic_config`).
 4. If the Terraform variable is also unset (`null`), the target provider applies its own default, or the Kafka broker applies its cluster-wide default.
 

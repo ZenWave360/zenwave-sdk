@@ -16,5 +16,4 @@ operations:
     bindings:
       kafka:
         x-principal: sample.producer
-        transactional: true
         x-transactional-id-prefix: sample-producer-
