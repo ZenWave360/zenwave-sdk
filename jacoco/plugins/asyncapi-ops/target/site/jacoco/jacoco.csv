@@ -7,8 +7,8 @@ io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsInte
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntent.PrincipalIntent,0,3,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsAvroBundler,31,166,6,12,5,31,6,8,0,5
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntentProcessor.StreamsApplication,0,26,0,2,0,8,0,4,0,3
-io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsChannelAddressResolver,28,572,11,55,3,88,11,41,1,18
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntent,8,223,5,19,1,48,5,14,0,7
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsChannelAddressResolver,28,572,11,55,3,88,11,41,1,18
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsChannelAddressResolver.Resolution,0,16,0,2,0,2,0,3,0,2
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntent.RoleBindingIntent,0,3,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsGeneratorPlugin,0,35,0,0,0,7,0,1,0,1
@@ -17,5 +17,5 @@ io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsSpec
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsGenerator.Templates,9,58,0,0,2,17,1,2,1,2
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntent.AclIntent,0,18,0,0,0,6,0,1,0,1
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsGenerator,166,257,10,18,30,55,8,11,0,5
-io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntent.SkippedChannelIntent,0,3,0,0,0,1,0,1,0,1
 io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntentProcessor.StreamsScope,0,13,0,0,0,3,0,1,0,1
+io.zenwave360.sdk.plugins:asyncapi-ops,io.zenwave360.sdk.plugins,AsyncAPIOpsIntent.SkippedChannelIntent,0,3,0,0,0,1,0,1,0,1
