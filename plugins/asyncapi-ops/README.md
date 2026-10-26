@@ -364,7 +364,7 @@ operations:
             replicas: 2
             topicConfiguration:
               retention.ms: 259200000   # 3 days
-            x-env-server-overrides:
+            envServerOverrides:
               dev:
                 replicas: 1
                 topicConfiguration:
@@ -404,7 +404,7 @@ components:
         replicas: 2
         topicConfiguration:
           retention.ms: 259200000   # 3 days
-        x-env-server-overrides:
+        envServerOverrides:
           dev:
             replicas: 1
             topicConfiguration:

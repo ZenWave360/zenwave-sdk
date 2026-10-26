@@ -26,7 +26,7 @@ components:
         replicas: 2
         topicConfiguration:
           retention.ms: 259200000       # 3 days
-        x-env-server-overrides:
+        envServerOverrides:
           dev:
             replicas: 1
             topicConfiguration:
@@ -36,7 +36,7 @@ components:
         replicas: 3
         topicConfiguration:
           retention.ms: 604800000       # 7 days
-        x-env-server-overrides:
+        envServerOverrides:
           dev:
             partitions: 1
             replicas: 1
@@ -49,7 +49,7 @@ components:
         topicConfiguration:
           retention.ms: 2592000000      # 30 days
           cleanup.policy: ["delete"]
-        x-env-server-overrides:
+        envServerOverrides:
           dev:
             replicas: 1
             topicConfiguration:
@@ -60,7 +60,7 @@ components:
         topicConfiguration:
           retention.ms: 31536000000     # 1 year
           cleanup.policy: ["delete"]
-        x-env-server-overrides:
+        envServerOverrides:
           dev:
             replicas: 1
             topicConfiguration:

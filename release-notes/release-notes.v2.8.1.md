@@ -36,8 +36,6 @@ The camelCase field names proposed for Kafka binding 0.6.0 ([asyncapi/bindings#3
 | `schemaCompatibility` (message binding) | `x-schemaCompatibility` |
 | `principal` (operation binding) | `x-principal` |
 
-**Unprefixed kebab-case keys are no longer read**: `env-server-overrides`, `error-topics` and `transactional-id-prefix` without the `x-` prefix are not valid Kafka binding fields (the binding schema only allows extra keys that start with `x-`). They are now ignored and a warning names the replacement. Rename them to `x-env-server-overrides`/`envServerOverrides`, `x-error-topics`/`errorTopics` or `x-transactional-id-prefix`/`transactionalIdPrefix`.
-
 ### asyncapi-ops: transactional id prefix alone marks a producer as transactional
 
 `send` operations no longer need `transactional: true` to get a `TRANSACTIONAL_ID`/`PREFIXED` ACL. The prefix (`x-transactional-id-prefix` or `transactionalIdPrefix`) is enough, matching the proposed Kafka binding 0.6.0, which has no `transactional` field. Previously a spec that set only the prefix got no transactional id ACL. `transactional: true` without a prefix still logs a warning.
