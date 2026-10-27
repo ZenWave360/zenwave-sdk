@@ -23,3 +23,19 @@ Message payloads taken from different schemas of the same external file are now 
 Properties that reference a whole schema file (`$ref: './shade-kind.yml'`, no `#/...` fragment) now also generate one shared top-level class, named after the file without its extension (`shade-kind.yml` → `ShadeKind`), unless the schema sets `javaType` or a `title`. **Generated class names may change** for these properties, which used to be inlined with a name derived from the property name.
 
 A whole-file `$ref` used directly as a message payload keeps the class name it had before (derived from the message).
+
+### asyncapi-ops: Kafka binding field names aligned with the proposed Kafka binding 0.6.0
+
+The camelCase field names proposed for Kafka binding 0.6.0 ([asyncapi/bindings#305](https://github.com/asyncapi/bindings/pull/305)) are now read next to the existing `x-` extensions. If both are present, the `x-` extension wins.
+
+| Kafka binding 0.6.0 | `x-` extension (still supported) |
+|---|---|
+| `envServerOverrides` (channel binding, retry/DLQ config) | `x-env-server-overrides` |
+| `errorTopics` (operation binding) | `x-error-topics` |
+| `transactionalIdPrefix` (operation binding) | `x-transactional-id-prefix` |
+| `schemaCompatibility` (message binding) | `x-schemaCompatibility` |
+| `principal` (operation binding) | `x-principal` |
+
+### asyncapi-ops: transactional id prefix alone marks a producer as transactional
+
+`send` operations no longer need `transactional: true` to get a `TRANSACTIONAL_ID`/`PREFIXED` ACL. The prefix (`x-transactional-id-prefix` or `transactionalIdPrefix`) is enough, matching the proposed Kafka binding 0.6.0, which has no `transactional` field. Previously a spec that set only the prefix got no transactional id ACL. `transactional: true` without a prefix still logs a warning.

@@ -262,7 +262,29 @@ public class AsyncAPIOpsIntentProcessorTest {
     }
 
     @Test
-    public void test_unprefixed_extensions_are_supported() throws Exception {
+    public void test_kafka_binding_field_names_are_supported() throws Exception {
+        Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
+        Model api = getApis(context).get(0);
+
+        Map<String, Object> channelBinding = JSONPath.get(api, "$.channels['reserve-stock-command'].bindings.kafka");
+        channelBinding.put("envServerOverrides", channelBinding.remove("x-env-server-overrides"));
+
+        Map<String, Object> operationBinding = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka");
+        operationBinding.put("errorTopics", operationBinding.remove("x-error-topics"));
+
+        context = buildIntent("staging", context);
+
+        AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
+        long ownedTopics = intent.topics.stream().filter(t -> !t.isRetryOrDlq).count();
+        Assertions.assertEquals(3, ownedTopics);
+        intent.topics.stream().filter(t -> !t.isRetryOrDlq).forEach(t -> Assertions.assertEquals(3, t.partitions));
+
+        long retryDlqTopics = intent.topics.stream().filter(t -> t.isRetryOrDlq).count();
+        Assertions.assertEquals(4, retryDlqTopics, "errorTopics must generate retry/DLQ topics");
+    }
+
+    @Test
+    public void test_unprefixed_kebab_case_keys_are_ignored() throws Exception {
         Map<String, Object> context = loadContext(ASYNCAPI_PROVIDER);
         Model api = getApis(context).get(0);
 
@@ -275,12 +297,12 @@ public class AsyncAPIOpsIntentProcessorTest {
         context = buildIntent("staging", context);
 
         AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
-        long ownedTopics = intent.topics.stream().filter(t -> !t.isRetryOrDlq).count();
-        Assertions.assertEquals(3, ownedTopics);
-        intent.topics.stream().filter(t -> !t.isRetryOrDlq).forEach(t -> Assertions.assertEquals(3, t.partitions));
-
-        long retryDlqTopics = intent.topics.stream().filter(t -> t.isRetryOrDlq).count();
-        Assertions.assertEquals(4, retryDlqTopics, "Unprefixed error-topics must still generate retry/DLQ topics");
+        AsyncAPIOpsIntent.TopicIntent ownedTopic = intent.topics.stream()
+                .filter(t -> !t.isRetryOrDlq && "merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0".equals(t.topicName))
+                .findFirst()
+                .orElseThrow();
+        Assertions.assertNotEquals(3, ownedTopic.partitions, "env-server-overrides must not be applied");
+        Assertions.assertFalse(intent.topics.stream().anyMatch(t -> t.isRetryOrDlq), "error-topics must not generate retry/DLQ topics");
     }
 
     @Test
@@ -291,7 +313,7 @@ public class AsyncAPIOpsIntentProcessorTest {
         Map<String, Object> channelBinding = JSONPath.get(api, "$.channels['reserve-stock-command'].bindings.kafka");
         Map<String, Object> overrides = JSONPath.get(channelBinding, "$.x-env-server-overrides.staging");
         overrides.put("partitions", 7);
-        channelBinding.put("env-server-overrides", Map.of("staging", Map.of("partitions", 11)));
+        channelBinding.put("envServerOverrides", Map.of("staging", Map.of("partitions", 11)));
 
         Map<String, Object> operationBinding = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka");
         operationBinding.put("principal", "standard.principal");
@@ -306,7 +328,7 @@ public class AsyncAPIOpsIntentProcessorTest {
                 .filter(t -> !t.isRetryOrDlq && "merchandising.inventory.inventory-adjustment.reserve-stock.command.avro.v0".equals(t.topicName))
                 .findFirst()
                 .orElseThrow();
-        Assertions.assertEquals(7, ownedTopic.partitions, "x-env-server-overrides must win over env-server-overrides");
+        Assertions.assertEquals(7, ownedTopic.partitions, "x-env-server-overrides must win over envServerOverrides");
 
         Assertions.assertTrue(intent.acls.stream().anyMatch(a -> "extension.principal".equals(a.principal)));
         Assertions.assertFalse(intent.acls.stream().anyMatch(a -> "standard.principal".equals(a.principal)));
@@ -324,8 +346,7 @@ public class AsyncAPIOpsIntentProcessorTest {
         receiveBinding.put("groupId", Map.of("type", "string", "const", List.of("const-array.group", "ignored.group")));
 
         Map<String, Object> sendBinding = JSONPath.get(api, "$.operations['onReserveStockResponse'].bindings.kafka");
-        sendBinding.put("transactional", true);
-        sendBinding.put("x-transactional-id-prefix", "inventory-adjustment-tx-");
+        sendBinding.put("transactionalIdPrefix", "inventory-adjustment-tx-");
 
         context = buildIntent("staging", context);
         AsyncAPIOpsIntent intent = (AsyncAPIOpsIntent) context.get("intent");
@@ -427,7 +448,7 @@ public class AsyncAPIOpsIntentProcessorTest {
         Map<String, Object> channelBinding = JSONPath.get(api, "$.channels['reserve-stock-command'].bindings.kafka");
         Map<String, Object> baseChannelBinding = new LinkedHashMap<>(channelBinding);
         baseChannelBinding.remove("x-env-server-overrides");
-        baseChannelBinding.remove("env-server-overrides");
+        baseChannelBinding.remove("envServerOverrides");
         replaceAll(channelBinding, baseChannelBinding);
 
         Map<String, Object> operationBinding = JSONPath.get(api, "$.operations['doReserveStockCommand'].bindings.kafka");
@@ -435,7 +456,7 @@ public class AsyncAPIOpsIntentProcessorTest {
         Map<String, Object> retryConfig = JSONPath.get(errorTopics, "$.retry");
         Map<String, Object> retryBaseConfig = new LinkedHashMap<>(retryConfig);
         retryBaseConfig.remove("x-env-server-overrides");
-        retryBaseConfig.remove("env-server-overrides");
+        retryBaseConfig.remove("envServerOverrides");
         replaceAll(retryConfig, retryBaseConfig);
 
         context = buildIntent("staging", context);

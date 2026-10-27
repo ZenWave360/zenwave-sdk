@@ -2,6 +2,10 @@ package io.zenwave360.sdk.utils;
 
 import dev.jbang.dependencies.DependencyUtil;
 import dev.jbang.dependencies.MavenRepo;
+import eu.maveniverse.maven.mima.context.Context;
+import eu.maveniverse.maven.mima.context.ContextOverrides;
+import eu.maveniverse.maven.mima.context.Runtimes;
+import org.eclipse.aether.repository.RemoteRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +29,6 @@ public class MavenLoader {
     private static Logger log = LoggerFactory.getLogger(MavenLoader.class);
 
     static final String CENTRAL_URL = "https://repo1.maven.org/maven2/";
-    static final String SNAPSHOTS_URL = "https://s01.oss.sonatype.org/content/repositories/snapshots/";
 
     public static URLClassLoader loadJBangDependencies(List<String> dependencies, List<String> repos) {
         if (dependencies == null || dependencies.isEmpty()) {
@@ -57,19 +60,55 @@ public class MavenLoader {
     }
 
     /**
-     * Extra {@code --repos} first, then JBang {@code run.repos}/{@code repos}, then central and snapshots.
+     * Extra {@code --repos} first, then JBang {@code run.repos}/{@code repos}, then active
+     * Maven {@code settings.xml} profile repositories, then Maven Central (Maven's implicit default).
+     * <p>
+     * JBang's resolver always <em>replaces</em> the remote-repo list, so settings.xml
+     * repository URLs must be copied in here. {@code <servers>} still come from
+     * settings.xml at resolve time, matched by repository id.
      */
     static List<MavenRepo> resolveMavenRepos(List<String> extraRepos) {
-        return resolveMavenRepos(extraRepos, jbangConfiguredReposValue());
+        return resolveMavenRepos(extraRepos, jbangConfiguredReposValue(), mavenSettingsRepos());
     }
 
     static List<MavenRepo> resolveMavenRepos(List<String> extraRepos, String jbangReposConfig) {
+        return resolveMavenRepos(extraRepos, jbangReposConfig, List.of());
+    }
+
+    static List<MavenRepo> resolveMavenRepos(List<String> extraRepos, String jbangReposConfig, List<MavenRepo> settingsRepos) {
         LinkedHashMap<String, MavenRepo> byUrl = new LinkedHashMap<>();
         addRepoRefs(byUrl, extraRepos);
         addRepoRefs(byUrl, splitRepoRefs(jbangReposConfig));
+        if (settingsRepos != null) {
+            for (MavenRepo repo : settingsRepos) {
+                addIfAbsent(byUrl, repo);
+            }
+        }
         addIfAbsent(byUrl, DependencyUtil.toMavenRepo("central"));
-        addIfAbsent(byUrl, new MavenRepo("snapshots", SNAPSHOTS_URL));
         return new ArrayList<>(byUrl.values());
+    }
+
+    static List<MavenRepo> mavenSettingsRepos() {
+        return mavenSettingsRepos(ContextOverrides.create().withUserSettings(true));
+    }
+
+    /**
+     * Active profile repositories from user and global settings.xml, as computed by MIMA (the resolver JBang uses).
+     * Mirrored repositories are unwrapped because JBang applies settings.xml mirrors again at resolve time.
+     */
+    static List<MavenRepo> mavenSettingsRepos(ContextOverrides.Builder overrides) {
+        List<MavenRepo> repos = new ArrayList<>();
+        try (Context context = Runtimes.INSTANCE.getRuntime().create(overrides.repositories(List.of()).build())) {
+            for (RemoteRepository repo : context.remoteRepositories()) {
+                List<RemoteRepository> originals = repo.getMirroredRepositories().isEmpty() ? List.of(repo) : repo.getMirroredRepositories();
+                for (RemoteRepository original : originals) {
+                    repos.add(new MavenRepo(original.getId(), original.getUrl()));
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Could not read Maven settings.xml repositories", e);
+        }
+        return repos;
     }
 
     static String jbangConfiguredReposValue() {

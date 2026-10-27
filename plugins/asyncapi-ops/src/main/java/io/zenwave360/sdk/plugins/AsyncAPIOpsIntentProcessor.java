@@ -29,14 +29,14 @@ import java.util.stream.Collectors;
  * declared inline in a spec file are owned (generate topic + schemas); channels resolved
  * from a cross-file {@code $ref} are external (contribute ACLs and error topics only).
  *
- * <p>Retry/DLQ provisioning is driven by the {@code x-error-topics} or {@code error-topics}
- * operation binding extension.
+ * <p>Retry/DLQ provisioning is driven by the {@code x-error-topics} extension or the
+ * {@code errorTopics} Kafka operation binding field.
  */
 public class AsyncAPIOpsIntentProcessor implements Processor {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @DocumentedOption(description = "Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Used to merge x-env-server-overrides/env-server-overrides from channel and error-topic bindings.")
+    @DocumentedOption(description = "Target server/environment name matching a key in asyncapi servers (e.g. dev, staging, production). Used to merge x-env-server-overrides/envServerOverrides from channel and error-topic bindings.")
     public String server;
 
     @DocumentedOption(description = "Selects which values a channel address parameter expands to, as parameterValues.<name>=v1,v2 (every channel using that name, enum required) or parameterValues.<channelKey>.<name>=v1 (that channel only, also accepted for parameters with no enum). Values are validated against each channel's own enum.")
@@ -213,12 +213,12 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
     }
 
     /**
-     * The vendor extension has precedence over the proposed standard property. The former
-     * x-schemaCompatibility extension remains as a compatibility fallback for existing specs.
+     * The vendor extension has precedence over the proposed standard property, so specs can move
+     * from x-schemaCompatibility to schemaCompatibility once it is part of the Kafka binding.
      */
     private String resolveSchemaCompatibility(Map message) {
         Map kafkaBinding = JSONPath.get(message, "$.bindings.kafka", Collections.emptyMap());
-        return getStringFirst(kafkaBinding, "x-compatibility", "compatibility", "x-schemaCompatibility");
+        return getStringFirst(kafkaBinding, "x-schemaCompatibility", "schemaCompatibility");
     }
 
     private String resolveSchemaSourceUri(Model apiModel, Map message) {
@@ -353,7 +353,7 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
 
         String addressTemplate = (String) errorTopics.get("addressTemplate");
         if (addressTemplate == null) {
-            log.warn("x-error-topics.addressTemplate is missing for groupId='{}' topic='{}' — skipping", groupId, topicAddress);
+            log.warn("errorTopics.addressTemplate is missing for groupId='{}' topic='{}' — skipping", groupId, topicAddress);
             return;
         }
 
@@ -383,23 +383,23 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
 
         Object value = errorTopics.get("retrySuffixes");
         if (!(value instanceof List<?> suffixes)) {
-            throw new IllegalArgumentException("x-error-topics.retrySuffixes must be an array of strings");
+            throw new IllegalArgumentException("errorTopics.retrySuffixes must be an array of strings");
         }
         if (suffixes.size() != retryTopics) {
-            throw new IllegalArgumentException("x-error-topics.retrySuffixes length must equal retryTopics");
+            throw new IllegalArgumentException("errorTopics.retrySuffixes length must equal retryTopics");
         }
 
         List<String> validatedSuffixes = new ArrayList<>(suffixes.size());
         Set<String> uniqueSuffixes = new HashSet<>();
         for (Object suffix : suffixes) {
             if (!(suffix instanceof String stringSuffix)) {
-                throw new IllegalArgumentException("x-error-topics.retrySuffixes must contain only strings");
+                throw new IllegalArgumentException("errorTopics.retrySuffixes must contain only strings");
             }
             if (stringSuffix.isBlank()) {
-                throw new IllegalArgumentException("x-error-topics.retrySuffixes must not contain blank values");
+                throw new IllegalArgumentException("errorTopics.retrySuffixes must not contain blank values");
             }
             if (!uniqueSuffixes.add(stringSuffix)) {
-                throw new IllegalArgumentException("x-error-topics.retrySuffixes values must be unique");
+                throw new IllegalArgumentException("errorTopics.retrySuffixes values must be unique");
             }
             validatedSuffixes.add(stringSuffix);
         }
@@ -420,13 +420,17 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
         addKafkaAcl("GROUP", groupId, "LITERAL", principal, operation, intent);
     }
 
+    /**
+     * A transactional id prefix marks the producer as transactional; there is no separate
+     * {@code transactional: true} flag in the Kafka binding.
+     */
     private void addTransactionalAclIfNeeded(Map kafkaBinding, String principal, AsyncAPIOpsIntent intent) {
-        if (!Boolean.TRUE.equals(kafkaBinding.get("transactional"))) {
-            return;
-        }
-        String transactionalIdPrefix = getStringFirst(kafkaBinding, "x-transactional-id-prefix", "transactional-id-prefix");
+        warnIfRemovedKey(kafkaBinding, "transactional-id-prefix", "transactionalIdPrefix");
+        String transactionalIdPrefix = getStringFirst(kafkaBinding, "x-transactional-id-prefix", "transactionalIdPrefix");
         if (transactionalIdPrefix == null) {
-            log.warn("Kafka send operation is transactional but x-transactional-id-prefix is missing. Skipping transactional id ACL.");
+            if (Boolean.TRUE.equals(kafkaBinding.get("transactional"))) {
+                log.warn("Kafka send operation has transactional: true but no x-transactional-id-prefix/transactionalIdPrefix. Skipping transactional id ACL.");
+            }
             return;
         }
         addKafkaAcl("TRANSACTIONAL_ID", transactionalIdPrefix, "PREFIXED", principal, "Write", intent);
@@ -783,7 +787,7 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
     // -------------------------------------------------------------------------
 
     /**
-     * Merges {@code x-env-server-overrides[server]} or {@code env-server-overrides[server]}
+     * Merges {@code x-env-server-overrides[server]} or {@code envServerOverrides[server]}
      * into the channel kafka binding.
      */
     @SuppressWarnings("unchecked")
@@ -799,7 +803,7 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
     }
 
     /**
-     * Merges {@code x-env-server-overrides[server]} or {@code env-server-overrides[server]}
+     * Merges {@code x-env-server-overrides[server]} or {@code envServerOverrides[server]}
      * into the error topic (retry/dlq) config.
      */
     @SuppressWarnings("unchecked")
@@ -815,13 +819,25 @@ public class AsyncAPIOpsIntentProcessor implements Processor {
     }
 
     private Map getErrorTopicsConfig(Map operation) {
-        return JSONPath.getFirst(operation, "$.bindings.kafka.x-error-topics", "$.bindings.kafka.error-topics");
+        warnIfRemovedKey(JSONPath.get(operation, "$.bindings.kafka", Collections.emptyMap()), "error-topics", "errorTopics");
+        return JSONPath.getFirst(operation, "$.bindings.kafka.x-error-topics", "$.bindings.kafka.errorTopics");
     }
 
     private Map<String, Object> getServerOverrides(Map<String, Object> config) {
+        warnIfRemovedKey(config, "env-server-overrides", "envServerOverrides");
         return JSONPath.getFirst(config,
                 "$.x-env-server-overrides." + server,
-                "$.env-server-overrides." + server);
+                "$.envServerOverrides." + server);
+    }
+
+    /**
+     * Unprefixed kebab-case keys are not valid in the Kafka binding (only x- extensions are), so
+     * they are no longer read. Warn instead of silently provisioning less than the spec asks for.
+     */
+    private void warnIfRemovedKey(Map map, String removedKey, String bindingKey) {
+        if (map.containsKey(removedKey)) {
+            log.warn("'{}' is no longer supported, use '{}' or 'x-{}'. Ignoring '{}'.", removedKey, bindingKey, removedKey, removedKey);
+        }
     }
 
     private String getStringFirst(Map map, String... keys) {

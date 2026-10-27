@@ -1,6 +1,7 @@
 package io.zenwave360.sdk.utils;
 
 import dev.jbang.dependencies.MavenRepo;
+import eu.maveniverse.maven.mima.context.ContextOverrides;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -65,8 +66,6 @@ public class MavenLoaderTest {
         Assertions.assertEquals("github", repos.get(0).getId());
         Assertions.assertEquals("https://maven.pkg.github.com/org/repo", repos.get(0).getUrl());
         Assertions.assertTrue(repos.stream().anyMatch(repo -> "central".equals(repo.getId())));
-        Assertions.assertTrue(repos.stream().anyMatch(repo ->
-                MavenLoader.SNAPSHOTS_URL.equals(normalize(repo.getUrl()))));
     }
 
     @Test
@@ -143,6 +142,137 @@ public class MavenLoaderTest {
         String value = MavenLoader.jbangConfiguredReposValue(project, localRoot, userConfig);
 
         Assertions.assertEquals("acme=https://maven.acme.local/maven", value.trim());
+    }
+
+    @Test
+    void testMavenSettingsActiveByDefaultRepositories(@TempDir Path tempDir) throws Exception {
+        Path settings = tempDir.resolve("settings.xml");
+        Files.writeString(settings, """
+                <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0">
+                  <profiles>
+                    <profile>
+                      <id>corp</id>
+                      <activation><activeByDefault>true</activeByDefault></activation>
+                      <repositories>
+                        <repository>
+                          <id>corporate</id>
+                          <url>https://artifactory.example.com/maven</url>
+                        </repository>
+                      </repositories>
+                    </profile>
+                    <profile>
+                      <id>idle</id>
+                      <repositories>
+                        <repository>
+                          <id>idle</id>
+                          <url>https://idle.example.com/maven</url>
+                        </repository>
+                      </repositories>
+                    </profile>
+                  </profiles>
+                </settings>
+                """);
+
+        List<MavenRepo> fromSettings = settingsRepos(settings, tempDir.resolve("no-global.xml"));
+        Assertions.assertEquals(1, fromSettings.size());
+        Assertions.assertEquals("corporate", fromSettings.get(0).getId());
+        Assertions.assertEquals("https://artifactory.example.com/maven", fromSettings.get(0).getUrl());
+
+        List<MavenRepo> repos = MavenLoader.resolveMavenRepos(null, null, fromSettings);
+        Assertions.assertEquals("corporate", repos.get(0).getId());
+        Assertions.assertTrue(repos.stream().anyMatch(repo -> "central".equals(repo.getId())));
+    }
+
+    @Test
+    void testMavenSettingsExplicitActiveProfiles(@TempDir Path tempDir) throws Exception {
+        Path settings = tempDir.resolve("settings.xml");
+        Files.writeString(settings, """
+                <settings>
+                  <activeProfiles>
+                    <activeProfile>github</activeProfile>
+                  </activeProfiles>
+                  <profiles>
+                    <profile>
+                      <id>github</id>
+                      <repositories>
+                        <repository>
+                          <id>github</id>
+                          <url>https://maven.pkg.github.com/org/repo</url>
+                        </repository>
+                      </repositories>
+                    </profile>
+                    <profile>
+                      <id>not-listed</id>
+                      <repositories>
+                        <repository>
+                          <id>other</id>
+                          <url>https://other.example.com/maven</url>
+                        </repository>
+                      </repositories>
+                    </profile>
+                  </profiles>
+                </settings>
+                """);
+
+        List<MavenRepo> fromSettings = settingsRepos(settings, tempDir.resolve("no-global.xml"));
+        Assertions.assertEquals(1, fromSettings.size());
+        Assertions.assertEquals("github", fromSettings.get(0).getId());
+        Assertions.assertEquals("https://maven.pkg.github.com/org/repo", fromSettings.get(0).getUrl());
+    }
+
+    @Test
+    void testMavenSettingsUserReposWinOverGlobal(@TempDir Path tempDir) throws Exception {
+        Path user = tempDir.resolve("user-settings.xml");
+        Path global = tempDir.resolve("global-settings.xml");
+        Files.writeString(global, """
+                <settings>
+                  <profiles>
+                    <profile>
+                      <id>corp</id>
+                      <activation><activeByDefault>true</activeByDefault></activation>
+                      <repositories>
+                        <repository>
+                          <id>corporate</id>
+                          <url>https://global.example.com/maven</url>
+                        </repository>
+                      </repositories>
+                    </profile>
+                  </profiles>
+                </settings>
+                """);
+        Files.writeString(user, """
+                <settings>
+                  <profiles>
+                    <profile>
+                      <id>corp</id>
+                      <activation><activeByDefault>true</activeByDefault></activation>
+                      <repositories>
+                        <repository>
+                          <id>corporate</id>
+                          <url>https://user.example.com/maven</url>
+                        </repository>
+                      </repositories>
+                    </profile>
+                  </profiles>
+                </settings>
+                """);
+
+        List<MavenRepo> fromSettings = settingsRepos(user, global);
+        Assertions.assertEquals(1, fromSettings.size());
+        Assertions.assertEquals("https://user.example.com/maven", fromSettings.get(0).getUrl());
+    }
+
+    @Test
+    void testMavenSettingsMissingFileIsEmpty(@TempDir Path tempDir) {
+        List<MavenRepo> fromSettings = settingsRepos(tempDir.resolve("missing.xml"), tempDir.resolve("no-global.xml"));
+        Assertions.assertTrue(fromSettings.isEmpty());
+    }
+
+    private static List<MavenRepo> settingsRepos(Path userSettings, Path globalSettings) {
+        return MavenLoader.mavenSettingsRepos(ContextOverrides.create()
+                .withUserSettings(true)
+                .withUserSettingsXmlOverride(userSettings)
+                .withGlobalSettingsXmlOverride(globalSettings));
     }
 
     private static String normalize(String url) {

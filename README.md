@@ -26,12 +26,16 @@ ZenWave SDK is a configurable and extensible toolkit for **Domain Driven Design 
 **Table of Contents:**
 
 - [ZenWave SDK](#zenwave-sdk)
-  - [Jbang Instalation](#jbang-instalation)
+  - [JBang Instalation](#jbang-instalation)
+    - [Snapshots repository](#snapshots-repository)
   - [Available Plugins](#available-plugins)
+- [ZenWave SDK Documentation](#zenwave-sdk-documentation)
   - [Changelog](#changelog)
   - [Features / Roadmap](#features--roadmap)
   - [Building from source](#building-from-source)
   - [Usage](#usage)
+    - [Lint ZDL models](#lint-zdl-models)
+    - [Generate documentation](#generate-documentation)
 
 ## JBang Instalation
 
@@ -53,12 +57,48 @@ or if you prefer to use the _next_ experimental/unstable **snapshot** versions:
 jbang alias add --fresh --force --name=zw next@zenwave360/zenwave-sdk
 ```
 
+### Snapshots repository
+
+ZenWave snapshots (`-SNAPSHOT` versions built from `develop`) are published to the Maven repository
+[https://www.zenwave360.io/maven-snapshots/](https://www.zenwave360.io/maven-snapshots/), served from
+[zenwave360/maven-snapshots](https://github.com/zenwave360/maven-snapshots). The `snapshots` alias above already uses it.
+
+To use snapshots from a Maven build, for example the `zenwave-sdk-maven-plugin`, add the repository to your `pom.xml`:
+
+```xml
+<repositories>
+    <repository>
+        <id>zenwave-snapshots</id>
+        <url>https://www.zenwave360.io/maven-snapshots/</url>
+        <releases><enabled>false</enabled></releases>
+        <snapshots><enabled>true</enabled></snapshots>
+    </repository>
+</repositories>
+<pluginRepositories>
+    <pluginRepository>
+        <id>zenwave-snapshots</id>
+        <url>https://www.zenwave360.io/maven-snapshots/</url>
+        <releases><enabled>false</enabled></releases>
+        <snapshots><enabled>true</enabled></snapshots>
+    </pluginRepository>
+</pluginRepositories>
+```
+
+And from Gradle:
+
+```kotlin
+repositories {
+    mavenCentral()
+    maven("https://www.zenwave360.io/maven-snapshots/") { mavenContent { snapshotsOnly() } }
+}
+```
+
 If you plan to use **custom plugins** you can create your own [jbang-catalog.json](jbang-catalog.json) in the current folder where you want to use `jbang zw`or perform a custom instalation with a command in the following format:
 
 ```shell
 jbang alias add --name=zw  --force \
     -m=io.zenwave360.sdk.Main \
-    --repos=mavencentral,snapshots=https://s01.oss.sonatype.org/content/repositories/snapshots \
+    --repos=mavencentral,snapshots=https://www.zenwave360.io/maven-snapshots/ \
     --deps=\
 org.slf4j:slf4j-simple:1.7.36,\
 io.zenwave360.sdk.plugins:asyncapi-spring-cloud-streams3:2.4.0,\
@@ -299,23 +339,18 @@ You can include any **custom plugin** jars in the `--deps` option.
 
 1. `zw --repos` / `-r` (`id=url` or a JBang alias such as `central`)
 2. Silent JBang defaults: `run.repos` or `repos` in `jbang.properties` (project directory walking up, then `~/.jbang/jbang.properties`)
-3. Maven Central and Sonatype snapshots
+3. Active profile `<repositories>` from Maven `settings.xml` (`~/.m2/settings.xml`, then `$MAVEN_HOME/conf/settings.xml`)
+4. Maven Central is always included.
 
-`~/.m2/settings.xml` is used for **credentials** (matching the repository id), not for extra repository URLs.
+NOTE: settings.xml is read by [MIMA](https://github.com/maveniverse/mima), the same library JBang uses for mirrors and credentials. Profiles listed in `<activeProfiles>` and profiles marked `<activeByDefault>true</activeByDefault>` are **both** active. Maven itself would drop the `activeByDefault` ones once another profile is active.
 
-To use GitHub Packages without passing `--repos` on every command:
+You can still set extra repos without touching settings.xml:
 
 ```shell
 jbang config set run.repos central,github=https://maven.pkg.github.com/OWNER/REPO
 ```
 
-Or drop a project-local `jbang.properties` next to your `.zw` scripts:
-
-```properties
-run.repos=central,github=https://maven.pkg.github.com/OWNER/REPO
-```
-
-GitHub Packages requires authentication even for public packages. Use a `~/.m2/settings.xml` `<server>` whose `<id>` matches the repo id (`github` in the examples above), or `GITHUB_TOKEN` / `~/.netrc` host auth for `maven.pkg.github.com`.
+GitHub Packages requires authentication even for public packages. Use a `~/.m2/settings.xml` `<server>` whose `<id>` matches the repo id (`github` in the examples above).
 
 
 NOTE: it will list any available plugin, standard or custom, inside any of these root java packages "io", "com" or "org".

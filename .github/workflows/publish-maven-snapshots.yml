@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       publish-snapshots:
-        description: "Publish the verified SNAPSHOT artifacts to Maven Central"
+        description: "Also publish the verified SNAPSHOT artifacts to Maven Central (snapshots always go to zenwave360/maven-snapshots)"
         required: false
         type: boolean
         default: false
@@ -20,9 +20,11 @@ concurrency:
 
 jobs:
   publish-snapshot:
-    uses: ZenWave360/release-workflows/.github/workflows/publish-snapshots-maven.yml@main
+    # Pilot for git-maven-publisher snapshots (zenwave360/maven-snapshots, branch gh-pages); back to @main once merged there.
+    uses: ZenWave360/release-workflows/.github/workflows/publish-snapshots-maven.yml@feature/git-snapshots
     with:
       publish-snapshots: ${{ github.event_name == 'workflow_dispatch' && inputs.publish-snapshots }}
+      publish-git-snapshots: true
       jacoco-csv-files: >
         ./plugins/asyncapi-spring-cloud-streams3/target/site/jacoco/jacoco.csv
         ./plugins/avro-schema-compiler/target/site/jacoco/jacoco.csv
@@ -46,3 +48,4 @@ jobs:
       CENTRAL_TOKEN: ${{ secrets.CENTRAL_TOKEN }}
       SIGN_KEY: ${{ secrets.SIGN_KEY }}
       SIGN_KEY_PASS: ${{ secrets.SIGN_KEY_PASS }}
+      GIT_PUBLISHER_TOKEN: ${{ secrets.GIT_PUBLISHER_TOKEN }}
