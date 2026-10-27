@@ -74,6 +74,12 @@
         </exclusions>
     </dependency>
     <dependency>
+        <!-- JBang's resolver, used directly to read settings.xml profile repositories; must match the version jbang-cli ${jbang-core.version} declares -->
+        <groupId>eu.maveniverse.maven.mima</groupId>
+        <artifactId>context</artifactId>
+        <version>${mima.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.github.jknack</groupId>
       <artifactId>handlebars</artifactId>
       <version>${handlebars-java.version}</version>

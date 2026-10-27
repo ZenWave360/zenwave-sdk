@@ -54,7 +54,8 @@
 
         <slf4j-api.version>1.7.36</slf4j-api.version>
         <picocli.version>4.6.3</picocli.version>
-        <jbang-core.version>RELEASE</jbang-core.version>
+        <jbang-core.version>0.132.1</jbang-core.version>
+        <mima.version>2.4.33</mima.version>
         <reflections.version>0.10.2</reflections.version>
         <handlebars-java.version>4.3.1</handlebars-java.version>
         <json-path.version>2.9.0</json-path.version>

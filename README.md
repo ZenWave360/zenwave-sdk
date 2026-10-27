@@ -26,12 +26,16 @@ ZenWave SDK is a configurable and extensible toolkit for **Domain Driven Design 
 **Table of Contents:**
 
 - [ZenWave SDK](#zenwave-sdk)
-  - [Jbang Instalation](#jbang-instalation)
+  - [JBang Instalation](#jbang-instalation)
+    - [Snapshots repository](#snapshots-repository)
   - [Available Plugins](#available-plugins)
+- [ZenWave SDK Documentation](#zenwave-sdk-documentation)
   - [Changelog](#changelog)
   - [Features / Roadmap](#features--roadmap)
   - [Building from source](#building-from-source)
   - [Usage](#usage)
+    - [Lint ZDL models](#lint-zdl-models)
+    - [Generate documentation](#generate-documentation)
 
 ## JBang Instalation
 
@@ -335,23 +339,18 @@ You can include any **custom plugin** jars in the `--deps` option.
 
 1. `zw --repos` / `-r` (`id=url` or a JBang alias such as `central`)
 2. Silent JBang defaults: `run.repos` or `repos` in `jbang.properties` (project directory walking up, then `~/.jbang/jbang.properties`)
-3. Maven Central and Sonatype snapshots
+3. Active profile `<repositories>` from Maven `settings.xml` (`~/.m2/settings.xml`, then `$MAVEN_HOME/conf/settings.xml`)
+4. Maven Central is always included.
 
-`~/.m2/settings.xml` is used for **credentials** (matching the repository id), not for extra repository URLs.
+NOTE: settings.xml is read by [MIMA](https://github.com/maveniverse/mima), the same library JBang uses for mirrors and credentials. Profiles listed in `<activeProfiles>` and profiles marked `<activeByDefault>true</activeByDefault>` are **both** active. Maven itself would drop the `activeByDefault` ones once another profile is active.
 
-To use GitHub Packages without passing `--repos` on every command:
+You can still set extra repos without touching settings.xml:
 
 ```shell
 jbang config set run.repos central,github=https://maven.pkg.github.com/OWNER/REPO
 ```
 
-Or drop a project-local `jbang.properties` next to your `.zw` scripts:
-
-```properties
-run.repos=central,github=https://maven.pkg.github.com/OWNER/REPO
-```
-
-GitHub Packages requires authentication even for public packages. Use a `~/.m2/settings.xml` `<server>` whose `<id>` matches the repo id (`github` in the examples above), or `GITHUB_TOKEN` / `~/.netrc` host auth for `maven.pkg.github.com`.
+GitHub Packages requires authentication even for public packages. Use a `~/.m2/settings.xml` `<server>` whose `<id>` matches the repo id (`github` in the examples above).
 
 
 NOTE: it will list any available plugin, standard or custom, inside any of these root java packages "io", "com" or "org".
