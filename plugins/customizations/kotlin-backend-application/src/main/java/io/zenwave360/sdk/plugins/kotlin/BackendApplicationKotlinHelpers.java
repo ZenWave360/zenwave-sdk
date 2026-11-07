@@ -118,8 +118,20 @@ public class BackendApplicationKotlinHelpers {
         if(typeInitializer.trim().isEmpty()) {
             return " = null";
         }
-        return typeInitializer;
+        return fixKotlinNumberLiterals(field, typeInitializer);
     };
+
+    /**
+     * Kotlin does not widen number literals: `Integer? = 1` does not compile. Integer fields keep the `as Integer`
+     * convention of {@link #populateField}. Long literals already get their `L` in ZDLJavaSignatureUtils.
+     */
+    private String fixKotlinNumberLiterals(Map field, String typeInitializer) {
+        var literal = java.util.regex.Pattern.compile("^(\\s*=\\s*)(-?\\d+)\\s*$").matcher(typeInitializer);
+        if (!literal.matches() || JSONPath.get(field, "isArray", false) || !"Integer".equals(field.get("type"))) {
+            return typeInitializer;
+        }
+        return literal.group(1) + literal.group(2) + " as Integer";
+    }
 
     public String idFieldInitialization(Map method, Options options) {
         var zdl = options.get("zdl");

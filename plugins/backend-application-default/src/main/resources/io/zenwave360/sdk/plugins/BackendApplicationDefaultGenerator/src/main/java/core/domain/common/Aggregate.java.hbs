@@ -43,8 +43,10 @@ public class {{aggregate.name}} {
         {{~#if method.parameter}}
         mapper.update(rootEntity, input);
         {{~/if}}
-		{{~#if method.transition.to}}
-		rootEntity.set{{asJavaTypeName ../aggregate.lifecycle.field}}({{lifecycleFieldType ../aggregate}}.{{method.transition.to}});
+		{{~#if (singleTransitionTo method)}}
+		rootEntity.set{{asJavaTypeName ../aggregate.lifecycle.field}}({{lifecycleFieldType ../aggregate}}.{{singleTransitionTo method}});
+        {{~else if method.transition.to}}
+		// TODO CUSTOM_REQUIRED: call rootEntity.set{{asJavaTypeName ../aggregate.lifecycle.field}}(...) with one of {{transitionTargets method}}
         {{~/if}}
 
         return new {{asJavaTypeName method.name}}Result(

@@ -290,6 +290,27 @@ public class BackendApplicationDefaultHelpers {
     }
 
     /**
+     * The single target state of a method's @transition(to: ...), or null when there is none or there are several:
+     * then the implementation decides which one, and the templates leave a TODO.
+     */
+    public Object singleTransitionTo(Map<String, Object> method, Options options) {
+        var to = JSONPath.get(method, "$.transition.to");
+        if (to instanceof Collection<?> targets) {
+            return targets.size() == 1 ? targets.iterator().next() : null;
+        }
+        return to;
+    }
+
+    /** The target states of a method's @transition(to: ...), comma separated. */
+    public String transitionTargets(Map<String, Object> method, Options options) {
+        var to = JSONPath.get(method, "$.transition.to");
+        if (to instanceof Collection<?> targets) {
+            return targets.stream().map(String::valueOf).collect(Collectors.joining(", "));
+        }
+        return to == null ? "" : String.valueOf(to);
+    }
+
+    /**
      * Returns true if the aggregate has a lifecycle (state machine) defined.
      */
     public boolean hasLifecycle(Map<String, Object> aggregate, Options options) {
@@ -340,8 +361,9 @@ public class BackendApplicationDefaultHelpers {
     /**
      * Returns true if the entity has a @lifecycle annotation (for non-aggregate entities).
      */
-    public boolean hasEntityLifecycle(Map<String, Object> entity, Options options) {
-        return LifecycleSupport.hasEntityLifecycle(entity);
+    /** Accepts any value: templates evaluate it inside `and`, also for methods without an entity (`false`). */
+    public boolean hasEntityLifecycle(Object entity, Options options) {
+        return entity instanceof Map<?, ?> map && LifecycleSupport.hasEntityLifecycle((Map<String, Object>) map);
     }
 
     /**

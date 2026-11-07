@@ -121,9 +121,11 @@ public {{abstractClass entity}} class {{entity.className}} {{addExtends entity}}
     {{~#if (eq relationship.type 'OneToOne')}}
     public {{entity.className}} set{{capitalize relationship.fieldName}}({{{relationshipFieldType relationship}}} {{relationship.fieldName}}) {
         this.{{relationship.fieldName}} = {{relationship.fieldName}};
+        {{~#if relationship.otherEntityFieldName}}
         if ({{relationship.fieldName}} != null) {
             {{relationship.fieldName}}.set{{capitalize relationship.otherEntityFieldName}}(this);
         }
+        {{~/if}}
         return this;
     }
     {{~/if}}

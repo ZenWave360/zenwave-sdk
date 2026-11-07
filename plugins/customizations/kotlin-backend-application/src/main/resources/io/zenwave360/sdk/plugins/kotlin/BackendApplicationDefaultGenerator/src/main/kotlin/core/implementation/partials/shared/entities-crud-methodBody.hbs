@@ -7,6 +7,9 @@
     {{_entity.instanceName}} = {{_entity.instanceName}}Repository.save({{_entity.instanceName}})
     // TODO: may need to reload the entity to fetch relationships 'mapped by id'
     {{~> (partial '../withEvents') varName=_entity.instanceName }}
+    {{~#if method.returnTypeIsArray}}
+    val {{_entity.instanceNamePlural}} = listOf({{_entity.instanceName}})
+    {{~/if}}
     return {{wrapWithMapper _entity}}
 {{~else if (isCrudMethod 'list' method=method entity=_entity )}}
     {{~#if method.options.paginated}}
