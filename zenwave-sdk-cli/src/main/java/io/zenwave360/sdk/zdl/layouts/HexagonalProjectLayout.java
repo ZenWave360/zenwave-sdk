@@ -4,7 +4,7 @@ package io.zenwave360.sdk.zdl.layouts;
  * Hexagonal Architecture (Ports and Adapters). The hexagon interior is represented by the
  * {@code domain} and {@code application} packages; application ports and their implementations
  * are grouped under {@code application}, while driving and driven adapters are siblings under
- * {@code adapter.in} and {@code adapter.out}.
+ * {@code adapter.driving} and {@code adapter.driven}.
  *
  * <pre>
  * 📦 {{basePackage}}
@@ -12,20 +12,20 @@ package io.zenwave360.sdk.zdl.layouts;
  *        └─ 📦 event                       # Domain events
  *    📦 application                        # Application-side hexagon interior
  *        ├─ 📦 port
- *        |     ├─ 📦 in                    # Driving ports (service interfaces)
+ *        |     ├─ 📦 driving               # Driving ports (service interfaces)
  *        |     |     └─ 📦 dto             # Command / query models
- *        |     └─ 📦 out                   # Driven ports
+ *        |     └─ 📦 driven                # Driven ports
  *        |           ├─ 📦 {{persistence}} # Repository interfaces (Spring Data)
  *        |           └─ 📦 event           # EventPublisher interface
  *        |                 └─ 📦 dto       # AsyncAPI payloads
  *        └─ 📦 service                     # Driving port implementations
  *              └─ 📦 mapper
  *    📦 adapter
- *        ├─ 📦 in                          # Driving adapters
+ *        ├─ 📦 driving                     # Driving adapters
  *        |     ├─ 📦 web                   # REST controllers
  *        |     ├─ 📦 event                 # Event listeners
  *        |     └─ 📦 command               # AsyncAPI command handlers
- *        └─ 📦 out                         # Driven adapters
+ *        └─ 📦 driven                      # Driven adapters
  *              ├─ 📦 {{persistence}}       # Custom repository implementations
  *              └─ 📦 event                 # EventPublisher implementation
  *    📦 config                             # Spring Boot wiring
@@ -49,11 +49,11 @@ public class HexagonalProjectLayout extends ProjectLayout {
         domainEventsPackage = "{{entitiesPackage}}.event";
 
         // driving (primary) ports
-        inboundPackage = "{{moduleBasePackage}}.application.port.in";
+        inboundPackage = "{{moduleBasePackage}}.application.port.driving";
         inboundDtosPackage = "{{inboundPackage}}.dto";
 
         // driven (secondary) ports
-        outboundPackage = "{{moduleBasePackage}}.application.port.out";
+        outboundPackage = "{{moduleBasePackage}}.application.port.driven";
         outboundRepositoryPackage = "{{outboundPackage}}.{{persistence}}";
         outboundEventsPackage = "{{outboundPackage}}.event";
         outboundEventsModelPackage = "{{outboundEventsPackage}}.dto";
@@ -63,12 +63,12 @@ public class HexagonalProjectLayout extends ProjectLayout {
         coreImplementationMappersPackage = "{{coreImplementationPackage}}.mapper";
 
         // driven adapters
-        infrastructurePackage = "{{moduleBasePackage}}.adapter.out";
+        infrastructurePackage = "{{moduleBasePackage}}.adapter.driven";
         infrastructureRepositoryPackage = "{{infrastructurePackage}}.{{persistence}}";
         infrastructureEventsPackage = "{{infrastructurePackage}}.event";
 
         // driving adapters
-        adaptersPackage = "{{moduleBasePackage}}.adapter.in";
+        adaptersPackage = "{{moduleBasePackage}}.adapter.driving";
         adaptersWebPackage = "{{adaptersPackage}}.web";
         adaptersWebMappersPackage = "{{adaptersWebPackage}}.mapper";
         adaptersCommandsPackage = "{{adaptersPackage}}.command";
@@ -89,13 +89,13 @@ public class HexagonalProjectLayout extends ProjectLayout {
         domainEventsCommonPackage = "{{entitiesCommonPackage}}.event";
         coreImplementationCommonPackage = "{{commonPackage}}.application.service";
         coreImplementationMappersCommonPackage = "{{coreImplementationCommonPackage}}.mapper";
-        infrastructureRepositoryCommonPackage = "{{commonPackage}}.adapter.out.{{persistence}}";
-        infrastructureEventsCommonPackage = "{{commonPackage}}.adapter.out.event";
-        adaptersWebCommonPackage = "{{commonPackage}}.adapter.in.web";
+        infrastructureRepositoryCommonPackage = "{{commonPackage}}.adapter.driven.{{persistence}}";
+        infrastructureEventsCommonPackage = "{{commonPackage}}.adapter.driven.event";
+        adaptersWebCommonPackage = "{{commonPackage}}.adapter.driving.web";
         adaptersWebMappersCommonPackage = "{{adaptersWebCommonPackage}}.mapper";
-        adaptersCommandsCommonPackage = "{{commonPackage}}.adapter.in.command";
+        adaptersCommandsCommonPackage = "{{commonPackage}}.adapter.driving.command";
         adaptersCommandsMappersCommonPackage = "{{adaptersCommandsCommonPackage}}.mapper";
-        adaptersEventsCommonPackage = "{{commonPackage}}.adapter.in.event";
+        adaptersEventsCommonPackage = "{{commonPackage}}.adapter.driving.event";
         adaptersEventsMappersCommonPackage = "{{adaptersEventsCommonPackage}}.mapper";
     }
 

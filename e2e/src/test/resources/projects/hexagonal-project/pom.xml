@@ -184,8 +184,8 @@
 						<configuration>
 							<inputSpec>${project.basedir}/src/main/resources/apis/openapi.yml</inputSpec>
 							<generatorName>spring</generatorName>
-							<apiPackage>io.zenwave360.example.customer.adapter.in.web</apiPackage>
-							<modelPackage>io.zenwave360.example.customer.adapter.in.web.dto</modelPackage>
+							<apiPackage>io.zenwave360.example.customer.adapter.driving.web</apiPackage>
+							<modelPackage>io.zenwave360.example.customer.adapter.driving.web.dto</modelPackage>
 							<modelNameSuffix>DTO</modelNameSuffix>
 							<addCompileSourceRoot>true</addCompileSourceRoot>
 							<generateSupportingFiles>false</generateSupportingFiles>
