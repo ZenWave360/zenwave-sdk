@@ -361,6 +361,12 @@ public class ZDLJavaSignatureUtils {
             value = field.get("type") + ".values()[0]";
         } else if ("LocalDate".equals(field.get("type"))) {
             value = "LocalDate.now()";
+        } else if ("LocalDateTime".equals(field.get("type"))) {
+            value = "LocalDateTime.now()";
+        } else if ("LocalTime".equals(field.get("type"))) {
+            value = "LocalTime.now()";
+        } else if ("OffsetDateTime".equals(field.get("type"))) {
+            value = "OffsetDateTime.now()";
         } else if ("ZonedDateTime".equals(field.get("type"))) {
             value = "ZonedDateTime.now()";
         } else if ("Instant".equals(field.get("type"))) {

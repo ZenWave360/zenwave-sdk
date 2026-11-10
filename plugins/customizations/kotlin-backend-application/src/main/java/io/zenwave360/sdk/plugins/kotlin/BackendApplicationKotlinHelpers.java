@@ -146,9 +146,26 @@ public class BackendApplicationKotlinHelpers {
     }
 
     public String populateField(Map field, Options options) {
+        return populateField(field, options.get("zdl"), 0);
+    }
+
+    /**
+     * Nested inputs (inline or not) are Kotlin data classes without defaults: build them with every non-array field,
+     * by name. The depth limit stops self-referencing inputs.
+     */
+    private String populateField(Map field, Object zdl, int depth) {
+        var nestedInput = (Map<String, Object>) JSONPath.get(zdl, "$.inputs." + field.get("type"));
+        if (nestedInput != null && depth < 5 && !JSONPath.get(field, "isArray", false) && !JSONPath.get(field, "isEnum", false)) {
+            var fields = JSONPath.get(nestedInput, "$.fields", Map.<String, Map>of());
+            return java.util.Objects.requireNonNullElse(nestedInput.get("className"), field.get("type")) + "(" + fields.values().stream()
+                    .filter(nested -> !JSONPath.get(nested, "isArray", false))
+                    .map(nested -> nested.get("name") + " = " + populateField(nested, zdl, depth + 1))
+                    .collect(Collectors.joining(", ")) + ")";
+        }
         var populate = ZDLJavaSignatureUtils.populateField(field).replace("new ", "");
-        if("Integer".equals(field.get("type"))) {
-            populate = populate.replace("0", "0 as Integer");
+        // Kotlin does not widen an Int literal into the Integer? the entities declare
+        if("Integer".equals(field.get("type")) && populate.matches("-?\\d+")) {
+            populate = populate + " as Integer";
         }
         return populate;
     }
