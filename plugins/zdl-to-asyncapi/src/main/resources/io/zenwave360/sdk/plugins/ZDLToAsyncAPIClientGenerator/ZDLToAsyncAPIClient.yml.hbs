@@ -9,7 +9,7 @@ info:
 {{{applicationExtensions}}}
 {{~/if}}
 
-{{#if clientModel.channels}}
+{{#if clientModel.hasChannels}}
 channels:
 {{#each clientModel.channels as |channel|}}
   {{@key}}:
@@ -18,7 +18,7 @@ channels:
 {{else}}
 channels: {}
 {{/if}}
-{{#if clientModel.operations}}
+{{#if clientModel.hasOperations}}
 operations:
 {{#each clientModel.operations as |operation|}}
   {{@key}}:

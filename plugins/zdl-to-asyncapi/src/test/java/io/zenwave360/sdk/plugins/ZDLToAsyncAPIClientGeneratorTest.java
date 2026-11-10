@@ -128,4 +128,30 @@ public class ZDLToAsyncAPIClientGeneratorTest {
         ZDLToAsyncAPIClientGenerator generator = new ZDLToAsyncAPIClientGenerator();
         Assertions.assertThrows(IllegalArgumentException.class, () -> generator.generate(model));
     }
+
+    @Test
+    public void test_no_consumed_channels_generates_empty_objects() throws Exception {
+        var model = loadZDLModel("""
+                @aggregate
+                entity Payment {
+                    id String
+                }
+
+                input PaymentInput {
+                    id String
+                }
+
+                service PaymentsProcessingService for (Payment) {
+                    createPayment(PaymentInput) Payment
+                }
+                """);
+
+        ZDLToAsyncAPIClientGenerator generator = new ZDLToAsyncAPIClientGenerator();
+        String content = generator.generate(model).getAllTemplateOutputs().get(0).getContent();
+        Assertions.assertTrue(content.contains("channels: {}"), content);
+        Assertions.assertTrue(content.contains("operations: {}"), content);
+        Map<String, Object> asyncapi = mapper.readValue(content, Map.class);
+        Assertions.assertEquals(Map.of(), asyncapi.get("channels"));
+        Assertions.assertEquals(Map.of(), asyncapi.get("operations"));
+    }
 }
