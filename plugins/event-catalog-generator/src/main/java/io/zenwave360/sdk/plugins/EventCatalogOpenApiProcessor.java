@@ -81,8 +81,11 @@ public class EventCatalogOpenApiProcessor implements Processor {
             if (model == null) continue;
 
             String version = str(map(model.get("info")), "version", null);
-            if (version != null && serviceData.get("_version") == null) {
-                serviceData.put("_version", version);
+            // Manifest service version wins; spec info.version is only a fallback (regenerated specs often reset it).
+            String manifestVersion = manifestService.documentVersion();
+            String effectiveVersion = manifestVersion != null && !manifestVersion.isBlank() ? manifestVersion : version;
+            if (effectiveVersion != null && serviceData.get("_version") == null) {
+                serviceData.put("_version", effectiveVersion);
             }
 
             annotateArtifactLink(manifestRuntime, manifest, eventCatalog, manifestService, artifact, contentOptions);
