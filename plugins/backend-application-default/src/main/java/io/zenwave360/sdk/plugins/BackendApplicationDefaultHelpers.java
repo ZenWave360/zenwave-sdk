@@ -427,10 +427,45 @@ public class BackendApplicationDefaultHelpers {
         return ServiceEventPlanner.serviceMethodEventPublications(zdl, method);
     }
 
+    /**
+     * Business rules a service method applies, from {@code @rules(...)} then deprecated {@code @policy(...)}.
+     * Looks up {@code $.rules.<name>}, falling back to {@code $.policies.<name>} for older parsers.
+     */
     public List<Map> methodPolicies(Map<String, Object> method, Options options) {
         var zdl = (Map) options.get("zdl");
-        var policies = JSONPath.get(method, "optionsList[?(@.name == 'policy')].value", Collections.emptyList());
-        return policies.stream().map(policy -> JSONPath.get(zdl, "$.policies." + policy, Collections.emptyMap())).collect(Collectors.toList());
+        var names = new LinkedHashSet<String>();
+        names.addAll(methodOptionValues(method, "rules"));
+        names.addAll(methodOptionValues(method, "policy"));
+        return names.stream().map(name -> lookupNamedRule(zdl, name)).collect(Collectors.toList());
+    }
+
+    private List<String> methodOptionValues(Map<String, Object> method, String optionName) {
+        Object values = JSONPath.get(method, "optionsList[?(@.name == '" + optionName + "')].value", Collections.emptyList());
+        var names = new ArrayList<String>();
+        collectRuleNames(names, values);
+        return names;
+    }
+
+    private void collectRuleNames(List<String> names, Object value) {
+        if (value instanceof Collection<?> collection) {
+            for (Object item : collection) {
+                collectRuleNames(names, item);
+            }
+        } else if (value instanceof String name && !name.isBlank()) {
+            names.add(name);
+        }
+    }
+
+    private Map lookupNamedRule(Map zdl, String name) {
+        Map rules = JSONPath.get(zdl, "$.rules", Collections.emptyMap());
+        if (rules != null && rules.containsKey(name)) {
+            return (Map) rules.get(name);
+        }
+        Map policies = JSONPath.get(zdl, "$.policies", Collections.emptyMap());
+        if (policies != null && policies.containsKey(name)) {
+            return (Map) policies.get(name);
+        }
+        return Collections.emptyMap();
     }
 
     public String mapperInputSignature(String inputType, Options options) {
