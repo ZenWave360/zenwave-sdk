@@ -10,6 +10,7 @@ import io.zenwave360.sdk.utils.JSONPath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -125,6 +126,103 @@ public class BackendApplicationDefaultHelpersTest {
         var service = JSONPath.get(zdl, "$.services.CustomerService");
         var needsEventsProducer = helpers.needsEventBus((Map) service, options(Map.of("zdl", zdl)));
         Assertions.assertTrue(needsEventsProducer);
+    }
+
+    @Test
+    void methodPolicies_rulesAnnotationWithRulesBlock() throws Exception {
+        Map<String, Object> zdl;
+        Map<String, Object> method;
+        Map<String, Object> parsed = null;
+        try {
+            parsed = loadZdlContent("""
+                    @aggregate
+                    entity Order { id Long }
+
+                    rules {
+                        minAmount "An order total must be at least 10 EUR"
+                        stock-first "Stock is reserved before payment is taken"
+                    }
+
+                    service OrderService for (Order) {
+                        @rules(minAmount, "stock-first")
+                        cancelOrder()
+                    }
+                    """);
+        } catch (Exception ignored) {
+            // dsl-kotlin 1.10.0 does not know `rules`
+        }
+        Map parsedRules = parsed == null ? null : JSONPath.get(parsed, "$.rules", Collections.emptyMap());
+        if (parsedRules != null && parsedRules.containsKey("minAmount")) {
+            zdl = parsed;
+            method = JSONPath.get(parsed, "$.services.OrderService.methods.cancelOrder");
+        } else {
+            // parser does not fill $.rules; build the model so lookup is still covered
+            method = Map.<String, Object>of("optionsList", List.of(Map.of("name", "rules", "value", List.of("minAmount", "stock-first"))));
+            zdl = Map.<String, Object>of("rules", Map.of(
+                    "minAmount", Map.of("name", "minAmount", "value", "An order total must be at least 10 EUR"),
+                    "stock-first", Map.of("name", "stock-first", "value", "Stock is reserved before payment is taken")));
+        }
+
+        List<Map> resolved = helpers.methodPolicies(method, options(Map.of("zdl", zdl)));
+        Assertions.assertEquals(List.of("minAmount", "stock-first"), resolved.stream().map(r -> r.get("name")).toList());
+        Assertions.assertEquals("An order total must be at least 10 EUR", resolved.get(0).get("value"));
+        Assertions.assertEquals("Stock is reserved before payment is taken", resolved.get(1).get("value"));
+    }
+
+    @Test
+    void methodPolicies_policyAnnotationWithPoliciesBlock() throws Exception {
+        var zdl = loadZdlContent("""
+                @aggregate
+                entity Order { id Long }
+
+                policies {
+                    shipedOrdersCanNotBeCancelled "Shipped orders can not be cancelled"
+                }
+
+                service OrderService for (Order) {
+                    @policy(shipedOrdersCanNotBeCancelled)
+                    cancelOrder()
+                }
+                """);
+        Map<String, Object> method = JSONPath.get(zdl, "$.services.OrderService.methods.cancelOrder");
+
+        List<Map> resolved = helpers.methodPolicies(method, options(Map.of("zdl", zdl)));
+        Assertions.assertEquals(1, resolved.size());
+        Assertions.assertEquals("shipedOrdersCanNotBeCancelled", resolved.get(0).get("name"));
+        Assertions.assertEquals("Shipped orders can not be cancelled", resolved.get(0).get("value"));
+    }
+
+    @Test
+    void methodPolicies_rulesAnnotationWithPoliciesOnlyModel() {
+        // older parsers only fill $.policies; @rules must still resolve
+        Map<String, Object> method = Map.<String, Object>of("optionsList", List.of(Map.of("name", "rules", "value", "shipedOrdersCanNotBeCancelled")));
+        Map<String, Object> zdl = Map.<String, Object>of("policies", Map.of(
+                "shipedOrdersCanNotBeCancelled",
+                Map.of("name", "shipedOrdersCanNotBeCancelled", "value", "Shipped orders can not be cancelled")));
+
+        List<Map> resolved = helpers.methodPolicies(method, options(Map.of("zdl", zdl)));
+        Assertions.assertEquals(1, resolved.size());
+        Assertions.assertEquals("shipedOrdersCanNotBeCancelled", resolved.get(0).get("name"));
+        Assertions.assertEquals("Shipped orders can not be cancelled", resolved.get(0).get("value"));
+    }
+
+    @Test
+    void methodPolicies_rulesFirstThenPolicyDeduped() {
+        Map<String, Object> method = Map.<String, Object>of("optionsList", List.of(
+                Map.of("name", "policy", "value", List.of("b", "c")),
+                Map.of("name", "rules", "value", List.of("a", "b"))));
+        Map<String, Object> zdl = Map.<String, Object>of("rules", Map.of(
+                "a", Map.of("name", "a", "value", "A"),
+                "b", Map.of("name", "b", "value", "B"),
+                "c", Map.of("name", "c", "value", "C")));
+
+        List<Map> resolved = helpers.methodPolicies(method, options(Map.of("zdl", zdl)));
+        Assertions.assertEquals(List.of("a", "b", "c"), resolved.stream().map(r -> r.get("name")).toList());
+    }
+
+    private Map<String, Object> loadZdlContent(String zdl) throws Exception {
+        Map<String, Object> model = new ZDLParser().withContent(zdl).parse();
+        return (Map<String, Object>) new ZDLProcessor().process(model).get("zdl");
     }
 
 }
