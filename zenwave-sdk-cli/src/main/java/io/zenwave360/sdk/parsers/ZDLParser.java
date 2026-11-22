@@ -100,7 +100,7 @@ public class ZDLParser implements Parser, ConfigurationProvider {
                 var message = JSONPath.get(problem, "message");
                 var location = JSONPath.get(problem, "location", new int[5]);
                 var path = JSONPath.get(problem, "path");
-                System.err.printf("ZDL ERROR [%s]: %s [line: %s, char: %s]%n", path, message, location[2], location[3]+1);
+                System.err.printf("ZDL %s [%s]: %s [line: %s, char: %s]%n", severityLabel(problem), path, message, location[2], location[3]+1);
             }
             if(!continueOnZdlError) {
                 throw new ParseProblemsException(problems);
@@ -162,7 +162,7 @@ public class ZDLParser implements Parser, ConfigurationProvider {
             if (!problems.isEmpty()) {
                 // Same policy as the primary model: report problems, and only fail when continueOnZdlError is off.
                 for (Object problem : problems) {
-                    System.err.printf("ZDL ERROR [%s] in referenced '%s' (%s): %s%n", JSONPath.get(problem, "path"),
+                    System.err.printf("ZDL %s [%s] in referenced '%s' (%s): %s%n", severityLabel(problem), JSONPath.get(problem, "path"),
                             api.get("name"), resolvedApiUri, JSONPath.get(problem, "message"));
                 }
                 if (!continueOnZdlError) {
@@ -172,6 +172,11 @@ public class ZDLParser implements Parser, ConfigurationProvider {
             return referencedZdlModel;
         }
         return loader.parse(resolvedApiUri);
+    }
+
+    /** Problems with severity WARNING are reported as warnings; they still count as problems for failing the parse. */
+    private static String severityLabel(Object problem) {
+        return "WARNING".equals(JSONPath.get(problem, "severity")) ? "WARNING" : "ERROR";
     }
 
     private static String rootMessage(Throwable error) {
