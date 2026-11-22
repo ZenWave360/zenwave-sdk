@@ -436,7 +436,9 @@ public class BackendApplicationDefaultHelpers {
         var names = new LinkedHashSet<String>();
         names.addAll(methodOptionValues(method, "rules"));
         names.addAll(methodOptionValues(method, "policy"));
-        return names.stream().map(name -> lookupNamedRule(zdl, name)).collect(Collectors.toList());
+        var resolved = new LinkedHashSet<Map>();
+        names.forEach(name -> resolved.addAll(lookupNamedRule(zdl, name)));
+        return new ArrayList<>(resolved);
     }
 
     private List<String> methodOptionValues(Map<String, Object> method, String optionName) {
@@ -456,16 +458,30 @@ public class BackendApplicationDefaultHelpers {
         }
     }
 
-    private Map lookupNamedRule(Map zdl, String name) {
+    /**
+     * The model keys a rule by {@code <Aggregate>.<name>} when its block has an aggregate, else by name.
+     * Tries the exact key in {@code $.rules}, then {@code $.policies}, then every entry named like the bare name.
+     */
+    private List<Map> lookupNamedRule(Map zdl, String name) {
         Map rules = JSONPath.get(zdl, "$.rules", Collections.emptyMap());
-        if (rules != null && rules.containsKey(name)) {
-            return (Map) rules.get(name);
-        }
         Map policies = JSONPath.get(zdl, "$.policies", Collections.emptyMap());
-        if (policies != null && policies.containsKey(name)) {
-            return (Map) policies.get(name);
+        for (Map source : Arrays.asList(rules, policies)) {
+            if (source != null && source.get(name) instanceof Map found) {
+                return List.of(found);
+            }
         }
-        return Collections.emptyMap();
+        var matches = new ArrayList<Map>();
+        for (Map source : Arrays.asList(rules, policies)) {
+            if (source == null) {
+                continue;
+            }
+            for (Object entry : source.values()) {
+                if (entry instanceof Map rule && name.equals(rule.get("name")) && !matches.contains(rule)) {
+                    matches.add(rule);
+                }
+            }
+        }
+        return matches;
     }
 
     public String mapperInputSignature(String inputType, Options options) {

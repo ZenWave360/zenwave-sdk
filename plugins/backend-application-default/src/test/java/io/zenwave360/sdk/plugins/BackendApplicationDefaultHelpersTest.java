@@ -128,45 +128,80 @@ public class BackendApplicationDefaultHelpersTest {
         Assertions.assertTrue(needsEventsProducer);
     }
 
-    @Test
-    void methodPolicies_rulesAnnotationWithRulesBlock() throws Exception {
-        Map<String, Object> zdl;
-        Map<String, Object> method;
-        Map<String, Object> parsed = null;
-        try {
-            parsed = loadZdlContent("""
-                    @aggregate
-                    entity Order { id Long }
+    private static final String RULES_ZDL = """
+            @aggregate
+            entity Order { id Long }
+            event OrderPlaced { id Long }
 
-                    rules {
-                        minAmount "An order total must be at least 10 EUR"
-                        stock-first "Stock is reserved before payment is taken"
-                    }
+            rules (Order) {
+                limit "An order is capped"
+                @invariant noOversell "No oversell"
+            }
 
-                    service OrderService for (Order) {
-                        @rules(minAmount, "stock-first")
-                        cancelOrder()
-                    }
-                    """);
-        } catch (Exception ignored) {
-            // dsl-kotlin 1.10.0 does not know `rules`
-        }
-        Map parsedRules = parsed == null ? null : JSONPath.get(parsed, "$.rules", Collections.emptyMap());
-        if (parsedRules != null && parsedRules.containsKey("minAmount")) {
-            zdl = parsed;
-            method = JSONPath.get(parsed, "$.services.OrderService.methods.cancelOrder");
-        } else {
-            // parser does not fill $.rules; build the model so lookup is still covered
-            method = Map.<String, Object>of("optionsList", List.of(Map.of("name", "rules", "value", List.of("minAmount", "stock-first"))));
-            zdl = Map.<String, Object>of("rules", Map.of(
-                    "minAmount", Map.of("name", "minAmount", "value", "An order total must be at least 10 EUR"),
-                    "stock-first", Map.of("name", "stock-first", "value", "Stock is reserved before payment is taken")));
-        }
+            rules {
+                audit "Every change is audited"
+            }
 
+            policies (Order) {
+                legacy "A deprecated policy"
+            }
+
+            service OrderService for (Order) {
+                @rules(limit)
+                bare()
+
+                @rules(Order.limit)
+                qualified()
+
+                @rules(limit, Order.limit, audit)
+                both()
+
+                @policy(audit)
+                policyAudit()
+
+                @policy(legacy)
+                legacyPolicy()
+
+                @rules(noOversell)
+                annotated()
+            }
+            """;
+
+    private List<String> resolvedValues(String methodName) throws Exception {
+        var zdl = loadZdlContent(RULES_ZDL);
+        Map<String, Object> method = JSONPath.get(zdl, "$.services.OrderService.methods." + methodName);
         List<Map> resolved = helpers.methodPolicies(method, options(Map.of("zdl", zdl)));
-        Assertions.assertEquals(List.of("minAmount", "stock-first"), resolved.stream().map(r -> r.get("name")).toList());
-        Assertions.assertEquals("An order total must be at least 10 EUR", resolved.get(0).get("value"));
-        Assertions.assertEquals("Stock is reserved before payment is taken", resolved.get(1).get("value"));
+        return resolved.stream().map(r -> (String) r.get("value")).toList();
+    }
+
+    @Test
+    void methodPolicies_bareNameFindsAggregateRule() throws Exception {
+        Assertions.assertEquals(List.of("An order is capped"), resolvedValues("bare"));
+    }
+
+    @Test
+    void methodPolicies_qualifiedNameFindsAggregateRule() throws Exception {
+        Assertions.assertEquals(List.of("An order is capped"), resolvedValues("qualified"));
+    }
+
+    @Test
+    void methodPolicies_bareAndQualifiedAreDeduplicated() throws Exception {
+        Assertions.assertEquals(List.of("An order is capped", "Every change is audited"), resolvedValues("both"));
+    }
+
+    @Test
+    void methodPolicies_policyAnnotationFindsTopLevelRule() throws Exception {
+        Assertions.assertEquals(List.of("Every change is audited"), resolvedValues("policyAudit"));
+    }
+
+    @Test
+    void methodPolicies_deprecatedPoliciesKeywordResolves() throws Exception {
+        Assertions.assertEquals(List.of("A deprecated policy"), resolvedValues("legacyPolicy"));
+    }
+
+    @Test
+    void methodPolicies_annotatedRuleResolves() throws Exception {
+        Assertions.assertEquals(List.of("No oversell"), resolvedValues("annotated"));
     }
 
     @Test
