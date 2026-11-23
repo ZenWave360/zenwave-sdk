@@ -290,6 +290,27 @@ public class BackendApplicationDefaultHelpers {
     }
 
     /**
+     * The single target state of a method's @transition(to: ...), or null when there is none or there are several:
+     * then the implementation decides which one, and the templates leave a TODO.
+     */
+    public Object singleTransitionTo(Map<String, Object> method, Options options) {
+        var to = JSONPath.get(method, "$.transition.to");
+        if (to instanceof Collection<?> targets) {
+            return targets.size() == 1 ? targets.iterator().next() : null;
+        }
+        return to;
+    }
+
+    /** The target states of a method's @transition(to: ...), comma separated. */
+    public String transitionTargets(Map<String, Object> method, Options options) {
+        var to = JSONPath.get(method, "$.transition.to");
+        if (to instanceof Collection<?> targets) {
+            return targets.stream().map(String::valueOf).collect(Collectors.joining(", "));
+        }
+        return to == null ? "" : String.valueOf(to);
+    }
+
+    /**
      * Returns true if the aggregate has a lifecycle (state machine) defined.
      */
     public boolean hasLifecycle(Map<String, Object> aggregate, Options options) {
@@ -340,8 +361,9 @@ public class BackendApplicationDefaultHelpers {
     /**
      * Returns true if the entity has a @lifecycle annotation (for non-aggregate entities).
      */
-    public boolean hasEntityLifecycle(Map<String, Object> entity, Options options) {
-        return LifecycleSupport.hasEntityLifecycle(entity);
+    /** Accepts any value: templates evaluate it inside `and`, also for methods without an entity (`false`). */
+    public boolean hasEntityLifecycle(Object entity, Options options) {
+        return entity instanceof Map<?, ?> map && LifecycleSupport.hasEntityLifecycle((Map<String, Object>) map);
     }
 
     /**
@@ -405,10 +427,61 @@ public class BackendApplicationDefaultHelpers {
         return ServiceEventPlanner.serviceMethodEventPublications(zdl, method);
     }
 
+    /**
+     * Business rules a service method applies, from {@code @rules(...)} then deprecated {@code @policy(...)}.
+     * Looks up {@code $.rules.<name>}, falling back to {@code $.policies.<name>} for older parsers.
+     */
     public List<Map> methodPolicies(Map<String, Object> method, Options options) {
         var zdl = (Map) options.get("zdl");
-        var policies = JSONPath.get(method, "optionsList[?(@.name == 'policy')].value", Collections.emptyList());
-        return policies.stream().map(policy -> JSONPath.get(zdl, "$.policies." + policy, Collections.emptyMap())).collect(Collectors.toList());
+        var names = new LinkedHashSet<String>();
+        names.addAll(methodOptionValues(method, "rules"));
+        names.addAll(methodOptionValues(method, "policy"));
+        var resolved = new LinkedHashSet<Map>();
+        names.forEach(name -> resolved.addAll(lookupNamedRule(zdl, name)));
+        return new ArrayList<>(resolved);
+    }
+
+    private List<String> methodOptionValues(Map<String, Object> method, String optionName) {
+        Object values = JSONPath.get(method, "optionsList[?(@.name == '" + optionName + "')].value", Collections.emptyList());
+        var names = new ArrayList<String>();
+        collectRuleNames(names, values);
+        return names;
+    }
+
+    private void collectRuleNames(List<String> names, Object value) {
+        if (value instanceof Collection<?> collection) {
+            for (Object item : collection) {
+                collectRuleNames(names, item);
+            }
+        } else if (value instanceof String name && !name.isBlank()) {
+            names.add(name);
+        }
+    }
+
+    /**
+     * The model keys a rule by {@code <Aggregate>.<name>} when its block has an aggregate, else by name.
+     * Tries the exact key in {@code $.rules}, then {@code $.policies}, then every entry named like the bare name.
+     */
+    private List<Map> lookupNamedRule(Map zdl, String name) {
+        Map rules = JSONPath.get(zdl, "$.rules", Collections.emptyMap());
+        Map policies = JSONPath.get(zdl, "$.policies", Collections.emptyMap());
+        for (Map source : Arrays.asList(rules, policies)) {
+            if (source != null && source.get(name) instanceof Map found) {
+                return List.of(found);
+            }
+        }
+        var matches = new ArrayList<Map>();
+        for (Map source : Arrays.asList(rules, policies)) {
+            if (source == null) {
+                continue;
+            }
+            for (Object entry : source.values()) {
+                if (entry instanceof Map rule && name.equals(rule.get("name")) && !matches.contains(rule)) {
+                    matches.add(rule);
+                }
+            }
+        }
+        return matches;
     }
 
     public String mapperInputSignature(String inputType, Options options) {

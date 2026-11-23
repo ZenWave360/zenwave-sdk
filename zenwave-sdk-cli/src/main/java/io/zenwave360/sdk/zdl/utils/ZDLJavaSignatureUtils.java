@@ -318,12 +318,20 @@ public class ZDLJavaSignatureUtils {
         return String.format("%s%s%s", prefix, type, suffix);
     };
 
+    /** An integer literal for a Long field needs the L suffix, in Java (`Long x = 1;`) as in Kotlin (`Long? = 1`). */
+    private static String longLiteral(Map field, String value) {
+        if ("Long".equals(field.get("type")) && !JSONPath.get(field, "isArray", false) && value.matches("-?\\d+")) {
+            return value + "L";
+        }
+        return value;
+    }
+
     public static String fieldTypeInitializer(Map field) {
         if (field.get("initialValue") != null) {
             if ("String".equals(field.get("type")) || "TextBlob".equals(field.get("type"))) {
                 return "= \"" + field.get("initialValue") + "\"";
             }
-            return "= " + field.get("initialValue");
+            return "= " + longLiteral(field, String.valueOf(field.get("initialValue")));
         }
         if (field.get("isArray") == Boolean.TRUE) {
             if("byte".equalsIgnoreCase(String.valueOf(field.get("type")))) {
@@ -342,7 +350,7 @@ public class ZDLJavaSignatureUtils {
                     return "\"" + field.get("initialValue") + "\"";
                 }
             }
-            return String.valueOf(field.get("initialValue"));
+            return longLiteral(field, String.valueOf(field.get("initialValue")));
         }
         if ("String".equals(field.get("type")) || "TextBlob".equals(field.get("type"))) {
             int min = Integer.valueOf(JSONPath.get(field, "validations.minlength.value", "0"));
@@ -353,6 +361,12 @@ public class ZDLJavaSignatureUtils {
             value = field.get("type") + ".values()[0]";
         } else if ("LocalDate".equals(field.get("type"))) {
             value = "LocalDate.now()";
+        } else if ("LocalDateTime".equals(field.get("type"))) {
+            value = "LocalDateTime.now()";
+        } else if ("LocalTime".equals(field.get("type"))) {
+            value = "LocalTime.now()";
+        } else if ("OffsetDateTime".equals(field.get("type"))) {
+            value = "OffsetDateTime.now()";
         } else if ("ZonedDateTime".equals(field.get("type"))) {
             value = "ZonedDateTime.now()";
         } else if ("Instant".equals(field.get("type"))) {

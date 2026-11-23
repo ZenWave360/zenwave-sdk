@@ -88,7 +88,11 @@ public class ZDLToAsyncAPIClientGenerator extends AbstractZDLGenerator {
                 "channels",
                 channels,
                 "operations",
-                operations);
+                operations,
+                "hasChannels",
+                !channels.isEmpty(),
+                "hasOperations",
+                !operations.isEmpty());
     }
 
     private List<ConsumedChannel> findConsumedChannels(Map<String, Object> model) {

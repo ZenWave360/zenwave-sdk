@@ -96,7 +96,8 @@ public class ZDLProcessor extends AbstractBaseProcessor {
                 entity = serviceAggregates.get(0);
             } else {
                 var returnType = JSONPath.get(method, "$.returnType");
-                if(serviceAggregates.contains(returnType) || entitiesForServices.contains(returnType)) {
+                // entitiesForServices holds nulls for plain @aggregate entities: a method without return type must not match them
+                if(returnType != null && (serviceAggregates.contains(returnType) || entitiesForServices.contains(returnType))) {
                     entity = (String) returnType;
                 } else {
                     var entityForId = JSONPath.get(method, "$.options.entityForId");

@@ -107,6 +107,10 @@ public class OpenAPIControllersKotlinHelpers {
     }
 
     private String populateConstructor(Map api, String type) {
+        return populateConstructor(api, type, 0);
+    }
+
+    private String populateConstructor(Map api, String type, int depth) {
         var dtoName = type.substring(openApiModelNamePrefix.length(), type.length() - openApiModelNameSuffix.length());
         var schema = JSONPath.get(api, "$.components.schemas." + dtoName);
         if(schema == null) {
@@ -116,8 +120,22 @@ public class OpenAPIControllersKotlinHelpers {
         var properties = JSONPath.get(schema, "$.properties", Map.<String, Map<String, Object>>of());
         return properties.entrySet().stream()
                 .filter(entry -> required.contains(entry.getKey()))
-                .map(entry -> entry.getKey() + " = " + populateProperty(entry.getValue(), openApiModelNamePrefix, openApiModelNameSuffix))
+                .map(entry -> entry.getKey() + " = " + populateRequiredProperty(api, entry.getValue(), depth))
                 .collect(Collectors.joining(", "));
+    }
+
+    /**
+     * A nested DTO is built with its own required properties: its Kotlin constructor has no defaults for them.
+     * The depth limit stops self-referencing schemas.
+     */
+    private String populateRequiredProperty(Map api, Map<String, Object> property, int depth) {
+        var otherEntity = (String) property.get("x--schema-name");
+        var isEnum = property.get("enum") != null;
+        if (otherEntity != null && !isEnum && !"array".equals(property.get("type")) && depth < 5) {
+            var nestedType = openApiModelNamePrefix + otherEntity + openApiModelNameSuffix;
+            return nestedType + "(" + populateConstructor(api, nestedType, depth + 1) + ")";
+        }
+        return populateProperty(property, openApiModelNamePrefix, openApiModelNameSuffix);
     }
 
     public static String populateProperty(Map property, String openApiModelNamePrefix, String openApiModelNameSuffix) {

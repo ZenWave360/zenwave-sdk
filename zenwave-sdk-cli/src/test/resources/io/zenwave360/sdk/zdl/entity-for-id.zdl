@@ -1,0 +1,42 @@
+config {
+    basePackage "io.zenwave360.example"
+    persistence jpa
+}
+
+@aggregate
+entity Customer {
+    name String
+}
+
+@aggregate
+entity Address {
+    street String
+}
+
+output CustomerSummary {
+    name String
+}
+
+event CustomerRemoved {
+    id String
+}
+
+/** A service for two aggregates: methods with an id need @entityForId. */
+@rest("/customers")
+service CustomerService for (Customer, Address) {
+
+    @entityForId(Customer)
+    @delete("/{id}")
+    removeWithEvents(id) withEvents CustomerRemoved
+
+    @entityForId(Customer)
+    @delete("/{id}/plain")
+    removeWithoutReturn(id)
+
+    @entityForId(Customer)
+    @get("/{id}/summary")
+    getSummary(id) CustomerSummary
+
+    @get("/{id}")
+    getAddress(id) Address
+}

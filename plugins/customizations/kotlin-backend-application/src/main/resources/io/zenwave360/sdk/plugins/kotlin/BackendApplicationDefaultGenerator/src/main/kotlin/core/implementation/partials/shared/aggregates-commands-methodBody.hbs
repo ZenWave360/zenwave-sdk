@@ -25,8 +25,10 @@
 
     val result = {{asInstanceName aggregateCommand.aggregate.className}}.{{aggregateCommand.command.name}}({{#if method.parameter}}input{{/if}})
 
-	{{~#if method.transition.to}}
-	rootEntity.{{aggregateCommand.aggregate.lifecycle.field}} = {{lifecycleFieldType aggregateCommand.aggregate}}.{{method.transition.to}}
+	{{~#if (singleTransitionTo method)}}
+	rootEntity.{{aggregateCommand.aggregate.lifecycle.field}} = {{lifecycleFieldType aggregateCommand.aggregate}}.{{singleTransitionTo method}}
+	{{~else if method.transition.to}}
+	// TODO CUSTOM_REQUIRED: set rootEntity.{{aggregateCommand.aggregate.lifecycle.field}} to one of {{transitionTargets method}}
 	{{~/if}}
 
     {{aggregateCommand.entity.instanceName}}Repository.save(result.aggregateRoot)
@@ -85,8 +87,10 @@
 
 	val {{asInstanceName aggregateCommand.aggregate.className}}Result = {{asInstanceName aggregateCommand.aggregate.className}}.{{command.name}}({{#if method.parameter}}input{{/if}})
 
-	{{~#if method.transition.to}}
-	rootEntity.{{aggregateCommand.aggregate.lifecycle.field}} = {{lifecycleFieldType aggregateCommand.aggregate}}.{{method.transition.to}}
+	{{~#if (singleTransitionTo method)}}
+	rootEntity.{{aggregateCommand.aggregate.lifecycle.field}} = {{lifecycleFieldType aggregateCommand.aggregate}}.{{singleTransitionTo method}}
+	{{~else if method.transition.to}}
+	// TODO CUSTOM_REQUIRED: set rootEntity.{{aggregateCommand.aggregate.lifecycle.field}} to one of {{transitionTargets method}}
 	{{~/if}}
 
     {{aggregateCommand.entity.instanceName}}Repository.save({{asInstanceName aggregateCommand.aggregate.className}}Result.aggregateRoot)

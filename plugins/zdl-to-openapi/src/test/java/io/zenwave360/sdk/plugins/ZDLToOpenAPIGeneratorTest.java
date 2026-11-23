@@ -66,6 +66,37 @@ public class ZDLToOpenAPIGeneratorTest {
     }
 
     @Test
+    public void min_max_are_emitted_even_when_zero() throws Exception {
+        String zdl = """
+                @aggregate
+                entity Order {
+                  unitPrice BigDecimal required min(0)
+                  discount BigDecimal max(0)
+                  quantity Integer required min(1)
+                  limit Integer min(0) max(10)
+                }
+
+                @rest(\"/orders\")
+                service OrderService for (Order) {
+                  @post(\"/checkout\")
+                  checkout(Order) Order
+                }
+                """;
+        Map<String, Object> model = new ZDLParser().withContent(zdl).parse();
+        model = new ZDLProcessor().process(model);
+        model = new PathsProcessor().process(model);
+
+        String openApi = new ZDLToOpenAPIGenerator().generate(model).getAllTemplateOutputs().get(0).getContent();
+        Map<String, Object> schema = mapper.readValue(openApi, Map.class);
+
+        Assertions.assertEquals(0, ((Number) JSONPath.get(schema, "$.components.schemas.Order.properties.unitPrice.minimum")).intValue());
+        Assertions.assertEquals(0, ((Number) JSONPath.get(schema, "$.components.schemas.Order.properties.discount.maximum")).intValue());
+        Assertions.assertEquals(1, ((Number) JSONPath.get(schema, "$.components.schemas.Order.properties.quantity.minimum")).intValue());
+        Assertions.assertEquals(0, ((Number) JSONPath.get(schema, "$.components.schemas.Order.properties.limit.minimum")).intValue());
+        Assertions.assertEquals(10, ((Number) JSONPath.get(schema, "$.components.schemas.Order.properties.limit.maximum")).intValue());
+    }
+
+    @Test
     public void test_customer_address_zdl_to_openapi_fileupload() throws Exception {
         Map<String, Object> model = loadZDLModelFromResource("classpath:io/zenwave360/sdk/resources/zdl/documents.zdl");
         ZDLToOpenAPIGenerator generator = new ZDLToOpenAPIGenerator();

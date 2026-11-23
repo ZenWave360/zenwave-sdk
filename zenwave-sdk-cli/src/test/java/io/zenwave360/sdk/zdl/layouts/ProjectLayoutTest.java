@@ -38,14 +38,14 @@ class ProjectLayoutTest {
         assertAll(
                 () -> assertEquals("io.example.customer.domain", layout.entitiesPackage),
                 () -> assertEquals("io.example.customer.domain.event", layout.domainEventsPackage),
-                () -> assertEquals("io.example.customer.application.port.in", layout.inboundPackage),
-                () -> assertEquals("io.example.customer.application.port.in.dto", layout.inboundDtosPackage),
-                () -> assertEquals("io.example.customer.application.port.out.jpa", layout.outboundRepositoryPackage),
+                () -> assertEquals("io.example.customer.application.port.driving", layout.inboundPackage),
+                () -> assertEquals("io.example.customer.application.port.driving.dto", layout.inboundDtosPackage),
+                () -> assertEquals("io.example.customer.application.port.driven.jpa", layout.outboundRepositoryPackage),
                 () -> assertEquals("io.example.customer.application.service", layout.coreImplementationPackage),
-                () -> assertEquals("io.example.customer.adapter.out.jpa", layout.infrastructureRepositoryPackage),
-                () -> assertEquals("io.example.customer.adapter.in.web", layout.adaptersWebPackage),
-                () -> assertEquals("io.example.customer.adapter.in.event.customer", layout.adaptersEventsPackage),
-                () -> assertEquals("io.example.customer.adapter.in.command", layout.asyncApiConsumerApiPackage));
+                () -> assertEquals("io.example.customer.adapter.driven.jpa", layout.infrastructureRepositoryPackage),
+                () -> assertEquals("io.example.customer.adapter.driving.web", layout.adaptersWebPackage),
+                () -> assertEquals("io.example.customer.adapter.driving.event.customer", layout.adaptersEventsPackage),
+                () -> assertEquals("io.example.customer.adapter.driving.command", layout.asyncApiConsumerApiPackage));
     }
 
     @Test

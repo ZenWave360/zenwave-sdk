@@ -182,4 +182,24 @@ public class ZDLParserTest {
         Assertions.assertNotNull(JSONPath.get(referencedZdl, "$.events.PaymentAuthorized"));
     }
 
+    @Test
+    public void deprecationProblemsAreLoggedAsWarnings() throws Exception {
+        var original = System.err;
+        var captured = new java.io.ByteArrayOutputStream();
+        System.setErr(new java.io.PrintStream(captured, true, StandardCharsets.UTF_8));
+        try {
+            new ZDLParser().withContent("""
+                    entity Order { id Long }
+                    policies { legacy "A deprecated policy" }
+                    """).parse();
+        } catch (Exception ignored) {
+            // warnings still count as problems unless continueOnZdlError
+        } finally {
+            System.setErr(original);
+        }
+        var log = captured.toString(StandardCharsets.UTF_8);
+        Assertions.assertTrue(log.contains("ZDL WARNING [policies]: 'policies' is deprecated"), log);
+        Assertions.assertFalse(log.contains("ZDL ERROR"), log);
+    }
+
 }

@@ -1,4 +1,5 @@
-{{~assign "_entity" aggregateCommandsForMethod.entity}}
+{{!-- false, not null: a missing entity would resolve to the _entity of a previous method --}}
+{{~assign "_entity" (ifTruthy aggregateCommandsForMethod.entity aggregateCommandsForMethod.entity false)}}
 {{~assign "returnEntity" (methodReturnEntity method)}}
     {{{logMethodCall method}}}
 {{!-- @Async --}}
@@ -14,8 +15,10 @@
             {{~#if method.parameter}}
             {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
             {{~/if}}
-			{{~#if method.transition.to}}
-			existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{method.transition.to}}
+			{{~#if (singleTransitionTo method)}}
+			existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{singleTransitionTo method}}
+            {{~else if method.transition.to}}
+			// TODO CUSTOM_REQUIRED: set existing{{_entity.className}}.{{_entity.options.lifecycle.field}} to one of {{transitionTargets method}}
             {{~/if}}
             existing{{_entity.className}}
         }
@@ -37,8 +40,10 @@
             {{~#if method.parameter}}
             {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
             {{~/if}}
-			{{~#if method.transition.to}}
-			existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{method.transition.to}}
+			{{~#if (singleTransitionTo method)}}
+			existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{singleTransitionTo method}}
+            {{~else if method.transition.to}}
+			// TODO CUSTOM_REQUIRED: set existing{{_entity.className}}.{{_entity.options.lifecycle.field}} to one of {{transitionTargets method}}
             {{~/if}}
             existing{{_entity.className}}
         }
@@ -60,8 +65,10 @@
         {{~#if method.parameter}}
         {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
         {{~/if}}
-		{{~#if method.transition.to}}
-		existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{method.transition.to}}
+		{{~#if (singleTransitionTo method)}}
+		existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{singleTransitionTo method}}
+        {{~else if method.transition.to}}
+		// TODO CUSTOM_REQUIRED: set existing{{_entity.className}}.{{_entity.options.lifecycle.field}} to one of {{transitionTargets method}}
         {{~/if}}
     }
     {{_entity.instanceNamePlural}} = {{_entity.instanceName}}Repository.saveAll({{_entity.instanceNamePlural}})
@@ -104,8 +111,10 @@
             {{entityServiceTransitionsClassName _entity}}.{{transitionMethodName method}}(existing{{_entity.className}})
             {{~/if}}
             {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
-			{{~#if method.transition.to}}
-			existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{method.transition.to}}
+			{{~#if (singleTransitionTo method)}}
+			existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{singleTransitionTo method}}
+            {{~else if method.transition.to}}
+			// TODO CUSTOM_REQUIRED: set existing{{_entity.className}}.{{_entity.options.lifecycle.field}} to one of {{transitionTargets method}}
             {{~/if}}
             existing{{_entity.className}}
         }
@@ -141,8 +150,10 @@
             {{entityServiceTransitionsClassName _entity}}.{{transitionMethodName method}}(existing{{_entity.className}})
             {{~/if}}
             {{asInstanceName service.name}}Mapper.update(existing{{_entity.className}}, {{{mapperInputCallSignature method.parameter}}})
-			{{~#if method.transition.to}}
-			existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{method.transition.to}}
+			{{~#if (singleTransitionTo method)}}
+			existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{singleTransitionTo method}}
+            {{~else if method.transition.to}}
+			// TODO CUSTOM_REQUIRED: set existing{{_entity.className}}.{{_entity.options.lifecycle.field}} to one of {{transitionTargets method}}
             {{~/if}}
             existing{{_entity.className}}
         }
@@ -152,6 +163,9 @@
             {{~> (partial '../withEvents') varName='it' }}
         }
         {{~/if}}
+        {{~#unless (eq _entity.name method.returnType)}}
+        ?.let { {{asInstanceName service.name}}Mapper.as{{method.returnType}}(it) }
+        {{~/unless}}
         ?: throw NoSuchElementException("{{_entity.className}} not found with id: {{{idForStringInterpolation method}}}")
 {{!-- Entity update(id, Entity) --}}
 {{~else if (and _entity method.paramId method.parameter method.returnType)}}
@@ -165,6 +179,9 @@
             {{~> (partial '../withEvents') varName='it' }}
         }
         {{~/if}}
+        {{~#unless (eq _entity.name method.returnType)}}
+        ?.let { {{asInstanceName service.name}}Mapper.as{{method.returnType}}(it) }
+        {{~/unless}}
         ?: throw NoSuchElementException("{{_entity.className}} not found with id: {{{idForStringInterpolation method}}}")
 {{!-- Optional<Entity> transition(id) with lifecycle from/to (no input) --}}
 {{~else if (and _entity (hasEntityLifecycle _entity) method.paramId (not method.parameter) method.returnType method.returnTypeIsOptional (or method.transition.from method.transition.to))}}
@@ -173,8 +190,10 @@
 			{{~#if method.transition.from}}
 			{{entityServiceTransitionsClassName _entity}}.{{transitionMethodName method}}(existing{{_entity.className}})
 			{{~/if}}
-			{{~#if method.transition.to}}
-			existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{method.transition.to}}
+			{{~#if (singleTransitionTo method)}}
+			existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{singleTransitionTo method}}
+			{{~else if method.transition.to}}
+			// TODO CUSTOM_REQUIRED: set existing{{_entity.className}}.{{_entity.options.lifecycle.field}} to one of {{transitionTargets method}}
 			{{~/if}}
 			existing{{_entity.className}}
 		}
@@ -191,8 +210,10 @@
 	{{~#if method.transition.from}}
 	{{entityServiceTransitionsClassName _entity}}.{{transitionMethodName method}}(existing{{_entity.className}})
 	{{~/if}}
-	{{~#if method.transition.to}}
-	existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{method.transition.to}}
+	{{~#if (singleTransitionTo method)}}
+	existing{{_entity.className}}.{{_entity.options.lifecycle.field}} = {{entityLifecycleFieldType _entity}}.{{singleTransitionTo method}}
+	{{~else if method.transition.to}}
+	// TODO CUSTOM_REQUIRED: set existing{{_entity.className}}.{{_entity.options.lifecycle.field}} to one of {{transitionTargets method}}
 	{{~/if}}
 	val {{_entity.instanceName}} = {{_entity.instanceName}}Repository.save(existing{{_entity.className}})
 	{{~> (partial '../withEvents') varName=_entity.instanceName }}
@@ -235,6 +256,6 @@
     // TODO: implement this method
     {{~> (partial '../withEvents') varName=_entity.instanceName }}
   {{~#if method.returnType}}
-    return null
+    TODO("implement {{method.name}}")
   {{~/if}}
 {{~/if}}

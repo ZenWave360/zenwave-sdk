@@ -46,5 +46,15 @@ public class ZDLProcessorTest {
         var attachmentInput = JSONPath.get(model, "$.zdl.inputs.AddressInputCopy", Map.of());
     }
 
+    @Test
+    public void testProcessZDL_EntityForIdOnMethodsWithoutReturnType() throws Exception {
+        var model = loadZDL("classpath:io/zenwave360/sdk/zdl/entity-for-id.zdl");
+        var methods = "$.zdl.services.CustomerService.methods.";
+        Assertions.assertEquals("Customer", JSONPath.get(model, methods + "removeWithEvents.entity"));
+        Assertions.assertEquals("Customer", JSONPath.get(model, methods + "removeWithoutReturn.entity"));
+        Assertions.assertEquals("Customer", JSONPath.get(model, methods + "getSummary.entity"));
+        Assertions.assertEquals("Address", JSONPath.get(model, methods + "getAddress.entity"));
+    }
+
 
 }

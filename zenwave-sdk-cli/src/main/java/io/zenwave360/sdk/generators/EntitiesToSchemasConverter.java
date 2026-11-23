@@ -112,6 +112,14 @@ public class EntitiesToSchemasConverter {
             if (maxlength != null && !isArray) {
                 property.put("maxLength", asNumber(maxlength));
             }
+            String min = JSONPath.get(field, "$.validations.min.value");
+            if (min != null && !isArray) {
+                property.put("minimum", asNumber(min));
+            }
+            String max = JSONPath.get(field, "$.validations.max.value");
+            if (max != null && !isArray) {
+                property.put("maximum", asNumber(max));
+            }
             String pattern = JSONPath.get(field, "$.validations.pattern.value");
             if (pattern != null) {
                 property.put("pattern", pattern);
@@ -234,7 +242,11 @@ public class EntitiesToSchemasConverter {
         try {
             return Integer.parseInt(number);
         } catch (NumberFormatException e) {
-            return number;
+            try {
+                return Double.valueOf(number);
+            } catch (NumberFormatException e2) {
+                return number;
+            }
         }
     }
 }

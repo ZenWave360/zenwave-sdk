@@ -10,6 +10,7 @@ import io.zenwave360.sdk.utils.JSONPath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -125,6 +126,138 @@ public class BackendApplicationDefaultHelpersTest {
         var service = JSONPath.get(zdl, "$.services.CustomerService");
         var needsEventsProducer = helpers.needsEventBus((Map) service, options(Map.of("zdl", zdl)));
         Assertions.assertTrue(needsEventsProducer);
+    }
+
+    private static final String RULES_ZDL = """
+            @aggregate
+            entity Order { id Long }
+            event OrderPlaced { id Long }
+
+            rules (Order) {
+                limit "An order is capped"
+                @invariant noOversell "No oversell"
+            }
+
+            rules {
+                audit "Every change is audited"
+            }
+
+            policies (Order) {
+                legacy "A deprecated policy"
+            }
+
+            service OrderService for (Order) {
+                @rules(limit)
+                bare()
+
+                @rules(Order.limit)
+                qualified()
+
+                @rules(limit, Order.limit, audit)
+                both()
+
+                @policy(audit)
+                policyAudit()
+
+                @policy(legacy)
+                legacyPolicy()
+
+                @rules(noOversell)
+                annotated()
+            }
+            """;
+
+    private List<String> resolvedValues(String methodName) throws Exception {
+        var zdl = loadZdlContent(RULES_ZDL);
+        Map<String, Object> method = JSONPath.get(zdl, "$.services.OrderService.methods." + methodName);
+        List<Map> resolved = helpers.methodPolicies(method, options(Map.of("zdl", zdl)));
+        return resolved.stream().map(r -> (String) r.get("value")).toList();
+    }
+
+    @Test
+    void methodPolicies_bareNameFindsAggregateRule() throws Exception {
+        Assertions.assertEquals(List.of("An order is capped"), resolvedValues("bare"));
+    }
+
+    @Test
+    void methodPolicies_qualifiedNameFindsAggregateRule() throws Exception {
+        Assertions.assertEquals(List.of("An order is capped"), resolvedValues("qualified"));
+    }
+
+    @Test
+    void methodPolicies_bareAndQualifiedAreDeduplicated() throws Exception {
+        Assertions.assertEquals(List.of("An order is capped", "Every change is audited"), resolvedValues("both"));
+    }
+
+    @Test
+    void methodPolicies_policyAnnotationFindsTopLevelRule() throws Exception {
+        Assertions.assertEquals(List.of("Every change is audited"), resolvedValues("policyAudit"));
+    }
+
+    @Test
+    void methodPolicies_deprecatedPoliciesKeywordResolves() throws Exception {
+        Assertions.assertEquals(List.of("A deprecated policy"), resolvedValues("legacyPolicy"));
+    }
+
+    @Test
+    void methodPolicies_annotatedRuleResolves() throws Exception {
+        Assertions.assertEquals(List.of("No oversell"), resolvedValues("annotated"));
+    }
+
+    @Test
+    void methodPolicies_policyAnnotationWithPoliciesBlock() throws Exception {
+        var zdl = loadZdlContent("""
+                @aggregate
+                entity Order { id Long }
+
+                policies {
+                    shipedOrdersCanNotBeCancelled "Shipped orders can not be cancelled"
+                }
+
+                service OrderService for (Order) {
+                    @policy(shipedOrdersCanNotBeCancelled)
+                    cancelOrder()
+                }
+                """);
+        Map<String, Object> method = JSONPath.get(zdl, "$.services.OrderService.methods.cancelOrder");
+
+        List<Map> resolved = helpers.methodPolicies(method, options(Map.of("zdl", zdl)));
+        Assertions.assertEquals(1, resolved.size());
+        Assertions.assertEquals("shipedOrdersCanNotBeCancelled", resolved.get(0).get("name"));
+        Assertions.assertEquals("Shipped orders can not be cancelled", resolved.get(0).get("value"));
+    }
+
+    @Test
+    void methodPolicies_rulesAnnotationWithPoliciesOnlyModel() {
+        // older parsers only fill $.policies; @rules must still resolve
+        Map<String, Object> method = Map.<String, Object>of("optionsList", List.of(Map.of("name", "rules", "value", "shipedOrdersCanNotBeCancelled")));
+        Map<String, Object> zdl = Map.<String, Object>of("policies", Map.of(
+                "shipedOrdersCanNotBeCancelled",
+                Map.of("name", "shipedOrdersCanNotBeCancelled", "value", "Shipped orders can not be cancelled")));
+
+        List<Map> resolved = helpers.methodPolicies(method, options(Map.of("zdl", zdl)));
+        Assertions.assertEquals(1, resolved.size());
+        Assertions.assertEquals("shipedOrdersCanNotBeCancelled", resolved.get(0).get("name"));
+        Assertions.assertEquals("Shipped orders can not be cancelled", resolved.get(0).get("value"));
+    }
+
+    @Test
+    void methodPolicies_rulesFirstThenPolicyDeduped() {
+        Map<String, Object> method = Map.<String, Object>of("optionsList", List.of(
+                Map.of("name", "policy", "value", List.of("b", "c")),
+                Map.of("name", "rules", "value", List.of("a", "b"))));
+        Map<String, Object> zdl = Map.<String, Object>of("rules", Map.of(
+                "a", Map.of("name", "a", "value", "A"),
+                "b", Map.of("name", "b", "value", "B"),
+                "c", Map.of("name", "c", "value", "C")));
+
+        List<Map> resolved = helpers.methodPolicies(method, options(Map.of("zdl", zdl)));
+        Assertions.assertEquals(List.of("a", "b", "c"), resolved.stream().map(r -> r.get("name")).toList());
+    }
+
+    private Map<String, Object> loadZdlContent(String zdl) throws Exception {
+        Map<String, Object> model = new ZDLParser().withContent(zdl).parse();
+        return (Map<String, Object>) new ZDLProcessor().process(model).get("zdl");
     }
 
 }

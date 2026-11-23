@@ -92,8 +92,11 @@ public class EventCatalogAsyncApiProcessor implements Processor {
                 diagnostic.getCode(), diagnostic.getLocation(), diagnostic.getMessage()));
 
         String version = channelIndex.getVersion();
-        if (version != null && serviceData.get("_version") == null) {
-            serviceData.put("_version", version);
+        // Manifest service version wins; spec info.version is only a fallback (regenerated specs often reset it).
+        String manifestVersion = manifestService.documentVersion();
+        String effectiveVersion = manifestVersion != null && !manifestVersion.isBlank() ? manifestVersion : version;
+        if (effectiveVersion != null && serviceData.get("_version") == null) {
+            serviceData.put("_version", effectiveVersion);
         }
         annotateArtifactLink(manifestRuntime, manifest, eventCatalog, manifestService, artifact, contentOptions);
 
