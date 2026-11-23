@@ -1,7 +1,7 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.utils,ZDLCallsUtils.ResolvedCommand,0,9,0,0,0,1,0,1,0,1
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.utils,ZDLCallsUtils,68,373,14,36,9,76,13,23,0,11
-io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.utils,ZDLJavaSignatureUtils,170,1216,48,132,27,204,47,86,5,38
+io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.utils,ZDLJavaSignatureUtils,196,1244,56,136,31,209,53,87,5,39
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.utils,ZDLFindUtils,114,505,16,26,16,83,17,32,6,22
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.utils,ZDLAnnotator,0,356,0,34,0,71,0,31,0,14
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.utils,ZDLListenerUtils,210,1026,55,93,33,203,48,50,1,23
@@ -16,7 +16,7 @@ io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,ZDL2JDLProcessor,
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,OverlayApplicator.NodeReference,27,188,13,25,7,36,13,11,0,5
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,YamlOverlyMerger,78,211,19,35,15,46,18,21,4,8
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,YamlOverlayGeneratedFilesProcessor,2,94,0,12,1,22,1,10,1,4
-io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,ZDLProcessor,58,854,17,57,7,159,16,35,0,14
+io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,ZDLProcessor,49,865,14,62,4,162,14,38,0,14
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.processors,OpenApiProcessor,2,390,9,35,0,78,9,23,0,10
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.lint,LintDiagnostic.Severity,0,21,0,0,0,2,0,1,0,1
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.lint,ZdlListenerLinter,5,220,10,20,3,39,10,9,0,4
@@ -95,7 +95,7 @@ io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,Model,3,22,0,0,1,7,1
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,JSONMerger,52,0,6,0,10,0,5,0,2,0
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,SpecResourceLoader,22,335,9,49,3,67,7,38,0,16
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,GraphQLParser,5,8,0,0,2,3,1,2,1,2
-io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,ZDLParser,84,455,16,42,9,99,14,33,1,17
+io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,ZDLParser,89,470,16,44,9,100,14,35,1,18
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,Parser,37,0,2,0,7,0,2,0,1,0
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,Parser.ParseProblemsException,0,6,0,0,0,3,0,1,0,1
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.parsers,DefaultYamlParser,24,163,3,5,9,36,7,14,4,13
@@ -124,7 +124,7 @@ io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,AbstractAsyncapiG
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,JsonSchemaToJsonFaker,78,503,24,68,16,95,24,39,1,14
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,AbstractOpenAPIGenerator,58,170,14,18,14,26,12,16,3,9
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,AbstractAsyncapiGenerator.OperationRoleType,5,69,2,10,2,10,3,8,1,4
-io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,EntitiesToSchemasConverter,72,727,27,87,13,133,26,43,1,11
+io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,EntitiesToSchemasConverter,76,757,27,95,15,139,26,47,1,11
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.generators,AbstractAsyncapiGenerator.Templates,0,82,0,0,0,22,0,3,0,3
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.annotators,JMoleculesAnnotator.Architecture,0,21,0,0,0,2,0,1,0,1
 io.zenwave360.sdk:zenwave-sdk-cli,io.zenwave360.sdk.zdl.annotators,JMoleculesAnnotator,4,317,0,41,2,60,1,30,1,9
