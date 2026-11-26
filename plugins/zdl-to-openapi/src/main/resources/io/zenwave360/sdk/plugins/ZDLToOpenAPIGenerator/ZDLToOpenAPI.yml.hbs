@@ -25,7 +25,7 @@ tags:
 {{~/each}}
 
 
-paths:
+paths:{{#unless zdlModel.hasPaths}} {}{{/unless}}
 {{~#each zdlModel.services as |service|}}
   {{~#if service.isLegacy}}
     {{~> (partial 'legacy')~}}
@@ -126,7 +126,7 @@ paths:
 {{~/each}}
 
 {{{schemasAsString}}}
-{{~#if (or zdlModel.paginatedEntities service.isLegacy)}}
+{{~#if zdlModel.includePagination}}
     Page:
       type: object
       required:

@@ -66,6 +66,42 @@ public class ZDLToOpenAPIGeneratorTest {
     }
 
     @Test
+    public void service_without_rest_operations_is_valid_yaml_with_config_version() throws Exception {
+        String zdl = """
+                config {
+                    title "No REST"
+                    version "1.2.3"
+                }
+
+                @aggregate
+                entity Order {
+                  orderId String required
+                }
+
+                @rest(\"/orders\")
+                service OrderService for (Order) {
+                  placeOrder(Order) Order
+                }
+                """;
+        Map<String, Object> model = new ZDLParser().withContent(zdl).parse();
+        model = new ZDLProcessor().process(model);
+        model = new PathsProcessor().process(model);
+
+        String openApi = new ZDLToOpenAPIGenerator().generate(model).getAllTemplateOutputs().get(0).getContent();
+        Map<String, Object> schema = mapper.readValue(openApi, Map.class);
+
+        Assertions.assertEquals("1.2.3", JSONPath.get(schema, "$.info.version"));
+        Assertions.assertEquals(Map.of(), JSONPath.get(schema, "$.paths"));
+        Assertions.assertEquals(Map.of(), JSONPath.get(schema, "$.components.schemas"));
+        Assertions.assertNull(JSONPath.get(schema, "$.components.parameters"));
+
+        var generator = new ZDLToOpenAPIGenerator();
+        generator.version = "2.0.0";
+        String withOption = generator.generate(model).getAllTemplateOutputs().get(0).getContent();
+        Assertions.assertEquals("2.0.0", JSONPath.get(mapper.readValue(withOption, Map.class), "$.info.version"));
+    }
+
+    @Test
     public void min_max_are_emitted_even_when_zero() throws Exception {
         String zdl = """
                 @aggregate

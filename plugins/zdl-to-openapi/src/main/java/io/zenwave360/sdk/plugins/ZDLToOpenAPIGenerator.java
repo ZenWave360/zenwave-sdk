@@ -169,6 +169,16 @@ public class ZDLToOpenAPIGenerator extends Generator {
         // remove first line
         openAPISchemasString = openAPISchemasString.substring(openAPISchemasString.indexOf("\n") + 1);
 
+        // valid YAML when there are no operations or no schemas: `paths: {}`, and Page/parameters only when used
+        boolean anyLegacy = JSONPath.get(zdlModel, "$.services[*].isLegacy", List.<Object>of()).contains(Boolean.TRUE);
+        boolean anyPath = paths.stream().anyMatch(p -> p != null && !p.isEmpty());
+        boolean includePagination = !paginatedEntities.isEmpty() || anyLegacy;
+        zdlModel.put("hasPaths", anyPath || anyLegacy);
+        zdlModel.put("includePagination", includePagination);
+        if (schemas.isEmpty()) {
+            openAPISchemasString = includePagination ? "components:\n  schemas:\n" : "components:\n  schemas: {}\n";
+        }
+
         var template = generateTemplateOutput(contextModel, zdlToOpenAPITemplate, zdlModel, openAPISchemasString);
 
         var generatedProjectFiles = new GeneratedProjectFiles();
