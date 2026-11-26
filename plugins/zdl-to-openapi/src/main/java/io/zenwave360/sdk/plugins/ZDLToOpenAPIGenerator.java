@@ -31,6 +31,9 @@ public class ZDLToOpenAPIGenerator extends Generator {
     @DocumentedOption(description = "API Title")
     public String title;
 
+    @DocumentedOption(description = "OpenAPI document version (info.version). Defaults to the ZDL config version, or 0.0.1")
+    public String version;
+
     @DocumentedOption(description = "DTO Suffix used for schemas in PATCH operations")
     public String dtoPatchSuffix = "Patch";
 
@@ -270,6 +273,8 @@ public class ZDLToOpenAPIGenerator extends Generator {
         model.put("context", contextModel);
         model.put("zdlModel", zdlModel);
         model.put("schemasAsString", schemasAsString);
+        String configVersion = JSONPath.get(zdlModel, "$.config.version", (String) null);
+        model.put("apiVersion", StringUtils.firstNonBlank(version, configVersion, "0.0.1"));
         return getTemplateEngine().processTemplate(model, template);
     }
 }
