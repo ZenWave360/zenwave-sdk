@@ -1,5 +1,6 @@
 package io.zenwave360.sdk.parsers;
 
+import io.zenwave360.sdk.utils.ClassLoaderUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -38,11 +39,8 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
         this.apiOverlayFiles = asyncapiOverlayFiles;
     }
 
-    private ClassLoader projectClassLoader;
-
     private SpecResourceLoader resourceLoader() {
         return new SpecResourceLoader()
-                .withProjectClassLoader(projectClassLoader)
                 .withAuthentication(authentication);
     }
 
@@ -56,12 +54,6 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
         apiFile = openapiFile;
     }
 
-
-    @Override
-    public DefaultYamlParser withProjectClassLoader(ClassLoader projectClassLoader) {
-        this.projectClassLoader = projectClassLoader;
-        return this;
-    }
 
     public DefaultYamlParser withApiFile(URI specFile) {
         this.apiFile = specFile;
@@ -112,7 +104,7 @@ public class DefaultYamlParser implements io.zenwave360.sdk.parsers.Parser {
         String overlayedContent = mergeAndOverlay(baseContent, null, apiOverlayFiles);
         URI baseUri = resourceLoader().normalizeBaseUri(apiFile);
         JavaRefParser parser = JavaRefParser.fromText(overlayedContent, baseUri.toString())
-                .withResourceClassLoader(this.projectClassLoader)
+                .withResourceClassLoader(ClassLoaderUtils.getProjectClassLoader())
                 .withAuthentication(authentication.toArray(AuthenticationValue[]::new))
                 .withOptions(new RefParserOptions(OnCircular.SKIP, io.zenwave360.jsonrefparser.model.OnMissing.SKIP));
         return new Model(apiFile, $Refs.from(parser.parse().dereference().mergeAllOf().getParsedDocument()));

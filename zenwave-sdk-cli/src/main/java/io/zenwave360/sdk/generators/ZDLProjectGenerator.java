@@ -205,7 +205,6 @@ public class ZDLProjectGenerator extends AbstractZDLGenerator {
         // Resolved only when the plugin registered listener templates, so other generators never pay
         // the resolution/validation cost.
         if (templates.shouldGenerateListeners() && !templates.listenersByApiTemplates.isEmpty()) {
-            ClassLoader projectClassLoader = configuration != null ? configuration.getProjectClassLoader() : null;
             Map<String, Object> listenerOptions = new LinkedHashMap<>(asConfigurationMap());
             // A processed layout here belongs to the consuming module. Keep only the raw CLI layout
             // overrides; the referenced ZDL selects and processes its own ProjectLayout.
@@ -214,7 +213,7 @@ public class ZDLProjectGenerator extends AbstractZDLGenerator {
                 Maps.deepMerge(listenerOptions, Maps.copy(configuration.getOptions()));
             }
             for (Map<String, Object> listenerGroup : ZDLListenerUtils.listenerGroups(
-                    apiModel, projectClassLoader, listenerOptions)) {
+                    apiModel, listenerOptions)) {
                 Map<String, Object> listenerTemplateModel = new LinkedHashMap<>();
                 listenerTemplateModel.put("listenerGroup", listenerGroup);
                 String apiId = (String) listenerGroup.get("apiId");

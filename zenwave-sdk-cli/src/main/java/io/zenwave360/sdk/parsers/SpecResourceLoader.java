@@ -1,5 +1,6 @@
 package io.zenwave360.sdk.parsers;
 
+import io.zenwave360.sdk.utils.ClassLoaderUtils;
 import static io.zenwave360.jsonrefparser.$RefParserOptions.OnCircular.SKIP;
 
 import java.io.BufferedReader;
@@ -27,13 +28,7 @@ import org.apache.commons.lang3.Strings;
  */
 public class SpecResourceLoader {
 
-    private ClassLoader projectClassLoader;
     private List<AuthenticationValue> authentication = List.of();
-
-    public SpecResourceLoader withProjectClassLoader(ClassLoader projectClassLoader) {
-        this.projectClassLoader = projectClassLoader;
-        return this;
-    }
 
     public SpecResourceLoader withAuthentication(List<AuthenticationValue> authentication) {
         this.authentication = authentication != null ? authentication : List.of();
@@ -47,7 +42,7 @@ public class SpecResourceLoader {
     public Model parse(URI resource) throws IOException {
         URI normalizedResource = normalizeBaseUri(resource);
         $RefParser parser = new $RefParser(normalizedResource)
-                .withResourceClassLoader(projectClassLoader)
+                .withResourceClassLoader(ClassLoaderUtils.getProjectClassLoader())
                 .withAuthenticationValues(authentication)
                 .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing(OnMissing.SKIP));
         return new Model(resource, parser.parse().dereference().mergeAllOf().getRefs());
@@ -61,10 +56,7 @@ public class SpecResourceLoader {
         URI normalizedResource = normalizeBaseUri(resource);
         if ("classpath".equalsIgnoreCase(normalizedResource.getScheme())) {
             String resourcePath = getClasspathResourcePath(normalizedResource);
-            ClassLoader resourceClassLoader = projectClassLoader != null
-                    ? projectClassLoader
-                    : getClass().getClassLoader();
-            try (InputStream inputStream = resourceClassLoader.getResourceAsStream(resourcePath)) {
+            try (InputStream inputStream = ClassLoaderUtils.getClassLoader().getResourceAsStream(resourcePath)) {
                 if (inputStream == null) {
                     throw new IOException("InputStream not found for " + resource);
                 }

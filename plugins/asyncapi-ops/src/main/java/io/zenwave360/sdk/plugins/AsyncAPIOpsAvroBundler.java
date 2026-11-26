@@ -19,10 +19,9 @@ class AsyncAPIOpsAvroBundler {
     private final AvroSchemaLoader loader;
     private final List<String> avroImports;
 
-    AsyncAPIOpsAvroBundler(List<String> avroImports, List<AuthenticationValue> authentication, ClassLoader projectClassLoader) {
+    AsyncAPIOpsAvroBundler(List<String> avroImports, List<AuthenticationValue> authentication) {
         this.avroImports = avroImports != null ? avroImports : List.of();
         this.loader = new AvroSchemaLoader();
-        this.loader.withProjectClassLoader(projectClassLoader);
         this.loader.authentication = authentication != null ? authentication : List.of();
     }
 

@@ -34,8 +34,6 @@ public class ZDLParser implements Parser, ConfigurationProvider {
     @DocumentedOption(description = "Authentication configuration values for fetching remote resources.")
     public List<AuthenticationValue> authentication = List.of();
 
-    private ClassLoader projectClassLoader;
-
     public void setZdlFile(String zdlFile) {
         if(zdlFile != null) {
             this.zdlFiles = List.of(zdlFile);
@@ -66,11 +64,6 @@ public class ZDLParser implements Parser, ConfigurationProvider {
         return this;
     }
 
-    public ZDLParser withProjectClassLoader(ClassLoader projectClassLoader) {
-        this.projectClassLoader = projectClassLoader;
-        return this;
-    }
-
     public ZDLParser withAuthentication(List<AuthenticationValue> authentication) {
         this.authentication = authentication != null ? authentication : List.of();
         return this;
@@ -81,7 +74,6 @@ public class ZDLParser implements Parser, ConfigurationProvider {
         String zdlString = content;
         if(zdlString == null) {
             SpecResourceLoader loader = new SpecResourceLoader()
-                    .withProjectClassLoader(projectClassLoader)
                     .withAuthentication(authentication);
             if (zdlFiles.size() > 1) {
                 System.err.println("ZDL WARNING: joining several ZDL files into one model is deprecated "
@@ -125,7 +117,6 @@ public class ZDLParser implements Parser, ConfigurationProvider {
     private void loadReferencedApiModels(Map<String, Object> zdlModel, URI declaringDocument) throws IOException {
         Map<String, Map<String, Object>> apis = JSONPath.get(zdlModel, "$.apis", Map.of());
         SpecResourceLoader loader = new SpecResourceLoader()
-                .withProjectClassLoader(projectClassLoader)
                 .withAuthentication(authentication);
         for (Map<String, Object> api : apis.values()) {
             String apiUri = apiUri(api);

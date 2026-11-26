@@ -9,6 +9,7 @@ import io.zenwave360.sdk.plugins.ConfigurationProvider;
 import io.zenwave360.sdk.processors.GeneratedFilesProcessor;
 import io.zenwave360.sdk.processors.Processor;
 import io.zenwave360.sdk.templating.HandlebarsEngine;
+import io.zenwave360.sdk.utils.ClassLoaderUtils;
 import io.zenwave360.sdk.utils.CommaSeparatedCollectionDeserializationHandler;
 import io.zenwave360.sdk.utils.ObjectInstantiatorDeserializationHandler;
 import io.zenwave360.sdk.writers.TemplateWriter;
@@ -39,12 +40,21 @@ public class MainGenerator {
         Map<String, Object> model = new HashMap<>();
         GeneratedProjectFiles generatedProjectFiles = new GeneratedProjectFiles();
 
+        ClassLoaderUtils.withProjectClassLoader(configuration.getProjectClassLoader(), () -> {
+            runChain(chain, configuration, model, generatedProjectFiles);
+            return null;
+        });
+    }
+
+    private void runChain(List<Class> chain, Plugin configuration, Map<String, Object> model,
+            GeneratedProjectFiles generatedProjectFiles) throws Exception {
         int chainIndex = 0;
         for (Class pluginClass : chain) {
             log.debug("Executing chained pluginClass {}", pluginClass);
             Object plugin = pluginClass.getDeclaredConstructor().newInstance();
             applyConfiguration(chainIndex++, plugin, configuration);
 
+            // deprecated: only for third-party implementations that still read it; SDK code reads ClassLoaderUtils
             if (plugin instanceof WithProjectClassLoader) {
                 ((WithProjectClassLoader) plugin).withProjectClassLoader(configuration.getProjectClassLoader());
             }

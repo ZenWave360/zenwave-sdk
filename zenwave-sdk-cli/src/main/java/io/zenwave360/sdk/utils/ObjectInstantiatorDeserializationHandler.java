@@ -17,7 +17,7 @@ public class ObjectInstantiatorDeserializationHandler extends DeserializationPro
             if (value != null && value.startsWith("new ")) {
                 String className = StringUtils.substringAfter(value, "new ").replaceAll("\\(\\)$", "").trim();
                 try {
-                    Class<?> clazz = Class.forName(className);
+                    Class<?> clazz = ClassLoaderUtils.loadClass(className);
                     Object instance = clazz.getDeclaredConstructor().newInstance();
                     if (instClass.isAssignableFrom(instance.getClass())) {
                         return instance;

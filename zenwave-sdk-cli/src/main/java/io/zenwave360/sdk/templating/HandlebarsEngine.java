@@ -17,12 +17,13 @@ import com.github.jknack.handlebars.context.MapValueResolver;
 import com.github.jknack.handlebars.helper.ConditionalHelpers;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.io.*;
+import io.zenwave360.sdk.utils.ClassLoaderUtils;
 
 public class HandlebarsEngine implements TemplateEngine {
 
     Context context;
     Handlebars handlebars = new Handlebars()
-            .with(new CompositeTemplateLoader(new FolderTemplateLoader(), new ClassPathTemplateLoader()));
+            .with(new CompositeTemplateLoader(new FolderTemplateLoader(), new ProjectClassPathTemplateLoader()));
 
     public HandlebarsEngine() {
         context = Context
@@ -112,6 +113,14 @@ public class HandlebarsEngine implements TemplateEngine {
         contextModel.clear();
         contextModel.putAll(currentModel);
         return templateOutputList;
+    }
+
+    /** Templates from the project class loader (CLI --deps, Maven includeProjectClasspath), SDK ones by parent delegation. */
+    private static class ProjectClassPathTemplateLoader extends ClassPathTemplateLoader {
+        @Override
+        protected URL getResource(final String location) {
+            return ClassLoaderUtils.getClassLoader().getResource(location.startsWith("/") ? location.substring(1) : location);
+        }
     }
 
     private static class FolderTemplateLoader extends URLTemplateLoader {

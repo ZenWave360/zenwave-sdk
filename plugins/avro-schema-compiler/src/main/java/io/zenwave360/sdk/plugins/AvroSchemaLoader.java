@@ -7,6 +7,7 @@ import io.zenwave360.jsonrefparser.$RefParserOptions.OnMissing;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.parsers.Parser;
 import io.zenwave360.sdk.utils.AntStyleMatcher;
+import io.zenwave360.sdk.utils.ClassLoaderUtils;
 import org.reflections.scanners.Scanners;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,14 +49,6 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
     @DocumentedOption(description = "Authentication configuration values for fetching remote resources.")
     public List<AuthenticationValue> authentication = List.of();
 
-    private ClassLoader projectClassLoader;
-
-    @Override
-    public Parser withProjectClassLoader(ClassLoader projectClassLoader) {
-        this.projectClassLoader = projectClassLoader;
-        return this;
-    }
-
     @Override
     public Map<String, Object> parse() throws IOException {
         List<URI> avroFileURIs = null;
@@ -75,7 +68,7 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
         var schemas = new ArrayList<Map<String, Object>>();
         for (URI uri : avroFileURIs) {
             $RefParser parser = new $RefParser(uri)
-                    .withResourceClassLoader(this.projectClassLoader)
+                    .withResourceClassLoader(ClassLoaderUtils.getProjectClassLoader())
                     .withAuthenticationValues(authentication)
                     .withOptions(new $RefParserOptions().withOnCircular(SKIP).withOnMissing(OnMissing.FAIL));
             Object schema = parser.parse().getRefs().schema();
@@ -200,7 +193,7 @@ public class AvroSchemaLoader implements io.zenwave360.sdk.parsers.Parser {
                                 ConfigurationBuilder config = new ConfigurationBuilder()
                                         .setScanners(Scanners.Resources);
 
-                                if (this.projectClassLoader instanceof URLClassLoader urlClassLoader) {
+                                if (ClassLoaderUtils.getProjectClassLoader() instanceof URLClassLoader urlClassLoader) {
                                     config.addClassLoaders(urlClassLoader);
                                     config.addUrls(urlClassLoader.getURLs());
                                 } else {

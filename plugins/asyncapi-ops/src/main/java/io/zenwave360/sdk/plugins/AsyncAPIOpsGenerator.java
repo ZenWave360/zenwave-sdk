@@ -1,6 +1,7 @@
 package io.zenwave360.sdk.plugins;
 
 import io.zenwave360.sdk.MainGenerator;
+import io.zenwave360.sdk.utils.ClassLoaderUtils;
 import io.zenwave360.jsonrefparser.AuthenticationValue;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.Generator;
@@ -101,8 +102,7 @@ public class AsyncAPIOpsGenerator extends Generator {
         if (intent == null || intent.schemas.isEmpty()) {
             return List.of();
         }
-        ClassLoader projectClassLoader = configuration != null ? configuration.getProjectClassLoader() : null;
-        AsyncAPIOpsAvroBundler bundler = new AsyncAPIOpsAvroBundler(avroImports, authentication, projectClassLoader);
+        AsyncAPIOpsAvroBundler bundler = new AsyncAPIOpsAvroBundler(avroImports, authentication);
         // Channel address parameter expansion produces one subject per resolved address, all
         // referencing the same bundled .avsc file: bundle and write each file only once.
         var schemasByTargetFile = new java.util.LinkedHashMap<String, AsyncAPIOpsIntent.SchemaIntent>();
@@ -125,11 +125,11 @@ public class AsyncAPIOpsGenerator extends Generator {
         } else {
             // Instantiate FQ class name
             try {
-                templatesObject = (Templates) Class.forName(templates).getConstructor(
+                templatesObject = (Templates) ClassLoaderUtils.loadClass(templates).getConstructor(
                         AsyncAPIOpsGenerator.class).newInstance(this);
             } catch (Exception e) {
                 try {
-                    templatesObject = (Templates) Class.forName(templates).getConstructor().newInstance();
+                    templatesObject = (Templates) ClassLoaderUtils.loadClass(templates).getConstructor().newInstance();
                 } catch (Exception ex) {
                     throw new RuntimeException(e);
                 }

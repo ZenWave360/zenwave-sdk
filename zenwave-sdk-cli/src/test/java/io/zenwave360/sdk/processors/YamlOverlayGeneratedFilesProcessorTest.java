@@ -1,5 +1,6 @@
 package io.zenwave360.sdk.processors;
 
+import io.zenwave360.sdk.utils.ClassLoaderUtils;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
@@ -221,7 +222,10 @@ class YamlOverlayGeneratedFilesProcessorTest {
         try (var classLoader = new java.net.URLClassLoader(new java.net.URL[] { tempDir.toUri().toURL() }, null)) {
             var processor = new TestProcessor();
             processor.overlayFiles = List.of("classpath:classpath-overlay.yml");
-            processor.withProjectClassLoader(classLoader).process(filesWith(output));
+            ClassLoaderUtils.withProjectClassLoader(classLoader, () -> {
+                processor.process(filesWith(output));
+                return null;
+            });
         }
 
         Assertions.assertTrue(output.getContent().contains("Renamed from classpath"), output.getContent());

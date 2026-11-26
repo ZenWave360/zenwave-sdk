@@ -151,7 +151,7 @@ class ZDLListenerUtilsTest {
                 "basePackage", "com.example.clinical",
                 "moduleBasePackage", "com.example.clinical.modules.clinical");
         var binding = ((List<Map<String, Object>>) ZDLListenerUtils
-                .listenerGroups(zdl, null, generatorOptions).get(0).get("bindings")).get(0);
+                .listenerGroups(zdl, generatorOptions).get(0).get("bindings")).get(0);
 
         Assertions.assertEquals(
                 "com.example.clinical.modules.documents.domain.events.PaymentAuthorized",

@@ -1,5 +1,6 @@
 package io.zenwave360.sdk.parsers;
 
+import io.zenwave360.sdk.utils.ClassLoaderUtils;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -125,9 +126,8 @@ class SpecResourceLoaderTest {
     void loadsClasspathResourcesFromTheProjectClassLoader() throws IOException {
         Files.writeString(tempDir.resolve("on-project-classpath.yml"), "key: value", StandardCharsets.UTF_8);
         try (var classLoader = new URLClassLoader(new URL[] { tempDir.toUri().toURL() }, null)) {
-            String content = new SpecResourceLoader()
-                    .withProjectClassLoader(classLoader)
-                    .load("classpath:on-project-classpath.yml");
+            String content = ClassLoaderUtils.withProjectClassLoader(classLoader,
+                    () -> new SpecResourceLoader().load("classpath:on-project-classpath.yml"));
             Assertions.assertEquals("key: value", content);
         }
     }

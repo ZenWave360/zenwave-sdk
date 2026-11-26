@@ -2,7 +2,6 @@ package io.zenwave360.sdk.processors;
 
 import io.zenwave360.jsonrefparser.AuthenticationValue;
 import io.zenwave360.sdk.parsers.DefaultYamlParser;
-import io.zenwave360.sdk.parsers.WithProjectClassLoader;
 import io.zenwave360.sdk.templating.OutputFormatType;
 import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
@@ -13,11 +12,9 @@ import java.util.Map;
 import java.util.function.UnaryOperator;
 
 public abstract class YamlOverlayGeneratedFilesProcessor
-        implements GeneratedFilesProcessor, WithProjectClassLoader<YamlOverlayGeneratedFilesProcessor> {
+        implements GeneratedFilesProcessor {
 
     public List<AuthenticationValue> authentication = List.of();
-
-    private ClassLoader projectClassLoader;
 
     protected abstract String getMergeFile();
 
@@ -25,12 +22,6 @@ public abstract class YamlOverlayGeneratedFilesProcessor
 
     protected UnaryOperator<Map<String, Object>> getDocumentOrderer() {
         return UnaryOperator.identity();
-    }
-
-    @Override
-    public YamlOverlayGeneratedFilesProcessor withProjectClassLoader(ClassLoader projectClassLoader) {
-        this.projectClassLoader = projectClassLoader;
-        return this;
     }
 
     @Override
@@ -42,7 +33,6 @@ public abstract class YamlOverlayGeneratedFilesProcessor
         }
 
         DefaultYamlParser resourceLoader = new DefaultYamlParser()
-                .withProjectClassLoader(projectClassLoader)
                 .withAuthentication(authentication);
 
         for (TemplateOutput output : generatedProjectFiles.getAllTemplateOutputs()) {

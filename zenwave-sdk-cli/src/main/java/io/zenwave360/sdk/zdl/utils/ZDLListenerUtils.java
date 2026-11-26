@@ -1,5 +1,6 @@
 package io.zenwave360.sdk.zdl.utils;
 
+import io.zenwave360.sdk.utils.ClassLoaderUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -36,23 +37,18 @@ public final class ZDLListenerUtils {
     }
 
     public static List<Map<String, Object>> listenerGroups(Map<String, Object> zdlModel) {
-        return listenerGroups(zdlModel, null, Map.of());
-    }
-
-    public static List<Map<String, Object>> listenerGroups(Map<String, Object> zdlModel, ClassLoader projectClassLoader) {
-        return listenerGroups(zdlModel, projectClassLoader, Map.of());
+        return listenerGroups(zdlModel, Map.of());
     }
 
     public static List<Map<String, Object>> listenerGroups(Map<String, Object> zdlModel,
-            ClassLoader projectClassLoader, Map<String, Object> generatorOptions) {
+            Map<String, Object> generatorOptions) {
         var groups = new LinkedHashMap<String, Map<String, Object>>();
         List<Map<String, Object>> services = JSONPath.get(zdlModel, "$.services[*]", List.of());
         for (Map<String, Object> service : services) {
             List<Map<String, Object>> methods = JSONPath.get(service, "$.methods[*]", List.of());
             for (Map<String, Object> method : methods) {
                 for (Map<String, Object> occurrence : listenerOccurrences(method)) {
-                    var binding = buildBinding(zdlModel, service, method, occurrence, projectClassLoader,
-                            generatorOptions);
+                    var binding = buildBinding(zdlModel, service, method, occurrence, generatorOptions);
                     var group = groups.computeIfAbsent((String) binding.get("groupKey"),
                             key -> newGroup(binding));
                     addBinding(group, binding);
@@ -143,8 +139,7 @@ public final class ZDLListenerUtils {
     }
 
     private static Map<String, Object> buildBinding(Map<String, Object> zdlModel, Map<String, Object> service,
-            Map<String, Object> method, Map<String, Object> occurrence, ClassLoader projectClassLoader,
-            Map<String, Object> generatorOptions) {
+            Map<String, Object> method, Map<String, Object> occurrence, Map<String, Object> generatorOptions) {
         var methodLabel = service.get("name") + "." + method.get("name");
         Map<String, Object> event = resolveListenerEvent(zdlModel, methodLabel, occurrence);
         String eventName = trimToNull((String) occurrence.get("event"));
@@ -165,8 +160,7 @@ public final class ZDLListenerUtils {
             binding.put("apiName", apiName);
             binding.put("apiId", referencedApiId(api, referencedModel, apiName));
             binding.put("groupName", stripApiSuffix(apiName));
-            binding.put("eventType", referencedDomainEventsPackage(api, referencedModel, methodLabel,
-                    projectClassLoader, generatorOptions)
+            binding.put("eventType", referencedDomainEventsPackage(api, referencedModel, methodLabel, generatorOptions)
                     + "." + eventClassName);
             binding.put("listenerMethodName", "on" + eventClassName);
         } else {
@@ -233,7 +227,7 @@ public final class ZDLListenerUtils {
     }
 
     private static String referencedDomainEventsPackage(Map<String, Object> api, Map<String, Object> referencedModel,
-            String methodLabel, ClassLoader projectClassLoader, Map<String, Object> generatorOptions) {
+            String methodLabel, Map<String, Object> generatorOptions) {
         Map<String, Object> apiConfig = JSONPath.get(api, "$.config", Map.of());
         String explicitPackage = trimToNull((String) apiConfig.get("domainEventsPackage"));
         if (explicitPackage != null) {
@@ -255,7 +249,7 @@ public final class ZDLListenerUtils {
         Maps.deepMerge(options, referencedOptions);
         Maps.deepMerge(options, apiOptions);
 
-        return referencedLayout(layoutClassName, projectClassLoader, methodLabel, (String) api.get("name"))
+        return referencedLayout(layoutClassName, methodLabel, (String) api.get("name"))
                 .processedLayout(options).domainEventsPackage;
     }
 
@@ -276,32 +270,21 @@ public final class ZDLListenerUtils {
         }
     }
 
-    private static ProjectLayout referencedLayout(String layoutClassName, ClassLoader projectClassLoader,
-            String methodLabel, String apiName) {
+    private static ProjectLayout referencedLayout(String layoutClassName, String methodLabel, String apiName) {
         if (layoutClassName == null) {
             return new DefaultProjectLayout();
         }
         var candidates = List.of(layoutClassName, ProjectLayout.class.getPackageName() + "." + layoutClassName);
-        var classLoaders = new LinkedHashSet<ClassLoader>();
-        if (projectClassLoader != null) {
-            classLoaders.add(projectClassLoader);
-        }
-        if (Thread.currentThread().getContextClassLoader() != null) {
-            classLoaders.add(Thread.currentThread().getContextClassLoader());
-        }
-        classLoaders.add(ZDLListenerUtils.class.getClassLoader());
         Exception lastFailure = null;
         for (String candidate : candidates) {
-            for (ClassLoader classLoader : classLoaders) {
-                try {
-                    Class<?> layoutType = Class.forName(candidate, true, classLoader);
-                    if (!ProjectLayout.class.isAssignableFrom(layoutType)) {
-                        throw new IllegalArgumentException(candidate + " does not extend " + ProjectLayout.class.getName());
-                    }
-                    return (ProjectLayout) layoutType.getConstructor().newInstance();
-                } catch (Exception e) {
-                    lastFailure = e;
+            try {
+                Class<?> layoutType = ClassLoaderUtils.loadClass(candidate);
+                if (!ProjectLayout.class.isAssignableFrom(layoutType)) {
+                    throw new IllegalArgumentException(candidate + " does not extend " + ProjectLayout.class.getName());
                 }
+                return (ProjectLayout) layoutType.getConstructor().newInstance();
+            } catch (Exception e) {
+                lastFailure = e;
             }
         }
         throw new IllegalArgumentException("@listener on '" + methodLabel + "': unable to load layout '"

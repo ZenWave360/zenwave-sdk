@@ -5,7 +5,6 @@ import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.parsers.DefaultYamlParser;
 import io.zenwave360.sdk.parsers.Model;
 import io.zenwave360.sdk.parsers.Parser;
-import io.zenwave360.sdk.parsers.WithProjectClassLoader;
 import io.zenwave360.sdk.processors.AsyncApiProcessor;
 import io.zenwave360.sdk.processors.Processor;
 import io.zenwave360.sdk.utils.JSONPath;
@@ -28,11 +27,9 @@ import java.util.Map;
  * <p>Channel ownership is determined downstream by {@link AsyncAPIOpsIntentProcessor} via the
  * {@code x--external-channel} marker set here on channels resolved from cross-file {@code $ref}s.
  */
-public class AsyncAPIOpsSpecLoader implements Processor, WithProjectClassLoader<AsyncAPIOpsSpecLoader> {
+public class AsyncAPIOpsSpecLoader implements Processor {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-
-    private ClassLoader projectClassLoader;
 
     @DocumentedOption(description = "AsyncAPI Specification File")
     public URI apiFile;
@@ -47,12 +44,6 @@ public class AsyncAPIOpsSpecLoader implements Processor, WithProjectClassLoader<
     @DocumentedOption(description = "Deprecated alias for apiOverlayFiles.")
     public void setAsyncapiOverlayFiles(List<String> asyncapiOverlayFiles) {
         this.apiOverlayFiles = asyncapiOverlayFiles;
-    }
-
-    @Override
-    public AsyncAPIOpsSpecLoader withProjectClassLoader(ClassLoader projectClassLoader) {
-        this.projectClassLoader = projectClassLoader;
-        return this;
     }
 
     @Override
@@ -83,8 +74,7 @@ public class AsyncAPIOpsSpecLoader implements Processor, WithProjectClassLoader<
     private Model loadAndProcess(URI fileUri) throws Exception {
 
         DefaultYamlParser parser = new DefaultYamlParser()
-                .withApiFile(fileUri)
-                .withProjectClassLoader(projectClassLoader);
+                .withApiFile(fileUri);
         parser.apiOverlayFiles = apiOverlayFiles;
 
         Map<String, Object> parsed = parser.parse();

@@ -14,14 +14,6 @@ public class GraphQLParser implements Parser {
     public URI specFile;
     public String targetProperty = "graphql";
 
-    private ClassLoader projectClassLoader;
-
-    @Override
-    public GraphQLParser withProjectClassLoader(ClassLoader projectClassLoader) {
-        this.projectClassLoader = projectClassLoader;
-        return this;
-    }
-
     @Override
     public Map<String, Object> parse() throws IOException {
 //        SchemaParser schemaParser = new SchemaParser();

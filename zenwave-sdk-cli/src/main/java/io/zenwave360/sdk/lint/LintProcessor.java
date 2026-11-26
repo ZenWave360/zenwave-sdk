@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.zenwave360.sdk.doc.DocumentedOption;
-import io.zenwave360.sdk.parsers.WithProjectClassLoader;
+import io.zenwave360.sdk.utils.ClassLoaderUtils;
 import io.zenwave360.sdk.processors.Processor;
 import io.zenwave360.sdk.utils.NamingUtils;
 
@@ -17,7 +17,7 @@ import io.zenwave360.sdk.utils.NamingUtils;
  * {@link LintReportWriter}. A linter that cannot be loaded or throws is recorded as a tool failure, and the
  * remaining linters still run.
  */
-public class LintProcessor implements Processor, WithProjectClassLoader<LintProcessor> {
+public class LintProcessor implements Processor {
 
     private static final String LINTERS_PACKAGE = LintProcessor.class.getPackageName();
 
@@ -36,14 +36,6 @@ public class LintProcessor implements Processor, WithProjectClassLoader<LintProc
     public String root;
 
     public String zdlFile;
-
-    private ClassLoader projectClassLoader;
-
-    @Override
-    public LintProcessor withProjectClassLoader(ClassLoader projectClassLoader) {
-        this.projectClassLoader = projectClassLoader;
-        return this;
-    }
 
     @Override
     public Map<String, Object> process(Map<String, Object> contextModel) {
@@ -90,7 +82,7 @@ public class LintProcessor implements Processor, WithProjectClassLoader<LintProc
                 candidates.add(LINTERS_PACKAGE + "." + simpleName + "Linter");
             }
         }
-        ClassLoader classLoader = projectClassLoader != null ? projectClassLoader : getClass().getClassLoader();
+        ClassLoader classLoader = ClassLoaderUtils.getClassLoader();
         for (String candidate : candidates) {
             try {
                 return Class.forName(candidate, true, classLoader);

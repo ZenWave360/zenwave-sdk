@@ -1,6 +1,7 @@
 package io.zenwave360.sdk.plugins;
 
 import io.zenwave360.sdk.MainGenerator;
+import io.zenwave360.sdk.utils.ClassLoaderUtils;
 import io.zenwave360.sdk.doc.DocumentedOption;
 import io.zenwave360.sdk.generators.AbstractAsyncapiGenerator;
 import io.zenwave360.sdk.options.ProgrammingStyle;
@@ -90,10 +91,10 @@ public class AsyncAPIGenerator extends AbstractAsyncapiGenerator {
         } else {
             // Instantiate FQ class name
             try {
-                templatesObject = (Templates) Class.forName(templates).getConstructor(AsyncAPIGenerator.class).newInstance(this);
+                templatesObject = (Templates) ClassLoaderUtils.loadClass(templates).getConstructor(AsyncAPIGenerator.class).newInstance(this);
             } catch (Exception e) {
                 try {
-                    templatesObject = (Templates) Class.forName(templates).getConstructor().newInstance();
+                    templatesObject = (Templates) ClassLoaderUtils.loadClass(templates).getConstructor().newInstance();
                 } catch (Exception ex) {
                     throw new RuntimeException(e);
                 }

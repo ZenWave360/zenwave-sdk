@@ -230,14 +230,36 @@ public class MavenLoader {
         }
     }
 
-    private static class ChildFirstURLClassLoader extends URLClassLoader {
+    static class ChildFirstURLClassLoader extends URLClassLoader {
+        /** APIs shared with the SDK: a second copy from a --deps transitive would not be assignable to the SDK types. */
+        private static final String[] PARENT_FIRST_PACKAGES = {
+                "java.", "javax.", "jdk.", "sun.",
+                "io.zenwave360.sdk.", "org.slf4j.", "com.fasterxml.jackson.", "com.github.jknack.handlebars."
+        };
+
         public ChildFirstURLClassLoader(URL[] urls, ClassLoader parent) {
             super(urls, parent);
+        }
+
+        private static boolean isParentFirst(String name) {
+            for (String prefix : PARENT_FIRST_PACKAGES) {
+                if (name.startsWith(prefix)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         @Override
         protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
             Class<?> c = findLoadedClass(name);
+            if (c == null && isParentFirst(name)) {
+                try {
+                    c = getParent().loadClass(name);
+                } catch (ClassNotFoundException e) {
+                    // not in the SDK: a class only the --deps jars have (e.g. io.zenwave360.sdk.plugins.quarkus.*)
+                }
+            }
             if (c == null) {
                 try {
                     c = findClass(name);
