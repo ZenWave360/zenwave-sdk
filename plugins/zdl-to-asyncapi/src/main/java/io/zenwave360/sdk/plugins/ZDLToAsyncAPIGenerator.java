@@ -261,7 +261,26 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
     private void buildSelfConsumedOperation(AsyncApiBinding binding, Map<String, Object> channels, Map<String, Object> operations, Map<String, Object> model) {
         var channelName = binding.channel();
         channels.computeIfAbsent(channelName, k -> Maps.of("address", "add topic here")); // keeps channel order; messages and address come from the event(s)
-        operations.put(binding.operationName("do"), Maps.of("action", "receive", "serviceName", binding.method().get("serviceName"), "channel", channelName));
+        operations.put(selfConsumedOperationName(binding, operations, model), Maps.of("action", "receive", "serviceName", binding.method().get("serviceName"), "channel", channelName));
+    }
+
+    /**
+     * do&lt;Event&gt;, named after the first event of the channel, as the operation naming rules expect for a receive
+     * of that message. An explicit operationId wins; do&lt;Method&gt; when two methods consume the same channel.
+     */
+    private String selfConsumedOperationName(AsyncApiBinding binding, Map<String, Object> operations, Map<String, Object> model) {
+        var operationId = (String) binding.asyncapi().get("operationId");
+        if (operationId != null) {
+            return operationId;
+        }
+        Map<String, Map<String, Object>> events = JSONPath.get(model, "$.events", Map.of());
+        var eventName = events.values().stream()
+                .filter(event -> Objects.equals(binding.channel(), JSONPath.get(event, "$.options.asyncapi.channel")))
+                .map(event -> (String) event.get("name"))
+                .findFirst()
+                .orElse(null);
+        var name = eventName != null ? "do" + asJavaTypeName(eventName) : binding.operationName("do");
+        return operations.containsKey(name) ? binding.operationName("do") : name;
     }
 
     private void buildMethodCommand(AsyncApiBinding binding, Map<String, Object> channels, Map<String, Object> operations, Map<String, Object> model, LinkedHashMap<Object, Object> messages) {

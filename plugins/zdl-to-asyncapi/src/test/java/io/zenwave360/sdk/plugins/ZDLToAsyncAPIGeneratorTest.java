@@ -317,11 +317,13 @@ public class ZDLToAsyncAPIGeneratorTest {
                 new ArrayList<>(((Map) JSONPath.get(asyncapi, "$.channels['payment-failed-event-v1'].messages")).keySet()));
         Assertions.assertEquals("payments.payment-retried.event.v1", JSONPath.get(asyncapi, "$.channels['payment-retried-event-v1'].address"));
 
-        // receive operations on the own event channel, still named after the service method
-        Assertions.assertEquals("receive", JSONPath.get(asyncapi, "$.operations.doReauthorizePayment.action"));
-        Assertions.assertEquals("#/channels/payment-retried-event-v1", JSONPath.get(asyncapi, "$.operations.doReauthorizePayment.channel['$ref']"));
-        Assertions.assertEquals("#/channels/payment-failed-event-v1", JSONPath.get(asyncapi, "$.operations.doRetryPayment.channel['$ref']"));
+        // receive operations on the own event channel, named do<Event> after the channel's first event
+        // (operation naming rule EDA-OPR-001); a second method on the same channel falls back to do<Method>
+        Assertions.assertEquals("receive", JSONPath.get(asyncapi, "$.operations.doPaymentRetried.action"));
+        Assertions.assertEquals("#/channels/payment-retried-event-v1", JSONPath.get(asyncapi, "$.operations.doPaymentRetried.channel['$ref']"));
+        Assertions.assertEquals("#/channels/payment-failed-event-v1", JSONPath.get(asyncapi, "$.operations.doPaymentFailed.channel['$ref']"));
         Assertions.assertEquals("#/channels/payment-failed-event-v1", JSONPath.get(asyncapi, "$.operations.doVoidPayment.channel['$ref']"));
+        Assertions.assertNull(JSONPath.get(asyncapi, "$.operations.doReauthorizePayment"));
         Assertions.assertEquals("send", JSONPath.get(asyncapi, "$.operations.onPaymentRetried.action"));
         // client api occurrence is not a provider operation
         Assertions.assertNull(JSONPath.get(asyncapi, "$.channels['order-cancelled-event-v1']"));
