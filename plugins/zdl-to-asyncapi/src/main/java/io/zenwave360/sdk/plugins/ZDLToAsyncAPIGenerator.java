@@ -107,22 +107,30 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         Map<String, Object> operations = new LinkedHashMap<>();
         model.put("operations", operations);
 
-        // input commands
+        // input commands: one binding per provider-side @asyncapi occurrence (repeatable annotation)
         var messages = new LinkedHashMap<>();
         model.put("messages", messages);
-        var methodsWithCommands = JSONPath.get(model, "$.services[*].methods[*][?(@.options.asyncapi)]", Collections.<Map>emptyList()).stream().filter(method -> {
-            var api = JSONPath.get(method, "$.options.asyncapi.api", (String) null);
-            var role = JSONPath.get(model, "$.apis." + api + ".role");
-            return role == null || "provider".equals(role);
-        }).toList();
+        var ownEventChannels = new HashSet<String>(JSONPath.get(model, "$.events[*].options.asyncapi.channel", List.<String>of()));
+        List<AsyncApiBinding> providerBindings = providerAsyncApiBindings(model);
         Set<String> responseEventNames = new HashSet<>();
-        methodsWithCommands.forEach(method -> responseEventNames.addAll(ZDLFindUtils.methodEventsFlatList(method)));
-        for (Map<String, Object> method : methodsWithCommands) {
+        providerBindings.forEach(binding -> responseEventNames.addAll(ZDLFindUtils.methodEventsFlatList(binding.method())));
+        List<Map> methodsWithCommands = new ArrayList<>();
+        for (AsyncApiBinding binding : providerBindings) {
+            if (ownEventChannels.contains(binding.channel())) {
+                // self-consumed: this service receives its own event channel; the channel carries only the event message(s)
+                if (AsyncapiVersionType.v3.equals(asyncapiVersion)) {
+                    buildSelfConsumedOperation(binding, channels, operations, model);
+                }
+                continue;
+            }
+            if (!methodsWithCommands.contains(binding.method())) {
+                methodsWithCommands.add(binding.method());
+            }
             if (AsyncapiVersionType.v3.equals(asyncapiVersion)) {
-                buildMethodCommand(method, channels, operations, model, messages);
+                buildMethodCommand(binding, channels, operations, model, messages);
             }
             if (AsyncapiVersionType.v2.equals(asyncapiVersion)) {
-                buildCommandChannelV2(method, channels, model, messages);
+                buildCommandChannelV2(binding, channels, model, messages);
             }
         }
         addAllEventsAsMessages(messages, JSONPath.get(model, "$.events", Map.of()), responseEventNames);
@@ -216,14 +224,51 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         channels.put(channelName, channel);
     }
 
-    private void buildMethodCommand(Map method, Map<String, Object> channels, Map<String, Object> operations, Map<String, Object> model, LinkedHashMap<Object, Object> messages) {
-        if(isMethodCommandThirdPartyAPI(method, model)) {
-            return;
+    /**
+     * Provider-side {@code @asyncapi} occurrences: no {@code api}, or an {@code api} whose role is not {@code client}.
+     * Every occurrence of the repeatable annotation is a binding (not only the last one in {@code options.asyncapi}).
+     */
+    private List<AsyncApiBinding> providerAsyncApiBindings(Map<String, Object> model) {
+        List<AsyncApiBinding> bindings = new ArrayList<>();
+        List<Map<String, Object>> methods = JSONPath.get(model, "$.services[*].methods[*]", List.of());
+        for (Map<String, Object> method : methods) {
+            for (Object occurrence : ZDLFindUtils.methodOptionOccurrences(method, "asyncapi")) {
+                var asyncapi = occurrence instanceof Map<?, ?> map ? (Map<String, Object>) map : Map.<String, Object>of();
+                var api = (String) asyncapi.get("api");
+                var role = api != null ? JSONPath.get(model, "$.apis." + api + ".role") : null;
+                if (role == null || "provider".equals(role)) {
+                    bindings.add(new AsyncApiBinding(method, asyncapi));
+                }
+            }
         }
-        var operationId = JSONPath.get(method, "$.options.asyncapi.operationId", (String) null);
-        var commandName = firstNonNull(operationId, "do" + asJavaTypeName((String) method.get("name")));
-        var channelName = JSONPath.get(method, "$.options.asyncapi.channel", commandName + "Channel");
-        var topic = JSONPath.getFirst(method, "$.options.topic", "$.options.asyncapi.topic");
+        return bindings;
+    }
+
+    private record AsyncApiBinding(Map<String, Object> method, Map<String, Object> asyncapi) {
+        String operationName(String prefix) {
+            return firstNonNull((String) asyncapi.get("operationId"), prefix + asJavaTypeName((String) method.get("name")));
+        }
+
+        String channel() {
+            return (String) asyncapi.get("channel");
+        }
+    }
+
+    /**
+     * Receive operation on an event channel this service publishes itself (private consumption, e.g. a retry loop).
+     * Reuses the event message(s) of the channel: no command message is added, so the topic keeps a single payload contract.
+     */
+    private void buildSelfConsumedOperation(AsyncApiBinding binding, Map<String, Object> channels, Map<String, Object> operations, Map<String, Object> model) {
+        var channelName = binding.channel();
+        channels.computeIfAbsent(channelName, k -> Maps.of("address", "add topic here")); // keeps channel order; messages and address come from the event(s)
+        operations.put(binding.operationName("do"), Maps.of("action", "receive", "serviceName", binding.method().get("serviceName"), "channel", channelName));
+    }
+
+    private void buildMethodCommand(AsyncApiBinding binding, Map<String, Object> channels, Map<String, Object> operations, Map<String, Object> model, LinkedHashMap<Object, Object> messages) {
+        var method = binding.method();
+        var commandName = binding.operationName("do");
+        var channelName = firstNonNull(binding.channel(), commandName + "Channel");
+        var topic = firstNonNull(JSONPath.get(method, "$.options.topic"), binding.asyncapi().get("topic"));
 
         var channel = (Map) channels.getOrDefault(channelName, Maps.of("address", "add topic here"));
         if(topic != null) {
@@ -238,22 +283,18 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         message.put("messageName", messageName);
         messages.put(commandType, message);
 
-        var channelMessages = Maps.of(messageName, Map.of("$ref", "#/components/messages/" + messageName));
+        var channelMessages = (Map) channel.getOrDefault("messages", new LinkedHashMap<>());
+        channelMessages.put(messageName, Map.of("$ref", "#/components/messages/" + messageName));
         channel.put("messages", channelMessages);
         channels.put(channelName, channel);
         operations.put(commandName, Maps.of("action", "receive", "serviceName", method.get("serviceName"), "channel", channelName));
     }
 
-    private boolean isMethodCommandThirdPartyAPI(Map method, Map<String, Object> model) {
-        var api = JSONPath.get(method, "$.options.asyncapi.api", (String) null);
-        var role = JSONPath.get(model, "$.apis." + api + ".role");
-        return "client".equals(role);
-    }
-
-    private void buildCommandChannelV2(Map method, Map<String, Object> channels, Map<String, Object> model, LinkedHashMap<Object, Object> messages) {
-        var operationId = JSONPath.get(method, "$.options.asyncapi.operationId", "do" + asJavaTypeName((String) method.get("name")));
-        var channelName = JSONPath.get(method, "$.options.asyncapi.channel", operationId + "Channel");
-        var topic = JSONPath.getFirst(method, "$.options.topic", "$.options.asyncapi.topic");
+    private void buildCommandChannelV2(AsyncApiBinding binding, Map<String, Object> channels, Map<String, Object> model, LinkedHashMap<Object, Object> messages) {
+        var method = binding.method();
+        var operationId = binding.operationName("do");
+        var channelName = firstNonNull(binding.channel(), operationId + "Channel");
+        var topic = firstNonNull(JSONPath.get(method, "$.options.topic"), binding.asyncapi().get("topic"));
 
         var commandType = (String) method.get("parameter");
         var javadoc = firstNonNull(trimToNull((String) method.get("javadoc")), method.get("name"));

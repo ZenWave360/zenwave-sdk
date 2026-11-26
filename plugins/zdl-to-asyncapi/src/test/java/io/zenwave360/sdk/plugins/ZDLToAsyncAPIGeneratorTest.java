@@ -262,4 +262,92 @@ public class ZDLToAsyncAPIGeneratorTest {
 
         System.out.println(outputTemplates.get(0).getContent());
     }
+
+    private static final String SELF_CONSUMED_ZDL = """
+            config { basePackage "io.example.payments" }
+            apis {
+                asyncapi client OrdersApi "classpath:does-not-exist/orders-asyncapi.yml"
+            }
+            @aggregate
+            entity Payment { orderId String attemptCount Integer }
+            input RetryPaymentInput { orderId String attemptCount Integer }
+            input ReauthorizePaymentInput { orderId String attemptCount Integer }
+            input VoidPaymentInput { orderId String reason String }
+            input StartPaymentInput { orderId String }
+            service PaymentsService for (Payment) {
+                @asyncapi(channel: "payment-retried-event-v1")
+                reauthorizePayment(ReauthorizePaymentInput) Payment? withEvents [PaymentAuthorized | PaymentFailed]
+                @asyncapi(channel: "payment-failed-event-v1")
+                retryPayment(RetryPaymentInput) Payment? withEvents [PaymentRetried | PaymentRetryExhausted]
+                // the self-consumed occurrence is not the last one: every occurrence is a binding
+                @asyncapi(channel: "payment-failed-event-v1")
+                @asyncapi(api: OrdersApi, channel: "order-cancelled-event-v1")
+                voidPayment(VoidPaymentInput) Payment? withEvents PaymentVoided
+                @asyncapi(channel: "start-payment-command-v1", topic: "payments.start-payment.command.v1")
+                startPayment(StartPaymentInput) Payment withEvents PaymentAuthorized
+            }
+            @asyncapi({ channel: "payment-authorized-event-v1", topic: "payments.payment-authorized.event.v1" })
+            event PaymentAuthorized { orderId String }
+            @asyncapi({ channel: "payment-failed-event-v1", topic: "payments.payment-failed.event.v1" })
+            event PaymentFailed { orderId String attemptCount Integer }
+            /** Two events on the same channel: a self-consumer receives both. */
+            @asyncapi({ channel: "payment-retried-event-v1", topic: "payments.payment-retried.event.v1" })
+            event PaymentRetried { orderId String attemptCount Integer }
+            @asyncapi({ channel: "payment-retried-event-v1", topic: "payments.payment-retried.event.v1" })
+            event PaymentRetryExhausted { orderId String attemptCount Integer }
+            @asyncapi({ channel: "payment-voided-event-v1", topic: "payments.payment-voided.event.v1" })
+            event PaymentVoided { orderId String }
+            """;
+
+    @Test
+    public void test_self_consumed_event_channel_reuses_event_messages() throws Exception {
+        Map<String, Object> model = new ZDLProcessor().process(new ZDLParser().withContent(SELF_CONSUMED_ZDL).parse());
+        ZDLToAsyncAPIGenerator generator = new ZDLToAsyncAPIGenerator();
+        generator.targetFile = "target/out/self-consumed/asyncapi.yml";
+        generator.schemaFormat = ZDLToAsyncAPIGenerator.SchemaFormat.avro;
+
+        List<TemplateOutput> outputTemplates = generator.generate(model).getAllTemplateOutputs();
+        String content = outputTemplates.stream().filter(t -> t.getTargetFile().endsWith("asyncapi.yml")).findFirst().orElseThrow().getContent();
+        Map<String, Object> asyncapi = mapper.readValue(content, Map.class);
+
+        // event channels keep only their event messages: no <Input>Command next to the event
+        Assertions.assertEquals(java.util.Set.of("PaymentRetriedResponse", "PaymentRetryExhaustedResponse"),
+                new java.util.HashSet<>(((Map) JSONPath.get(asyncapi, "$.channels['payment-retried-event-v1'].messages")).keySet()));
+        Assertions.assertEquals(List.of("PaymentFailedResponse"),
+                new ArrayList<>(((Map) JSONPath.get(asyncapi, "$.channels['payment-failed-event-v1'].messages")).keySet()));
+        Assertions.assertEquals("payments.payment-retried.event.v1", JSONPath.get(asyncapi, "$.channels['payment-retried-event-v1'].address"));
+
+        // receive operations on the own event channel, still named after the service method
+        Assertions.assertEquals("receive", JSONPath.get(asyncapi, "$.operations.doReauthorizePayment.action"));
+        Assertions.assertEquals("#/channels/payment-retried-event-v1", JSONPath.get(asyncapi, "$.operations.doReauthorizePayment.channel['$ref']"));
+        Assertions.assertEquals("#/channels/payment-failed-event-v1", JSONPath.get(asyncapi, "$.operations.doRetryPayment.channel['$ref']"));
+        Assertions.assertEquals("#/channels/payment-failed-event-v1", JSONPath.get(asyncapi, "$.operations.doVoidPayment.channel['$ref']"));
+        Assertions.assertEquals("send", JSONPath.get(asyncapi, "$.operations.onPaymentRetried.action"));
+        // client api occurrence is not a provider operation
+        Assertions.assertNull(JSONPath.get(asyncapi, "$.channels['order-cancelled-event-v1']"));
+
+        // no command message/schema for self-consumed inputs; real commands unchanged
+        Map<String, Object> componentMessages = JSONPath.get(asyncapi, "$.components.messages");
+        Assertions.assertFalse(componentMessages.containsKey("ReauthorizePaymentInputCommand"));
+        Assertions.assertFalse(componentMessages.containsKey("RetryPaymentInputCommand"));
+        Assertions.assertFalse(componentMessages.containsKey("VoidPaymentInputCommand"));
+        Assertions.assertEquals(List.of("StartPaymentInputCommand"),
+                new ArrayList<>(((Map) JSONPath.get(asyncapi, "$.channels['start-payment-command-v1'].messages")).keySet()));
+        Assertions.assertEquals("receive", JSONPath.get(asyncapi, "$.operations.doStartPayment.action"));
+        List<String> avroFiles = outputTemplates.stream().map(TemplateOutput::getTargetFile).filter(f -> f.endsWith(".avsc")).toList();
+        Assertions.assertTrue(avroFiles.stream().anyMatch(f -> f.endsWith("/StartPaymentInput.avsc")));
+        Assertions.assertTrue(avroFiles.stream().noneMatch(f -> f.endsWith("/ReauthorizePaymentInput.avsc")), avroFiles.toString());
+
+        // one payload schema per topic (Schema Registry TopicNameStrategy): every channel message has a distinct payload per address
+        Map<String, Object> channels = JSONPath.get(asyncapi, "$.channels");
+        for (Map.Entry<String, Object> channel : channels.entrySet()) {
+            Map<String, Object> messages = JSONPath.get(channel.getValue(), "$.messages", Map.of());
+            for (Object message : messages.values()) {
+                String name = ((String) JSONPath.get(message, "$['$ref']")).substring("#/components/messages/".length());
+                Assertions.assertTrue(componentMessages.containsKey(name), "Missing component for " + name);
+                Assertions.assertFalse(name.endsWith("Command") && JSONPath.get(asyncapi, "$.operations[?(@.action == 'send' && @.channel['$ref'] == '#/channels/" + channel.getKey() + "')]", List.of()).size() > 0,
+                        "command message on an event channel: " + channel.getKey());
+            }
+        }
+    }
 }
