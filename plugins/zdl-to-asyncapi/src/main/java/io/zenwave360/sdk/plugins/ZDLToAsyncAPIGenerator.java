@@ -55,6 +55,9 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
     @DocumentedOption(description = "Target file")
     public String targetFile;
 
+    @DocumentedOption(description = "AsyncAPI document version (info.version). Defaults to the ZDL config version, or 0.0.1")
+    public String version;
+
     @DocumentedOption(description = "Schema format for messages' payload")
     public SchemaFormat schemaFormat = SchemaFormat.schema;
 
@@ -379,6 +382,7 @@ public class ZDLToAsyncAPIGenerator extends AbstractZDLGenerator {
         model.putAll(this.asConfigurationMap());
         model.put("context", contextModel);
         model.put("zdlModel", zdlModel);
+        model.put("apiVersion", firstNonNull(trimToNull(version), trimToNull(JSONPath.get(zdlModel, "$.config.version", (String) null)), "0.0.1"));
         model.put("isDefaultSchemaFormat", schemaFormat == SchemaFormat.schema);
         model.put("schemaFormatString", schemaFormat == SchemaFormat.schema ? defaultSchemaFormat : avroSchemaFormat);
         model.put("schemasAsString", schemasAsString);

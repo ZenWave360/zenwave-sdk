@@ -41,8 +41,8 @@ public class ZDLToAsyncAPIClientGenerator extends AbstractZDLGenerator {
     @DocumentedOption(description = "AsyncAPI document title")
     public String title;
 
-    @DocumentedOption(description = "AsyncAPI document version")
-    public String version = "1.0.0";
+    @DocumentedOption(description = "AsyncAPI document version. Defaults to the ZDL config version, or 1.0.0")
+    public String version;
 
     private final TemplateInput template = new TemplateInput(
             "io/zenwave360/sdk/plugins/ZDLToAsyncAPIClientGenerator/ZDLToAsyncAPIClient.yml",
@@ -83,7 +83,7 @@ public class ZDLToAsyncAPIClientGenerator extends AbstractZDLGenerator {
                 "title",
                 firstNonNull(trimToNull(title), "AsyncAPI client for " + serviceTitle),
                 "version",
-                version,
+                firstNonNull(trimToNull(version), trimToNull(JSONPath.get(model, "$.config.version", (String) null)), "1.0.0"),
                 "description",
                 "Consumed AsyncAPI channels for " + serviceTitle + ".",
                 "channels",
