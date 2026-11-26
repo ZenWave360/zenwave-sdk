@@ -108,6 +108,73 @@ public class ZDLToAsyncAPIClientGeneratorTest {
     }
 
     @Test
+    public void test_multiple_asyncapi_annotations_on_one_method() throws Exception {
+        var model = loadZDLModel("""
+                apis {
+                    asyncapi client PaymentsProcessingApi "https://registry.example.com/apis/payments-processing/asyncapi.yml"
+                }
+
+                @aggregate
+                entity StockReservation {
+                    id String
+                }
+
+                input ReleaseStockInput {
+                    id String
+                }
+
+                service CatalogInventoryService for (StockReservation) {
+                    @asyncapi(api: PaymentsProcessingApi, channel: "payment-declined-event-v1")
+                    @asyncapi(api: PaymentsProcessingApi, channel: "payment-retry-exhausted-event-v1")
+                    @asyncapi(api: PaymentsProcessingApi, channel: "payment-voided-event-v1")
+                    releaseStock(ReleaseStockInput) StockReservation
+                }
+                """);
+
+        ZDLToAsyncAPIClientGenerator generator = new ZDLToAsyncAPIClientGenerator();
+        Map<String, Object> asyncapi = mapper.readValue(generator.generate(model).getAllTemplateOutputs().get(0).getContent(), Map.class);
+
+        var base = "https://registry.example.com/apis/payments-processing/asyncapi.yml#/channels/";
+        Map<String, Map<String, Object>> channels = (Map) asyncapi.get("channels");
+        Map<String, Map<String, Object>> operations = (Map) asyncapi.get("operations");
+        Assertions.assertEquals(3, channels.size());
+        Assertions.assertEquals(base + "payment-declined-event-v1", channels.get("payment-declined-event-v1").get("$ref"));
+        Assertions.assertEquals(base + "payment-retry-exhausted-event-v1", channels.get("payment-retry-exhausted-event-v1").get("$ref"));
+        Assertions.assertEquals(base + "payment-voided-event-v1", channels.get("payment-voided-event-v1").get("$ref"));
+        Assertions.assertEquals(3, operations.size());
+        Assertions.assertEquals("#/channels/payment-declined-event-v1", JSONPath.get(asyncapi, "$.operations.onPaymentDeclinedEventV1.channel.$ref"));
+        Assertions.assertEquals("#/channels/payment-retry-exhausted-event-v1", JSONPath.get(asyncapi, "$.operations.onPaymentRetryExhaustedEventV1.channel.$ref"));
+        Assertions.assertEquals("#/channels/payment-voided-event-v1", JSONPath.get(asyncapi, "$.operations.onPaymentVoidedEventV1.channel.$ref"));
+    }
+
+    @Test
+    public void test_undeclared_api_in_non_last_asyncapi_annotation_fails() throws Exception {
+        var model = loadZDLModel("""
+                apis {
+                    asyncapi client OrdersCheckoutApi "https://registry.example.com/apis/orders-checkout/asyncapi.yml"
+                }
+
+                @aggregate
+                entity Payment {
+                    id String
+                }
+
+                input PaymentInput {
+                    id String
+                }
+
+                service PaymentsProcessingService for (Payment) {
+                    @asyncapi(api: MissingApi, channel: OrderCancelledChannel)
+                    @asyncapi(api: OrdersCheckoutApi, channel: OrderCreatedChannel)
+                    firstHandler(PaymentInput) Payment
+                }
+                """);
+
+        ZDLToAsyncAPIClientGenerator generator = new ZDLToAsyncAPIClientGenerator();
+        Assertions.assertThrows(IllegalArgumentException.class, () -> generator.generate(model));
+    }
+
+    @Test
     public void test_undeclared_api_fails() throws Exception {
         var model = loadZDLModel("""
                 @aggregate

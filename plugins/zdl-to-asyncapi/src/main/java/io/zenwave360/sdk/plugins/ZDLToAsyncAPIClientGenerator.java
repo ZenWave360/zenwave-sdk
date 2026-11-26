@@ -26,6 +26,7 @@ import io.zenwave360.sdk.templating.TemplateOutput;
 import io.zenwave360.sdk.utils.JSONPath;
 import io.zenwave360.sdk.utils.Maps;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
+import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 
 public class ZDLToAsyncAPIClientGenerator extends AbstractZDLGenerator {
 
@@ -97,24 +98,28 @@ public class ZDLToAsyncAPIClientGenerator extends AbstractZDLGenerator {
 
     private List<ConsumedChannel> findConsumedChannels(Map<String, Object> model) {
         Map<String, Map<String, Object>> apis = JSONPath.get(model, "$.apis", Map.of());
-        List<Map<String, Object>> methods = JSONPath.get(model, "$.services[*].methods[*][?(@.options.asyncapi)]", Collections.emptyList());
-        validateApiReferences(apis, methods);
+        List<Map<String, Object>> methods = JSONPath.get(model, "$.services[*].methods[*]", Collections.emptyList());
+        List<AsyncApiOccurrence> occurrences = methods.stream()
+                .flatMap(method -> ZDLFindUtils.methodOptionOccurrences(method, "asyncapi").stream()
+                        .map(value -> new AsyncApiOccurrence(method, value instanceof Map<?, ?> map ? (Map<String, Object>) map : Map.of())))
+                .toList();
+        validateApiReferences(apis, occurrences);
         return apis.values().stream()
                 .filter(this::isAsyncApiClient)
-                .flatMap(api -> methods.stream()
-                        .filter(method -> Objects.equals(api.get("name"), JSONPath.get(method, "$.options.asyncapi.api")))
-                        .map(method -> toConsumedChannel(api, method)))
+                .flatMap(api -> occurrences.stream()
+                        .filter(occurrence -> Objects.equals(api.get("name"), occurrence.asyncapi().get("api")))
+                        .map(occurrence -> toConsumedChannel(api, occurrence)))
                 .toList();
     }
 
-    private void validateApiReferences(Map<String, Map<String, Object>> apis, List<Map<String, Object>> methods) {
-        for (Map<String, Object> method : methods) {
-            var apiName = trimToNull(JSONPath.get(method, "$.options.asyncapi.api", (String) null));
+    private void validateApiReferences(Map<String, Map<String, Object>> apis, List<AsyncApiOccurrence> occurrences) {
+        for (AsyncApiOccurrence occurrence : occurrences) {
+            var apiName = occurrence.api();
             if (apiName != null && !apis.containsKey(apiName)) {
-                throw new IllegalArgumentException("Method '" + method.get("name") + "' references undeclared asyncapi API: " + apiName);
+                throw new IllegalArgumentException("Method '" + occurrence.methodName() + "' references undeclared asyncapi API: " + apiName);
             }
-            if (apiName != null && trimToNull(JSONPath.get(method, "$.options.asyncapi.channel", (String) null)) == null) {
-                throw new IllegalArgumentException("Missing asyncapi channel for method: " + method.get("name"));
+            if (apiName != null && occurrence.channel() == null) {
+                throw new IllegalArgumentException("Missing asyncapi channel for method: " + occurrence.methodName());
             }
         }
     }
@@ -123,15 +128,15 @@ public class ZDLToAsyncAPIClientGenerator extends AbstractZDLGenerator {
         return Objects.equals("asyncapi", api.get("type")) && Objects.equals("client", api.get("role"));
     }
 
-    private ConsumedChannel toConsumedChannel(Map<String, Object> api, Map<String, Object> method) {
-        var channelName = trimToNull(JSONPath.get(method, "$.options.asyncapi.channel", (String) null));
+    private ConsumedChannel toConsumedChannel(Map<String, Object> api, AsyncApiOccurrence occurrence) {
+        var channelName = occurrence.channel();
         var apiName = (String) api.get("name");
         var apiUri = trimToNull(firstNonNull((String) api.get("uri"), JSONPath.get(api, "$.config.uri", (String) null)));
         if (apiUri == null) {
             throw new IllegalArgumentException("Missing uri for asyncapi client API: " + apiName);
         }
         validateUri(apiName, apiUri);
-        return new ConsumedChannel(apiName, apiUri, channelName, (String) method.get("name"));
+        return new ConsumedChannel(apiName, apiUri, channelName, occurrence.methodName());
     }
 
     private void validateUri(String apiName, String apiUri) {
@@ -190,6 +195,22 @@ public class ZDLToAsyncAPIClientGenerator extends AbstractZDLGenerator {
         model.put("context", contextModel);
         model.put("clientModel", clientModel);
         return getTemplateEngine().processTemplate(model, template);
+    }
+
+    /** One {@code @asyncapi} annotation occurrence on a service method. */
+    private record AsyncApiOccurrence(Map<String, Object> method, Map<String, Object> asyncapi) {
+
+        String methodName() {
+            return (String) method.get("name");
+        }
+
+        String api() {
+            return trimToNull(Objects.toString(asyncapi.get("api"), null));
+        }
+
+        String channel() {
+            return trimToNull(Objects.toString(asyncapi.get("channel"), null));
+        }
     }
 
     private record ConsumedChannel(String apiName, String apiUri, String channelName, String methodName) {

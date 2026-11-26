@@ -31,6 +31,7 @@ import io.zenwave360.sdk.utils.NamingUtils;
 import io.zenwave360.sdk.zdl.GeneratedProjectFiles;
 import io.zenwave360.sdk.zdl.ProjectTemplates;
 import io.zenwave360.sdk.zdl.layouts.ProjectLayout;
+import io.zenwave360.sdk.zdl.utils.ZDLFindUtils;
 
 /**
  * Generates backend-owned implementations of consumer interfaces generated separately by
@@ -284,23 +285,32 @@ public class BackendApplicationAsyncApiAdaptersGenerator extends AbstractAsyncap
         String channel = (String) operation.get("x--channel");
         List<Map<String, Object>> methods = JSONPath.get(zdl, "$.services[*].methods[*]", List.of());
         List<Map<String, Object>> candidates = methods.stream()
-                .filter(method -> JSONPath.get(method, "$.options.asyncapi") != null)
-                .filter(this::belongsToCurrentApi)
+                .filter(method -> !currentApiOccurrences(method).isEmpty())
                 .toList();
         List<Map<String, Object>> byOperation = candidates.stream()
                 .filter(method -> Objects.equals(operationId, method.get("name"))
-                        || Objects.equals(operationId, JSONPath.get(method, "$.options.asyncapi.operationId")))
+                        || currentApiOccurrences(method).stream()
+                                .anyMatch(occurrence -> Objects.equals(operationId, occurrence.get("operationId"))))
                 .toList();
         if (!byOperation.isEmpty()) {
             return byOperation;
         }
         return candidates.stream()
-                .filter(method -> Objects.equals(channel, JSONPath.get(method, "$.options.asyncapi.channel")))
+                .filter(method -> currentApiOccurrences(method).stream()
+                        .anyMatch(occurrence -> Objects.equals(channel, occurrence.get("channel"))))
                 .toList();
     }
 
-    private boolean belongsToCurrentApi(Map<String, Object> method) {
-        String apiName = JSONPath.get(method, "$.options.asyncapi.api");
+    /** {@code @asyncapi} occurrences of a method (one per annotation) that belong to the current API. */
+    private List<Map<String, Object>> currentApiOccurrences(Map<String, Object> method) {
+        return ZDLFindUtils.methodOptionOccurrences(method, "asyncapi").stream()
+                .map(value -> value instanceof Map<?, ?> map ? (Map<String, Object>) map : Map.<String, Object>of())
+                .filter(this::belongsToCurrentApi)
+                .toList();
+    }
+
+    private boolean belongsToCurrentApi(Map<String, Object> asyncapiOccurrence) {
+        Object apiName = asyncapiOccurrence.get("api");
         return Objects.equals(currentApiName, apiName) || (apiName == null && asyncApiCount == 1);
     }
 

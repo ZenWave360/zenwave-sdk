@@ -34,6 +34,24 @@ public class ZDLFindUtils {
         return null;
     }
 
+    /**
+     * Values of a repeatable method annotation (e.g. {@code @asyncapi}), one per occurrence in {@code optionsList},
+     * falling back to the single {@code options.<name>} value.
+     */
+    public static List<Object> methodOptionOccurrences(Map<String, Object> method, String optionName) {
+        var occurrences = new ArrayList<Object>();
+        List<Map<String, Object>> optionsList = JSONPath.get(method, "$.optionsList[*]", List.of());
+        for (Map<String, Object> option : optionsList) {
+            if (optionName.equals(option.get("name"))) {
+                occurrences.add(option.get("value"));
+            }
+        }
+        if (occurrences.isEmpty() && JSONPath.get(method, "$.options." + optionName) != null) {
+            occurrences.add(JSONPath.get(method, "$.options." + optionName));
+        }
+        return occurrences;
+    }
+
     public static List<Map<String, Object>> methodsWithEvents(Map<String, Object> model) {
         return JSONPath.get(model, "$.services[*].methods[*][?(@.withEvents.length() > 0)]", Collections.<Map<String, Object>>emptyList());
     }
