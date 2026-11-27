@@ -151,6 +151,48 @@ class EventCatalogRichArtifactsTest {
                 "Local inline schemas must not be passed to build-time HTTP fetching");
     }
 
+    @Test
+    void zdlOnlyServiceUsesTheManifestServiceVersion() throws Exception {
+        Path serviceDir = tempDir.resolve("platform/modulith/modulith-service");
+        Files.createDirectories(serviceDir);
+        write(tempDir.resolve("zenwave-architecture.yml"), """
+                config:
+                  title: ZDL only catalog
+                  version: 0.0.1
+                  contentResolution: [workspace]
+                domains:
+                  platform:
+                    name: Platform
+                    subdomains:
+                      modulith:
+                        name: Modulith
+                        services:
+                          modulith-service:
+                            name: Modulith Service
+                            version: 0.10.3
+                            artifacts:
+                              - type: zdl
+                                path: orders-domain-model.zdl
+                                version: 0.0.0
+                              - type: zdl
+                                path: payments-domain-model.zdl
+                                version: 0.0.0
+                """);
+        // no ZDL file on disk: the version must not depend on the artifacts being loadable
+
+        Path output = tempDir.resolve("catalog-zdl-only");
+        new MainGenerator().generate(new EventCatalogPlugin()
+                .withOption("inputFile", tempDir.resolve("zenwave-architecture.yml").toString())
+                .withOption("outputFolder", output.toString())
+                .withOption("preferredSource", "workspace")
+                .withOption("linkSource", "workspace"));
+
+        Path serviceIndex = output.resolve(
+                "domains/platform/subdomains/platform.modulith/services/platform.modulith.modulith-service/index.mdx");
+        assertEquals("0.10.3", String.valueOf(frontmatter(serviceIndex).get("version")),
+                "A service with only ZDL artifacts takes the manifest service version, not the config or artifact version");
+    }
+
     private String manifest() {
         return """
                 config:

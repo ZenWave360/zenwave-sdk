@@ -53,6 +53,13 @@ public class EventCatalogZdlProcessor implements Processor {
     private void processZdlArtifacts(BlockingZenWaveManifestLoader manifestRuntime, ZenWaveManifest manifest,
                                      ManifestService manifestService, Map<String, Object> serviceData,
                                      String serviceId, ManifestLoadOptions contentOptions) {
+        // Manifest service version wins, as in the AsyncAPI and OpenAPI processors: a service with only ZDL artifacts
+        // (e.g. a modulith with several domain models) would otherwise fall back to the catalog config version.
+        String manifestVersion = manifestService.documentVersion();
+        if (manifestVersion != null && !manifestVersion.isBlank() && serviceData.get("_version") == null
+                && !manifestService.findArtifacts("zdl").isEmpty()) {
+            serviceData.put("_version", manifestVersion);
+        }
         for (ManifestArtifact artifact : manifestService.findArtifacts("zdl")) {
             String zdlText;
             try {
